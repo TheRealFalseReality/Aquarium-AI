@@ -35,6 +35,8 @@ dependencies:
   url_launcher: ^6.2.6
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.3
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -95,3 +97,19 @@ flutter:
 
   assets:
     - assets/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  macos:
+    generate: true
+  windows:
+    generate: true
+  web:
+    generate: true
+  image_path: "assets/AquaPi Logo.png"
+
+flutter_native_splash:
+  image: assets/AquaPi Logo.png
+  color: "#d8f3ff"
+  color_dark: "#2D3748"
