@@ -1,7 +1,10 @@
 // lib/main.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
 import 'screens/welcome_screen.dart';
@@ -9,7 +12,10 @@ import 'screens/about_screen.dart';
 import 'screens/tank_volume_calculator.dart';
 import 'screens/calculators_screen.dart'; // Import the new screen
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  unawaited(MobileAds.instance.initialize());
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
@@ -76,7 +82,7 @@ class MyApp extends StatelessWidget {
         color: const Color(0xFF4A5568),
       ),
     );
-    
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
