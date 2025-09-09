@@ -27,8 +27,8 @@ class AppDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isDarkMode
-                        ? [Color(0xFF0D47A1), Color(0xFF00ACC1)]
-                        : [Color(0xFF7FB3C8), Color(0xFFC4B1C5)],
+                        ? [const Color(0xFF0D47A1), const Color(0xFF00ACC1)]
+                        : [const Color(0xFF7FB3C8), const Color(0xFFC4B1C5)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -42,9 +42,9 @@ class AppDrawer extends StatelessWidget {
                         height: 60,
                       ),
                       const SizedBox(width: 12),
-                      GradientText(
+                      const GradientText(
                         'Fish.AI',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 50,
                           fontWeight: FontWeight.bold,
                           shadows: [
@@ -73,29 +73,29 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.chat),
-                  title: Text('AI Chatbot'),
-                  onTap: () { /* navigate('/chatbot'); */ },
+                  leading: const Icon(Icons.chat),
+                  title: const Text('AI Chatbot'),
+                  onTap: () => navigate('/chatbot'),
                 ),
                 ListTile(
-                  leading: Icon(Icons.calculate),
-                  title: Text('AI Compatibility Tool'),
+                  leading: const Icon(Icons.calculate),
+                  title: const Text('AI Compatibility Tool'),
                   onTap: () { /* navigate('/compat-ai'); */ },
                 ),
                 ListTile(
-                  leading: Icon(Icons.science),
-                  title: Text('Aquarium Calculators'),
+                  leading: const Icon(Icons.science),
+                  title: const Text('Aquarium Calculators'),
                   onTap: () => navigate('/calculators'),
                 ),
                 ListTile(
-                  leading: Icon(Icons.opacity),
-                  title: Text('Tank Volume'),
+                  leading: const Icon(Icons.opacity),
+                  title: const Text('Tank Volume'),
                   onTap: () => navigate('/tank-volume'),
                 ),
               ],
             ),
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -105,12 +105,12 @@ class AppDrawer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.home),
+                        icon: const Icon(Icons.home),
                         onPressed: () => navigate('/'),
                         tooltip: 'Home',
                       ),
                       IconButton(
-                        icon: Icon(Icons.info),
+                        icon: const Icon(Icons.info),
                         onPressed: () => navigate('/about'),
                         tooltip: 'About',
                       ),
