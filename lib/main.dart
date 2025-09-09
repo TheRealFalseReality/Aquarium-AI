@@ -19,6 +19,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final textTheme = GoogleFonts.interTextTheme(Theme.of(context).textTheme);
@@ -29,7 +31,6 @@ class MyApp extends StatelessWidget {
       brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF7FB3C8),
-        background: const Color(0xFFd8f3ff),
         primary: const Color(0xFF7FB3C8),
         secondary: const Color(0xFFC4B1C5),
         surface: const Color(0xFFeef7fb),
@@ -56,7 +57,6 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF7FB3C8),
         brightness: Brightness.dark,
-        background: const Color(0xFF2D3748),
         primary: const Color(0xFF7FB3C8),
         secondary: const Color(0xFFC4B1C5),
         surface: const Color(0xFF1A202C),

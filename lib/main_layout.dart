@@ -6,8 +6,7 @@ class MainLayout extends StatelessWidget {
   final Widget child;
   final String title;
 
-  const MainLayout({required this.title, required this.child, Key? key})
-      : super(key: key);
+  const MainLayout({required this.title, required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {

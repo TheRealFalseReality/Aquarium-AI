@@ -4,6 +4,8 @@ import '../theme_provider.dart';
 import 'gradient_text.dart';
 
 class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);

@@ -6,6 +6,8 @@ import '../main_layout.dart';
 
 // Main Calculators Screen
 class CalculatorsScreen extends StatefulWidget {
+  const CalculatorsScreen({super.key});
+
   @override
   _CalculatorsScreenState createState() => _CalculatorsScreenState();
 }
@@ -136,6 +138,8 @@ Widget _buildSubSectionTitle(BuildContext context, String title) {
 
 // --- SalinityConverter Widget ---
 class SalinityConverter extends StatefulWidget {
+  const SalinityConverter({super.key});
+
   @override
   _SalinityConverterState createState() => _SalinityConverterState();
 }
@@ -258,11 +262,11 @@ class _SalinityConverterState extends State<SalinityConverter> {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _calculate,
-          child: const Text('Convert Salinity'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             textStyle: const TextStyle(fontSize: 16),
           ),
+          child: const Text('Convert Salinity'),
         ),
         if (_results.isNotEmpty)
           Padding(
@@ -321,6 +325,8 @@ class _SalinityConverterState extends State<SalinityConverter> {
 
 // --- CarbonDioxideCalculator Widget ---
 class CarbonDioxideCalculator extends StatefulWidget {
+  const CarbonDioxideCalculator({super.key});
+
   @override
   _CarbonDioxideCalculatorState createState() =>
       _CarbonDioxideCalculatorState();
@@ -391,11 +397,11 @@ class _CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _calculateCO2,
-          child: const Text('Calculate CO₂ (ppm)'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             textStyle: const TextStyle(fontSize: 16),
           ),
+          child: const Text('Calculate CO₂ (ppm)'),
         ),
         if (_result.isNotEmpty)
           Padding(
@@ -428,6 +434,8 @@ class _CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
 
 // --- AlkalinityConverter Widget ---
 class AlkalinityConverter extends StatefulWidget {
+  const AlkalinityConverter({super.key});
+
   @override
   _AlkalinityConverterState createState() => _AlkalinityConverterState();
 }
@@ -531,11 +539,11 @@ class _AlkalinityConverterState extends State<AlkalinityConverter> {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _convertAlkalinity,
-          child: const Text('Convert Alkalinity'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             textStyle: const TextStyle(fontSize: 16),
           ),
+          child: const Text('Convert Alkalinity'),
         ),
         if (_results['dkh']!.isNotEmpty)
           Padding(
@@ -583,6 +591,8 @@ class _AlkalinityConverterState extends State<AlkalinityConverter> {
 
 // --- TemperatureConverter Widget ---
 class TemperatureConverter extends StatefulWidget {
+  const TemperatureConverter({super.key});
+
   @override
   _TemperatureConverterState createState() => _TemperatureConverterState();
 }
@@ -672,11 +682,11 @@ class _TemperatureConverterState extends State<TemperatureConverter> {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _convertTemp,
-          child: const Text('Convert Temperature'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             textStyle: const TextStyle(fontSize: 16),
           ),
+          child: const Text('Convert Temperature'),
         ),
         if (_results['toValue']!.isNotEmpty)
           Padding(

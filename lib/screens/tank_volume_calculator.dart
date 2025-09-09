@@ -5,6 +5,8 @@ import 'dart:math';
 import '../main_layout.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
+  const TankVolumeCalculator({super.key});
+
   @override
   _TankVolumeCalculatorState createState() => _TankVolumeCalculatorState();
 }
@@ -168,11 +170,11 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _calculateVolume,
-            child: Text('Calculate'),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16),
               textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            child: Text('Calculate'),
           ),
           const SizedBox(height: 16),
           if (_gallons.isNotEmpty) _buildResultsCard(),

@@ -1,5 +1,6 @@
 // lib/screens/about_screen.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +9,8 @@ import '../main_layout.dart';
 
 // Convert to a StatefulWidget
 class AboutScreen extends StatefulWidget {
+  const AboutScreen({super.key});
+
   @override
   _AboutScreenState createState() => _AboutScreenState();
 }
@@ -34,7 +37,9 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      print('Could not launch $urlString');
+      if (kDebugMode) {
+        print('Could not launch $urlString');
+      }
     }
   }
 

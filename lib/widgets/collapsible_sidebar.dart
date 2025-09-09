@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../theme_provider.dart';
 
 class CollapsibleSidebar extends StatefulWidget {
+  const CollapsibleSidebar({super.key});
+
   @override
   _CollapsibleSidebarState createState() => _CollapsibleSidebarState();
 }
@@ -24,7 +26,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
       child: Column(
         children: [
           // ... (Header and Divider are the same)
-          Container(
+          SizedBox(
             height: 80,
             child: Center(
               child: Image.asset(
@@ -34,7 +36,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
               ),
             ),
           ),
-          Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -58,7 +60,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
             },
             tooltip: _isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
           ),
-          Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
 
           // THEME TOGGLER FIX
           if (_isCollapsed)
@@ -93,7 +95,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
   Widget _buildNavTile(BuildContext context, IconData icon, String title, String routeName, bool showTitle) {
     // ... (same as before)
     final bool isSelected = ModalRoute.of(context)?.settings.name == routeName;
-    final Color tileColor = isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.2) : Colors.transparent;
+    final Color tileColor = isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent;
     final Color contentColor = isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant;
 
     if (showTitle) {
