@@ -2,20 +2,22 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/tank_volume_calculator.dart';
-import 'screens/calculators_screen.dart'; // Import the new screen
+import 'screens/calculators_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  unawaited(MobileAds.instance.initialize());
-
+  if (!kIsWeb) {
+    unawaited(MobileAds.instance.initialize());
+  }
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
