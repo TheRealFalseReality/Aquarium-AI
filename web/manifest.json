@@ -1,6 +1,6 @@
 {
-    "name": "fishai",
-    "short_name": "fishai",
+    "name": "Fish.AI",
+    "short_name": "Fish.AI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

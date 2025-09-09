@@ -81,14 +81,14 @@ class AppDrawer extends StatelessWidget {
                   onTap: () { /* navigate('/compat-ai'); */ },
                 ),
                 ListTile(
+                  leading: Icon(Icons.science),
+                  title: Text('Calculators'),
+                  onTap: () => navigate('/calculators'),
+                ),
+                ListTile(
                   leading: Icon(Icons.opacity),
                   title: Text('Tank Volume'),
                   onTap: () => navigate('/tank-volume'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.science),
-                  title: Text('Calculators'),
-                  onTap: () { /* navigate('/calculators'); */ },
                 ),
                 ListTile(
                   leading: Icon(Icons.chat),

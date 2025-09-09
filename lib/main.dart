@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'theme_provider.dart'; // Import the new provider
+import 'theme_provider.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/tank_volume_calculator.dart';
+import 'screens/calculators_screen.dart'; // Import the new screen
 
 void main() {
   runApp(
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = GoogleFonts.interTextTheme(Theme.of(context).textTheme);
 
+    // ... (lightTheme and darkTheme definitions remain the same)
     final lightTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -75,18 +77,18 @@ class MyApp extends StatelessWidget {
       ),
     );
     
-    // Use the Consumer widget to listen for changes in ThemeProvider
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
           title: 'Fish.AI',
           theme: lightTheme,
           darkTheme: darkTheme,
-          themeMode: themeProvider.themeMode, // Set themeMode from the provider
+          themeMode: themeProvider.themeMode,
           routes: {
             '/': (context) => WelcomeScreen(),
             '/about': (context) => AboutScreen(),
             '/tank-volume': (context) => TankVolumeCalculator(),
+            '/calculators': (context) => CalculatorsScreen(), // Add the new route
           },
           initialRoute: '/',
         );
