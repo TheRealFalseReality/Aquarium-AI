@@ -10,7 +10,7 @@ class TankVolumeCalculator extends StatefulWidget {
 }
 
 class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
-  // State variables matching the React component
+  // State variables
   String _shape = 'Rectangle';
   String _units = 'Inches';
   String _cylinderType = 'Full';
@@ -20,15 +20,15 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   final _widthController = TextEditingController();
   final _heightController = TextEditingController();
   final _diameterController = TextEditingController();
-  final _edgeController = TextEditingController(); // For Hexagonal
-  final _fullWidthController = TextEditingController(); // For BowFront
+  final _edgeController = TextEditingController();
+  final _fullWidthController = TextEditingController();
 
   // Results
   String _gallons = '';
   String _liters = '';
   String _pounds = '';
+  String _kilograms = '';
 
-  // Map of shapes to icons
   final Map<String, IconData> shapeIcons = {
     'Rectangle': Icons.check_box_outline_blank,
     'Cube': Icons.check_box_outline_blank,
@@ -39,7 +39,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
   @override
   void dispose() {
-    // Dispose all controllers
     _lengthController.dispose();
     _widthController.dispose();
     _heightController.dispose();
@@ -50,7 +49,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   }
 
   void _calculateVolume() {
-    // Parse all dimensions, defaulting to 0
     final length = double.tryParse(_lengthController.text) ?? 0;
     final width = double.tryParse(_widthController.text) ?? 0;
     final height = double.tryParse(_heightController.text) ?? 0;
@@ -61,7 +59,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     double volume = 0;
     final radius = diameter / 2.0;
 
-    // Volume calculations based on shape
     switch (_shape) {
       case 'Cube':
         volume = pow(length, 3).toDouble();
@@ -75,7 +72,7 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           case 'Corner':
             volume = fullCylinderVolume / 4;
             break;
-          default: // Full
+          default:
             volume = fullCylinderVolume;
         }
         break;
@@ -83,18 +80,15 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         volume = (3 * sqrt(3.0) / 2) * pow(edge, 2) * height;
         break;
       case 'BowFront':
-        // This formula seems complex and might need verification for accuracy.
-        // It appears to be an approximation. A more accurate calculation would involve calculus.
-        // We will implement the provided formula.
-        // Rectangular part: length * width * height
-        // Bow part: Area of bow * height
-        // Area of bow = Area of segment of a circle.
-        // Let's use the React formula directly.
         double bowDepth = fullWidth - width;
-        double r = (pow(length / 2, 2) + pow(bowDepth, 2)) / (2 * bowDepth);
-        double theta = 2 * asin((length/2)/r);
-        double segmentArea = pow(r,2)/2 * (theta - sin(theta));
-        volume = (length * width * height) + (segmentArea * height);
+        if (bowDepth <= 0) {
+          volume = length * width * height;
+        } else {
+          double r = (pow(length / 2, 2) + pow(bowDepth, 2)) / (2 * bowDepth);
+          double theta = 2 * asin((length / 2) / r);
+          double segmentArea = pow(r, 2) / 2 * (theta - sin(theta));
+          volume = (length * width * height) + (segmentArea * height);
+        }
         break;
       case 'Rectangle':
       default:
@@ -102,7 +96,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         break;
     }
 
-    // Unit conversions
     double conversionGallons = 0;
     double conversionLiters = 0;
     switch (_units) {
@@ -126,12 +119,14 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
     final double gallonsResult = volume * conversionGallons;
     final double litersResult = volume * conversionLiters;
-    final double poundsResult = gallonsResult * 8.34; // Water weight constant
+    final double poundsResult = gallonsResult * 8.34;
+    final double kilogramsResult = litersResult;
 
     setState(() {
       _gallons = gallonsResult.toStringAsFixed(2);
       _liters = litersResult.toStringAsFixed(2);
       _pounds = poundsResult.toStringAsFixed(2);
+      _kilograms = kilogramsResult.toStringAsFixed(2);
     });
   }
 
@@ -150,7 +145,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                 ?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
-          // --- SHAPE SELECTOR ---
           _buildSectionTitle(context, 'Shape'),
           Wrap(
             alignment: WrapAlignment.center,
@@ -161,25 +155,17 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             }).toList(),
           ),
           const SizedBox(height: 16),
-
-          // --- CYLINDER TYPE (Conditional) ---
           if (_shape == 'Cylinder') _buildCylinderTypeSelector(),
-
-          // --- UNIT SELECTOR ---
           _buildSectionTitle(context, 'Units'),
           _buildUnitSelector(),
           const SizedBox(height: 16),
-
-          // --- DIMENSION INPUTS ---
           Card(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.all(16.0),
               child: _renderInputs(),
             ),
           ),
           const SizedBox(height: 16),
-
-          // --- CALCULATE BUTTON ---
           ElevatedButton(
             onPressed: _calculateVolume,
             child: Text('Calculate'),
@@ -189,15 +175,11 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // --- RESULTS CARD ---
           if (_gallons.isNotEmpty) _buildResultsCard(),
         ],
       ),
     );
   }
-
-  // --- WIDGET BUILDERS ---
 
   Widget _buildShapeSelector(String shapeName, IconData icon) {
     final bool isSelected = _shape == shapeName;
@@ -205,41 +187,65 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       onTap: () {
         setState(() {
           _shape = shapeName;
-          // Reset cylinder type if shape changes away from Cylinder
           if (shapeName != 'Cylinder') {
             _cylinderType = 'Full';
           }
         });
       },
       child: Chip(
-        avatar: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null),
+        avatar: Icon(icon,
+            color:
+                isSelected ? Theme.of(context).colorScheme.onPrimary : null),
         label: Text(shapeName),
-        backgroundColor: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
+        backgroundColor: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surface,
         labelStyle: TextStyle(
-          color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
+          color: isSelected
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context).colorScheme.onSurface,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
-  
+
+  // UPDATED CYLINDER TYPE SELECTOR
   Widget _buildCylinderTypeSelector() {
+    const List<String> types = ['Full', 'Half', 'Corner'];
     return Column(
       children: [
         _buildSectionTitle(context, 'Cylinder Type'),
-        SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: 'Full', label: Text('Full')),
-            ButtonSegment(value: 'Half', label: Text('Half')),
-            ButtonSegment(value: 'Corner', label: Text('Corner')),
-          ],
-          selected: {_cylinderType},
-          onSelectionChanged: (Set<String> newSelection) {
-            setState(() {
-              _cylinderType = newSelection.first;
-            });
-          },
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: types.map((typeName) {
+            final bool isSelected = _cylinderType == typeName;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _cylinderType = typeName;
+                });
+              },
+              child: Chip(
+                label: Text(typeName),
+                backgroundColor: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                labelStyle: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontWeight:
+                      isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            );
+          }).toList(),
         ),
         const SizedBox(height: 16),
       ],
@@ -247,64 +253,95 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   }
 
   Widget _buildUnitSelector() {
-    return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment(value: 'Inches', label: Text('Inches')),
-        ButtonSegment(value: 'Feet', label: Text('Feet')),
-        ButtonSegment(value: 'cm', label: Text('cm')),
-        ButtonSegment(value: 'Meters', label: Text('Meters')),
-      ],
-      selected: {_units},
-      onSelectionChanged: (Set<String> newSelection) {
-        setState(() {
-          _units = newSelection.first;
-        });
-      },
+    const List<String> units = ['Inches', 'Feet', 'cm', 'Meters'];
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8.0,
+      runSpacing: 8.0,
+      children: units.map((unitName) {
+        final bool isSelected = _units == unitName;
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _units = unitName;
+            });
+          },
+          child: Chip(
+            label: Text(unitName),
+            backgroundColor: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surface,
+            labelStyle: TextStyle(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSurface,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        );
+      }).toList(),
     );
   }
 
+  // UPDATED RENDER INPUTS WIDGET
   Widget _renderInputs() {
+    List<Widget> fields;
     switch (_shape) {
       case 'Cube':
-        return _buildTextField(_lengthController, 'Side Length');
+        fields = [_buildTextField(_lengthController, 'Side Length')];
+        break;
       case 'Cylinder':
-        return Column(children: [
+        fields = [
           _buildTextField(_diameterController, 'Diameter'),
           _buildTextField(_heightController, 'Height'),
-        ]);
+        ];
+        break;
       case 'Hexagonal':
-        return Column(children: [
+        fields = [
           _buildTextField(_edgeController, 'Edge Length'),
           _buildTextField(_heightController, 'Height'),
-        ]);
+        ];
+        break;
       case 'BowFront':
-        return Column(children: [
+        fields = [
           _buildTextField(_lengthController, 'Length (Back)'),
           _buildTextField(_widthController, 'Width (Side)'),
-          _buildTextField(_fullWidthController, 'Full Width (Front to Back)'),
+          _buildTextField(_fullWidthController, 'Full Width'),
           _buildTextField(_heightController, 'Height'),
-        ]);
+        ];
+        break;
       case 'Rectangle':
       default:
-        return Column(children: [
+        fields = [
           _buildTextField(_lengthController, 'Length'),
           _buildTextField(_widthController, 'Width'),
           _buildTextField(_heightController, 'Height'),
-        ]);
+        ];
     }
+
+    // Use a Wrap widget for a responsive, centered grid pattern
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 8.0,
+      alignment: WrapAlignment.center,
+      children: fields.map((field) {
+        return SizedBox(
+          width: 200, // Set a consistent width for fields
+          child: field,
+        );
+      }).toList(),
+    );
   }
-  
+
   Widget _buildTextField(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
     );
   }
 
@@ -327,22 +364,42 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildResultColumn('Gallons', _gallons, Theme.of(context).colorScheme.primary),
-            _buildResultColumn('Liters', _liters, Theme.of(context).colorScheme.secondary),
-            _buildResultColumn('Pounds', _pounds, Colors.green),
+            _buildResultColumn(
+              'Volume',
+              '$_gallons gal',
+              '$_liters L',
+              Theme.of(context).colorScheme.primary,
+            ),
+            _buildResultColumn(
+              'Weight',
+              '$_pounds lbs',
+              '$_kilograms kg',
+              Colors.green,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildResultColumn(String label, String value, Color color) {
+  Widget _buildResultColumn(
+      String label, String value1, String value2, Color color) {
     return Flexible(
       child: Column(
         children: [
-          Text(label, style: Theme.of(context).textTheme.titleMedium),
+          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
           Text(
-            value,
+            value1,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value2,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: color,
                   fontWeight: FontWeight.bold,

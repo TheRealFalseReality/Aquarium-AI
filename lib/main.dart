@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
             '/': (context) => WelcomeScreen(),
             '/about': (context) => AboutScreen(),
             '/tank-volume': (context) => TankVolumeCalculator(),
-            '/calculators': (context) => CalculatorsScreen(), // Add the new route
+            '/calculators': (context) => CalculatorsScreen(),
           },
           initialRoute: '/',
         );
