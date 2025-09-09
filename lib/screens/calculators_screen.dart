@@ -1,10 +1,8 @@
-// lib/screens/calculators_screen.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../main_layout.dart';
+import '../widgets/ad_component.dart';
 
-// Main Calculators Screen
 class CalculatorsScreen extends StatefulWidget {
   const CalculatorsScreen({super.key});
 
@@ -52,11 +50,13 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
 
     return MainLayout(
       title: 'Calculators',
+      bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const NativeAdWidget(),
               Text(
                 'Aquarium Calculators',
                 style: Theme.of(context)

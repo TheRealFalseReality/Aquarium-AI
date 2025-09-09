@@ -1,13 +1,11 @@
-// lib/screens/about_screen.dart
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../main_layout.dart';
+import '../widgets/ad_component.dart';
 
-// Convert to a StatefulWidget
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
 
@@ -16,23 +14,20 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  String _version = '...'; // Default text while loading
+  String _version = '...';
 
   @override
   void initState() {
     super.initState();
-    _loadVersion(); // Load the version when the screen is initialized
+    _loadVersion();
   }
 
-  // Asynchronous method to get the app version
   Future<void> _loadVersion() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
     setState(() {
       _version = info.version;
     });
   }
-
-  // --- Other methods remain the same ---
 
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -128,6 +123,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'About',
+      bottomNavigationBar: const AdBanner(),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -172,7 +168,6 @@ class _AboutScreenState extends State<AboutScreen> {
                 ),
               ),
               const Spacer(),
-              // Display the version from the state
               Text(
                 'Version $_version',
                 style: Theme.of(context).textTheme.bodySmall,

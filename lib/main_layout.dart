@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'widgets/app_drawer.dart';
-import 'widgets/gradient_text.dart'; // Import the gradient text widget
+import 'widgets/gradient_text.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;
   final String title;
+  final Widget? bottomNavigationBar;
 
-  const MainLayout({required this.title, required this.child, super.key});
+  const MainLayout({
+    required this.title,
+    required this.child,
+    this.bottomNavigationBar,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,22 +20,19 @@ class MainLayout extends StatelessWidget {
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            // Navigate to home and remove all previous routes
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
           child: Row(
-            mainAxisSize: MainAxisSize.min, // Constrain row size to its content
+            mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
                 'assets/AquaPi Logo.png',
-                // Increased logo size
                 height: 40,
               ),
               const SizedBox(width: 12),
               GradientText(
                 'Fish.AI',
                 style: const TextStyle(
-                  // Increased text size to match
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
                 ),
@@ -42,11 +45,11 @@ class MainLayout extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        toolbarHeight: 80, // Increased toolbar height to accommodate larger logo
+        toolbarHeight: 80,
       ),
       drawer: AppDrawer(),
       body: child,
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 }
-

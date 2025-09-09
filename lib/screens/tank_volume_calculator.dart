@@ -1,8 +1,7 @@
-// lib/screens/tank_volume_calculator.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../main_layout.dart';
+import '../widgets/ad_component.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
   const TankVolumeCalculator({super.key});
@@ -12,12 +11,10 @@ class TankVolumeCalculator extends StatefulWidget {
 }
 
 class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
-  // State variables
   String _shape = 'Rectangle';
   String _units = 'Inches';
   String _cylinderType = 'Full';
 
-  // Controllers for all possible inputs
   final _lengthController = TextEditingController();
   final _widthController = TextEditingController();
   final _heightController = TextEditingController();
@@ -25,7 +22,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   final _edgeController = TextEditingController();
   final _fullWidthController = TextEditingController();
 
-  // Results
   String _gallons = '';
   String _liters = '';
   String _pounds = '';
@@ -136,9 +132,11 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Tank Volume Calculator',
+      bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          const NativeAdWidget(),
           Text(
             'Tank Volume Calculator',
             style: Theme.of(context)
@@ -213,7 +211,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     );
   }
 
-  // UPDATED CYLINDER TYPE SELECTOR
   Widget _buildCylinderTypeSelector() {
     const List<String> types = ['Full', 'Half', 'Corner'];
     return Column(
@@ -286,7 +283,6 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     );
   }
 
-  // UPDATED RENDER INPUTS WIDGET
   Widget _renderInputs() {
     List<Widget> fields;
     switch (_shape) {
@@ -322,14 +318,13 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         ];
     }
 
-    // Use a Wrap widget for a responsive, centered grid pattern
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
       alignment: WrapAlignment.center,
       children: fields.map((field) {
         return SizedBox(
-          width: 200, // Set a consistent width for fields
+          width: 200,
           child: field,
         );
       }).toList(),
@@ -343,7 +338,7 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
     );
   }
 

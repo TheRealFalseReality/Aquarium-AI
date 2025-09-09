@@ -1,8 +1,7 @@
-// lib/screens/welcome_screen.dart
-
 import 'package:flutter/material.dart';
 import '../main_layout.dart';
-import '../widgets/gradient_text.dart'; // Import the new widget
+import '../widgets/gradient_text.dart';
+import '../widgets/ad_component.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -11,6 +10,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Welcome',
+      bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -18,7 +18,6 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // UPDATED: New logo and gradient text
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -28,7 +27,7 @@ class WelcomeScreen extends StatelessWidget {
                     GradientText(
                       'Fish.AI',
                       style: const TextStyle(
-                        fontSize: 80, // Large font size
+                        fontSize: 80,
                         fontWeight: FontWeight.bold,
                       ),
                       gradient: LinearGradient(colors: [
@@ -45,7 +44,6 @@ class WelcomeScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
-                // FeatureCard widgets remain the same
                 FeatureCard(
                   icon: '🐠',
                   title: 'AI Compatibility Calculator',
@@ -74,7 +72,6 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-// FeatureCard class remains the same
 class FeatureCard extends StatelessWidget {
   final String icon;
   final String title;
