@@ -142,6 +142,14 @@ class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          Text(
+            'Tank Volume Calculator',
+            style: Theme.of(context)
+                .textTheme
+                .headlineLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
           // --- SHAPE SELECTOR ---
           _buildSectionTitle(context, 'Shape'),
           Wrap(
