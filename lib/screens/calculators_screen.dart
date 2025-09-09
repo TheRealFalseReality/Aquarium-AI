@@ -150,7 +150,6 @@ class _SalinityConverterState extends State<SalinityConverter> {
   String _fromUnit = 'Salinity (ppt)';
   Map<String, String> _results = {};
 
-  // UPDATED: Getter for unit abbreviation
   String get _unitAbbreviation {
     switch (_fromUnit) {
       case 'Salinity (ppt)':

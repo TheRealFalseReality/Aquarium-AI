@@ -1,5 +1,3 @@
-// lib/main.dart
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -33,7 +31,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = GoogleFonts.interTextTheme(Theme.of(context).textTheme);
 
-    // ... (lightTheme and darkTheme definitions remain the same)
     final lightTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,

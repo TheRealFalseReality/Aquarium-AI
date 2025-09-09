@@ -25,7 +25,6 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
       color: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
-          // ... (Header and Divider are the same)
           SizedBox(
             height: 80,
             child: Center(
@@ -50,7 +49,6 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
               ],
             ),
           ),
-          // ... (Collapse button and Divider are the same)
           IconButton(
             icon: Icon(_isCollapsed ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded),
             onPressed: () {
@@ -62,7 +60,6 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
           ),
           Divider(height: 1, color: Theme.of(context).dividerColor),
 
-          // THEME TOGGLER FIX
           if (_isCollapsed)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -73,7 +70,6 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
               ),
             )
           else
-            // Use an AnimatedOpacity to fade in the content
             AnimatedOpacity(
               opacity: _isCollapsed ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 200),
@@ -91,9 +87,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
     );
   }
 
-  // The _buildNavTile widget builder remains the same as the previous corrected version
   Widget _buildNavTile(BuildContext context, IconData icon, String title, String routeName, bool showTitle) {
-    // ... (same as before)
     final bool isSelected = ModalRoute.of(context)?.settings.name == routeName;
     final Color tileColor = isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent;
     final Color contentColor = isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant;

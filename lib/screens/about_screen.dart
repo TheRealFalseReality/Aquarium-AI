@@ -54,7 +54,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: [
-                      TextSpan(text: 'AquaPi AI is proudly brought to you by '),
+                      TextSpan(text: 'Fish.AI is proudly brought to you by '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: InkWell(

@@ -1,16 +1,14 @@
-// lib/theme_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
   static const String themeKey = "theme_is_dark";
-  ThemeMode _themeMode = ThemeMode.light; // 1. Default to light theme
+  ThemeMode _themeMode = ThemeMode.light;
 
   ThemeMode get themeMode => _themeMode;
 
   ThemeProvider() {
-    _loadTheme(); // 2. Load saved theme when the provider is created
+    _loadTheme();
   }
 
   // Load theme preference from device storage
@@ -31,7 +29,7 @@ class ThemeProvider with ChangeNotifier {
   // Toggle the theme and save the new preference
   void toggleTheme(bool isDarkMode) {
     _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    _saveTheme(isDarkMode); // 3. Save the new state
+    _saveTheme(isDarkMode);
     notifyListeners();
   }
 }

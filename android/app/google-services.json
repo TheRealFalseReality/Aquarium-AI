@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209151214292",
+    "project_id": "fishai-31d40",
+    "storage_bucket": "fishai-31d40.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209151214292:android:4ec677afabcb5ec4c8b141",
+        "android_client_info": {
+          "package_name": "com.example.fishai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqmBqMJxOQV34fToX2B952kTEqIXxfNHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

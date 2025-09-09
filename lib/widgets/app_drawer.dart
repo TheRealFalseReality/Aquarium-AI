@@ -27,8 +27,8 @@ class AppDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isDarkMode
-                        ? [Color(0xFF0D47A1), Color(0xFF00ACC1)] // Dark blue to cyan
-                        : [Color(0xFF7FB3C8), Color(0xFFC4B1C5)], // Original light theme gradient
+                        ? [Color(0xFF0D47A1), Color(0xFF00ACC1)]
+                        : [Color(0xFF7FB3C8), Color(0xFFC4B1C5)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
