@@ -1,9 +1,14 @@
+// lib/screens/about_screen.dart
+
+import 'dart:io'; // Import for Platform check
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart'; // Import Provider
+import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
+import '../theme_provider.dart'; // Import ThemeProvider
 import '../widgets/ad_component.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -45,7 +50,7 @@ class _AboutScreenState extends State<AboutScreen> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Contact & Feedback', textAlign: TextAlign.center),
+          title: const Text('Contact & Feedback', textAlign: TextAlign.center),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -54,7 +59,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: [
-                      TextSpan(text: 'Fish.AI is proudly brought to you by '),
+                      const TextSpan(text: 'Fish.AI is proudly brought to you by '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: InkWell(
@@ -76,7 +81,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   'Please create an issue on GitHub for feedback, bug reports, or questions.',
                   textAlign: TextAlign.center,
                 ),
@@ -87,11 +92,10 @@ class _AboutScreenState extends State<AboutScreen> {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: SelectableText(
+                  child: const SelectableText(
                     'contactus@capitalcityaquatics.com',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -101,13 +105,13 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           actions: <Widget>[
             TextButton.icon(
-              icon: Icon(Icons.bug_report),
-              label: Text('Create Issue on GitHub'),
+              icon: const Icon(Icons.bug_report),
+              label: const Text('Create Issue on GitHub'),
               onPressed: () => _launchURL(
                   'https://github.com/TheRealFalseReality/TheRealFalseReality.github.io/issues'),
             ),
             TextButton(
-              child: Text('Close'),
+              child: const Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -121,6 +125,9 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Access the ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MainLayout(
       title: 'About',
       bottomNavigationBar: const AdBanner(),
@@ -145,26 +152,43 @@ class _AboutScreenState extends State<AboutScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
+              // Conditionally show the Material You toggle only on Android
+              if (!kIsWeb && Platform.isAndroid)
+                Card(
+                  child: SwitchListTile(
+                    title: const Text("Use Material You Theme"),
+                    subtitle: Text(
+                      "Experimental: Adapts to your wallpaper colors.",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    value: themeProvider.useMaterialYou,
+                    onChanged: (value) {
+                      themeProvider.toggleMaterialYou(value);
+                    },
+                    secondary: const Icon(Icons.color_lens_outlined),
+                  ),
+                ),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
-                icon: Icon(Icons.feedback),
-                label: Text('Contact & Feedback'),
+                icon: const Icon(Icons.feedback),
+                label: const Text('Contact & Feedback'),
                 onPressed: () => _showFeedbackModal(context),
                 style: ElevatedButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle: TextStyle(fontSize: 16),
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
-                icon: Icon(Icons.code),
-                label: Text('View on Github'),
+                icon: const Icon(Icons.code),
+                label: const Text('View on Github'),
                 onPressed: () => _launchURL(
                     'https://github.com/TheRealFalseReality/TheRealFalseReality.github.io'),
                 style: OutlinedButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle: TextStyle(fontSize: 16),
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
               ),
               const Spacer(),

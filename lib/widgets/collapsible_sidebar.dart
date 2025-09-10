@@ -71,7 +71,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
             icon: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               transitionBuilder: (child, animation) {
-                return ScaleTransition(child: child, scale: animation);
+                return ScaleTransition(scale: animation, child: child);
               },
               child: Icon(
                 _isCollapsed
