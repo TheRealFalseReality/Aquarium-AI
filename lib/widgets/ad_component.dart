@@ -1,3 +1,5 @@
+// lib/widgets/ad_component.dart
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -55,8 +57,10 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
+    // If ad is not loaded or on web, return a small container within SafeArea
+    // to ensure there's always bottom padding for the system navigation bar.
     if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
-      return const SizedBox.shrink();
+      return const SafeArea(child: SizedBox(height: 0));
     }
 
     return SafeArea(

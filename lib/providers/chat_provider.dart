@@ -1,5 +1,3 @@
-// lib/providers/chat_provider.dart
-
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -168,16 +166,16 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final userMessageText = 
       'Please analyze my water parameters for my $tankType tank.\n'
       'Temp: $temp°$tempUnit'
-      '${ph!.isNotEmpty ? ', pH: $ph' : ''}'
-      '${salinity!.isNotEmpty ? ', Salinity: $salinity $salinityUnit' : ''}'
-      '${additionalInfo!.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
+      '${ph.isNotEmpty ? ', pH: $ph' : ''}'
+      '${salinity.isNotEmpty ? ', Salinity: $salinity $salinityUnit' : ''}'
+      '${additionalInfo.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
 
     state = ChatState(
       messages: [...state.messages, ChatMessage(text: userMessageText, isUser: true)],
       isLoading: true,
     );
 
-    final tempForAnalysis = tempUnit == 'F' ? ((double.parse(temp!) - 32) * 5 / 9).toStringAsFixed(2) : temp;
+    final tempForAnalysis = tempUnit == 'F' ? ((double.parse(temp) - 32) * 5 / 9).toStringAsFixed(2) : temp;
 
     final prompt = '''
     Act as an aquarium expert. Analyze the following water parameters for a $tankType aquarium:

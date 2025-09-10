@@ -1,5 +1,3 @@
-// lib/screens/chatbot_screen.dart
-
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'water_parameter_analysis_screen.dart';
 import 'automation_script_screen.dart';
 import 'analysis_result_screen.dart';
 import 'automation_script_result_screen.dart';
+import '../widgets/ad_component.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
@@ -103,24 +102,63 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       });
     });
 
+    // Create a new list that includes alternating ads
+    final List<Object> itemsWithAds = [];
+    const int adInterval = 4; // Show ad after every 4 messages
+    int adCounter = 0; // To alternate between ad types
+    for (int i = 0; i < chatState.messages.length; i++) {
+      itemsWithAds.add(chatState.messages[i]);
+      // Add an ad after the interval has passed, but not as the very first item.
+      if ((i + 1) % adInterval == 0 && i > 0) {
+        if (adCounter % 2 == 0) {
+          itemsWithAds.add('BANNER_AD');
+        } else {
+          itemsWithAds.add('NATIVE_AD');
+        }
+        adCounter++;
+      }
+    }
+
     return MainLayout(
       title: 'AI Chatbot',
+      bottomNavigationBar: const AdBanner(),
       child: SafeArea(
         child: Stack(
           children: [
             ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 160.0),
-              itemCount: chatState.messages.length,
+              itemCount: itemsWithAds.length,
               itemBuilder: (context, index) {
-                final message = chatState.messages[index];
-                return MessageBubble(
-                  isUser: message.isUser,
-                  text: message.text,
-                  followUpQuestions: message.followUpQuestions,
-                  analysisResult: message.analysisResult,
-                  automationScript: message.automationScript,
-                );
+                final item = itemsWithAds[index];
+
+                if (item is ChatMessage) {
+                  // If the item is a ChatMessage, build the MessageBubble
+                  return MessageBubble(
+                    isUser: item.isUser,
+                    text: item.text,
+                    followUpQuestions: item.followUpQuestions,
+                    analysisResult: item.analysisResult,
+                    automationScript: item.automationScript,
+                  );
+                } else if (item == 'BANNER_AD') {
+                  // If it's a banner ad placeholder, build the AdBanner
+                  return const Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    child: AdBanner(),
+                  );
+                } else if (item == 'NATIVE_AD') {
+                  // If it's a native ad placeholder, build the NativeAdWidget
+                  return const Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    child: NativeAdWidget(),
+                  );
+                } else {
+                  // Fallback for any other case
+                  return const SizedBox.shrink();
+                }
               },
             ),
             if (_expandedMenu != null)

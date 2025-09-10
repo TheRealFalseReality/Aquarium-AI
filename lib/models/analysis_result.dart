@@ -1,8 +1,3 @@
-// lib/models/analysis_result.dart
-
-import 'package:flutter/material.dart';
-
-// Represents the overall summary of the water parameter analysis.
 class AnalysisSummary {
   final String status;
   final String title;

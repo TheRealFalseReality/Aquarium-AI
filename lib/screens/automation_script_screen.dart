@@ -1,10 +1,7 @@
-// lib/screens/automation_script_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
-import 'automation_script_result_screen.dart';
 
 class AutomationScriptScreen extends ConsumerStatefulWidget {
   const AutomationScriptScreen({super.key});
