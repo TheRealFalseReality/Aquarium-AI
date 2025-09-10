@@ -4,14 +4,24 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import '../models/analysis_result.dart';
+import '../models/automation_script.dart';
 
-// Represents a single chat message, now with optional follow-up questions
+// Represents a single chat message
 class ChatMessage {
   final String text;
   final bool isUser;
   final List<String>? followUpQuestions;
+  final WaterAnalysisResult? analysisResult;
+  final AutomationScript? automationScript;
 
-  ChatMessage({required this.text, required this.isUser, this.followUpQuestions});
+  ChatMessage({
+    required this.text,
+    required this.isUser,
+    this.followUpQuestions,
+    this.analysisResult,
+    this.automationScript,
+  });
 }
 
 // Represents the state of the chat screen
@@ -20,6 +30,16 @@ class ChatState {
   final bool isLoading;
 
   ChatState({required this.messages, this.isLoading = false});
+}
+
+// Helper function to extract JSON from a markdown code block
+String _extractJson(String text) {
+  final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
+  final match = regExp.firstMatch(text);
+  if (match != null) {
+    return match.group(1) ?? text;
+  }
+  return text;
 }
 
 // The StateNotifier that will manage the ChatState
@@ -137,12 +157,115 @@ class ChatNotifier extends StateNotifier<ChatState> {
       );
     }
   }
+
+  // New method for water parameter analysis
+  Future<WaterAnalysisResult?> analyzeWaterParameters(Map<String, String> params) async {
+    final {
+      'tankType': tankType, 'ph': ph, 'temp': temp, 'salinity': salinity, 
+      'additionalInfo': additionalInfo, 'tempUnit': tempUnit, 'salinityUnit': salinityUnit
+    } = params;
+
+    final userMessageText = 
+      'Please analyze my water parameters for my $tankType tank.\n'
+      'Temp: $temp°$tempUnit'
+      '${ph!.isNotEmpty ? ', pH: $ph' : ''}'
+      '${salinity!.isNotEmpty ? ', Salinity: $salinity $salinityUnit' : ''}'
+      '${additionalInfo!.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
+
+    state = ChatState(
+      messages: [...state.messages, ChatMessage(text: userMessageText, isUser: true)],
+      isLoading: true,
+    );
+
+    final tempForAnalysis = tempUnit == 'F' ? ((double.parse(temp!) - 32) * 5 / 9).toStringAsFixed(2) : temp;
+
+    final prompt = '''
+    Act as an aquarium expert. Analyze the following water parameters for a $tankType aquarium:
+    ${ph.isNotEmpty ? '- pH: $ph' : ''}
+    - Temperature: $tempForAnalysis°C
+    ${salinity.isNotEmpty ? '- Salinity: $salinity ${salinityUnit == 'ppt' ? 'ppt' : 'Specific Gravity (SG)'}' : ''}
+    ${additionalInfo.isNotEmpty ? '- Additional Information: $additionalInfo' : ''}
+    Provide a detailed but easy-to-understand analysis. Respond with a JSON object.
+    IMPORTANT: For the 'value' field of the temperature parameter, you MUST use the original user-provided value which is '$temp°$tempUnit'.
+    The status for each parameter and the overall summary MUST be one of "Good", "Needs Attention", or "Bad".
+    The 'howAquaPiHelps' section should conclude with a subtle link to our store: [Shop AquaPi](https://www.capitalcityaquatics.com/store).
+
+    The JSON structure must be:
+    {
+      "summary": { "status": "Good" | "Needs Attention" | "Bad", "title": "...", "message": "..." },
+      "parameters": [
+        { "name": "Temperature", "value": "$temp°$tempUnit", "idealRange": "...", "status": "Good" | "Needs Attention" | "Bad", "advice": "..." }
+        // ... other parameters if provided
+      ],
+      "howAquaPiHelps": "..."
+    }
+    ''';
+
+    try {
+      final response = await _model.generateContent([Content.text(prompt)]);
+      final cleanedResponse = _extractJson(response.text!);
+      final jsonResponse = json.decode(cleanedResponse);
+      final analysisResult = WaterAnalysisResult.fromJson(jsonResponse);
+      
+      state = ChatState(
+        messages: [...state.messages, ChatMessage(text: "Here is your water analysis:", isUser: false, analysisResult: analysisResult)],
+        isLoading: false,
+      );
+      return analysisResult;
+
+    } catch (e) {
+      state = ChatState(
+        messages: [...state.messages, ChatMessage(text: 'Error processing analysis: ${e.toString()}', isUser: false)],
+        isLoading: false,
+      );
+      return null;
+    }
+  }
+
+  // New method for generating automation scripts
+  Future<AutomationScript?> generateAutomationScript(String description) async {
+    final userMessageText = 'Generate an automation script for: "$description"';
+    state = ChatState(
+      messages: [...state.messages, ChatMessage(text: userMessageText, isUser: true)],
+      isLoading: true,
+    );
+
+    final prompt = '''
+    You are an expert on Home Assistant and ESPHome. A user wants to create a simple automation for their aquarium. Based on the user's description, provide a valid and well-commented YAML code snippet for either a Home Assistant automation or an ESPHome configuration. Also, provide a brief, friendly explanation of what the code does and where it should be placed.
+    User's request: "$description"
+    Respond with a JSON object with this exact structure:
+    {
+      "title": "Automation for [User's Request]",
+      "explanation": "A Markdown-formatted explanation of the script that concludes with subtle links to our store: [Shop AquaPi](https://www.capitalcityaquatics.com/store) and the Home Assistant website: [Learn more about Home Assistant](https://www.home-assistant.io/).",
+      "code": "The YAML code block as a string, including newline characters (\\n) for proper formatting."
+    }
+    ''';
+
+    try {
+      final response = await _model.generateContent([Content.text(prompt)]);
+      final cleanedResponse = _extractJson(response.text!);
+      final jsonResponse = json.decode(cleanedResponse);
+      final automationScript = AutomationScript.fromJson(jsonResponse);
+
+      state = ChatState(
+        messages: [...state.messages, ChatMessage(text: "Here is your automation script:", isUser: false, automationScript: automationScript)],
+        isLoading: false,
+      );
+      return automationScript;
+    } catch (e) {
+      state = ChatState(
+        messages: [...state.messages, ChatMessage(text: 'Error generating script: ${e.toString()}', isUser: false)],
+        isLoading: false,
+      );
+      return null;
+    }
+  }
 }
 
 // Provider for the generative model
 final geminiModelProvider = Provider<GenerativeModel>((ref) {
   return FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.0-flash',
+    model: 'gemini-1.5-flash',
   );
 });
 

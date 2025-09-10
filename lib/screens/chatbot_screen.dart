@@ -1,11 +1,17 @@
 // lib/screens/chatbot_screen.dart
 
+import 'package:fish_ai/models/analysis_result.dart';
+import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
+import 'water_parameter_analysis_screen.dart';
+import 'automation_script_screen.dart';
+import 'analysis_result_screen.dart';
+import 'automation_script_result_screen.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
@@ -15,7 +21,7 @@ class ChatbotScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
-  String? _expandedMenu = 'aquarium';
+  String? _expandedMenu;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollButton = false;
 
@@ -33,7 +39,6 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   }
 
   void _scrollListener() {
-    // Show the scroll button if the user has scrolled up more than a certain threshold
     final shouldShow = _scrollController.position.pixels <
         _scrollController.position.maxScrollExtent - 100;
     if (shouldShow != _showScrollButton) {
@@ -59,9 +64,34 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     final chatNotifier = ref.read(chatProvider.notifier);
     final textController = TextEditingController();
 
-    ref.listen(chatProvider, (_, __) {
+    ref.listen(chatProvider, (_, next) {
+      final newMessages = next.messages;
+      if (newMessages.isNotEmpty) {
+        final lastMessage = newMessages.last;
+        if (lastMessage.analysisResult != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AnalysisResultScreen(result: lastMessage.analysisResult!),
+              ),
+            );
+          });
+        } else if (lastMessage.automationScript != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AutomationScriptResultScreen(
+                    script: lastMessage.automationScript!),
+              ),
+            );
+          });
+        }
+      }
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Only auto-scroll if the user is already at or near the bottom
         if (!_showScrollButton && _scrollController.hasClients) {
           _scrollToBottom();
         }
@@ -73,10 +103,9 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       child: SafeArea(
         child: Stack(
           children: [
-            // Layer 1: Chat messages
             ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 160.0), // Padding to avoid overlap
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 160.0),
               itemCount: chatState.messages.length,
               itemBuilder: (context, index) {
                 final message = chatState.messages[index];
@@ -84,11 +113,11 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   isUser: message.isUser,
                   text: message.text,
                   followUpQuestions: message.followUpQuestions,
+                  analysisResult: message.analysisResult,
+                  automationScript: message.automationScript,
                 );
               },
             ),
-
-            // Layer 2: Dismissible barrier for the suggestion menu
             if (_expandedMenu != null)
               Positioned.fill(
                 child: GestureDetector(
@@ -102,70 +131,69 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   ),
                 ),
               ),
-
-            // Layer 3: Bottom UI (suggestions and text input)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                child: Column(
-                  children: [
-                    if (chatState.isLoading)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    _buildSuggestionMenu(),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: textController,
-                              decoration: InputDecoration(
-                                hintText: 'Ask AquaPi anything...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                child: AbsorbPointer(
+                  absorbing: chatState.isLoading,
+                  child: Column(
+                    children: [
+                      if (chatState.isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      _buildSuggestionMenu(context),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: textController,
+                                decoration: InputDecoration(
+                                  hintText: 'Ask AquaPi anything...',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  filled: true,
                                 ),
-                                filled: true,
+                                onSubmitted: (value) {
+                                  if (value.isNotEmpty) {
+                                    chatNotifier.sendMessage(value);
+                                    textController.clear();
+                                  }
+                                },
                               ),
-                              onSubmitted: (value) {
-                                if (value.isNotEmpty) {
-                                  chatNotifier.sendMessage(value);
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.send),
+                              onPressed: () {
+                                final message = textController.text;
+                                if (message.isNotEmpty) {
+                                  chatNotifier.sendMessage(message);
                                   textController.clear();
                                 }
                               },
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: () {
-                              final message = textController.text;
-                              if (message.isNotEmpty) {
-                                chatNotifier.sendMessage(message);
-                                textController.clear();
-                              }
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-
-            // Layer 4: Scroll to Bottom FAB
             Positioned(
               bottom: 80,
               right: 16,
@@ -185,7 +213,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     );
   }
 
-  Widget _buildSuggestionMenu() {
+  Widget _buildSuggestionMenu(BuildContext context) {
     return Column(
       children: [
         Row(
@@ -215,6 +243,16 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 });
               },
             ),
+            IconButton(
+              icon: const Icon(Icons.science_outlined),
+              tooltip: "AI Tools",
+              onPressed: () {
+                setState(() {
+                  _expandedMenu =
+                      _expandedMenu == 'ai_tools' ? null : 'ai_tools';
+                });
+              },
+            ),
           ],
         ),
         if (_expandedMenu != null)
@@ -223,31 +261,51 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             child: Column(
               children: [
                 Text(
-                  _expandedMenu == 'aquarium'
-                      ? 'Aquarium Questions'
-                      : 'AquaPi Questions',
+                  _getMenuTitle(_expandedMenu!),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 4),
-                _buildSuggestionChips(
-                  _expandedMenu == 'aquarium'
-                      ? [
-                          "How do I cycle my aquarium?",
-                          "What are the best beginner fish?",
-                          "How often should I change my water?",
-                        ]
-                      : [
-                          "What is AquaPi?",
-                          "Compare to Apex Neptune",
-                          "What parameters can AquaPi monitor?",
-                          "Can I use my own sensors?",
-                        ],
-                ),
+                _getMenuContent(_expandedMenu!, context),
               ],
             ),
           ),
       ],
     );
+  }
+
+  String _getMenuTitle(String menu) {
+    switch (menu) {
+      case 'aquarium':
+        return 'Aquarium Questions';
+      case 'aquapi':
+        return 'AquaPi Questions';
+      case 'ai_tools':
+        return 'AI Tools';
+      default:
+        return '';
+    }
+  }
+
+  Widget _getMenuContent(String menu, BuildContext context) {
+    switch (menu) {
+      case 'aquarium':
+        return _buildSuggestionChips([
+          "How do I cycle my aquarium?",
+          "What are the best beginner fish?",
+          "How often should I change my water?",
+        ]);
+      case 'aquapi':
+        return _buildSuggestionChips([
+          "What is AquaPi?",
+          "Compare to Apex Neptune",
+          "What parameters can AquaPi monitor?",
+          "Can I use my own sensors?",
+        ]);
+      case 'ai_tools':
+        return _buildToolButtons(context);
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildSuggestionChips(List<String> questions) {
@@ -269,18 +327,56 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       }).toList(),
     );
   }
+
+  Widget _buildToolButtons(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        ActionChip(
+          avatar: const Icon(Icons.water_drop),
+          label: const Text('Water Analysis'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const WaterParameterAnalysisScreen()),
+            );
+            setState(() => _expandedMenu = null);
+          },
+        ),
+        ActionChip(
+          avatar: const Icon(Icons.code),
+          label: const Text('Script Generator'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const AutomationScriptScreen()),
+            );
+            setState(() => _expandedMenu = null);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class MessageBubble extends ConsumerWidget {
   final bool isUser;
   final String text;
   final List<String>? followUpQuestions;
+  final WaterAnalysisResult? analysisResult;
+  final AutomationScript? automationScript;
 
   const MessageBubble({
     super.key,
     required this.isUser,
     required this.text,
     this.followUpQuestions,
+    this.analysisResult,
+    this.automationScript,
   });
 
   @override
@@ -303,8 +399,9 @@ class MessageBubble extends ConsumerWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Column(
-                  crossAxisAlignment:
-                      isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: isUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
                   children: [
                     Text(
                       isUser ? 'You' : 'Fish.AI',
@@ -334,7 +431,38 @@ class MessageBubble extends ConsumerWidget {
               ),
             ],
           ),
-          // Render follow-up questions directly under the message bubble
+          if (analysisResult != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 48.0),
+              child: ElevatedButton(
+                child: const Text('View Analysis'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          AnalysisResultScreen(result: analysisResult!),
+                    ),
+                  );
+                },
+              ),
+            ),
+          if (automationScript != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 48.0),
+              child: ElevatedButton(
+                child: const Text('View Script'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AutomationScriptResultScreen(
+                          script: automationScript!),
+                    ),
+                  );
+                },
+              ),
+            ),
           if (followUpQuestions != null && followUpQuestions!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 48.0),
