@@ -89,15 +89,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
         // --- UPDATED PARSING LOGIC using RegExp ---
         try {
           // Regular expression to find a JSON object with a "follow_ups" key.
-          // This is more robust than searching for a fixed string.
           final RegExp jsonRegExp = RegExp(r'{\s*"follow_ups"\s*:\s*\[.*?\]\s*}', dotAll: true);
           final Match? jsonMatch = jsonRegExp.firstMatch(responseText);
           
           if (jsonMatch != null) {
-            final jsonString = jsonMatch.group(0);
+            var jsonString = jsonMatch.group(0);
             if (jsonString != null) {
               // Remove the JSON string from the main response
               mainResponse = responseText.replaceFirst(jsonString, '').trim();
+              
+              // Sanitize the JSON string to remove trailing commas in arrays
+              jsonString = jsonString.replaceAll(RegExp(r',\s*\]'), ']');
               
               // Decode the JSON
               final decodedJson = json.decode(jsonString);

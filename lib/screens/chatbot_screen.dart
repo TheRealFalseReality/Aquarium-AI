@@ -7,115 +7,266 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 
-class ChatbotScreen extends ConsumerWidget {
+class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ChatbotScreenState createState() => _ChatbotScreenState();
+}
+
+class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
+  String? _expandedMenu = 'aquarium';
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    // Show the scroll button if the user has scrolled up more than a certain threshold
+    final shouldShow = _scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent - 100;
+    if (shouldShow != _showScrollButton) {
+      setState(() {
+        _showScrollButton = shouldShow;
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
     final chatNotifier = ref.read(chatProvider.notifier);
-    final scrollController = ScrollController();
     final textController = TextEditingController();
 
-    // Scroll to the bottom of the list when new messages are added
     ref.listen(chatProvider, (_, __) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
+        // Only auto-scroll if the user is already at or near the bottom
+        if (!_showScrollButton && _scrollController.hasClients) {
+          _scrollToBottom();
         }
       });
     });
 
-    // Determine if the conversation has started (i.e., more than the initial welcome message)
-    final bool conversationHasStarted = chatState.messages.length > 1;
-
     return MainLayout(
       title: 'AI Chatbot',
       child: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                itemCount: chatState.messages.length,
-                itemBuilder: (context, index) {
-                  final message = chatState.messages[index];
-                  return MessageBubble(
-                    isUser: message.isUser,
-                    text: message.text,
-                    followUpQuestions: message.followUpQuestions,
-                  );
-                },
-              ),
+            // Layer 1: Chat messages
+            ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 160.0), // Padding to avoid overlap
+              itemCount: chatState.messages.length,
+              itemBuilder: (context, index) {
+                final message = chatState.messages[index];
+                return MessageBubble(
+                  isUser: message.isUser,
+                  text: message.text,
+                  followUpQuestions: message.followUpQuestions,
+                );
+              },
             ),
-            if (chatState.isLoading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: CircularProgressIndicator(),
+
+            // Layer 2: Dismissible barrier for the suggestion menu
+            if (_expandedMenu != null)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _expandedMenu = null;
+                    });
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
               ),
-            
-            // The initial prompt menu
-            CollapsibleSuggestions(
-              key: const ValueKey('initial_suggestions'),
-              title: "Ask, Analyze, and Automate",
-              questions: const [
-                "What is AquaPi?",
-                "Compare to Apex Neptune",
-                "What parameters can AquaPi monitor?",
-                "Can I use my own sensors?",
-              ],
-              // It will collapse itself after the conversation starts
-              startExpanded: !conversationHasStarted,
-            ),
-            
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: textController,
-                      decoration: InputDecoration(
-                        hintText: 'Ask AquaPi anything...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
+
+            // Layer 3: Bottom UI (suggestions and text input)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Column(
+                  children: [
+                    if (chatState.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: CircularProgressIndicator(),
                       ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          chatNotifier.sendMessage(value);
-                          textController.clear();
-                        }
-                      },
+                    _buildSuggestionMenu(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: textController,
+                              decoration: InputDecoration(
+                                hintText: 'Ask AquaPi anything...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                filled: true,
+                              ),
+                              onSubmitted: (value) {
+                                if (value.isNotEmpty) {
+                                  chatNotifier.sendMessage(value);
+                                  textController.clear();
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () {
+                              final message = textController.text;
+                              if (message.isNotEmpty) {
+                                chatNotifier.sendMessage(message);
+                                textController.clear();
+                              }
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () {
-                      final message = textController.text;
-                      if (message.isNotEmpty) {
-                        chatNotifier.sendMessage(message);
-                        textController.clear();
-                      }
-                    },
-                    style: IconButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ),
+
+            // Layer 4: Scroll to Bottom FAB
+            Positioned(
+              bottom: 80,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: _showScrollButton ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: FloatingActionButton.small(
+                  onPressed: _scrollToBottom,
+                  tooltip: 'Scroll to Latest',
+                  child: const Icon(Icons.arrow_downward),
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSuggestionMenu() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.bubble_chart),
+              tooltip: "Aquarium Questions",
+              onPressed: () {
+                setState(() {
+                  _expandedMenu =
+                      _expandedMenu == 'aquarium' ? null : 'aquarium';
+                });
+              },
+            ),
+            IconButton(
+              icon: Image.asset(
+                'assets/AquaPi Logo.png',
+                color: Theme.of(context).colorScheme.onSurface,
+                height: 24,
+                width: 24,
+              ),
+              tooltip: "AquaPi Questions",
+              onPressed: () {
+                setState(() {
+                  _expandedMenu = _expandedMenu == 'aquapi' ? null : 'aquapi';
+                });
+              },
+            ),
+          ],
+        ),
+        if (_expandedMenu != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Column(
+              children: [
+                Text(
+                  _expandedMenu == 'aquarium'
+                      ? 'Aquarium Questions'
+                      : 'AquaPi Questions',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                _buildSuggestionChips(
+                  _expandedMenu == 'aquarium'
+                      ? [
+                          "How do I cycle my aquarium?",
+                          "What are the best beginner fish?",
+                          "How often should I change my water?",
+                        ]
+                      : [
+                          "What is AquaPi?",
+                          "Compare to Apex Neptune",
+                          "What parameters can AquaPi monitor?",
+                          "Can I use my own sensors?",
+                        ],
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSuggestionChips(List<String> questions) {
+    final chatNotifier = ref.read(chatProvider.notifier);
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: questions.map((q) {
+        return ActionChip(
+          label: Text(q),
+          onPressed: () {
+            chatNotifier.sendMessage(q);
+            setState(() {
+              _expandedMenu = null;
+            });
+          },
+        );
+      }).toList(),
     );
   }
 }
@@ -137,11 +288,13 @@ class MessageBubble extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Column(
-        crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment:
+                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
               if (!isUser)
                 CircleAvatar(
@@ -150,7 +303,8 @@ class MessageBubble extends ConsumerWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Column(
-                  crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
                     Text(
                       isUser ? 'You' : 'Fish.AI',
@@ -196,88 +350,6 @@ class MessageBubble extends ConsumerWidget {
                   );
                 }).toList(),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class CollapsibleSuggestions extends ConsumerStatefulWidget {
-  final String title;
-  final List<String> questions;
-  final bool startExpanded;
-  
-  const CollapsibleSuggestions({
-    super.key,
-    required this.title,
-    required this.questions,
-    this.startExpanded = true,
-  });
-
-  @override
-  ConsumerState<CollapsibleSuggestions> createState() => _CollapsibleSuggestionsState();
-}
-
-class _CollapsibleSuggestionsState extends ConsumerState<CollapsibleSuggestions> {
-  late bool _isExpanded;
-
-  @override
-  void initState() {
-    super.initState();
-    _isExpanded = widget.startExpanded;
-  }
-
-  @override
-  void didUpdateWidget(covariant CollapsibleSuggestions oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // If the widget is rebuilt and should no longer be expanded, collapse it
-    if (!widget.startExpanded && _isExpanded) {
-      setState(() {
-        _isExpanded = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ),
-                  Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
-                ],
-              ),
-            ),
-          ),
-          if (_isExpanded)
-            // Center the chips and allow them to wrap
-            Wrap(
-              alignment: WrapAlignment.center, // Horizontally centers the chips
-              spacing: 8,
-              runSpacing: 4,
-              children: widget.questions.map((q) {
-                // Use ActionChip for clickable chips
-                return ActionChip(
-                  label: Text(q),
-                  onPressed: () {
-                    ref.read(chatProvider.notifier).sendMessage(q);
-                  },
-                );
-              }).toList(),
             ),
         ],
       ),
