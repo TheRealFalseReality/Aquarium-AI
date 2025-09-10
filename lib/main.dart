@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fish_ai/widgets/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +32,6 @@ void main() async {
     ),
   );
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = GoogleFonts.interTextTheme(Theme.of(context).textTheme);
 
+    // ... (keep your existing lightTheme and darkTheme definitions)
     final lightTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -97,14 +98,31 @@ class MyApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
-          routes: {
-            '/': (context) => const WelcomeScreen(),
-            '/about': (context) => const AboutScreen(),
-            '/tank-volume': (context) => const TankVolumeCalculator(),
-            '/calculators': (context) => const CalculatorsScreen(),
-            '/chatbot': (context) => const ChatbotScreen(),
-          },
           initialRoute: '/',
+          onGenerateRoute: (settings) {
+            Widget page;
+            switch (settings.name) {
+              case '/':
+                page = const WelcomeScreen();
+                break;
+              case '/about':
+                page = const AboutScreen();
+                break;
+              case '/tank-volume':
+                page = const TankVolumeCalculator();
+                break;
+              case '/calculators':
+                page = const CalculatorsScreen();
+                break;
+              case '/chatbot':
+                page = const ChatbotScreen();
+                break;
+              // Add a default case, maybe a 404 page or redirect to home
+              default:
+                page = const WelcomeScreen();
+            }
+            return FadeSlideRoute(page: page);
+          },
         );
       },
     );
