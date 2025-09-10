@@ -36,7 +36,7 @@ class _WaterParameterAnalysisScreenState
     super.dispose();
   }
 
-  void _submitAnalysis() async {
+  void _submitAnalysis() {
     if (_formKey.currentState!.validate()) {
       final params = {
         'tankType': _tankTypeController.text,
@@ -48,17 +48,12 @@ class _WaterParameterAnalysisScreenState
         'salinityUnit': _isSalinitySg ? 'SG' : 'ppt',
       };
 
-      final result =
-          await ref.read(chatProvider.notifier).analyzeWaterParameters(params);
+      // Start the analysis but don't wait for it to complete
+      ref.read(chatProvider.notifier).analyzeWaterParameters(params);
 
-      if (mounted && result != null) {
-        Navigator.pop(context); // Close the form
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AnalysisResultScreen(result: result),
-          ),
-        );
+      // Immediately close the form
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
@@ -77,13 +72,20 @@ class _WaterParameterAnalysisScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'AI Water Parameter Analysis',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'AI Water Parameter Analysis',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                    ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
                 ],
               ),
               const SizedBox(height: 8),

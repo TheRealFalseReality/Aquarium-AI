@@ -24,20 +24,16 @@ class _AutomationScriptScreenState
     super.dispose();
   }
 
-  void _submitScriptRequest() async {
+  void _submitScriptRequest() {
     if (_formKey.currentState!.validate()) {
-      final script = await ref
+      // Start the script generation but don't wait for it
+      ref
           .read(chatProvider.notifier)
           .generateAutomationScript(_descriptionController.text);
-      if (mounted && script != null) {
-        Navigator.pop(context); // Close the form
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                AutomationScriptResultScreen(script: script),
-          ),
-        );
+          
+      // Immediately close the form
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
@@ -56,12 +52,19 @@ class _AutomationScriptScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'AI Automation Script Generator',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'AI Automation Script Generator',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),

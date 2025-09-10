@@ -68,25 +68,30 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       final newMessages = next.messages;
       if (newMessages.isNotEmpty) {
         final lastMessage = newMessages.last;
+        // When a new message with a result arrives, push the result screen
         if (lastMessage.analysisResult != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    AnalysisResultScreen(result: lastMessage.analysisResult!),
-              ),
-            );
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AnalysisResultScreen(result: lastMessage.analysisResult!),
+                ),
+              );
+            }
           });
         } else if (lastMessage.automationScript != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AutomationScriptResultScreen(
-                    script: lastMessage.automationScript!),
-              ),
-            );
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AutomationScriptResultScreen(
+                      script: lastMessage.automationScript!),
+                ),
+              );
+            }
           });
         }
       }
@@ -231,7 +236,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             ),
             IconButton(
               icon: Image.asset(
-                'assets/AquaPi Logo.png',
+                'assets/AquaPiLogo300.png',
                 color: Theme.of(context).colorScheme.onSurface,
                 height: 24,
                 width: 24,

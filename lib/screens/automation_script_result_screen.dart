@@ -22,6 +22,8 @@ class AutomationScriptResultScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Spacer to balance the IconButton on the right
+              const SizedBox(width: 48), 
               Expanded(
                 child: Text(
                   script.title,
@@ -31,6 +33,10 @@ class AutomationScriptResultScreen extends StatelessWidget {
                       ?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
