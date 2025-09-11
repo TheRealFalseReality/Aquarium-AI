@@ -38,6 +38,7 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.chat),
                     title: const Text('AI Chatbot'),
+                    subtitle: const Text('Ask questions, analyze parameters, and more.'),
                     onTap: () => navigate('/chatbot'),
                   ),
                 ),
@@ -46,6 +47,7 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.calculate),
                     title: const Text('AI Compatibility Tool'),
+                    subtitle: const Text('Check fish compatibility with an AI report.'),
                     onTap: () => navigate('/compat-ai'),
                   ),
                 ),
@@ -54,6 +56,7 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.science),
                     title: const Text('Aquarium Calculators'),
+                    subtitle: const Text('Essential tools for salinity, CO₂, and more.'),
                     onTap: () => navigate('/calculators'),
                   ),
                 ),
@@ -62,6 +65,7 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.opacity),
                     title: const Text('Tank Volume'),
+                    subtitle: const Text('Calculate the volume of your aquarium.'),
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
