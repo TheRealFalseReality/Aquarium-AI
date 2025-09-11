@@ -1,23 +1,21 @@
-// lib/widgets/app_drawer.dart
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
 import 'gradient_text.dart';
-import 'animated_drawer_item.dart'; // Import the new animation widget
+import 'animated_drawer_item.dart';
 
-class AppDrawer extends StatefulWidget {
+class AppDrawer extends ConsumerStatefulWidget {
   const AppDrawer({super.key});
 
   @override
   _AppDrawerState createState() => _AppDrawerState();
 }
 
-class _AppDrawerState extends State<AppDrawer> {
+class _AppDrawerState extends ConsumerState<AppDrawer> {
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    final themeProviderState = ref.watch(themeProviderNotifierProvider);
+    final isDarkMode = themeProviderState.themeMode == ThemeMode.dark;
 
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer
@@ -71,7 +69,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ),
           const Divider(height: 1),
-          _buildDrawerFooter(context, themeProvider, isDarkMode, navigate),
+          _buildDrawerFooter(context, isDarkMode, navigate),
         ],
       ),
     );
@@ -128,8 +126,9 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  Widget _buildDrawerFooter(BuildContext context, ThemeProvider themeProvider,
+  Widget _buildDrawerFooter(BuildContext context,
       bool isDarkMode, void Function(String) navigate) {
+    final themeProviderNotifier = ref.read(themeProviderNotifierProvider.notifier);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -160,7 +159,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 title: Text(isDarkMode ? 'Dark Mode' : 'Light Mode'),
                 value: isDarkMode,
                 onChanged: (value) {
-                  themeProvider.toggleTheme(value);
+                  themeProviderNotifier.toggleTheme(value);
                 },
                 secondary:
                     Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),

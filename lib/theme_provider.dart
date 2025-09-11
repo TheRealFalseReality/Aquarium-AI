@@ -1,51 +1,57 @@
 // lib/theme_provider.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeProvider with ChangeNotifier {
+final themeProviderNotifierProvider = NotifierProvider<ThemeProviderNotifier, ThemeProviderState>(ThemeProviderNotifier.new);
+
+class ThemeProviderState {
+  final ThemeMode themeMode;
+  final bool useMaterialYou;
+
+  ThemeProviderState({this.themeMode = ThemeMode.light, this.useMaterialYou = false});
+
+  ThemeProviderState copyWith({ThemeMode? themeMode, bool? useMaterialYou}) {
+    return ThemeProviderState(
+      themeMode: themeMode ?? this.themeMode,
+      useMaterialYou: useMaterialYou ?? this.useMaterialYou,
+    );
+  }
+}
+
+class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
   static const String themeKey = "theme_is_dark";
-  static const String materialYouKey = "material_you_enabled"; // New key
+  static const String materialYouKey = "material_you_enabled";
 
-  ThemeMode _themeMode = ThemeMode.light;
-  bool _useMaterialYou = false; // New state variable
-
-  ThemeMode get themeMode => _themeMode;
-  bool get useMaterialYou => _useMaterialYou; // New getter
-
-  ThemeProvider() {
+  @override
+  ThemeProviderState build() {
     _loadPreferences();
+    return ThemeProviderState();
   }
 
-  // Load both theme and Material You preferences
   void _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final isDarkMode = prefs.getBool(themeKey) ?? false;
-    _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-
-    // Load the Material You preference, defaulting to false
-    _useMaterialYou = prefs.getBool(materialYouKey) ?? false;
-
-    notifyListeners();
+    final useMaterialYou = prefs.getBool(materialYouKey) ?? false;
+    state = state.copyWith(
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      useMaterialYou: useMaterialYou,
+    );
   }
 
-  // Save a boolean preference to device storage
   Future<void> _savePreference(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
 
-  // Toggle the theme and save the new preference
   void toggleTheme(bool isDarkMode) {
-    _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    state = state.copyWith(themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light);
     _savePreference(themeKey, isDarkMode);
-    notifyListeners();
   }
 
-  // Toggle Material You theme and save the preference
   void toggleMaterialYou(bool isEnabled) {
-    _useMaterialYou = isEnabled;
+    state = state.copyWith(useMaterialYou: isEnabled);
     _savePreference(materialYouKey, isEnabled);
-    notifyListeners();
   }
 }

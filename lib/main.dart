@@ -1,11 +1,9 @@
-// lib/main.dart
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart' as provider;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'theme_provider.dart';
 import 'screens/welcome_screen.dart';
@@ -28,17 +26,11 @@ void main() async {
     unawaited(MobileAds.instance.initialize());
   }
   runApp(
-    provider.ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: const ProviderScope(child: MyApp()),
-    ),
+    const ProviderScope(child: MyApp()),
   );
 }
-// lib/main.dart
 
-// ... (keep all the existing code above the MyApp widget)
-
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
@@ -58,104 +50,100 @@ class MyApp extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
-    // We need to listen to the provider to rebuild when the theme changes.
-    return provider.Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final textTheme =
-            GoogleFonts.interTextTheme(Theme.of(context).textTheme);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeProvider = ref.watch(themeProviderNotifierProvider);
+    final textTheme =
+        GoogleFonts.interTextTheme(Theme.of(context).textTheme);
 
-        return DynamicColorBuilder(
-          builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            // Determine which color scheme to use based on the provider's state
-            ColorScheme lightColorScheme;
-            ColorScheme darkColorScheme;
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        // Determine which color scheme to use based on the provider's state
+        ColorScheme lightColorScheme;
+        ColorScheme darkColorScheme;
 
-            if (themeProvider.useMaterialYou &&
-                lightDynamic != null &&
-                darkDynamic != null) {
-              // Use dynamic colors if the feature is enabled and available
-              lightColorScheme = lightDynamic;
-              darkColorScheme = darkDynamic;
-            } else {
-              // Otherwise, fall back to the default schemes
-              lightColorScheme = _defaultLightColorScheme;
-              darkColorScheme = _defaultDarkColorScheme;
+        if (themeProvider.useMaterialYou &&
+            lightDynamic != null &&
+            darkDynamic != null) {
+          // Use dynamic colors if the feature is enabled and available
+          lightColorScheme = lightDynamic;
+          darkColorScheme = darkDynamic;
+        } else {
+          // Otherwise, fall back to the default schemes
+          lightColorScheme = _defaultLightColorScheme;
+          darkColorScheme = _defaultDarkColorScheme;
+        }
+
+        final lightTheme = ThemeData(
+          useMaterial3: true,
+          colorScheme: lightColorScheme,
+          textTheme: textTheme.apply(
+            bodyColor: const Color(0xFF344A53),
+            displayColor: const Color(0xFF344A53),
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: lightColorScheme.surface,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+          ),
+          cardTheme: CardThemeData(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            color: Colors.white,
+          ),
+        );
+
+        final darkTheme = ThemeData(
+          useMaterial3: true,
+          colorScheme: darkColorScheme,
+          textTheme: textTheme.apply(
+            bodyColor: const Color(0xFFE2E8F0),
+            displayColor: const Color(0xFFE2E8F0),
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: darkColorScheme.surface,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+          ),
+          cardTheme: CardThemeData(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            color: const Color(0xFF4A5568),
+          ),
+        );
+
+        return MaterialApp(
+          title: 'Fish.AI',
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: themeProvider.themeMode,
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            Widget page;
+            switch (settings.name) {
+              case '/':
+                page = const WelcomeScreen();
+                break;
+              case '/about':
+                page = const AboutScreen();
+                break;
+              case '/tank-volume':
+                page = const TankVolumeCalculator();
+                break;
+              case '/calculators':
+                page = const CalculatorsScreen();
+                break;
+              case '/chatbot':
+                page = const ChatbotScreen();
+                break;
+              case '/compat-ai':
+                page = const FishCompatibilityScreen();
+                break;
+              default:
+                page = const WelcomeScreen();
             }
-
-            final lightTheme = ThemeData(
-              useMaterial3: true,
-              colorScheme: lightColorScheme,
-              textTheme: textTheme.apply(
-                bodyColor: const Color(0xFF344A53),
-                displayColor: const Color(0xFF344A53),
-              ),
-              appBarTheme: AppBarTheme(
-                backgroundColor: lightColorScheme.surface,
-                elevation: 0,
-                scrolledUnderElevation: 1,
-              ),
-              cardTheme: CardThemeData(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                color: Colors.white,
-              ),
-            );
-
-            final darkTheme = ThemeData(
-              useMaterial3: true,
-              colorScheme: darkColorScheme,
-              textTheme: textTheme.apply(
-                bodyColor: const Color(0xFFE2E8F0),
-                displayColor: const Color(0xFFE2E8F0),
-              ),
-              appBarTheme: AppBarTheme(
-                backgroundColor: darkColorScheme.surface,
-                elevation: 0,
-                scrolledUnderElevation: 1,
-              ),
-              cardTheme: CardThemeData(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                color: const Color(0xFF4A5568),
-              ),
-            );
-
-            return MaterialApp(
-              title: 'Fish.AI',
-              theme: lightTheme,
-              darkTheme: darkTheme,
-              themeMode: themeProvider.themeMode,
-              initialRoute: '/',
-              onGenerateRoute: (settings) {
-                Widget page;
-                switch (settings.name) {
-                  case '/':
-                    page = const WelcomeScreen();
-                    break;
-                  case '/about':
-                    page = const AboutScreen();
-                    break;
-                  case '/tank-volume':
-                    page = const TankVolumeCalculator();
-                    break;
-                  case '/calculators':
-                    page = const CalculatorsScreen();
-                    break;
-                  case '/chatbot':
-                    page = const ChatbotScreen();
-                    break;
-                  case '/compat-ai':
-                    page = const FishCompatibilityScreen();
-                    break;
-                  default:
-                    page = const WelcomeScreen();
-                }
-                return FadeSlideRoute(page: page);
-              },
-            );
+            return FadeSlideRoute(page: page);
           },
         );
       },

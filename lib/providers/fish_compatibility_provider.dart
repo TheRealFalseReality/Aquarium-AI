@@ -1,32 +1,51 @@
-// lib/providers/fish_compatibility_provider.dart
-
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 
-class FishCompatibilityProvider extends ChangeNotifier {
-  FishCompatibilityProvider() {
-    _loadFishData();
+final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier, FishCompatibilityState>(FishCompatibilityNotifier.new);
+
+class FishCompatibilityState {
+  final Map<String, List<Fish>> fishData;
+  final List<Fish> selectedFish;
+  final CompatibilityReport? report;
+  final bool isLoading;
+  final String? error;
+
+  FishCompatibilityState({
+    this.fishData = const {},
+    this.selectedFish = const [],
+    this.report,
+    this.isLoading = false,
+    this.error,
+  });
+
+  FishCompatibilityState copyWith({
+    Map<String, List<Fish>>? fishData,
+    List<Fish>? selectedFish,
+    CompatibilityReport? report,
+    bool? isLoading,
+    String? error,
+  }) {
+    return FishCompatibilityState(
+      fishData: fishData ?? this.fishData,
+      selectedFish: selectedFish ?? this.selectedFish,
+      report: report ?? this.report,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
   }
+}
 
-  Map<String, List<Fish>> _fishData = {};
-  Map<String, List<Fish>> get fishData => _fishData;
-
-  List<Fish> _selectedFish = [];
-  List<Fish> get selectedFish => _selectedFish;
-
-  CompatibilityReport? _report;
-  CompatibilityReport? get report => _report;
-
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
-
-  String? _error;
-  String? get error => _error;
+class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
+  @override
+  FishCompatibilityState build() {
+    _loadFishData();
+    return FishCompatibilityState();
+  }
 
   Future<void> _loadFishData() async {
     try {
@@ -37,46 +56,40 @@ class FishCompatibilityProvider extends ChangeNotifier {
           .toList();
       final marine =
           (jsonResponse['marine'] as List).map((f) => Fish.fromJson(f)).toList();
-      _fishData = {'freshwater': freshwater, 'marine': marine};
+      state = state.copyWith(fishData: {'freshwater': freshwater, 'marine': marine});
     } catch (e) {
-      _error = "Failed to load fish data: ${e.toString()}";
+      state = state.copyWith(error: "Failed to load fish data: ${e.toString()}");
     }
-    notifyListeners();
   }
 
   void selectFish(Fish fish) {
-    if (_selectedFish.contains(fish)) {
-      _selectedFish.remove(fish);
+    final newSelectedFish = List<Fish>.from(state.selectedFish);
+    if (newSelectedFish.contains(fish)) {
+      newSelectedFish.remove(fish);
     } else {
-      _selectedFish.add(fish);
+      newSelectedFish.add(fish);
     }
-    _report = null;
-    notifyListeners();
+    state = state.copyWith(selectedFish: newSelectedFish, report: null);
   }
 
   void clearSelection() {
-    _selectedFish = [];
-    _report = null;
-    notifyListeners();
+    state = state.copyWith(selectedFish: [], report: null);
   }
 
   Future<void> getCompatibilityReport(String category) async {
-    if (_selectedFish.isEmpty) return;
+    if (state.selectedFish.isEmpty) return;
 
-    _isLoading = true;
-    _report = null;
-    _error = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, report: null, error: null);
 
-    final harmonyScore = _calculateHarmonyScore(_selectedFish);
-    final prompt = _buildPrompt(category, _selectedFish, harmonyScore);
+    final harmonyScore = _calculateHarmonyScore(state.selectedFish);
+    final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
     final model =
         FirebaseAI.googleAI().generativeModel(model: 'gemini-1.5-flash');
 
     try {
       final response = await model.generateContent([Content.text(prompt)]);
       final reportJson = json.decode(response.text!);
-      _report = CompatibilityReport(
+      final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel'],
         harmonySummary: reportJson['harmonySummary'],
         detailedSummary: reportJson['detailedSummary'],
@@ -87,11 +100,9 @@ class FishCompatibilityProvider extends ChangeNotifier {
             reportJson['compatibleFish'].map((f) => f['name'])),
         groupHarmonyScore: harmonyScore,
       );
+      state = state.copyWith(report: report, isLoading: false);
     } catch (e) {
-      _error = "Failed to generate report: ${e.toString()}";
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      state = state.copyWith(error: "Failed to generate report: ${e.toString()}", isLoading: false);
     }
   }
 

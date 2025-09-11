@@ -1,13 +1,11 @@
-// lib/screens/fish_compatibility_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 
-class FishCompatibilityScreen extends StatefulWidget {
+class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
 
   @override
@@ -15,60 +13,56 @@ class FishCompatibilityScreen extends StatefulWidget {
       _FishCompatibilityScreenState();
 }
 
-class _FishCompatibilityScreenState extends State<FishCompatibilityScreen> {
+class _FishCompatibilityScreenState
+    extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => FishCompatibilityProvider(),
-      child: Consumer<FishCompatibilityProvider>(
-        builder: (context, provider, child) {
-          // Show the report dialog when a report is generated
-          if (provider.report != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showReportDialog(context, provider.report!);
-              provider.clearSelection(); 
-            });
-          }
+    final provider = ref.watch(fishCompatibilityProvider);
+    final notifier = ref.read(fishCompatibilityProvider.notifier);
 
-          return MainLayout(
-            title: 'AI Compatibility Calculator',
-            child: Column(
-              children: [
-                _buildCategorySelector(provider),
-                Expanded(
-                  child: provider.fishData.isEmpty
-                      ? const Center(child: CircularProgressIndicator())
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            childAspectRatio: 3 / 4,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                          itemCount: provider.fishData[_selectedCategory]?.length ?? 0,
-                          itemBuilder: (context, index) {
-                            final fish = provider.fishData[_selectedCategory]![index];
-                            final isSelected =
-                                provider.selectedFish.contains(fish);
-                            return _buildFishCard(fish, isSelected, provider);
-                          },
-                        ),
-                ),
-                if (provider.selectedFish.isNotEmpty)
-                  _buildBottomBar(provider),
-              ],
-            ),
-          );
-        },
+    if (provider.report != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showReportDialog(context, provider.report!);
+        notifier.clearSelection();
+      });
+    }
+
+    return MainLayout(
+      title: 'AI Compatibility Calculator',
+      child: Column(
+        children: [
+          _buildCategorySelector(notifier),
+          Expanded(
+            child: provider.fishData.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 200,
+                      childAspectRatio: 3 / 4,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: provider.fishData[_selectedCategory]?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      final fish = provider.fishData[_selectedCategory]![index];
+                      final isSelected =
+                          provider.selectedFish.contains(fish);
+                      return _buildFishCard(fish, isSelected, notifier);
+                    },
+                  ),
+          ),
+          if (provider.selectedFish.isNotEmpty)
+            _buildBottomBar(provider, notifier),
+        ],
       ),
     );
   }
 
-  Widget _buildCategorySelector(FishCompatibilityProvider notifier) {
+  Widget _buildCategorySelector(FishCompatibilityNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -101,7 +95,7 @@ class _FishCompatibilityScreenState extends State<FishCompatibilityScreen> {
   }
 
   Widget _buildFishCard(
-      Fish fish, bool isSelected, FishCompatibilityProvider notifier) {
+      Fish fish, bool isSelected, FishCompatibilityNotifier notifier) {
     return Card(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -142,7 +136,7 @@ class _FishCompatibilityScreenState extends State<FishCompatibilityScreen> {
     );
   }
 
-  Widget _buildBottomBar(FishCompatibilityProvider provider) {
+  Widget _buildBottomBar(FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -176,7 +170,7 @@ class _FishCompatibilityScreenState extends State<FishCompatibilityScreen> {
           ElevatedButton(
             onPressed: provider.isLoading
                 ? null
-                : () => provider.getCompatibilityReport(_selectedCategory),
+                : () => notifier.getCompatibilityReport(_selectedCategory),
             child: provider.isLoading
                 ? const CircularProgressIndicator()
                 : const Text('Get Report'),
