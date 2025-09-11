@@ -1,3 +1,5 @@
+import 'fish.dart';
+
 class CompatibilityReport {
   final String harmonyLabel;
   final String harmonySummary;
@@ -7,6 +9,7 @@ class CompatibilityReport {
   final String careGuide;
   final List<String> compatibleFish;
   final double groupHarmonyScore;
+  final List<Fish> selectedFish;
 
   CompatibilityReport({
     required this.harmonyLabel,
@@ -17,5 +20,6 @@ class CompatibilityReport {
     required this.careGuide,
     required this.compatibleFish,
     required this.groupHarmonyScore,
+    required this.selectedFish,
   });
 }

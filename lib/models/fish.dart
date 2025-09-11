@@ -1,3 +1,5 @@
+// lib/models/fish.dart
+
 class Fish {
   final String name;
   final List<String> commonNames;
@@ -20,12 +22,12 @@ class Fish {
   factory Fish.fromJson(Map<String, dynamic> json) {
     return Fish(
       name: json['name'] as String,
-      commonNames: List<String>.from(json['commonNames']),
+      commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
-      compatible: List<String>.from(json['compatible']),
-      notRecommended: List<String>.from(json['notRecommended']),
-      notCompatible: List<String>.from(json['notCompatible']),
-      withCaution: List<String>.from(json['withCaution']),
+      compatible: List<String>.from(json['compatible'] ?? []),
+      notRecommended: List<String>.from(json['notRecommended'] ?? []),
+      notCompatible: List<String>.from(json['notCompatible'] ?? []),
+      withCaution: List<String>.from(json['withCaution'] ?? []),
     );
   }
 }

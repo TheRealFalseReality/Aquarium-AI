@@ -1,22 +1,35 @@
+// lib/providers/fish_compatibility_provider.dart
+
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 
+// Helper function to extract JSON from a markdown code block
+String _extractJson(String text) {
+  final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
+  final match = regExp.firstMatch(text);
+  if (match != null) {
+    return match.group(1) ?? text;
+  }
+  return text;
+}
+
 final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier, FishCompatibilityState>(FishCompatibilityNotifier.new);
 
 class FishCompatibilityState {
-  final Map<String, List<Fish>> fishData;
+  final AsyncValue<Map<String, List<Fish>>> fishData;
   final List<Fish> selectedFish;
   final CompatibilityReport? report;
   final bool isLoading;
   final String? error;
 
   FishCompatibilityState({
-    this.fishData = const {},
+    this.fishData = const AsyncValue.loading(),
     this.selectedFish = const [],
     this.report,
     this.isLoading = false,
@@ -24,16 +37,17 @@ class FishCompatibilityState {
   });
 
   FishCompatibilityState copyWith({
-    Map<String, List<Fish>>? fishData,
+    AsyncValue<Map<String, List<Fish>>>? fishData,
     List<Fish>? selectedFish,
     CompatibilityReport? report,
     bool? isLoading,
     String? error,
+    bool clearReport = false,
   }) {
     return FishCompatibilityState(
       fishData: fishData ?? this.fishData,
       selectedFish: selectedFish ?? this.selectedFish,
-      report: report ?? this.report,
+      report: clearReport ? null : report ?? this.report,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -56,9 +70,9 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
           .toList();
       final marine =
           (jsonResponse['marine'] as List).map((f) => Fish.fromJson(f)).toList();
-      state = state.copyWith(fishData: {'freshwater': freshwater, 'marine': marine});
-    } catch (e) {
-      state = state.copyWith(error: "Failed to load fish data: ${e.toString()}");
+      state = state.copyWith(fishData: AsyncValue.data({'freshwater': freshwater, 'marine': marine}));
+    } catch (e, stackTrace) {
+      state = state.copyWith(fishData: AsyncValue.error(e, stackTrace));
     }
   }
 
@@ -69,17 +83,21 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     } else {
       newSelectedFish.add(fish);
     }
-    state = state.copyWith(selectedFish: newSelectedFish, report: null);
+    state = state.copyWith(selectedFish: newSelectedFish, clearReport: true);
   }
 
   void clearSelection() {
-    state = state.copyWith(selectedFish: [], report: null);
+    state = state.copyWith(selectedFish: [], clearReport: true);
+  }
+
+  void clearError() {
+    state = state.copyWith(error: null);
   }
 
   Future<void> getCompatibilityReport(String category) async {
     if (state.selectedFish.isEmpty) return;
 
-    state = state.copyWith(isLoading: true, report: null, error: null);
+    state = state.copyWith(isLoading: true, clearReport: true, error: null);
 
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
@@ -88,7 +106,8 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
     try {
       final response = await model.generateContent([Content.text(prompt)]);
-      final reportJson = json.decode(response.text!);
+      final cleanedResponse = _extractJson(response.text!);
+      final reportJson = json.decode(cleanedResponse);
       final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel'],
         harmonySummary: reportJson['harmonySummary'],
@@ -99,6 +118,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         compatibleFish: List<String>.from(
             reportJson['compatibleFish'].map((f) => f['name'])),
         groupHarmonyScore: harmonyScore,
+        selectedFish: state.selectedFish,
       );
       state = state.copyWith(report: report, isLoading: false);
     } catch (e) {
