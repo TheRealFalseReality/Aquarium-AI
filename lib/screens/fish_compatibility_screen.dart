@@ -34,7 +34,6 @@ class FishCompatibilityScreenState
     _loadingOverlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Blurred background
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -43,7 +42,7 @@ class FishCompatibilityScreenState
               ),
             ),
           ),
-          Center(
+            Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -55,7 +54,7 @@ class FishCompatibilityScreenState
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Analyzing ${category.toUpperCase()} Fish...',
+                    'Analyzing Fish...',
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall
@@ -77,7 +76,7 @@ class FishCompatibilityScreenState
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                fish.name.split(' ')[0], // Show first word of name
+                                fish.name.split(' ')[0],
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyLarge
@@ -114,6 +113,10 @@ class FishCompatibilityScreenState
     _loadingOverlayEntry = null;
   }
 
+  void _openReport(CompatibilityReport report, {bool fromHistory = false}) {
+    _showReportDialog(context, report, fromHistory: fromHistory);
+  }
+
   @override
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
@@ -121,19 +124,21 @@ class FishCompatibilityScreenState
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
-      if (next.isLoading && ! (previous?.isLoading ?? false)) {
+      if (next.isLoading && !(previous?.isLoading ?? false)) {
         _showLoadingOverlay(context, next.selectedFish, _selectedCategory);
       } else if (!next.isLoading && (previous?.isLoading ?? false)) {
         _hideLoadingOverlay();
       }
 
-      if (next.report != null && (previous?.report != next.report)) {
+      // Show freshly generated report automatically
+      if (next.report != null && previous?.report != next.report) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            _showReportDialog(context, next.report!);
+            _openReport(next.report!);
           }
         });
       }
+
       if (next.error != null && previous?.error != next.error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -153,6 +158,10 @@ class FishCompatibilityScreenState
         });
       }
     });
+
+    final hasLastReport = providerState.lastReport != null;
+    final canShowLastReportFab =
+        hasLastReport && (providerState.report == null);
 
     return MainLayout(
       title: 'AI Compatibility Calculator',
@@ -203,7 +212,7 @@ class FishCompatibilityScreenState
                           child: Text('No fish found for this category.'));
                     }
                     return GridView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 200,
@@ -226,6 +235,23 @@ class FishCompatibilityScreenState
                 _buildBottomBar(providerState, notifier),
             ],
           ),
+          // Floating Action Button for "Last Report"
+          if (canShowLastReportFab)
+            Positioned(
+              bottom: 16 + 56, // leave space above ad banner (approx)
+              right: 16,
+              child: FloatingActionButton.extended(
+                heroTag: 'last_report_fab',
+                icon: const Icon(Icons.history),
+                label: const Text('Last Report'),
+                onPressed: () {
+                  final last = providerState.lastReport;
+                  if (last != null) {
+                    _openReport(last, fromHistory: true);
+                  }
+                },
+              ),
+            ),
         ],
       ),
     );
@@ -250,7 +276,7 @@ class FishCompatibilityScreenState
             },
           ),
           const SizedBox(width: 16),
-          ChoiceChip(
+            ChoiceChip(
             avatar: const Text('🐠'),
             label: const Text('Saltwater'),
             selected: _selectedCategory == 'marine',
@@ -316,7 +342,7 @@ class FishCompatibilityScreenState
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3), // More transparent
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -345,7 +371,11 @@ class FishCompatibilityScreenState
                     ? null
                     : () => notifier.getCompatibilityReport(_selectedCategory),
                 child: provider.isLoading
-                    ? const CircularProgressIndicator()
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      )
                     : const Text('Get Report'),
               ),
             ],
@@ -355,7 +385,8 @@ class FishCompatibilityScreenState
     );
   }
 
-  void _showReportDialog(BuildContext context, CompatibilityReport report) {
+  void _showReportDialog(BuildContext context, CompatibilityReport report,
+      {bool fromHistory = false}) {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
     final sections = {
@@ -388,7 +419,10 @@ class FishCompatibilityScreenState
                 icon: const Icon(Icons.close),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  notifier.clearSelection();
+                  // Only clear selection for freshly generated (active) report dialogs
+                  if (!fromHistory) {
+                    notifier.clearSelection();
+                  }
                 },
               ),
             ),
@@ -412,6 +446,15 @@ class FishCompatibilityScreenState
                     index,
                   );
                 }),
+                const SizedBox(height: 12),
+                Text(
+                  'Disclaimer: AI may occasionally provide inaccurate recommendations. Always cross-check critical information.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                        fontStyle: FontStyle.italic,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -468,7 +511,10 @@ class FishCompatibilityScreenState
     return Card(
       color: isEven
           ? null
-          : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          : Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.3),
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -512,7 +558,6 @@ class FishCompatibilityScreenState
                   backgroundImage: NetworkImage(fish.imageURL),
                 ),
                 const SizedBox(width: 16),
-                // Use a Flexible widget to prevent text overflow issues
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

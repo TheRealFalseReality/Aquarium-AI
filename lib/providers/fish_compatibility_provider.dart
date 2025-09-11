@@ -21,7 +21,8 @@ final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier, Fi
 class FishCompatibilityState {
   final AsyncValue<Map<String, List<Fish>>> fishData;
   final List<Fish> selectedFish;
-  final CompatibilityReport? report;
+  final CompatibilityReport? report;       // Current (active) report (shown right after generation)
+  final CompatibilityReport? lastReport;   // Persisted last generated report (for "Get Last Report")
   final bool isLoading;
   final String? error;
 
@@ -29,6 +30,7 @@ class FishCompatibilityState {
     this.fishData = const AsyncValue.loading(),
     this.selectedFish = const [],
     this.report,
+    this.lastReport,
     this.isLoading = false,
     this.error,
   });
@@ -37,14 +39,20 @@ class FishCompatibilityState {
     AsyncValue<Map<String, List<Fish>>>? fishData,
     List<Fish>? selectedFish,
     CompatibilityReport? report,
+    CompatibilityReport? lastReport,
     bool? isLoading,
     String? error,
     bool clearReport = false,
+    bool clearLastReport = false,
   }) {
     return FishCompatibilityState(
       fishData: fishData ?? this.fishData,
       selectedFish: selectedFish ?? this.selectedFish,
       report: clearReport ? null : report ?? this.report,
+      lastReport: clearLastReport
+          ? null
+          : lastReport ??
+              this.lastReport, // keep previous lastReport unless explicitly replaced or cleared
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -80,15 +88,21 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     } else {
       newSelectedFish.add(fish);
     }
+    // Clear only the active report (so a new one can be generated), retain lastReport
     state = state.copyWith(selectedFish: newSelectedFish, clearReport: true);
   }
 
   void clearSelection() {
+    // Clear only current report (active), keep lastReport so user can re-open it
     state = state.copyWith(selectedFish: [], clearReport: true);
   }
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  void clearLastReport() {
+    state = state.copyWith(clearLastReport: true);
   }
 
   Future<void> getCompatibilityReport(String category) async {
@@ -113,12 +127,14 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         decorations: reportJson['decorations'],
         careGuide: reportJson['careGuide'],
         compatibleFish: List<String>.from(
-            reportJson['compatibleFish'].map((f) => f['name'])),
+          reportJson['compatibleFish'].map((f) => f['name']),
+        ),
         groupHarmonyScore: harmonyScore,
         selectedFish: state.selectedFish,
         tankMatesSummary: reportJson['tankMatesSummary'],
       );
-      state = state.copyWith(report: report, isLoading: false);
+      // Set BOTH current report and lastReport
+      state = state.copyWith(report: report, lastReport: report, isLoading: false);
     } catch (e) {
       state = state.copyWith(error: "Failed to generate report: ${e.toString()}", isLoading: false);
     }
