@@ -1,24 +1,22 @@
-// lib/screens/about_screen.dart
-
-import 'dart:io'; // Import for Platform check
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart'; // Import Provider
 import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
-import '../theme_provider.dart'; // Import ThemeProvider
+import '../theme_provider.dart';
 import '../widgets/ad_component.dart';
 
-class AboutScreen extends StatefulWidget {
+class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
 
   @override
   _AboutScreenState createState() => _AboutScreenState();
 }
 
-class _AboutScreenState extends State<AboutScreen> {
+class _AboutScreenState extends ConsumerState<AboutScreen> {
   String _version = '...';
 
   @override
@@ -36,7 +34,8 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    // The mode is changed here to open in-app
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
       if (kDebugMode) {
         print('Could not launch $urlString');
       }
@@ -125,8 +124,8 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Access the ThemeProvider
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProviderState = ref.watch(themeProviderNotifierProvider);
+    final themeProviderNotifier = ref.read(themeProviderNotifierProvider.notifier);
 
     return MainLayout(
       title: 'About',
@@ -152,7 +151,6 @@ class _AboutScreenState extends State<AboutScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              // Conditionally show the Material You toggle only on Android
               if (!kIsWeb && Platform.isAndroid)
                 Card(
                   child: SwitchListTile(
@@ -161,9 +159,9 @@ class _AboutScreenState extends State<AboutScreen> {
                       "Experimental: Adapts to your wallpaper colors.",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    value: themeProvider.useMaterialYou,
+                    value: themeProviderState.useMaterialYou,
                     onChanged: (value) {
-                      themeProvider.toggleMaterialYou(value);
+                      themeProviderNotifier.toggleMaterialYou(value);
                     },
                     secondary: const Icon(Icons.color_lens_outlined),
                   ),

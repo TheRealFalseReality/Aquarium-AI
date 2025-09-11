@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
-  provider: ^6.1.2
+  # provider: ^6.1.2
   url_launcher: ^6.2.6
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.3
