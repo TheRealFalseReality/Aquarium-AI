@@ -119,6 +119,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
             reportJson['compatibleFish'].map((f) => f['name'])),
         groupHarmonyScore: harmonyScore,
         selectedFish: state.selectedFish,
+        tankMatesSummary: reportJson['tankMatesSummary'],
       );
       state = state.copyWith(report: report, isLoading: false);
     } catch (e) {
@@ -185,7 +186,8 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       4. "tankSize": "A recommended minimum tank size.",
       5. "decorations": "Recommended decorations and setup.",
       6. "careGuide": "A general care guide for this group.",
-      7. "compatibleFish": [{"name": "List of other fish that are compatible with ALL selected fish."}]
+      7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
+      8. "compatibleFish": [{"name": "List of other fish that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
       ''';
   }
 }

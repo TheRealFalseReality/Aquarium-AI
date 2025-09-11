@@ -34,7 +34,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
 
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    // The mode is changed here to open in-app
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
       if (kDebugMode) {
         print('Could not launch $urlString');
       }

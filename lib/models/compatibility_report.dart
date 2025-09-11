@@ -10,6 +10,7 @@ class CompatibilityReport {
   final List<String> compatibleFish;
   final double groupHarmonyScore;
   final List<Fish> selectedFish;
+  final String tankMatesSummary;
 
   CompatibilityReport({
     required this.harmonyLabel,
@@ -21,5 +22,6 @@ class CompatibilityReport {
     required this.compatibleFish,
     required this.groupHarmonyScore,
     required this.selectedFish,
+    required this.tankMatesSummary,
   });
 }

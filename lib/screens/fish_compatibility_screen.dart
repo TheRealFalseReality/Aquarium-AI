@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
@@ -217,20 +218,37 @@ class _FishCompatibilityScreenState
   void _showReportDialog(BuildContext context, CompatibilityReport report) {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
-    // Define the sections to display in the report
     final sections = {
-      'Selected Fish': _buildSelectedFishSection(report.selectedFish),
-      'Detailed Summary': SelectableText(report.detailedSummary),
-      'Recommended Tank Size': SelectableText(report.tankSize),
-      'Decorations and Setup': SelectableText(report.decorations),
-      'Care Guide': SelectableText(report.careGuide),
-      'Compatible Tank Mates': SelectableText(report.compatibleFish.join(', ')),
+      'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
+      'Detailed Summary': SelectableText(report.detailedSummary, textAlign: TextAlign.center),
+      'Recommended Tank Size': SelectableText(report.tankSize, textAlign: TextAlign.center),
+      'Decorations and Setup': SelectableText(report.decorations, textAlign: TextAlign.center),
+      'Care Guide': SelectableText(report.careGuide, textAlign: TextAlign.center),
+      'Compatible Tank Mates': _buildTankMatesSection(context, report),
     };
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Center(child: Text('Compatibility Report')),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        contentPadding: const EdgeInsets.all(8.0),
+        title: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Text('Compatibility Report', textAlign: TextAlign.center),
+            Positioned(
+              right: -10,
+              top: -10,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  notifier.clearSelection();
+                },
+              ),
+            ),
+          ],
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
@@ -253,15 +271,6 @@ class _FishCompatibilityScreenState
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              notifier.clearSelection();
-            },
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
@@ -329,6 +338,7 @@ class _FishCompatibilityScreenState
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             content,
@@ -338,18 +348,73 @@ class _FishCompatibilityScreenState
     );
   }
 
-  Widget _buildSelectedFishSection(List<Fish> selectedFish) {
+  Widget _buildSelectedFishSection(BuildContext context, List<Fish> selectedFish) {
     return Column(
       children: selectedFish.map((fish) {
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(fish.imageURL),
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: NetworkImage(fish.imageURL),
+                ),
+                const SizedBox(width: 16),
+                // Use a Flexible widget to prevent text overflow issues
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        fish.name,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        fish.commonNames.join(', '),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          title: Text(fish.name),
-          subtitle: Text(fish.commonNames.join(', ')),
-          contentPadding: EdgeInsets.zero,
         );
       }).toList(),
+    );
+  }
+  
+  Widget _buildTankMatesSection(BuildContext context, CompatibilityReport report) {
+    return Column(
+      children: [
+        SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),
+        const SizedBox(height: 8),
+        Text(
+          "(Click a fish to search)",
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 4.0,
+          alignment: WrapAlignment.center,
+          children: report.compatibleFish
+              .map((fishName) => ActionChip(
+                    label: Text(fishName),
+                    onPressed: () async {
+                      final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                  ))
+              .toList(),
+        ),
+      ],
     );
   }
 
