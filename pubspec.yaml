@@ -106,7 +106,6 @@ flutter:
 
   assets:
     - assets/
-    - assets/fishcompat.json # JSON file for fish compatibility data
 
 flutter_launcher_icons:
   android: true

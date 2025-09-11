@@ -1,5 +1,4 @@
-// lib/screens/fish_compatibility_screen.dart
-
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,6 +6,7 @@ import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
+import '../widgets/ad_component.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -19,13 +19,114 @@ class FishCompatibilityScreen extends ConsumerStatefulWidget {
 class _FishCompatibilityScreenState
     extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
+  OverlayEntry? _loadingOverlayEntry;
+
+  @override
+  void dispose() {
+    _loadingOverlayEntry?.remove();
+    super.dispose();
+  }
+
+  void _showLoadingOverlay(
+      BuildContext context, List<Fish> selectedFish, String category) {
+    if (_loadingOverlayEntry != null) return;
+
+    _loadingOverlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Blurred background
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              child: Container(
+                color: Colors.black.withOpacity(0.4),
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 5,
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Analyzing ${category.toUpperCase()} Fish...',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12.0,
+                    runSpacing: 12.0,
+                    children: selectedFish
+                        .map(
+                          (fish) => Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage: NetworkImage(fish.imageURL),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                fish.name.split(' ')[0], // Show first word of name
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Please wait while the AI generates your compatibility report.',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Overlay.of(context).insert(_loadingOverlayEntry!);
+  }
+
+  void _hideLoadingOverlay() {
+    _loadingOverlayEntry?.remove();
+    _loadingOverlayEntry = null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
-    ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
+    ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
+        (previous, next) {
+      if (next.isLoading && ! (previous?.isLoading ?? false)) {
+        _showLoadingOverlay(context, next.selectedFish, _selectedCategory);
+      } else if (!next.isLoading && (previous?.isLoading ?? false)) {
+        _hideLoadingOverlay();
+      }
+
       if (next.report != null && (previous?.report != next.report)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -55,43 +156,55 @@ class _FishCompatibilityScreenState
 
     return MainLayout(
       title: 'AI Compatibility Calculator',
-      child: Column(
+      bottomNavigationBar: const AdBanner(),
+      child: Stack(
         children: [
-          _buildCategorySelector(notifier),
-          Expanded(
-            child: providerState.fishData.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text('Failed to load fish data:\n$error', textAlign: TextAlign.center,),
+          Column(
+            children: [
+              _buildCategorySelector(notifier),
+              Expanded(
+                child: providerState.fishData.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Failed to load fish data:\n$error',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  data: (fishData) {
+                    final fishList = fishData[_selectedCategory] ?? [];
+                    if (fishList.isEmpty) {
+                      return const Center(
+                          child: Text('No fish found for this category.'));
+                    }
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200,
+                        childAspectRatio: 3 / 4,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: fishList.length,
+                      itemBuilder: (context, index) {
+                        final fish = fishList[index];
+                        final isSelected =
+                            providerState.selectedFish.contains(fish);
+                        return _buildFishCard(fish, isSelected, notifier);
+                      },
+                    );
+                  },
                 ),
               ),
-              data: (fishData) {
-                final fishList = fishData[_selectedCategory] ?? [];
-                if (fishList.isEmpty) {
-                  return const Center(child: Text('No fish found for this category.'));
-                }
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    childAspectRatio: 3 / 4,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: fishList.length,
-                  itemBuilder: (context, index) {
-                    final fish = fishList[index];
-                    final isSelected = providerState.selectedFish.contains(fish);
-                    return _buildFishCard(fish, isSelected, notifier);
-                  },
-                );
-              },
-            ),
+              if (providerState.selectedFish.isNotEmpty)
+                _buildBottomBar(providerState, notifier),
+            ],
           ),
-          if (providerState.selectedFish.isNotEmpty)
-            _buildBottomBar(providerState, notifier),
         ],
       ),
     );
@@ -104,8 +217,10 @@ class _FishCompatibilityScreenState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ChoiceChip(
+            avatar: const Text('🐟'),
             label: const Text('Freshwater'),
             selected: _selectedCategory == 'freshwater',
+            showCheckmark: false,
             onSelected: (selected) {
               if (selected) {
                 setState(() => _selectedCategory = 'freshwater');
@@ -115,8 +230,10 @@ class _FishCompatibilityScreenState
           ),
           const SizedBox(width: 16),
           ChoiceChip(
+            avatar: const Text('🐠'),
             label: const Text('Saltwater'),
             selected: _selectedCategory == 'marine',
+            showCheckmark: false,
             onSelected: (selected) {
               if (selected) {
                 setState(() => _selectedCategory = 'marine');
@@ -171,46 +288,48 @@ class _FishCompatibilityScreenState
     );
   }
 
-  Widget _buildBottomBar(FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: provider.selectedFish
-                    .map((fish) => Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: CircleAvatar(
-                            backgroundImage: NetworkImage(fish.imageURL),
-                          ),
-                        ))
-                    .toList(),
+  Widget _buildBottomBar(
+      FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.3), // More transparent
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () => notifier.clearSelection(),
+                tooltip: 'Clear Selection',
               ),
-            ),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: provider.selectedFish
+                        .map((fish) => Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(fish.imageURL),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: provider.isLoading
+                    ? null
+                    : () => notifier.getCompatibilityReport(_selectedCategory),
+                child: provider.isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Get Report'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: provider.isLoading
-                ? null
-                : () => notifier.getCompatibilityReport(_selectedCategory),
-            child: provider.isLoading
-                ? const CircularProgressIndicator()
-                : const Text('Get Report'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -220,17 +339,22 @@ class _FishCompatibilityScreenState
 
     final sections = {
       'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
-      'Detailed Summary': SelectableText(report.detailedSummary, textAlign: TextAlign.center),
-      'Recommended Tank Size': SelectableText(report.tankSize, textAlign: TextAlign.center),
-      'Decorations and Setup': SelectableText(report.decorations, textAlign: TextAlign.center),
-      'Care Guide': SelectableText(report.careGuide, textAlign: TextAlign.center),
+      'Detailed Summary':
+          SelectableText(report.detailedSummary, textAlign: TextAlign.center),
+      'Recommended Tank Size':
+          SelectableText(report.tankSize, textAlign: TextAlign.center),
+      'Decorations and Setup':
+          SelectableText(report.decorations, textAlign: TextAlign.center),
+      'Care Guide':
+          SelectableText(report.careGuide, textAlign: TextAlign.center),
       'Compatible Tank Mates': _buildTankMatesSection(context, report),
     };
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
         contentPadding: const EdgeInsets.all(8.0),
         title: Stack(
           alignment: Alignment.center,
@@ -317,10 +441,13 @@ class _FishCompatibilityScreenState
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, Widget content, int index) {
+  Widget _buildSection(
+      BuildContext context, String title, Widget content, int index) {
     final isEven = index % 2 == 0;
     return Card(
-      color: isEven ? null : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: isEven
+          ? null
+          : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -348,7 +475,8 @@ class _FishCompatibilityScreenState
     );
   }
 
-  Widget _buildSelectedFishSection(BuildContext context, List<Fish> selectedFish) {
+  Widget _buildSelectedFishSection(
+      BuildContext context, List<Fish> selectedFish) {
     return Column(
       children: selectedFish.map((fish) {
         return Padding(
@@ -386,15 +514,19 @@ class _FishCompatibilityScreenState
       }).toList(),
     );
   }
-  
-  Widget _buildTankMatesSection(BuildContext context, CompatibilityReport report) {
+
+  Widget _buildTankMatesSection(
+      BuildContext context, CompatibilityReport report) {
     return Column(
       children: [
         SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text(
           "(Click a fish to search)",
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(fontStyle: FontStyle.italic),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
@@ -406,9 +538,11 @@ class _FishCompatibilityScreenState
               .map((fishName) => ActionChip(
                     label: Text(fishName),
                     onPressed: () async {
-                      final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
+                      final url = Uri.parse(
+                          'https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
                       if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
                       }
                     },
                   ))
