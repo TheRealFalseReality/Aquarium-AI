@@ -17,6 +17,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'widgets/transitions.dart';
+import 'screens/fish_compatibility_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -145,6 +146,9 @@ class MyApp extends StatelessWidget {
                     break;
                   case '/chatbot':
                     page = const ChatbotScreen();
+                    break;
+                  case '/compat-ai':
+                    page = const FishCompatibilityScreen();
                     break;
                   default:
                     page = const WelcomeScreen();

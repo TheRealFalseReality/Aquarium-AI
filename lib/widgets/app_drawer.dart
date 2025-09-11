@@ -48,8 +48,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.calculate),
                     title: const Text('AI Compatibility Tool'),
-                    onTap: () => navigate(
-                        '/compat-ai'), // Assuming this route will be added
+                    onTap: () => navigate('/compat-ai'),
                   ),
                 ),
                 AnimatedDrawerItem(
