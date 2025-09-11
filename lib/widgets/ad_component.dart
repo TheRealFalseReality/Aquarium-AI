@@ -1,5 +1,3 @@
-// lib/widgets/ad_component.dart
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';

@@ -13,10 +13,10 @@ class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
 
   @override
-  _AboutScreenState createState() => _AboutScreenState();
+  AboutScreenState createState() => AboutScreenState();
 }
 
-class _AboutScreenState extends ConsumerState<AboutScreen> {
+class AboutScreenState extends ConsumerState<AboutScreen> {
   String _version = '...';
 
   @override

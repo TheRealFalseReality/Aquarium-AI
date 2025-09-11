@@ -1,5 +1,3 @@
-// lib/providers/chat_provider.dart
-
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

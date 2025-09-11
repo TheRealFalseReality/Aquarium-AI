@@ -7,10 +7,10 @@ class AutomationScriptScreen extends ConsumerStatefulWidget {
   const AutomationScriptScreen({super.key});
 
   @override
-  _AutomationScriptScreenState createState() => _AutomationScriptScreenState();
+  AutomationScriptScreenState createState() => AutomationScriptScreenState();
 }
 
-class _AutomationScriptScreenState
+class AutomationScriptScreenState
     extends ConsumerState<AutomationScriptScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();

@@ -12,11 +12,11 @@ class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
 
   @override
-  _FishCompatibilityScreenState createState() =>
-      _FishCompatibilityScreenState();
+  FishCompatibilityScreenState createState() =>
+      FishCompatibilityScreenState();
 }
 
-class _FishCompatibilityScreenState
+class FishCompatibilityScreenState
     extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
   OverlayEntry? _loadingOverlayEntry;
@@ -411,7 +411,7 @@ class _FishCompatibilityScreenState
                     entry.value,
                     index,
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -468,7 +468,7 @@ class _FishCompatibilityScreenState
     return Card(
       color: isEven
           ? null
-          : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+          : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 0,
       shape: RoundedRectangleBorder(

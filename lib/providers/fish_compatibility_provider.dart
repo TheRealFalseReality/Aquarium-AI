@@ -1,5 +1,3 @@
-// lib/providers/fish_compatibility_provider.dart
-
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';

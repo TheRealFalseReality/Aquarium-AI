@@ -7,10 +7,10 @@ class CalculatorsScreen extends StatefulWidget {
   const CalculatorsScreen({super.key});
 
   @override
-  _CalculatorsScreenState createState() => _CalculatorsScreenState();
+  CalculatorsScreenState createState() => CalculatorsScreenState();
 }
 
-class _CalculatorsScreenState extends State<CalculatorsScreen> {
+class CalculatorsScreenState extends State<CalculatorsScreen> {
   String _activeCalculator = 'Salinity';
 
   Widget _renderCalculator() {
@@ -141,10 +141,10 @@ class SalinityConverter extends StatefulWidget {
   const SalinityConverter({super.key});
 
   @override
-  _SalinityConverterState createState() => _SalinityConverterState();
+  SalinityConverterState createState() => SalinityConverterState();
 }
 
-class _SalinityConverterState extends State<SalinityConverter> {
+class SalinityConverterState extends State<SalinityConverter> {
   final _valueController = TextEditingController();
   final _tempController = TextEditingController(text: '25');
   String _fromUnit = 'Salinity (ppt)';
@@ -327,11 +327,11 @@ class CarbonDioxideCalculator extends StatefulWidget {
   const CarbonDioxideCalculator({super.key});
 
   @override
-  _CarbonDioxideCalculatorState createState() =>
-      _CarbonDioxideCalculatorState();
+  CarbonDioxideCalculatorState createState() =>
+      CarbonDioxideCalculatorState();
 }
 
-class _CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
+class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
   final _phController = TextEditingController();
   final _dkhController = TextEditingController();
   String _result = '';
@@ -436,10 +436,10 @@ class AlkalinityConverter extends StatefulWidget {
   const AlkalinityConverter({super.key});
 
   @override
-  _AlkalinityConverterState createState() => _AlkalinityConverterState();
+  AlkalinityConverterState createState() => AlkalinityConverterState();
 }
 
-class _AlkalinityConverterState extends State<AlkalinityConverter> {
+class AlkalinityConverterState extends State<AlkalinityConverter> {
   final _inputValueController = TextEditingController();
   String _fromUnit = 'dKH';
   Map<String, String> _results = {'dkh': '', 'ppm': '', 'meq': ''};
@@ -593,10 +593,10 @@ class TemperatureConverter extends StatefulWidget {
   const TemperatureConverter({super.key});
 
   @override
-  _TemperatureConverterState createState() => _TemperatureConverterState();
+  TemperatureConverterState createState() => TemperatureConverterState();
 }
 
-class _TemperatureConverterState extends State<TemperatureConverter> {
+class TemperatureConverterState extends State<TemperatureConverter> {
   final _inputValueController = TextEditingController();
   String _fromUnit = 'Fahrenheit';
   Map<String, String> _results = {'toValue': '', 'kelvin': ''};

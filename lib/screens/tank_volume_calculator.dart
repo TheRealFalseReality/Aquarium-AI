@@ -7,10 +7,10 @@ class TankVolumeCalculator extends StatefulWidget {
   const TankVolumeCalculator({super.key});
 
   @override
-  _TankVolumeCalculatorState createState() => _TankVolumeCalculatorState();
+  TankVolumeCalculatorState createState() => TankVolumeCalculatorState();
 }
 
-class _TankVolumeCalculatorState extends State<TankVolumeCalculator> {
+class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   String _shape = 'Rectangle';
   String _units = 'Inches';
   String _cylinderType = 'Full';

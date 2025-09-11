@@ -8,10 +8,10 @@ class AppDrawer extends ConsumerStatefulWidget {
   const AppDrawer({super.key});
 
   @override
-  _AppDrawerState createState() => _AppDrawerState();
+  AppDrawerState createState() => AppDrawerState();
 }
 
-class _AppDrawerState extends ConsumerState<AppDrawer> {
+class AppDrawerState extends ConsumerState<AppDrawer> {
   @override
   Widget build(BuildContext context) {
     final themeProviderState = ref.watch(themeProviderNotifierProvider);

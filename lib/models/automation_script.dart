@@ -1,5 +1,3 @@
-// lib/models/automation_script.dart
-
 class AutomationScript {
   final String title;
   final String explanation;

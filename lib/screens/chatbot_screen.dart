@@ -16,10 +16,10 @@ class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
 
   @override
-  _ChatbotScreenState createState() => _ChatbotScreenState();
+  ChatbotScreenState createState() => ChatbotScreenState();
 }
 
-class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
+class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   String? _expandedMenu;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollButton = false;

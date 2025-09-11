@@ -1,5 +1,3 @@
-// lib/widgets/animated_drawer_item.dart
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -14,10 +12,10 @@ class AnimatedDrawerItem extends StatefulWidget {
   });
 
   @override
-  _AnimatedDrawerItemState createState() => _AnimatedDrawerItemState();
+   createState() => AnimatedDrawerItemState();
 }
 
-class _AnimatedDrawerItemState extends State<AnimatedDrawerItem> {
+class AnimatedDrawerItemState extends State<AnimatedDrawerItem> {
   bool _isAnimated = false;
 
   @override

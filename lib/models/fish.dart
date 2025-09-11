@@ -1,5 +1,3 @@
-// lib/models/fish.dart
-
 class Fish {
   final String name;
   final List<String> commonNames;

@@ -1,5 +1,3 @@
-// lib/theme_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +8,7 @@ class ThemeProviderState {
   final ThemeMode themeMode;
   final bool useMaterialYou;
 
-  ThemeProviderState({this.themeMode = ThemeMode.light, this.useMaterialYou = false});
+  ThemeProviderState({this.themeMode = ThemeMode.system, this.useMaterialYou = false}); // Changed default to ThemeMode.system
 
   ThemeProviderState copyWith({ThemeMode? themeMode, bool? useMaterialYou}) {
     return ThemeProviderState(
@@ -32,10 +30,18 @@ class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
 
   void _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDarkMode = prefs.getBool(themeKey) ?? false;
+    final isDarkMode = prefs.getBool(themeKey);
     final useMaterialYou = prefs.getBool(materialYouKey) ?? false;
+    
+    ThemeMode themeMode;
+    if (isDarkMode == null) {
+      themeMode = ThemeMode.system;
+    } else {
+      themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    }
+
     state = state.copyWith(
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode: themeMode,
       useMaterialYou: useMaterialYou,
     );
   }

@@ -1,5 +1,3 @@
-// lib/screens/welcome_screen.dart
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../main_layout.dart';
@@ -67,10 +65,10 @@ class AnimatedHeader extends StatefulWidget {
   const AnimatedHeader({super.key});
 
   @override
-  _AnimatedHeaderState createState() => _AnimatedHeaderState();
+  AnimatedHeaderState createState() => AnimatedHeaderState();
 }
 
-class _AnimatedHeaderState extends State<AnimatedHeader> {
+class AnimatedHeaderState extends State<AnimatedHeader> {
   bool _isAnimated = false;
 
   @override
@@ -121,10 +119,10 @@ class AnimatedText extends StatefulWidget {
   const AnimatedText(this.text, {super.key, this.style, required this.delay});
 
   @override
-  _AnimatedTextState createState() => _AnimatedTextState();
+  AnimatedTextState createState() => AnimatedTextState();
 }
 
-class _AnimatedTextState extends State<AnimatedText> {
+class AnimatedTextState extends State<AnimatedText> {
   bool _isAnimated = false;
 
   @override
@@ -160,10 +158,10 @@ class AnimatedFeatureCard extends StatefulWidget {
   const AnimatedFeatureCard({super.key, required this.child, required this.delay});
 
   @override
-  _AnimatedFeatureCardState createState() => _AnimatedFeatureCardState();
+  AnimatedFeatureCardState createState() => AnimatedFeatureCardState();
 }
 
-class _AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
+class AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
   bool _isAnimated = false;
 
   @override

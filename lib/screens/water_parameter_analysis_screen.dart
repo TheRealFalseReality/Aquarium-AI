@@ -7,11 +7,11 @@ class WaterParameterAnalysisScreen extends ConsumerStatefulWidget {
   const WaterParameterAnalysisScreen({super.key});
 
   @override
-  _WaterParameterAnalysisScreenState createState() =>
-      _WaterParameterAnalysisScreenState();
+  TankVolumeCalculatorState createState() =>
+      TankVolumeCalculatorState();
 }
 
-class _WaterParameterAnalysisScreenState
+class TankVolumeCalculatorState
     extends ConsumerState<WaterParameterAnalysisScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tankTypeController = TextEditingController();
