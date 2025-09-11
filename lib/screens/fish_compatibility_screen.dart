@@ -39,7 +39,7 @@ class _FishCompatibilityScreenState
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -316,7 +316,7 @@ class _FishCompatibilityScreenState
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.3), // More transparent
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3), // More transparent
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -468,7 +468,7 @@ class _FishCompatibilityScreenState
     return Card(
       color: isEven
           ? null
-          : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 0,
       shape: RoundedRectangleBorder(

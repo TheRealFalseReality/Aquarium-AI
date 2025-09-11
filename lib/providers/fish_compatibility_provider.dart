@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -154,8 +153,9 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
   double _calculateHarmonyScore(List<Fish> fishList) {
     if (fishList.isEmpty) return 1.0;
-    if (fishList.length == 1)
+    if (fishList.length == 1) {
       return _getPairwiseProbability(fishList[0], fishList[0]);
+    }
 
     double minProb = 1.0;
     for (int i = 0; i < fishList.length; i++) {

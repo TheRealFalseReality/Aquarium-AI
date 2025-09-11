@@ -143,11 +143,11 @@ class AnalysisResultScreen extends StatelessWidget {
   Map<String, Color> _getStatusColors(BuildContext context, String status) {
     switch (status.toLowerCase()) {
       case 'good':
-        return {'text': Colors.green, 'bg': Colors.green.withOpacity(0.1)};
+        return {'text': Colors.green, 'bg': Colors.green.withValues(alpha: 0.1)};
       case 'needs attention':
-        return {'text': Colors.orange, 'bg': Colors.orange.withOpacity(0.1)};
+        return {'text': Colors.orange, 'bg': Colors.orange.withValues(alpha: 0.1)};
       case 'bad':
-        return {'text': Colors.red, 'bg': Colors.red.withOpacity(0.1)};
+        return {'text': Colors.red, 'bg': Colors.red.withValues(alpha: 0.1)};
       default:
         return {
           'text': Theme.of(context).colorScheme.onSurface,
