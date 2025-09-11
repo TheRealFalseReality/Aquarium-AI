@@ -161,6 +161,27 @@ class _FishCompatibilityScreenState
         children: [
           Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'AI Fish Compatibility',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Select two or more fish to generate a compatibility report.',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
               _buildCategorySelector(notifier),
               Expanded(
                 child: providerState.fishData.when(
