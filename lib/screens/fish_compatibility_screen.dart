@@ -7,6 +7,7 @@ import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/modern_chip.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -42,7 +43,7 @@ class FishCompatibilityScreenState
               ),
             ),
           ),
-            Center(
+          Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -130,7 +131,6 @@ class FishCompatibilityScreenState
         _hideLoadingOverlay();
       }
 
-      // Show freshly generated report automatically
       if (next.report != null && previous?.report != next.report) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -171,7 +171,8 @@ class FishCompatibilityScreenState
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
                 child: Column(
                   children: [
                     Text(
@@ -182,7 +183,7 @@ class FishCompatibilityScreenState
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       'Select two or more fish to generate a compatibility report.',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -215,10 +216,10 @@ class FishCompatibilityScreenState
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200,
+                        maxCrossAxisExtent: 210,
                         childAspectRatio: 3 / 4,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 18,
+                        mainAxisSpacing: 18,
                       ),
                       itemCount: fishList.length,
                       itemBuilder: (context, index) {
@@ -235,10 +236,9 @@ class FishCompatibilityScreenState
                 _buildBottomBar(providerState, notifier),
             ],
           ),
-          // Floating Action Button for "Last Report"
           if (canShowLastReportFab)
             Positioned(
-              bottom: 16 + 56, // leave space above ad banner (approx)
+              bottom: 16 + 56,
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
@@ -259,33 +259,28 @@ class FishCompatibilityScreenState
 
   Widget _buildCategorySelector(FishCompatibilityNotifier notifier) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 8,
+        alignment: WrapAlignment.center,
         children: [
-          ChoiceChip(
-            avatar: const Text('🐟'),
-            label: const Text('Freshwater'),
+          ModernSelectableChip(
+            label: 'Freshwater',
+            emoji: '🐟',
             selected: _selectedCategory == 'freshwater',
-            showCheckmark: false,
-            onSelected: (selected) {
-              if (selected) {
-                setState(() => _selectedCategory = 'freshwater');
-                notifier.clearSelection();
-              }
+            onTap: () {
+              setState(() => _selectedCategory = 'freshwater');
+              notifier.clearSelection();
             },
           ),
-          const SizedBox(width: 16),
-            ChoiceChip(
-            avatar: const Text('🐠'),
-            label: const Text('Saltwater'),
+          ModernSelectableChip(
+            label: 'Saltwater',
+            emoji: '🐠',
             selected: _selectedCategory == 'marine',
-            showCheckmark: false,
-            onSelected: (selected) {
-              if (selected) {
-                setState(() => _selectedCategory = 'marine');
-                notifier.clearSelection();
-              }
+            onTap: () {
+              setState(() => _selectedCategory = 'marine');
+              notifier.clearSelection();
             },
           ),
         ],
@@ -295,41 +290,77 @@ class FishCompatibilityScreenState
 
   Widget _buildFishCard(
       Fish fish, bool isSelected, FishCompatibilityNotifier notifier) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
-          width: 3,
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isSelected ? cs.primary : cs.outlineVariant.withOpacity(0.25),
+          width: isSelected ? 3 : 1.2,
         ),
+        boxShadow: [
+          if (isSelected)
+            BoxShadow(
+              color: cs.primary.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          )
+        ],
+        gradient: isSelected
+            ? LinearGradient(
+                colors: [
+                  cs.primary.withOpacity(0.18),
+                  cs.secondary.withOpacity(0.18),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isSelected ? null : Theme.of(context).cardColor,
       ),
-      child: InkWell(
-        onTap: () => notifier.selectFish(fish),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Image.network(
-                fish.imageURL,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.error),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () => notifier.selectFish(fish),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(18)),
+                  child: Image.network(
+                    fish.imageURL,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Icon(Icons.error)),
+                  ),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                fish.name,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: Text(
+                  fish.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -337,46 +368,77 @@ class FishCompatibilityScreenState
 
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
+    final cs = Theme.of(context).colorScheme;
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+          decoration: BoxDecoration(
+            color: cs.surface.withOpacity(0.55),
+            border: Border(
+              top: BorderSide(
+                color: cs.primary.withOpacity(0.25),
+                width: 1.2,
+              ),
+            ),
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.clear),
+                icon: const Icon(Icons.clear_rounded),
                 onPressed: () => notifier.clearSelection(),
                 tooltip: 'Clear Selection',
               ),
+              const SizedBox(width: 4),
               Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: provider.selectedFish
-                        .map((fish) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: CircleAvatar(
-                                backgroundImage: NetworkImage(fish.imageURL),
-                              ),
-                            ))
-                        .toList(),
+                child: SizedBox(
+                  height: 52,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: provider.selectedFish.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final fish = provider.selectedFish[index];
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: Image.network(
+                          fish.imageURL,
+                          width: 52,
+                          height: 52,
+                          fit: BoxFit.cover,
+                          errorBuilder: (c, e, s) => Container(
+                            width: 52,
+                            height: 52,
+                            color: cs.error.withOpacity(0.1),
+                            child: Icon(Icons.error,
+                                color: cs.error, size: 20),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
-              ElevatedButton(
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
                 onPressed: provider.isLoading
                     ? null
                     : () => notifier.getCompatibilityReport(_selectedCategory),
-                child: provider.isLoading
+                icon: provider.isLoading
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         child: CircularProgressIndicator(strokeWidth: 3),
                       )
-                    : const Text('Get Report'),
+                    : const Icon(Icons.analytics_outlined),
+                label: const Text('Get Report'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                ),
               ),
             ],
           ),
@@ -416,10 +478,9 @@ class FishCompatibilityScreenState
               right: -10,
               top: -10,
               child: IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close_rounded),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Only clear selection for freshly generated (active) report dialogs
                   if (!fromHistory) {
                     notifier.clearSelection();
                   }
@@ -468,13 +529,15 @@ class FishCompatibilityScreenState
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Group Harmony',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -482,22 +545,23 @@ class FishCompatibilityScreenState
               report.harmonyLabel,
               style: Theme.of(context)
                   .textTheme
-                  .headlineMedium
-                  ?.copyWith(color: harmonyColor),
+                  .headlineSmall
+                  ?.copyWith(color: harmonyColor, fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
             SelectableText(
               '${(report.groupHarmonyScore * 100).toStringAsFixed(0)}%',
-              style: Theme.of(context)
-                  .textTheme
-                  .displayMedium
-                  ?.copyWith(color: harmonyColor),
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: harmonyColor,
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             SelectableText(
               report.harmonySummary,
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
@@ -508,33 +572,33 @@ class FishCompatibilityScreenState
   Widget _buildSection(
       BuildContext context, String title, Widget content, int index) {
     final isEven = index % 2 == 0;
+    final cs = Theme.of(context).colorScheme;
     return Card(
       color: isEven
           ? null
-          : Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.3),
-      margin: const EdgeInsets.only(bottom: 12.0),
+          : cs.surfaceContainerHighest.withValues(alpha: 0.28),
+      margin: const EdgeInsets.only(bottom: 14.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: Theme.of(context).dividerColor,
-          width: 0.5,
+          color: cs.outlineVariant.withOpacity(0.4),
+          width: 0.8,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             content,
           ],
         ),
@@ -547,33 +611,49 @@ class FishCompatibilityScreenState
     return Column(
       children: selectedFish.map((fish) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(fish.imageURL),
-                ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fish.name,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Text(
-                        fish.commonNames.join(', '),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHigh
+                    .withOpacity(0.4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(fish.imageURL),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fish.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          fish.commonNames.join(', '),
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -583,36 +663,37 @@ class FishCompatibilityScreenState
 
   Widget _buildTankMatesSection(
       BuildContext context, CompatibilityReport report) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           "(Click a fish to search)",
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(fontStyle: FontStyle.italic),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Wrap(
-          spacing: 8.0,
-          runSpacing: 4.0,
+          spacing: 10.0,
+          runSpacing: 8.0,
           alignment: WrapAlignment.center,
-          children: report.compatibleFish
-              .map((fishName) => ActionChip(
-                    label: Text(fishName),
-                    onPressed: () async {
-                      final url = Uri.parse(
-                          'https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                  ))
-              .toList(),
+          children: report.compatibleFish.map((fishName) {
+            return ModernSelectableChip(
+              label: fishName,
+              selected: false,
+              dense: true,
+              onTap: () async {
+                final url = Uri.parse(
+                    'https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+            );
+          }).toList(),
         ),
       ],
     );
@@ -620,7 +701,7 @@ class FishCompatibilityScreenState
 
   Color _getHarmonyColor(double score) {
     if (score >= 0.75) return Colors.green;
-    if (score >= 0.5) return Colors.yellow;
+    if (score >= 0.5) return Colors.yellow.shade700;
     if (score >= 0.25) return Colors.orange;
     return Colors.red;
   }

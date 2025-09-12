@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -57,21 +56,25 @@ class MyApp extends ConsumerWidget {
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        // Determine which color scheme to use based on the provider's state
         ColorScheme lightColorScheme;
         ColorScheme darkColorScheme;
 
         if (themeProvider.useMaterialYou &&
             lightDynamic != null &&
             darkDynamic != null) {
-          // Use dynamic colors if the feature is enabled and available
           lightColorScheme = lightDynamic;
           darkColorScheme = darkDynamic;
         } else {
-          // Otherwise, fall back to the default schemes
           lightColorScheme = _defaultLightColorScheme;
           darkColorScheme = _defaultDarkColorScheme;
         }
+
+        final baseChipShape = StadiumBorder(
+          side: BorderSide(
+            color: lightColorScheme.outlineVariant.withOpacity(0.3),
+            width: 1,
+          ),
+        );
 
         final lightTheme = ThemeData(
           useMaterial3: true,
@@ -79,6 +82,15 @@ class MyApp extends ConsumerWidget {
           textTheme: textTheme.apply(
             bodyColor: const Color(0xFF344A53),
             displayColor: const Color(0xFF344A53),
+          ),
+          chipTheme: ChipThemeData(
+            shape: baseChipShape,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            showCheckmark: false,
+            side: BorderSide(
+              color: lightColorScheme.outlineVariant.withOpacity(0.25),
+            ),
           ),
           appBarTheme: AppBarTheme(
             backgroundColor: lightColorScheme.surface,
@@ -99,6 +111,15 @@ class MyApp extends ConsumerWidget {
           textTheme: textTheme.apply(
             bodyColor: const Color(0xFFE2E8F0),
             displayColor: const Color(0xFFE2E8F0),
+          ),
+          chipTheme: ChipThemeData(
+            shape: baseChipShape,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            showCheckmark: false,
+            side: BorderSide(
+              color: darkColorScheme.outlineVariant.withOpacity(0.3),
+            ),
           ),
           appBarTheme: AppBarTheme(
             backgroundColor: darkColorScheme.surface,

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'automation_script_screen.dart';
 import 'analysis_result_screen.dart';
 import 'automation_script_result_screen.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/mini_ai_chip.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
@@ -19,21 +21,34 @@ class ChatbotScreen extends ConsumerStatefulWidget {
   ChatbotScreenState createState() => ChatbotScreenState();
 }
 
-class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
+class ChatbotScreenState extends ConsumerState<ChatbotScreen>
+    with TickerProviderStateMixin {
   String? _expandedMenu;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _inputController = TextEditingController();
+  final FocusNode _inputFocusNode = FocusNode();
   bool _showScrollButton = false;
+  bool _sending = false;
+  late AnimationController _sendIconController;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _inputFocusNode.addListener(() => setState(() {}));
+    _sendIconController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
+    _inputController.dispose();
+    _inputFocusNode.dispose();
+    _sendIconController.dispose();
     super.dispose();
   }
 
@@ -41,9 +56,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     final shouldShow = _scrollController.position.pixels <
         _scrollController.position.maxScrollExtent - 100;
     if (shouldShow != _showScrollButton) {
-      setState(() {
-        _showScrollButton = shouldShow;
-      });
+      setState(() => _showScrollButton = shouldShow);
     }
   }
 
@@ -51,23 +64,34 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeOutCubic,
       );
+    }
+  }
+
+  Future<void> _sendCurrentMessage() async {
+    final chatNotifier = ref.read(chatProvider.notifier);
+    final text = _inputController.text.trim();
+    if (text.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    _sendIconController.forward(from: 0);
+    chatNotifier.sendMessage(text);
+    _inputController.clear();
+    await Future.delayed(const Duration(milliseconds: 250));
+    if (mounted) {
+      setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
-    final chatNotifier = ref.read(chatProvider.notifier);
-    final textController = TextEditingController();
 
     ref.listen(chatProvider, (_, next) {
       final newMessages = next.messages;
       if (newMessages.isNotEmpty) {
         final lastMessage = newMessages.last;
-        // When a new message with a result arrives, push the result screen
         if (lastMessage.analysisResult != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -94,7 +118,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           });
         }
       }
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_showScrollButton && _scrollController.hasClients) {
           _scrollToBottom();
@@ -102,22 +125,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       });
     });
 
-    // Create a new list that includes alternating ads
-    final List<Object> itemsWithAds = [];
-    const int adInterval = 4; // Show ad after every 4 messages
-    int adCounter = 0; // To alternate between ad types
-    for (int i = 0; i < chatState.messages.length; i++) {
-      itemsWithAds.add(chatState.messages[i]);
-      // Add an ad after the interval has passed, but not as the very first item.
-      if ((i + 1) % adInterval == 0 && i > 0) {
-        if (adCounter % 2 == 0) {
-          itemsWithAds.add('BANNER_AD');
-        } else {
-          itemsWithAds.add('NATIVE_AD');
-        }
-        adCounter++;
-      }
-    }
+    final itemsWithAds = _buildItemsWithAds(chatState);
 
     return MainLayout(
       title: 'AI Chatbot',
@@ -127,13 +135,11 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           children: [
             ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 160.0),
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 170.0),
               itemCount: itemsWithAds.length,
               itemBuilder: (context, index) {
                 final item = itemsWithAds[index];
-
                 if (item is ChatMessage) {
-                  // If the item is a ChatMessage, build the MessageBubble
                   return MessageBubble(
                     isUser: item.isUser,
                     text: item.text,
@@ -142,111 +148,39 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                     automationScript: item.automationScript,
                   );
                 } else if (item == 'BANNER_AD') {
-                  // If it's a banner ad placeholder, build the AdBanner
                   return const Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 8.0),
                     child: AdBanner(),
                   );
                 } else if (item == 'NATIVE_AD') {
-                  // If it's a native ad placeholder, build the NativeAdWidget
                   return const Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 8.0),
                     child: NativeAdWidget(),
                   );
-                } else {
-                  // Fallback for any other case
-                  return const SizedBox.shrink();
                 }
+                return const SizedBox.shrink();
               },
             ),
             if (_expandedMenu != null)
               Positioned.fill(
                 child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _expandedMenu = null;
-                    });
-                  },
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                  onTap: () => setState(() => _expandedMenu = null),
+                  child: Container(color: Colors.transparent),
                 ),
               ),
+            _buildBottomComposer(chatState),
             Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: AbsorbPointer(
-                  absorbing: chatState.isLoading,
-                  child: Column(
-                    children: [
-                      if (chatState.isLoading)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      _buildSuggestionMenu(context),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: textController,
-                                decoration: InputDecoration(
-                                  hintText: 'Ask AquaPi anything...',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                ),
-                                onSubmitted: (value) {
-                                  if (value.isNotEmpty) {
-                                    chatNotifier.sendMessage(value);
-                                    textController.clear();
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.send),
-                              onPressed: () {
-                                final message = textController.text;
-                                if (message.isNotEmpty) {
-                                  chatNotifier.sendMessage(message);
-                                  textController.clear();
-                                }
-                              },
-                              style: IconButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 80,
+              bottom: 86,
               right: 16,
               child: AnimatedOpacity(
                 opacity: _showScrollButton ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 250),
                 child: FloatingActionButton.small(
                   onPressed: _scrollToBottom,
                   tooltip: 'Scroll to Latest',
-                  child: const Icon(Icons.arrow_downward),
+                  child: const Icon(Icons.arrow_downward_rounded),
                 ),
               ),
             ),
@@ -256,77 +190,232 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     );
   }
 
-  Widget _buildSuggestionMenu(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.bubble_chart),
-              tooltip: "Aquarium Questions",
-              onPressed: () {
-                setState(() {
-                  _expandedMenu =
-                      _expandedMenu == 'aquarium' ? null : 'aquarium';
-                });
-              },
-            ),
-            IconButton(
-              icon: Image.asset(
-                'assets/AquaPiLogo300.png',
-                color: Theme.of(context).colorScheme.onSurface,
-                height: 24,
-                width: 24,
-              ),
-              tooltip: "AquaPi Questions",
-              onPressed: () {
-                setState(() {
-                  _expandedMenu = _expandedMenu == 'aquapi' ? null : 'aquapi';
-                });
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.science_outlined),
-              tooltip: "AI Tools",
-              onPressed: () {
-                setState(() {
-                  _expandedMenu =
-                      _expandedMenu == 'ai_tools' ? null : 'ai_tools';
-                });
-              },
-            ),
-          ],
-        ),
-        if (_expandedMenu != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Column(
-              children: [
-                Text(
-                  _getMenuTitle(_expandedMenu!),
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                _getMenuContent(_expandedMenu!, context),
-              ],
-            ),
-          ),
+  List<Object> _buildItemsWithAds(ChatState chatState) {
+    final List<Object> itemsWithAds = [];
+    const int adInterval = 4;
+    int adCounter = 0;
+    for (int i = 0; i < chatState.messages.length; i++) {
+      itemsWithAds.add(chatState.messages[i]);
+      if ((i + 1) % adInterval == 0 && i > 0) {
+        if (adCounter % 2 == 0) {
+          itemsWithAds.add('BANNER_AD');
+        } else {
+          itemsWithAds.add('NATIVE_AD');
+        }
+        adCounter++;
+      }
+    }
+    return itemsWithAds;
+  }
+
+  Widget _buildBottomComposer(ChatState chatState) {
+    final cs = Theme.of(context).colorScheme;
+    final focused = _inputFocusNode.hasFocus;
+    final loading = chatState.isLoading;
+
+    final gradient = LinearGradient(
+      colors: [
+        cs.primary,
+        cs.secondary,
+        cs.tertiary ?? cs.primaryContainer,
       ],
+      stops: const [0.0, 0.55, 1.0],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: AbsorbPointer(
+        absorbing: loading,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
+            border: Border(
+              top: BorderSide(
+                color: cs.outlineVariant.withOpacity(0.25),
+                width: 0.6,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, -2),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (loading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: SizedBox(
+                    height: 32,
+                    width: 32,
+                    child: CircularProgressIndicator(strokeWidth: 3.2),
+                  ),
+                ),
+              _buildSuggestionMenu(context),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        padding: const EdgeInsets.all(1.6),
+                        decoration: BoxDecoration(
+                          gradient: gradient,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: focused
+                              ? [
+                                  BoxShadow(
+                                    color: cs.primary.withOpacity(0.35),
+                                    blurRadius: 18,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ]
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ],
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
+                                .withOpacity(0.85),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: TextField(
+                            controller: _inputController,
+                            focusNode: _inputFocusNode,
+                            minLines: 1,
+                            maxLines: 6,
+                            textInputAction: TextInputAction.newline,
+                            decoration: InputDecoration(
+                              hintText: 'Ask AquaPi anything...',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                color: cs.onSurface.withOpacity(0.45),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                            ),
+                            onSubmitted: (_) => _sendCurrentMessage(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _AnimatedSendButton(
+                      controller: _sendIconController,
+                      onPressed: _sendCurrentMessage,
+                      disabled: _sending || loading,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  String _getMenuTitle(String menu) {
-    switch (menu) {
-      case 'aquarium':
-        return 'Aquarium Questions';
-      case 'aquapi':
-        return 'AquaPi Questions';
-      case 'ai_tools':
-        return 'AI Tools';
-      default:
-        return '';
-    }
+  /// TOP SUGGESTION MENU
+  /// Updated: icon-only chips (no text labels) as requested.
+  Widget _buildSuggestionMenu(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final expanded = _expandedMenu != null;
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutCubic,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              MiniAIChip(
+                label: 'Aquarium',
+                icon: Icons.bubble_chart_outlined,
+                iconOnly: true,
+                tooltip: 'Aquarium Questions',
+                selected: _expandedMenu == 'aquarium',
+                onTap: () {
+                  setState(() {
+                    _expandedMenu =
+                        _expandedMenu == 'aquarium' ? null : 'aquarium';
+                  });
+                },
+              ),
+              const SizedBox(width: 10),
+              MiniAIChip(
+                label: 'AquaPi',
+                icon: Icons.memory_outlined,
+                iconOnly: true,
+                tooltip: 'AquaPi Questions',
+                selected: _expandedMenu == 'aquapi',
+                onTap: () {
+                  setState(() {
+                    _expandedMenu =
+                        _expandedMenu == 'aquapi' ? null : 'aquapi';
+                  });
+                },
+              ),
+              const SizedBox(width: 10),
+              MiniAIChip(
+                label: 'AI Tools',
+                icon: Icons.science_outlined,
+                iconOnly: true,
+                tooltip: 'AI Tools',
+                selected: _expandedMenu == 'ai_tools',
+                onTap: () {
+                  setState(() {
+                    _expandedMenu =
+                        _expandedMenu == 'ai_tools' ? null : 'ai_tools';
+                  });
+                },
+              ),
+            ],
+          ),
+          if (expanded)
+            Padding(
+              padding: const EdgeInsets.only(
+                  bottom: 6, top: 4, left: 12, right: 12),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surface.withOpacity(0.65),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: cs.primary.withOpacity(0.25),
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: _getMenuContent(_expandedMenu!, context),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _getMenuContent(String menu, BuildContext context) {
@@ -334,14 +423,14 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       case 'aquarium':
         return _buildSuggestionChips([
           "How do I cycle my aquarium?",
-          "What are the best beginner fish?",
-          "How often should I change my water?",
+            "What are the best beginner fish?",
+          "How often should I change water?",
         ]);
       case 'aquapi':
         return _buildSuggestionChips([
           "What is AquaPi?",
           "Compare to Apex Neptune",
-          "What parameters can AquaPi monitor?",
+          "What can AquaPi monitor?",
           "Can I use my own sensors?",
         ]);
       case 'ai_tools':
@@ -356,15 +445,14 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
-      runSpacing: 4,
+      runSpacing: 6,
       children: questions.map((q) {
-        return ActionChip(
-          label: Text(q),
-          onPressed: () {
+        return MiniAIChip(
+          label: q,
+          dense: true,
+          onTap: () {
             chatNotifier.sendMessage(q);
-            setState(() {
-              _expandedMenu = null;
-            });
+            setState(() => _expandedMenu = null);
           },
         );
       }).toList(),
@@ -375,12 +463,12 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
-      runSpacing: 4,
+      runSpacing: 6,
       children: [
-        ActionChip(
-          avatar: const Icon(Icons.water_drop),
-          label: const Text('Water Analysis'),
-          onPressed: () {
+        MiniAIChip(
+          label: 'Water Analysis',
+          icon: Icons.water_drop_outlined,
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -389,10 +477,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             setState(() => _expandedMenu = null);
           },
         ),
-        ActionChip(
-          avatar: const Icon(Icons.code),
-          label: const Text('Script Generator'),
-          onPressed: () {
+        MiniAIChip(
+          label: 'Script Generator',
+          icon: Icons.code_outlined,
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -402,6 +490,124 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           },
         ),
       ],
+    );
+  }
+}
+
+class _AnimatedSendButton extends StatefulWidget {
+  final AnimationController controller;
+  final VoidCallback onPressed;
+  final bool disabled;
+
+  const _AnimatedSendButton({
+    required this.controller,
+    required this.onPressed,
+    required this.disabled,
+  });
+
+  @override
+  State<_AnimatedSendButton> createState() => _AnimatedSendButtonState();
+}
+
+class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
+  bool _hover = false;
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final gradient = LinearGradient(
+      colors: [
+        cs.primary,
+        cs.secondary,
+        cs.tertiary ?? cs.primaryContainer,
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    final scale = _pressed
+        ? 0.9
+        : _hover
+            ? 1.08
+            : 1.0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() {
+        _hover = false;
+        _pressed = false;
+      }),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          if (!widget.disabled) setState(() => _pressed = true);
+        },
+        onTapUp: (_) {
+          if (!widget.disabled) setState(() => _pressed = false);
+        },
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.disabled ? null : widget.onPressed,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 200),
+          scale: scale,
+          curve: Curves.easeOutCubic,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 240),
+            opacity: widget.disabled ? 0.55 : 1.0,
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: gradient,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.primary.withOpacity(0.45),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 420),
+                  switchInCurve: Curves.easeOutBack,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+                  child: widget.disabled
+                      ? SizedBox(
+                          key: const ValueKey('progress'),
+                          width: 26,
+                          height: 26,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor:
+                                AlwaysStoppedAnimation(cs.onPrimary),
+                          ),
+                        )
+                      : RotationTransition(
+                          key: const ValueKey('icon'),
+                          turns: Tween<double>(begin: 0, end: 1)
+                              .animate(CurvedAnimation(
+                            parent: widget.controller,
+                            curve: Curves.elasticOut,
+                          )),
+                          child: Icon(
+                            Icons.send_rounded,
+                            color: cs.onPrimary,
+                            size: 26,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -424,6 +630,11 @@ class MessageBubble extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final bubbleColor = isUser
+        ? cs.primaryContainer.withOpacity(0.85)
+        : Theme.of(context).cardColor.withOpacity(0.95);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Column(
@@ -437,9 +648,10 @@ class MessageBubble extends ConsumerWidget {
             children: [
               if (!isUser)
                 CircleAvatar(
+                  backgroundColor: cs.primary.withOpacity(0.15),
                   child: Image.asset('assets/AquaPi Logo.png'),
                 ),
-              const SizedBox(width: 8),
+              if (!isUser) const SizedBox(width: 8),
               Flexible(
                 child: Column(
                   crossAxisAlignment: isUser
@@ -448,16 +660,26 @@ class MessageBubble extends ConsumerWidget {
                   children: [
                     Text(
                       isUser ? 'You' : 'Fish.AI',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isUser
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
+                        color: bubbleColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(18),
+                          topRight: const Radius.circular(18),
+                          bottomLeft: Radius.circular(isUser ? 18 : 4),
+                          bottomRight: Radius.circular(isUser ? 4 : 18),
+                        ),
+                        border: Border.all(
+                          color: cs.outlineVariant.withOpacity(0.25),
+                          width: 0.6,
+                        ),
                       ),
                       child: MarkdownBody(
                         selectable: true,
@@ -475,47 +697,42 @@ class MessageBubble extends ConsumerWidget {
             ],
           ),
           if (analysisResult != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 48.0),
-              child: ElevatedButton(
-                child: const Text('View Analysis'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          AnalysisResultScreen(result: analysisResult!),
-                    ),
-                  );
-                },
-              ),
+            _ResultButton(
+              label: 'View Analysis',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AnalysisResultScreen(result: analysisResult!),
+                  ),
+                );
+              },
             ),
           if (automationScript != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 48.0),
-              child: ElevatedButton(
-                child: const Text('View Script'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AutomationScriptResultScreen(
-                          script: automationScript!),
-                    ),
-                  );
-                },
-              ),
+            _ResultButton(
+              label: 'View Script',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AutomationScriptResultScreen(
+                        script: automationScript!),
+                  ),
+                );
+              },
             ),
           if (followUpQuestions != null && followUpQuestions!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 48.0),
               child: Wrap(
                 spacing: 8,
-                runSpacing: 4,
+                runSpacing: 6,
                 children: followUpQuestions!.map((q) {
-                  return ActionChip(
-                    label: Text(q),
-                    onPressed: () {
+                  return MiniAIChip(
+                    label: q,
+                    dense: true,
+                    onTap: () {
                       ref.read(chatProvider.notifier).sendMessage(q);
                     },
                   );
@@ -523,6 +740,86 @@ class MessageBubble extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ResultButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _ResultButton({required this.label, required this.onTap});
+
+  @override
+  State<_ResultButton> createState() => _ResultButtonState();
+}
+
+class _ResultButtonState extends State<_ResultButton> {
+  bool _hover = false;
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, left: 48.0),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() {
+          _hover = false;
+          _pressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  cs.primary,
+                  cs.secondary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: _pressed
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: cs.primary.withOpacity(0.4),
+                        blurRadius: _hover ? 16 : 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+            ),
+            transform: Matrix4.identity()
+              ..scale(_pressed ? 0.94 : (_hover ? 1.02 : 1.0)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.visibility_rounded,
+                    size: 18, color: cs.onPrimary),
+                const SizedBox(width: 8),
+                Text(
+                  widget.label,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: cs.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

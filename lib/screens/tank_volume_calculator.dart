@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/modern_chip.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
   const TankVolumeCalculator({super.key});
@@ -32,7 +33,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     'Cube': Icons.check_box_outline_blank,
     'Cylinder': Icons.circle_outlined,
     'Hexagonal': Icons.hexagon_outlined,
-    'BowFront': Icons.front_loader,
+    'BowFront': Icons.architecture_outlined,
   };
 
   @override
@@ -148,138 +149,90 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           _buildSectionTitle(context, 'Shape'),
           Wrap(
             alignment: WrapAlignment.center,
-            spacing: 8.0,
-            runSpacing: 8.0,
+            spacing: 14.0,
+            runSpacing: 12.0,
             children: shapeIcons.keys.map((shapeName) {
-              return _buildShapeSelector(shapeName, shapeIcons[shapeName]!);
+              final selected = _shape == shapeName;
+              return ModernSelectableChip(
+                label: shapeName,
+                icon: shapeIcons[shapeName],
+                selected: selected,
+                onTap: () {
+                  setState(() {
+                    _shape = shapeName;
+                    if (shapeName != 'Cylinder') {
+                      _cylinderType = 'Full';
+                    }
+                  });
+                },
+              );
             }).toList(),
           ),
-          const SizedBox(height: 16),
-          if (_shape == 'Cylinder') _buildCylinderTypeSelector(),
+          if (_shape == 'Cylinder') ...[
+            const SizedBox(height: 16),
+            _buildSectionTitle(context, 'Cylinder Type'),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12.0,
+              runSpacing: 10.0,
+              children: ['Full', 'Half', 'Corner'].map((typeName) {
+                final selected = _cylinderType == typeName;
+                return ModernSelectableChip(
+                  label: typeName,
+                  selected: selected,
+                  dense: true,
+                  onTap: () {
+                    setState(() {
+                      _cylinderType = typeName;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: 12),
           _buildSectionTitle(context, 'Units'),
-          _buildUnitSelector(),
-          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12.0,
+            runSpacing: 10.0,
+            children: ['Inches', 'Feet', 'cm', 'Meters'].map((unitName) {
+              final selected = _units == unitName;
+              return ModernSelectableChip(
+                label: unitName,
+                selected: selected,
+                dense: true,
+                onTap: () {
+                  setState(() {
+                    _units = unitName;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 22),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0, vertical: 22.0),
               child: _renderInputs(),
             ),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          const SizedBox(height: 22),
+          ElevatedButton.icon(
             onPressed: _calculateVolume,
+            icon: const Icon(Icons.calculate_outlined),
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+              textStyle: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.4),
             ),
-            child: Text('Calculate'),
+            label: const Text('Calculate'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 22),
           if (_gallons.isNotEmpty) _buildResultsCard(),
         ],
       ),
-    );
-  }
-
-  Widget _buildShapeSelector(String shapeName, IconData icon) {
-    final bool isSelected = _shape == shapeName;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _shape = shapeName;
-          if (shapeName != 'Cylinder') {
-            _cylinderType = 'Full';
-          }
-        });
-      },
-      child: Chip(
-        avatar: Icon(icon,
-            color:
-                isSelected ? Theme.of(context).colorScheme.onPrimary : null),
-        label: Text(shapeName),
-        backgroundColor: isSelected
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.surface,
-        labelStyle: TextStyle(
-          color: isSelected
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurface,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-    );
-  }
-
-  Widget _buildCylinderTypeSelector() {
-    const List<String> types = ['Full', 'Half', 'Corner'];
-    return Column(
-      children: [
-        _buildSectionTitle(context, 'Cylinder Type'),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: types.map((typeName) {
-            final bool isSelected = _cylinderType == typeName;
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _cylinderType = typeName;
-                });
-              },
-              child: Chip(
-                label: Text(typeName),
-                backgroundColor: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surface,
-                labelStyle: TextStyle(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context).colorScheme.onSurface,
-                  fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildUnitSelector() {
-    const List<String> units = ['Inches', 'Feet', 'cm', 'Meters'];
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 8.0,
-      runSpacing: 8.0,
-      children: units.map((unitName) {
-        final bool isSelected = _units == unitName;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _units = unitName;
-            });
-          },
-          child: Chip(
-            label: Text(unitName),
-            backgroundColor: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.surface,
-            labelStyle: TextStyle(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-        );
-      }).toList(),
     );
   }
 
@@ -319,12 +272,12 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     }
 
     return Wrap(
-      spacing: 8.0,
-      runSpacing: 8.0,
+      spacing: 16.0,
+      runSpacing: 16.0,
       alignment: WrapAlignment.center,
       children: fields.map((field) {
         return SizedBox(
-          width: 200,
+          width: 190,
           child: field,
         );
       }).toList(),
@@ -336,7 +289,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        border:
+            OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
     );
@@ -344,10 +298,12 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      padding: const EdgeInsets.only(top: 18.0, bottom: 12.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
         textAlign: TextAlign.center,
       ),
     );
@@ -357,7 +313,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     return Card(
       color: Theme.of(context).colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -384,20 +341,23 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     return Flexible(
       child: Column(
         children: [
-          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          Text(label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
           const SizedBox(height: 8),
           Text(
             value1,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: color,
                   fontWeight: FontWeight.bold,
                 ),
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          Text(
+          const SizedBox(height: 6),
+            Text(
             value2,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: color,
                   fontWeight: FontWeight.bold,
                 ),
