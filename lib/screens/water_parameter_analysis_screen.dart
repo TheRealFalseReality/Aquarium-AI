@@ -49,7 +49,7 @@ class TankVolumeCalculatorState
       };
 
       // Start the analysis
-      final result = await ref.read(chatProvider.notifier).analyzeWaterParameters(params);
+      await ref.read(chatProvider.notifier).analyzeWaterParameters(params);
 
       setState(() => _isSubmitting = false);
 

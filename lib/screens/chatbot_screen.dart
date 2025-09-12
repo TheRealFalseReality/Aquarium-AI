@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/material.dart';
@@ -220,7 +219,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       colors: [
         cs.primary,
         cs.secondary,
-        cs.tertiary ?? cs.primaryContainer,
+        cs.tertiary,
       ],
       stops: const [0.0, 0.55, 1.0],
       begin: Alignment.topLeft,
@@ -524,7 +523,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
       colors: [
         cs.primary,
         cs.secondary,
-        cs.tertiary ?? cs.primaryContainer,
+        cs.tertiary,
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,

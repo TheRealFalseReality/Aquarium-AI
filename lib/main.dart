@@ -90,7 +90,7 @@ class MyApp extends ConsumerWidget {
 
         final baseChipShape = StadiumBorder(
           side: BorderSide(
-            color: lightColorScheme.outlineVariant.withOpacity(0.3),
+            color: lightColorScheme.outlineVariant.withValues(alpha: 0.3),
             width: 1,
           ),
         );
@@ -108,7 +108,7 @@ class MyApp extends ConsumerWidget {
             labelStyle: const TextStyle(fontWeight: FontWeight.w600),
             showCheckmark: false,
             side: BorderSide(
-              color: lightColorScheme.outlineVariant.withOpacity(0.25),
+              color: lightColorScheme.outlineVariant.withValues(alpha: 0.25),
             ),
           ),
           appBarTheme: AppBarTheme(
@@ -137,7 +137,7 @@ class MyApp extends ConsumerWidget {
             labelStyle: const TextStyle(fontWeight: FontWeight.w600),
             showCheckmark: false,
             side: BorderSide(
-              color: darkColorScheme.outlineVariant.withOpacity(0.3),
+              color: darkColorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
           ),
           appBarTheme: AppBarTheme(

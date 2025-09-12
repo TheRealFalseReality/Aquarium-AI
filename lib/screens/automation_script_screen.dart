@@ -27,7 +27,7 @@ class AutomationScriptScreenState
       setState(() => _isSubmitting = true);
       
       // Start the script generation
-      final result = await ref
+      await ref
           .read(chatProvider.notifier)
           .generateAutomationScript(_descriptionController.text);
       

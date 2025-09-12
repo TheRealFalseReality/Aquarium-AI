@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:fish_ai/models/analysis_result.dart';
+import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
-import './models/analysis_result.dart';
-import './models/automation_script.dart';
 
 // Represents a single chat message
 class ChatMessage {

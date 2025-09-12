@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:fish_ai/models/compatibility_report.dart';
+import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import './models/fish.dart';
-import './models/compatibility_report.dart';
 
 // Helper function to extract JSON from a markdown code block
 String _extractJson(String text) {

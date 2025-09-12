@@ -306,18 +306,18 @@ class FishCompatibilityScreenState
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isSelected ? cs.primary : cs.outlineVariant.withOpacity(0.25),
+          color: isSelected ? cs.primary : cs.outlineVariant.withValues(alpha: 0.25),
           width: isSelected ? 3 : 1.2,
         ),
         boxShadow: [
           if (isSelected)
             BoxShadow(
-              color: cs.primary.withOpacity(0.35),
+              color: cs.primary.withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 3),
           )
@@ -325,8 +325,8 @@ class FishCompatibilityScreenState
         gradient: isSelected
             ? LinearGradient(
                 colors: [
-                  cs.primary.withOpacity(0.18),
-                  cs.secondary.withOpacity(0.18),
+                  cs.primary.withValues(alpha: 0.18),
+                  cs.secondary.withValues(alpha: 0.18),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -384,10 +384,10 @@ class FishCompatibilityScreenState
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: cs.surface.withOpacity(0.55),
+            color: cs.surface.withValues(alpha: 0.55),
             border: Border(
               top: BorderSide(
-                color: cs.primary.withOpacity(0.25),
+                color: cs.primary.withValues(alpha: 0.25),
                 width: 1.2,
               ),
             ),
@@ -419,7 +419,7 @@ class FishCompatibilityScreenState
                           errorBuilder: (c, e, s) => Container(
                             width: 52,
                             height: 52,
-                            color: cs.error.withOpacity(0.1),
+                            color: cs.error.withValues(alpha: 0.1),
                             child: Icon(Icons.error,
                                 color: cs.error, size: 20),
                           ),
@@ -591,7 +591,7 @@ class FishCompatibilityScreenState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.4),
+          color: cs.outlineVariant.withValues(alpha: 0.4),
           width: 0.8,
         ),
       ),
@@ -631,7 +631,7 @@ class FishCompatibilityScreenState
                 color: Theme.of(context)
                     .colorScheme
                     .surfaceContainerHigh
-                    .withOpacity(0.4),
+                    .withValues(alpha: 0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -672,7 +672,6 @@ class FishCompatibilityScreenState
 
   Widget _buildTankMatesSection(
       BuildContext context, CompatibilityReport report) {
-    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),

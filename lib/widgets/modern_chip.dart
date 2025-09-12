@@ -34,8 +34,8 @@ class ModernSelectableChip extends StatelessWidget {
     final baseRadius = dense ? 20.0 : 28.0;
 
     final Color fallbackBg = selected
-        ? cs.primary.withOpacity(0.18)
-        : cs.surfaceVariant.withOpacity(0.55);
+        ? cs.primary.withValues(alpha: 0.18)
+        : cs.surfaceContainerHighest.withValues(alpha: 0.55);
 
     final Gradient? gradient = selected
         ? LinearGradient(
@@ -49,8 +49,8 @@ class ModernSelectableChip extends StatelessWidget {
         : null;
 
     final Color borderColor = selected
-        ? cs.primary.withOpacity(0.75)
-        : cs.outlineVariant.withOpacity(0.28);
+        ? cs.primary.withValues(alpha: 0.75)
+        : cs.outlineVariant.withValues(alpha: 0.28);
 
     final Color labelColor = selected ? cs.onPrimary : cs.onSurface;
 
@@ -78,9 +78,9 @@ class ModernSelectableChip extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(baseRadius),
         onTap: onTap,
-        splashColor: (selected ? cs.onPrimary : cs.primary).withOpacity(0.18),
+        splashColor: (selected ? cs.onPrimary : cs.primary).withValues(alpha: 0.18),
         highlightColor:
-            (selected ? cs.onPrimary : cs.primary).withOpacity(0.06),
+            (selected ? cs.onPrimary : cs.primary).withValues(alpha: 0.06),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
@@ -100,7 +100,7 @@ class ModernSelectableChip extends StatelessWidget {
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: cs.primary.withOpacity(0.35),
+                      color: cs.primary.withValues(alpha: 0.35),
                       blurRadius: 14,
                       spreadRadius: 1,
                       offset: const Offset(0, 4),
@@ -108,7 +108,7 @@ class ModernSelectableChip extends StatelessWidget {
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     )
