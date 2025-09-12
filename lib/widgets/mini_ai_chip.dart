@@ -49,16 +49,16 @@ class _MiniAIChipState extends State<MiniAIChip> {
         : null;
 
     final backgroundColor = widget.selected
-        ? cs.primary.withOpacity(0.18)
-        : cs.surface.withOpacity(widget.iconOnly ? 0.5 : 0.65);
+        ? cs.primary.withValues(alpha: 0.18)
+        : cs.surface.withValues(alpha: widget.iconOnly ? 0.5 : 0.65);
 
     final iconColor = widget.selected
         ? cs.onPrimary
-        : cs.onSurface.withOpacity(0.85);
+        : cs.onSurface.withValues(alpha: 0.85);
 
     final labelColor = widget.selected
         ? cs.onPrimary
-        : cs.onSurface.withOpacity(0.90);
+        : cs.onSurface.withValues(alpha: 0.90);
 
     final scale = _pressed
         ? 0.92
@@ -85,21 +85,21 @@ class _MiniAIChipState extends State<MiniAIChip> {
             borderRadius: borderRadius,
             border: Border.all(
               color: widget.selected
-                  ? cs.primary.withOpacity(0.6)
-                  : cs.outlineVariant.withOpacity(0.3),
+                  ? cs.primary.withValues(alpha: 0.6)
+                  : cs.outlineVariant.withValues(alpha: 0.3),
               width: 1.2,
             ),
             boxShadow: widget.selected
                 ? [
                     BoxShadow(
-                      color: cs.primary.withOpacity(0.35),
+                      color: cs.primary.withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withValues(alpha: 0.07),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     )

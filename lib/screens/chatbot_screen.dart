@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/material.dart';
@@ -217,7 +216,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       colors: [
         cs.primary,
         cs.secondary,
-        cs.tertiary ?? cs.primaryContainer,
+        cs.tertiary,
       ],
       stops: const [0.0, 0.55, 1.0],
       begin: Alignment.topLeft,
@@ -232,16 +231,16 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         absorbing: loading,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
+            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.94),
             border: Border(
               top: BorderSide(
-                color: cs.outlineVariant.withOpacity(0.25),
+                color: cs.outlineVariant.withValues(alpha: 0.25),
                 width: 0.6,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, -2),
               )
@@ -276,7 +275,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                           boxShadow: focused
                               ? [
                                   BoxShadow(
-                                    color: cs.primary.withOpacity(0.35),
+                                    color: cs.primary.withValues(alpha: 0.35),
                                     blurRadius: 18,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 4),
@@ -284,7 +283,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                                 ]
                               : [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
                                   )
@@ -296,7 +295,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                             color: Theme.of(context)
                                 .colorScheme
                                 .surface
-                                .withOpacity(0.85),
+                                .withValues(alpha: 0.85),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: TextField(
@@ -309,7 +308,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                               hintText: 'Ask AquaPi anything...',
                               border: InputBorder.none,
                               hintStyle: TextStyle(
-                                color: cs.onSurface.withOpacity(0.45),
+                                color: cs.onSurface.withValues(alpha: 0.45),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -399,10 +398,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   bottom: 6, top: 4, left: 12, right: 12),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: cs.surface.withOpacity(0.65),
+                  color: cs.surface.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: cs.primary.withOpacity(0.25),
+                    color: cs.primary.withValues(alpha: 0.25),
                     width: 1,
                   ),
                 ),
@@ -521,7 +520,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
       colors: [
         cs.primary,
         cs.secondary,
-        cs.tertiary ?? cs.primaryContainer,
+        cs.tertiary,
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -564,7 +563,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: cs.primary.withOpacity(0.45),
+                    color: cs.primary.withValues(alpha: 0.45),
                     blurRadius: 18,
                     offset: const Offset(0, 6),
                   )
@@ -632,8 +631,8 @@ class MessageBubble extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final bubbleColor = isUser
-        ? cs.primaryContainer.withOpacity(0.85)
-        : Theme.of(context).cardColor.withOpacity(0.95);
+        ? cs.primaryContainer.withValues(alpha: 0.85)
+        : Theme.of(context).cardColor.withValues(alpha: 0.95);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -648,7 +647,7 @@ class MessageBubble extends ConsumerWidget {
             children: [
               if (!isUser)
                 CircleAvatar(
-                  backgroundColor: cs.primary.withOpacity(0.15),
+                  backgroundColor: cs.primary.withValues(alpha: 0.15),
                   child: Image.asset('assets/AquaPi Logo.png'),
                 ),
               if (!isUser) const SizedBox(width: 8),
@@ -677,7 +676,7 @@ class MessageBubble extends ConsumerWidget {
                           bottomRight: Radius.circular(isUser ? 4 : 18),
                         ),
                         border: Border.all(
-                          color: cs.outlineVariant.withOpacity(0.25),
+                          color: cs.outlineVariant.withValues(alpha: 0.25),
                           width: 0.6,
                         ),
                       ),
@@ -795,7 +794,7 @@ class _ResultButtonState extends State<_ResultButton> {
                   ? []
                   : [
                       BoxShadow(
-                        color: cs.primary.withOpacity(0.4),
+                        color: cs.primary.withValues(alpha: 0.4),
                         blurRadius: _hover ? 16 : 10,
                         offset: const Offset(0, 5),
                       )
