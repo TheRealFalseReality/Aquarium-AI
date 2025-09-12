@@ -216,7 +216,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ${additionalInfo.isNotEmpty ? '- Additional Information: $additionalInfo' : ''}
     Provide a detailed but easy-to-understand analysis. Respond with a JSON object.
     IMPORTANT: For the 'value' field of the temperature parameter, you MUST use the original user-provided value which is '$temp°$tempUnit'.
-    The status for each parameter and the overall summary MUST be one of "Good", "Needs Attention", or "Bad".
+    The status for each parameter and the overall summary MUST be one of "Excellent", "Good", "Needs Attention", "Bad" or something similar.
     The 'howAquaPiHelps' section should conclude with a subtle link to our store: [Shop AquaPi](https://www.capitalcityaquatics.com/store).
 
     The JSON structure must be:
