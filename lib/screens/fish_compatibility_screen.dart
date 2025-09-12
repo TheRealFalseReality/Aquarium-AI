@@ -145,12 +145,21 @@ class FishCompatibilityScreenState
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(next.error!),
-                action: SnackBarAction(
-                  label: 'Dismiss',
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                ),
+                duration: const Duration(seconds: 6),
+                action: next.isRetryable
+                    ? SnackBarAction(
+                        label: 'Retry',
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          notifier.retryCompatibilityReport();
+                        },
+                      )
+                    : SnackBarAction(
+                        label: 'Dismiss',
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        },
+                      ),
               ),
             );
             notifier.clearError();

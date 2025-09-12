@@ -6,10 +6,10 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
-import 'water_parameter_analysis_screen.dart';
-import 'automation_script_screen.dart';
-import 'analysis_result_screen.dart';
-import 'automation_script_result_screen.dart';
+import './water_parameter_analysis_screen.dart';
+import './automation_script_screen.dart';
+import './analysis_result_screen.dart';
+import './automation_script_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 
@@ -145,6 +145,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                     followUpQuestions: item.followUpQuestions,
                     analysisResult: item.analysisResult,
                     automationScript: item.automationScript,
+                    isError: item.isError,
+                    isRetryable: item.isRetryable,
+                    originalMessage: item.originalMessage,
                   );
                 } else if (item == 'BANNER_AD') {
                   return const Padding(
@@ -617,6 +620,9 @@ class MessageBubble extends ConsumerWidget {
   final List<String>? followUpQuestions;
   final WaterAnalysisResult? analysisResult;
   final AutomationScript? automationScript;
+  final bool isError;
+  final bool isRetryable;
+  final String? originalMessage;
 
   const MessageBubble({
     super.key,
@@ -625,6 +631,9 @@ class MessageBubble extends ConsumerWidget {
     this.followUpQuestions,
     this.analysisResult,
     this.automationScript,
+    this.isError = false,
+    this.isRetryable = false,
+    this.originalMessage,
   });
 
   @override
@@ -647,8 +656,12 @@ class MessageBubble extends ConsumerWidget {
             children: [
               if (!isUser)
                 CircleAvatar(
-                  backgroundColor: cs.primary.withValues(alpha: 0.15),
-                  child: Image.asset('assets/AquaPi Logo.png'),
+                  backgroundColor: isError 
+                      ? cs.error.withOpacity(0.15)
+                      : cs.primary.withOpacity(0.15),
+                  child: isError 
+                      ? Icon(Icons.error_outline, color: cs.error)
+                      : Image.asset('assets/AquaPi Logo.png'),
                 ),
               if (!isUser) const SizedBox(width: 8),
               Flexible(
@@ -658,10 +671,11 @@ class MessageBubble extends ConsumerWidget {
                       : CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isUser ? 'You' : 'Fish.AI',
+                      isUser ? 'You' : isError ? 'Fish.AI - Error' : 'Fish.AI',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,
+                            color: isError ? cs.error : null,
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -676,8 +690,10 @@ class MessageBubble extends ConsumerWidget {
                           bottomRight: Radius.circular(isUser ? 4 : 18),
                         ),
                         border: Border.all(
-                          color: cs.outlineVariant.withValues(alpha: 0.25),
-                          width: 0.6,
+                          color: isError 
+                              ? cs.error.withOpacity(0.5)
+                              : cs.outlineVariant.withOpacity(0.25),
+                          width: isError ? 1.2 : 0.6,
                         ),
                       ),
                       child: MarkdownBody(
@@ -695,6 +711,12 @@ class MessageBubble extends ConsumerWidget {
               ),
             ],
           ),
+          if (isError && isRetryable && originalMessage != null)
+            _RetryButton(
+              onTap: () {
+                ref.read(chatProvider.notifier).retryMessage(originalMessage!);
+              },
+            ),
           if (analysisResult != null)
             _ResultButton(
               label: 'View Analysis',
@@ -739,6 +761,76 @@ class MessageBubble extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _RetryButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _RetryButton({required this.onTap});
+
+  @override
+  State<_RetryButton> createState() => _RetryButtonState();
+}
+
+class _RetryButtonState extends State<_RetryButton> {
+  bool _hover = false;
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, left: 48.0),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() {
+          _hover = false;
+          _pressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: cs.error,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: _pressed
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: cs.error.withOpacity(0.4),
+                        blurRadius: _hover ? 16 : 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+            ),
+            transform: Matrix4.identity()
+              ..scale(_pressed ? 0.94 : (_hover ? 1.02 : 1.0)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.refresh_rounded, size: 18, color: cs.onError),
+                const SizedBox(width: 8),
+                Text(
+                  'Retry',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: cs.onError,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

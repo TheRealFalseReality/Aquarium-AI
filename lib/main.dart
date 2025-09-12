@@ -1,23 +1,42 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'theme_provider.dart';
-import 'screens/welcome_screen.dart';
-import 'screens/about_screen.dart';
-import 'screens/tank_volume_calculator.dart';
-import 'screens/calculators_screen.dart';
-import 'screens/chatbot_screen.dart';
+import './theme_provider.dart';
+import './screens/welcome_screen.dart';
+import './screens/about_screen.dart';
+import './screens/tank_volume_calculator.dart';
+import './screens/calculators_screen.dart';
+import './screens/chatbot_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'widgets/transitions.dart';
-import 'screens/fish_compatibility_screen.dart';
+import './firebase_options.dart';
+import './widgets/transitions.dart';
+import './screens/fish_compatibility_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set up error handling
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kDebugMode) {
+      print('Flutter Error: ${details.exception}');
+      print('Stack trace: ${details.stack}');
+    }
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print('Platform Error: $error');
+      print('Stack trace: $stack');
+    }
+    return true;
+  };
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

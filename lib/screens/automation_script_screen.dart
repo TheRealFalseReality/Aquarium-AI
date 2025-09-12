@@ -14,6 +14,7 @@ class AutomationScriptScreenState
     extends ConsumerState<AutomationScriptScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -21,14 +22,18 @@ class AutomationScriptScreenState
     super.dispose();
   }
 
-  void _submitScriptRequest() {
+  void _submitScriptRequest() async {
     if (_formKey.currentState!.validate()) {
-      // Start the script generation but don't wait for it
-      ref
+      setState(() => _isSubmitting = true);
+      
+      // Start the script generation
+      await ref
           .read(chatProvider.notifier)
           .generateAutomationScript(_descriptionController.text);
+      
+      setState(() => _isSubmitting = false);
           
-      // Immediately close the form
+      // Close the form after submission
       if (mounted) {
         Navigator.pop(context);
       }
@@ -87,13 +92,19 @@ class AutomationScriptScreenState
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _submitScriptRequest,
+                onPressed: _isSubmitting ? null : _submitScriptRequest,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('Generate Script'),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Generate Script'),
               ),
             ],
           ),

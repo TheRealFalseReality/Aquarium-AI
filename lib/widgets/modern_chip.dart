@@ -34,8 +34,8 @@ class ModernSelectableChip extends StatelessWidget {
     final baseRadius = dense ? 20.0 : 28.0;
 
     final Color fallbackBg = selected
-        ? cs.primary.withValues(alpha: .18)
-        : cs.surfaceContainerHighest .withValues(alpha: 0.55);
+        ? cs.primary.withValues(alpha: 0.18)
+        : cs.surfaceContainerHighest.withValues(alpha: 0.55);
 
     final Gradient? gradient = selected
         ? LinearGradient(
