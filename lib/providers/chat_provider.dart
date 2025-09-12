@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
-import '../models/analysis_result.dart';
-import '../models/automation_script.dart';
+import './models/analysis_result.dart';
+import './models/automation_script.dart';
 
 // Represents a single chat message
 class ChatMessage {
@@ -12,6 +12,9 @@ class ChatMessage {
   final List<String>? followUpQuestions;
   final WaterAnalysisResult? analysisResult;
   final AutomationScript? automationScript;
+  final bool isError;
+  final bool isRetryable;
+  final String? originalMessage;
 
   ChatMessage({
     required this.text,
@@ -19,6 +22,9 @@ class ChatMessage {
     this.followUpQuestions,
     this.analysisResult,
     this.automationScript,
+    this.isError = false,
+    this.isRetryable = false,
+    this.originalMessage,
   });
 }
 
@@ -120,11 +126,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // Sends a message to the Gemini API and updates the state
   Future<void> sendMessage(String message) async {
-    // Add the user's message to the state
-    state = ChatState(
-      messages: [...state.messages, ChatMessage(text: message, isUser: true)],
-      isLoading: true,
-    );
+    await _sendMessageWithRetry(message, isRetry: false);
+  }
+
+  // Retry a failed message
+  Future<void> retryMessage(String originalMessage) async {
+    await _sendMessageWithRetry(originalMessage, isRetry: true);
+  }
+
+  // Internal method to send message with retry capability
+  Future<void> _sendMessageWithRetry(String message, {required bool isRetry}) async {
+    // Add the user's message to the state (only if not retry)
+    if (!isRetry) {
+      state = ChatState(
+        messages: [...state.messages, ChatMessage(text: message, isUser: true)],
+        isLoading: true,
+      );
+    } else {
+      // For retry, just update loading state
+      state = ChatState(
+        messages: state.messages,
+        isLoading: true,
+      );
+    }
 
     try {
       // Send the message to the model
@@ -161,7 +185,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           // If parsing fails, just use the whole response text without follow-ups
           mainResponse = responseText;
           followUps = [];
-           if (kDebugMode) {
+          if (kDebugMode) {
             print("Error parsing follow-up questions: $e");
           }
         }
@@ -173,18 +197,48 @@ class ChatNotifier extends StateNotifier<ChatState> {
           isLoading: false,
         );
       } else {
-        state = ChatState(
-          messages: [...state.messages, ChatMessage(text: 'No response from model.', isUser: false)],
-          isLoading: false,
-        );
+        _handleError('No response received from AI', message, isRetry);
       }
     } catch (e) {
-      // Handle any errors
-      state = ChatState(
-        messages: [...state.messages, ChatMessage(text: 'Error: ${e.toString()}', isUser: false)],
-        isLoading: false,
-      );
+      _handleError(e.toString(), message, isRetry);
     }
+  }
+
+  // Handle errors with user-friendly messages and retry options
+  void _handleError(String error, String originalMessage, bool wasRetry) {
+    String userFriendlyMessage;
+    bool isRetryable = true;
+
+    // Categorize errors and provide user-friendly messages
+    if (error.contains('network') || error.contains('connection') || error.contains('timeout')) {
+      userFriendlyMessage = '🔌 **Connection Issue**\n\nI\'m having trouble connecting to the AI service. Please check your internet connection and try again.';
+    } else if (error.contains('quota') || error.contains('limit') || error.contains('rate')) {
+      userFriendlyMessage = '⏰ **Service Temporarily Unavailable**\n\nThe AI service is currently busy. Please wait a moment and try again.';
+    } else if (error.contains('Invalid API key') || error.contains('authentication')) {
+      userFriendlyMessage = '🔐 **Authentication Error**\n\nThere\'s an issue with the AI service configuration. Please contact support.';
+      isRetryable = false;
+    } else {
+      userFriendlyMessage = '⚠️ **AI Service Error**\n\nI encountered an unexpected error while processing your request. Please try again.';
+    }
+
+    // Add debug info in debug mode
+    if (kDebugMode) {
+      userFriendlyMessage += '\n\n*Debug: $error*';
+    }
+
+    state = ChatState(
+      messages: [
+        ...state.messages,
+        ChatMessage(
+          text: userFriendlyMessage,
+          isUser: false,
+          isError: true,
+          isRetryable: isRetryable,
+          originalMessage: originalMessage,
+        )
+      ],
+      isLoading: false,
+    );
   }
 
   // New method for water parameter analysis
@@ -243,11 +297,32 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return analysisResult;
 
     } catch (e) {
+      final errorMessage = _getWaterAnalysisErrorMessage(e.toString());
       state = ChatState(
-        messages: [...state.messages, ChatMessage(text: 'Error processing analysis: ${e.toString()}', isUser: false)],
+        messages: [
+          ...state.messages,
+          ChatMessage(
+            text: errorMessage,
+            isUser: false,
+            isError: true,
+            isRetryable: true,
+            originalMessage: userMessageText,
+          )
+        ],
         isLoading: false,
       );
       return null;
+    }
+  }
+
+  // Helper method for water analysis specific error messages
+  String _getWaterAnalysisErrorMessage(String error) {
+    if (error.contains('FormatException') || error.contains('json')) {
+      return '🧪 **Analysis Processing Error**\n\nI received data from the AI but had trouble formatting your analysis. The AI response may be malformed. Please try again.';
+    } else if (error.contains('network') || error.contains('connection')) {
+      return '🔌 **Connection Issue**\n\nI couldn\'t connect to the AI service to analyze your water parameters. Please check your connection and try again.';
+    } else {
+      return '⚠️ **Water Analysis Error**\n\nI encountered an error while analyzing your water parameters. Please try again or check if your input values are valid.';
     }
   }
 
@@ -282,11 +357,32 @@ class ChatNotifier extends StateNotifier<ChatState> {
       );
       return automationScript;
     } catch (e) {
+      final errorMessage = _getAutomationScriptErrorMessage(e.toString());
       state = ChatState(
-        messages: [...state.messages, ChatMessage(text: 'Error generating script: ${e.toString()}', isUser: false)],
+        messages: [
+          ...state.messages,
+          ChatMessage(
+            text: errorMessage,
+            isUser: false,
+            isError: true,
+            isRetryable: true,
+            originalMessage: userMessageText,
+          )
+        ],
         isLoading: false,
       );
       return null;
+    }
+  }
+
+  // Helper method for automation script specific error messages
+  String _getAutomationScriptErrorMessage(String error) {
+    if (error.contains('FormatException') || error.contains('json')) {
+      return '🤖 **Script Generation Error**\n\nI generated automation code but had trouble formatting it properly. The AI response may be malformed. Please try again with a more specific description.';
+    } else if (error.contains('network') || error.contains('connection')) {
+      return '🔌 **Connection Issue**\n\nI couldn\'t connect to the AI service to generate your automation script. Please check your connection and try again.';
+    } else {
+      return '⚠️ **Automation Error**\n\nI encountered an error while generating your automation script. Please try again with a clearer description of what you want to automate.';
     }
   }
 }

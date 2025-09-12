@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/fish.dart';
-import '../models/compatibility_report.dart';
+import './models/fish.dart';
+import './models/compatibility_report.dart';
 
 // Helper function to extract JSON from a markdown code block
 String _extractJson(String text) {
@@ -25,6 +25,8 @@ class FishCompatibilityState {
   final CompatibilityReport? lastReport;   // Persisted last generated report (for "Get Last Report")
   final bool isLoading;
   final String? error;
+  final bool isRetryable;
+  final String? lastCategory; // Store last category for retry
 
   FishCompatibilityState({
     this.fishData = const AsyncValue.loading(),
@@ -33,6 +35,8 @@ class FishCompatibilityState {
     this.lastReport,
     this.isLoading = false,
     this.error,
+    this.isRetryable = false,
+    this.lastCategory,
   });
 
   FishCompatibilityState copyWith({
@@ -42,8 +46,11 @@ class FishCompatibilityState {
     CompatibilityReport? lastReport,
     bool? isLoading,
     String? error,
+    bool? isRetryable,
+    String? lastCategory,
     bool clearReport = false,
     bool clearLastReport = false,
+    bool clearError = false,
   }) {
     return FishCompatibilityState(
       fishData: fishData ?? this.fishData,
@@ -54,7 +61,9 @@ class FishCompatibilityState {
           : lastReport ??
               this.lastReport, // keep previous lastReport unless explicitly replaced or cleared
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : error ?? this.error,
+      isRetryable: isRetryable ?? this.isRetryable,
+      lastCategory: lastCategory ?? this.lastCategory,
     );
   }
 }
@@ -98,17 +107,29 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(clearError: true, isRetryable: false);
   }
 
   void clearLastReport() {
     state = state.copyWith(clearLastReport: true);
   }
 
+  // Add retry functionality
+  Future<void> retryCompatibilityReport() async {
+    if (state.lastCategory != null && state.selectedFish.isNotEmpty) {
+      await getCompatibilityReport(state.lastCategory!);
+    }
+  }
+
   Future<void> getCompatibilityReport(String category) async {
     if (state.selectedFish.isEmpty) return;
 
-    state = state.copyWith(isLoading: true, clearReport: true, error: null);
+    state = state.copyWith(
+      isLoading: true, 
+      clearReport: true, 
+      clearError: true,
+      lastCategory: category,
+    );
 
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
@@ -136,7 +157,27 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       // Set BOTH current report and lastReport
       state = state.copyWith(report: report, lastReport: report, isLoading: false);
     } catch (e) {
-      state = state.copyWith(error: "Failed to generate report: ${e.toString()}", isLoading: false);
+      final userFriendlyError = _getFriendlyErrorMessage(e.toString());
+      state = state.copyWith(
+        error: userFriendlyError, 
+        isLoading: false,
+        isRetryable: true,
+      );
+    }
+  }
+
+  // Helper method to provide user-friendly error messages
+  String _getFriendlyErrorMessage(String error) {
+    if (error.contains('network') || error.contains('connection') || error.contains('timeout')) {
+      return 'Connection problem! Please check your internet connection and try again.';
+    } else if (error.contains('quota') || error.contains('limit') || error.contains('rate')) {
+      return 'AI service is busy right now. Please wait a moment and try again.';
+    } else if (error.contains('FormatException') || error.contains('json')) {
+      return 'AI response formatting error. The analysis was generated but couldn\'t be processed properly. Please try again.';
+    } else if (error.contains('Invalid API key') || error.contains('authentication')) {
+      return 'Authentication error with AI service. Please contact support.';
+    } else {
+      return 'Something went wrong while generating your compatibility report. Please try again.';
     }
   }
 

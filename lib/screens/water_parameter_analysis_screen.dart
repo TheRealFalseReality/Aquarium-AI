@@ -22,6 +22,7 @@ class TankVolumeCalculatorState
 
   bool _isTempFahrenheit = true;
   bool _isSalinitySg = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -33,8 +34,10 @@ class TankVolumeCalculatorState
     super.dispose();
   }
 
-  void _submitAnalysis() {
+  void _submitAnalysis() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isSubmitting = true);
+      
       final params = {
         'tankType': _tankTypeController.text,
         'ph': _phController.text,
@@ -45,10 +48,13 @@ class TankVolumeCalculatorState
         'salinityUnit': _isSalinitySg ? 'SG' : 'ppt',
       };
 
-      // Start the analysis but don't wait for it to complete
-      ref.read(chatProvider.notifier).analyzeWaterParameters(params);
+      // Start the analysis
+      final result = await ref.read(chatProvider.notifier).analyzeWaterParameters(params);
 
-      // Immediately close the form
+      setState(() => _isSubmitting = false);
+
+      // Close the form after submission, regardless of success/failure
+      // The user will see the result in the chat
       if (mounted) {
         Navigator.pop(context);
       }
@@ -156,13 +162,19 @@ class TankVolumeCalculatorState
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _submitAnalysis,
+                onPressed: _isSubmitting ? null : _submitAnalysis,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('Submit for Analysis'),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Submit for Analysis'),
               ),
             ],
           ),
