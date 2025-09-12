@@ -235,16 +235,16 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         child: Container(
           decoration: BoxDecoration(
             color:
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.94),
+                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
             border: Border(
               top: BorderSide(
-                color: cs.outlineVariant.withValues(alpha: 0.25),
+                color: cs.outlineVariant.withOpacity(0.25),
                 width: 0.6,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: Colors.black.withOpacity(0.08),
                 blurRadius: 12,
                 offset: const Offset(0, -2),
               )
@@ -289,7 +289,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                           boxShadow: focused
                               ? [
                                   BoxShadow(
-                                    color: cs.primary.withValues(alpha: 0.35),
+                                    color: cs.primary.withOpacity(0.35),
                                     blurRadius: 18,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 4),
@@ -297,7 +297,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                                 ]
                               : [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
+                                    color: Colors.black.withOpacity(0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
                                   )
@@ -309,7 +309,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                             color: Theme.of(context)
                                 .colorScheme
                                 .surface
-                                .withValues(alpha: 0.85),
+                                .withOpacity(0.85),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: TextField(
@@ -322,7 +322,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                               hintText: 'Ask AquaPi anything...',
                               border: InputBorder.none,
                               hintStyle: TextStyle(
-                                color: cs.onSurface.withValues(alpha: 0.45),
+                                color: cs.onSurface.withOpacity(0.45),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -350,8 +350,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  /// TOP SUGGESTION MENU
-  /// Updated: icon-only chips (no text labels) as requested.
   Widget _buildSuggestionMenu(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final expanded = _expandedMenu != null;
@@ -411,10 +409,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   bottom: 6, top: 4, left: 12, right: 12),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: cs.surface.withValues(alpha: 0.65),
+                  color: cs.surface.withOpacity(0.65),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: cs.primary.withValues(alpha: 0.25),
+                    color: cs.primary.withOpacity(0.25),
                     width: 1,
                   ),
                 ),
@@ -472,6 +470,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   }
 
   Widget _buildToolButtons(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
@@ -480,6 +479,11 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         MiniAIChip(
           label: 'Water Analysis',
           icon: Icons.water_drop_outlined,
+          customGradient: LinearGradient(
+            colors: [Colors.blue.shade400, Colors.teal.shade300],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -492,6 +496,11 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         MiniAIChip(
           label: 'Script Generator',
           icon: Icons.code_outlined,
+          customGradient: LinearGradient(
+            colors: [Colors.purple.shade400, Colors.indigo.shade300],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -576,7 +585,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: cs.primary.withValues(alpha: 0.45),
+                    color: cs.primary.withOpacity(0.45),
                     blurRadius: 18,
                     offset: const Offset(0, 6),
                   )
@@ -597,7 +606,8 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                           height: 26,
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation(cs.onPrimary),
+                            valueColor:
+                                AlwaysStoppedAnimation(cs.onPrimary),
                           ),
                         )
                       : RotationTransition(
@@ -649,8 +659,8 @@ class MessageBubble extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final bubbleColor = isUser
-        ? cs.primaryContainer.withValues(alpha: 0.85)
-        : Theme.of(context).cardColor.withValues(alpha: 0.95);
+        ? cs.primaryContainer.withOpacity(0.85)
+        : Theme.of(context).cardColor.withOpacity(0.95);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -878,7 +888,8 @@ class _ResultButtonState extends State<_ResultButton> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -893,7 +904,7 @@ class _ResultButtonState extends State<_ResultButton> {
                   ? []
                   : [
                       BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.4),
+                        color: cs.primary.withOpacity(0.4),
                         blurRadius: _hover ? 16 : 10,
                         offset: const Offset(0, 5),
                       )
@@ -904,7 +915,8 @@ class _ResultButtonState extends State<_ResultButton> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.visibility_rounded, size: 18, color: cs.onPrimary),
+                Icon(Icons.visibility_rounded,
+                    size: 18, color: cs.onPrimary),
                 const SizedBox(width: 8),
                 Text(
                   widget.label,

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 /// MiniAIChip
 /// Compact chip used for chatbot suggestion menus & follow-ups.
-/// Updated: Removed selection indicators (no checkmark or dot).
-/// Selection is expressed only via color/gradient & subtle shadow.
+/// Updated: Can now accept a custom gradient for styling.
 class MiniAIChip extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
   final IconData? icon;
   final bool selected;
   final bool dense;
-  final bool iconOnly; // When true, only the icon is shown (used in top menu)
+  final bool iconOnly;
   final String? tooltip;
+  final Gradient? customGradient;
 
   const MiniAIChip({
     super.key,
@@ -22,6 +22,7 @@ class MiniAIChip extends StatefulWidget {
     this.dense = false,
     this.iconOnly = false,
     this.tooltip,
+    this.customGradient,
   });
 
   @override
@@ -37,7 +38,9 @@ class _MiniAIChipState extends State<MiniAIChip> {
     final cs = Theme.of(context).colorScheme;
     final borderRadius = BorderRadius.circular(widget.iconOnly ? 18 : 22);
 
-    final gradient = widget.selected
+    final bool hasCustomLook = widget.customGradient != null && !widget.selected;
+
+    final Gradient? gradient = widget.selected
         ? LinearGradient(
             colors: [
               cs.primary,
@@ -46,19 +49,19 @@ class _MiniAIChipState extends State<MiniAIChip> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           )
-        : null;
+        : widget.customGradient;
 
     final backgroundColor = widget.selected
-        ? cs.primary.withValues(alpha: 0.18)
-        : cs.surface.withValues(alpha: widget.iconOnly ? 0.5 : 0.65);
+        ? cs.primary.withOpacity(0.18)
+        : cs.surface.withOpacity(widget.iconOnly ? 0.5 : 0.65);
 
-    final iconColor = widget.selected
+    final iconColor = widget.selected || hasCustomLook
         ? cs.onPrimary
-        : cs.onSurface.withValues(alpha: 0.85);
+        : cs.onSurface.withOpacity(0.85);
 
-    final labelColor = widget.selected
+    final labelColor = widget.selected || hasCustomLook
         ? cs.onPrimary
-        : cs.onSurface.withValues(alpha: 0.90);
+        : cs.onSurface.withOpacity(0.90);
 
     final scale = _pressed
         ? 0.92
@@ -85,21 +88,21 @@ class _MiniAIChipState extends State<MiniAIChip> {
             borderRadius: borderRadius,
             border: Border.all(
               color: widget.selected
-                  ? cs.primary.withValues(alpha: 0.6)
-                  : cs.outlineVariant.withValues(alpha: 0.3),
+                  ? cs.primary.withOpacity(0.6)
+                  : cs.outlineVariant.withOpacity(0.3),
               width: 1.2,
             ),
-            boxShadow: widget.selected
+            boxShadow: widget.selected || hasCustomLook
                 ? [
                     BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.35),
+                      color: cs.primary.withOpacity(0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.07),
+                      color: Colors.black.withOpacity(0.07),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     )
@@ -134,7 +137,6 @@ class _MiniAIChipState extends State<MiniAIChip> {
                   ),
                 ),
               ],
-              // (Removed checkmark / dot)
             ],
           ),
         ),
