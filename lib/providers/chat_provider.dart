@@ -151,8 +151,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
 
     try {
-      // Send the message to the model
-      final response = await _chatSession.sendMessage(Content.text(message));
+      // Send the message to the model with timeout
+      final response = await _chatSession.sendMessage(Content.text(message))
+          .timeout(const Duration(seconds: 30));
       final responseText = response.text;
       
       if (responseText != null) {
@@ -285,7 +286,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ''';
 
     try {
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await _model.generateContent([Content.text(prompt)])
+          .timeout(const Duration(seconds: 30));
       final cleanedResponse = _extractJson(response.text!);
       final jsonResponse = json.decode(cleanedResponse);
       final analysisResult = WaterAnalysisResult.fromJson(jsonResponse);
@@ -346,7 +348,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ''';
 
     try {
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await _model.generateContent([Content.text(prompt)])
+          .timeout(const Duration(seconds: 30));
       final cleanedResponse = _extractJson(response.text!);
       final jsonResponse = json.decode(cleanedResponse);
       final automationScript = AutomationScript.fromJson(jsonResponse);

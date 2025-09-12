@@ -137,7 +137,8 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         FirebaseAI.googleAI().generativeModel(model: 'gemini-1.5-flash');
 
     try {
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)])
+          .timeout(const Duration(seconds: 30));
       final cleanedResponse = _extractJson(response.text!);
       final reportJson = json.decode(cleanedResponse);
       final report = CompatibilityReport(
