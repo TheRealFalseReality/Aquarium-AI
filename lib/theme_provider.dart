@@ -8,7 +8,7 @@ class ThemeProviderState {
   final ThemeMode themeMode;
   final bool useMaterialYou;
 
-  ThemeProviderState({this.themeMode = ThemeMode.system, this.useMaterialYou = true}); // Changed default to ThemeMode.system
+  ThemeProviderState({this.themeMode = ThemeMode.system, this.useMaterialYou = true});
 
   ThemeProviderState copyWith({ThemeMode? themeMode, bool? useMaterialYou}) {
     return ThemeProviderState(
@@ -19,7 +19,7 @@ class ThemeProviderState {
 }
 
 class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
-  static const String themeKey = "theme_is_dark";
+  static const String themeModeKey = "theme_mode";
   static const String materialYouKey = "material_you_enabled";
 
   @override
@@ -30,34 +30,32 @@ class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
 
   void _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDarkMode = prefs.getBool(themeKey);
+    final themeIndex = prefs.getInt(themeModeKey) ?? 0; // Default to System
     final useMaterialYou = prefs.getBool(materialYouKey) ?? true;
     
-    ThemeMode themeMode;
-    if (isDarkMode == null) {
-      themeMode = ThemeMode.system;
-    } else {
-      themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    }
-
     state = state.copyWith(
-      themeMode: themeMode,
+      themeMode: ThemeMode.values[themeIndex],
       useMaterialYou: useMaterialYou,
     );
   }
 
-  Future<void> _savePreference(String key, bool value) async {
+  Future<void> _saveThemePreference(String key, int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, value);
+  }
+  
+  Future<void> _saveMaterialYouPreference(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
 
-  void toggleTheme(bool isDarkMode) {
-    state = state.copyWith(themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light);
-    _savePreference(themeKey, isDarkMode);
+  void setThemeMode(ThemeMode mode) {
+    state = state.copyWith(themeMode: mode);
+    _saveThemePreference(themeModeKey, mode.index);
   }
 
   void toggleMaterialYou(bool isEnabled) {
     state = state.copyWith(useMaterialYou: isEnabled);
-    _savePreference(materialYouKey, isEnabled);
+    _saveMaterialYouPreference(materialYouKey, isEnabled);
   }
 }

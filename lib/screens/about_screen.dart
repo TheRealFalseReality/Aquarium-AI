@@ -34,10 +34,24 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
 
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
-    // The mode is changed here to open in-app
-    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+    // The mode is changed here to open in the default browser
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (kDebugMode) {
         print('Could not launch $urlString');
+      }
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'contactus@capitalcityaquatics.com',
+      query: 'subject=Fish.AI Feedback',
+    );
+
+    if (!await launchUrl(emailLaunchUri)) {
+      if (kDebugMode) {
+        print('Could not launch email');
       }
     }
   }
@@ -58,7 +72,8 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: [
-                      const TextSpan(text: 'Fish.AI is proudly brought to you by '),
+                      const TextSpan(
+                          text: 'Fish.AI is proudly brought to you by '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: InkWell(
@@ -85,18 +100,23 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const SelectableText(
-                    'contactus@capitalcityaquatics.com',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                InkWell(
+                  onTap: _launchEmail,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    textAlign: TextAlign.center,
+                    child: const Text(
+                      'contactus@capitalcityaquatics.com',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ],
@@ -124,8 +144,6 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProviderState = ref.watch(themeProviderNotifierProvider);
-    final themeProviderNotifier = ref.read(themeProviderNotifierProvider.notifier);
 
     return MainLayout(
       title: 'About',
@@ -151,22 +169,6 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              if (!kIsWeb && Platform.isAndroid)
-                Card(
-                  child: SwitchListTile(
-                    title: const Text("Use Material You Theme"),
-                    subtitle: Text(
-                      "Experimental: Adapts to your wallpaper colors.",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    value: themeProviderState.useMaterialYou,
-                    onChanged: (value) {
-                      themeProviderNotifier.toggleMaterialYou(value);
-                    },
-                    secondary: const Icon(Icons.color_lens_outlined),
-                  ),
-                ),
-              const SizedBox(height: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.feedback),
                 label: const Text('Contact & Feedback'),

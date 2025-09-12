@@ -13,8 +13,7 @@ class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
 
   @override
-  FishCompatibilityScreenState createState() =>
-      FishCompatibilityScreenState();
+  FishCompatibilityScreenState createState() => FishCompatibilityScreenState();
 }
 
 class FishCompatibilityScreenState
@@ -98,6 +97,13 @@ class FishCompatibilityScreenState
                         ?.copyWith(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(fishCompatibilityProvider.notifier).cancel();
+                    },
+                    child: const Text('Cancel'),
+                  ),
                 ],
               ),
             ),
@@ -171,8 +177,9 @@ class FishCompatibilityScreenState
     final hasLastReport = providerState.lastReport != null;
     final canShowLastReportFab =
         hasLastReport && (providerState.report == null);
-        
-    final double bottomBarHeight = providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
+
+    final double bottomBarHeight =
+        providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
 
     return MainLayout(
       title: 'AI Compatibility Calculator',
@@ -180,8 +187,7 @@ class FishCompatibilityScreenState
       child: Stack(
         children: [
           providerState.fishData.when(
-            loading: () =>
-                const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -203,7 +209,8 @@ class FishCompatibilityScreenState
                   // Header Sliver
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 4),
                       child: Column(
                         children: [
                           Text(
@@ -232,7 +239,8 @@ class FishCompatibilityScreenState
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 210,
                         childAspectRatio: 3 / 4,
                         crossAxisSpacing: 18,
@@ -241,7 +249,8 @@ class FishCompatibilityScreenState
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final fish = fishList[index];
-                          final isSelected = providerState.selectedFish.contains(fish);
+                          final isSelected =
+                              providerState.selectedFish.contains(fish);
                           return _buildFishCard(fish, isSelected, notifier);
                         },
                         childCount: fishList.length,
@@ -251,13 +260,17 @@ class FishCompatibilityScreenState
                   // Disclaimer Sliver
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomBarHeight + 16), // Padding to avoid bottom bar
+                      padding: EdgeInsets.fromLTRB(24, 0, 24,
+                          bottomBarHeight + 16), // Padding to avoid bottom bar
                       child: Text(
                         'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          fontStyle: FontStyle.italic,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.7),
+                              fontStyle: FontStyle.italic,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -283,14 +296,14 @@ class FishCompatibilityScreenState
                 },
               ),
             ),
-            // The Bottom Bar is now at the bottom of the Stack
-            if (providerState.selectedFish.isNotEmpty)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: _buildBottomBar(providerState, notifier),
-              ),
+          // The Bottom Bar is now at the bottom of the Stack
+          if (providerState.selectedFish.isNotEmpty)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildBottomBar(providerState, notifier),
+            ),
         ],
       ),
     );
@@ -412,12 +425,13 @@ class FishCompatibilityScreenState
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
+          padding:
+              const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
           decoration: BoxDecoration(
-            color: cs.surface.withOpacity(0.85),
+            color: cs.surface.withOpacity(0.05),
             border: Border(
               top: BorderSide(
-                color: cs.outlineVariant.withOpacity(0.25),
+                color: cs.outlineVariant.withOpacity(0.05),
                 width: 1.2,
               ),
             ),
@@ -450,8 +464,8 @@ class FishCompatibilityScreenState
                             width: 52,
                             height: 52,
                             color: cs.error.withOpacity(0.1),
-                            child: Icon(Icons.error,
-                                color: cs.error, size: 20),
+                            child:
+                                Icon(Icons.error, color: cs.error, size: 20),
                           ),
                         ),
                       );
@@ -473,8 +487,8 @@ class FishCompatibilityScreenState
                     : const Icon(Icons.analytics_outlined),
                 label: const Text('Get Report'),
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 16),
                   textStyle: const TextStyle(
                       fontWeight: FontWeight.bold, letterSpacing: 0.3),
                 ),
@@ -538,12 +552,19 @@ class FishCompatibilityScreenState
                 _buildHarmonyCard(context, report),
                 const SizedBox(height: 16),
                 // Injecting the Ad Widget here
-                _buildSection(context, 'Detailed Summary', SelectableText(report.detailedSummary, textAlign: TextAlign.center), 1),
+                _buildSection(
+                    context,
+                    'Detailed Summary',
+                    SelectableText(report.detailedSummary,
+                        textAlign: TextAlign.center),
+                    1),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: NativeAdWidget(),
                 ),
-                ...sections.entries.where((entry) => entry.key != 'Detailed Summary').map((entry) {
+                ...sections.entries
+                    .where((entry) => entry.key != 'Detailed Summary')
+                    .map((entry) {
                   final index = sections.keys.toList().indexOf(entry.key);
                   return _buildSection(
                     context,
@@ -619,9 +640,8 @@ class FishCompatibilityScreenState
     final isEven = index % 2 == 0;
     final cs = Theme.of(context).colorScheme;
     return Card(
-      color: isEven
-          ? null
-          : cs.surfaceContainerHighest.withOpacity(0.28),
+      color:
+          isEven ? null : cs.surfaceContainerHighest.withOpacity(0.28),
       margin: const EdgeInsets.only(bottom: 14.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -661,7 +681,8 @@ class FishCompatibilityScreenState
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 color: Theme.of(context)

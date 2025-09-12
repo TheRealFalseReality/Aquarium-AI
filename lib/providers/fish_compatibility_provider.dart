@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:fish_ai/models/compatibility_report.dart';
@@ -5,6 +6,41 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Helper class for cancellable operations
+class CancellableCompleter<T> {
+  final Completer<T> _completer = Completer<T>();
+  bool _isCancelled = false;
+
+  Future<T> get future => _completer.future;
+  bool get isCompleted => _completer.isCompleted;
+  bool get isCancelled => _isCancelled;
+
+  void complete([FutureOr<T>? value]) {
+    if (!_isCancelled) {
+      _completer.complete(value);
+    }
+  }
+
+  void completeError(Object error, [StackTrace? stackTrace]) {
+    if (!_isCancelled) {
+      _completer.completeError(error, stackTrace);
+    }
+  }
+
+  void cancel() {
+    if (!_completer.isCompleted) {
+      _isCancelled = true;
+      _completer.completeError(CancelledException());
+    }
+  }
+}
+
+class CancelledException implements Exception {
+  @override
+  String toString() => 'Future was cancelled';
+}
+
 
 // Helper function to extract JSON from a markdown code block
 String _extractJson(String text) {
@@ -16,13 +52,15 @@ String _extractJson(String text) {
   return text;
 }
 
-final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier, FishCompatibilityState>(FishCompatibilityNotifier.new);
+final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier,
+    FishCompatibilityState>(FishCompatibilityNotifier.new);
 
 class FishCompatibilityState {
   final AsyncValue<Map<String, List<Fish>>> fishData;
   final List<Fish> selectedFish;
-  final CompatibilityReport? report;       // Current (active) report (shown right after generation)
-  final CompatibilityReport? lastReport;   // Persisted last generated report (for "Get Last Report")
+  final CompatibilityReport? report; // Current (active) report (shown right after generation)
+  final CompatibilityReport?
+      lastReport; // Persisted last generated report (for "Get Last Report")
   final bool isLoading;
   final String? error;
   final bool isRetryable;
@@ -59,7 +97,8 @@ class FishCompatibilityState {
       lastReport: clearLastReport
           ? null
           : lastReport ??
-              this.lastReport, // keep previous lastReport unless explicitly replaced or cleared
+              this
+                  .lastReport, // keep previous lastReport unless explicitly replaced or cleared
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : error ?? this.error,
       isRetryable: isRetryable ?? this.isRetryable,
@@ -69,6 +108,8 @@ class FishCompatibilityState {
 }
 
 class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
+  CancellableCompleter<GenerateContentResponse>? _cancellableCompleter;
+
   @override
   FishCompatibilityState build() {
     _loadFishData();
@@ -77,14 +118,16 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
   Future<void> _loadFishData() async {
     try {
-      final jsonString = await rootBundle.loadString('assets/fishcompat.json');
+      final jsonString =
+          await rootBundle.loadString('assets/fishcompat.json');
       final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-      final freshwater = (jsonResponse['freshwater'] as List)
-          .map((f) => Fish.fromJson(f))
-          .toList();
+      final freshwater =
+          (jsonResponse['freshwater'] as List).map((f) => Fish.fromJson(f)).toList();
       final marine =
           (jsonResponse['marine'] as List).map((f) => Fish.fromJson(f)).toList();
-      state = state.copyWith(fishData: AsyncValue.data({'freshwater': freshwater, 'marine': marine}));
+      state = state.copyWith(
+          fishData: AsyncValue.data(
+              {'freshwater': freshwater, 'marine': marine}));
     } catch (e, stackTrace) {
       state = state.copyWith(fishData: AsyncValue.error(e, stackTrace));
     }
@@ -114,6 +157,11 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     state = state.copyWith(clearLastReport: true);
   }
 
+  void cancel() {
+    _cancellableCompleter?.cancel();
+    state = state.copyWith(isLoading: false);
+  }
+
   // Add retry functionality
   Future<void> retryCompatibilityReport() async {
     if (state.lastCategory != null && state.selectedFish.isNotEmpty) {
@@ -125,8 +173,8 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     if (state.selectedFish.isEmpty) return;
 
     state = state.copyWith(
-      isLoading: true, 
-      clearReport: true, 
+      isLoading: true,
+      clearReport: true,
       clearError: true,
       lastCategory: category,
     );
@@ -134,11 +182,15 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
     final model =
-        FirebaseAI.googleAI().generativeModel(model: 'gemini-1.5-flash');
+        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
+    _cancellableCompleter = CancellableCompleter();
+    _cancellableCompleter!.future.catchError((_) {});
 
     try {
-      final response = await model.generateContent([Content.text(prompt)])
+      final response = await model
+          .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
+      _cancellableCompleter?.complete(response);
       final cleanedResponse = _extractJson(response.text!);
       final reportJson = json.decode(cleanedResponse);
       final report = CompatibilityReport(
@@ -156,26 +208,34 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         tankMatesSummary: reportJson['tankMatesSummary'],
       );
       // Set BOTH current report and lastReport
-      state = state.copyWith(report: report, lastReport: report, isLoading: false);
-    } catch (e) {
-      final userFriendlyError = _getFriendlyErrorMessage(e.toString());
       state = state.copyWith(
-        error: userFriendlyError, 
-        isLoading: false,
-        isRetryable: true,
-      );
+          report: report, lastReport: report, isLoading: false);
+    } catch (e) {
+      if (!(_cancellableCompleter?.isCancelled ?? false)) {
+        final userFriendlyError = _getFriendlyErrorMessage(e.toString());
+        state = state.copyWith(
+          error: userFriendlyError,
+          isLoading: false,
+          isRetryable: true,
+        );
+      }
     }
   }
 
   // Helper method to provide user-friendly error messages
   String _getFriendlyErrorMessage(String error) {
-    if (error.contains('network') || error.contains('connection') || error.contains('timeout')) {
+    if (error.contains('network') ||
+        error.contains('connection') ||
+        error.contains('timeout')) {
       return 'Connection problem! Please check your internet connection and try again.';
-    } else if (error.contains('quota') || error.contains('limit') || error.contains('rate')) {
+    } else if (error.contains('quota') ||
+        error.contains('limit') ||
+        error.contains('rate')) {
       return 'AI service is busy right now. Please wait a moment and try again.';
     } else if (error.contains('FormatException') || error.contains('json')) {
       return 'AI response formatting error. The analysis was generated but couldn\'t be processed properly. Please try again.';
-    } else if (error.contains('Invalid API key') || error.contains('authentication')) {
+    } else if (error.contains('Invalid API key') ||
+        error.contains('authentication')) {
       return 'Authentication error with AI service. Please contact support.';
     } else {
       return 'Something went wrong while generating your compatibility report. Please try again.';

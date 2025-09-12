@@ -1,9 +1,44 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+
+// Helper class for cancellable operations
+class CancellableCompleter<T> {
+  final Completer<T> _completer = Completer<T>();
+  bool _isCancelled = false;
+
+  Future<T> get future => _completer.future;
+  bool get isCompleted => _completer.isCompleted;
+  bool get isCancelled => _isCancelled;
+
+  void complete([FutureOr<T>? value]) {
+    if (!_isCancelled) {
+      _completer.complete(value);
+    }
+  }
+
+  void completeError(Object error, [StackTrace? stackTrace]) {
+    if (!_isCancelled) {
+      _completer.completeError(error, stackTrace);
+    }
+  }
+
+  void cancel() {
+    if (!_completer.isCompleted) {
+      _isCancelled = true;
+      _completer.completeError(CancelledException());
+    }
+  }
+}
+
+class CancelledException implements Exception {
+  @override
+  String toString() => 'Future was cancelled';
+}
 
 // Represents a single chat message
 class ChatMessage {
@@ -53,7 +88,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = ChatState(
       messages: [
         ChatMessage(
-          text: "# Welcome to Fish.AI!\n\nI'm your intelligent assistant for aquariums and fish keeping! Ask me anything about your aquarium and fish, analyze water parameters, generate custom automation scripts, or get an AI analysis of your aquarium photos.",
+          text:
+              "# Welcome to Fish.AI!\n\nI'm your intelligent assistant for aquariums and fish keeping! Ask me anything about your aquarium and fish, analyze water parameters, generate custom automation scripts, or get an AI analysis of your aquarium photos.",
           isUser: false,
         ),
       ],
@@ -61,6 +97,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   final GenerativeModel _model;
+  CancellableCompleter<GenerateContentResponse>? _cancellableCompleter;
 
   // The persona is provided as the first item in the history, from the 'model' role.
   late final ChatSession _chatSession = _model.startChat(
@@ -124,6 +161,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ],
   );
 
+  void cancel() {
+    _cancellableCompleter?.cancel();
+    state = ChatState(messages: state.messages, isLoading: false);
+  }
+
   // Sends a message to the Gemini API and updates the state
   Future<void> sendMessage(String message) async {
     await _sendMessageWithRetry(message, isRetry: false);
@@ -135,7 +177,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   // Internal method to send message with retry capability
-  Future<void> _sendMessageWithRetry(String message, {required bool isRetry}) async {
+  Future<void> _sendMessageWithRetry(String message,
+      {required bool isRetry}) async {
     // Add the user's message to the state (only if not retry)
     if (!isRetry) {
       state = ChatState(
@@ -150,12 +193,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
       );
     }
 
+    _cancellableCompleter = CancellableCompleter();
+    _cancellableCompleter!.future.catchError((_) {});
+
     try {
       // Send the message to the model with timeout
-      final response = await _chatSession.sendMessage(Content.text(message))
+      final response = await _chatSession
+          .sendMessage(Content.text(message))
           .timeout(const Duration(seconds: 30));
+      _cancellableCompleter?.complete(response);
       final responseText = response.text;
-      
+
       if (responseText != null) {
         String mainResponse = responseText;
         List<String> followUps = [];
@@ -163,18 +211,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
         // --- UPDATED PARSING LOGIC using RegExp ---
         try {
           // Regular expression to find a JSON object with a "follow_ups" key.
-          final RegExp jsonRegExp = RegExp(r'{\s*"follow_ups"\s*:\s*\[.*?\]\s*}', dotAll: true);
+          final RegExp jsonRegExp =
+              RegExp(r'{\s*"follow_ups"\s*:\s*\[.*?\]\s*}', dotAll: true);
           final Match? jsonMatch = jsonRegExp.firstMatch(responseText);
-          
+
           if (jsonMatch != null) {
             var jsonString = jsonMatch.group(0);
             if (jsonString != null) {
               // Remove the JSON string from the main response
               mainResponse = responseText.replaceFirst(jsonString, '').trim();
-              
+
               // Sanitize the JSON string to remove trailing commas in arrays
               jsonString = jsonString.replaceAll(RegExp(r',\s*\]'), ']');
-              
+
               // Decode the JSON
               final decodedJson = json.decode(jsonString);
               if (decodedJson['follow_ups'] is List) {
@@ -194,14 +243,22 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
         // Add the model's response to the state
         state = ChatState(
-          messages: [...state.messages, ChatMessage(text: mainResponse, isUser: false, followUpQuestions: followUps)],
+          messages: [
+            ...state.messages,
+            ChatMessage(
+                text: mainResponse,
+                isUser: false,
+                followUpQuestions: followUps)
+          ],
           isLoading: false,
         );
       } else {
         _handleError('No response received from AI', message, isRetry);
       }
     } catch (e) {
-      _handleError(e.toString(), message, isRetry);
+      if (!(_cancellableCompleter?.isCancelled ?? false)) {
+        _handleError(e.toString(), message, isRetry);
+      }
     }
   }
 
@@ -211,15 +268,24 @@ class ChatNotifier extends StateNotifier<ChatState> {
     bool isRetryable = true;
 
     // Categorize errors and provide user-friendly messages
-    if (error.contains('network') || error.contains('connection') || error.contains('timeout')) {
-      userFriendlyMessage = '🔌 **Connection Issue**\n\nI\'m having trouble connecting to the AI service. Please check your internet connection and try again.';
-    } else if (error.contains('quota') || error.contains('limit') || error.contains('rate')) {
-      userFriendlyMessage = '⏰ **Service Temporarily Unavailable**\n\nThe AI service is currently busy. Please wait a moment and try again.';
-    } else if (error.contains('Invalid API key') || error.contains('authentication')) {
-      userFriendlyMessage = '🔐 **Authentication Error**\n\nThere\'s an issue with the AI service configuration. Please contact support.';
+    if (error.contains('network') ||
+        error.contains('connection') ||
+        error.contains('timeout')) {
+      userFriendlyMessage =
+          '🔌 **Connection Issue**\n\nI\'m having trouble connecting to the AI service. Please check your internet connection and try again.';
+    } else if (error.contains('quota') ||
+        error.contains('limit') ||
+        error.contains('rate')) {
+      userFriendlyMessage =
+          '⏰ **Service Temporarily Unavailable**\n\nThe AI service is currently busy. Please wait a moment and try again.';
+    } else if (error.contains('Invalid API key') ||
+        error.contains('authentication')) {
+      userFriendlyMessage =
+          '🔐 **Authentication Error**\n\nThere\'s an issue with the AI service configuration. Please contact support.';
       isRetryable = false;
     } else {
-      userFriendlyMessage = '⚠️ **AI Service Error**\n\nI encountered an unexpected error while processing your request. Please try again.';
+      userFriendlyMessage =
+          '⚠️ **AI Service Error**\n\nI encountered an unexpected error while processing your request. Please try again.';
     }
 
     // Add debug info in debug mode
@@ -243,25 +309,36 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   // New method for water parameter analysis
-  Future<WaterAnalysisResult?> analyzeWaterParameters(Map<String, String> params) async {
+  Future<WaterAnalysisResult?> analyzeWaterParameters(
+      Map<String, String> params) async {
     final {
-      'tankType': tankType, 'ph': ph, 'temp': temp, 'salinity': salinity, 
-      'additionalInfo': additionalInfo, 'tempUnit': tempUnit, 'salinityUnit': salinityUnit
+      'tankType': tankType,
+      'ph': ph,
+      'temp': temp,
+      'salinity': salinity,
+      'additionalInfo': additionalInfo,
+      'tempUnit': tempUnit,
+      'salinityUnit': salinityUnit
     } = params;
 
-    final userMessageText = 
-      'Please analyze my water parameters for my $tankType tank.\n'
-      'Temp: $temp°$tempUnit'
-      '${ph.isNotEmpty ? ', pH: $ph' : ''}'
-      '${salinity.isNotEmpty ? ', Salinity: $salinity $salinityUnit' : ''}'
-      '${additionalInfo.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
+    final userMessageText =
+        'Please analyze my water parameters for my $tankType tank.\n'
+        'Temp: $temp°$tempUnit'
+        '${ph.isNotEmpty ? ', pH: $ph' : ''}'
+        '${salinity.isNotEmpty ? ', Salinity: $salinity $salinityUnit' : ''}'
+        '${additionalInfo.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
 
     state = ChatState(
-      messages: [...state.messages, ChatMessage(text: userMessageText, isUser: true)],
+      messages: [
+        ...state.messages,
+        ChatMessage(text: userMessageText, isUser: true)
+      ],
       isLoading: true,
     );
 
-    final tempForAnalysis = tempUnit == 'F' ? ((double.parse(temp) - 32) * 5 / 9).toStringAsFixed(2) : temp;
+    final tempForAnalysis = tempUnit == 'F'
+        ? ((double.parse(temp) - 32) * 5 / 9).toStringAsFixed(2)
+        : temp;
 
     final prompt = '''
     Act as an aquarium expert. Analyze the following water parameters for a $tankType aquarium:
@@ -284,35 +361,45 @@ class ChatNotifier extends StateNotifier<ChatState> {
       "howAquaPiHelps": "..."
     }
     ''';
-
+    _cancellableCompleter = CancellableCompleter();
+    _cancellableCompleter!.future.catchError((_) {});
     try {
-      final response = await _model.generateContent([Content.text(prompt)])
+      final response = await _model
+          .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
+      _cancellableCompleter?.complete(response);
       final cleanedResponse = _extractJson(response.text!);
       final jsonResponse = json.decode(cleanedResponse);
       final analysisResult = WaterAnalysisResult.fromJson(jsonResponse);
-      
-      state = ChatState(
-        messages: [...state.messages, ChatMessage(text: "Here is your water analysis:", isUser: false, analysisResult: analysisResult)],
-        isLoading: false,
-      );
-      return analysisResult;
 
-    } catch (e) {
-      final errorMessage = _getWaterAnalysisErrorMessage(e.toString());
       state = ChatState(
         messages: [
           ...state.messages,
           ChatMessage(
-            text: errorMessage,
-            isUser: false,
-            isError: true,
-            isRetryable: true,
-            originalMessage: userMessageText,
-          )
+              text: "Here is your water analysis:",
+              isUser: false,
+              analysisResult: analysisResult)
         ],
         isLoading: false,
       );
+      return analysisResult;
+    } catch (e) {
+      if (!(_cancellableCompleter?.isCancelled ?? false)) {
+        final errorMessage = _getWaterAnalysisErrorMessage(e.toString());
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: errorMessage,
+              isUser: false,
+              isError: true,
+              isRetryable: true,
+              originalMessage: userMessageText,
+            )
+          ],
+          isLoading: false,
+        );
+      }
       return null;
     }
   }
@@ -332,10 +419,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<AutomationScript?> generateAutomationScript(String description) async {
     final userMessageText = 'Generate an automation script for: "$description"';
     state = ChatState(
-      messages: [...state.messages, ChatMessage(text: userMessageText, isUser: true)],
+      messages: [
+        ...state.messages,
+        ChatMessage(text: userMessageText, isUser: true)
+      ],
       isLoading: true,
     );
-
+    _cancellableCompleter = CancellableCompleter();
+    _cancellableCompleter!.future.catchError((_) {});
     final prompt = '''
     You are an expert on Home Assistant and ESPHome. A user wants to create a simple automation for their aquarium. Based on the user's description, provide a valid and well-commented YAML code snippet for either a Home Assistant automation or an ESPHome configuration. Also, provide a brief, friendly explanation of what the code does and where it should be placed.
     User's request: "$description"
@@ -348,32 +439,42 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ''';
 
     try {
-      final response = await _model.generateContent([Content.text(prompt)])
+      final response = await _model
+          .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
+      _cancellableCompleter?.complete(response);
       final cleanedResponse = _extractJson(response.text!);
       final jsonResponse = json.decode(cleanedResponse);
       final automationScript = AutomationScript.fromJson(jsonResponse);
 
       state = ChatState(
-        messages: [...state.messages, ChatMessage(text: "Here is your automation script:", isUser: false, automationScript: automationScript)],
+        messages: [
+          ...state.messages,
+          ChatMessage(
+              text: "Here is your automation script:",
+              isUser: false,
+              automationScript: automationScript)
+        ],
         isLoading: false,
       );
       return automationScript;
     } catch (e) {
-      final errorMessage = _getAutomationScriptErrorMessage(e.toString());
-      state = ChatState(
-        messages: [
-          ...state.messages,
-          ChatMessage(
-            text: errorMessage,
-            isUser: false,
-            isError: true,
-            isRetryable: true,
-            originalMessage: userMessageText,
-          )
-        ],
-        isLoading: false,
-      );
+      if (!(_cancellableCompleter?.isCancelled ?? false)) {
+        final errorMessage = _getAutomationScriptErrorMessage(e.toString());
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: errorMessage,
+              isUser: false,
+              isError: true,
+              isRetryable: true,
+              originalMessage: userMessageText,
+            )
+          ],
+          isLoading: false,
+        );
+      }
       return null;
     }
   }
@@ -393,7 +494,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 // Provider for the generative model
 final geminiModelProvider = Provider<GenerativeModel>((ref) {
   return FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
   );
 });
 

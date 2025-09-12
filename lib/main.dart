@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -220,6 +221,9 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
+                break;
+              case '/settings':
+                page = const SettingsScreen();
                 break;
               default:
                 page = const WelcomeScreen();

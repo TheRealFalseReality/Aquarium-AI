@@ -4,18 +4,12 @@ import '../theme_provider.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
-class AppDrawer extends ConsumerStatefulWidget {
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
-  AppDrawerState createState() => AppDrawerState();
-}
-
-class AppDrawerState extends ConsumerState<AppDrawer> {
-  @override
-  Widget build(BuildContext context) {
-    final themeProviderState = ref.watch(themeProviderNotifierProvider);
-    final isDarkMode = themeProviderState.themeMode == ThemeMode.dark;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer
@@ -73,7 +67,7 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
             ),
           ),
           const Divider(height: 1),
-          _buildDrawerFooter(context, isDarkMode, navigate),
+          _buildDrawerFooter(context, navigate),
         ],
       ),
     );
@@ -130,46 +124,32 @@ class AppDrawerState extends ConsumerState<AppDrawer> {
     );
   }
 
-  Widget _buildDrawerFooter(BuildContext context,
-      bool isDarkMode, void Function(String) navigate) {
-    final themeProviderNotifier = ref.read(themeProviderNotifierProvider.notifier);
+  Widget _buildDrawerFooter(BuildContext context, void Function(String) navigate) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          children: [
-            AnimatedDrawerItem(
-              delay: const Duration(milliseconds: 450),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.home),
-                    onPressed: () => navigate('/'),
-                    tooltip: 'Home',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.info),
-                    onPressed: () => navigate('/about'),
-                    tooltip: 'About',
-                  ),
-                ],
+        child: AnimatedDrawerItem(
+          delay: const Duration(milliseconds: 450),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.home_outlined),
+                onPressed: () => navigate('/'),
+                tooltip: 'Home',
               ),
-            ),
-            const SizedBox(height: 8),
-            AnimatedDrawerItem(
-              delay: const Duration(milliseconds: 500),
-              child: SwitchListTile(
-                title: Text(isDarkMode ? 'Dark Mode' : 'Light Mode'),
-                value: isDarkMode,
-                onChanged: (value) {
-                  themeProviderNotifier.toggleTheme(value);
-                },
-                secondary:
-                    Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () => navigate('/about'),
+                tooltip: 'About',
               ),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => navigate('/settings'),
+                tooltip: 'Settings',
+              ),
+            ],
+          ),
         ),
       ),
     );

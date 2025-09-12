@@ -22,7 +22,7 @@ class ChatbotScreen extends ConsumerStatefulWidget {
 
 class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     with TickerProviderStateMixin {
-  String? _expandedMenu;
+  String? _expandedMenu = 'ai_tools';
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _inputController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
@@ -151,14 +151,14 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   );
                 } else if (item == 'BANNER_AD') {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                     child: AdBanner(),
                   );
                 } else if (item == 'NATIVE_AD') {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                     child: NativeAdWidget(),
                   );
                 }
@@ -234,7 +234,8 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         absorbing: loading,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.94),
+            color:
+                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.94),
             border: Border(
               top: BorderSide(
                 color: cs.outlineVariant.withValues(alpha: 0.25),
@@ -253,12 +254,22 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               if (loading)
-                const Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: SizedBox(
-                    height: 32,
-                    width: 32,
-                    child: CircularProgressIndicator(strokeWidth: 3.2),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 32,
+                        width: 32,
+                        child: CircularProgressIndicator(strokeWidth: 3.2),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(chatProvider.notifier).cancel();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ],
                   ),
                 ),
               _buildSuggestionMenu(context),
@@ -374,8 +385,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 selected: _expandedMenu == 'aquapi',
                 onTap: () {
                   setState(() {
-                    _expandedMenu =
-                        _expandedMenu == 'aquapi' ? null : 'aquapi';
+                    _expandedMenu = _expandedMenu == 'aquapi' ? null : 'aquapi';
                   });
                 },
               ),
@@ -425,7 +435,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       case 'aquarium':
         return _buildSuggestionChips([
           "How do I cycle my aquarium?",
-            "What are the best beginner fish?",
+          "What are the best beginner fish?",
           "How often should I change water?",
         ]);
       case 'aquapi':
@@ -587,8 +597,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                           height: 26,
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
-                            valueColor:
-                                AlwaysStoppedAnimation(cs.onPrimary),
+                            valueColor: AlwaysStoppedAnimation(cs.onPrimary),
                           ),
                         )
                       : RotationTransition(
@@ -656,19 +665,18 @@ class MessageBubble extends ConsumerWidget {
             children: [
               if (!isUser)
                 CircleAvatar(
-                  backgroundColor: isError 
+                  backgroundColor: isError
                       ? cs.error.withOpacity(0.15)
                       : cs.primary.withOpacity(0.15),
-                  child: isError 
+                  child: isError
                       ? Icon(Icons.error_outline, color: cs.error)
                       : Image.asset('assets/AquaPi Logo.png'),
                 ),
               if (!isUser) const SizedBox(width: 8),
               Flexible(
                 child: Column(
-                  crossAxisAlignment: isUser
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
                     Text(
                       isUser ? 'You' : isError ? 'Fish.AI - Error' : 'Fish.AI',
@@ -690,7 +698,7 @@ class MessageBubble extends ConsumerWidget {
                           bottomRight: Radius.circular(isUser ? 4 : 18),
                         ),
                         border: Border.all(
-                          color: isError 
+                          color: isError
                               ? cs.error.withOpacity(0.5)
                               : cs.outlineVariant.withOpacity(0.25),
                           width: isError ? 1.2 : 0.6,
@@ -737,8 +745,8 @@ class MessageBubble extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AutomationScriptResultScreen(
-                        script: automationScript!),
+                    builder: (context) =>
+                        AutomationScriptResultScreen(script: automationScript!),
                   ),
                 );
               },
@@ -870,8 +878,7 @@ class _ResultButtonState extends State<_ResultButton> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -897,8 +904,7 @@ class _ResultButtonState extends State<_ResultButton> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.visibility_rounded,
-                    size: 18, color: cs.onPrimary),
+                Icon(Icons.visibility_rounded, size: 18, color: cs.onPrimary),
                 const SizedBox(width: 8),
                 Text(
                   widget.label,
