@@ -494,7 +494,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 // Provider for the generative model
 final geminiModelProvider = Provider<GenerativeModel>((ref) {
   return FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-flash-lite',
   );
 });
 

@@ -182,7 +182,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
     final model =
-        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
+        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash-lite');
     _cancellableCompleter = CancellableCompleter();
     _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
 
