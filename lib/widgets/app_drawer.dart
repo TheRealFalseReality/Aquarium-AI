@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../theme_provider.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 

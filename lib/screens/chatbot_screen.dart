@@ -470,7 +470,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   }
 
   Widget _buildToolButtons(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,

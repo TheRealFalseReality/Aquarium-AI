@@ -194,7 +194,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
 
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future.catchError((_) {});
+    _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
 
     try {
       // Send the message to the model with timeout
@@ -362,7 +362,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
     ''';
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future.catchError((_) {});
+    _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
     try {
       final response = await _model
           .generateContent([Content.text(prompt)])
@@ -426,7 +426,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       isLoading: true,
     );
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future.catchError((_) {});
+    _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
     final prompt = '''
     You are an expert on Home Assistant and ESPHome. A user wants to create a simple automation for their aquarium. Based on the user's description, provide a valid and well-commented YAML code snippet for either a Home Assistant automation or an ESPHome configuration. Also, provide a brief, friendly explanation of what the code does and where it should be placed.
     User's request: "$description"

@@ -184,7 +184,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final model =
         FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future.catchError((_) {});
+    _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
 
     try {
       final response = await model
