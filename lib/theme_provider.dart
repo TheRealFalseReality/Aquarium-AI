@@ -8,7 +8,7 @@ class ThemeProviderState {
   final ThemeMode themeMode;
   final bool useMaterialYou;
 
-  ThemeProviderState({this.themeMode = ThemeMode.system, this.useMaterialYou = false}); // Changed default to ThemeMode.system
+  ThemeProviderState({this.themeMode = ThemeMode.system, this.useMaterialYou = true}); // Changed default to ThemeMode.system
 
   ThemeProviderState copyWith({ThemeMode? themeMode, bool? useMaterialYou}) {
     return ThemeProviderState(
@@ -31,7 +31,7 @@ class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
   void _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final isDarkMode = prefs.getBool(themeKey);
-    final useMaterialYou = prefs.getBool(materialYouKey) ?? false;
+    final useMaterialYou = prefs.getBool(materialYouKey) ?? true;
     
     ThemeMode themeMode;
     if (isDarkMode == null) {

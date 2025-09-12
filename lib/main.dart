@@ -51,27 +51,44 @@ void main() async {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
+  // AI-inspired color palette
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF7FB3C8),
+    seedColor: const Color(0xFF005f73), // Original seed for consistent hues
     brightness: Brightness.light,
-    primary: const Color(0xFF7FB3C8),
-    secondary: const Color(0xFFC4B1C5),
-    surface: const Color(0xFFeef7fb),
+    primary: const Color(0xFF0a9396),
+    secondary: const Color(0xFF94d2bd),
+    tertiary: const Color(0xFFe9d8a6),
+    surface: const Color(0xFFFFFFFF), // White surface for contrast
+    background: const Color(0xFFd8f3ff), // Light mode background
+    error: const Color(0xFFae2012),
+    onPrimary: Colors.white,
+    onSecondary: Colors.black,
+    onTertiary: Colors.black,
+    onSurface: Colors.black,
+    onBackground: Colors.black,
   );
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF7FB3C8),
+    seedColor: const Color(0xFF005f73), // Original seed for consistent hues
     brightness: Brightness.dark,
-    primary: const Color(0xFF7FB3C8),
-    secondary: const Color(0xFFC4B1C5),
-    surface: const Color(0xFF1A202C),
+    primary: const Color(0xFF94d2bd),
+    secondary: const Color(0xFF0a9396),
+    tertiary: const Color(0xFFe9d8a6),
+    surface: const Color(0xFF4A5568), // A slightly lighter surface for cards
+    background: const Color(0xFF2d3748), // Dark mode background
+    error: const Color(0xFFe57373), // Lighter error for dark mode
+    onPrimary: Colors.black,
+    onSecondary: Colors.white,
+    onTertiary: Colors.black,
+    onSurface: Colors.white,
+    onBackground: Colors.white,
   );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
     final textTheme =
-        GoogleFonts.interTextTheme(Theme.of(context).textTheme);
+        GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -90,17 +107,18 @@ class MyApp extends ConsumerWidget {
 
         final baseChipShape = StadiumBorder(
           side: BorderSide(
-            color: lightColorScheme.outlineVariant.withValues(alpha: 0.3),
+            color: lightColorScheme.outlineVariant.withOpacity(0.3),
             width: 1,
           ),
         );
 
         final lightTheme = ThemeData(
           useMaterial3: true,
+          scaffoldBackgroundColor: lightColorScheme.background,
           colorScheme: lightColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: const Color(0xFF344A53),
-            displayColor: const Color(0xFF344A53),
+            bodyColor: const Color(0xFF343a40),
+            displayColor: const Color(0xFF212529),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -108,28 +126,40 @@ class MyApp extends ConsumerWidget {
             labelStyle: const TextStyle(fontWeight: FontWeight.w600),
             showCheckmark: false,
             side: BorderSide(
-              color: lightColorScheme.outlineVariant.withValues(alpha: 0.25),
+              color: lightColorScheme.outlineVariant.withOpacity(0.25),
             ),
           ),
           appBarTheme: AppBarTheme(
-            backgroundColor: lightColorScheme.surface,
+            backgroundColor: lightColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
+            shape: Border(
+              bottom: BorderSide(
+                color: const Color(0xFFdee2e6),
+                width: 1,
+              ),
+            ),
           ),
           cardTheme: CardThemeData(
             elevation: 1,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: const Color(0xFFdee2e6),
+                width: 1,
+              ),
+            ),
             color: Colors.white,
           ),
         );
 
         final darkTheme = ThemeData(
           useMaterial3: true,
+          scaffoldBackgroundColor: darkColorScheme.background,
           colorScheme: darkColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: const Color(0xFFE2E8F0),
-            displayColor: const Color(0xFFE2E8F0),
+            bodyColor: const Color(0xFFf8f9fa),
+            displayColor: const Color(0xFFe9ecef),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -137,18 +167,29 @@ class MyApp extends ConsumerWidget {
             labelStyle: const TextStyle(fontWeight: FontWeight.w600),
             showCheckmark: false,
             side: BorderSide(
-              color: darkColorScheme.outlineVariant.withValues(alpha: 0.3),
+              color: darkColorScheme.outlineVariant.withOpacity(0.3),
             ),
           ),
           appBarTheme: AppBarTheme(
-            backgroundColor: darkColorScheme.surface,
+            backgroundColor: darkColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
+            shape: Border(
+              bottom: BorderSide(
+                color: const Color(0xFF495057),
+                width: 1,
+              ),
+            ),
           ),
           cardTheme: CardThemeData(
             elevation: 1,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: const Color(0xFF495057),
+                width: 1,
+              ),
+            ),
             color: const Color(0xFF4A5568),
           ),
         );

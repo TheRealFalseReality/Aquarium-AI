@@ -4,11 +4,64 @@ import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 
+// A simple data class for our feature cards
+class FeatureInfo {
+  final String icon;
+  final String title;
+  final String description;
+  final String routeName;
+  final Duration delay;
+
+  FeatureInfo({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.routeName,
+    required this.delay,
+  });
+}
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // List of features to display in the grid
+    final List<FeatureInfo> features = [
+      FeatureInfo(
+        icon: '🐠',
+        title: 'AI Compatibility Calculator',
+        description:
+            'Get a detailed, AI-powered compatibility report with care guides and tank recommendations.',
+        routeName: '/compat-ai',
+        delay: const Duration(milliseconds: 700),
+      ),
+      FeatureInfo(
+        icon: '🤖',
+        title: 'AI Chatbot',
+        description:
+            'Ask questions, get water parameter analysis, and generate automation scripts.',
+        routeName: '/chatbot',
+        delay: const Duration(milliseconds: 800),
+      ),
+      FeatureInfo(
+        icon: '🧪',
+        title: 'Aquarium Calculators',
+        description:
+            'Essential tools for precise aquarium management. Convert Salinity, CO₂, Alkalinity, and more.',
+        routeName: '/calculators',
+        delay: const Duration(milliseconds: 900),
+      ),
+      FeatureInfo(
+        icon: '🧊',
+        title: 'Tank Volume Calculator',
+        description:
+            'Quickly calculate the volume and weight of water in your aquarium, no matter the shape.',
+        routeName: '/tank-volume',
+        delay: const Duration(milliseconds: 1000),
+      ),
+    ];
+
     return MainLayout(
       title: 'Welcome',
       bottomNavigationBar: const AdBanner(),
@@ -22,36 +75,33 @@ class WelcomeScreen extends StatelessWidget {
                 const AnimatedHeader(),
                 const SizedBox(height: 16),
                 AnimatedText(
-                  'Your intelligent assistant for aquatic compatibility.',
+                  'Your intelligent assistant for all things aquatic.',
                   style: Theme.of(context).textTheme.titleMedium,
                   delay: const Duration(milliseconds: 500),
                 ),
                 const SizedBox(height: 48),
-                AnimatedFeatureCard(
-                  delay: const Duration(milliseconds: 700),
-                  child: FeatureCard(
-                    icon: '🐠',
-                    title: 'AI Compatibility Calculator',
-                    description:
-                        'Select your fish and get a detailed, AI-powered compatibility report with care guides and tank recommendations.',
-                    onTap: () {
-                      Navigator.pushNamed(context, '/compat-ai');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                AnimatedFeatureCard(
-                  delay: const Duration(milliseconds: 900),
-                  child: FeatureCard(
-                    icon: '🤖',
-                    title: 'AI Chatbot',
-                    description:
-                        'Ask questions, get water parameter analysis, and generate automation scripts with our intelligent chatbot.',
-                    onTap: () {
-                      Navigator.pushNamed(context, '/chatbot');
-                    },
-                  ),
-                ),
+                // Using a Wrap widget for a responsive layout that adjusts columns automatically
+                Wrap(
+                  spacing: 16.0, // Horizontal space between cards
+                  runSpacing: 16.0, // Vertical space between cards
+                  alignment: WrapAlignment.center,
+                  children: features.map((feature) {
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400), // Max width for each card
+                      child: AnimatedFeatureCard(
+                        delay: feature.delay,
+                        child: FeatureCard(
+                          icon: feature.icon,
+                          title: feature.title,
+                          description: feature.description,
+                          onTap: () {
+                            Navigator.pushNamed(context, feature.routeName);
+                          },
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
               ],
             ),
           ),
@@ -213,6 +263,8 @@ class FeatureCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min, // Allow card to shrink to content size
             children: [
               Text(
                 icon,
@@ -225,6 +277,7 @@ class FeatureCard extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
+              // Removed Expanded to allow height to be dynamic
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodyMedium,

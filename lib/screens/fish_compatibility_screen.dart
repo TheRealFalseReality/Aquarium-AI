@@ -39,7 +39,7 @@ class FishCompatibilityScreenState
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: Container(
-                color: Colors.black.withValues(alpha: 0.4),
+                color: Colors.black.withOpacity(0.4),
               ),
             ),
           ),
@@ -171,83 +171,105 @@ class FishCompatibilityScreenState
     final hasLastReport = providerState.lastReport != null;
     final canShowLastReportFab =
         hasLastReport && (providerState.report == null);
+        
+    final double bottomBarHeight = providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
 
     return MainLayout(
       title: 'AI Compatibility Calculator',
       bottomNavigationBar: const AdBanner(),
       child: Stack(
         children: [
-          Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-                child: Column(
-                  children: [
-                    Text(
-                      'AI Fish Compatibility',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Select two or more fish to generate a compatibility report.',
-                      style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+          providerState.fishData.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Failed to load fish data:\n$error',
+                  textAlign: TextAlign.center,
                 ),
               ),
-              _buildCategorySelector(notifier),
-              Expanded(
-                child: providerState.fishData.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) => Center(
+            ),
+            data: (fishData) {
+              final fishList = fishData[_selectedCategory] ?? [];
+              if (fishList.isEmpty) {
+                return const Center(
+                    child: Text('No fish found for this category.'));
+              }
+              // Use a CustomScrollView to make the header scrollable
+              return CustomScrollView(
+                slivers: [
+                  // Header Sliver
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Failed to load fish data:\n$error',
-                        textAlign: TextAlign.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+                      child: Column(
+                        children: [
+                          Text(
+                            'AI Fish Compatibility',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Select two or more fish to generate a compatibility report.',
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  data: (fishData) {
-                    final fishList = fishData[_selectedCategory] ?? [];
-                    if (fishList.isEmpty) {
-                      return const Center(
-                          child: Text('No fish found for this category.'));
-                    }
-                    return GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                  // Category Selector Sliver
+                  SliverToBoxAdapter(
+                    child: _buildCategorySelector(notifier),
+                  ),
+                  // Grid of Fish Cards Sliver
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 210,
                         childAspectRatio: 3 / 4,
                         crossAxisSpacing: 18,
                         mainAxisSpacing: 18,
                       ),
-                      itemCount: fishList.length,
-                      itemBuilder: (context, index) {
-                        final fish = fishList[index];
-                        final isSelected =
-                            providerState.selectedFish.contains(fish);
-                        return _buildFishCard(fish, isSelected, notifier);
-                      },
-                    );
-                  },
-                ),
-              ),
-              if (providerState.selectedFish.isNotEmpty)
-                _buildBottomBar(providerState, notifier),
-            ],
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final fish = fishList[index];
+                          final isSelected = providerState.selectedFish.contains(fish);
+                          return _buildFishCard(fish, isSelected, notifier);
+                        },
+                        childCount: fishList.length,
+                      ),
+                    ),
+                  ),
+                  // Disclaimer Sliver
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomBarHeight + 16), // Padding to avoid bottom bar
+                      child: Text(
+                        'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
+          // Position the FAB above the bottom bar
           if (canShowLastReportFab)
             Positioned(
-              bottom: 16 + 56,
+              bottom: bottomBarHeight + 24, // Adjust this value for spacing
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
@@ -261,6 +283,14 @@ class FishCompatibilityScreenState
                 },
               ),
             ),
+            // The Bottom Bar is now at the bottom of the Stack
+            if (providerState.selectedFish.isNotEmpty)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: _buildBottomBar(providerState, notifier),
+              ),
         ],
       ),
     );
@@ -306,18 +336,18 @@ class FishCompatibilityScreenState
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isSelected ? cs.primary : cs.outlineVariant.withValues(alpha: 0.25),
+          color: isSelected ? cs.primary : cs.outlineVariant.withOpacity(0.25),
           width: isSelected ? 3 : 1.2,
         ),
         boxShadow: [
           if (isSelected)
             BoxShadow(
-              color: cs.primary.withValues(alpha: 0.35),
+              color: cs.primary.withOpacity(0.35),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(0, 3),
           )
@@ -325,8 +355,8 @@ class FishCompatibilityScreenState
         gradient: isSelected
             ? LinearGradient(
                 colors: [
-                  cs.primary.withValues(alpha: 0.18),
-                  cs.secondary.withValues(alpha: 0.18),
+                  cs.primary.withOpacity(0.18),
+                  cs.secondary.withOpacity(0.18),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -382,12 +412,12 @@ class FishCompatibilityScreenState
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
           decoration: BoxDecoration(
-            color: cs.surface.withValues(alpha: 0.55),
+            color: cs.surface.withOpacity(0.85),
             border: Border(
               top: BorderSide(
-                color: cs.primary.withValues(alpha: 0.25),
+                color: cs.outlineVariant.withOpacity(0.25),
                 width: 1.2,
               ),
             ),
@@ -419,7 +449,7 @@ class FishCompatibilityScreenState
                           errorBuilder: (c, e, s) => Container(
                             width: 52,
                             height: 52,
-                            color: cs.error.withValues(alpha: 0.1),
+                            color: cs.error.withOpacity(0.1),
                             child: Icon(Icons.error,
                                 color: cs.error, size: 20),
                           ),
@@ -507,7 +537,13 @@ class FishCompatibilityScreenState
               children: [
                 _buildHarmonyCard(context, report),
                 const SizedBox(height: 16),
-                ...sections.entries.map((entry) {
+                // Injecting the Ad Widget here
+                _buildSection(context, 'Detailed Summary', SelectableText(report.detailedSummary, textAlign: TextAlign.center), 1),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: NativeAdWidget(),
+                ),
+                ...sections.entries.where((entry) => entry.key != 'Detailed Summary').map((entry) {
                   final index = sections.keys.toList().indexOf(entry.key);
                   return _buildSection(
                     context,
@@ -585,13 +621,13 @@ class FishCompatibilityScreenState
     return Card(
       color: isEven
           ? null
-          : cs.surfaceContainerHighest.withValues(alpha: 0.28),
+          : cs.surfaceContainerHighest.withOpacity(0.28),
       margin: const EdgeInsets.only(bottom: 14.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: cs.outlineVariant.withValues(alpha: 0.4),
+          color: cs.outlineVariant.withOpacity(0.4),
           width: 0.8,
         ),
       ),
@@ -631,7 +667,7 @@ class FishCompatibilityScreenState
                 color: Theme.of(context)
                     .colorScheme
                     .surfaceContainerHigh
-                    .withValues(alpha: 0.4),
+                    .withOpacity(0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
