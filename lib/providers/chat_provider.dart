@@ -54,6 +54,7 @@ class ChatMessage {
   final bool isError;
   final bool isRetryable;
   final String? originalMessage;
+  final bool isAd;
 
   ChatMessage({
     required this.text,
@@ -66,6 +67,7 @@ class ChatMessage {
     this.isError = false,
     this.isRetryable = false,
     this.originalMessage,
+    this.isAd = false,
   });
 }
 
@@ -118,7 +120,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         text:
             "# Welcome to Fish.AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
         isUser: false,
-      )
+      ),
+      ChatMessage(text: 'ad', isUser: false, isAd: true),
     ]);
     _initSession();
   }
@@ -161,13 +164,14 @@ I am Fish.AI, your aquarium + AquaPi expert. Use concise, friendly, markdown-for
   }
 
   Future<void> _sendWithRetry(String message, {required bool isRetry}) async {
+    final currentMessages = state.messages.where((m) => !m.isAd).toList();
     if (!isRetry) {
       state = ChatState(
-        messages: [...state.messages, ChatMessage(text: message, isUser: true)],
+        messages: [...currentMessages, ChatMessage(text: message, isUser: true)],
         isLoading: true,
       );
     } else {
-      state = ChatState(messages: state.messages, isLoading: true);
+      state = ChatState(messages: currentMessages, isLoading: true);
     }
 
     _cancellable = CancellableCompleter();
@@ -284,7 +288,7 @@ I am Fish.AI, your aquarium + AquaPi expert. Use concise, friendly, markdown-for
         '${additionalInfo.isNotEmpty ? ', Additional Info: $additionalInfo' : ''}';
 
     state = ChatState(
-      messages: [...state.messages, ChatMessage(text: userMsg, isUser: true)],
+      messages: [...state.messages.where((m) => !m.isAd), ChatMessage(text: userMsg, isUser: true)],
       isLoading: true,
     );
 
@@ -369,7 +373,7 @@ IMPORTANT: Keep original units in "value".
   Future<AutomationScript?> generateAutomationScript(String description) async {
     final userMsg = 'Generate an automation script for: "$description"';
     state = ChatState(
-      messages: [...state.messages, ChatMessage(text: userMsg, isUser: true)],
+      messages: [...state.messages.where((m) => !m.isAd), ChatMessage(text: userMsg, isUser: true)],
       isLoading: true,
     );
 
@@ -459,7 +463,7 @@ Return ONLY JSON:
     if (!isRegeneration) {
       state = ChatState(
         messages: [
-          ...state.messages,
+          ...state.messages.where((m) => !m.isAd),
           ChatMessage(
             text: '📷 Submitted an aquarium photo for AI analysis.\n\n$note',
             isUser: true,
@@ -469,7 +473,7 @@ Return ONLY JSON:
         isLoading: true,
       );
     } else {
-      state = ChatState(messages: state.messages, isLoading: true);
+      state = ChatState(messages: state.messages.where((m) => !m.isAd).toList(), isLoading: true);
     }
 
     _cancellable = CancellableCompleter();

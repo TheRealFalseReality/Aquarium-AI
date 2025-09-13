@@ -157,8 +157,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       });
     });
 
-    final itemsWithAds = _itemsWithAds(chatState);
-
     return MainLayout(
       title: 'AI Chatbot',
       bottomNavigationBar: const AdBanner(),
@@ -168,34 +166,27 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
             ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 170),
-              itemCount: itemsWithAds.length,
+              itemCount: chatState.messages.length,
               itemBuilder: (context, index) {
-                final item = itemsWithAds[index];
-                if (item is ChatMessage) {
-                  return MessageBubble(
-                    isUser: item.isUser,
-                    text: item.text,
-                    followUpQuestions: item.followUpQuestions,
-                    analysisResult: item.analysisResult,
-                    automationScript: item.automationScript,
-                    photoAnalysisResult: item.photoAnalysisResult,
-                    photoBytes: item.photoBytes,
-                    isError: item.isError,
-                    isRetryable: item.isRetryable,
-                    originalMessage: item.originalMessage,
-                  );
-                } else if (item == 'BANNER_AD') {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                    child: AdBanner(),
-                  );
-                } else if (item == 'NATIVE_AD') {
+                final item = chatState.messages[index];
+                if (item.isAd) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: NativeAdWidget(),
                   );
                 }
-                return const SizedBox.shrink();
+                return MessageBubble(
+                  isUser: item.isUser,
+                  text: item.text,
+                  followUpQuestions: item.followUpQuestions,
+                  analysisResult: item.analysisResult,
+                  automationScript: item.automationScript,
+                  photoAnalysisResult: item.photoAnalysisResult,
+                  photoBytes: item.photoBytes,
+                  isError: item.isError,
+                  isRetryable: item.isRetryable,
+                  originalMessage: item.originalMessage,
+                );
               },
             ),
             if (_expandedMenu != null)
@@ -223,20 +214,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         ),
       ),
     );
-  }
-
-  List<Object> _itemsWithAds(ChatState chatState) {
-    final List<Object> items = [];
-    const int adInterval = 4;
-    int adCounter = 0;
-    for (int i = 0; i < chatState.messages.length; i++) {
-      items.add(chatState.messages[i]);
-      if ((i + 1) % adInterval == 0 && i > 0) {
-        items.add(adCounter % 2 == 0 ? 'BANNER_AD' : 'NATIVE_AD');
-        adCounter++;
-      }
-    }
-    return items;
   }
 
   Widget _composer(ChatState chatState) {
