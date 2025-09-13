@@ -1,174 +1,145 @@
 import 'package:flutter/material.dart';
 
-/// MiniAIChip
-/// Compact chip used for chatbot suggestion menus & follow-ups.
-/// Updated: Can now accept a custom gradient for styling.
 class MiniAIChip extends StatefulWidget {
   final String label;
-  final VoidCallback onTap;
   final IconData? icon;
-  final bool selected;
-  final bool dense;
+  final Widget? customIcon;
   final bool iconOnly;
+  final bool selected;
+  final VoidCallback? onTap;
   final String? tooltip;
-  final Gradient? customGradient;
+  final bool dense;
+  final LinearGradient? customGradient;
 
   const MiniAIChip({
     super.key,
     required this.label,
-    required this.onTap,
     this.icon,
-    this.selected = false,
-    this.dense = false,
+    this.customIcon,
     this.iconOnly = false,
+    this.selected = false,
+    this.onTap,
     this.tooltip,
+    this.dense = false,
     this.customGradient,
-  });
+  }) : assert(icon == null || customIcon == null,
+            'Cannot provide both an icon and a customIcon');
 
   @override
   State<MiniAIChip> createState() => _MiniAIChipState();
 }
 
 class _MiniAIChipState extends State<MiniAIChip> {
-  bool _hover = false;
-  bool _pressed = false;
+  bool _isHovering = false;
+  bool _isTapped = false;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final borderRadius = BorderRadius.circular(widget.iconOnly ? 18 : 22);
+    final bool isSelected = widget.selected;
 
-    final bool hasCustomLook = widget.customGradient != null && !widget.selected;
+    final Color textColor = isSelected ? cs.onPrimary : cs.onSurfaceVariant;
+    final double scale = _isTapped ? 0.95 : (_isHovering ? 1.05 : 1.0);
+    final double elevation =
+        isSelected ? 8 : (_isHovering || _isTapped ? 6 : 2);
 
-    final Gradient? gradient = widget.selected
-        ? LinearGradient(
-            colors: [
-              cs.primary,
-              cs.secondary,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : widget.customGradient;
+    final gradient = widget.customGradient ??
+        LinearGradient(
+          colors: isSelected
+              ? [cs.primary, cs.secondary]
+              : [cs.surfaceVariant, cs.surface],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
 
-    final backgroundColor = widget.selected
-        ? cs.primary.withOpacity(0.18)
-        : cs.surface.withOpacity(widget.iconOnly ? 0.5 : 0.65);
+    final double horizontalPadding =
+        widget.iconOnly ? (widget.dense ? 8 : 12) : (widget.dense ? 12 : 16);
+    final double verticalPadding = widget.dense ? 6 : 10;
+    final double iconSize = widget.dense ? 16 : 20;
 
-    final iconColor = widget.selected || hasCustomLook
-        ? cs.onPrimary
-        : cs.onSurface.withOpacity(0.85);
+    Widget? iconWidget;
+    if (widget.customIcon != null) {
+      iconWidget = ColorFiltered(
+        colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
+        child: widget.customIcon,
+      );
+    } else if (widget.icon != null) {
+      iconWidget = Icon(widget.icon, size: iconSize, color: textColor);
+    }
 
-    final labelColor = widget.selected || hasCustomLook
-        ? cs.onPrimary
-        : cs.onSurface.withOpacity(0.90);
-
-    final scale = _pressed
-        ? 0.92
-        : (_hover ? 1.05 : 1.0);
-
-    final padding = widget.iconOnly
-        ? const EdgeInsets.all(6)
-        : EdgeInsets.symmetric(
-            horizontal: widget.dense ? 10 : 14,
-            vertical: widget.dense ? 6 : 8,
-          );
-
-    Widget chipContent = AnimatedScale(
-      scale: scale,
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOutCubic,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: _hover || widget.selected ? 1.0 : 0.92,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: gradient,
-            color: gradient == null ? backgroundColor : null,
-            borderRadius: borderRadius,
-            border: Border.all(
-              color: widget.selected
-                  ? cs.primary.withOpacity(0.6)
-                  : cs.outlineVariant.withOpacity(0.3),
-              width: 1.2,
-            ),
-            boxShadow: widget.selected || hasCustomLook
-                ? [
-                    BoxShadow(
-                      color: cs.primary.withOpacity(0.35),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ],
-          ),
-          padding: padding,
-          child: Row(
+    Widget content = widget.iconOnly
+        ? (iconWidget ?? const SizedBox.shrink())
+        : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.icon != null)
-                Icon(
-                  widget.icon,
-                  size: widget.iconOnly
-                      ? 18
-                      : (widget.dense ? 16 : 18),
-                  color: iconColor,
-                ),
-              if (!widget.iconOnly) ...[
-                if (widget.icon != null) const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    widget.label,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: widget.selected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          letterSpacing: 0.25,
-                          color: labelColor,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+              if (iconWidget != null) ...[
+                iconWidget,
+                SizedBox(width: widget.dense ? 6 : 8),
+              ],
+              // Wrapped the Text widget with Flexible to prevent overflow
+              Flexible(
+                child: Text(
+                  widget.label,
+                  style: (widget.dense
+                          ? Theme.of(context).textTheme.bodySmall
+                          : Theme.of(context).textTheme.labelLarge)
+                      ?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
                   ),
                 ),
-              ],
+              ),
             ],
+          );
+
+    Widget chip = Material(
+      color: Colors.transparent,
+      child: AnimatedScale(
+        scale: scale,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isSelected ? 0.2 : 0.1),
+                blurRadius: elevation,
+                offset: Offset(0, elevation / 4),
+              )
+            ],
+            border: Border.all(
+              color: isSelected
+                  ? cs.primaryContainer.withOpacity(0.5)
+                  : cs.outline.withOpacity(0.2),
+              width: 0.5,
+            ),
+          ),
+          child: content,
         ),
       ),
     );
 
-    if (widget.tooltip != null) {
-      chipContent = Tooltip(message: widget.tooltip!, child: chipContent);
-    }
-
-    return Semantics(
-      button: true,
-      selected: widget.selected,
-      label: widget.label,
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() {
-          _hover = false;
-          _pressed = false;
-        }),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-            onTapDown: (_) {
-            setState(() => _pressed = true);
-          },
-          onTapUp: (_) {
-            setState(() => _pressed = false);
-          },
-          onTapCancel: () => setState(() => _pressed = false),
-          onTap: widget.onTap,
-          child: chipContent,
-        ),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isTapped = true),
+        onTapUp: (_) => setState(() => _isTapped = false),
+        onTapCancel: () => setState(() => _isTapped = false),
+        onTap: widget.onTap,
+        child: widget.tooltip != null
+            ? Tooltip(
+                message: widget.tooltip!,
+                child: chip,
+              )
+            : chip,
       ),
     );
   }

@@ -346,9 +346,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  Widget _suggestionMenu(BuildContext context) {
+Widget _suggestionMenu(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final expanded = _expandedMenu != null;
+
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutCubic,
@@ -373,7 +374,12 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
               const SizedBox(width: 10),
               MiniAIChip(
                 label: 'AquaPi',
-                icon: Icons.memory_outlined,
+                // Simply provide the image. The chip will color it automatically.
+                customIcon: Image.asset(
+                  'assets/AquaPiLogo300.png',
+                  height: 24,
+                  width: 24,
+                ),
                 iconOnly: true,
                 tooltip: 'AquaPi Questions',
                 selected: _expandedMenu == 'aquapi',
@@ -415,12 +421,41 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: _menuContent(_expandedMenu!, context),
+                  child: Column(
+                    children: [
+                      _menuTitle(_getMenuTitle(_expandedMenu!), context),
+                      const SizedBox(height: 8),
+                      _menuContent(_expandedMenu!, context),
+                    ],
+                  ),
                 ),
               ),
             ),
         ],
       ),
+    );
+  }
+
+  String _getMenuTitle(String menu) {
+    switch (menu) {
+      case 'aquarium':
+        return 'Aquarium Questions';
+      case 'aquapi':
+        return 'AquaPi Questions';
+      case 'ai_tools':
+        return 'AI Tools';
+      default:
+        return '';
+    }
+  }
+
+  Widget _menuTitle(String title, BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
     );
   }
 
