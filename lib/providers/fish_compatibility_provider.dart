@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants.dart'; 
+import 'model_provider.dart';
 
 // Helper class for cancellable operations
 class CancellableCompleter<T> {
@@ -42,7 +42,6 @@ class CancelledException implements Exception {
   String toString() => 'Future was cancelled';
 }
 
-
 // Helper function to extract JSON from a markdown code block
 String _extractJson(String text) {
   final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
@@ -59,13 +58,12 @@ final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier,
 class FishCompatibilityState {
   final AsyncValue<Map<String, List<Fish>>> fishData;
   final List<Fish> selectedFish;
-  final CompatibilityReport? report; // Current (active) report (shown right after generation)
-  final CompatibilityReport?
-      lastReport; // Persisted last generated report (for "Get Last Report")
+  final CompatibilityReport? report;
+  final CompatibilityReport? lastReport;
   final bool isLoading;
   final String? error;
   final bool isRetryable;
-  final String? lastCategory; // Store last category for retry
+  final String? lastCategory;
 
   FishCompatibilityState({
     this.fishData = const AsyncValue.loading(),
@@ -95,11 +93,7 @@ class FishCompatibilityState {
       fishData: fishData ?? this.fishData,
       selectedFish: selectedFish ?? this.selectedFish,
       report: clearReport ? null : report ?? this.report,
-      lastReport: clearLastReport
-          ? null
-          : lastReport ??
-              this
-                  .lastReport, // keep previous lastReport unless explicitly replaced or cleared
+      lastReport: clearLastReport ? null : lastReport ?? this.lastReport,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : error ?? this.error,
       isRetryable: isRetryable ?? this.isRetryable,
@@ -141,12 +135,10 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     } else {
       newSelectedFish.add(fish);
     }
-    // Clear only the active report (so a new one can be generated), retain lastReport
     state = state.copyWith(selectedFish: newSelectedFish, clearReport: true);
   }
 
   void clearSelection() {
-    // Clear only current report (active), keep lastReport so user can re-open it
     state = state.copyWith(selectedFish: [], clearReport: true);
   }
 
@@ -163,7 +155,6 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     state = state.copyWith(isLoading: false);
   }
 
-  // Add retry functionality
   Future<void> retryCompatibilityReport() async {
     if (state.lastCategory != null && state.selectedFish.isNotEmpty) {
       await getCompatibilityReport(state.lastCategory!);
@@ -179,11 +170,16 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       clearError: true,
       lastCategory: category,
     );
+    
+    final models = ref.read(modelProvider);
+
+    // Use the model name from settings
+    final model =
+        FirebaseAI.googleAI().generativeModel(model: models.geminiModel);
 
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
-    final model =
-        FirebaseAI.googleAI().generativeModel(model: geminiModel);
+    
     _cancellableCompleter = CancellableCompleter();
     _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
 
@@ -208,7 +204,6 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         selectedFish: state.selectedFish,
         tankMatesSummary: reportJson['tankMatesSummary'],
       );
-      // Set BOTH current report and lastReport
       state = state.copyWith(
           report: report, lastReport: report, isLoading: false);
     } catch (e) {
@@ -223,24 +218,10 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     }
   }
 
-  // Helper method to provide user-friendly error messages
   String _getFriendlyErrorMessage(String error) {
-    if (error.contains('network') ||
-        error.contains('connection') ||
-        error.contains('timeout')) {
-      return 'Connection problem! Please check your internet connection and try again.';
-    } else if (error.contains('quota') ||
-        error.contains('limit') ||
-        error.contains('rate')) {
-      return 'AI service is busy right now. Please wait a moment and try again.';
-    } else if (error.contains('FormatException') || error.contains('json')) {
-      return 'AI response formatting error. The analysis was generated but couldn\'t be processed properly. Please try again.';
-    } else if (error.contains('Invalid API key') ||
-        error.contains('authentication')) {
-      return 'Authentication error with AI service. Please contact support.';
-    } else {
-      return 'Something went wrong while generating your compatibility report. Please try again.';
-    }
+    
+    // Fallback for any other errors, showing the actual message
+    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
   double _getWeightedScore(double score) {

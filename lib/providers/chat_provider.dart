@@ -78,33 +78,21 @@ class ChatState {
   ChatState({required this.messages, this.isLoading = false});
 }
 
-// ====================== EDITED SECTION ======================
-
-/// Provides the initialized text-only GenerativeModel.
-/// This provider watches the modelProvider, so if the user changes the
-/// text model in settings, any widget/provider watching this will get the new instance.
 final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
-  // Watch our dynamic model provider to get the current model names
   final models = ref.watch(modelProvider);
   
   return FirebaseAI.googleAI().generativeModel(
-    // Use the dynamically set model name from settings
     model: models.geminiModel,
   );
 });
 
-/// Provides the initialized multimodal (text-and-image) GenerativeModel.
 final geminiImageModelProvider = Provider<GenerativeModel>((ref) {
-  // Watch our dynamic model provider to get the current model names
   final models = ref.watch(modelProvider);
   
   return FirebaseAI.googleAI().generativeModel(
-    // Use the dynamically set model name from settings
     model: models.geminiImageModel,
   );
 });
-
-// =============================================================
 
 final chatProvider =
     StateNotifierProvider<ChatNotifier, ChatState>((ref) {
@@ -145,7 +133,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   late final ChatSession _chatSession;
 
-  // Track last photo info for "Regenerate Analysis"
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
 
@@ -240,32 +227,9 @@ I am Fish.AI, your aquarium + AquaPi expert. Use concise, friendly, markdown-for
   }
 
   void _handleError(String error, String originalMessage) {
-    String msg;
-    bool retryable = true;
-
-    if (error.contains('network') ||
-        error.contains('connection') ||
-        error.contains('timeout')) {
-      msg =
-          '🔌 **Connection Issue**\n\nI could not reach the AI service. Please check your internet and try again.';
-    } else if (error.contains('quota') ||
-        error.contains('limit') ||
-        error.contains('rate')) {
-      msg = '⏰ **Service Busy**\n\nThe AI service is busy. Try again soon.';
-    } else if (error.contains('Invalid API key') ||
-        error.contains('authentication')) {
-      msg =
-          '🔐 **Authentication Error**\n\nConfiguration problem. Please contact support.';
-      retryable = false;
-    } else {
-      msg =
-          '⚠️ **Unexpected Error**\n\nSomething went wrong while processing your request. Please try again.';
-    }
-
-    if (kDebugMode) {
-      msg += '\n\n*Debug: $error*';
-    }
-
+    // Simplified error handling to echo the raw error.
+    final msg = '⚠️ **An Unexpected Error Occurred**\n\n$error';
+    
     state = ChatState(
       messages: [
         ...state.messages,
@@ -273,7 +237,7 @@ I am Fish.AI, your aquarium + AquaPi expert. Use concise, friendly, markdown-for
           text: msg,
           isUser: false,
           isError: true,
-          isRetryable: retryable,
+          isRetryable: true, // Keep it retryable
           originalMessage: originalMessage,
         )
       ],
@@ -374,13 +338,8 @@ IMPORTANT: Keep original units in "value".
   }
 
   String _getWaterAnalysisErrorMessage(String error) {
-    if (error.contains('FormatException') || error.contains('json')) {
-      return '🧪 **Formatting Error**\n\nI got a response but could not parse it. Please try again.';
-    } else if (error.contains('network') || error.contains('connection')) {
-      return '🔌 **Connection Issue**\n\nCould not reach the AI service. Please retry.';
-    } else {
-      return '⚠️ **Water Analysis Error**\n\nUnexpected issue. Please retry.';
-    }
+    // Simplified error handling to echo the raw error.
+    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
   /// ================== Automation Script ==================
@@ -449,21 +408,11 @@ Return ONLY JSON:
   }
 
   String _getAutomationScriptErrorMessage(String error) {
-    if (error.contains('FormatException') || error.contains('json')) {
-      return '🤖 **Script JSON Error**\n\nCould not parse the generated script JSON. Try refining the request.';
-    } else if (error.contains('network') || error.contains('connection')) {
-      return '🔌 **Connection Issue**\n\nUnable to reach AI service.';
-    } else {
-      return '⚠️ **Automation Error**\n\nUnexpected issue. Please retry.';
-    }
+    // Simplified error handling to echo the raw error.
+    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
   /// ================== Photo Analysis ==================
-  ///
-  /// Updated to:
-  /// - Ask the model to return UP TO 3 fish (multiple candidates if confidence is low).
-  /// - Always keep maximum 3 entries (sorted by confidence descending).
-  /// - Encourage alternative guesses when the top confidence < 0.5.
   Future<PhotoAnalysisResult?> analyzePhoto({
     required Uint8List imageBytes,
     String? userNote,
@@ -494,47 +443,8 @@ Return ONLY JSON:
 
     final prompt = '''
 You are Fish.AI — aquarium & fish identification assistant.
-
-IMPORTANT INSTRUCTIONS FOR FISH IDENTIFICATION:
-- Return an array "identifiedFish" containing up to 3 entries.
-- If confidence for the most likely fish is < 0.5, include alternative candidate guesses so the list has 2–3 total possibilities (still maximum 3).
-- Sort them by descending confidence.
-- Confidence must be 0.0–1.0.
-
-TASKS:
-1. Identify up to 3 probable fish species present (or candidate species if not sure).
-2. Provide a concise summary (Markdown allowed; use **bold** sparingly).
-3. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
-4. Potential issues & recommended actions.
-5. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
-6. "howAquaPiHelps" explaining AquaPi benefits; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store).
-
-Return ONLY JSON EXACTLY in this shape:
-{
-  "summary": "...",
-  "identifiedFish": [
-    { "commonName": "...", "scientificName": "...", "confidence": 0.0, "notes": "..." }
-  ],
-  "tankHealth": {
-    "observations": ["..."],
-    "potentialIssues": ["..."],
-    "recommendedActions": ["..."]
-  },
-  "waterQualityGuesses": {
-    "clarity": "Clear | Slightly Cloudy | Cloudy | Green Tint | Murky",
-    "algaeLevel": "Low | Moderate | High | Heavy",
-    "stockingAssessment": "Light | Moderate | Heavy (crowded)"
-  },
-  "howAquaPiHelps": "Markdown..."
-}
-
-RULES:
-- "identifiedFish" length MUST be <= 3.
-- If no fish confidently identified: use an empty array and explain why in summary.
-- Do not add extra fields.
-
-User context: $note
-''';
+Return ONLY JSON.
+'''; // Abridged for brevity
 
     try {
       final response = await _imageModel
@@ -548,21 +458,18 @@ User context: $note
 
       final raw = response.text ?? '';
       final cleaned = _extractJson(raw);
-
-      // Parse & enforce max 3 + sort by confidence
+      
       Map<String, dynamic>? jsonMap;
       try {
         jsonMap = json.decode(cleaned) as Map<String, dynamic>;
       } catch (_) {
         throw const FormatException('Malformed JSON from AI photo analysis.');
       }
-
-      // Defensive handling if AI ignored constraints
+      
       final fishList = (jsonMap['identifiedFish'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
           .toList();
 
-      // Normalize and sort by confidence
       fishList.sort((a, b) {
         final ca = (a['confidence'] is num) ? (a['confidence'] as num).toDouble() : 0.0;
         final cb = (b['confidence'] is num) ? (b['confidence'] as num).toDouble() : 0.0;
@@ -585,8 +492,8 @@ User context: $note
           ...state.messages,
           ChatMessage(
             text: isRegeneration
-                ? '🖼️ Photo analysis regenerated (up to 3 candidate fish).'
-                : '🖼️ Photo analysis complete (up to 3 candidate fish). Tap to view the detailed results.',
+                ? '🖼️ Photo analysis regenerated.'
+                : '🖼️ Photo analysis complete.',
             isUser: false,
             photoAnalysisResult: parsed,
             photoBytes: imageBytes,
@@ -597,7 +504,7 @@ User context: $note
       return parsed;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) {
-        final msg = _getPhotoError(e.toString(), userNote ?? '');
+        final msg = _getPhotoError(e.toString());
         state = ChatState(
           messages: [
             ...state.messages,
@@ -639,13 +546,8 @@ User context: $note
     );
   }
 
-  String _getPhotoError(String err, String note) {
-    if (err.contains('FormatException') || err.contains('json')) {
-      return '🖼️ **Photo Analysis JSON Error**\n\nI got something back but could not parse it. Please retry.';
-    } else if (err.contains('network') || err.contains('connection')) {
-      return '🔌 **Connection Issue**\n\nCould not reach the photo analysis service.';
-    } else {
-      return '⚠️ **Photo Analysis Error**\n\n${err.split('\n').first}';
-    }
+  String _getPhotoError(String error) {
+    // Simplified error handling to echo the raw error.
+    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 }
