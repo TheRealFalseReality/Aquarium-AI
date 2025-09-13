@@ -134,104 +134,129 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     return MainLayout(
       title: 'Tank Volume Calculator',
       bottomNavigationBar: const AdBanner(),
-      child: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          const NativeAdWidget(),
-          Text(
-            'Tank Volume Calculator',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const NetworkImage(
+                'https://i.pinimg.com/originals/a1/26/b3/a126b3605cb42a7ae2595015b6a7a1f0.jpg'), // Placeholder background
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.6),
+              BlendMode.darken,
+            ),
           ),
-          _buildSectionTitle(context, 'Shape'),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 14.0,
-            runSpacing: 12.0,
-            children: shapeIcons.keys.map((shapeName) {
-              final selected = _shape == shapeName;
-              return ModernSelectableChip(
-                label: shapeName,
-                icon: shapeIcons[shapeName],
-                selected: selected,
-                onTap: () {
-                  setState(() {
-                    _shape = shapeName;
-                    if (shapeName != 'Cylinder') {
-                      _cylinderType = 'Full';
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          if (_shape == 'Cylinder') ...[
-            const SizedBox(height: 16),
-            _buildSectionTitle(context, 'Cylinder Type'),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            const NativeAdWidget(),
+            Text(
+              'Tank Volume Calculator',
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            _buildSectionTitle(context, 'Shape'),
             Wrap(
               alignment: WrapAlignment.center,
-              spacing: 12.0,
-              runSpacing: 10.0,
-              children: ['Full', 'Half', 'Corner'].map((typeName) {
-                final selected = _cylinderType == typeName;
+              spacing: 14.0,
+              runSpacing: 12.0,
+              children: shapeIcons.keys.map((shapeName) {
+                final selected = _shape == shapeName;
                 return ModernSelectableChip(
-                  label: typeName,
+                  label: shapeName,
+                  icon: shapeIcons[shapeName],
                   selected: selected,
-                  dense: true,
+                  selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                  selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
                   onTap: () {
                     setState(() {
-                      _cylinderType = typeName;
+                      _shape = shapeName;
+                      if (shapeName != 'Cylinder') {
+                        _cylinderType = 'Full';
+                      }
                     });
                   },
                 );
               }).toList(),
             ),
+            if (_shape == 'Cylinder') ...[
+              const SizedBox(height: 16),
+              _buildSectionTitle(context, 'Cylinder Type'),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12.0,
+                runSpacing: 10.0,
+                children: ['Full', 'Half', 'Corner'].map((typeName) {
+                  final selected = _cylinderType == typeName;
+                  return ModernSelectableChip(
+                    label: typeName,
+                    selected: selected,
+                    dense: true,
+                    selectedColor: Theme.of(context).colorScheme.secondaryContainer,
+                    selectedTextColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                    onTap: () {
+                      setState(() {
+                        _cylinderType = typeName;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+            const SizedBox(height: 12),
+            _buildSectionTitle(context, 'Units'),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12.0,
+              runSpacing: 10.0,
+              children: ['Inches', 'Feet', 'cm', 'Meters'].map((unitName) {
+                final selected = _units == unitName;
+                return ModernSelectableChip(
+                  label: unitName,
+                  selected: selected,
+                  dense: true,
+                  selectedColor: Theme.of(context).colorScheme.tertiaryContainer,
+                  selectedTextColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                  onTap: () {
+                    setState(() {
+                      _units = unitName;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 22),
+            Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 22.0),
+                child: _renderInputs(),
+              ),
+            ),
+            const SizedBox(height: 22),
+            ElevatedButton.icon(
+              onPressed: _calculateVolume,
+              icon: const Icon(Icons.calculate_outlined),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.4),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              label: const Text('Calculate'),
+            ),
+            const SizedBox(height: 22),
+            if (_gallons.isNotEmpty) _buildResultsCard(),
           ],
-          const SizedBox(height: 12),
-          _buildSectionTitle(context, 'Units'),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12.0,
-            runSpacing: 10.0,
-            children: ['Inches', 'Feet', 'cm', 'Meters'].map((unitName) {
-              final selected = _units == unitName;
-              return ModernSelectableChip(
-                label: unitName,
-                selected: selected,
-                dense: true,
-                onTap: () {
-                  setState(() {
-                    _units = unitName;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 22),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0, vertical: 22.0),
-              child: _renderInputs(),
-            ),
-          ),
-          const SizedBox(height: 22),
-          ElevatedButton.icon(
-            onPressed: _calculateVolume,
-            icon: const Icon(Icons.calculate_outlined),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
-              textStyle: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.4),
-            ),
-            label: const Text('Calculate'),
-          ),
-          const SizedBox(height: 22),
-          if (_gallons.isNotEmpty) _buildResultsCard(),
-        ],
+        ),
       ),
     );
   }
@@ -289,8 +314,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        border:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
     );
@@ -303,6 +327,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.9),
             ),
         textAlign: TextAlign.center,
       ),
@@ -313,8 +338,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     return Card(
       color: Theme.of(context).colorScheme.surface,
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -355,7 +379,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
-            Text(
+          Text(
             value2,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: color,

@@ -504,8 +504,10 @@ class FishCompatibilityScreenState
       {bool fromHistory = false}) {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
+    // Reordered sections as requested
     final sections = {
       'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
+      'Compatible Tank Mates': _buildTankMatesSection(context, report),
       'Detailed Summary':
           SelectableText(report.detailedSummary, textAlign: TextAlign.center),
       'Recommended Tank Size':
@@ -514,7 +516,6 @@ class FishCompatibilityScreenState
           SelectableText(report.decorations, textAlign: TextAlign.center),
       'Care Guide':
           SelectableText(report.careGuide, textAlign: TextAlign.center),
-      'Compatible Tank Mates': _buildTankMatesSection(context, report),
     };
 
     showDialog(
@@ -551,21 +552,25 @@ class FishCompatibilityScreenState
               children: [
                 _buildHarmonyCard(context, report),
                 const SizedBox(height: 16),
-                // Injecting the Ad Widget here
-                _buildSection(
-                    context,
-                    'Detailed Summary',
-                    SelectableText(report.detailedSummary,
-                        textAlign: TextAlign.center),
-                    1),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: NativeAdWidget(),
-                ),
-                ...sections.entries
-                    .where((entry) => entry.key != 'Detailed Summary')
-                    .map((entry) {
+                ...sections.entries.map((entry) {
                   final index = sections.keys.toList().indexOf(entry.key);
+                  // Injecting the ad after the Detailed Summary
+                  if (entry.key == 'Detailed Summary') {
+                    return Column(
+                      children: [
+                        _buildSection(
+                          context,
+                          entry.key,
+                          entry.value,
+                          index,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: NativeAdWidget(),
+                        ),
+                      ],
+                    );
+                  }
                   return _buildSection(
                     context,
                     entry.key,
@@ -640,8 +645,7 @@ class FishCompatibilityScreenState
     final isEven = index % 2 == 0;
     final cs = Theme.of(context).colorScheme;
     return Card(
-      color:
-          isEven ? null : cs.surfaceContainerHighest.withOpacity(0.28),
+      color: isEven ? null : cs.surfaceContainerHighest.withOpacity(0.28),
       margin: const EdgeInsets.only(bottom: 14.0),
       elevation: 0,
       shape: RoundedRectangleBorder(

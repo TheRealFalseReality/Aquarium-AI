@@ -27,21 +27,21 @@ class AppDrawer extends ConsumerWidget {
               padding: EdgeInsets.zero,
               children: <Widget>[
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 200),
-                  child: ListTile(
-                    leading: const Icon(Icons.chat),
-                    title: const Text('AI Chatbot'),
-                    subtitle: const Text('Ask questions, analyze parameters, and more.'),
-                    onTap: () => navigate('/chatbot'),
-                  ),
-                ),
-                AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 250),
                   child: ListTile(
                     leading: const Icon(Icons.calculate),
                     title: const Text('AI Compatibility Tool'),
                     subtitle: const Text('Check fish compatibility with an AI report.'),
                     onTap: () => navigate('/compat-ai'),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 200),
+                  child: ListTile(
+                    leading: const Icon(Icons.chat),
+                    title: const Text('AI Chatbot'),
+                    subtitle: const Text('Ask questions, analyze parameters, and more.'),
+                    onTap: () => navigate('/chatbot'),
                   ),
                 ),
                 AnimatedDrawerItem(

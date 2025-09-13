@@ -30,7 +30,7 @@ class WelcomeScreen extends StatelessWidget {
     final List<FeatureInfo> features = [
       FeatureInfo(
         icon: '🐠',
-        title: 'AI Compatibility Calculator',
+        title: 'AI Compatibility Tool',
         description:
             'Get a detailed, AI-powered compatibility report with care guides and tank recommendations.',
         routeName: '/compat-ai',
