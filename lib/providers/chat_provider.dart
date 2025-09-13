@@ -80,7 +80,7 @@ class ChatState {
 
 final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
   final models = ref.watch(modelProvider);
-  
+
   return FirebaseAI.googleAI().generativeModel(
     model: models.geminiModel,
   );
@@ -88,7 +88,7 @@ final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
 
 final geminiImageModelProvider = Provider<GenerativeModel>((ref) {
   final models = ref.watch(modelProvider);
-  
+
   return FirebaseAI.googleAI().generativeModel(
     model: models.geminiImageModel,
   );
@@ -135,6 +135,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
+  PhotoAnalysisResult? _lastPhotoResult;
 
   void _initSession() {
     _chatSession = _textModel.startChat(
@@ -478,7 +479,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (!isRegeneration) {
       state = ChatState(
         messages: [
-          ...state.messages.where((m) => !m.isAd),
+          ...state.messages,
           ChatMessage(
             text: '📷 Submitted an aquarium photo for AI analysis.\n\n$note',
             isUser: true,
@@ -488,15 +489,45 @@ class ChatNotifier extends StateNotifier<ChatState> {
         isLoading: true,
       );
     } else {
-      state = ChatState(messages: state.messages.where((m) => !m.isAd).toList(), isLoading: true);
+      // Just turn loading on (do not duplicate user submission message)
+      state = ChatState(messages: state.messages, isLoading: true);
     }
 
     _cancellable = CancellableCompleter();
 
     final prompt = '''
 You are Fish.AI — aquarium & fish identification assistant.
-Return ONLY JSON.
-'''; // Abridged for brevity
+
+TASKS:
+1. Identify fish species (best guess if uncertain) with confidence 0–1.
+2. Provide a concise summary (Markdown allowed; use **bold** sparingly).
+3. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
+4. Potential issues & recommended actions.
+5. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
+6. "howAquaPiHelps" explaining AquaPi benefits; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store).
+
+Return ONLY JSON:
+{
+  "summary": "...",
+  "identifiedFish": [
+    { "commonName": "...", "scientificName": "...", "confidence": 0.0, "notes": "..." }
+  ],
+  "tankHealth": {
+    "observations": ["..."],
+    "potentialIssues": ["..."],
+    "recommendedActions": ["..."]
+  },
+  "waterQualityGuesses": {
+    "clarity": "Clear | Slightly Cloudy | Cloudy | Green Tint | Murky",
+    "algaeLevel": "Low | Moderate | High | Heavy",
+    "stockingAssessment": "Light | Moderate | Heavy (crowded)"
+  },
+  "howAquaPiHelps": "Markdown..."
+}
+
+If no fish identified confidently: identifiedFish = [] and explain uncertainty in summary.
+User context: $note
+''';
 
     try {
       final response = await _imageModel
@@ -510,34 +541,15 @@ Return ONLY JSON.
 
       final raw = response.text ?? '';
       final cleaned = _extractJson(raw);
-      
-      Map<String, dynamic>? jsonMap;
-      try {
-        jsonMap = json.decode(cleaned) as Map<String, dynamic>;
-      } catch (_) {
+      final parsed = PhotoAnalysisResult.tryParseJson(cleaned);
+
+      if (parsed == null) {
         throw const FormatException('Malformed JSON from AI photo analysis.');
       }
-      
-      final fishList = (jsonMap['identifiedFish'] as List<dynamic>? ?? [])
-          .whereType<Map<String, dynamic>>()
-          .toList();
-
-      fishList.sort((a, b) {
-        final ca = (a['confidence'] is num) ? (a['confidence'] as num).toDouble() : 0.0;
-        final cb = (b['confidence'] is num) ? (b['confidence'] as num).toDouble() : 0.0;
-        return cb.compareTo(ca);
-      });
-
-      if (fishList.length > 3) {
-        jsonMap['identifiedFish'] = fishList.take(3).toList();
-      } else {
-        jsonMap['identifiedFish'] = fishList;
-      }
-
-      final parsed = PhotoAnalysisResult.fromJson(jsonMap);
 
       _lastPhotoBytes = imageBytes;
       _lastPhotoNote = userNote;
+      _lastPhotoResult = parsed;
 
       state = ChatState(
         messages: [
@@ -545,7 +557,7 @@ Return ONLY JSON.
           ChatMessage(
             text: isRegeneration
                 ? '🖼️ Photo analysis regenerated.'
-                : '🖼️ Photo analysis complete.',
+                : '🖼️ Photo analysis complete. Tap to view the detailed results.',
             isUser: false,
             photoAnalysisResult: parsed,
             photoBytes: imageBytes,
@@ -556,7 +568,7 @@ Return ONLY JSON.
       return parsed;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) {
-        final msg = _getPhotoError(e.toString());
+        final msg = _getPhotoError(e.toString(), userNote ?? '');
         state = ChatState(
           messages: [
             ...state.messages,
@@ -598,8 +610,13 @@ Return ONLY JSON.
     );
   }
 
-  String _getPhotoError(String error) {
-    // Simplified error handling to echo the raw error.
-    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
+  String _getPhotoError(String err, String note) {
+    if (err.contains('FormatException') || err.contains('json')) {
+      return '🖼️ **Photo Analysis JSON Error**\n\nI got something back but could not parse it. Please retry.';
+    } else if (err.contains('network') || err.contains('connection')) {
+      return '🔌 **Connection Issue**\n\nCould not reach the photo analysis service.';
+    } else {
+      return '⚠️ **Photo Analysis Error**\n\n${err.split('\n').first}';
+    }
   }
 }
