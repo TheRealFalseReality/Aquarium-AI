@@ -9,58 +9,93 @@ class AnalysisResultScreen extends StatelessWidget {
 
   const AnalysisResultScreen({super.key, required this.result});
 
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'excellent':
+      case 'good':
+        return Colors.green;
+      case 'needs attention':
+        return Colors.orange;
+      case 'bad':
+        return Colors.red;
+      default:
+        return Colors.blueGrey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return MainLayout(
       title: 'Analysis Result',
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Analysis Result',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          _buildSummaryCard(context, result.summary),
-          const SizedBox(height: 16),
-          ...result.parameters.map((p) => _buildParameterCard(context, p)),
-          const SizedBox(height: 16),
-          _buildHowAquaPiHelpsCard(context, result.howAquaPiHelps),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          _header(context),
+          const SizedBox(height: 12),
+          _summaryCard(context, result.summary),
+          const SizedBox(height: 18),
+          ...result.parameters.map((p) => _parameterCard(context, p)),
+          const SizedBox(height: 18),
+          _howAquaPiHelpsCard(context, result.howAquaPiHelps),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            icon: const Icon(Icons.close),
+            label: const Text('Close'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, AnalysisSummary summary) {
-    final colors = _getStatusColors(context, summary.status);
+  Widget _header(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Water Parameter Analysis',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _summaryCard(BuildContext context, AnalysisSummary summary) {
+    final color = _statusColor(summary.status);
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.10),
+              cs.surfaceVariant.withOpacity(0.20),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(18),
         child: Column(
           children: [
             Text(
               summary.status,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors['text'],
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color,
                   ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
@@ -68,68 +103,13 @@ class AnalysisResultScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            Text(
-              summary.message,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParameterCard(BuildContext context, ParameterAnalysis param) {
-    final colors = _getStatusColors(context, param.status);
-    return Card(
-      color: colors['bg'],
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(param.name,
-                    style: Theme.of(context).textTheme.titleMedium),
-                Text(param.value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                            fontWeight: FontWeight.bold, color: colors['text'])),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text('Ideal: ${param.idealRange}',
-                style: Theme.of(context).textTheme.bodySmall),
-            const Divider(height: 16),
-            Text(param.advice, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHowAquaPiHelpsCard(BuildContext context, String markdownText) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("How AquaPi Can Help",
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            // Markdown for bold rendering inside summary message
             MarkdownBody(
-              data: markdownText,
+              data: summary.message,
+              selectable: true,
               onTapLink: (text, href, title) {
-                if (href != null) {
-                  launchUrl(Uri.parse(href));
-                }
+                if (href != null) launchUrl(Uri.parse(href));
               },
             ),
           ],
@@ -138,19 +118,117 @@ class AnalysisResultScreen extends StatelessWidget {
     );
   }
 
-  Map<String, Color> _getStatusColors(BuildContext context, String status) {
-    switch (status.toLowerCase()) {
-      case 'good':
-        return {'text': Colors.green, 'bg': Colors.green.withValues(alpha: 0.1)};
-      case 'needs attention':
-        return {'text': Colors.orange, 'bg': Colors.orange.withValues(alpha: 0.1)};
-      case 'bad':
-        return {'text': Colors.red, 'bg': Colors.red.withValues(alpha: 0.1)};
-      default:
-        return {
-          'text': Theme.of(context).colorScheme.onSurface,
-          'bg': Theme.of(context).colorScheme.surface
-        };
-    }
+  Widget _parameterCard(BuildContext context, ParameterAnalysis param) {
+    final color = _statusColor(param.status);
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.08),
+              cs.surfaceVariant.withOpacity(0.15),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    param.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: color.withOpacity(0.5)),
+                  ),
+                  child: Text(
+                    param.value,
+                    style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Ideal: ${param.idealRange}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurface.withOpacity(0.75),
+                  ),
+            ),
+            const Divider(height: 18),
+            // Markdown to render **bold** inside advice
+            MarkdownBody(
+              data: param.advice,
+              selectable: true,
+              onTapLink: (text, href, title) {
+                if (href != null) launchUrl(Uri.parse(href));
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _howAquaPiHelpsCard(BuildContext context, String markdownText) {
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              cs.primary.withOpacity(0.10),
+              cs.secondary.withOpacity(0.12),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("How AquaPi Can Help",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            MarkdownBody(
+              data: markdownText,
+              selectable: true,
+              onTapLink: (text, href, title) {
+                if (href != null) launchUrl(Uri.parse(href));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

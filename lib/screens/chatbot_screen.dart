@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
+import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -10,6 +13,8 @@ import './water_parameter_analysis_screen.dart';
 import './automation_script_screen.dart';
 import './analysis_result_screen.dart';
 import './automation_script_result_screen.dart';
+import './photo_analysis_screen.dart';
+import './photo_analysis_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 
@@ -90,27 +95,41 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     ref.listen(chatProvider, (_, next) {
       final newMessages = next.messages;
       if (newMessages.isNotEmpty) {
-        final lastMessage = newMessages.last;
-        if (lastMessage.analysisResult != null) {
+        final last = newMessages.last;
+        if (last.analysisResult != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      AnalysisResultScreen(result: lastMessage.analysisResult!),
+                  builder: (_) =>
+                      AnalysisResultScreen(result: last.analysisResult!),
                 ),
               );
             }
           });
-        } else if (lastMessage.automationScript != null) {
+        } else if (last.automationScript != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AutomationScriptResultScreen(
-                      script: lastMessage.automationScript!),
+                  builder: (_) => AutomationScriptResultScreen(
+                      script: last.automationScript!),
+                ),
+              );
+            }
+          });
+        } else if (last.photoAnalysisResult != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PhotoAnalysisResultScreen(
+                    result: last.photoAnalysisResult!,
+                    photoBytes: last.photoBytes,
+                  ),
                 ),
               );
             }
@@ -124,7 +143,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       });
     });
 
-    final itemsWithAds = _buildItemsWithAds(chatState);
+    final itemsWithAds = _itemsWithAds(chatState);
 
     return MainLayout(
       title: 'AI Chatbot',
@@ -134,7 +153,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           children: [
             ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 170.0),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 170),
               itemCount: itemsWithAds.length,
               itemBuilder: (context, index) {
                 final item = itemsWithAds[index];
@@ -145,20 +164,20 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                     followUpQuestions: item.followUpQuestions,
                     analysisResult: item.analysisResult,
                     automationScript: item.automationScript,
+                    photoAnalysisResult: item.photoAnalysisResult,
+                    photoBytes: item.photoBytes,
                     isError: item.isError,
                     isRetryable: item.isRetryable,
                     originalMessage: item.originalMessage,
                   );
                 } else if (item == 'BANNER_AD') {
                   return const Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: AdBanner(),
                   );
                 } else if (item == 'NATIVE_AD') {
                   return const Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: NativeAdWidget(),
                   );
                 }
@@ -172,7 +191,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   child: Container(color: Colors.transparent),
                 ),
               ),
-            _buildBottomComposer(chatState),
+            _composer(chatState),
             Positioned(
               bottom: 86,
               right: 16,
@@ -192,39 +211,27 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  List<Object> _buildItemsWithAds(ChatState chatState) {
-    final List<Object> itemsWithAds = [];
+  List<Object> _itemsWithAds(ChatState chatState) {
+    final List<Object> items = [];
     const int adInterval = 4;
     int adCounter = 0;
     for (int i = 0; i < chatState.messages.length; i++) {
-      itemsWithAds.add(chatState.messages[i]);
+      items.add(chatState.messages[i]);
       if ((i + 1) % adInterval == 0 && i > 0) {
-        if (adCounter % 2 == 0) {
-          itemsWithAds.add('BANNER_AD');
-        } else {
-          itemsWithAds.add('NATIVE_AD');
-        }
+        items.add(adCounter % 2 == 0 ? 'BANNER_AD' : 'NATIVE_AD');
         adCounter++;
       }
     }
-    return itemsWithAds;
+    return items;
   }
 
-  Widget _buildBottomComposer(ChatState chatState) {
+  Widget _composer(ChatState chatState) {
     final cs = Theme.of(context).colorScheme;
     final focused = _inputFocusNode.hasFocus;
     final loading = chatState.isLoading;
 
-    final gradient = LinearGradient(
-      colors: [
-        cs.primary,
-        cs.secondary,
-        cs.tertiary,
-      ],
-      stops: const [0.0, 0.55, 1.0],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
+    final gradient =
+        LinearGradient(colors: [cs.primary, cs.secondary, cs.tertiary]);
 
     return Positioned(
       bottom: 0,
@@ -234,8 +241,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         absorbing: loading,
         child: Container(
           decoration: BoxDecoration(
-            color:
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
             border: Border(
               top: BorderSide(
                 color: cs.outlineVariant.withOpacity(0.25),
@@ -255,7 +261,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
             children: [
               if (loading)
                 Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
+                  padding: const EdgeInsets.only(top: 10),
                   child: Column(
                     children: [
                       const SizedBox(
@@ -272,7 +278,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                     ],
                   ),
                 ),
-              _buildSuggestionMenu(context),
+              _suggestionMenu(context),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -306,10 +312,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surface
-                                .withOpacity(0.85),
+                            color:
+                                Theme.of(context).colorScheme.surfaceVariant
+                                    .withOpacity(0.6),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: TextField(
@@ -350,7 +355,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  Widget _buildSuggestionMenu(BuildContext context) {
+  Widget _suggestionMenu(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final expanded = _expandedMenu != null;
     return AnimatedSize(
@@ -405,11 +410,11 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           ),
           if (expanded)
             Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 6, top: 4, left: 12, right: 12),
+              padding:
+                  const EdgeInsets.only(bottom: 6, top: 4, left: 12, right: 12),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: cs.surface.withOpacity(0.65),
+                  color: cs.surface.withOpacity(0.75),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: cs.primary.withOpacity(0.25),
@@ -419,7 +424,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: _getMenuContent(_expandedMenu!, context),
+                  child: _menuContent(_expandedMenu!, context),
                 ),
               ),
             ),
@@ -428,29 +433,29 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  Widget _getMenuContent(String menu, BuildContext context) {
+  Widget _menuContent(String menu, BuildContext context) {
     switch (menu) {
       case 'aquarium':
-        return _buildSuggestionChips([
+        return _suggestionChips([
           "How do I cycle my aquarium?",
           "What are the best beginner fish?",
           "How often should I change water?",
         ]);
       case 'aquapi':
-        return _buildSuggestionChips([
+        return _suggestionChips([
           "What is AquaPi?",
           "Compare to Apex Neptune",
           "What can AquaPi monitor?",
           "Can I use my own sensors?",
         ]);
       case 'ai_tools':
-        return _buildToolButtons(context);
+        return _toolButtons(context);
       default:
         return const SizedBox.shrink();
     }
   }
 
-  Widget _buildSuggestionChips(List<String> questions) {
+  Widget _suggestionChips(List<String> questions) {
     final chatNotifier = ref.read(chatProvider.notifier);
     return Wrap(
       alignment: WrapAlignment.center,
@@ -469,7 +474,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-  Widget _buildToolButtons(BuildContext context) {
+  Widget _toolButtons(BuildContext context) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
@@ -477,17 +482,16 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       children: [
         MiniAIChip(
           label: 'Water Analysis',
-          icon: Icons.water_drop_outlined,
+            icon: Icons.water_drop_outlined,
           customGradient: LinearGradient(
             colors: [Colors.blue.shade400, Colors.teal.shade300],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const WaterParameterAnalysisScreen()),
+                builder: (_) => const WaterParameterAnalysisScreen(),
+              ),
             );
             setState(() => _expandedMenu = null);
           },
@@ -497,14 +501,29 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           icon: Icons.code_outlined,
           customGradient: LinearGradient(
             colors: [Colors.purple.shade400, Colors.indigo.shade300],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const AutomationScriptScreen()),
+                builder: (_) => const AutomationScriptScreen(),
+              ),
+            );
+            setState(() => _expandedMenu = null);
+          },
+        ),
+        MiniAIChip(
+          label: 'Photo Analyzer',
+          icon: Icons.camera_alt_outlined,
+          customGradient: LinearGradient(
+            colors: [Colors.deepOrange.shade400, Colors.amber.shade400],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const PhotoAnalysisScreen(),
+              ),
             );
             setState(() => _expandedMenu = null);
           },
@@ -537,15 +556,8 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final gradient = LinearGradient(
-      colors: [
-        cs.primary,
-        cs.secondary,
-        cs.tertiary,
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
+    final gradient =
+        LinearGradient(colors: [cs.primary, cs.secondary, cs.tertiary]);
 
     final scale = _pressed
         ? 0.9
@@ -555,10 +567,11 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() {
-        _hover = false;
-        _pressed = false;
-      }),
+      onExit: (_) =>
+          setState(() {
+            _hover = false;
+            _pressed = false;
+          }),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) {
@@ -595,9 +608,8 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                   duration: const Duration(milliseconds: 420),
                   switchInCurve: Curves.easeOutBack,
                   switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    return ScaleTransition(scale: animation, child: child);
-                  },
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
                   child: widget.disabled
                       ? SizedBox(
                           key: const ValueKey('progress'),
@@ -611,11 +623,12 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                         )
                       : RotationTransition(
                           key: const ValueKey('icon'),
-                          turns: Tween<double>(begin: 0, end: 1)
-                              .animate(CurvedAnimation(
-                            parent: widget.controller,
-                            curve: Curves.elasticOut,
-                          )),
+                          turns: Tween<double>(begin: 0, end: 1).animate(
+                            CurvedAnimation(
+                              parent: widget.controller,
+                              curve: Curves.elasticOut,
+                            ),
+                          ),
                           child: Icon(
                             Icons.send_rounded,
                             color: cs.onPrimary,
@@ -638,6 +651,8 @@ class MessageBubble extends ConsumerWidget {
   final List<String>? followUpQuestions;
   final WaterAnalysisResult? analysisResult;
   final AutomationScript? automationScript;
+  final PhotoAnalysisResult? photoAnalysisResult;
+  final Uint8List? photoBytes;
   final bool isError;
   final bool isRetryable;
   final String? originalMessage;
@@ -649,10 +664,48 @@ class MessageBubble extends ConsumerWidget {
     this.followUpQuestions,
     this.analysisResult,
     this.automationScript,
+    this.photoAnalysisResult,
+    this.photoBytes,
     this.isError = false,
     this.isRetryable = false,
     this.originalMessage,
   });
+
+  void _openImage(BuildContext context) {
+    if (photoBytes == null) return;
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Scaffold(
+            backgroundColor: Colors.black.withOpacity(0.95),
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: InteractiveViewer(
+                      maxScale: 5,
+                      child: Image.memory(photoBytes!),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -688,7 +741,11 @@ class MessageBubble extends ConsumerWidget {
                       isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isUser ? 'You' : isError ? 'Fish.AI - Error' : 'Fish.AI',
+                      isUser
+                          ? 'You'
+                          : isError
+                              ? 'Fish.AI - Error'
+                              : 'Fish.AI',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,
@@ -713,14 +770,65 @@ class MessageBubble extends ConsumerWidget {
                           width: isError ? 1.2 : 0.6,
                         ),
                       ),
-                      child: MarkdownBody(
-                        selectable: true,
-                        data: text,
-                        onTapLink: (text, href, title) {
-                          if (href != null) {
-                            launchUrl(Uri.parse(href));
-                          }
-                        },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MarkdownBody(
+                            selectable: true,
+                            data: text,
+                            onTapLink: (text, href, title) {
+                              if (href != null) launchUrl(Uri.parse(href));
+                            },
+                          ),
+                          if (photoBytes != null) ...[
+                            const SizedBox(height: 10),
+                            GestureDetector(
+                              onTap: () => _openImage(context),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Stack(
+                                  children: [
+                                    Image.memory(
+                                      photoBytes!,
+                                      height: 120,
+                                      width: 180,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Positioned(
+                                      bottom: 4,
+                                      right: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.zoom_in,
+                                                size: 12, color: Colors.white),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'View',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ]
+                        ],
                       ),
                     ),
                   ],
@@ -741,7 +849,7 @@ class MessageBubble extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
+                    builder: (_) =>
                         AnalysisResultScreen(result: analysisResult!),
                   ),
                 );
@@ -754,8 +862,24 @@ class MessageBubble extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        AutomationScriptResultScreen(script: automationScript!),
+                    builder: (_) => AutomationScriptResultScreen(
+                      script: automationScript!,
+                    ),
+                  ),
+                );
+              },
+            ),
+          if (photoAnalysisResult != null)
+            _ResultButton(
+              label: 'View Photo Analysis',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PhotoAnalysisResultScreen(
+                      result: photoAnalysisResult!,
+                      photoBytes: photoBytes,
+                    ),
                   ),
                 );
               },
@@ -799,15 +923,15 @@ class _RetryButtonState extends State<_RetryButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
       child: MouseRegion(
         onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() {
-          _hover = false;
-          _pressed = false;
-        }),
+        onExit: (_) =>
+            setState(() {
+              _hover = false;
+              _pressed = false;
+            }),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _pressed = true),
           onTapUp: (_) => setState(() => _pressed = false),
@@ -870,15 +994,15 @@ class _ResultButtonState extends State<_ResultButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
       child: MouseRegion(
         onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() {
-          _hover = false;
-          _pressed = false;
-        }),
+        onExit: (_) =>
+            setState(() {
+              _hover = false;
+              _pressed = false;
+            }),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _pressed = true),
           onTapUp: (_) => setState(() => _pressed = false),
