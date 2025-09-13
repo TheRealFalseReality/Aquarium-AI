@@ -388,7 +388,7 @@ class FishCompatibilityScreenState
       key: const ValueKey('search_bar'),
       elevation: 6,
       borderRadius: BorderRadius.circular(30),
-      child: Container(
+      child: SizedBox(
         // Constrain the width so it doesn't overlap the "Last Report" FAB
         width: canShowLastReportFab
             ? MediaQuery.of(context).size.width - 180
@@ -526,15 +526,14 @@ class FishCompatibilityScreenState
                                 : FontWeight.w500,
                           ),
                       textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                     if (fish.commonNames.isNotEmpty)
                       Text(
                         fish.commonNames.join(', '),
                         style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.center,
-                        maxLines: 2, // Changed from 1 to 2
+                        maxLines: 2,
                       ),
                   ],
                 ),

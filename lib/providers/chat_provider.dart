@@ -7,6 +7,7 @@ import 'package:firebase_ai/firebase_ai.dart';
 import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
+import '../constants.dart';
 
 /// ====================== Cancellable Helper ======================
 class CancellableCompleter<T> {
@@ -78,14 +79,14 @@ class ChatState {
 /// Separate model providers (text vs image) for flexibility
 final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
   return FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.5-flash-lite',
+    model: geminiModel,
   );
 });
 
 final geminiImageModelProvider = Provider<GenerativeModel>((ref) {
   // Multimodal capable model (adjust if needed)
   return FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.5-flash',
+    model: geminiImageModel,
   );
 });
 

@@ -6,6 +6,7 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../constants.dart'; 
 
 // Helper class for cancellable operations
 class CancellableCompleter<T> {
@@ -182,7 +183,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
     final model =
-        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash-lite');
+        FirebaseAI.googleAI().generativeModel(model: geminiModel);
     _cancellableCompleter = CancellableCompleter();
     _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
 
