@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
@@ -131,7 +130,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   // Track last photo info for "Regenerate Analysis"
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
-  PhotoAnalysisResult? _lastPhotoResult;
 
   void _initSession() {
     _chatSession = _textModel.startChat(
@@ -562,7 +560,6 @@ User context: $note
 
       _lastPhotoBytes = imageBytes;
       _lastPhotoNote = userNote;
-      _lastPhotoResult = parsed;
 
       state = ChatState(
         messages: [

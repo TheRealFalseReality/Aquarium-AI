@@ -6,11 +6,13 @@ class MainLayout extends StatelessWidget {
   final Widget child;
   final String title;
   final Widget? bottomNavigationBar;
+  final Widget? floatingActionButton; 
 
   const MainLayout({
     required this.title,
     required this.child,
     this.bottomNavigationBar,
+    this.floatingActionButton, 
     super.key,
   });
 
@@ -50,6 +52,7 @@ class MainLayout extends StatelessWidget {
       drawer: AppDrawer(),
       body: child,
       bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
     );
   }
 }

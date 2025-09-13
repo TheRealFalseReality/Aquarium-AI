@@ -20,11 +20,42 @@ class FishCompatibilityScreenState
     extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
   OverlayEntry? _loadingOverlayEntry;
+  List<Fish> _filteredFishList = [];
+  bool _isSearchVisible = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_filterFishList);
+  }
 
   @override
   void dispose() {
     _loadingOverlayEntry?.remove();
+    _searchController.removeListener(_filterFishList);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterFishList() {
+    final fishData = ref.read(fishCompatibilityProvider).fishData;
+    final allFish = fishData.value?[_selectedCategory] ?? [];
+    final query = _searchController.text;
+
+    setState(() {
+      if (query.isEmpty) {
+        _filteredFishList = allFish;
+      } else {
+        _filteredFishList = allFish.where((fish) {
+          final nameMatches =
+              fish.name.toLowerCase().contains(query.toLowerCase());
+          final commonNamesMatch = fish.commonNames
+              .any((name) => name.toLowerCase().contains(query.toLowerCase()));
+          return nameMatches || commonNamesMatch;
+        }).toList();
+      }
+    });
   }
 
   void _showLoadingOverlay(
@@ -176,7 +207,7 @@ class FishCompatibilityScreenState
 
     final hasLastReport = providerState.lastReport != null;
     final canShowLastReportFab =
-        hasLastReport && (providerState.report == null);
+        hasLastReport && (providerState.report == null) && !_isSearchVisible;
 
     final double bottomBarHeight =
         providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
@@ -198,8 +229,14 @@ class FishCompatibilityScreenState
               ),
             ),
             data: (fishData) {
-              final fishList = fishData[_selectedCategory] ?? [];
-              if (fishList.isEmpty) {
+              final allFish = fishData[_selectedCategory] ?? [];
+              // Initialize filtered list if it's empty
+              if (_filteredFishList.isEmpty &&
+                  _searchController.text.isEmpty) {
+                _filteredFishList = allFish;
+              }
+
+              if (allFish.isEmpty) {
                 return const Center(
                     child: Text('No fish found for this category.'));
               }
@@ -248,12 +285,12 @@ class FishCompatibilityScreenState
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final fish = fishList[index];
+                          final fish = _filteredFishList[index];
                           final isSelected =
                               providerState.selectedFish.contains(fish);
                           return _buildFishCard(fish, isSelected, notifier);
                         },
-                        childCount: fishList.length,
+                        childCount: _filteredFishList.length,
                       ),
                     ),
                   ),
@@ -261,7 +298,7 @@ class FishCompatibilityScreenState
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(24, 0, 24,
-                          bottomBarHeight + 16), // Padding to avoid bottom bar
+                          bottomBarHeight + 80), // Padding to avoid bottom bar
                       child: Text(
                         'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -296,6 +333,12 @@ class FishCompatibilityScreenState
                 },
               ),
             ),
+          Positioned(
+            bottom: bottomBarHeight + 24,
+            left: 16,
+            right: 16,
+            child: _buildSearchWidget(canShowLastReportFab),
+          ),
           // The Bottom Bar is now at the bottom of the Stack
           if (providerState.selectedFish.isNotEmpty)
             Positioned(
@@ -305,6 +348,77 @@ class FishCompatibilityScreenState
               child: _buildBottomBar(providerState, notifier),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchWidget(bool canShowLastReportFab) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: _isSearchVisible
+          ? _buildSearchBar(canShowLastReportFab)
+          : Align(
+              alignment: Alignment.bottomLeft,
+              child: FloatingActionButton.extended(
+                key: const ValueKey('search_fab'),
+                heroTag: 'search_fab',
+                icon: const Icon(Icons.search),
+                label: const Text('Search'),
+                onPressed: () {
+                  setState(() {
+                    _isSearchVisible = true;
+                  });
+                },
+              ),
+            ),
+    );
+  }
+
+  Widget _buildSearchBar(bool canShowLastReportFab) {
+    return Material(
+      key: const ValueKey('search_bar'),
+      elevation: 6,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        // Constrain the width so it doesn't overlap the "Last Report" FAB
+        width: canShowLastReportFab
+            ? MediaQuery.of(context).size.width - 180
+            : double.infinity,
+        child: TextField(
+          controller: _searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search by name...',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                _searchController.clear();
+                setState(() {
+                  _isSearchVisible = false;
+                });
+                // Unfocus the text field
+                FocusScope.of(context).unfocus();
+              },
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface,
+          ),
+        ),
       ),
     );
   }
@@ -324,6 +438,7 @@ class FishCompatibilityScreenState
             onTap: () {
               setState(() => _selectedCategory = 'freshwater');
               notifier.clearSelection();
+              _searchController.clear();
             },
           ),
           ModernSelectableChip(
@@ -333,6 +448,7 @@ class FishCompatibilityScreenState
             onTap: () {
               setState(() => _selectedCategory = 'marine');
               notifier.clearSelection();
+              _searchController.clear();
             },
           ),
         ],
@@ -400,15 +516,27 @@ class FishCompatibilityScreenState
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Text(
-                  fish.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                child: Column(
+                  children: [
+                    Text(
+                      fish.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (fish.commonNames.isNotEmpty)
+                      Text(
+                        fish.commonNames.join(', '),
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                        maxLines: 2, // Changed from 1 to 2
                       ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  ],
                 ),
               ),
             ],
