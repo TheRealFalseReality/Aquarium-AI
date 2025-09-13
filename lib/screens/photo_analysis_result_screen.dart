@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../models/photo_analysis_result.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../widgets/ad_component.dart';
 
 class PhotoAnalysisResultScreen extends ConsumerStatefulWidget {
   final PhotoAnalysisResult result;
@@ -38,7 +40,7 @@ class _PhotoAnalysisResultScreenState
     await ref.read(chatProvider.notifier).regeneratePhotoAnalysis();
     if (mounted) {
       setState(() => _regenerating = false);
-      // Pop this screen; listener in chatbot pushes the new one
+      // Pop this screen; the chat listener will push the new regenerated result automatically
       Navigator.pop(context);
     }
   }
@@ -93,9 +95,15 @@ class _PhotoAnalysisResultScreenState
           const SizedBox(height: 16),
           _summaryCard(context),
           const SizedBox(height: 16),
+          // Insert a Native Ad early in the scroll (after summary)
+          const NativeAdWidget(),
+          const SizedBox(height: 16),
           _fishCard(context),
           const SizedBox(height: 16),
           _tankHealthCard(context),
+          const SizedBox(height: 16),
+          // Another Native Ad between sections (optional – remove if you only want one)
+          const NativeAdWidget(),
           const SizedBox(height: 16),
           _waterGuessesCard(context),
           const SizedBox(height: 16),
@@ -113,9 +121,8 @@ class _PhotoAnalysisResultScreenState
                           child: CircularProgressIndicator(strokeWidth: 3),
                         )
                       : const Icon(Icons.refresh_rounded),
-                  label: Text(_regenerating
-                      ? 'Regenerating...'
-                      : 'Regenerate Analysis'),
+                  label: Text(
+                      _regenerating ? 'Regenerating...' : 'Regenerate Analysis'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 14, horizontal: 20),
@@ -138,7 +145,7 @@ class _PhotoAnalysisResultScreenState
           ),
           const SizedBox(height: 12),
           Text(
-            'Tip: Regeneration may produce slightly different identifications or wording.',
+            'Tip: Regenerating may produce slightly different identifications or wording.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontStyle: FontStyle.italic,
                   color: cs.onSurface.withOpacity(0.65),

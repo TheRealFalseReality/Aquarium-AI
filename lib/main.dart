@@ -17,22 +17,26 @@ import 'package:firebase_core/firebase_core.dart';
 import './firebase_options.dart';
 import './widgets/transitions.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/photo_analysis_screen.dart'; // keep route if needed externally
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Set up error handling
+
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     if (kDebugMode) {
+      // ignore: avoid_print
       print('Flutter Error: ${details.exception}');
+      // ignore: avoid_print
       print('Stack trace: ${details.stack}');
     }
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
+      // ignore: avoid_print
       print('Platform Error: $error');
+      // ignore: avoid_print
       print('Stack trace: $stack');
     }
     return true;
@@ -52,15 +56,14 @@ void main() async {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // AI-inspired color palette
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF005f73), // Original seed for consistent hues
+    seedColor: const Color(0xFF005f73),
     brightness: Brightness.light,
     primary: const Color(0xFF0a9396),
     secondary: const Color(0xFF94d2bd),
     tertiary: const Color(0xFFe9d8a6),
-    surface: const Color(0xFFFFFFFF), // White surface for contrast
-    background: const Color(0xFFd8f3ff), // Light mode background
+    surface: const Color(0xFFFFFFFF),
+    background: const Color(0xFFd8f3ff),
     error: const Color(0xFFae2012),
     onPrimary: Colors.white,
     onSecondary: Colors.black,
@@ -70,14 +73,14 @@ class MyApp extends ConsumerWidget {
   );
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF005f73), // Original seed for consistent hues
+    seedColor: const Color(0xFF005f73),
     brightness: Brightness.dark,
     primary: const Color(0xFF94d2bd),
     secondary: const Color(0xFF0a9396),
     tertiary: const Color(0xFFe9d8a6),
-    surface: const Color(0xFF4A5568), // A slightly lighter surface for cards
-    background: const Color(0xFF2d3748), // Dark mode background
-    error: const Color(0xFFe57373), // Lighter error for dark mode
+    surface: const Color(0xFF4A5568),
+    background: const Color(0xFF2d3748),
+    error: const Color(0xFFe57373),
     onPrimary: Colors.black,
     onSecondary: Colors.white,
     onTertiary: Colors.black,
@@ -134,9 +137,9 @@ class MyApp extends ConsumerWidget {
             backgroundColor: lightColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: Border(
+            shape: const Border(
               bottom: BorderSide(
-                color: const Color(0xFFdee2e6),
+                color: Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
@@ -145,8 +148,8 @@ class MyApp extends ConsumerWidget {
             elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: const Color(0xFFdee2e6),
+              side: const BorderSide(
+                color: Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
@@ -175,9 +178,9 @@ class MyApp extends ConsumerWidget {
             backgroundColor: darkColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: Border(
+            shape: const Border(
               bottom: BorderSide(
-                color: const Color(0xFF495057),
+                color: Color(0xFF495057),
                 width: 1,
               ),
             ),
@@ -186,8 +189,8 @@ class MyApp extends ConsumerWidget {
             elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: const Color(0xFF495057),
+              side: const BorderSide(
+                color: Color(0xFF495057),
                 width: 1,
               ),
             ),
@@ -202,6 +205,7 @@ class MyApp extends ConsumerWidget {
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
           onGenerateRoute: (settings) {
+            final args = settings.arguments;
             Widget page;
             switch (settings.name) {
               case '/':
@@ -217,10 +221,18 @@ class MyApp extends ConsumerWidget {
                 page = const CalculatorsScreen();
                 break;
               case '/chatbot':
-                page = const ChatbotScreen();
+                bool autoOpen = false;
+                if (args is Map && args['openPhotoAnalyzer'] == true) {
+                  autoOpen = true;
+                }
+                page = ChatbotScreen(autoOpenPhotoAnalyzer: autoOpen);
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
+                break;
+              case '/photo-analyzer':
+                // direct route (kept, but we now prefer going through /chatbot with arg)
+                page = const PhotoAnalysisScreen();
                 break;
               case '/settings':
                 page = const SettingsScreen();

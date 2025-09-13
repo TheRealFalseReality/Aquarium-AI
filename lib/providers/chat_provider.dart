@@ -254,7 +254,7 @@ I am Fish.AI, your aquarium + AquaPi expert. Use concise, friendly, markdown-for
         ...state.messages,
         ChatMessage(
           text: msg,
-            isUser: false,
+          isUser: false,
           isError: true,
           isRetryable: retryable,
           originalMessage: originalMessage,
@@ -442,6 +442,11 @@ Return ONLY JSON:
   }
 
   /// ================== Photo Analysis ==================
+  ///
+  /// Updated to:
+  /// - Ask the model to return UP TO 3 fish (multiple candidates if confidence is low).
+  /// - Always keep maximum 3 entries (sorted by confidence descending).
+  /// - Encourage alternative guesses when the top confidence < 0.5.
   Future<PhotoAnalysisResult?> analyzePhoto({
     required Uint8List imageBytes,
     String? userNote,
@@ -465,7 +470,6 @@ Return ONLY JSON:
         isLoading: true,
       );
     } else {
-      // Just turn loading on (do not duplicate user submission message)
       state = ChatState(messages: state.messages, isLoading: true);
     }
 
@@ -474,15 +478,21 @@ Return ONLY JSON:
     final prompt = '''
 You are Fish.AI — aquarium & fish identification assistant.
 
+IMPORTANT INSTRUCTIONS FOR FISH IDENTIFICATION:
+- Return an array "identifiedFish" containing up to 3 entries.
+- If confidence for the most likely fish is < 0.5, include alternative candidate guesses so the list has 2–3 total possibilities (still maximum 3).
+- Sort them by descending confidence.
+- Confidence must be 0.0–1.0.
+
 TASKS:
-1. Identify fish species (best guess if uncertain) with confidence 0–1.
+1. Identify up to 3 probable fish species present (or candidate species if not sure).
 2. Provide a concise summary (Markdown allowed; use **bold** sparingly).
 3. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
 4. Potential issues & recommended actions.
 5. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
 6. "howAquaPiHelps" explaining AquaPi benefits; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store).
 
-Return ONLY JSON:
+Return ONLY JSON EXACTLY in this shape:
 {
   "summary": "...",
   "identifiedFish": [
@@ -501,7 +511,11 @@ Return ONLY JSON:
   "howAquaPiHelps": "Markdown..."
 }
 
-If no fish identified confidently: identifiedFish = [] and explain uncertainty in summary.
+RULES:
+- "identifiedFish" length MUST be <= 3.
+- If no fish confidently identified: use an empty array and explain why in summary.
+- Do not add extra fields.
+
 User context: $note
 ''';
 
@@ -517,11 +531,34 @@ User context: $note
 
       final raw = response.text ?? '';
       final cleaned = _extractJson(raw);
-      final parsed = PhotoAnalysisResult.tryParseJson(cleaned);
 
-      if (parsed == null) {
+      // Parse & enforce max 3 + sort by confidence
+      Map<String, dynamic>? jsonMap;
+      try {
+        jsonMap = json.decode(cleaned) as Map<String, dynamic>;
+      } catch (_) {
         throw const FormatException('Malformed JSON from AI photo analysis.');
       }
+
+      // Defensive handling if AI ignored constraints
+      final fishList = (jsonMap['identifiedFish'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
+
+      // Normalize and sort by confidence
+      fishList.sort((a, b) {
+        final ca = (a['confidence'] is num) ? (a['confidence'] as num).toDouble() : 0.0;
+        final cb = (b['confidence'] is num) ? (b['confidence'] as num).toDouble() : 0.0;
+        return cb.compareTo(ca);
+      });
+
+      if (fishList.length > 3) {
+        jsonMap['identifiedFish'] = fishList.take(3).toList();
+      } else {
+        jsonMap['identifiedFish'] = fishList;
+      }
+
+      final parsed = PhotoAnalysisResult.fromJson(jsonMap);
 
       _lastPhotoBytes = imageBytes;
       _lastPhotoNote = userNote;
@@ -532,8 +569,8 @@ User context: $note
           ...state.messages,
           ChatMessage(
             text: isRegeneration
-                ? '🖼️ Photo analysis regenerated.'
-                : '🖼️ Photo analysis complete. Tap to view the detailed results.',
+                ? '🖼️ Photo analysis regenerated (up to 3 candidate fish).'
+                : '🖼️ Photo analysis complete (up to 3 candidate fish). Tap to view the detailed results.',
             isUser: false,
             photoAnalysisResult: parsed,
             photoBytes: imageBytes,

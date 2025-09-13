@@ -19,7 +19,8 @@ import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
-  const ChatbotScreen({super.key});
+  final bool autoOpenPhotoAnalyzer;
+  const ChatbotScreen({super.key, this.autoOpenPhotoAnalyzer = false});
 
   @override
   ChatbotScreenState createState() => ChatbotScreenState();
@@ -34,6 +35,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   bool _showScrollButton = false;
   bool _sending = false;
   late AnimationController _sendIconController;
+  bool _autoOpened = false;
 
   @override
   void initState() {
@@ -44,6 +46,18 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       vsync: this,
       duration: const Duration(milliseconds: 380),
     );
+    // If requested via route arguments, open the Photo Analyzer after first frame
+    if (widget.autoOpenPhotoAnalyzer) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_autoOpened) {
+          _autoOpened = true;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PhotoAnalysisScreen()),
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -482,7 +496,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       children: [
         MiniAIChip(
           label: 'Water Analysis',
-            icon: Icons.water_drop_outlined,
+          icon: Icons.water_drop_outlined,
           customGradient: LinearGradient(
             colors: [Colors.blue.shade400, Colors.teal.shade300],
           ),
@@ -519,6 +533,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
             colors: [Colors.deepOrange.shade400, Colors.amber.shade400],
           ),
           onTap: () {
+            // Already in chatbot; just open analyzer
             Navigator.push(
               context,
               MaterialPageRoute(
