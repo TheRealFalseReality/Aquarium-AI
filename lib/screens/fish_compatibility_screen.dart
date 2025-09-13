@@ -21,148 +21,11 @@ class FishCompatibilityScreenState
   String _selectedCategory = 'freshwater';
   OverlayEntry? _loadingOverlayEntry;
 
-  // Alphabet quick-jump
-  final ScrollController _scrollController = ScrollController();
-  List<Fish> _sortedFish = [];
-  final Map<String, int> _letterToIndex = {};
-  final double _letterItemHeight = 30;
-  String? _highlightedLetter; // visual feedback when tapped
-  DateTime _lastHighlightTime = DateTime.now();
-
   @override
   void dispose() {
     _loadingOverlayEntry?.remove();
-    _scrollController.dispose();
     super.dispose();
   }
-
-  void _prepareAlphabetIndex(List<Fish> fishList) {
-    _sortedFish = [...fishList]..sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
-    _letterToIndex.clear();
-    for (int i = 0; i < _sortedFish.length; i++) {
-      final first = _sortedFish[i].name.isNotEmpty
-          ? _sortedFish[i].name[0].toUpperCase()
-          : '';
-      if (first.isEmpty) continue;
-      _letterToIndex.putIfAbsent(first, () => i);
-    }
-  }
-
-  Future<void> _scrollToIndex(int index) async {
-    if (!_scrollController.hasClients) return;
-    final position = index * 280.0; // approximate item height incl. spacing
-    _scrollController.animateTo(
-      position.clamp(
-        0,
-        _scrollController.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _scrollToLetter(String letter) {
-    final index = _letterToIndex[letter];
-    if (index == null) return;
-    _highlight(letter);
-    _scrollToIndex(index);
-  }
-
-  void _scrollToTop() {
-    _highlight('↑');
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _highlight(String letter) {
-    setState(() {
-      _highlightedLetter = letter;
-      _lastHighlightTime = DateTime.now();
-    });
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (DateTime.now().difference(_lastHighlightTime).inMilliseconds >= 600) {
-        if (mounted) {
-          setState(() => _highlightedLetter = null);
-        }
-      }
-    });
-  }
-
-  Widget _alphabetRail() {
-    if (_sortedFish.isEmpty) return const SizedBox.shrink();
-
-    // Only show letters that exist
-    final existingLetters = _letterToIndex.keys.toList()..sort();
-    if (existingLetters.isEmpty) return const SizedBox.shrink();
-
-    return Positioned(
-      top: 0,
-      bottom: (_bottomBarHeight(ref.watch(fishCompatibilityProvider)) + 8),
-      right: 4,
-      child: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.only(top: 12, bottom: 12),
-            decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.85),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.35),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          width: 46,
-          child: Column(
-            children: [
-              _AlphabetButton(
-                label: '↑',
-                isHighlighted: _highlightedLetter == '↑',
-                onTap: _scrollToTop,
-                tooltip: 'Top',
-                height: _letterItemHeight,
-                accent: Theme.of(context).colorScheme.primary,
-              ),
-              const Divider(height: 2),
-              Expanded(
-                child: ListView.builder(
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  itemCount: existingLetters.length,
-                  itemBuilder: (context, i) {
-                    final letter = existingLetters[i];
-                    return _AlphabetButton(
-                      label: letter,
-                      isHighlighted: _highlightedLetter == letter,
-                      onTap: () => _scrollToLetter(letter),
-                      height: _letterItemHeight,
-                      accent: Theme.of(context).colorScheme.secondary,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  double _bottomBarHeight(FishCompatibilityState state) =>
-      state.selectedFish.isNotEmpty ? 84.0 : 0.0;
 
   void _showLoadingOverlay(
       BuildContext context, List<Fish> selectedFish, String category) {
@@ -315,7 +178,8 @@ class FishCompatibilityScreenState
     final canShowLastReportFab =
         hasLastReport && (providerState.report == null);
 
-    final bottomBarHeight = _bottomBarHeight(providerState);
+    final double bottomBarHeight =
+        providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
 
     return MainLayout(
       title: 'AI Compatibility Calculator',
@@ -324,7 +188,7 @@ class FishCompatibilityScreenState
         children: [
           providerState.fishData.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(
+            error: (error, stackTrace) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
@@ -339,11 +203,10 @@ class FishCompatibilityScreenState
                 return const Center(
                     child: Text('No fish found for this category.'));
               }
-              _prepareAlphabetIndex(fishList);
-
+              // Use a CustomScrollView to make the header scrollable
               return CustomScrollView(
-                controller: _scrollController,
                 slivers: [
+                  // Header Sliver
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -368,9 +231,11 @@ class FishCompatibilityScreenState
                       ),
                     ),
                   ),
+                  // Category Selector Sliver
                   SliverToBoxAdapter(
                     child: _buildCategorySelector(notifier),
                   ),
+                  // Grid of Fish Cards Sliver
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     sliver: SliverGrid(
@@ -383,19 +248,20 @@ class FishCompatibilityScreenState
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final fish = _sortedFish[index];
+                          final fish = fishList[index];
                           final isSelected =
                               providerState.selectedFish.contains(fish);
                           return _buildFishCard(fish, isSelected, notifier);
                         },
-                        childCount: _sortedFish.length,
+                        childCount: fishList.length,
                       ),
                     ),
                   ),
+                  // Disclaimer Sliver
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          24, 0, 24, bottomBarHeight + 16),
+                      padding: EdgeInsets.fromLTRB(24, 0, 24,
+                          bottomBarHeight + 16), // Padding to avoid bottom bar
                       child: Text(
                         'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -413,10 +279,10 @@ class FishCompatibilityScreenState
               );
             },
           ),
-          _alphabetRail(),
+          // Position the FAB above the bottom bar
           if (canShowLastReportFab)
             Positioned(
-              bottom: bottomBarHeight + 24,
+              bottom: bottomBarHeight + 24, // Adjust this value for spacing
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
@@ -430,6 +296,7 @@ class FishCompatibilityScreenState
                 },
               ),
             ),
+          // The Bottom Bar is now at the bottom of the Stack
           if (providerState.selectedFish.isNotEmpty)
             Positioned(
               bottom: 0,
@@ -457,7 +324,6 @@ class FishCompatibilityScreenState
             onTap: () {
               setState(() => _selectedCategory = 'freshwater');
               notifier.clearSelection();
-              _scrollToTop();
             },
           ),
           ModernSelectableChip(
@@ -467,7 +333,6 @@ class FishCompatibilityScreenState
             onTap: () {
               setState(() => _selectedCategory = 'marine');
               notifier.clearSelection();
-              _scrollToTop();
             },
           ),
         ],
@@ -560,7 +425,8 @@ class FishCompatibilityScreenState
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          padding:
+              const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
           decoration: BoxDecoration(
             color: cs.surface.withOpacity(0.05),
             border: Border(
@@ -638,6 +504,7 @@ class FishCompatibilityScreenState
       {bool fromHistory = false}) {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
+    // Reordered sections as requested
     final sections = {
       'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
       'Compatible Tank Mates': _buildTankMatesSection(context, report),
@@ -687,6 +554,7 @@ class FishCompatibilityScreenState
                 const SizedBox(height: 16),
                 ...sections.entries.map((entry) {
                   final index = sections.keys.toList().indexOf(entry.key);
+                  // Injecting the ad after the Detailed Summary
                   if (entry.key == 'Detailed Summary') {
                     return Column(
                       children: [
@@ -905,75 +773,5 @@ class FishCompatibilityScreenState
     if (score >= 0.5) return Colors.yellow.shade700;
     if (score >= 0.25) return Colors.orange;
     return Colors.red;
-  }
-}
-
-/// Single letter button on alphabet rail
-class _AlphabetButton extends StatelessWidget {
-  final String label;
-  final bool isHighlighted;
-  final VoidCallback onTap;
-  final double height;
-  final String? tooltip;
-  final Color accent;
-
-  const _AlphabetButton({
-    required this.label,
-    required this.isHighlighted,
-    required this.onTap,
-    required this.height,
-    required this.accent,
-    this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final child = AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-      height: height - 4,
-      decoration: BoxDecoration(
-        color: isHighlighted
-            ? accent.withOpacity(0.85)
-            : cs.surfaceVariant.withOpacity(0.55),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isHighlighted
-            ? [
-                BoxShadow(
-                  color: accent.withOpacity(0.45),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                )
-              ]
-            : [],
-        border: Border.all(
-          color: isHighlighted
-              ? accent.withOpacity(0.9)
-              : cs.outlineVariant.withOpacity(0.35),
-          width: 1,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: isHighlighted ? cs.onPrimary : cs.onSurface,
-              fontSize: 13,
-              letterSpacing: 0.5,
-            ),
-      ),
-    );
-
-    return Semantics(
-      label: label == '↑' ? 'Scroll to top' : 'Jump to $label',
-      button: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: tooltip != null ? Tooltip(message: tooltip!, child: child) : child,
-      ),
-    );
   }
 }
