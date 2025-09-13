@@ -7,6 +7,7 @@ import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
+import '../widgets/fish_card.dart'; // Import the new fish card
 import 'compatibility_report.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
@@ -279,7 +280,7 @@ class FishCompatibilityScreenState
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 210,
-                        childAspectRatio: 3 / 4,
+                        childAspectRatio: 3 / 4, // Reverted aspect ratio
                         crossAxisSpacing: 18,
                         mainAxisSpacing: 18,
                       ),
@@ -288,7 +289,10 @@ class FishCompatibilityScreenState
                           final fish = _filteredFishList[index];
                           final isSelected =
                               providerState.selectedFish.contains(fish);
-                          return _buildFishCard(fish, isSelected, notifier);
+                          return FishCard(
+                            fish: fish,
+                            isSelected: isSelected,
+                          );
                         },
                         childCount: _filteredFishList.length,
                       ),
@@ -458,94 +462,6 @@ class FishCompatibilityScreenState
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFishCard(
-      Fish fish, bool isSelected, FishCompatibilityNotifier notifier) {
-    final cs = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutCubic,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isSelected ? cs.primary : cs.outlineVariant.withOpacity(0.25),
-          width: isSelected ? 3 : 1.2,
-        ),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: cs.primary.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          )
-        ],
-        gradient: isSelected
-            ? LinearGradient(
-                colors: [
-                  cs.primary.withOpacity(0.18),
-                  cs.secondary.withOpacity(0.18),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: isSelected ? null : Theme.of(context).cardColor,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: () => notifier.selectFish(fish),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(18)),
-                  child: Image.network(
-                    fish.imageURL,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Center(child: Icon(Icons.error)),
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Column(
-                  children: [
-                    Text(
-                      fish.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w500,
-                          ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                    ),
-                    if (fish.commonNames.isNotEmpty)
-                      Text(
-                        fish.commonNames.join(', '),
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
