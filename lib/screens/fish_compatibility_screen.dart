@@ -631,7 +631,6 @@ class FishCompatibilityScreenState
       {bool fromHistory = false}) {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
-    // Reordered sections as requested
     final sections = {
       'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
       'Compatible Tank Mates': _buildTankMatesSection(context, report),
@@ -685,15 +684,15 @@ class FishCompatibilityScreenState
                   if (entry.key == 'Detailed Summary') {
                     return Column(
                       children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: NativeAdWidget(),
+                        ),
                         _buildSection(
                           context,
                           entry.key,
                           entry.value,
                           index,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: NativeAdWidget(),
                         ),
                       ],
                     );

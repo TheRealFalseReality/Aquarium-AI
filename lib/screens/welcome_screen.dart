@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
+import '../providers/model_provider.dart';
 
 class FeatureInfo {
   final String icon;
@@ -10,7 +14,8 @@ class FeatureInfo {
   final String description;
   final String routeName;
   final Duration delay;
-  final bool openPhotoAnalyzer; // NEW flag to auto-open analyzer in chatbot
+  final bool openPhotoAnalyzer;
+  final String? url;
 
   FeatureInfo({
     required this.icon,
@@ -19,14 +24,24 @@ class FeatureInfo {
     required this.routeName,
     required this.delay,
     this.openPhotoAnalyzer = false,
+    this.url,
   });
 }
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modelState = ref.watch(modelProvider);
+
     final List<FeatureInfo> features = [
       FeatureInfo(
         icon: '🐠',
@@ -39,8 +54,7 @@ class WelcomeScreen extends StatelessWidget {
       FeatureInfo(
         icon: '🤖',
         title: 'AI Chatbot',
-        description:
-            'Ask questions, get water analysis, scripts & more.',
+        description: 'Ask questions, get water analysis, scripts & more.',
         routeName: '/chatbot',
         delay: const Duration(milliseconds: 700),
       ),
@@ -48,7 +62,7 @@ class WelcomeScreen extends StatelessWidget {
         icon: '📷',
         title: 'Photo Analyzer',
         description:
-            'Identify fish & assess visible tank health from a photo (auto-opens inside Chatbot).',
+            'Identify fish & assess visible tank health from a photo.',
         routeName: '/chatbot',
         openPhotoAnalyzer: true,
         delay: const Duration(milliseconds: 750),
@@ -68,6 +82,14 @@ class WelcomeScreen extends StatelessWidget {
             'Quickly calculate volume & water weight for many tank shapes.',
         routeName: '/tank-volume',
         delay: const Duration(milliseconds: 850),
+      ),
+      FeatureInfo(
+        icon: '🛒',
+        title: 'AquaPi Store',
+        description: 'Visit the official store for AquaPi products.',
+        routeName: '',
+        url: 'https://www.capitalcityaquatics.com/store/aquapi',
+        delay: const Duration(milliseconds: 900),
       ),
     ];
 
@@ -102,21 +124,43 @@ class WelcomeScreen extends StatelessWidget {
                           title: feature.title,
                           description: feature.description,
                           onTap: () {
-                            if (feature.openPhotoAnalyzer) {
+                            if (feature.url != null) {
+                              _launchURL(feature.url!);
+                            } else if (feature.openPhotoAnalyzer) {
                               Navigator.pushNamed(
                                 context,
                                 feature.routeName,
                                 arguments: {'openPhotoAnalyzer': true},
                               );
                             } else {
-                              Navigator.pushNamed(
-                                  context, feature.routeName);
+                              Navigator.pushNamed(context, feature.routeName);
                             }
                           },
                         ),
                       ),
                     );
                   }).toList(),
+                ),
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Currently using the following models:',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${modelState.geminiModel} (text)',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Text(
+                        '${modelState.geminiImageModel} (image)',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -220,7 +264,8 @@ class AnimatedFeatureCard extends StatefulWidget {
   final Widget child;
   final Duration delay;
 
-  const AnimatedFeatureCard({super.key, required this.child, required this.delay});
+  const AnimatedFeatureCard(
+      {super.key, required this.child, required this.delay});
 
   @override
   AnimatedFeatureCardState createState() => AnimatedFeatureCardState();
