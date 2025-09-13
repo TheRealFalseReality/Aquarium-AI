@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_ai/firebase_ai.dart';
 
 import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
-import '../constants.dart';
+import 'model_provider.dart';
 
 /// ====================== Cancellable Helper ======================
 class CancellableCompleter<T> {
@@ -78,19 +78,33 @@ class ChatState {
   ChatState({required this.messages, this.isLoading = false});
 }
 
-/// Separate model providers (text vs image) for flexibility
+// ====================== EDITED SECTION ======================
+
+/// Provides the initialized text-only GenerativeModel.
+/// This provider watches the modelProvider, so if the user changes the
+/// text model in settings, any widget/provider watching this will get the new instance.
 final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
+  // Watch our dynamic model provider to get the current model names
+  final models = ref.watch(modelProvider);
+  
   return FirebaseAI.googleAI().generativeModel(
-    model: geminiModel,
+    // Use the dynamically set model name from settings
+    model: models.geminiModel,
   );
 });
 
+/// Provides the initialized multimodal (text-and-image) GenerativeModel.
 final geminiImageModelProvider = Provider<GenerativeModel>((ref) {
-  // Multimodal capable model (adjust if needed)
+  // Watch our dynamic model provider to get the current model names
+  final models = ref.watch(modelProvider);
+  
   return FirebaseAI.googleAI().generativeModel(
-    model: geminiImageModel,
+    // Use the dynamically set model name from settings
+    model: models.geminiImageModel,
   );
 });
+
+// =============================================================
 
 final chatProvider =
     StateNotifierProvider<ChatNotifier, ChatState>((ref) {

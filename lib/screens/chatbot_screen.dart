@@ -909,7 +909,6 @@ class _RetryButton extends StatefulWidget {
 }
 
 class _RetryButtonState extends State<_RetryButton> {
-  bool _hover = false;
   bool _pressed = false;
 
   @override
@@ -917,51 +916,42 @@ class _RetryButtonState extends State<_RetryButton> {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) =>
-            setState(() {
-              _hover = false;
-              _pressed = false;
-            }),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _pressed = true),
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTapCancel: () => setState(() => _pressed = false),
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              color: cs.error,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: _pressed
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: cs.error.withOpacity(0.4),
-                        blurRadius: _hover ? 16 : 10,
-                        offset: const Offset(0, 5),
-                      )
-                    ],
-            ),
-            transform: Matrix4.identity()
-              ..scale(_pressed ? 0.94 : (_hover ? 1.02 : 1.0)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.refresh_rounded, size: 18, color: cs.onError),
-                const SizedBox(width: 8),
-                Text(
-                  'Retry',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: cs.onError,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: cs.error,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: _pressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: cs.error.withOpacity(0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
+          ),
+          transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.refresh_rounded, size: 18, color: cs.onError),
+              const SizedBox(width: 8),
+              Text(
+                'Retry',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: cs.onError,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
           ),
         ),
       ),
@@ -980,7 +970,6 @@ class _ResultButton extends StatefulWidget {
 }
 
 class _ResultButtonState extends State<_ResultButton> {
-  bool _hover = false;
   bool _pressed = false;
 
   @override
@@ -988,60 +977,51 @@ class _ResultButtonState extends State<_ResultButton> {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) =>
-            setState(() {
-              _hover = false;
-              _pressed = false;
-            }),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _pressed = true),
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTapCancel: () => setState(() => _pressed = false),
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  cs.primary,
-                  cs.secondary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: _pressed
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: cs.primary.withOpacity(0.4),
-                        blurRadius: _hover ? 16 : 10,
-                        offset: const Offset(0, 5),
-                      )
-                    ],
-            ),
-            transform: Matrix4.identity()
-              ..scale(_pressed ? 0.94 : (_hover ? 1.02 : 1.0)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.visibility_rounded,
-                    size: 18, color: cs.onPrimary),
-                const SizedBox(width: 8),
-                Text(
-                  widget.label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: cs.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                cs.primary,
+                cs.secondary,
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: _pressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: cs.primary.withOpacity(0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
+          ),
+          transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.visibility_rounded,
+                  size: 18, color: cs.onPrimary),
+              const SizedBox(width: 8),
+              Text(
+                widget.label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: cs.onPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
           ),
         ),
       ),
