@@ -33,6 +33,7 @@
       "region": "us-east1"
     }
   },
+  // Prerender.IO
   "functions": [
     {
       "source": "functions",
