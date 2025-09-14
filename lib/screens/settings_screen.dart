@@ -76,7 +76,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'AI Model Settings',
+                    'Google Gemini Settings',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -99,22 +99,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    children: [
-                      Chip(
-                        label: Text('Current Text Model: ${models.geminiModel}'),
-                        avatar: const Icon(Icons.text_fields),
-                      ),
-                      Chip(
-                        label: Text(
-                            'Current Image Model: ${models.geminiImageModel}'),
-                        avatar: const Icon(Icons.image),
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 24),
                   TextField(
