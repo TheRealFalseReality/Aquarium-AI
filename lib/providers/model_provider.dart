@@ -11,11 +11,13 @@ class ModelState {
   final String geminiModel;
   final String geminiImageModel;
   final String apiKey;
+  final bool isLoading; // <-- Add isLoading flag
 
   ModelState({
     required this.geminiModel,
     required this.geminiImageModel,
     required this.apiKey,
+    this.isLoading = true, // <-- Default to true
   });
 }
 
@@ -42,7 +44,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     state = ModelState(
         geminiModel: geminiModel,
         geminiImageModel: geminiImageModel,
-        apiKey: apiKey);
+        apiKey: apiKey,
+        isLoading: false); // <-- Set isLoading to false when done
   }
 
   // Method to update and save models
@@ -59,7 +62,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     state = ModelState(
         geminiModel: newGeminiModel,
         geminiImageModel: newGeminiImageModel,
-        apiKey: newApiKey);
+        apiKey: newApiKey,
+        isLoading: false);
   }
 
   // *** NEW METHOD ***
@@ -76,6 +80,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       geminiModel: defaultGeminiModel,
       geminiImageModel: defaultGeminiImageModel,
       apiKey: '',
+      isLoading: false,
     );
   }
 }
@@ -84,3 +89,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
 final modelProvider = StateNotifierProvider<ModelNotifier, ModelState>(
   (ref) => ModelNotifier(),
 );
+
+// New provider to easily check the loading state
+final modelProviderLoading = Provider<bool>((ref) {
+  return ref.watch(modelProvider).isLoading;
+});

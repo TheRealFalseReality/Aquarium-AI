@@ -7,6 +7,7 @@ import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
+import '../widgets/api_key_dialog.dart'; // Import the new dialog
 
 class FeatureInfo {
   final String icon;
@@ -28,8 +29,20 @@ class FeatureInfo {
   });
 }
 
-class WelcomeScreen extends ConsumerWidget {
+// Converted to ConsumerStatefulWidget to use initState
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // No need for the API key check here anymore.
+  }
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -39,8 +52,20 @@ class WelcomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    // Listen to the provider for changes.
+    ref.listen<ModelState>(modelProvider, (previous, next) {
+      // If the provider is no longer loading and the API key is empty, show the dialog.
+      if (previous!.isLoading && !next.isLoading && next.apiKey.isEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) => const ApiKeyDialog(),
+        );
+      }
+    });
+
     final modelState = ref.watch(modelProvider);
+    final isLoading = ref.watch(modelProviderLoading);
 
     final List<FeatureInfo> features = [
       FeatureInfo(
@@ -96,77 +121,80 @@ class WelcomeScreen extends ConsumerWidget {
     return MainLayout(
       title: 'Welcome',
       bottomNavigationBar: const AdBanner(),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const AnimatedHeader(),
-                const SizedBox(height: 16),
-                AnimatedText(
-                  'Your intelligent assistant for all things aquatic.',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  delay: const Duration(milliseconds: 520),
-                ),
-                const SizedBox(height: 48),
-                Wrap(
-                  spacing: 16.0,
-                  runSpacing: 16.0,
-                  alignment: WrapAlignment.center,
-                  children: features.map((feature) {
-                    return ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: AnimatedFeatureCard(
-                        delay: feature.delay,
-                        child: FeatureCard(
-                          icon: feature.icon,
-                          title: feature.title,
-                          description: feature.description,
-                          onTap: () {
-                            if (feature.url != null) {
-                              _launchURL(feature.url!);
-                            } else if (feature.openPhotoAnalyzer) {
-                              Navigator.pushNamed(
-                                context,
-                                feature.routeName,
-                                arguments: {'openPhotoAnalyzer': true},
-                              );
-                            } else {
-                              Navigator.pushNamed(context, feature.routeName);
-                            }
-                          },
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 48),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
                   child: Column(
-                    children: [
-                      Text(
-                        'Currently using the following models:',
-                        style: Theme.of(context).textTheme.bodySmall,
+                    children: <Widget>[
+                      const AnimatedHeader(),
+                      const SizedBox(height: 16),
+                      AnimatedText(
+                        'Your intelligent assistant for all things aquatic.',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        delay: const Duration(milliseconds: 520),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${modelState.geminiModel} (text)',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      const SizedBox(height: 48),
+                      Wrap(
+                        spacing: 16.0,
+                        runSpacing: 16.0,
+                        alignment: WrapAlignment.center,
+                        children: features.map((feature) {
+                          return ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 400),
+                            child: AnimatedFeatureCard(
+                              delay: feature.delay,
+                              child: FeatureCard(
+                                icon: feature.icon,
+                                title: feature.title,
+                                description: feature.description,
+                                onTap: () {
+                                  if (feature.url != null) {
+                                    _launchURL(feature.url!);
+                                  } else if (feature.openPhotoAnalyzer) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      feature.routeName,
+                                      arguments: {'openPhotoAnalyzer': true},
+                                    );
+                                  } else {
+                                    Navigator.pushNamed(
+                                        context, feature.routeName);
+                                  }
+                                },
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
-                      Text(
-                        '${modelState.geminiImageModel} (image)',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      const SizedBox(height: 48),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Currently using the following models:',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${modelState.geminiModel} (text)',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              '${modelState.geminiImageModel} (image)',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   ),
-                )
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }

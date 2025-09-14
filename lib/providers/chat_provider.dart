@@ -146,7 +146,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   void _initSession() {
     if (_textModel == null) return;
-    _chatSession = _textModel!.startChat(
+    _chatSession = _textModel.startChat(
       history: [
         Content.model([
           TextPart('''
@@ -365,7 +365,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _cancellable = CancellableCompleter();
 
     try {
-      final response = await _textModel!
+      final response = await _textModel
           .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
@@ -453,7 +453,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ''';
 
     try {
-      final response = await _textModel!
+      final response = await _textModel
           .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
@@ -574,7 +574,7 @@ User context: $note
         DataPart(mimeType, imageBytes),
         TextPart(prompt),
       ];
-      final response = await _imageModel!
+      final response = await _imageModel
           .generateContent(content as Iterable<Content>)
           .timeout(const Duration(seconds: 55));
 

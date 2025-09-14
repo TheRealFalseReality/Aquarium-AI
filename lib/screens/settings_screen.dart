@@ -18,6 +18,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _geminiModelController;
   late final TextEditingController _geminiImageModelController;
   late final TextEditingController _apiKeyController;
+  bool _isApiKeyVisible = false;
 
   @override
   void initState() {
@@ -117,9 +118,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _apiKeyController,
-                    decoration: const InputDecoration(
+                    obscureText: !_isApiKeyVisible,
+                    decoration: InputDecoration(
                       labelText: 'Google AI API Key',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isApiKeyVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isApiKeyVisible = !_isApiKeyVisible;
+                          });
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
