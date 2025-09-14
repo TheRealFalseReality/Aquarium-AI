@@ -1,3 +1,5 @@
+// lib/widgets/app_drawer.dart
+
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +24,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer
-      if (ModalRoute.of(context)?.settings.name != routeName) {
-        Navigator.pushNamed(context, routeName);
-      }
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (ModalRoute.of(context)?.settings.name != routeName) {
+          Navigator.pushNamed(context, routeName);
+        }
+      });
     }
 
     return Drawer(
@@ -83,10 +87,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               ],
             ),
           ),
-          // --- FOOTER SECTION ---
-          // This section is now outside the Expanded ListView, so it sticks to the bottom.
           const Divider(height: 1),
-          _buildCollapsibleThemeMenu(),
+          AnimatedDrawerItem(
+            delay: const Duration(milliseconds: 400),
+            child: _buildCollapsibleThemeMenu(),
+          ),
           const Divider(height: 1),
           _buildDrawerFooter(context, navigate),
         ],
@@ -98,7 +103,52 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final themeState = ref.watch(themeProviderNotifierProvider);
     final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
     final themeModes = [ThemeMode.light, ThemeMode.system, ThemeMode.dark];
-    final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+    final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid);
+
+    final collapsibleContent = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Column(
+        children: [
+          ToggleButtons(
+            isSelected: [
+              themeState.themeMode == ThemeMode.light,
+              themeState.themeMode == ThemeMode.system,
+              themeState.themeMode == ThemeMode.dark,
+            ],
+            onPressed: (index) {
+              themeNotifier.setThemeMode(themeModes[index]);
+            },
+            borderRadius: BorderRadius.circular(8.0),
+            children: const [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(message: 'Light Mode', child: Icon(Icons.light_mode_outlined, size: 20)),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(message: 'System Default', child: Icon(Icons.brightness_auto_outlined, size: 20)),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(message: 'Dark Mode', child: Icon(Icons.dark_mode_outlined, size: 20)),
+              ),
+            ],
+          ),
+          if (isMaterialYouAvailable) ...[
+            const SizedBox(height: 8),
+            FilterChip(
+              label: const Text('Material You'),
+              labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              avatar: const Icon(Icons.color_lens_outlined, size: 18),
+              selected: themeState.useMaterialYou,
+              onSelected: (isSelected) {
+                themeNotifier.toggleMaterialYou(isSelected);
+              },
+            ),
+          ]
+        ],
+      ),
+    );
 
     return Column(
       children: [
@@ -109,60 +159,16 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               _isAppearanceExpanded = !_isAppearanceExpanded;
             });
           },
-          trailing: Icon(
-            _isAppearanceExpanded ? Icons.expand_less : Icons.expand_more,
+          trailing: AnimatedRotation(
+            turns: _isAppearanceExpanded ? 0.5 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: const Icon(Icons.expand_more),
           ),
         ),
-        AnimatedCrossFade(
-          firstChild: Container(),
-          secondChild: Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Column(
-              children: [
-                ToggleButtons(
-                  isSelected: [
-                    themeState.themeMode == ThemeMode.light,
-                    themeState.themeMode == ThemeMode.system,
-                    themeState.themeMode == ThemeMode.dark,
-                  ],
-                  onPressed: (index) {
-                    themeNotifier.setThemeMode(themeModes[index]);
-                  },
-                  borderRadius: BorderRadius.circular(8.0),
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Tooltip(message: 'Light Mode', child: Icon(Icons.light_mode_outlined, size: 20)),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Tooltip(message: 'System Default', child: Icon(Icons.brightness_auto_outlined, size: 20)),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Tooltip(message: 'Dark Mode', child: Icon(Icons.dark_mode_outlined, size: 20)),
-                    ),
-                  ],
-                ),
-                if (isMaterialYouAvailable) ...[
-                  const SizedBox(height: 8),
-                  FilterChip(
-                    label: const Text('Material You'),
-                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                    avatar: const Icon(Icons.color_lens_outlined, size: 18),
-                    selected: themeState.useMaterialYou,
-                    onSelected: (isSelected) {
-                      themeNotifier.toggleMaterialYou(isSelected);
-                    },
-                  ),
-                ]
-              ],
-            ),
-          ),
-          crossFadeState: _isAppearanceExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
+        AnimatedSize(
           duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _isAppearanceExpanded ? collapsibleContent : const SizedBox.shrink(),
         ),
       ],
     );
@@ -170,6 +176,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   Widget _buildDrawerHeader(
       BuildContext context, bool isDarkMode, VoidCallback onTap) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return DrawerHeader(
       padding: EdgeInsets.zero,
       child: GestureDetector(
@@ -179,8 +187,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isDarkMode
-                  ? [const Color(0xFF0D47A1), const Color(0xFF00ACC1)]
-                  : [const Color(0xFF7FB3C8), const Color(0xFFC4B1C5)],
+                  ? [colorScheme.surfaceContainerHighest, colorScheme.primary]
+                  : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -191,9 +199,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               children: [
                 Image.asset('assets/AquaPi Logo.png', height: 60),
                 const SizedBox(width: 12),
-                const GradientText(
+                GradientText(
                   'Fish.AI',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 50,
                     fontWeight: FontWeight.bold,
                     shadows: [
@@ -205,10 +213,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ],
                   ),
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Color.fromARGB(255, 220, 230, 255),
-                    ],
+                    colors: isDarkMode
+                        ? [
+                            Colors.white,
+                            const Color.fromARGB(255, 220, 230, 255),
+                          ]
+                        : [
+                            colorScheme.primary,
+                            colorScheme.secondary,
+                          ],
                   ),
                 ),
               ],
@@ -218,17 +231,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       ),
     );
   }
-  
-  // --- SPACING FIX IS HERE ---
+
   Widget _buildDrawerFooter(
       BuildContext context, void Function(String) navigate) {
-    // Get the device's safe area padding at the bottom.
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    // The SafeArea widget is removed from here.
     return Padding(
-      // We apply padding manually. We use the device's safe area padding
-      // if it's greater than 0, otherwise, we fall back to a default small padding.
       padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
         delay: const Duration(milliseconds: 450),

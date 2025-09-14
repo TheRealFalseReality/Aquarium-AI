@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/ad_helper.dart';
 
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
@@ -24,9 +23,7 @@ class _AdBannerState extends State<AdBanner> {
   }
 
   void _loadAd() {
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/6300978111'
-        : 'ca-app-pub-3940256099942544/2934735716';
+    final adUnitId = AdHelper.bannerAdUnitId; // Use the AdHelper
 
     final bannerAd = BannerAd(
       adUnitId: adUnitId,
@@ -55,8 +52,6 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
-    // If ad is not loaded or on web, return a small container within SafeArea
-    // to ensure there's always bottom padding for the system navigation bar.
     if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
@@ -91,9 +86,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   }
 
   void _loadAd() {
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/2247696110'
-        : 'ca-app-pub-3940256099942544/3986624511';
+    final adUnitId = AdHelper.nativeAdUnitId; // Use the AdHelper
 
     final nativeAd = NativeAd(
       adUnitId: adUnitId,
@@ -167,9 +160,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 
   void _loadAd() {
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/6300978111'
-        : 'ca-app-pub-3940256099942544/2934735716';
+    final adUnitId = AdHelper.bannerAdUnitId; // Use the AdHelper
 
     final bannerAd = BannerAd(
       adUnitId: adUnitId,
