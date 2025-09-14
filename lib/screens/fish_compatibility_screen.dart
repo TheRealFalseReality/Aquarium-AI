@@ -21,42 +21,29 @@ class FishCompatibilityScreenState
     extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
   OverlayEntry? _loadingOverlayEntry;
-  List<Fish> _filteredFishList = [];
+  // The _filteredFishList state variable has been removed to prevent state inconsistencies.
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterFishList);
+    // Renamed for clarity. This listener just triggers a rebuild.
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _loadingOverlayEntry?.remove();
-    _searchController.removeListener(_filterFishList);
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  void _filterFishList() {
-    final fishData = ref.read(fishCompatibilityProvider).fishData;
-    final allFish = fishData.value?[_selectedCategory] ?? [];
-    final query = _searchController.text;
-
-    setState(() {
-      if (query.isEmpty) {
-        _filteredFishList = allFish;
-      } else {
-        _filteredFishList = allFish.where((fish) {
-          final nameMatches =
-              fish.name.toLowerCase().contains(query.toLowerCase());
-          final commonNamesMatch = fish.commonNames
-              .any((name) => name.toLowerCase().contains(query.toLowerCase()));
-          return nameMatches || commonNamesMatch;
-        }).toList();
-      }
-    });
+  // This method simply calls setState to trigger a rebuild.
+  // The actual filtering logic is now handled declaratively in the build method.
+  void _onSearchChanged() {
+    setState(() {});
   }
 
   void _showLoadingOverlay(
@@ -231,20 +218,28 @@ class FishCompatibilityScreenState
             ),
             data: (fishData) {
               final allFish = fishData[_selectedCategory] ?? [];
-              // Initialize filtered list if it's empty
-              if (_filteredFishList.isEmpty &&
-                  _searchController.text.isEmpty) {
-                _filteredFishList = allFish;
-              }
+              
+              // The list is now filtered directly within the build method.
+              // This ensures the UI is always in sync with the state.
+              final query = _searchController.text;
+              final filteredFishList = allFish.where((fish) {
+                if (query.isEmpty) {
+                  return true;
+                }
+                final nameMatches =
+                    fish.name.toLowerCase().contains(query.toLowerCase());
+                final commonNamesMatch = fish.commonNames.any(
+                    (name) => name.toLowerCase().contains(query.toLowerCase()));
+                return nameMatches || commonNamesMatch;
+              }).toList();
 
               if (allFish.isEmpty) {
                 return const Center(
                     child: Text('No fish found for this category.'));
               }
-              // Use a CustomScrollView to make the header scrollable
+
               return CustomScrollView(
                 slivers: [
-                  // Header Sliver
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -269,24 +264,22 @@ class FishCompatibilityScreenState
                       ),
                     ),
                   ),
-                  // Category Selector Sliver
                   SliverToBoxAdapter(
                     child: _buildCategorySelector(notifier),
                   ),
-                  // Grid of Fish Cards Sliver
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 210,
-                        childAspectRatio: 3 / 4, // Reverted aspect ratio
+                        childAspectRatio: 3 / 4,
                         crossAxisSpacing: 18,
                         mainAxisSpacing: 18,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final fish = _filteredFishList[index];
+                          final fish = filteredFishList[index];
                           final isSelected =
                               providerState.selectedFish.contains(fish);
                           return FishCard(
@@ -294,7 +287,7 @@ class FishCompatibilityScreenState
                             isSelected: isSelected,
                           );
                         },
-                        childCount: _filteredFishList.length,
+                        childCount: filteredFishList.length,
                       ),
                     ),
                   ),
@@ -304,7 +297,6 @@ class FishCompatibilityScreenState
                       child: BannerAdWidget(),
                     ),
                   ),
-                  // Disclaimer Sliver
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(24, 0, 24,
@@ -326,10 +318,9 @@ class FishCompatibilityScreenState
               );
             },
           ),
-          // Position the FAB above the bottom bar
           if (canShowLastReportFab)
             Positioned(
-              bottom: bottomBarHeight + 24, // Adjust this value for spacing
+              bottom: bottomBarHeight + 24,
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
@@ -349,7 +340,6 @@ class FishCompatibilityScreenState
             right: 16,
             child: _buildSearchWidget(canShowLastReportFab),
           ),
-          // The Bottom Bar is now at the bottom of the Stack
           if (providerState.selectedFish.isNotEmpty)
             Positioned(
               bottom: 0,
@@ -399,7 +389,6 @@ class FishCompatibilityScreenState
       elevation: 6,
       borderRadius: BorderRadius.circular(30),
       child: SizedBox(
-        // Constrain the width so it doesn't overlap the "Last Report" FAB
         width: canShowLastReportFab
             ? MediaQuery.of(context).size.width - 180
             : double.infinity,
@@ -416,7 +405,6 @@ class FishCompatibilityScreenState
                 setState(() {
                   _isSearchVisible = false;
                 });
-                // Unfocus the text field
                 FocusScope.of(context).unfocus();
               },
             ),
@@ -446,9 +434,11 @@ class FishCompatibilityScreenState
             emoji: '🐟',
             selected: _selectedCategory == 'freshwater',
             onTap: () {
-              setState(() => _selectedCategory = 'freshwater');
-              notifier.clearSelection();
-              _searchController.clear();
+              if (_selectedCategory != 'freshwater') {
+                setState(() => _selectedCategory = 'freshwater');
+                notifier.clearSelection();
+                _searchController.clear();
+              }
             },
           ),
           ModernSelectableChip(
@@ -456,9 +446,11 @@ class FishCompatibilityScreenState
             emoji: '🐠',
             selected: _selectedCategory == 'marine',
             onTap: () {
-              setState(() => _selectedCategory = 'marine');
-              notifier.clearSelection();
-              _searchController.clear();
+              if (_selectedCategory != 'marine') {
+                setState(() => _selectedCategory = 'marine');
+                notifier.clearSelection();
+                _searchController.clear();
+              }
             },
           ),
         ],
@@ -474,7 +466,7 @@ class FishCompatibilityScreenState
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
           padding:
-              const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
+              const EdgeInsets.fromLTRB(16, 16, 16, 16),
           decoration: BoxDecoration(
             color: cs.surface.withOpacity(0.05),
             border: Border(
