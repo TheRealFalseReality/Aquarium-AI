@@ -137,7 +137,7 @@ class _MiniAIChipState extends State<MiniAIChip> {
         child: widget.tooltip != null
             ? Tooltip(
                 message: widget.tooltip!,
-                child: chip,
+                child: SizedBox(child: chip),
               )
             : chip,
       ),

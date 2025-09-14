@@ -17,7 +17,7 @@ import 'package:firebase_core/firebase_core.dart';
 import './firebase_options.dart';
 import './widgets/transitions.dart';
 import './screens/fish_compatibility_screen.dart';
-import './screens/photo_analysis_screen.dart'; // keep route if needed externally
+import './screens/photo_analysis_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

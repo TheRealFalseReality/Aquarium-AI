@@ -135,7 +135,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
-  PhotoAnalysisResult? _lastPhotoResult;
 
   void _initSession() {
     _chatSession = _textModel.startChat(
@@ -319,10 +318,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
       isLoading: true,
     );
 
-    final tempC = tempUnit == 'F'
-        ? ((double.parse(temp) - 32) * 5 / 9).toStringAsFixed(2)
-        : temp;
-
     final prompt = '''
     Act as an aquarium expert. Analyze the following water parameters for a $tankType aquarium:
     ${ph.isNotEmpty ? '- pH: $ph' : ''}
@@ -330,7 +325,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ${salinity.isNotEmpty ? '- Salinity: $salinity ${salinityUnit == 'ppt' ? 'ppt' : 'Specific Gravity (SG)'}' : ''}
     ${additionalInfo.isNotEmpty ? '- Additional Information: $additionalInfo' : ''}
     Provide a detailed but easy-to-understand analysis. Respond with a JSON object.
-    IMPORTANT: For the 'value' field of the temperature parameter, you MUST use the original user-provided value which is '$temp°$tempUnit'.
+    IMPORTANT: For the 'value' field of the temperature parameter, you MUST use the original user-provided value which is '$temp°$tempUnit'. For all other parameters, if their value is numeric, please return it as a string in the JSON.
     The status for each parameter and the overall summary MUST be one of "Good", "Needs Attention", or "Bad".
     The 'howAquaPiHelps' section should conclude with a subtle link to our store: [Shop AquaPi](https://www.capitalcityaquatics.com/store).
 
@@ -355,6 +350,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
       final cleaned = _extractJson(response.text ?? '');
       final decoded = json.decode(cleaned);
+
+      // ================== FIX STARTS HERE ==================
+      // This will prevent the TypeError by ensuring parameter values are strings.
+      if (decoded['parameters'] is List) {
+        final List<dynamic> parameters = decoded['parameters'];
+        for (final param in parameters) {
+          if (param is Map<String, dynamic> && param.containsKey('value')) {
+            param['value'] = param['value'].toString();
+          }
+        }
+      }
+      // ================== FIX ENDS HERE ==================
+
       final result = WaterAnalysisResult.fromJson(decoded);
 
       state = ChatState(
@@ -549,7 +557,6 @@ User context: $note
 
       _lastPhotoBytes = imageBytes;
       _lastPhotoNote = userNote;
-      _lastPhotoResult = parsed;
 
       state = ChatState(
         messages: [
