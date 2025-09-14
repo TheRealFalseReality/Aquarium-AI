@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -214,6 +215,9 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();
+                break;
+              case '/stocking':
+                page = const AquariumStockingScreen();
                 break;
               case '/chatbot':
                 bool autoOpen = false;

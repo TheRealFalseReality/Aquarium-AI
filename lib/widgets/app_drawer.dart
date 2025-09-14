@@ -52,6 +52,15 @@ class AppDrawer extends ConsumerWidget {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 300),
                   child: ListTile(
+                    leading: const Icon(Icons.auto_awesome),
+                    title: const Text('Stocking Assistant'),
+                    subtitle: const Text('Get personalized stocking recommendations for your aquarium.'),
+                    onTap: () => navigate('/stocking'),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 300),
+                  child: ListTile(
                     leading: const Icon(Icons.science),
                     title: const Text('Aquarium Calculators'),
                     subtitle: const Text('Essential tools for salinity, CO₂, and more.'),
