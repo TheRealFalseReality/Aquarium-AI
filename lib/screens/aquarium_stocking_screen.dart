@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
-import 'stocking_report_screen.dart'; // Import the new report screen
+import 'stocking_report_screen.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
   const AquariumStockingScreen({super.key});
@@ -16,7 +16,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   final _formKey = GlobalKey<FormState>();
   final _tankSizeController = TextEditingController();
   final _notesController = TextEditingController();
-  String _selectedCategory = 'freshwater'; // Default to freshwater
+  String _selectedCategory = 'freshwater';
 
   @override
   void dispose() {
@@ -38,17 +38,17 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   @override
   Widget build(BuildContext context) {
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
-      if (next.recommendation != null && next.recommendation != previous?.recommendation) {
+      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(report: next.recommendation!),
+            builder: (context) => StockingReportScreen(reports: next.recommendations!),
           ),
         );
       }
     });
 
     final state = ref.watch(aquariumStockingProvider);
-    final hasLastReport = state.lastRecommendation != null;
+    final hasLastReport = state.lastRecommendations != null && state.lastRecommendations!.isNotEmpty;
 
     return MainLayout(
       title: 'Aquarium Stocking Assistant',
@@ -56,7 +56,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => StockingReportScreen(report: state.lastRecommendation!),
+              builder: (context) => StockingReportScreen(reports: state.lastRecommendations!),
             ),
           );
         },

@@ -8,33 +8,32 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
 
-// The state for our new provider
 class AquariumStockingState {
   final bool isLoading;
-  final StockingRecommendation? recommendation;
-  final StockingRecommendation? lastRecommendation;
+  final List<StockingRecommendation>? recommendations;
+  final List<StockingRecommendation>? lastRecommendations;
   final String? error;
 
   AquariumStockingState({
     this.isLoading = false,
-    this.recommendation,
-    this.lastRecommendation,
+    this.recommendations,
+    this.lastRecommendations,
     this.error,
   });
 
   AquariumStockingState copyWith({
     bool? isLoading,
-    StockingRecommendation? recommendation,
-    StockingRecommendation? lastRecommendation,
+    List<StockingRecommendation>? recommendations,
+    List<StockingRecommendation>? lastRecommendations,
     String? error,
     bool clearError = false,
     bool clearRecommendation = false,
   }) {
     return AquariumStockingState(
       isLoading: isLoading ?? this.isLoading,
-      recommendation:
-          clearRecommendation ? null : recommendation ?? this.recommendation,
-      lastRecommendation: lastRecommendation ?? this.lastRecommendation,
+      recommendations:
+          clearRecommendation ? null : recommendations ?? this.recommendations,
+      lastRecommendations: lastRecommendations ?? this.lastRecommendations,
       error: clearError ? null : error ?? this.error,
     );
   }
@@ -54,26 +53,22 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         isLoading: true, clearError: true, clearRecommendation: true);
 
     final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
-
     if (fishDataAsync.isLoading) {
-      state = state.copyWith(
-        error: 'Fish data is still loading, please wait a moment and try again.',
-        isLoading: false,
-      );
-      return;
+        state = state.copyWith(
+            error: 'Fish data is still loading, please wait a moment and try again.',
+            isLoading: false,
+        );
+        return;
     }
-
     final fishData = fishDataAsync.valueOrNull;
     if (fishData == null) {
-      state = state.copyWith(
-        error: 'Fish data is unavailable. Cannot generate recommendations.',
-        isLoading: false,
-      );
-      return;
+        state = state.copyWith(
+            error: 'Fish data is unavailable. Cannot generate recommendations.',
+            isLoading: false,
+        );
+        return;
     }
-
     final models = ref.read(modelProvider);
-
     if (models.apiKey.isEmpty) {
       state = state.copyWith(
         error: 'API Key not set. Please go to settings to add your API key.',
@@ -81,7 +76,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       );
       return;
     }
-
     final allFish = fishData[tankType] ?? [];
     if (allFish.isEmpty) {
       state = state.copyWith(
@@ -90,60 +84,62 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       );
       return;
     }
-
-    final model = GenerativeModel(
-      model: models.geminiModel,
-      apiKey: models.apiKey,
-    );
-
+    
+    final model = GenerativeModel(model: models.geminiModel, apiKey: models.apiKey);
     final processedTankSize = _processTankSize(tankSize);
     final prompt = _buildPrompt(processedTankSize, tankType, userNotes, allFish);
 
     try {
       final response = await model.generateContent([Content.text(prompt)]);
       final cleanedResponse = _extractJson(response.text!);
-      final recommendationsJson =
-          json.decode(cleanedResponse) as Map<String, dynamic>;
+      final recommendationsJson = json.decode(cleanedResponse) as Map<String, dynamic>;
 
-      final List<StockingRecommendation> recommendations = [];
+      final List<StockingRecommendation> allGeneratedRecs = [];
       final recommendationList = recommendationsJson['recommendations'] as List;
 
       for (var rec in recommendationList) {
         final fishNames = List<String>.from(rec['fish']);
-        final recommendedFish =
-            allFish.where((fish) => fishNames.contains(fish.name)).toList();
-
+        final recommendedFish = allFish.where((fish) => fishNames.contains(fish.name)).toList();
         if (recommendedFish.isNotEmpty) {
           final harmonyScore = _calculateHarmonyScore(recommendedFish);
-
-          // Only consider recommendations with a high score
-          if (harmonyScore >= 0.8) {
-            recommendations.add(StockingRecommendation(
-              title: rec['title'],
-              summary: rec['summary'],
-              fish: recommendedFish,
-              harmonyScore: harmonyScore,
-              tankMatesSummary: rec['tankMatesSummary'],
-              tankMates: List<String>.from(rec['compatibleFish']),
-            ));
-          }
+          allGeneratedRecs.add(StockingRecommendation(
+            title: rec['title'],
+            summary: rec['summary'],
+            fish: recommendedFish,
+            harmonyScore: harmonyScore,
+            tankMatesSummary: rec['tankMatesSummary'],
+            tankMates: List<String>.from(rec['compatibleFish']),
+          ));
         }
       }
 
-      // Sort by score to ensure the absolute best is selected
-      recommendations.sort((a, b) => b.harmonyScore.compareTo(a.harmonyScore));
+      allGeneratedRecs.sort((a, b) => b.harmonyScore.compareTo(a.harmonyScore));
 
-      if (recommendations.isNotEmpty) {
-        final bestRecommendation = recommendations.first;
+      List<StockingRecommendation> finalRecs = [];
+      finalRecs.addAll(allGeneratedRecs.where((r) => r.harmonyScore >= 0.8));
+
+      if (finalRecs.length < 3 && allGeneratedRecs.length > finalRecs.length) {
+        var remainingRecs = allGeneratedRecs.where((r) => !finalRecs.contains(r)).toList();
+        int needed = 3 - finalRecs.length;
+        if (remainingRecs.length > 0) {
+            finalRecs.addAll(remainingRecs.take(needed));
+        }
+      }
+      
+      if (finalRecs.isEmpty && allGeneratedRecs.isNotEmpty) {
+          finalRecs.add(allGeneratedRecs.first);
+      }
+
+
+      if (finalRecs.isNotEmpty) {
         state = state.copyWith(
-          recommendation: bestRecommendation,
-          lastRecommendation: bestRecommendation,
+          recommendations: finalRecs,
+          lastRecommendations: finalRecs,
           isLoading: false,
         );
       } else {
         state = state.copyWith(
-          error:
-              'Could not generate a high-harmony recommendation for your criteria. Try adjusting the notes or tank size.',
+          error: 'Could not generate a valid recommendation for your criteria. Try adjusting the notes or tank size.',
           isLoading: false,
         );
       }
@@ -162,10 +158,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     return tankSize;
   }
 
-  // --- MODIFIED PROMPT ---
   String _buildPrompt(
       String tankSize, String tankType, String userNotes, List<Fish> allFish) {
-    // Create a more detailed list that includes compatibility info
     final fishListWithCompat = allFish.map((f) => {
       'name': f.name,
       'compatible': f.compatible,
@@ -174,7 +168,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     return '''
     You are an expert aquarium stocking advisor. Your most important goal is to create a stocking plan with the highest possible harmony.
 
-    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. Do not suggest a group if this rule is not met.
+    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
 
     User's Input:
     - Tank Size: "$tankSize"
@@ -184,9 +178,14 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     Available Fish and their compatibility data:
     ${json.encode(fishListWithCompat)}
 
-    Based on the user's input and the strict harmony rule, provide 3 distinct stocking recommendations that have a very high harmony score (over 80%).
+    Based on the user's input and the compatibility data, provide 5 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
 
-    Each recommendation must be a JSON object with "title", "summary", a "fish" list (containing only fish names), "tankMatesSummary", and a "compatibleFish" list (containing other fish names compatible with the entire group).
+    For each recommendation, provide a JSON object with:
+    - "title": A creative and descriptive title for the aquarium setup.
+    - "summary": An elaborate, detailed summary. Describe the overall atmosphere, the activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers). This should be at least two to three sentences long.
+    - "fish": A list of fish names for this recommendation.
+    - "tankMatesSummary": A detailed summary explaining why the suggested tank mates are a good fit for the core group of fish.
+    - "compatibleFish": A list of other fish names compatible with the entire group.
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
     ''';
