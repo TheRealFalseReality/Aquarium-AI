@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme_provider.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
@@ -9,6 +12,8 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
 
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer
@@ -65,6 +70,8 @@ class AppDrawer extends ConsumerWidget {
               ],
             ),
           ),
+          const Divider(height: 1),
+          _buildThemeToggles(context, themeState, themeNotifier),
           const Divider(height: 1),
           _buildDrawerFooter(context, navigate),
         ],
@@ -123,7 +130,72 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildDrawerFooter(BuildContext context, void Function(String) navigate) {
+  Widget _buildThemeToggles(BuildContext context, ThemeProviderState themeState,
+      ThemeProviderNotifier themeNotifier) {
+    final themeModes = [ThemeMode.light, ThemeMode.system, ThemeMode.dark];
+    final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Column(
+        children: [
+          Text(
+            'Appearance',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          ToggleButtons(
+            isSelected: [
+              themeState.themeMode == ThemeMode.light,
+              themeState.themeMode == ThemeMode.system,
+              themeState.themeMode == ThemeMode.dark,
+            ],
+            onPressed: (index) {
+              themeNotifier.setThemeMode(themeModes[index]);
+            },
+            borderRadius: BorderRadius.circular(8.0),
+            children: const [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(
+                  message: 'Light Mode',
+                  child: Icon(Icons.light_mode_outlined, size: 20),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(
+                  message: 'System Default',
+                  child: Icon(Icons.brightness_auto_outlined, size: 20),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Tooltip(
+                  message: 'Dark Mode',
+                  child: Icon(Icons.dark_mode_outlined, size: 20),
+                ),
+              ),
+            ],
+          ),
+          if (isMaterialYouAvailable) ...[
+            const SizedBox(height: 8),
+            FilterChip(
+              label: const Text('Material You'),
+              avatar: const Icon(Icons.color_lens_outlined, size: 18),
+              selected: themeState.useMaterialYou,
+              onSelected: (isSelected) {
+                themeNotifier.toggleMaterialYou(isSelected);
+              },
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerFooter(
+      BuildContext context, void Function(String) navigate) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
