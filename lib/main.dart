@@ -13,8 +13,6 @@ import './screens/tank_volume_calculator.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:firebase_core/firebase_core.dart';
-import './firebase_options.dart';
 import './widgets/transitions.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/photo_analysis_screen.dart';
@@ -42,9 +40,6 @@ void main() async {
     return true;
   };
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   if (!kIsWeb) {
     unawaited(MobileAds.instance.initialize());
   }

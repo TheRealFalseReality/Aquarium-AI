@@ -10,8 +10,15 @@ const String defaultGeminiImageModel = geminiImageModelDefault;
 class ModelState {
   final String geminiModel;
   final String geminiImageModel;
+  final String apiKey;
+  final bool isLoading; // <-- Add isLoading flag
 
-  ModelState({required this.geminiModel, required this.geminiImageModel});
+  ModelState({
+    required this.geminiModel,
+    required this.geminiImageModel,
+    required this.apiKey,
+    this.isLoading = true, // <-- Default to true
+  });
 }
 
 // 2. Create the Notifier
@@ -21,6 +28,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
           // Use the constants for the initial state
           geminiModel: defaultGeminiModel,
           geminiImageModel: defaultGeminiImageModel,
+          apiKey: '',
         )) {
     _loadModels();
   }
@@ -32,12 +40,17 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final geminiModel = prefs.getString('geminiModel') ?? defaultGeminiModel;
     final geminiImageModel =
         prefs.getString('geminiImageModel') ?? defaultGeminiImageModel;
+    final apiKey = prefs.getString('apiKey') ?? '';
     state = ModelState(
-        geminiModel: geminiModel, geminiImageModel: geminiImageModel);
+        geminiModel: geminiModel,
+        geminiImageModel: geminiImageModel,
+        apiKey: apiKey,
+        isLoading: false); // <-- Set isLoading to false when done
   }
 
   // Method to update and save models
-  Future<void> setModels(String newGeminiModel, String newGeminiImageModel) async {
+  Future<void> setModels(
+      String newGeminiModel, String newGeminiImageModel, String newApiKey) async {
     if (newGeminiModel.isEmpty || newGeminiImageModel.isEmpty) {
       return;
     }
@@ -45,8 +58,12 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('geminiModel', newGeminiModel);
     await prefs.setString('geminiImageModel', newGeminiImageModel);
+    await prefs.setString('apiKey', newApiKey);
     state = ModelState(
-        geminiModel: newGeminiModel, geminiImageModel: newGeminiImageModel);
+        geminiModel: newGeminiModel,
+        geminiImageModel: newGeminiImageModel,
+        apiKey: newApiKey,
+        isLoading: false);
   }
 
   // *** NEW METHOD ***
@@ -56,11 +73,14 @@ class ModelNotifier extends StateNotifier<ModelState> {
     // Remove the custom values from storage
     await prefs.remove('geminiModel');
     await prefs.remove('geminiImageModel');
-    
+    await prefs.remove('apiKey');
+
     // Set the state back to the default constants
     state = ModelState(
       geminiModel: defaultGeminiModel,
       geminiImageModel: defaultGeminiImageModel,
+      apiKey: '',
+      isLoading: false,
     );
   }
 }
@@ -69,3 +89,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
 final modelProvider = StateNotifierProvider<ModelNotifier, ModelState>(
   (ref) => ModelNotifier(),
 );
+
+// New provider to easily check the loading state
+final modelProviderLoading = Provider<bool>((ref) {
+  return ref.watch(modelProvider).isLoading;
+});

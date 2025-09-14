@@ -1,7 +1,7 @@
 name: fish_ai
 description: "AI tools for Fish!"
 publish_to: 'none'
-version: 0.4.0
+version: 0.5.0
 
 environment:
   sdk: ^3.9.2
@@ -24,8 +24,6 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   cupertino_icons: ^1.0.8
   google_mobile_ads: ^6.0.0
-  firebase_core: ^4.1.0
-  firebase_ai: ^3.2.0
 
 dev_dependencies:
   flutter_test:

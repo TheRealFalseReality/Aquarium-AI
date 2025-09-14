@@ -5,8 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   file_selector_windows
-  firebase_auth
-  firebase_core
   url_launcher_windows
 )
 

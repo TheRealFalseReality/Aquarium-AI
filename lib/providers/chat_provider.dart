@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
@@ -78,19 +78,25 @@ class ChatState {
   ChatState({required this.messages, this.isLoading = false});
 }
 
-final geminiTextModelProvider = Provider<GenerativeModel>((ref) {
+final geminiTextModelProvider = Provider<GenerativeModel?>((ref) {
   final models = ref.watch(modelProvider);
-
-  return FirebaseAI.googleAI().generativeModel(
+  if (models.apiKey.isEmpty) {
+    return null;
+  }
+  return GenerativeModel(
     model: models.geminiModel,
+    apiKey: models.apiKey,
   );
 });
 
-final geminiImageModelProvider = Provider<GenerativeModel>((ref) {
+final geminiImageModelProvider = Provider<GenerativeModel?>((ref) {
   final models = ref.watch(modelProvider);
-
-  return FirebaseAI.googleAI().generativeModel(
+  if (models.apiKey.isEmpty) {
+    return null;
+  }
+  return GenerativeModel(
     model: models.geminiImageModel,
+    apiKey: models.apiKey,
   );
 });
 
@@ -113,7 +119,7 @@ String _extractJson(String text) {
 
 /// ====================== Chat Notifier ======================
 class ChatNotifier extends StateNotifier<ChatState> {
-  ChatNotifier({required GenerativeModel textModel, required GenerativeModel imageModel})
+  ChatNotifier({required GenerativeModel? textModel, required GenerativeModel? imageModel})
       : _textModel = textModel,
         _imageModel = imageModel,
         super(ChatState(messages: [])) {
@@ -125,11 +131,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
       ),
       ChatMessage(text: 'ad', isUser: false, isAd: true),
     ]);
-    _initSession();
+    if (_textModel != null) {
+      _initSession();
+    }
   }
 
-  final GenerativeModel _textModel;
-  final GenerativeModel _imageModel;
+  final GenerativeModel? _textModel;
+  final GenerativeModel? _imageModel;
 
   late final ChatSession _chatSession;
 
@@ -137,6 +145,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   String? _lastPhotoNote;
 
   void _initSession() {
+    if (_textModel == null) return;
     _chatSession = _textModel.startChat(
       history: [
         Content.model([
@@ -205,10 +214,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
+    if (_textModel == null) {
+      _handleError('API Key not set. Please set it in the settings.', message);
+      return;
+    }
     await _sendWithRetry(message, isRetry: false);
   }
 
   Future<void> retryMessage(String original) async {
+    if (_textModel == null) {
+      _handleError('API Key not set. Please set it in the settings.', original);
+      return;
+    }
     await _sendWithRetry(original, isRetry: true);
   }
 
@@ -296,6 +313,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// ================== Water Parameter Analysis ==================
   Future<WaterAnalysisResult?> analyzeWaterParameters(
       Map<String, String> params) async {
+    if (_textModel == null) {
+      _handleError(
+          'API Key not set. Please set it in the settings.', 'Analyze water parameters');
+      return null;
+    }
     final {
       'tankType': tankType,
       'ph': ph,
@@ -405,6 +427,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// ================== Automation Script ==================
   Future<AutomationScript?> generateAutomationScript(String description) async {
+    if (_textModel == null) {
+      _handleError(
+          'API Key not set. Please set it in the settings.', 'Generate automation script');
+      return null;
+    }
     final userMsg = 'Generate an automation script for: "$description"';
     state = ChatState(
       messages: [...state.messages.where((m) => !m.isAd), ChatMessage(text: userMsg, isUser: true)],
@@ -480,6 +507,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
     String mimeType = 'image/jpeg',
     bool isRegeneration = false,
   }) async {
+    if (_imageModel == null) {
+      _handleError('API Key not set. Please set it in the settings.',
+          'Analyze photo');
+      return null;
+    }
     final note = (userNote?.trim().isNotEmpty ?? false)
         ? 'User note: ${userNote!.trim()}'
         : 'No additional user note.';
@@ -538,11 +570,12 @@ User context: $note
 ''';
 
     try {
+      final content = [
+        DataPart(mimeType, imageBytes),
+        TextPart(prompt),
+      ];
       final response = await _imageModel
-          .generateContent([
-            Content.inlineData(mimeType, imageBytes),
-            Content.text(prompt),
-          ])
+          .generateContent(content as Iterable<Content>)
           .timeout(const Duration(seconds: 55));
 
       _cancellable?.complete(response);
