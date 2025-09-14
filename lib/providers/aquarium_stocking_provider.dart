@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
@@ -98,17 +97,22 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       final recommendationList = recommendationsJson['recommendations'] as List;
 
       for (var rec in recommendationList) {
-        final fishNames = List<String>.from(rec['fish']);
-        final recommendedFish = allFish.where((fish) => fishNames.contains(fish.name)).toList();
-        if (recommendedFish.isNotEmpty) {
-          final harmonyScore = _calculateHarmonyScore(recommendedFish);
+        final coreFishNames = List<String>.from(rec['coreFish']);
+        final otherFishNames = List<String>.from(rec['otherDataBasedFish']);
+
+        final coreFish = allFish.where((fish) => coreFishNames.contains(fish.name)).toList();
+        final otherFish = allFish.where((fish) => otherFishNames.contains(fish.name)).toList();
+        
+        if (coreFish.isNotEmpty) {
+          final harmonyScore = _calculateHarmonyScore(coreFish);
           allGeneratedRecs.add(StockingRecommendation(
             title: rec['title'],
             summary: rec['summary'],
-            fish: recommendedFish,
+            coreFish: coreFish,
+            otherDataBasedFish: otherFish,
+            aiTankMatesSummary: rec['aiTankMatesSummary'],
+            aiRecommendedTankMates: List<String>.from(rec['aiRecommendedTankMates']), 
             harmonyScore: harmonyScore,
-            tankMatesSummary: rec['tankMatesSummary'],
-            tankMates: List<String>.from(rec['compatibleFish']),
           ));
         }
       }
@@ -121,7 +125,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       if (finalRecs.length < 3 && allGeneratedRecs.length > finalRecs.length) {
         var remainingRecs = allGeneratedRecs.where((r) => !finalRecs.contains(r)).toList();
         int needed = 3 - finalRecs.length;
-        if (remainingRecs.length > 0) {
+        if (remainingRecs.isNotEmpty) {
             finalRecs.addAll(remainingRecs.take(needed));
         }
       }
@@ -129,7 +133,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       if (finalRecs.isEmpty && allGeneratedRecs.isNotEmpty) {
           finalRecs.add(allGeneratedRecs.first);
       }
-
 
       if (finalRecs.isNotEmpty) {
         state = state.copyWith(
@@ -166,7 +169,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }).toList();
 
     return '''
-    You are an expert aquarium stocking advisor. Your most important goal is to create a stocking plan with the highest possible harmony.
+    You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
 
     A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
 
@@ -175,17 +178,18 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     - Tank Type: "$tankType"
     - Notes: "$userNotes"
 
-    Available Fish and their compatibility data:
+    Available Fish and their compatibility data (use this for "coreFish" and "otherDataBasedFish"):
     ${json.encode(fishListWithCompat)}
 
-    Based on the user's input and the compatibility data, provide 5 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
+    Based on the user's input, provide 3 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
 
     For each recommendation, provide a JSON object with:
     - "title": A creative and descriptive title for the aquarium setup.
-    - "summary": An elaborate, detailed summary. Describe the overall atmosphere, the activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers). This should be at least two to three sentences long.
-    - "fish": A list of fish names for this recommendation.
-    - "tankMatesSummary": A detailed summary explaining why the suggested tank mates are a good fit for the core group of fish.
-    - "compatibleFish": A list of other fish names compatible with the entire group.
+    - "summary": An elaborate, detailed summary (2-3 sentences) describing the tank's atmosphere, activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers).
+    - "coreFish": A list of 2-4 fish names that form the main, high-harmony group for this recommendation.
+    - "otherDataBasedFish": A list of other fish from the provided data that are compatible with **all** of the "coreFish".
+    - "aiTankMatesSummary": A detailed summary explaining why the "aiRecommendedTankMates" are a good fit for the core group of fish.
+    - "aiRecommendedTankMates": A list of 5-10 common fish names (not from the provided data) that you, as an AI, would recommend as additional tank mates.
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
     ''';
@@ -199,13 +203,21 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   double _getPairwiseProbability(Fish fishA, Fish fishB) {
     if (fishA.compatible.contains(fishB.name) &&
-        fishB.compatible.contains(fishA.name)) return 1.0;
+        fishB.compatible.contains(fishA.name)) {
+      return 1.0;
+    }
     if (fishA.notCompatible.contains(fishB.name) ||
-        fishB.notCompatible.contains(fishA.name)) return 0.0;
+        fishB.notCompatible.contains(fishA.name)) {
+      return 0.0;
+    }
     if (fishA.notRecommended.contains(fishB.name) ||
-        fishB.notRecommended.contains(fishA.name)) return 0.25;
+        fishB.notRecommended.contains(fishA.name)) {
+      return 0.25;
+    }
     if (fishA.withCaution.contains(fishB.name) ||
-        fishB.withCaution.contains(fishA.name)) return 0.75;
+        fishB.withCaution.contains(fishA.name)) {
+      return 0.75;
+    }
     return 0.5;
   }
 

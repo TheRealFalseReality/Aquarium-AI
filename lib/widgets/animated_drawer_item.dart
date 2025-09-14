@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 class AnimatedDrawerItem extends StatefulWidget {
   final Widget child;
@@ -8,40 +7,52 @@ class AnimatedDrawerItem extends StatefulWidget {
   const AnimatedDrawerItem({
     super.key,
     required this.child,
-    required this.delay,
+    this.delay = Duration.zero,
   });
 
   @override
-   createState() => AnimatedDrawerItemState();
+  State<AnimatedDrawerItem> createState() => _AnimatedDrawerItemState();
 }
 
-class AnimatedDrawerItemState extends State<AnimatedDrawerItem> {
-  bool _isAnimated = false;
+class _AnimatedDrawerItemState extends State<AnimatedDrawerItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
 
   @override
   void initState() {
     super.initState();
-    Timer(widget.delay, () {
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(-1.0, 0.0), // Start off-screen to the left
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Wait for the delay then start the animation
+    Future.delayed(widget.delay, () {
       if (mounted) {
-        setState(() {
-          _isAnimated = true;
-        });
+        _controller.forward();
       }
     });
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: _isAnimated ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOut,
-        transform: Matrix4.translationValues(0, _isAnimated ? 0 : 15, 0),
-        child: widget.child,
-      ),
+    return SlideTransition(
+      position: _offsetAnimation,
+      child: widget.child,
     );
   }
 }

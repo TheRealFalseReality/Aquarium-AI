@@ -1,7 +1,7 @@
 name: fish_ai
 description: "AI tools for Fish!"
 publish_to: 'none'
-version: 0.5.1
+version: 0.5.2
 
 environment:
   sdk: ^3.9.2
@@ -52,3 +52,12 @@ flutter_native_splash:
   image: assets/AquaPi Logo.png
   color: "#d8f3ff"
   color_dark: "#2D3748"
+
+
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+        - asset: assets/fonts/NotoSans-Bold.ttf
+        - asset: assets/fonts/NotoSans-BoldItalic.ttf
+          weight: 700
