@@ -7,7 +7,7 @@ import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
-import '../widgets/api_key_dialog.dart'; // Import the new dialog
+import '../widgets/api_key_dialog.dart';
 
 class FeatureInfo {
   final String icon;
