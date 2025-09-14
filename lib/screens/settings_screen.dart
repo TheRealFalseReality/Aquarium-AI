@@ -17,6 +17,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // Define controllers here
   late final TextEditingController _geminiModelController;
   late final TextEditingController _geminiImageModelController;
+  late final TextEditingController _apiKeyController;
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _geminiModelController = TextEditingController(text: models.geminiModel);
     _geminiImageModelController =
         TextEditingController(text: models.geminiImageModel);
+    _apiKeyController = TextEditingController(text: models.apiKey);
   }
 
   @override
@@ -33,6 +35,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Dispose controllers to prevent memory leaks
     _geminiModelController.dispose();
     _geminiImageModelController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -54,6 +57,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (_geminiImageModelController.text != next.geminiImageModel) {
         _geminiImageModelController.text = next.geminiImageModel;
+      }
+      if (_apiKeyController.text != next.apiKey) {
+        _apiKeyController.text = next.apiKey;
       }
     });
 
@@ -109,6 +115,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
+                  TextField(
+                    controller: _apiKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'Google AI API Key',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 4.0,
@@ -161,26 +175,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ElevatedButton.icon(
                         onPressed: () {
                           final newTextModel = _geminiModelController.text;
-                          final newImageModel = _geminiImageModelController.text;
+                          final newImageModel =
+                              _geminiImageModelController.text;
+                          final newApiKey = _apiKeyController.text;
 
                           if (newTextModel.isNotEmpty &&
                               newImageModel.isNotEmpty) {
-                            ref
-                                .read(modelProvider.notifier)
-                                .setModels(newTextModel, newImageModel);
+                            ref.read(modelProvider.notifier).setModels(
+                                newTextModel, newImageModel, newApiKey);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Models updated successfully!')),
+                                  content:
+                                      Text('Settings updated successfully!')),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Model names cannot be empty.')),
+                                  content:
+                                      Text('Model names cannot be empty.')),
                             );
                           }
                         },
                         icon: const Icon(Icons.save),
-                        label: const Text('Save Models'),
+                        label: const Text('Save Settings'),
                       ),
                     ],
                   ),

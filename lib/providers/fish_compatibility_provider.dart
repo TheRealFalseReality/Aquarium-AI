@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:firebase_ai/firebase_ai.dart';
 import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
 
 // Helper class for cancellable operations
@@ -170,18 +170,30 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       clearError: true,
       lastCategory: category,
     );
-    
+
     final models = ref.read(modelProvider);
 
-    // Use the model name from settings
-    final model =
-        FirebaseAI.googleAI().generativeModel(model: models.geminiModel);
+    if (models.apiKey.isEmpty) {
+      state = state.copyWith(
+        error: 'API Key not set. Please go to settings to add your API key.',
+        isLoading: false,
+        isRetryable: false,
+      );
+      return;
+    }
+
+    // Use the model name and API key from settings
+    final model = GenerativeModel(
+      model: models.geminiModel,
+      apiKey: models.apiKey,
+    );
 
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
-    
+
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future.catchError((error) => Future<GenerateContentResponse>.error(error));
+    _cancellableCompleter!.future
+        .catchError((error) => Future<GenerateContentResponse>.error(error));
 
     try {
       final response = await model
@@ -219,7 +231,6 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   String _getFriendlyErrorMessage(String error) {
-    
     // Fallback for any other errors, showing the actual message
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
