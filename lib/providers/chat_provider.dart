@@ -146,7 +146,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   void _initSession() {
     if (_textModel == null) return;
-    _chatSession = _textModel.startChat(
+    _chatSession = _textModel!.startChat(
       history: [
         Content.model([
           TextPart('''
@@ -198,7 +198,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
           - Maintain a friendly, informative, and clear tone.
           - Emphasize the open-source and community-driven nature of the project.
           - Be encouraging but realistic about the DIY nature of the product and its support limitations.
-          
           ''')
         ])
       ],
@@ -292,7 +291,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   void _handleError(String error, String originalMessage) {
-    // Simplified error handling to echo the raw error.
     final msg = '⚠️ **An Unexpected Error Occurred**\n\n$error';
     
     state = ChatState(
@@ -302,7 +300,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           text: msg,
           isUser: false,
           isError: true,
-          isRetryable: true, // Keep it retryable
+          isRetryable: true,
           originalMessage: originalMessage,
         )
       ],
@@ -365,7 +363,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _cancellable = CancellableCompleter();
 
     try {
-      final response = await _textModel
+      final response = await _textModel!
           .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
@@ -373,8 +371,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final cleaned = _extractJson(response.text ?? '');
       final decoded = json.decode(cleaned);
 
-      // ================== FIX STARTS HERE ==================
-      // This will prevent the TypeError by ensuring parameter values are strings.
       if (decoded['parameters'] is List) {
         final List<dynamic> parameters = decoded['parameters'];
         for (final param in parameters) {
@@ -383,7 +379,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
           }
         }
       }
-      // ================== FIX ENDS HERE ==================
 
       final result = WaterAnalysisResult.fromJson(decoded);
 
@@ -421,7 +416,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   String _getWaterAnalysisErrorMessage(String error) {
-    // Simplified error handling to echo the raw error.
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
@@ -453,7 +447,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ''';
 
     try {
-      final response = await _textModel
+      final response = await _textModel!
           .generateContent([Content.text(prompt)])
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
@@ -496,7 +490,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   String _getAutomationScriptErrorMessage(String error) {
-    // Simplified error handling to echo the raw error.
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
@@ -529,7 +522,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
         isLoading: true,
       );
     } else {
-      // Just turn loading on (do not duplicate user submission message)
       state = ChatState(messages: state.messages, isLoading: true);
     }
 
@@ -570,13 +562,17 @@ User context: $note
 ''';
 
     try {
-      final content = [
+      final contentParts = [
         DataPart(mimeType, imageBytes),
         TextPart(prompt),
       ];
-      final response = await _imageModel
-          .generateContent(content as Iterable<Content>)
+      
+      // ================== FIX IS HERE ==================
+      // The list of parts must be wrapped in a Content.multi() object.
+      final response = await _imageModel!
+          .generateContent([Content.multi(contentParts)])
           .timeout(const Duration(seconds: 55));
+      // ===============================================
 
       _cancellable?.complete(response);
 
