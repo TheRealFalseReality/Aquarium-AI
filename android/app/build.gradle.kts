@@ -12,6 +12,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.firebase.crashlytics") version "3.0.6" apply false
 }
 
 android {
@@ -58,4 +59,10 @@ flutter {
 
 dependencies {
     implementation("com.google.android.material:material:1.12.0")
+
+    // Add the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    // Add the Crashlytics dependency
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics")
 }
