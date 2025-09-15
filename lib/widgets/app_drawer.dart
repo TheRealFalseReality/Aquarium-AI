@@ -23,8 +23,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     void navigate(String routeName) {
-      Navigator.pop(context); // Close the drawer
+      Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
+        // Guard clause: Check if the widget is still mounted before using its context.
+        if (!mounted) return;
+
+        // Now it's safe to use the context for navigation.
         if (ModalRoute.of(context)?.settings.name != routeName) {
           Navigator.pushNamed(context, routeName);
         }
@@ -44,7 +48,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.calculate),
                     title: const Text('AI Compatibility Tool'),
-                    subtitle: const Text('Check fish compatibility with an AI report.'),
+                    subtitle:
+                        const Text('Check fish compatibility with an AI report.'),
                     onTap: () => navigate('/compat-ai'),
                   ),
                 ),
@@ -53,7 +58,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.chat),
                     title: const Text('AI Chatbot'),
-                    subtitle: const Text('Ask questions, analyze parameters, and more.'),
+                    subtitle: const Text(
+                        'Ask questions, analyze parameters, and more.'),
                     onTap: () => navigate('/chatbot'),
                   ),
                 ),
@@ -62,7 +68,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.auto_awesome),
                     title: const Text('Stocking Assistant'),
-                    subtitle: const Text('Get personalized stocking recommendations for your aquarium.'),
+                    subtitle: const Text(
+                        'Get personalized stocking recommendations for your aquarium.'),
                     onTap: () => navigate('/stocking'),
                   ),
                 ),
@@ -71,7 +78,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.science),
                     title: const Text('Aquarium Calculators'),
-                    subtitle: const Text('Essential tools for salinity, CO₂, and more.'),
+                    subtitle:
+                        const Text('Essential tools for salinity, CO₂, and more.'),
                     onTap: () => navigate('/calculators'),
                   ),
                 ),
@@ -80,7 +88,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: ListTile(
                     leading: const Icon(Icons.opacity),
                     title: const Text('Tank Volume'),
-                    subtitle: const Text('Calculate the volume of your aquarium.'),
+                    subtitle:
+                        const Text('Calculate the volume of your aquarium.'),
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
@@ -122,15 +131,21 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             children: const [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Tooltip(message: 'Light Mode', child: Icon(Icons.light_mode_outlined, size: 20)),
+                child: Tooltip(
+                    message: 'Light Mode',
+                    child: Icon(Icons.light_mode_outlined, size: 20)),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Tooltip(message: 'System Default', child: Icon(Icons.brightness_auto_outlined, size: 20)),
+                child: Tooltip(
+                    message: 'System Default',
+                    child: Icon(Icons.brightness_auto_outlined, size: 20)),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Tooltip(message: 'Dark Mode', child: Icon(Icons.dark_mode_outlined, size: 20)),
+                child: Tooltip(
+                    message: 'Dark Mode',
+                    child: Icon(Icons.dark_mode_outlined, size: 20)),
               ),
             ],
           ),
@@ -138,7 +153,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             const SizedBox(height: 8),
             FilterChip(
               label: const Text('Material You'),
-              labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              labelStyle:
+                  TextStyle(color: Theme.of(context).colorScheme.onSurface),
               avatar: const Icon(Icons.color_lens_outlined, size: 18),
               selected: themeState.useMaterialYou,
               onSelected: (isSelected) {
@@ -168,7 +184,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          child: _isAppearanceExpanded ? collapsibleContent : const SizedBox.shrink(),
+          child:
+              _isAppearanceExpanded ? collapsibleContent : const SizedBox.shrink(),
         ),
       ],
     );
@@ -237,7 +254,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
+      padding: EdgeInsets.fromLTRB(
+          16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
         delay: const Duration(milliseconds: 450),
         child: Row(
