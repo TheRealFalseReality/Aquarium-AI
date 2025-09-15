@@ -7,7 +7,7 @@ import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
-import '../widgets/fish_card.dart'; // Import the new fish card
+import '../widgets/fish_card.dart';
 import 'compatibility_report.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
@@ -29,6 +29,10 @@ class FishCompatibilityScreenState
   void initState() {
     super.initState();
     _searchController.addListener(_filterFishList);
+    // Initialize the list on the first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateAndFilterFishList();
+    });
   }
 
   @override
@@ -39,7 +43,8 @@ class FishCompatibilityScreenState
     super.dispose();
   }
 
-  void _filterFishList() {
+  // New method to handle both category changes and search filtering
+  void _updateAndFilterFishList() {
     final fishData = ref.read(fishCompatibilityProvider).fishData;
     final allFish = fishData.value?[_selectedCategory] ?? [];
     final query = _searchController.text;
@@ -57,6 +62,11 @@ class FishCompatibilityScreenState
         }).toList();
       }
     });
+  }
+
+  // Renamed for clarity
+  void _filterFishList() {
+    _updateAndFilterFishList();
   }
 
   void _showLoadingOverlay(
@@ -230,21 +240,11 @@ class FishCompatibilityScreenState
               ),
             ),
             data: (fishData) {
-              final allFish = fishData[_selectedCategory] ?? [];
-              // Initialize filtered list if it's empty
-              if (_filteredFishList.isEmpty &&
-                  _searchController.text.isEmpty) {
-                _filteredFishList = allFish;
+              if (_filteredFishList.isEmpty && _searchController.text.isEmpty) {
+                _filteredFishList = fishData[_selectedCategory] ?? [];
               }
-
-              if (allFish.isEmpty) {
-                return const Center(
-                    child: Text('No fish found for this category.'));
-              }
-              // Use a CustomScrollView to make the header scrollable
               return CustomScrollView(
                 slivers: [
-                  // Header Sliver
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -269,18 +269,16 @@ class FishCompatibilityScreenState
                       ),
                     ),
                   ),
-                  // Category Selector Sliver
                   SliverToBoxAdapter(
                     child: _buildCategorySelector(notifier),
                   ),
-                  // Grid of Fish Cards Sliver
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 210,
-                        childAspectRatio: 3 / 4, // Reverted aspect ratio
+                        childAspectRatio: 3 / 4,
                         crossAxisSpacing: 18,
                         mainAxisSpacing: 18,
                       ),
@@ -304,11 +302,10 @@ class FishCompatibilityScreenState
                       child: BannerAdWidget(),
                     ),
                   ),
-                  // Disclaimer Sliver
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(24, 0, 24,
-                          bottomBarHeight + 80), // Padding to avoid bottom bar
+                          bottomBarHeight + 80),
                       child: Text(
                         'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -326,10 +323,9 @@ class FishCompatibilityScreenState
               );
             },
           ),
-          // Position the FAB above the bottom bar
           if (canShowLastReportFab)
             Positioned(
-              bottom: bottomBarHeight + 24, // Adjust this value for spacing
+              bottom: bottomBarHeight + 24,
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
@@ -349,7 +345,6 @@ class FishCompatibilityScreenState
             right: 16,
             child: _buildSearchWidget(canShowLastReportFab),
           ),
-          // The Bottom Bar is now at the bottom of the Stack
           if (providerState.selectedFish.isNotEmpty)
             Positioned(
               bottom: 0,
@@ -399,7 +394,6 @@ class FishCompatibilityScreenState
       elevation: 6,
       borderRadius: BorderRadius.circular(30),
       child: SizedBox(
-        // Constrain the width so it doesn't overlap the "Last Report" FAB
         width: canShowLastReportFab
             ? MediaQuery.of(context).size.width - 180
             : double.infinity,
@@ -416,7 +410,6 @@ class FishCompatibilityScreenState
                 setState(() {
                   _isSearchVisible = false;
                 });
-                // Unfocus the text field
                 FocusScope.of(context).unfocus();
               },
             ),
@@ -449,6 +442,7 @@ class FishCompatibilityScreenState
               setState(() => _selectedCategory = 'freshwater');
               notifier.clearSelection();
               _searchController.clear();
+              _updateAndFilterFishList(); // Bug fix is here
             },
           ),
           ModernSelectableChip(
@@ -459,6 +453,7 @@ class FishCompatibilityScreenState
               setState(() => _selectedCategory = 'marine');
               notifier.clearSelection();
               _searchController.clear();
+              _updateAndFilterFishList(); // And also here
             },
           ),
         ],
@@ -474,7 +469,7 @@ class FishCompatibilityScreenState
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
         child: Container(
           padding:
-              const EdgeInsets.fromLTRB(16, 16, 16, 16), // Symmetrical padding
+              const EdgeInsets.fromLTRB(16, 16, 16, 16),
           decoration: BoxDecoration(
             color: cs.surface.withOpacity(0.05),
             border: Border(

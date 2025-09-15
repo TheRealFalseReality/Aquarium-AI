@@ -217,6 +217,7 @@ class MyApp extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
+          // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             Widget page;
