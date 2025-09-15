@@ -15,7 +15,7 @@ plugins {
 }
 
 android {
-    namespace = "com.cca.fishai"
+    namespace = "com.example.fishai"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
