@@ -40,7 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     // Watch the model provider for changes
-    final models = ref.watch(modelProvider);
+    ref.watch(modelProvider);
 
     // Listen for state changes to update controllers, e.g., after a reset
     ref.listen<ModelState>(modelProvider, (previous, next) {
