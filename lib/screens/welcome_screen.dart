@@ -93,7 +93,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 750),
       ),
       FeatureInfo(
-        icon: '✨',
+        icon: '🦐',
         title: 'AI Stocking Assistant',
         description: 'Receive custom, AI-powered stocking plans based on your tank\'s size and type to help you build a harmonious aquatic community.',
         routeName: '/stocking',

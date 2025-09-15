@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:209151214292:android:4ec677afabcb5ec4c8b141",
+        "mobilesdk_app_id": "1:209151214292:android:f88d075a89001fe2c8b141",
         "android_client_info": {
-          "package_name": "com.example.fishai"
+          "package_name": "com.cca.fishai"
         }
       },
       "oauth_client": [],

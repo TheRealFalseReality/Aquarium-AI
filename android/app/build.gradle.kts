@@ -15,7 +15,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.fishai"
+    namespace = "com.cca.fishai"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.fishai"
+        applicationId = "com.cca.fishai"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
