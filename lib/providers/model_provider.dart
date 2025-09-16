@@ -5,19 +5,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Define default values as constants for reusability
 const String defaultGeminiModel = geminiModelDefault;
 const String defaultGeminiImageModel = geminiImageModelDefault;
+const String defaultChatGPTModel = openAIModelDefault;
+const String defaultChatGPTImageModel = openAIImageModelDefault;
+const AIProvider defaultAIProvider = AIProvider.gemini;
+
+enum AIProvider { gemini, openAI }
 
 // 1. Define the state class
 class ModelState {
   final String geminiModel;
   final String geminiImageModel;
-  final String apiKey;
-  final bool isLoading; // <-- Add isLoading flag
+  final String geminiApiKey;
+  final String chatGPTModel;
+  final String chatGPTImageModel;
+  final String openAIApiKey;
+  final AIProvider activeProvider;
+  final bool isLoading;
 
   ModelState({
     required this.geminiModel,
     required this.geminiImageModel,
-    required this.apiKey,
-    this.isLoading = true, // <-- Default to true
+    required this.geminiApiKey,
+    required this.chatGPTModel,
+    required this.chatGPTImageModel,
+    required this.openAIApiKey,
+    required this.activeProvider,
+    this.isLoading = true,
   });
 }
 
@@ -25,61 +38,91 @@ class ModelState {
 class ModelNotifier extends StateNotifier<ModelState> {
   ModelNotifier()
       : super(ModelState(
-          // Use the constants for the initial state
           geminiModel: defaultGeminiModel,
           geminiImageModel: defaultGeminiImageModel,
-          apiKey: '',
+          geminiApiKey: '',
+          chatGPTModel: defaultChatGPTModel,
+          chatGPTImageModel: defaultChatGPTImageModel,
+          openAIApiKey: '',
+          activeProvider: defaultAIProvider,
         )) {
     _loadModels();
   }
 
-  // Method to load models from shared preferences
   Future<void> _loadModels() async {
     final prefs = await SharedPreferences.getInstance();
-    // Use the constants as the fallback
     final geminiModel = prefs.getString('geminiModel') ?? defaultGeminiModel;
     final geminiImageModel =
         prefs.getString('geminiImageModel') ?? defaultGeminiImageModel;
-    final apiKey = prefs.getString('apiKey') ?? '';
+    final geminiApiKey = prefs.getString('geminiApiKey') ?? '';
+    final chatGPTModel = prefs.getString('chatGPTModel') ?? defaultChatGPTModel;
+    final chatGPTImageModel = prefs.getString('chatGPTImageModel') ?? defaultChatGPTImageModel;
+    final openAIApiKey = prefs.getString('openAIApiKey') ?? '';
+    final activeProvider = AIProvider.values[prefs.getInt('activeProvider') ?? defaultAIProvider.index];
+
     state = ModelState(
-        geminiModel: geminiModel,
-        geminiImageModel: geminiImageModel,
-        apiKey: apiKey,
-        isLoading: false); // <-- Set isLoading to false when done
+      geminiModel: geminiModel,
+      geminiImageModel: geminiImageModel,
+      geminiApiKey: geminiApiKey,
+      chatGPTModel: chatGPTModel,
+      chatGPTImageModel: chatGPTImageModel,
+      openAIApiKey: openAIApiKey,
+      activeProvider: activeProvider,
+      isLoading: false,
+    );
   }
 
-  // Method to update and save models
-  Future<void> setModels(
-      String newGeminiModel, String newGeminiImageModel, String newApiKey) async {
-    if (newGeminiModel.isEmpty || newGeminiImageModel.isEmpty) {
+  Future<void> setModels({
+    required String newGeminiModel,
+    required String newGeminiImageModel,
+    required String newGeminiApiKey,
+    required String newChatGPTModel,
+    required String newChatGPTImageModel,
+    required String newOpenAIApiKey,
+    required AIProvider newActiveProvider,
+  }) async {
+    if (newGeminiModel.isEmpty || newGeminiImageModel.isEmpty || newChatGPTModel.isEmpty || newChatGPTImageModel.isEmpty) {
       return;
     }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('geminiModel', newGeminiModel);
     await prefs.setString('geminiImageModel', newGeminiImageModel);
-    await prefs.setString('apiKey', newApiKey);
+    await prefs.setString('geminiApiKey', newGeminiApiKey);
+    await prefs.setString('chatGPTModel', newChatGPTModel);
+    await prefs.setString('chatGPTImageModel', newChatGPTImageModel);
+    await prefs.setString('openAIApiKey', newOpenAIApiKey);
+    await prefs.setInt('activeProvider', newActiveProvider.index);
+
     state = ModelState(
-        geminiModel: newGeminiModel,
-        geminiImageModel: newGeminiImageModel,
-        apiKey: newApiKey,
-        isLoading: false);
+      geminiModel: newGeminiModel,
+      geminiImageModel: newGeminiImageModel,
+      geminiApiKey: newGeminiApiKey,
+      chatGPTModel: newChatGPTModel,
+      chatGPTImageModel: newChatGPTImageModel,
+      openAIApiKey: newOpenAIApiKey,
+      activeProvider: newActiveProvider,
+      isLoading: false,
+    );
   }
 
-  // *** NEW METHOD ***
-  // Method to reset models to their default values
-  Future<void> resetToDefaults() async {
+  Future<void> resetModelsToDefaults() async {
     final prefs = await SharedPreferences.getInstance();
-    // Remove the custom values from storage
+    // Remove only the model names from storage
     await prefs.remove('geminiModel');
     await prefs.remove('geminiImageModel');
-    await prefs.remove('apiKey');
+    await prefs.remove('chatGPTModel');
+    await prefs.remove('chatGPTImageModel');
 
-    // Set the state back to the default constants
+    // Set the state back to the default models, but keep the existing API keys and provider
     state = ModelState(
       geminiModel: defaultGeminiModel,
       geminiImageModel: defaultGeminiImageModel,
-      apiKey: '',
+      geminiApiKey: state.geminiApiKey,
+      chatGPTModel: defaultChatGPTModel,
+      chatGPTImageModel: defaultChatGPTImageModel,
+      openAIApiKey: state.openAIApiKey,
+      activeProvider: state.activeProvider,
       isLoading: false,
     );
   }

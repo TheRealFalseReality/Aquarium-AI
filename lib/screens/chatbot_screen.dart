@@ -315,7 +315,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                             maxLines: 6,
                             textInputAction: TextInputAction.newline,
                             decoration: InputDecoration(
-                              hintText: 'Ask AquaPi anything...',
+                              hintText: 'Ask Fish.AI anything...',
                               border: InputBorder.none,
                               hintStyle: TextStyle(
                                 color: cs.onSurface.withOpacity(0.45),

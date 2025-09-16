@@ -56,7 +56,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) {
       // If the provider is no longer loading and the API key is empty, show the dialog.
-      if (previous!.isLoading && !next.isLoading && next.apiKey.isEmpty) {
+      if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty) {
         showDialog(
           context: context,
           builder: (context) => const ApiKeyDialog(),
@@ -186,14 +186,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              '${modelState.geminiModel} (text)',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              '${modelState.geminiImageModel} (image)',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
+                            if (modelState.activeProvider == AIProvider.gemini) ...[
+                              Text(
+                                '${modelState.geminiModel} (text)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${modelState.geminiImageModel} (image)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ] else ...[
+                               Text(
+                                '${modelState.chatGPTModel} (text)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ]
                           ],
                         ),
                       )

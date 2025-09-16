@@ -6,7 +6,9 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'model_provider.dart';
+import '../prompts/fish_compatibility_prompt.dart';
 
 // Helper class for cancellable operations
 class CancellableCompleter<T> {
@@ -18,13 +20,13 @@ class CancellableCompleter<T> {
   bool get isCancelled => _isCancelled;
 
   void complete([FutureOr<T>? value]) {
-    if (!_isCancelled) {
+    if (!_isCancelled && !_completer.isCompleted) {
       _completer.complete(value);
     }
   }
 
   void completeError(Object error, [StackTrace? stackTrace]) {
-    if (!_isCancelled) {
+    if (!_isCancelled && !_completer.isCompleted) {
       _completer.completeError(error, stackTrace);
     }
   }
@@ -103,7 +105,7 @@ class FishCompatibilityState {
 }
 
 class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
-  CancellableCompleter<GenerateContentResponse>? _cancellableCompleter;
+  CancellableCompleter<dynamic>? _cancellableCompleter;
 
   @override
   FishCompatibilityState build() {
@@ -160,6 +162,44 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       await getCompatibilityReport(state.lastCategory!);
     }
   }
+    
+  // Helper function for OpenAI calls with retry logic
+  Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
+    int retries = 0;
+    const maxRetries = 3;
+    int delay = 1000; // start with 1 second
+
+    while (retries < maxRetries) {
+      try {
+        final response = await OpenAI.instance.chat.create(
+          model: modelName,
+          responseFormat: {"type": "json_object"},
+          messages: [
+            OpenAIChatCompletionChoiceMessageModel(
+              content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt)],
+              role: OpenAIChatMessageRole.user,
+            ),
+          ],
+        ).timeout(const Duration(seconds: 30));
+        _cancellableCompleter?.complete(response);
+        return response.choices.first.message.content?.first.text;
+      } catch (e) {
+        // Check the error message for rate limit indicators
+        if (e.toString().contains('429') || e.toString().toLowerCase().contains('rate limit')) {
+          retries++;
+          if (retries >= maxRetries) {
+            rethrow; // rethrow the exception if we've exhausted all retries
+          }
+          // Exponential backoff
+          await Future.delayed(Duration(milliseconds: delay));
+          delay *= 2; 
+        } else {
+          rethrow; // rethrow other exceptions immediately
+        }
+      }
+    }
+    return null;
+  }
 
   Future<void> getCompatibilityReport(String category) async {
     if (state.selectedFish.isEmpty) return;
@@ -172,35 +212,34 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     );
 
     final models = ref.read(modelProvider);
-
-    if (models.apiKey.isEmpty) {
-      state = state.copyWith(
-        error: 'API Key not set. Please go to settings to add your API key.',
-        isLoading: false,
-        isRetryable: false,
-      );
-      return;
-    }
-
-    // Use the model name and API key from settings
-    final model = GenerativeModel(
-      model: models.geminiModel,
-      apiKey: models.apiKey,
-    );
-
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
-    final prompt = _buildPrompt(category, state.selectedFish, harmonyScore);
+    final fishNames = state.selectedFish.map((f) => f.name).toList();
+    final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore);
 
     _cancellableCompleter = CancellableCompleter();
-    _cancellableCompleter!.future
-        .catchError((error) => Future<GenerateContentResponse>.error(error));
 
     try {
-      final response = await model
-          .generateContent([Content.text(prompt)])
-          .timeout(const Duration(seconds: 30));
-      _cancellableCompleter?.complete(response);
-      final cleanedResponse = _extractJson(response.text!);
+      String? responseText;
+      if (models.activeProvider == AIProvider.gemini) {
+        if (models.geminiApiKey.isEmpty) {
+          throw Exception('Gemini API Key not set. Please go to settings to add your API key.');
+        }
+        final model = GenerativeModel(model: models.geminiModel, apiKey: models.geminiApiKey);
+        final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 30));
+        _cancellableCompleter?.complete(response);
+        responseText = response.text;
+      } else {
+        if (models.openAIApiKey.isEmpty) {
+          throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
+        }
+        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+      }
+
+      if (responseText == null) {
+        throw Exception('Received no response from the AI service after multiple retries.');
+      }
+
+      final cleanedResponse = _extractJson(responseText);
       final reportJson = json.decode(cleanedResponse);
       final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel'],
@@ -231,7 +270,12 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   String _getFriendlyErrorMessage(String error) {
-    // Fallback for any other errors, showing the actual message
+    if (error.contains('429') || error.toLowerCase().contains('rate limit')) {
+        return '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
+    }
+    if (error.toLowerCase().contains('quota')) {
+        return '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
+    }
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
 
@@ -276,27 +320,5 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       }
     }
     return minProb;
-  }
-
-  String _buildPrompt(
-      String category, List<Fish> fishList, double harmonyScore) {
-    final fishNames = fishList.map((f) => f.name).join(', ');
-    final harmonyPercentage = (harmonyScore * 100).toStringAsFixed(0);
-
-    return '''
-      You are an aquarium expert. A user has selected a group of fish. Your task is to generate a tailored care guide and compatibility summary.
-      Selected Fish: $fishNames
-      Fish Type: $category
-      Group Harmony Score: $harmonyPercentage%
-      Please provide a JSON object with the following:
-      1. "harmonyLabel": "Based on the Group Harmony Score of $harmonyPercentage%, provide a one-word label (e.g., Excellent, Good, Fair, Poor).",
-      2. "harmonySummary": "Based on the Group Harmony Score of $harmonyPercentage%, write a brief summary of the overall compatibility of this group.",
-      3. "detailedSummary": "A detailed summary of the potential interactions in this specific group of fish.",
-      4. "tankSize": "A recommended minimum tank size.",
-      5. "decorations": "Recommended decorations and setup.",
-      6. "careGuide": "A general care guide for this group.",
-      7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
-      8. "compatibleFish": [{"name": "List of other fish that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
-      ''';
   }
 }

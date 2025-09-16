@@ -4,8 +4,11 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
+import 'dart:async';
+import '../prompts/stocking_recommendation_prompt.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -43,6 +46,42 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   AquariumStockingNotifier(this.ref) : super(AquariumStockingState());
 
+  // Helper function for OpenAI calls with retry logic
+  Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
+    int retries = 0;
+    const maxRetries = 3;
+    int delay = 1000; // start with 1 second
+
+    while (retries < maxRetries) {
+      try {
+        final response = await OpenAI.instance.chat.create(
+          model: modelName,
+          responseFormat: {"type": "json_object"},
+          messages: [
+            OpenAIChatCompletionChoiceMessageModel(
+              content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt)],
+              role: OpenAIChatMessageRole.user,
+            ),
+          ],
+        ).timeout(const Duration(seconds: 45)); // Increased timeout
+        return response.choices.first.message.content?.first.text;
+      } catch (e) {
+        // Check the error message for rate limit indicators
+        if (e.toString().contains('429') || e.toString().toLowerCase().contains('rate limit')) {
+          retries++;
+          if (retries >= maxRetries) {
+            rethrow; 
+          }
+          await Future.delayed(Duration(milliseconds: delay));
+          delay *= 2; 
+        } else {
+          rethrow; 
+        }
+      }
+    }
+    return null;
+  }
+
   Future<void> getStockingRecommendations({
     required String tankSize,
     required String tankType,
@@ -68,13 +107,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         return;
     }
     final models = ref.read(modelProvider);
-    if (models.apiKey.isEmpty) {
-      state = state.copyWith(
-        error: 'API Key not set. Please go to settings to add your API key.',
-        isLoading: false,
-      );
-      return;
-    }
     final allFish = fishData[tankType] ?? [];
     if (allFish.isEmpty) {
       state = state.copyWith(
@@ -84,13 +116,30 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return;
     }
     
-    final model = GenerativeModel(model: models.geminiModel, apiKey: models.apiKey);
     final processedTankSize = _processTankSize(tankSize);
-    final prompt = _buildPrompt(processedTankSize, tankType, userNotes, allFish);
+    final prompt = buildStockingRecommendationPrompt(processedTankSize, tankType, userNotes, allFish);
 
     try {
-      final response = await model.generateContent([Content.text(prompt)]);
-      final cleanedResponse = _extractJson(response.text!);
+      String? responseText;
+      if (models.activeProvider == AIProvider.gemini) {
+        if (models.geminiApiKey.isEmpty) {
+          throw Exception('Gemini API Key not set. Please go to settings to add your API key.');
+        }
+        final model = GenerativeModel(model: models.geminiModel, apiKey: models.geminiApiKey);
+        final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 45));
+        responseText = response.text;
+      } else {
+        if (models.openAIApiKey.isEmpty) {
+          throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
+        }
+        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+      }
+
+      if (responseText == null) {
+        throw Exception('Received no response from the AI service after multiple retries.');
+      }
+
+      final cleanedResponse = _extractJson(responseText);
       final recommendationsJson = json.decode(cleanedResponse) as Map<String, dynamic>;
 
       final List<StockingRecommendation> allGeneratedRecs = [];
@@ -147,8 +196,14 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
+      String errorMessage = 'Failed to generate recommendations: ${e.toString()}';
+      if (e.toString().contains('429') || e.toString().toLowerCase().contains('quota')) {
+          errorMessage = '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
+      } else if (e.toString().toLowerCase().contains('rate limit')) {
+          errorMessage = '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
+      }
       state = state.copyWith(
-        error: 'Failed to generate recommendations: ${e.toString()}',
+        error: errorMessage,
         isLoading: false,
       );
     }
@@ -159,40 +214,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return '$tankSize gallons';
     }
     return tankSize;
-  }
-
-  String _buildPrompt(
-      String tankSize, String tankType, String userNotes, List<Fish> allFish) {
-    final fishListWithCompat = allFish.map((f) => {
-      'name': f.name,
-      'compatible': f.compatible,
-    }).toList();
-
-    return '''
-    You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
-
-    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
-
-    User's Input:
-    - Tank Size: "$tankSize"
-    - Tank Type: "$tankType"
-    - Notes: "$userNotes"
-
-    Available Fish and their compatibility data (use this for "coreFish" and "otherDataBasedFish"):
-    ${json.encode(fishListWithCompat)}
-
-    Based on the user's input, provide 3 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
-
-    For each recommendation, provide a JSON object with:
-    - "title": A creative and descriptive title for the aquarium setup.
-    - "summary": An elaborate, detailed summary (2-3 sentences) describing the tank's atmosphere, activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers).
-    - "coreFish": A list of 2-4 fish names that form the main, high-harmony group for this recommendation.
-    - "otherDataBasedFish": A list of other fish from the provided data that are compatible with **all** of the "coreFish".
-    - "aiTankMatesSummary": A detailed summary explaining why the "aiRecommendedTankMates" are a good fit for the core group of fish.
-    - "aiRecommendedTankMates": A list of 5-10 common fish names (not from the provided data) that you, as an AI, would recommend as additional tank mates.
-
-    Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
-    ''';
   }
 
   String _extractJson(String text) {
