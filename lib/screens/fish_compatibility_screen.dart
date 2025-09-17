@@ -117,13 +117,19 @@ class FishCompatibilityScreenState
                                 backgroundImage: NetworkImage(fish.imageURL),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                fish.name.split(' ')[0],
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(color: Colors.white),
-                                textAlign: TextAlign.center,
+                              // MODIFIED: This section is now corrected to allow wrapping.
+                              SizedBox(
+                                width: 100, // Constrains the text width
+                                child: Text(
+                                  fish.name, // Use the full name
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(color: Colors.white),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ],
                           ),

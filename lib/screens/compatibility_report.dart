@@ -8,18 +8,42 @@ import '../providers/fish_compatibility_provider.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 
+// ADDED: New helper function to format AI-generated text with bold headers.
+Widget _formatAIResponse(BuildContext context, String text) {
+  final theme = Theme.of(context);
+  final defaultStyle = theme.textTheme.bodyMedium;
+  final boldStyle = theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold);
+
+  final List<TextSpan> spans = [];
+  // Standardize the bold markers and then split by them.
+  final cleanText = text.replaceAll('* **', '**');
+  final parts = cleanText.split('**');
+
+  for (int i = 0; i < parts.length; i++) {
+    // Every odd part was inside the markers, so it should be bold.
+    spans.add(TextSpan(
+      text: parts[i],
+      style: i.isOdd ? boldStyle : defaultStyle,
+    ));
+  }
+
+  return SelectableText.rich(
+    TextSpan(children: spans),
+    textAlign: TextAlign.center,
+  );
+}
+
 void showReportDialog(BuildContext context, CompatibilityReport report,
     {bool fromHistory = false}) {
   final sections = {
     'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
     'Compatible Tank Mates': _buildTankMatesSection(context, report),
-    'Detailed Summary':
-        SelectableText(report.detailedSummary, textAlign: TextAlign.center),
+    // MODIFIED: Use the new formatter for these sections.
+    'Detailed Summary': _formatAIResponse(context, report.detailedSummary),
     'Recommended Tank Size':
         SelectableText(report.tankSize, textAlign: TextAlign.center),
-    'Decorations and Setup':
-        SelectableText(report.decorations, textAlign: TextAlign.center),
-    'Care Guide': SelectableText(report.careGuide, textAlign: TextAlign.center),
+    'Decorations and Setup': _formatAIResponse(context, report.decorations),
+    'Care Guide': _formatAIResponse(context, report.careGuide),
   };
 
   showDialog(
@@ -86,7 +110,6 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                     );
                   }),
                   const SizedBox(height: 12),
-                  // ADDED: New expandable section for the calculation breakdown.
                   _buildCalculationBreakdown(context, report),
                   const BannerAdWidget(),
                   const SizedBox(height: 12),
@@ -188,7 +211,6 @@ Widget _buildSection(
   );
 }
 
-// ADDED: New function to build the expandable calculation breakdown section.
 Widget _buildCalculationBreakdown(
     BuildContext context, CompatibilityReport report) {
   final cs = Theme.of(context).colorScheme;
@@ -212,7 +234,8 @@ Widget _buildCalculationBreakdown(
       ),
       children: [
         Padding(
-          padding: const EdgeInsets.all(18.0),
+          padding:
+              const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
           child: SelectableText(
             report.calculationBreakdown,
             textAlign: TextAlign.center,
@@ -259,6 +282,9 @@ Widget _buildSelectedFishSection(
                             .textTheme
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
+                        // MODIFIED: Allow fish name to wrap to two lines.
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         fish.commonNames.join(', '),

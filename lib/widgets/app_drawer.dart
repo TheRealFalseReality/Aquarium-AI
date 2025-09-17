@@ -1,4 +1,4 @@
-// lib/widgets/app_drawer.dart
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
