@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:fish_ai/constants.dart';
 import 'package:flutter/foundation.dart';
 
 class AdHelper {
@@ -22,13 +23,13 @@ class AdHelper {
     if (kDebugMode) {
       // Use test ad unit IDs in debug mode
       return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/9214589741'
-          : 'ca-app-pub-3940256099942544/2435281174';
+          ? admobBannerAdUnitIdAndroidTest
+          : admobBannerAdUnitIdIOSTest;
     } else {
       // Use real ad unit IDs in release mode
       return Platform.isAndroid
-          ? 'ca-app-pub-5701077439648731/5466510018'
-          : 'ca-app-pub-5701077439648731/5466510018';
+          ? admobBannerAdUnitId
+          : admobBannerAdUnitId;
     }
   }
 
@@ -41,13 +42,13 @@ class AdHelper {
     if (kDebugMode) {
       // Use test ad unit IDs in debug mode
       return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/2247696110'
-          : 'ca-app-pub-3940256099942544/3986624511';
+          ? admobNativeAdUnitIdAndroidTest
+          : admobNativeAdUnitIdIOSTest;
     } else {
       // Use your real ad unit IDs in release mode
       return Platform.isAndroid
-          ? 'ca-app-pub-5701077439648731/1709391540'
-          : 'ca-app-pub-5701077439648731/1709391540';
+          ? admobNativeAdUnitId
+          : admobNativeAdUnitId;
     }
   }
 }

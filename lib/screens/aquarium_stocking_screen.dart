@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
@@ -52,6 +53,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
 
     return MainLayout(
       title: 'Aquarium Stocking Assistant',
+      bottomNavigationBar: const AdBanner(),
       floatingActionButton: hasLastReport ? FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(

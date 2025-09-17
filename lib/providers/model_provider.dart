@@ -7,8 +7,8 @@ const String defaultGeminiModel = geminiModelDefault;
 const String defaultGeminiImageModel = geminiImageModelDefault;
 const String defaultChatGPTModel = openAIModelDefault;
 const String defaultChatGPTImageModel = openAIImageModelDefault;
-const String defaultGroqModel = 'llama-3.1-8b-instant';
-const String defaultGroqImageModel = 'llama-3.3-70b-versatile';
+const String defaultGroqModel = groqModelDefault;
+const String defaultGroqImageModel = groqImageModelDefault;
 const AIProvider defaultAIProvider = AIProvider.gemini;
 
 enum AIProvider { gemini, openAI, groq }
