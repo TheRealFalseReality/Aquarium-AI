@@ -25,7 +25,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   AIProvider _selectedProvider = AIProvider.gemini;
 
   bool _isGeminiApiKeyVisible = false;
-  final bool _isOpenAIApiKeyVisible = false;
+  bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
 
   @override
@@ -72,6 +72,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
       return; // Stop the function
     }
+    if (_selectedProvider == AIProvider.openAI &&
+        _openAIApiKeyController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter an OpenAI API key before saving.')),
+      );
+      return; // Stop the function
+    }
     if (_selectedProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +88,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
       return; // Stop the function
     }
-    // Note: OpenAI is currently disabled, so no validation is needed for it.
 
     // If validation passes, proceed to save the settings.
     ref.read(modelProvider.notifier).setModels(
@@ -158,11 +165,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Active AI Provider',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Center(
+                    child: Text(
+                      'Active AI Provider',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SegmentedButton<AIProvider>(
@@ -180,7 +189,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Gemini is recommended and free.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()
@@ -222,17 +241,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  // ... rest of the unchanged widgets (_buildGeminiSettings, _buildOpenAISettings, etc.)
-
   Widget _buildGeminiSettings() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
         const SizedBox(height: 24),
-        Text(
-          'Google Gemini Settings',
-          style: Theme.of(context).textTheme.titleLarge,
+        Center(
+          child: Text(
+            'Google Gemini Settings',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -279,25 +298,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
-              child: const Text(
-                'Google AI Studio',
+              child: Text(
+                'https://aistudio.google.com/app/apikey',
                 style: TextStyle(
-                    color: Colors.blue, decoration: TextDecoration.underline),
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline),
               ),
             ),
             const Text('2. Sign in with your Google account.'),
             const Text(
                 '3. Click "Create API key in new project" or "Get API key".'),
             const Text('4. Copy the generated API key and paste it above.'),
-            InkWell(
-              onTap: () => launchUrl(
-                  Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
-              child: const Text(
-                'View Full Guide',
-                style: TextStyle(
-                    color: Colors.blue, decoration: TextDecoration.underline),
-              ),
-            ),
           ],
         ),
       ],
@@ -305,124 +316,75 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildOpenAISettings() {
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // The disabled settings section
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Divider(),
-            const SizedBox(height: 24),
-            Text(
-              'OpenAI Settings',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _openAIApiKeyController,
-              enabled: false,
-              obscureText: !_isOpenAIApiKeyVisible,
-              decoration: InputDecoration(
-                labelText: 'OpenAI API Key',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isOpenAIApiKeyVisible
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                  ),
-                  onPressed: null,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _chatGPTModelController,
-              enabled: false,
-              decoration: const InputDecoration(
-                labelText: 'ChatGPT Text Model',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _chatGPTImageModelController,
-              enabled: false,
-              decoration: const InputDecoration(
-                labelText: 'ChatGPT Multimedia Model',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildApiKeyGuide(
-              title: 'How to get your OpenAI API key:',
-              children: [
-                const Text('1. Go to the OpenAI API keys page.'),
-                InkWell(
-                  onTap: () => launchUrl(
-                      Uri.parse('https://platform.openai.com/account/api-keys')),
-                  child: const Text(
-                    'OpenAI API Keys',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline),
-                  ),
-                ),
-                const Text('2. Sign in and create a new secret key.'),
-                const Text('3. Copy the generated API key and paste it above.'),
-                InkWell(
-                  onTap: () => launchUrl(
-                      Uri.parse('https://www.merge.dev/blog/chatgpt-api-key')),
-                  child: const Text(
-                    'View Full Guide',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline),
-                  ),
-                ),
-              ],
-            ),
-          ],
+        const Divider(),
+        const SizedBox(height: 24),
+        Center(
+          child: Text(
+            'OpenAI Settings',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
-        // The creative "Coming Soon" overlay
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: Container(
-                color: Colors.black.withOpacity(0.1),
-                alignment: Alignment.center,
-                child: Transform.rotate(
-                  angle: -0.2,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    child: Text(
-                      'Coming Soon!',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          ),
-                    ),
-                  ),
-                ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _openAIApiKeyController,
+          enabled: true,
+          obscureText: !_isOpenAIApiKeyVisible,
+          decoration: InputDecoration(
+            labelText: 'OpenAI API Key',
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _isOpenAIApiKeyVisible
+                    ? Icons.visibility_off
+                    : Icons.visibility,
               ),
+              onPressed: () {
+                setState(() {
+                  _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
+                });
+              },
             ),
           ),
+        ),
+        const SizedBox(height: 24),
+        TextField(
+          controller: _chatGPTModelController,
+          enabled: true,
+          decoration: const InputDecoration(
+            labelText: 'ChatGPT Text Model',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _chatGPTImageModelController,
+          enabled: true,
+          decoration: const InputDecoration(
+            labelText: 'ChatGPT Multimedia Model',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildApiKeyGuide(
+          title: 'How to get your OpenAI API key:',
+          children: [
+            const Text('1. Go to the OpenAI API keys page.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
+              child: Text(
+                'https://platform.openai.com/api-keys',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline),
+              ),
+            ),
+            const Text('2. Sign in and create a new secret key.'),
+            const Text('3. Copy the generated API key and paste it above.'),
+          ],
         ),
       ],
     );
@@ -430,13 +392,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildGroqSettings() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
         const SizedBox(height: 24),
-        Text(
-          'Groq Settings',
-          style: Theme.of(context).textTheme.titleLarge,
+        Center(
+          child: Text(
+            'Groq Settings',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -479,11 +443,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             const Text('1. Go to the GroqCloud Console website.'),
             InkWell(
-              onTap: () => launchUrl(Uri.parse('https://console.groq.com/keys')),
-              child: const Text(
-                'GroqCloud Console',
+              onTap: () =>
+                  launchUrl(Uri.parse('https://console.groq.com/keys')),
+              child: Text(
+                'https://console.groq.com/keys',
                 style: TextStyle(
-                    color: Colors.blue, decoration: TextDecoration.underline),
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline),
               ),
             ),
             const Text('2. Sign in and navigate to the API Keys section.'),
