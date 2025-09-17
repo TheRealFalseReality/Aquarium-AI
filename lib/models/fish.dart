@@ -18,14 +18,25 @@ class Fish {
   });
 
   factory Fish.fromJson(Map<String, dynamic> json) {
+    // Helper function to safely parse lists that might contain objects
+    List<String> _parseStringList(List<dynamic>? data) {
+      if (data == null) return [];
+      // Check if the first item is a String or a Map
+      if (data.isNotEmpty && data.first is Map) {
+        return data.map((item) => item['name'] as String).toList();
+      }
+      return List<String>.from(data);
+    }
+
     return Fish(
       name: json['name'] as String,
       commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
-      compatible: List<String>.from(json['compatible'] ?? []),
-      notRecommended: List<String>.from(json['notRecommended'] ?? []),
-      notCompatible: List<String>.from(json['notCompatible'] ?? []),
-      withCaution: List<String>.from(json['withCaution'] ?? []),
+      // Use the new helper function to parse each list
+      compatible: _parseStringList(json['compatible']),
+      notRecommended: _parseStringList(json['notRecommended']),
+      notCompatible: _parseStringList(json['notCompatible']),
+      withCaution: _parseStringList(json['withCaution']),
     );
   }
 }
