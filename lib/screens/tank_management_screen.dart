@@ -370,7 +370,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       spacing: 8,
                       runSpacing: 4,
                       children: tank.inhabitants.take(3).map((inhabitant) {
+                        final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
                         return Chip(
+                          avatar: fishImageUrl != null
+                              ? CircleAvatar(
+                                  radius: 12,
+                                  backgroundImage: NetworkImage(fishImageUrl),
+                                  backgroundColor: Colors.transparent,
+                                )
+                              : CircleAvatar(
+                                  radius: 12,
+                                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.pets,
+                                    size: 12,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
                           label: Text(
                             '${inhabitant.quantity}x ${inhabitant.customName}',
                             style: const TextStyle(fontSize: 12),
@@ -432,6 +448,41 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 ],
               ),
+              // Tank Size Info
+              if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.straighten,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Tank Size: ${_formatTankSize(tank)}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              ],
+              // Harmony Score Info
+              if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.pets,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Harmony Score: ',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    _buildHarmonyScoreChip(tank),
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
               
               Text(
