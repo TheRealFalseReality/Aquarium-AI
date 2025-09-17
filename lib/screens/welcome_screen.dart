@@ -56,7 +56,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) {
       // If the provider is no longer loading and the API key is empty, show the dialog.
-      if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty) {
+      if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty && next.groqApiKey.isEmpty) {
         showDialog(
           context: context,
           builder: (context) => const ApiKeyDialog(),
@@ -195,9 +195,22 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 '${modelState.geminiImageModel} (image)',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
+                            ] else if (modelState.activeProvider == AIProvider.groq) ...[
+                              Text(
+                                '${modelState.groqModel} (text)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${modelState.groqImageModel} (image)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                             ] else ...[
-                               Text(
+                              Text(
                                 '${modelState.chatGPTModel} (text)',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${modelState.chatGPTImageModel} (image)',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ]

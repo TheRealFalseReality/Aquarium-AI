@@ -7,9 +7,11 @@ const String defaultGeminiModel = geminiModelDefault;
 const String defaultGeminiImageModel = geminiImageModelDefault;
 const String defaultChatGPTModel = openAIModelDefault;
 const String defaultChatGPTImageModel = openAIImageModelDefault;
+const String defaultGroqModel = 'llama-3.1-8b-instant';
+const String defaultGroqImageModel = 'llama-3.3-70b-versatile';
 const AIProvider defaultAIProvider = AIProvider.gemini;
 
-enum AIProvider { gemini, openAI }
+enum AIProvider { gemini, openAI, groq }
 
 // 1. Define the state class
 class ModelState {
@@ -19,6 +21,9 @@ class ModelState {
   final String chatGPTModel;
   final String chatGPTImageModel;
   final String openAIApiKey;
+  final String groqModel;
+  final String groqImageModel;
+  final String groqApiKey;
   final AIProvider activeProvider;
   final bool isLoading;
 
@@ -29,6 +34,9 @@ class ModelState {
     required this.chatGPTModel,
     required this.chatGPTImageModel,
     required this.openAIApiKey,
+    required this.groqModel,
+    required this.groqImageModel,
+    required this.groqApiKey,
     required this.activeProvider,
     this.isLoading = true,
   });
@@ -44,6 +52,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
           chatGPTModel: defaultChatGPTModel,
           chatGPTImageModel: defaultChatGPTImageModel,
           openAIApiKey: '',
+          groqModel: defaultGroqModel,
+          groqImageModel: defaultGroqImageModel,
+          groqApiKey: '',
           activeProvider: defaultAIProvider,
         )) {
     _loadModels();
@@ -56,9 +67,15 @@ class ModelNotifier extends StateNotifier<ModelState> {
         prefs.getString('geminiImageModel') ?? defaultGeminiImageModel;
     final geminiApiKey = prefs.getString('geminiApiKey') ?? '';
     final chatGPTModel = prefs.getString('chatGPTModel') ?? defaultChatGPTModel;
-    final chatGPTImageModel = prefs.getString('chatGPTImageModel') ?? defaultChatGPTImageModel;
+    final chatGPTImageModel =
+        prefs.getString('chatGPTImageModel') ?? defaultChatGPTImageModel;
     final openAIApiKey = prefs.getString('openAIApiKey') ?? '';
-    final activeProvider = AIProvider.values[prefs.getInt('activeProvider') ?? defaultAIProvider.index];
+    final groqModel = prefs.getString('groqModel') ?? defaultGroqModel;
+    final groqImageModel =
+        prefs.getString('groqImageModel') ?? defaultGroqImageModel;
+    final groqApiKey = prefs.getString('groqApiKey') ?? '';
+    final activeProvider = AIProvider
+        .values[prefs.getInt('activeProvider') ?? defaultAIProvider.index];
 
     state = ModelState(
       geminiModel: geminiModel,
@@ -67,6 +84,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatGPTModel: chatGPTModel,
       chatGPTImageModel: chatGPTImageModel,
       openAIApiKey: openAIApiKey,
+      groqModel: groqModel,
+      groqImageModel: groqImageModel,
+      groqApiKey: groqApiKey,
       activeProvider: activeProvider,
       isLoading: false,
     );
@@ -79,9 +99,17 @@ class ModelNotifier extends StateNotifier<ModelState> {
     required String newChatGPTModel,
     required String newChatGPTImageModel,
     required String newOpenAIApiKey,
+    required String newGroqModel,
+    required String newGroqImageModel,
+    required String newGroqApiKey,
     required AIProvider newActiveProvider,
   }) async {
-    if (newGeminiModel.isEmpty || newGeminiImageModel.isEmpty || newChatGPTModel.isEmpty || newChatGPTImageModel.isEmpty) {
+    if (newGeminiModel.isEmpty ||
+        newGeminiImageModel.isEmpty ||
+        newChatGPTModel.isEmpty ||
+        newChatGPTImageModel.isEmpty ||
+        newGroqModel.isEmpty ||
+        newGroqImageModel.isEmpty) {
       return;
     }
 
@@ -92,6 +120,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setString('chatGPTModel', newChatGPTModel);
     await prefs.setString('chatGPTImageModel', newChatGPTImageModel);
     await prefs.setString('openAIApiKey', newOpenAIApiKey);
+    await prefs.setString('groqModel', newGroqModel);
+    await prefs.setString('groqImageModel', newGroqImageModel);
+    await prefs.setString('groqApiKey', newGroqApiKey);
     await prefs.setInt('activeProvider', newActiveProvider.index);
 
     state = ModelState(
@@ -101,6 +132,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatGPTModel: newChatGPTModel,
       chatGPTImageModel: newChatGPTImageModel,
       openAIApiKey: newOpenAIApiKey,
+      groqModel: newGroqModel,
+      groqImageModel: newGroqImageModel,
+      groqApiKey: newGroqApiKey,
       activeProvider: newActiveProvider,
       isLoading: false,
     );
@@ -113,6 +147,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.remove('geminiImageModel');
     await prefs.remove('chatGPTModel');
     await prefs.remove('chatGPTImageModel');
+    await prefs.remove('groqModel');
+    await prefs.remove('groqImageModel');
 
     // Set the state back to the default models, but keep the existing API keys and provider
     state = ModelState(
@@ -122,6 +158,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatGPTModel: defaultChatGPTModel,
       chatGPTImageModel: defaultChatGPTImageModel,
       openAIApiKey: state.openAIApiKey,
+      groqModel: defaultGroqModel,
+      groqImageModel: defaultGroqImageModel,
+      groqApiKey: state.groqApiKey,
       activeProvider: state.activeProvider,
       isLoading: false,
     );

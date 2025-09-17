@@ -9,7 +9,7 @@ class ApiKeyDialog extends StatelessWidget {
       title: const Text('AI API Key Required'),
       content: const SingleChildScrollView(
         child: Text(
-          'To use the AI features of this app, you need to provide your own AI API key from either Google or OpenAI.\n\nPlease go to the settings screen to add your key.',
+          'To use the AI features of this app, you need to provide your own AI API key from Google, OpenAI (soon), or Groq.\n\nPlease go to the settings screen to add your key.',
         ),
       ),
       actions: [
