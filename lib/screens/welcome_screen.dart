@@ -100,6 +100,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 700),
       ),
       FeatureInfo(
+        icon: '🏠',
+        title: 'My Tanks',
+        description: 'Create and manage your custom tanks with inhabitants. Design your perfect aquarium setups.',
+        routeName: '/tank-management',
+        delay: const Duration(milliseconds: 750),
+      ),
+      FeatureInfo(
         icon: '🧪',
         title: 'Aquarium Calculators',
         description:
