@@ -43,6 +43,7 @@ class TankManagementScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.error_outline,
@@ -53,6 +54,7 @@ class TankManagementScreen extends ConsumerWidget {
             Text(
               'Error Loading Tanks',
               style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
@@ -81,6 +83,7 @@ class TankManagementScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.water,
@@ -93,6 +96,7 @@ class TankManagementScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
@@ -145,16 +149,19 @@ class TankManagementScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           Text(
             'Your Aquarium Collection',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
+              textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'You have $tankCount tank${tankCount == 1 ? '' : 's'} in your collection',
             style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
         ],
@@ -342,7 +349,7 @@ class TankManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(tank.name),
+        title: Text(tank.name, textAlign: TextAlign.center),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,7 +412,7 @@ class TankManagementScreen extends ConsumerWidget {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               
               const SizedBox(height: 16),
               Text(
@@ -420,6 +427,7 @@ class TankManagementScreen extends ConsumerWidget {
             ],
           ),
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -445,8 +453,9 @@ class TankManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Tank'),
-        content: Text('Are you sure you want to delete "${tank.name}"? This action cannot be undone.'),
+        title: const Text('Delete Tank', textAlign: TextAlign.center),
+        content: Text('Are you sure you want to delete "${tank.name}"? This action cannot be undone.', textAlign: TextAlign.center),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

@@ -155,179 +155,229 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     }
   }
 
+  void _cancelAndReturn() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
 
-    return MainLayout(
-      title: widget.existingTank != null ? 'Edit Tank' : 'Create Tank',
-      bottomNavigationBar: const AdBanner(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                widget.existingTank != null ? 'Edit Your Tank' : 'Create Your Tank',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Design and save your custom aquarium with inhabitants.',
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              
-              // Tank Name
-              TextFormField(
-                controller: _tankNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Tank Name',
-                  hintText: 'My Community Tank',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a tank name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              
-              // Tank Type Selection
-              Text(
-                'Tank Type',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12,
+    // Move the X from the AppBar to the page's header
+    return Scaffold(
+      // Remove the AppBar completely
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ModernSelectableChip(
-                    label: 'Freshwater',
-                    emoji: '🐟',
-                    selected: _selectedCategory == 'freshwater',
-                    onTap: () => _onCategoryChanged('freshwater'),
-                  ),
-                  ModernSelectableChip(
-                    label: 'Saltwater',
-                    emoji: '🐠',
-                    selected: _selectedCategory == 'marine',
-                    onTap: () => _onCategoryChanged('marine'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // Inhabitants Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Inhabitants',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _isLoadingFish ? null : _addInhabitant,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Fish'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              
-              if (_inhabitants.isEmpty)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
+                  // Custom Page Header with X Button
+                  Padding(
+                    padding: const EdgeInsets.only(top: 30, bottom: 16),
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Icon(
-                          Icons.pets,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.primary,
+                        // Centered Title
+                        Column(
+                          children: [
+                            Text(
+                              widget.existingTank != null
+                                  ? 'Edit Your Tank'
+                                  : 'Create Your Tank',
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Design and save your custom aquarium with inhabitants.',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No inhabitants added yet',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tap "Add Fish" to start building your tank community',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
+                        // X Button on the right
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: _cancelAndReturn,
+                            tooltip: 'Close',
+                          ),
                         ),
                       ],
                     ),
                   ),
-                )
-              else
-                ..._inhabitants.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final inhabitant = entry.value;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        child: Text('${inhabitant.quantity}'),
+                  const SizedBox(height: 8),
+                  // Tank Name
+                  TextFormField(
+                    controller: _tankNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tank Name',
+                      hintText: 'My Community Tank',
+                      border: OutlineInputBorder(),
+                    ),
+                    textAlign: TextAlign.center,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a tank name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  // Tank Type Selection
+                  Text(
+                    'Tank Type',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    children: [
+                      ModernSelectableChip(
+                        label: 'Freshwater',
+                        emoji: '🐟',
+                        selected: _selectedCategory == 'freshwater',
+                        onTap: () => _onCategoryChanged('freshwater'),
                       ),
-                      title: Text(inhabitant.customName),
-                      subtitle: Text('Fish Type: ${inhabitant.fishUnit}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => _editInhabitant(index),
+                      ModernSelectableChip(
+                        label: 'Saltwater',
+                        emoji: '🐠',
+                        selected: _selectedCategory == 'marine',
+                        onTap: () => _onCategoryChanged('marine'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Inhabitants Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Inhabitants',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _isLoadingFish ? null : _addInhabitant,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Fish'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_inhabitants.isEmpty)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.pets,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No inhabitants added yet',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Tap "Add Fish" to start building your tank community',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ..._inhabitants.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final inhabitant = entry.value;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text('${inhabitant.quantity}'),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _removeInhabitant(index),
+                          title: Text(inhabitant.customName),
+                          subtitle: Text('Fish Type: ${inhabitant.fishUnit}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _editInhabitant(index),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _removeInhabitant(index),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: 32),
+                  // Save Button
+                  ElevatedButton.icon(
+                    onPressed: tankState.isLoading ? null : _saveTank,
+                    icon: tankState.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save),
+                    label: Text(widget.existingTank != null
+                        ? 'Update Tank'
+                        : 'Save Tank'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                }).toList(),
-              
-              const SizedBox(height: 32),
-              
-              // Save Button
-              ElevatedButton.icon(
-                onPressed: tankState.isLoading ? null : _saveTank,
-                icon: tankState.isLoading 
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save),
-                label: Text(widget.existingTank != null ? 'Update Tank' : 'Save Tank'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  // Cancel Button
+                  OutlinedButton.icon(
+                    onPressed: tankState.isLoading ? null : _cancelAndReturn,
+                    icon: const Icon(Icons.cancel),
+                    label: const Text('Cancel'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
+      bottomNavigationBar: const AdBanner(),
     );
   }
 }
@@ -390,7 +440,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.existingInhabitant != null ? 'Edit Inhabitant' : 'Add Inhabitant'),
+      title: Text(widget.existingInhabitant != null ? 'Edit Inhabitant' : 'Add Inhabitant', textAlign: TextAlign.center),
       content: Form(
         key: _formKey,
         child: Column(
@@ -409,6 +459,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                 }
                 return null;
               },
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             
@@ -458,6 +509,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                 }
                 return null;
               },
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -474,4 +526,5 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       ],
     );
   }
+
 }
