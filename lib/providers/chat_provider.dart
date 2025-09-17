@@ -240,7 +240,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final response = await _groqChatSession!.sendMessage(message).timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
       final responseText = response.choices.first.message.content;
-      if (responseText == null) throw Exception('No response received from Groq');
       _processTextResponse(responseText);
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), message);
