@@ -248,7 +248,6 @@ class MyApp extends ConsumerWidget {
                 page = const FishCompatibilityScreen();
                 break;
               case '/photo-analyzer':
-                // direct route (kept, but we now prefer going through /chatbot with arg)
                 page = const PhotoAnalysisScreen();
                 break;
               case '/settings':
