@@ -86,6 +86,8 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                     );
                   }),
                   const SizedBox(height: 12),
+                  // ADDED: New expandable section for the calculation breakdown.
+                  _buildCalculationBreakdown(context, report),
                   const BannerAdWidget(),
                   const SizedBox(height: 12),
                   Text(
@@ -182,6 +184,41 @@ Widget _buildSection(
           content,
         ],
       ),
+    ),
+  );
+}
+
+// ADDED: New function to build the expandable calculation breakdown section.
+Widget _buildCalculationBreakdown(
+    BuildContext context, CompatibilityReport report) {
+  final cs = Theme.of(context).colorScheme;
+  return Card(
+    margin: const EdgeInsets.only(bottom: 14.0),
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18),
+      side: BorderSide(
+        color: cs.outlineVariant.withOpacity(0.4),
+        width: 0.8,
+      ),
+    ),
+    child: ExpansionTile(
+      title: Text(
+        'Calculation Breakdown',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+        textAlign: TextAlign.center,
+      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: SelectableText(
+            report.calculationBreakdown,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     ),
   );
 }

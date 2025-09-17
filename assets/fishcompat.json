@@ -274,6 +274,7 @@
       "notRecommended": [
         "Cichlids - American, Large",
         "Cichlids - Lake Tanganyikan",
+        "Discus",
         "Plants"
       ],
       "notCompatible": [
@@ -284,7 +285,6 @@
         "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
-        "Discus",
         "Freshwater Sharks",
         "Goldfish",
         "Gouramis",
@@ -319,6 +319,7 @@
       "notRecommended": [
         "Cichlids - American, Large",
         "Cichlids - Lake Malawian/Victoria",
+        "Discus",
         "Plants"
       ],
       "notCompatible": [
@@ -329,7 +330,6 @@
         "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
-        "Discus",
         "Freshwater Sharks",
         "Goldfish",
         "Gouramis",
@@ -454,18 +454,18 @@
       ],
       "notRecommended": [
         "Bettas (Male) ♂",
-        "Guppies",
-        "Killifish",
-        "Rainbowfish"
-      ],
-      "notCompatible": [
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
-        "Danios / Minnows",
         "Goldfish",
+        "Killifish",
         "Mollies / Platies / Swordtails",
         "Pond Fish",
+        "Rainbowfish",
         "Shrimp"
+      ],
+      "notCompatible": [
+        "Danios / Minnows",
+        "Guppies"
       ],
       "withCaution": [
         "Angelfish (Female) ♀",
@@ -544,12 +544,12 @@
         "Bettas (Male) ♂",
         "Cichlids - American, Large",
         "Cory Cats",
+        "Discus",
         "Larger Catfish"
       ],
       "notCompatible": [
         "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan",
-        "Discus"
+        "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
         "Angelfish (Female) ♀",
@@ -637,7 +637,6 @@
       "notRecommended": [
         "Barbs",
         "Bettas (Male) ♂",
-        "Discus",
         "Killifish",
         "Larger Catfish",
         "Pond Fish"
@@ -647,7 +646,8 @@
         "Angelfish (Male) ♂",
         "Cichlids - American, Large",
         "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan"
+        "Cichlids - Lake Tanganyikan",
+        "Discus"
       ],
       "withCaution": [
         "Bettas (Female) ♀",
@@ -858,13 +858,13 @@
       ],
       "notRecommended": [
         "Cichlids - American, Large",
+        "Discus",
         "Larger Catfish",
         "Pond Fish"
       ],
       "notCompatible": [
         "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan",
-        "Discus"
+        "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
         "Angelfish (Female) ♀",
@@ -981,6 +981,7 @@
         "Bettas (Female) ♀",
         "Cory Cats",
         "Danios / Minnows",
+        "Discus",
         "Freshwater Sharks",
         "Gouramis",
         "Guppies",
@@ -997,8 +998,7 @@
         "Bettas (Male) ♂",
         "Cichlids - American, Large",
         "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan",
-        "Discus"
+        "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
         "Plants",
@@ -1115,6 +1115,7 @@
         "Angelfish (Female) ♀",
         "Angelfish (Male) ♂",
         "Barbs",
+        "Discus",
         "Gouramis",
         "Rainbowfish"
       ],
@@ -1122,7 +1123,6 @@
         "Cichlids - American, Large",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
-        "Discus",
         "Killifish",
         "Larger Catfish"
       ],

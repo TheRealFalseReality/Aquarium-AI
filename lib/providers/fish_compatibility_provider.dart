@@ -162,7 +162,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       await getCompatibilityReport(state.lastCategory!);
     }
   }
-    
+      
   // Helper function for OpenAI calls with retry logic
   Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
     int retries = 0;
@@ -214,6 +214,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final models = ref.read(modelProvider);
     final harmonyScore = _calculateHarmonyScore(state.selectedFish);
     final fishNames = state.selectedFish.map((f) => f.name).toList();
+    // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore);
 
     _cancellableCompleter = CancellableCompleter();
@@ -241,6 +242,10 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
       final cleanedResponse = _extractJson(responseText);
       final reportJson = json.decode(cleanedResponse);
+      
+      // EDITED: Generate the calculation breakdown string here.
+      final calculationBreakdown = _generateCalculationBreakdown(state.selectedFish);
+
       final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel'],
         harmonySummary: reportJson['harmonySummary'],
@@ -254,6 +259,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         groupHarmonyScore: harmonyScore,
         selectedFish: state.selectedFish,
         tankMatesSummary: reportJson['tankMatesSummary'],
+        calculationBreakdown: calculationBreakdown, // Use the generated string.
       );
       state = state.copyWith(
           report: report, lastReport: report, isLoading: false);
@@ -305,10 +311,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   double _calculateHarmonyScore(List<Fish> fishList) {
-    if (fishList.isEmpty) return 1.0;
-    if (fishList.length == 1) {
-      return _getPairwiseProbability(fishList[0], fishList[0]);
-    }
+    if (fishList.length < 2) return 1.0;
 
     double minProb = 1.0;
     for (int i = 0; i < fishList.length; i++) {
@@ -320,5 +323,35 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       }
     }
     return minProb;
+  }
+  
+  // ADDED: New function to generate the breakdown string.
+  String _generateCalculationBreakdown(List<Fish> fishList) {
+    if (fishList.length < 2) {
+      return "Select at least two fish to see a compatibility breakdown.";
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln("Pairwise Compatibility:");
+
+    final probabilities = <double>[];
+    for (int i = 0; i < fishList.length; i++) {
+      for (int j = i + 1; j < fishList.length; j++) {
+        final fishA = fishList[i];
+        final fishB = fishList[j];
+        final prob = _getPairwiseProbability(fishA, fishB);
+        probabilities.add(prob);
+
+        buffer.writeln(
+            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+      }
+    }
+    
+    buffer.writeln("\nGroup Harmony Score:");
+    final minScore = probabilities.reduce(min);
+    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
+    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+
+    return buffer.toString();
   }
 }
