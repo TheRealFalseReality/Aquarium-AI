@@ -51,6 +51,8 @@ class Tank {
   final String name;
   final String type; // 'freshwater' or 'marine'
   final List<TankInhabitant> inhabitants;
+  final double? sizeGallons; // Tank size in gallons
+  final double? sizeLiters;  // Tank size in liters
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -59,6 +61,8 @@ class Tank {
     required this.name,
     required this.type,
     required this.inhabitants,
+    this.sizeGallons,
+    this.sizeLiters,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -67,6 +71,8 @@ class Tank {
     required String name,
     required String type,
     List<TankInhabitant>? inhabitants,
+    double? sizeGallons,
+    double? sizeLiters,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -74,6 +80,8 @@ class Tank {
       name: name,
       type: type,
       inhabitants: inhabitants ?? [],
+      sizeGallons: sizeGallons,
+      sizeLiters: sizeLiters,
       createdAt: now,
       updatedAt: now,
     );
@@ -85,6 +93,8 @@ class Tank {
       'name': name,
       'type': type,
       'inhabitants': inhabitants.map((i) => i.toJson()).toList(),
+      'sizeGallons': sizeGallons,
+      'sizeLiters': sizeLiters,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -98,6 +108,8 @@ class Tank {
       inhabitants: (json['inhabitants'] as List)
           .map((i) => TankInhabitant.fromJson(i))
           .toList(),
+      sizeGallons: json['sizeGallons']?.toDouble(),
+      sizeLiters: json['sizeLiters']?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -108,6 +120,8 @@ class Tank {
     String? name,
     String? type,
     List<TankInhabitant>? inhabitants,
+    double? sizeGallons,
+    double? sizeLiters,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -116,6 +130,8 @@ class Tank {
       name: name ?? this.name,
       type: type ?? this.type,
       inhabitants: inhabitants ?? this.inhabitants,
+      sizeGallons: sizeGallons ?? this.sizeGallons,
+      sizeLiters: sizeLiters ?? this.sizeLiters,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -1,16 +1,55 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
+import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
 import 'tank_creation_screen.dart';
 
-class TankManagementScreen extends ConsumerWidget {
+class TankManagementScreen extends ConsumerStatefulWidget {
   const TankManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  TankManagementScreenState createState() => TankManagementScreenState();
+}
+
+class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
+  Map<String, List<Fish>>? _fishData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFishData();
+  }
+
+  Future<void> _loadFishData() async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/fishcompat.json');
+      final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
+      
+      final fishData = <String, List<Fish>>{};
+      for (final category in ['freshwater', 'marine']) {
+        if (jsonResponse.containsKey(category)) {
+          fishData[category] = (jsonResponse[category] as List)
+              .map((f) => Fish.fromJson(f))
+              .toList();
+        }
+      }
+      
+      setState(() {
+        _fishData = fishData;
+      });
+    } catch (e) {
+      // Handle error silently for now
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
 
     return MainLayout(
@@ -211,6 +250,31 @@ class TankManagementScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                        // Tank Size Display
+                        if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.straighten,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatTankSize(tank),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        // Harmony Score Display
+                        if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                          const SizedBox(height: 4),
+                          _buildHarmonyScoreChip(tank),
+                        ],
                       ],
                     ),
                   ),
@@ -382,16 +446,55 @@ class TankManagementScreen extends ConsumerWidget {
                 const Text('No inhabitants added yet.')
               else
                 ...tank.inhabitants.map((inhabitant) {
+                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 12,
-                          child: Text(
-                            '${inhabitant.quantity}',
-                            style: const TextStyle(fontSize: 10),
-                          ),
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: fishImageUrl != null 
+                                ? NetworkImage(fishImageUrl) 
+                                : null,
+                              backgroundColor: fishImageUrl == null 
+                                ? Theme.of(context).colorScheme.primaryContainer 
+                                : null,
+                              child: fishImageUrl == null 
+                                ? Icon(
+                                    Icons.pets,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    size: 20,
+                                  ) 
+                                : null,
+                            ),
+                            if (inhabitant.quantity > 1)
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 18,
+                                    minHeight: 18,
+                                  ),
+                                  child: Text(
+                                    '${inhabitant.quantity}',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -499,5 +602,83 @@ class TankManagementScreen extends ConsumerWidget {
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTankSize(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gal (${tank.sizeLiters!.toStringAsFixed(0)} L)';
+    } else if (tank.sizeGallons != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons';
+    } else if (tank.sizeLiters != null) {
+      return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
+    }
+    return '';
+  }
+
+  Widget _buildHarmonyScoreChip(Tank tank) {
+    final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, _fishData);
+    if (harmonyScore == null) return const SizedBox.shrink();
+
+    final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
+    final percentage = (harmonyScore * 100).toStringAsFixed(0);
+    
+    Color chipColor;
+    Color textColor;
+    if (harmonyScore >= 0.8) {
+      chipColor = Colors.green.shade100;
+      textColor = Colors.green.shade800;
+    } else if (harmonyScore >= 0.6) {
+      chipColor = Colors.orange.shade100;
+      textColor = Colors.orange.shade800;
+    } else {
+      chipColor = Colors.red.shade100;
+      textColor = Colors.red.shade800;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: chipColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.pets,
+            size: 14,
+            color: textColor,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$label ($percentage%)',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _getFishImageUrl(String tankType, String fishName) {
+    if (_fishData == null) return null;
+    
+    final categoryFish = _fishData![tankType] ?? [];
+    final fish = categoryFish.firstWhere(
+      (f) => f.name == fishName,
+      orElse: () => Fish(
+        name: '',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      ),
+    );
+    
+    return fish.imageURL.isNotEmpty ? fish.imageURL : null;
   }
 }

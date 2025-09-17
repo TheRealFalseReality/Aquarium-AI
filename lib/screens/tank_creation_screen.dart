@@ -22,6 +22,8 @@ class TankCreationScreen extends ConsumerStatefulWidget {
 class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tankNameController = TextEditingController();
+  final _sizeGallonsController = TextEditingController();
+  final _sizeLitersController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
@@ -37,12 +39,20 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
+      if (widget.existingTank!.sizeGallons != null) {
+        _sizeGallonsController.text = widget.existingTank!.sizeGallons!.toString();
+      }
+      if (widget.existingTank!.sizeLiters != null) {
+        _sizeLitersController.text = widget.existingTank!.sizeLiters!.toString();
+      }
     }
   }
 
   @override
   void dispose() {
     _tankNameController.dispose();
+    _sizeGallonsController.dispose();
+    _sizeLitersController.dispose();
     super.dispose();
   }
 
@@ -117,16 +127,27 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   Future<void> _saveTank() async {
     if (_formKey.currentState!.validate()) {
       try {
+        final sizeGallons = _sizeGallonsController.text.trim().isNotEmpty 
+          ? double.tryParse(_sizeGallonsController.text.trim()) 
+          : null;
+        final sizeLiters = _sizeLitersController.text.trim().isNotEmpty 
+          ? double.tryParse(_sizeLitersController.text.trim()) 
+          : null;
+
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
                 inhabitants: _inhabitants,
+                sizeGallons: sizeGallons,
+                sizeLiters: sizeLiters,
               )
             : Tank.create(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
                 inhabitants: _inhabitants,
+                sizeGallons: sizeGallons,
+                sizeLiters: sizeLiters,
               );
 
         if (widget.existingTank != null) {
@@ -230,6 +251,89 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: 24),
+                  // Tank Size Section
+                  Text(
+                    'Tank Size (Optional)',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _sizeGallonsController,
+                          decoration: const InputDecoration(
+                            labelText: 'Gallons',
+                            hintText: '55',
+                            border: OutlineInputBorder(),
+                            suffixText: 'gal',
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            // Auto-convert gallons to liters
+                            if (value.isNotEmpty) {
+                              final gallons = double.tryParse(value);
+                              if (gallons != null) {
+                                final liters = gallons * 3.78541;
+                                _sizeLitersController.text = liters.toStringAsFixed(1);
+                              }
+                            } else {
+                              _sizeLitersController.clear();
+                            }
+                          },
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              final size = double.tryParse(value);
+                              if (size == null || size <= 0) {
+                                return 'Please enter a valid size';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _sizeLitersController,
+                          decoration: const InputDecoration(
+                            labelText: 'Liters',
+                            hintText: '208',
+                            border: OutlineInputBorder(),
+                            suffixText: 'L',
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            // Auto-convert liters to gallons
+                            if (value.isNotEmpty) {
+                              final liters = double.tryParse(value);
+                              if (liters != null) {
+                                final gallons = liters / 3.78541;
+                                _sizeGallonsController.text = gallons.toStringAsFixed(1);
+                              }
+                            } else {
+                              _sizeGallonsController.clear();
+                            }
+                          },
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              final size = double.tryParse(value);
+                              if (size == null || size <= 0) {
+                                return 'Please enter a valid size';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   // Tank Type Selection
@@ -434,6 +538,11 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       
       widget.onAdd(inhabitant);
       Navigator.of(context).pop();
+    } else if (_selectedFishUnit == null) {
+      // Show snackbar if no fish type selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a fish type')),
+      );
     }
   }
 
@@ -463,33 +572,98 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
             ),
             const SizedBox(height: 16),
             
-            DropdownButtonFormField<String>(
-              value: _selectedFishUnit,
-              decoration: const InputDecoration(
-                labelText: 'Fish Type',
-                border: OutlineInputBorder(),
+            // Fish Type Selection with Images
+            Text(
+              'Fish Type',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              items: widget.availableFish.map((fish) {
-                return DropdownMenuItem<String>(
-                  value: fish.name,
-                  child: Text(
-                    fish.name,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedFishUnit = value;
-                });
-              },
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select a fish type';
-                }
-                return null;
-              },
             ),
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: widget.availableFish.map((fish) {
+                    final isSelected = _selectedFishUnit == fish.name;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedFishUnit = fish.name;
+                        });
+                      },
+                      child: Container(
+                        width: 100,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected 
+                              ? Theme.of(context).colorScheme.primary 
+                              : Theme.of(context).colorScheme.outline,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          color: isSelected 
+                            ? Theme.of(context).colorScheme.primaryContainer 
+                            : null,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                fish.imageURL,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceVariant,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.pets,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              fish.name,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.onPrimaryContainer 
+                                  : null,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            if (_selectedFishUnit == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Please select a fish type',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
             
             TextFormField(
