@@ -17,6 +17,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import './widgets/transitions.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/photo_analysis_screen.dart';
+import './screens/tank_management_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -252,6 +253,9 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/settings':
                 page = const SettingsScreen();
+                break;
+              case '/tank-management':
+                page = const TankManagementScreen();
                 break;
               default:
                 page = const WelcomeScreen();

@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
+import '../models/tank.dart';
+import '../providers/tank_provider.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
@@ -22,13 +24,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    // Tank quick summary from provider
+    final tankState = ref.watch(tankProvider);
+    final tankCount = tankState.tanks.length;
+    final lastTank = tankState.tanks.isNotEmpty ? tankState.tanks.last : null;
+
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
-        // Guard clause: Check if the widget is still mounted before using its context.
         if (!mounted) return;
-
-        // Now it's safe to use the context for navigation.
         if (ModalRoute.of(context)?.settings.name != routeName) {
           Navigator.pushNamed(context, routeName);
         }
@@ -43,6 +47,30 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 180),
+                  child: Card(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: ListTile(
+                      leading: const Icon(Icons.person, size: 36),
+                      title: Text(
+                        'My Tanks',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: tankCount == 0
+                          ? const Text('No tanks yet. Tap to add one!')
+                          : Text(
+                              'Total: $tankCount\n'
+                              '${lastTank != null ? "Latest: ${lastTank.name}" : ""}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => navigate('/tank-management'),
+                      isThreeLine: tankCount > 0,
+                    ),
+                  ),
+                ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 250),
                   child: ListTile(
