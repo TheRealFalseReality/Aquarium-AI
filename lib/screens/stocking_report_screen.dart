@@ -1,23 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/stocking_recommendation.dart';
+import '../models/tank.dart';
 import '../main_layout.dart';
-import '../models/fish.dart'; // Import the Fish model
+import '../models/fish.dart';
+import '../providers/aquarium_stocking_provider.dart';
 
-class StockingReportScreen extends StatelessWidget {
+class StockingReportScreen extends ConsumerWidget {
   final List<StockingRecommendation> reports;
   final String? existingTankName; // Optional tank name for tank-based recommendations
   final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
+  
+  // For regeneration support
+  final Tank? originalTank; // For tank-based regeneration
+  final String? tankSize; // For general stocking regeneration
+  final String? tankType; // For general stocking regeneration  
+  final String? userNotes; // For general stocking regeneration
 
   const StockingReportScreen({
     super.key, 
     required this.reports,
     this.existingTankName,
     this.existingFish,
+    this.originalTank,
+    this.tankSize,
+    this.tankType,
+    this.userNotes,
   });
 
+  void _regenerateRecommendations(BuildContext context, WidgetRef ref) {
+    if (originalTank != null) {
+      // Tank-based regeneration
+      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: originalTank!);
+    } else if (tankSize != null && tankType != null) {
+      // General stocking regeneration  
+      ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
+        tankSize: tankSize!,
+        tankType: tankType!,
+        userNotes: userNotes ?? '',
+      );
+    } else {
+      // Show error if we don't have enough data to regenerate
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot regenerate recommendations - missing original parameters.'),
+        ),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen for new recommendations and replace current screen
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (next.recommendations != null && 
+          next.recommendations!.isNotEmpty && 
+          next.recommendations != reports) {
+        // Replace current screen with new recommendations
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              existingTankName: existingTankName,
+              existingFish: existingFish,
+              originalTank: originalTank,
+              tankSize: tankSize,
+              tankType: tankType,
+              userNotes: userNotes,
+            ),
+          ),
+        );
+      }
+    });
+
     return DefaultTabController(
       length: reports.length,
       child: MainLayout(
@@ -43,13 +99,28 @@ class StockingReportScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 50,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: 'Close Report',
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Regenerate button
+                      SizedBox(
+                        width: 50,
+                        child: IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () => _regenerateRecommendations(context, ref),
+                          tooltip: 'Regenerate Recommendations',
+                        ),
+                      ),
+                      // Close button
+                      SizedBox(
+                        width: 50,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                          tooltip: 'Close Report',
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

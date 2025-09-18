@@ -101,6 +101,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               reports: next.recommendations!,
               existingTankName: _currentTankForRecommendations?.name,
               existingFish: _currentExistingFish,
+              originalTank: _currentTankForRecommendations, // For regeneration
             ),
           ),
         );

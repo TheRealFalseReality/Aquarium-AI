@@ -42,7 +42,12 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(reports: next.recommendations!),
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              tankSize: _tankSizeController.text,
+              tankType: _selectedCategory,
+              userNotes: _notesController.text,
+            ),
           ),
         );
       }
