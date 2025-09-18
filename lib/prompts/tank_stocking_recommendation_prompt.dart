@@ -41,7 +41,7 @@ String buildTankStockingRecommendationPrompt(
     ${json.encode(fishListWithCompat)}
 
     Based on the current tank setup, provide 3 distinct recommendations for ADDITIONAL fish to add. Each recommendation should:
-    - MAINTAIN OR IMPROVE the current ${currentHarmonyPercentage}% harmony score
+    - MAINTAIN OR IMPROVE the current $currentHarmonyPercentage% harmony score
     - Be compatible with ALL existing fish
     - Consider appropriate stocking levels for the tank size
     - Suggest fish that complement the existing ecosystem
