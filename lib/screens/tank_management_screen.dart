@@ -518,7 +518,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${tank.inhabitants.length} type${tank.inhabitants.length == 1 ? '' : 's'} of fish',
+                          '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'} of fish',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -984,19 +984,48 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           child: Row(
             children: [
               // Fish image
-              CircleAvatar(
-                radius: 12,
-                backgroundImage: fishImageUrl != null ? NetworkImage(fishImageUrl) : null,
-                backgroundColor: fishImageUrl == null 
-                  ? Theme.of(context).colorScheme.primaryContainer 
-                  : null,
-                child: fishImageUrl == null 
-                  ? Icon(
-                      Icons.pets,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      size: 12,
-                    ) 
-                  : null,
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundImage: fishImageUrl != null ? NetworkImage(fishImageUrl) : null,
+                    backgroundColor: fishImageUrl == null 
+                      ? Theme.of(context).colorScheme.primaryContainer 
+                      : null,
+                    child: fishImageUrl == null 
+                      ? Icon(
+                          Icons.pets,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          size: 12,
+                        ) 
+                      : null,
+                  ),
+                  if (totalQuantity > 1)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 14,
+                          minHeight: 14,
+                        ),
+                        child: Text(
+                          '$totalQuantity',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 8),
               // Fish type and names
