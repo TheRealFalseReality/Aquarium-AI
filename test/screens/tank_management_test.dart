@@ -1,4 +1,6 @@
 import 'package:fish_ai/models/tank.dart';
+import 'package:fish_ai/models/fish.dart';
+import 'package:fish_ai/utils/tank_harmony_calculator.dart';
 import 'package:fish_ai/screens/tank_management_screen.dart';
 import 'package:fish_ai/screens/tank_creation_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   group('Tank Model Tests', () {
+    test('Tank creation with size', () {
+      final tank = Tank.create(
+        name: 'Test Tank with Size',
+        type: 'freshwater',
+        sizeGallons: 55.0,
+        sizeLiters: 208.2,
+      );
+
+      expect(tank.name, equals('Test Tank with Size'));
+      expect(tank.type, equals('freshwater'));
+      expect(tank.sizeGallons, equals(55.0));
+      expect(tank.sizeLiters, equals(208.2));
+      expect(tank.id, isA<String>());
+      expect(tank.inhabitants, isEmpty);
+    });
+
     test('Tank creation with UUID', () {
       final tank = Tank.create(
         name: 'Test Tank',
@@ -20,6 +38,34 @@ void main() {
       expect(tank.inhabitants, isEmpty);
       expect(tank.createdAt, isA<DateTime>());
       expect(tank.updatedAt, equals(tank.createdAt));
+    });
+
+    test('Tank JSON serialization with size', () {
+      final tank = Tank.create(
+        name: 'Saltwater Paradise',
+        type: 'marine',
+        sizeGallons: 120.0,
+        sizeLiters: 454.2,
+        inhabitants: [
+          TankInhabitant(
+            id: 'test-id',
+            customName: 'My Clownfish',
+            fishUnit: 'Clownfish',
+            quantity: 2,
+          ),
+        ],
+      );
+
+      final json = tank.toJson();
+      final recreatedTank = Tank.fromJson(json);
+
+      expect(recreatedTank.name, equals(tank.name));
+      expect(recreatedTank.type, equals(tank.type));
+      expect(recreatedTank.sizeGallons, equals(tank.sizeGallons));
+      expect(recreatedTank.sizeLiters, equals(tank.sizeLiters));
+      expect(recreatedTank.id, equals(tank.id));
+      expect(recreatedTank.inhabitants.length, equals(1));
+      expect(recreatedTank.inhabitants.first.customName, equals('My Clownfish'));
     });
 
     test('Tank JSON serialization', () {
@@ -78,6 +124,127 @@ void main() {
       expect(updated.name, equals('Updated Tank'));
       expect(updated.type, equals('marine'));
       expect(updated.createdAt, equals(original.createdAt)); // Created time should remain
+    });
+  });
+
+  group('Tank Harmony Calculator Tests', () {
+    test('Harmony score calculation with compatible fish', () {
+      final fishA = Fish(
+        name: 'Angelfish',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Cory Cats'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final fishB = Fish(
+        name: 'Cory Cats',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Angelfish'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+
+      final score = TankHarmonyCalculator.calculateHarmonyScore([fishA, fishB]);
+      expect(score, greaterThan(0.9)); // Should be high compatibility
+    });
+
+    test('Harmony score calculation with incompatible fish', () {
+      final fishA = Fish(
+        name: 'Aggressive Fish',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: ['Peaceful Fish'],
+        withCaution: [],
+      );
+      final fishB = Fish(
+        name: 'Peaceful Fish',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: ['Aggressive Fish'],
+        withCaution: [],
+      );
+
+      final score = TankHarmonyCalculator.calculateHarmonyScore([fishA, fishB]);
+      expect(score, lessThan(0.1)); // Should be very low compatibility
+    });
+
+    test('Harmony score with single fish returns 1.0', () {
+      final fish = Fish(
+        name: 'Solo Fish',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+
+      final score = TankHarmonyCalculator.calculateHarmonyScore([fish]);
+      expect(score, equals(1.0));
+    });
+
+    test('Tank harmony score calculation', () {
+      final tank = Tank.create(
+        name: 'Test Tank',
+        type: 'freshwater',
+        inhabitants: [
+          TankInhabitant(
+            id: 'id1',
+            customName: 'My Angel',
+            fishUnit: 'Angelfish',
+            quantity: 2,
+          ),
+          TankInhabitant(
+            id: 'id2',
+            customName: 'My Cory',
+            fishUnit: 'Cory Cats',
+            quantity: 3,
+          ),
+        ],
+      );
+
+      final fishData = {
+        'freshwater': [
+          Fish(
+            name: 'Angelfish',
+            commonNames: [],
+            imageURL: '',
+            compatible: ['Cory Cats'],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+          Fish(
+            name: 'Cory Cats',
+            commonNames: [],
+            imageURL: '',
+            compatible: ['Angelfish'],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        ]
+      };
+
+      final score = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData);
+      expect(score, isNotNull);
+      expect(score!, greaterThan(0.9));
+    });
+
+    test('Harmony labels', () {
+      expect(TankHarmonyCalculator.getHarmonyLabel(0.95), equals('Excellent'));
+      expect(TankHarmonyCalculator.getHarmonyLabel(0.85), equals('Good'));
+      expect(TankHarmonyCalculator.getHarmonyLabel(0.65), equals('Fair'));
+      expect(TankHarmonyCalculator.getHarmonyLabel(0.45), equals('Caution'));
+      expect(TankHarmonyCalculator.getHarmonyLabel(0.25), equals('Poor'));
     });
   });
 

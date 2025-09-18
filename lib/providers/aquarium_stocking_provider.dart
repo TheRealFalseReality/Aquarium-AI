@@ -9,6 +9,7 @@ import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
 import 'dart:async';
 import '../prompts/stocking_recommendation_prompt.dart';
+import '../utils/tank_harmony_calculator.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -153,7 +154,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         final otherFish = allFish.where((fish) => otherFishNames.contains(fish.name)).toList();
         
         if (coreFish.isNotEmpty) {
-          final harmonyScore = _calculateHarmonyScore(coreFish);
+          final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(coreFish);
           allGeneratedRecs.add(StockingRecommendation(
             title: rec['title'],
             summary: rec['summary'],
@@ -220,41 +221,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
     final match = regExp.firstMatch(text);
     return match?.group(1) ?? text;
-  }
-
-  double _getPairwiseProbability(Fish fishA, Fish fishB) {
-    if (fishA.compatible.contains(fishB.name) &&
-        fishB.compatible.contains(fishA.name)) {
-      return 1.0;
-    }
-    if (fishA.notCompatible.contains(fishB.name) ||
-        fishB.notCompatible.contains(fishA.name)) {
-      return 0.0;
-    }
-    if (fishA.notRecommended.contains(fishB.name) ||
-        fishB.notRecommended.contains(fishA.name)) {
-      return 0.25;
-    }
-    if (fishA.withCaution.contains(fishB.name) ||
-        fishB.withCaution.contains(fishA.name)) {
-      return 0.75;
-    }
-    return 0.5;
-  }
-
-  double _calculateHarmonyScore(List<Fish> fishList) {
-    if (fishList.length <= 1) return 1.0;
-
-    double minProb = 1.0;
-    for (int i = 0; i < fishList.length; i++) {
-      for (int j = i + 1; j < fishList.length; j++) {
-        final prob = _getPairwiseProbability(fishList[i], fishList[j]);
-        if (prob < minProb) {
-          minProb = prob;
-        }
-      }
-    }
-    return minProb;
   }
 }
 
