@@ -102,6 +102,45 @@ class _RecommendationTabView extends StatelessWidget {
             color: cs.onSurfaceVariant,
           ),
         ),
+        
+        // Show existing tank info for tank-based recommendations
+        if (isForExistingTank) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.surfaceVariant.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.outline.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: cs.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Adding to Existing Tank',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'These recommendations are designed to work with your current fish community. All suggested additions have been verified for compatibility.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        
         const Divider(height: 32),
         _SectionHeader(title: isForExistingTank ? 'Fish to Add' : 'Stocking Options'),
         const SizedBox(height: 8),

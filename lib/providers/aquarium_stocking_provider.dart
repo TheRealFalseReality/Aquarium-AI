@@ -272,6 +272,14 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       }
     }
 
+    if (existingFish.isEmpty) {
+      state = state.copyWith(
+        error: 'Could not find fish data for tank inhabitants. Please check if fish names match the database.',
+        isLoading: false,
+      );
+      return;
+    }
+
     final prompt = buildTankStockingRecommendationPrompt(tank, allFish, existingFish);
 
     try {

@@ -550,6 +550,37 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               const SizedBox(height: 8),
               
+              // Stocking recommendations availability indicator
+              if (tank.inhabitants.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 12,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Stocking ideas available',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              
               // Created date
               Text(
                 'Created ${_formatDate(tank.createdAt)}',
@@ -1116,9 +1147,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return;
     }
 
+    // Show loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 16),
+            Text('Getting stocking recommendations...'),
+          ],
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
     // Listen for stocking recommendations
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+        // Hide any existing snackbars
+        ScaffoldMessenger.of(context).clearSnackBars();
+        
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => StockingReportScreen(
@@ -1129,8 +1181,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
       }
       if (next.error != null) {
+        // Hide loading snackbar and show error
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
+          SnackBar(
+            content: Text('Error: ${next.error!}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Theme.of(context).colorScheme.onError,
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+          ),
         );
       }
     });

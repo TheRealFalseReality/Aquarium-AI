@@ -20,6 +20,7 @@ String buildTankStockingRecommendationPrompt(
     2. All recommended fish must be compatible with each other
     3. Priority is maintaining 100% compatibility or at least equal to current tank harmony
     4. Consider tank size limitations when making recommendations
+    5. Only recommend fish that will enhance the ecosystem without causing stress
 
     Tank Information:
     - Tank Name: "${tank.name}"
@@ -41,6 +42,8 @@ String buildTankStockingRecommendationPrompt(
     - Be compatible with ALL existing fish
     - Consider appropriate stocking levels for the tank size
     - Suggest fish that complement the existing ecosystem
+    - Account for water column usage (top, middle, bottom dwellers)
+    - Consider bioload and tank capacity
 
     For each recommendation, provide a JSON object with:
     - "title": A creative title describing what this addition would bring to the tank (e.g., "Bottom Dweller Cleanup Crew", "Colorful Mid-Water Community")
@@ -49,7 +52,7 @@ String buildTankStockingRecommendationPrompt(
     - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely
     - "aiTankMatesSummary": Explanation of why these additions work well with the existing community
     - "aiRecommendedTankMates": A list of 3-7 common fish names (not from the database) that would also be good additions
-    - "compatibilityNotes": Specific notes about how these additions interact with the existing fish
+    - "compatibilityNotes": Specific notes about how these additions interact with the existing fish and any special considerations
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
     ''';
