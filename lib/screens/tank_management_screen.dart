@@ -639,25 +639,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                         ),
-                        PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'duplicate') {
-                              _duplicateInhabitant(context, tank, inhabitant);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'duplicate',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.copy),
-                                  SizedBox(width: 8),
-                                  Text('Duplicate'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   );
@@ -746,27 +727,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
       }
     }
-  }
-
-  void _duplicateInhabitant(BuildContext context, Tank tank, TankInhabitant inhabitant) {
-    // This would be a simple notification since we can't modify the tank from here
-    // In a real implementation, you'd probably navigate to edit screen or add to tank provider
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('To duplicate "${inhabitant.customName}", please edit the tank and add a new fish'),
-        action: SnackBarAction(
-          label: 'Edit Tank',
-          onPressed: () {
-            Navigator.of(context).pop(); // Close details dialog
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => TankCreationScreen(existingTank: tank),
-              ),
-            );
-          },
-        ),
-      ),
-    );
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, Tank tank) {

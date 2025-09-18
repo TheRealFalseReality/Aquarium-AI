@@ -124,6 +124,24 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     });
   }
 
+  void _duplicateInhabitant(int index) {
+    final originalInhabitant = _inhabitants[index];
+    final duplicatedInhabitant = TankInhabitant(
+      id: const Uuid().v4(),
+      customName: '${originalInhabitant.customName} (Copy)',
+      fishUnit: originalInhabitant.fishUnit,
+      quantity: originalInhabitant.quantity,
+    );
+    
+    setState(() {
+      _inhabitants.insert(index + 1, duplicatedInhabitant);
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Duplicated "${originalInhabitant.customName}"')),
+    );
+  }
+
   Future<void> _saveTank() async {
     if (_formKey.currentState!.validate()) {
       try {
@@ -198,8 +216,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 children: [
                   // Custom Page Header with X Button
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: widget.existingTank != null ? 50 : 30, 
+                    padding: const EdgeInsets.only(
+                      top: 50, 
                       bottom: 16
                     ),
                     child: Stack(
@@ -429,6 +447,10 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
+                                icon: const Icon(Icons.copy),
+                                onPressed: () => _duplicateInhabitant(index),
+                              ),
+                              IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () => _editInhabitant(index),
                               ),
@@ -567,21 +589,13 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 40,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 40,
-      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.8,
-        ),
+        width: MediaQuery.of(context).size.width * 0.95,
+        height: MediaQuery.of(context).size.height * 0.9,
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               // Title
               Text(
@@ -591,7 +605,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               
               // Scrollable Content
               Expanded(
@@ -637,7 +651,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
             ),
             const SizedBox(height: 12),
             Container(
-              constraints: const BoxConstraints(maxHeight: 200),
+              constraints: const BoxConstraints(maxHeight: 350),
               child: SingleChildScrollView(
                 child: Wrap(
                   spacing: 8,
@@ -724,7 +738,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                   ),
                 ),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             
             TextFormField(
               controller: _quantityController,
@@ -752,7 +766,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
               ),
               
               // Action Buttons
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
