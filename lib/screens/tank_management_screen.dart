@@ -10,6 +10,13 @@ import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
 import 'tank_creation_screen.dart';
 
+enum TankSortOption {
+  name,
+  type,
+  size,
+  manual,
+}
+
 class TankManagementScreen extends ConsumerStatefulWidget {
   const TankManagementScreen({super.key});
 
@@ -19,6 +26,7 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Map<String, List<Fish>>? _fishData;
+  TankSortOption _currentSortOption = TankSortOption.name;
 
   @override
   void initState() {
@@ -168,18 +176,52 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+    final sortedTanks = _sortTanks(tanks);
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: tanks.length + 1, // +1 for header
+      itemCount: sortedTanks.length + 1, // +1 for header
       itemBuilder: (context, index) {
         if (index == 0) {
-          return _buildHeader(context, tanks.length);
+          return _buildHeader(context, sortedTanks.length);
         }
         
-        final tank = tanks[index - 1];
+        final tank = sortedTanks[index - 1];
         return _buildTankCard(context, ref, tank);
       },
     );
+  }
+
+  List<Tank> _sortTanks(List<Tank> tanks) {
+    final sortedTanks = List<Tank>.from(tanks);
+    
+    switch (_currentSortOption) {
+      case TankSortOption.name:
+        sortedTanks.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        break;
+      case TankSortOption.type:
+        sortedTanks.sort((a, b) {
+          final typeOrder = {'freshwater': 0, 'marine': 1};
+          final aOrder = typeOrder[a.type] ?? 2;
+          final bOrder = typeOrder[b.type] ?? 2;
+          if (aOrder != bOrder) return aOrder.compareTo(bOrder);
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
+        });
+        break;
+      case TankSortOption.size:
+        sortedTanks.sort((a, b) {
+          final aSize = a.sizeGallons ?? 0;
+          final bSize = b.sizeGallons ?? 0;
+          if (aSize != bSize) return bSize.compareTo(aSize); // Largest first
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
+        });
+        break;
+      case TankSortOption.manual:
+        // For manual sorting, use creation date as default (user can rearrange later if needed)
+        sortedTanks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+    }
+    
+    return sortedTanks;
   }
 
   Widget _buildHeader(BuildContext context, int tankCount) {
@@ -188,24 +230,84 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Text(
             'Your Aquarium Collection',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
-              textAlign: TextAlign.center,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'You have $tankCount tank${tankCount == 1 ? '' : 's'} in your collection',
             style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
+          
+          // Sort Options
+          Row(
+            children: [
+              Text(
+                'Sort by:',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: TankSortOption.values.map((option) {
+                      final isSelected = _currentSortOption == option;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(_getSortOptionLabel(option)),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() {
+                                _currentSortOption = option;
+                              });
+                            }
+                          },
+                          backgroundColor: Colors.transparent,
+                          selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                          checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                          labelStyle: TextStyle(
+                            color: isSelected 
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurface,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );
+  }
+
+  String _getSortOptionLabel(TankSortOption option) {
+    switch (option) {
+      case TankSortOption.name:
+        return 'Name';
+      case TankSortOption.type:
+        return 'Type';
+      case TankSortOption.size:
+        return 'Size';
+      case TankSortOption.manual:
+        return 'Manual';
+    }
+  }
   }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
@@ -391,98 +493,69 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
-                              child: Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 20,
-                                    backgroundImage: fishImageUrl != null 
-                                      ? NetworkImage(fishImageUrl) 
-                                      : null,
-                                    backgroundColor: fishImageUrl == null 
-                                      ? Theme.of(context).colorScheme.primaryContainer 
-                                      : null,
-                                    child: fishImageUrl == null 
-                                      ? Icon(
-                                          Icons.pets,
-                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                          size: 20,
-                                        ) 
-                                      : null,
-                                  ),
-                                  if (inhabitant.quantity > 1)
-                                    Positioned(
-                                      right: 0,
-                                      bottom: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(2),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          minWidth: 16,
-                                          minHeight: 16,
-                                        ),
-                                        child: Text(
-                                          '${inhabitant.quantity}',
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.onPrimary,
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.bold,
+                              child: Tooltip(
+                                message: '${inhabitant.quantity}x ${inhabitant.customName}',
+                                child: Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundImage: fishImageUrl != null 
+                                        ? NetworkImage(fishImageUrl) 
+                                        : null,
+                                      backgroundColor: fishImageUrl == null 
+                                        ? Theme.of(context).colorScheme.primaryContainer 
+                                        : null,
+                                      child: fishImageUrl == null 
+                                        ? Icon(
+                                            Icons.pets,
+                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                            size: 20,
+                                          ) 
+                                        : null,
+                                    ),
+                                    if (inhabitant.quantity > 1)
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            shape: BoxShape.circle,
                                           ),
-                                          textAlign: TextAlign.center,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 16,
+                                            minHeight: 16,
+                                          ),
+                                          child: Text(
+                                            '${inhabitant.quantity}',
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.onPrimary,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           },
                         ),
                       ),
-                      const SizedBox(height: 8),
-                    ],
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: tank.inhabitants.take(3).map((inhabitant) {
-                        final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
-                        return Chip(
-                          avatar: fishImageUrl != null
-                              ? CircleAvatar(
-                                  radius: 12,
-                                  backgroundImage: NetworkImage(fishImageUrl),
-                                  backgroundColor: Colors.transparent,
-                                )
-                              : CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                                  child: Icon(
-                                    Icons.pets,
-                                    size: 12,
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                  ),
-                                ),
-                          label: Text(
-                            '${inhabitant.quantity}x ${inhabitant.customName}',
-                            style: const TextStyle(fontSize: 12),
+                      if (tank.inhabitants.length > 5)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '+${tank.inhabitants.length - 5} more fish',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                          visualDensity: VisualDensity.compact,
-                        );
-                      }).toList()..addAll(
-                        tank.inhabitants.length > 3
-                            ? [
-                                Chip(
-                                  label: Text(
-                                    '+${tank.inhabitants.length - 3} more',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                )
-                              ]
-                            : [],
-                      ),
-                    ),
+                        ),
+                    ],
                   ],
                 ),
               const SizedBox(height: 8),
