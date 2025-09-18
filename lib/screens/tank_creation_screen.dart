@@ -567,13 +567,21 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-      child: SizedBox(
+      insetPadding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 40,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+      ),
+      child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.8,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Title
               Text(
