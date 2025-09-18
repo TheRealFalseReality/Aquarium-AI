@@ -30,6 +30,7 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Map<String, List<Fish>>? _fishData;
   TankSortOption _currentSortOption = TankSortOption.name;
+  Tank? _currentTankForRecommendations; // Track current tank for recommendations
 
   @override
   void initState() {
@@ -86,6 +87,42 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+
+    // Listen for stocking recommendations globally
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+        // Hide any existing snackbars
+        ScaffoldMessenger.of(context).clearSnackBars();
+        
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              existingTankName: _currentTankForRecommendations?.name,
+            ),
+          ),
+        );
+        // Clear the current tank reference
+        _currentTankForRecommendations = null;
+      }
+      if (next.error != null) {
+        // Hide loading snackbar and show error
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${next.error!}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Theme.of(context).colorScheme.onError,
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+          ),
+        );
+        // Clear the current tank reference
+        _currentTankForRecommendations = null;
+      }
+    });
 
     return MainLayout(
       title: 'My Tanks',
@@ -550,32 +587,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               const SizedBox(height: 8),
               
-              // Stocking recommendations availability indicator
+              // Stocking recommendations button
               if (tank.inhabitants.isNotEmpty) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
+                ElevatedButton.icon(
+                  onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                  icon: Icon(
+                    Icons.auto_awesome,
+                    size: 16,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Stocking ideas available',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+                  label: const Text('Get Stocking Ideas'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1147,6 +1175,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return;
     }
 
+    // Store the current tank for the listener
+    _currentTankForRecommendations = tank;
+
     // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -1161,41 +1192,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Text('Getting stocking recommendations...'),
           ],
         ),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 3),
       ),
     );
-
-    // Listen for stocking recommendations
-    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
-      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
-        // Hide any existing snackbars
-        ScaffoldMessenger.of(context).clearSnackBars();
-        
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => StockingReportScreen(
-              reports: next.recommendations!,
-              existingTankName: tank.name,
-            ),
-          ),
-        );
-      }
-      if (next.error != null) {
-        // Hide loading snackbar and show error
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error!}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            action: SnackBarAction(
-              label: 'Dismiss',
-              textColor: Theme.of(context).colorScheme.onError,
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            ),
-          ),
-        );
-      }
-    });
 
     // Get recommendations for this tank
     ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
