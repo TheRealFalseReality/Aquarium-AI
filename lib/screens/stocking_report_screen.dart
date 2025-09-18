@@ -134,7 +134,57 @@ class _RecommendationTabView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                // Tank name confirmation
+                if (existingTankName != null) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.aquarium, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tank: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        existingTankName!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Existing fish confirmation list
+                if (existingFish != null && existingFish!.isNotEmpty) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Current Fish: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          existingFish!.map((fish) => fish.name).join(', '),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Text(
                   'These recommendations are designed to work with your current fish community. All suggested additions have been verified for compatibility.',
                   style: theme.textTheme.bodySmall?.copyWith(
