@@ -31,6 +31,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Map<String, List<Fish>>? _fishData;
   TankSortOption _currentSortOption = TankSortOption.name;
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
+  List<Fish>? _currentExistingFish; // Track existing fish for recommendations
 
   @override
   void initState() {
@@ -99,11 +100,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             builder: (context) => StockingReportScreen(
               reports: next.recommendations!,
               existingTankName: _currentTankForRecommendations?.name,
+              existingFish: _currentExistingFish,
             ),
           ),
         );
         // Clear the current tank reference
         _currentTankForRecommendations = null;
+        _currentExistingFish = null;
       }
       if (next.error != null) {
         // Hide loading snackbar and show error
@@ -121,6 +124,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
         // Clear the current tank reference
         _currentTankForRecommendations = null;
+        _currentExistingFish = null;
       }
     });
 
@@ -1177,6 +1181,31 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
+    
+    // Calculate and store existing fish for the listener
+    if (_fishData != null) {
+      final categoryFish = _fishData![tank.type] ?? [];
+      final existingFish = <Fish>[];
+      
+      for (final inhabitant in tank.inhabitants) {
+        final fish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+        if (!existingFish.any((f) => f.name == fish.name)) {
+          existingFish.add(fish);
+        }
+      }
+      _currentExistingFish = existingFish;
+    }
 
     // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(

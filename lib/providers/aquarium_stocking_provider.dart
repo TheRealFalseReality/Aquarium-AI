@@ -280,7 +280,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return;
     }
 
-    final prompt = buildTankStockingRecommendationPrompt(tank, allFish, existingFish);
+    // Calculate current tank harmony score
+    final currentHarmonyScore = TankHarmonyCalculator.calculateHarmonyScore(existingFish);
+    
+    final prompt = buildTankStockingRecommendationPrompt(tank, allFish, existingFish, currentHarmonyScore);
 
     try {
       String? responseText;

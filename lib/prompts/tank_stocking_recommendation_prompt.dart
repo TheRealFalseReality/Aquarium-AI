@@ -3,7 +3,7 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
 
 String buildTankStockingRecommendationPrompt(
-    Tank tank, List<Fish> allFish, List<Fish> existingFish) {
+    Tank tank, List<Fish> allFish, List<Fish> existingFish, double currentHarmonyScore) {
   final fishListWithCompat = allFish.map((f) => {
     'name': f.name,
     'compatible': f.compatible,
@@ -11,21 +11,24 @@ String buildTankStockingRecommendationPrompt(
 
   final existingFishNames = existingFish.map((f) => f.name).toList();
   final tankSizeText = _formatTankSize(tank);
+  final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(1);
 
   return '''
     You are an expert aquarium stocking advisor. Your goal is to recommend additional fish to ADD to an existing tank while maintaining the highest possible harmony.
 
     CRITICAL REQUIREMENTS:
-    1. All recommended fish must be compatible with EVERY existing fish in the tank
-    2. All recommended fish must be compatible with each other
-    3. Priority is maintaining 100% compatibility or at least equal to current tank harmony
-    4. Consider tank size limitations when making recommendations
-    5. Only recommend fish that will enhance the ecosystem without causing stress
+    1. MAINTAIN CURRENT HARMONY: The tank currently has ${currentHarmonyPercentage}% harmony - this MUST be maintained or improved
+    2. All recommended fish must be compatible with EVERY existing fish in the tank
+    3. All recommended fish must be compatible with each other
+    4. Priority is maintaining current harmony score (${currentHarmonyPercentage}%) above all else
+    5. Consider tank size limitations when making recommendations
+    6. Only recommend fish that will enhance the ecosystem without causing stress
 
     Tank Information:
     - Tank Name: "${tank.name}"
     - Tank Size: "$tankSizeText"
     - Tank Type: "${tank.type}"
+    - Current Harmony Score: ${currentHarmonyPercentage}% (THIS MUST BE MAINTAINED OR IMPROVED)
     - Current Inhabitants: ${json.encode(existingFishNames)}
 
     Current Fish Compatibility Data:
@@ -38,12 +41,13 @@ String buildTankStockingRecommendationPrompt(
     ${json.encode(fishListWithCompat)}
 
     Based on the current tank setup, provide 3 distinct recommendations for ADDITIONAL fish to add. Each recommendation should:
-    - Maintain or improve the tank's overall harmony
+    - MAINTAIN OR IMPROVE the current ${currentHarmonyPercentage}% harmony score
     - Be compatible with ALL existing fish
     - Consider appropriate stocking levels for the tank size
     - Suggest fish that complement the existing ecosystem
     - Account for water column usage (top, middle, bottom dwellers)
     - Consider bioload and tank capacity
+    - Prioritize harmony preservation above variety
 
     For each recommendation, provide a JSON object with:
     - "title": A creative title describing what this addition would bring to the tank (e.g., "Bottom Dweller Cleanup Crew", "Colorful Mid-Water Community")

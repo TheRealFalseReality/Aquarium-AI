@@ -7,11 +7,13 @@ import '../models/fish.dart'; // Import the Fish model
 class StockingReportScreen extends StatelessWidget {
   final List<StockingRecommendation> reports;
   final String? existingTankName; // Optional tank name for tank-based recommendations
+  final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
 
   const StockingReportScreen({
     super.key, 
     required this.reports,
     this.existingTankName,
+    this.existingFish,
   });
 
   @override
@@ -58,6 +60,7 @@ class StockingReportScreen extends StatelessWidget {
                   return _RecommendationTabView(
                     report: report,
                     isForExistingTank: existingTankName != null,
+                    existingFish: existingFish,
                   );
                 }).toList(),
               ),
@@ -72,10 +75,12 @@ class StockingReportScreen extends StatelessWidget {
 class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
   final bool isForExistingTank;
+  final List<Fish>? existingFish;
 
   const _RecommendationTabView({
     required this.report,
     this.isForExistingTank = false,
+    this.existingFish,
   });
 
   @override
@@ -142,6 +147,22 @@ class _RecommendationTabView extends StatelessWidget {
         ],
         
         const Divider(height: 32),
+        
+        // Show existing fish for tank-based recommendations
+        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
+          _SectionHeader(title: 'Current Tank Inhabitants'),
+          const SizedBox(height: 8),
+          Text(
+            'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _FishCardGrid(fishList: existingFish!, isExisting: true),
+          const Divider(height: 32),
+        ],
+        
         _SectionHeader(title: isForExistingTank ? 'Fish to Add' : 'Stocking Options'),
         const SizedBox(height: 8),
         Text(
@@ -202,6 +223,36 @@ class _RecommendationTabView extends StatelessWidget {
             );
           }).toList(),
         ),
+        
+        // Calculation Breakdown for tank-based recommendations
+        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
+          const Divider(height: 32),
+          ExpansionTile(
+            title: Row(
+              children: [
+                Icon(Icons.calculate, size: 18, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Calculation Breakdown',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  _generateCalculationBreakdown(existingFish!, report),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -211,6 +262,69 @@ class _RecommendationTabView extends StatelessWidget {
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
+  }
+  
+  String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
+    // Combine existing fish with the recommended core fish to show full tank compatibility
+    final allTankFish = [...existingFish, ...report.coreFish];
+    
+    final buffer = StringBuffer();
+    buffer.writeln("Current Tank Analysis:");
+    buffer.writeln("Existing Fish: ${existingFish.map((f) => f.name).join(', ')}");
+    buffer.writeln("Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}");
+    buffer.writeln();
+    
+    // Import the harmony calculator method here
+    return buffer.toString() + _calculateCompatibilityBreakdown(allTankFish);
+  }
+  
+  String _calculateCompatibilityBreakdown(List<Fish> fishList) {
+    if (fishList.length < 2) {
+      return "Select at least two fish to see a compatibility breakdown.";
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln("Pairwise Compatibility:");
+
+    final probabilities = <double>[];
+    for (int i = 0; i < fishList.length; i++) {
+      for (int j = i + 1; j < fishList.length; j++) {
+        final fishA = fishList[i];
+        final fishB = fishList[j];
+        final prob = _getPairwiseProbability(fishA, fishB);
+        probabilities.add(prob);
+
+        buffer.writeln(
+            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+      }
+    }
+    
+    buffer.writeln("\nGroup Harmony Score:");
+    final minScore = probabilities.reduce((a, b) => a < b ? a : b);
+    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
+    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+
+    return buffer.toString();
+  }
+  
+  double _getPairwiseProbability(Fish fishA, Fish fishB) {
+    if (fishA.compatible.contains(fishB.name) &&
+        fishB.compatible.contains(fishA.name)) {
+      return 1.0;
+    }
+    if (fishA.notCompatible.contains(fishB.name) ||
+        fishB.notCompatible.contains(fishA.name)) {
+      return 0.0;
+    }
+    if (fishA.notRecommended.contains(fishB.name) ||
+        fishB.notRecommended.contains(fishA.name)) {
+      return 0.25;
+    }
+    if (fishA.withCaution.contains(fishB.name) ||
+        fishB.withCaution.contains(fishA.name)) {
+      return 0.75;
+    }
+    return 0.5;
   }
 }
 
@@ -235,10 +349,12 @@ class _FishCardGrid extends StatelessWidget {
     final List<Fish> fishList;
     final bool isCore;
     final bool isAddition;
+    final bool isExisting;
     const _FishCardGrid({
       required this.fishList, 
       this.isCore = false,
       this.isAddition = false,
+      this.isExisting = false,
     });
 
     @override
@@ -260,7 +376,9 @@ class _FishCardGrid extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: isCore 
+                      side: isExisting
+                          ? BorderSide(color: cs.secondary, width: 2)  // Different color for existing fish
+                          : isCore 
                           ? BorderSide(color: cs.primary, width: 2)
                           : BorderSide.none,
                     ),
