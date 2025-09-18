@@ -223,7 +223,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     return match?.group(1) ?? text;
   }
 }
-}
 
 final aquariumStockingProvider =
     StateNotifierProvider<AquariumStockingNotifier, AquariumStockingState>(

@@ -681,7 +681,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
             ),
             const SizedBox(height: 12),
             Container(
-              constraints: const BoxConstraints(maxHeight: 350),
+              constraints: const BoxConstraints(maxHeight: 450),
               child: SingleChildScrollView(
                 child: Wrap(
                   spacing: 8,
