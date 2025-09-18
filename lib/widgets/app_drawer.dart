@@ -53,7 +53,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: ListTile(
-                      leading: const Icon(Icons.person, size: 36),
+                      leading: const Icon(Icons.water, size: 36),
                       title: Text(
                         'My Tanks',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),

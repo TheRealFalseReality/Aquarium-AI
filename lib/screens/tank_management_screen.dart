@@ -512,7 +512,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     Row(
                       children: [
                         Icon(
-                          Icons.pets,
+                          Icons.category,
                           size: 16,
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -588,20 +588,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ],
                 ),
               ],
+              // Water Weight Display
+              if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.line_weight,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Weight: ${_formatWaterWeight(tank)}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                  ],
+                ),
+              ],
               // Harmony Score Info
               if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(
-                      Icons.pets,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
                     const SizedBox(width: 8),
-                    Text(
-                      'Harmony Score: ',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
                     _buildHarmonyScoreChip(tank),
                   ],
                 ),
@@ -637,7 +647,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 : null,
                               child: fishImageUrl == null 
                                 ? Icon(
-                                    Icons.pets,
+                                    Icons.shape_line,
                                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                                     size: 20,
                                   ) 
@@ -912,7 +922,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.pets,
+            Icons.shape_line,
             size: 14,
             color: textColor,
           ),
