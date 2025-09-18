@@ -9,7 +9,9 @@ import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
 import 'dart:async';
 import '../prompts/stocking_recommendation_prompt.dart';
+import '../prompts/tank_stocking_recommendation_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../models/tank.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -193,6 +195,164 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       } else {
         state = state.copyWith(
           error: 'Could not generate a valid recommendation for your criteria. Try adjusting the notes or tank size.',
+          isLoading: false,
+        );
+      }
+    } catch (e) {
+      String errorMessage = 'Failed to generate recommendations: ${e.toString()}';
+      if (e.toString().contains('429') || e.toString().toLowerCase().contains('quota')) {
+          errorMessage = '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
+      } else if (e.toString().toLowerCase().contains('rate limit')) {
+          errorMessage = '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
+      }
+      state = state.copyWith(
+        error: errorMessage,
+        isLoading: false,
+      );
+    }
+  }
+
+  Future<void> getTankStockingRecommendations({
+    required Tank tank,
+  }) async {
+    state = state.copyWith(
+        isLoading: true, clearError: true, clearRecommendation: true);
+
+    if (tank.inhabitants.isEmpty) {
+      state = state.copyWith(
+        error: 'Tank has no existing inhabitants. Use the regular stocking tool for empty tanks.',
+        isLoading: false,
+      );
+      return;
+    }
+
+    final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
+    if (fishDataAsync.isLoading) {
+        state = state.copyWith(
+            error: 'Fish data is still loading, please wait a moment and try again.',
+            isLoading: false,
+        );
+        return;
+    }
+    final fishData = fishDataAsync.valueOrNull;
+    if (fishData == null) {
+        state = state.copyWith(
+            error: 'Fish data is unavailable. Cannot generate recommendations.',
+            isLoading: false,
+        );
+        return;
+    }
+    final models = ref.read(modelProvider);
+    final allFish = fishData[tank.type] ?? [];
+    if (allFish.isEmpty) {
+      state = state.copyWith(
+        error: 'No fish data available for the selected tank type.',
+        isLoading: false,
+      );
+      return;
+    }
+
+    // Get existing fish from tank inhabitants
+    final existingFish = <Fish>[];
+    for (final inhabitant in tank.inhabitants) {
+      final fish = allFish.firstWhere(
+        (f) => f.name == inhabitant.fishUnit,
+        orElse: () => Fish(
+          name: inhabitant.fishUnit,
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        ),
+      );
+      if (!existingFish.any((f) => f.name == fish.name)) {
+        existingFish.add(fish);
+      }
+    }
+
+    final prompt = buildTankStockingRecommendationPrompt(tank, allFish, existingFish);
+
+    try {
+      String? responseText;
+      if (models.activeProvider == AIProvider.gemini) {
+        if (models.geminiApiKey.isEmpty) {
+          throw Exception('Gemini API Key not set. Please go to settings to add your API key.');
+        }
+        final model = GenerativeModel(model: models.geminiModel, apiKey: models.geminiApiKey);
+        final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 45));
+        responseText = response.text;
+      } else {
+        if (models.openAIApiKey.isEmpty) {
+          throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
+        }
+        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+      }
+
+      if (responseText == null) {
+        throw Exception('Received no response from the AI service after multiple retries.');
+      }
+
+      final cleanedResponse = _extractJson(responseText);
+      final recommendationsJson = json.decode(cleanedResponse) as Map<String, dynamic>;
+
+      final List<StockingRecommendation> allGeneratedRecs = [];
+      final recommendationList = recommendationsJson['recommendations'] as List;
+
+      for (var rec in recommendationList) {
+        final coreFishNames = List<String>.from(rec['coreFish']);
+        final otherFishNames = List<String>.from(rec['otherDataBasedFish']);
+
+        final coreFish = allFish.where((fish) => coreFishNames.contains(fish.name)).toList();
+        final otherFish = allFish.where((fish) => otherFishNames.contains(fish.name)).toList();
+        
+        if (coreFish.isNotEmpty) {
+          // Calculate harmony score including existing fish
+          final allTankFish = [...existingFish, ...coreFish];
+          final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(allTankFish);
+          
+          allGeneratedRecs.add(StockingRecommendation(
+            title: rec['title'],
+            summary: rec['summary'],
+            coreFish: coreFish,
+            otherDataBasedFish: otherFish,
+            aiTankMatesSummary: rec['aiTankMatesSummary'],
+            aiRecommendedTankMates: List<String>.from(rec['aiRecommendedTankMates']), 
+            harmonyScore: harmonyScore,
+            compatibilityNotes: rec['compatibilityNotes'],
+            isAdditionRecommendation: true,
+          ));
+        }
+      }
+
+      // Sort by harmony score (highest first)
+      allGeneratedRecs.sort((a, b) => b.harmonyScore.compareTo(a.harmonyScore));
+
+      List<StockingRecommendation> finalRecs = [];
+      finalRecs.addAll(allGeneratedRecs.where((r) => r.harmonyScore >= 0.8));
+
+      if (finalRecs.length < 3 && allGeneratedRecs.length > finalRecs.length) {
+        var remainingRecs = allGeneratedRecs.where((r) => !finalRecs.contains(r)).toList();
+        int needed = 3 - finalRecs.length;
+        if (remainingRecs.isNotEmpty) {
+            finalRecs.addAll(remainingRecs.take(needed));
+        }
+      }
+      
+      if (finalRecs.isEmpty && allGeneratedRecs.isNotEmpty) {
+          finalRecs.add(allGeneratedRecs.first);
+      }
+
+      if (finalRecs.isNotEmpty) {
+        state = state.copyWith(
+          recommendations: finalRecs,
+          lastRecommendations: finalRecs,
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(
+          error: 'Could not generate suitable additions for your tank. The existing inhabitants may be too restrictive.',
           isLoading: false,
         );
       }

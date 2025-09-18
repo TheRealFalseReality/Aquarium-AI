@@ -6,15 +6,22 @@ import '../models/fish.dart'; // Import the Fish model
 
 class StockingReportScreen extends StatelessWidget {
   final List<StockingRecommendation> reports;
+  final String? existingTankName; // Optional tank name for tank-based recommendations
 
-  const StockingReportScreen({super.key, required this.reports});
+  const StockingReportScreen({
+    super.key, 
+    required this.reports,
+    this.existingTankName,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: reports.length,
       child: MainLayout(
-        title: 'Stocking Recommendations',
+        title: existingTankName != null 
+          ? 'Stocking Ideas for "$existingTankName"'
+          : 'Stocking Recommendations',
         child: Column(
           children: [
             Container(
@@ -48,7 +55,10 @@ class StockingReportScreen extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: reports.map((report) {
-                  return _RecommendationTabView(report: report);
+                  return _RecommendationTabView(
+                    report: report,
+                    isForExistingTank: existingTankName != null,
+                  );
                 }).toList(),
               ),
             ),
@@ -61,8 +71,12 @@ class StockingReportScreen extends StatelessWidget {
 
 class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
+  final bool isForExistingTank;
 
-  const _RecommendationTabView({required this.report});
+  const _RecommendationTabView({
+    required this.report,
+    this.isForExistingTank = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,19 +103,42 @@ class _RecommendationTabView extends StatelessWidget {
           ),
         ),
         const Divider(height: 32),
-        _SectionHeader(title: 'Stocking Options'),
+        _SectionHeader(title: isForExistingTank ? 'Fish to Add' : 'Stocking Options'),
         const SizedBox(height: 8),
         Text(
-            'The "Core Fish" are a highly compatible group. The "Other Options" are additional fish from our database that you can add while maintaining high harmony.',
+            isForExistingTank
+                ? 'The "Recommended Additions" are compatible with your existing tank inhabitants. The "Other Options" provide more choices while maintaining harmony.'
+                : 'The "Core Fish" are a highly compatible group. The "Other Options" are additional fish from our database that you can add while maintaining high harmony.',
             style: theme.textTheme.bodySmall),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, isCore: true),
+        _FishCardGrid(fishList: report.coreFish, isCore: true, isAddition: isForExistingTank),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text('Other Options', style: theme.textTheme.titleMedium),
             const SizedBox(height: 16),
-            _FishCardGrid(fishList: report.otherDataBasedFish),
+            _FishCardGrid(fishList: report.otherDataBasedFish, isAddition: isForExistingTank),
+        ],
+
+        // Show compatibility notes for tank-based recommendations
+        if (isForExistingTank && report.compatibilityNotes != null) ...[
+          const Divider(height: 32),
+          _SectionHeader(title: 'Compatibility Notes'),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.primary.withOpacity(0.2)),
+            ),
+            child: Text(
+              report.compatibilityNotes!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface,
+              ),
+            ),
+          ),
         ],
 
         const Divider(height: 32),
@@ -158,7 +195,12 @@ class _SectionHeader extends StatelessWidget {
 class _FishCardGrid extends StatelessWidget {
     final List<Fish> fishList;
     final bool isCore;
-    const _FishCardGrid({required this.fishList, this.isCore = false});
+    final bool isAddition;
+    const _FishCardGrid({
+      required this.fishList, 
+      this.isCore = false,
+      this.isAddition = false,
+    });
 
     @override
     Widget build(BuildContext context) {

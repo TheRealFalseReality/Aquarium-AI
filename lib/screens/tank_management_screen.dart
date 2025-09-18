@@ -7,9 +7,11 @@ import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
 import 'tank_creation_screen.dart';
+import 'stocking_report_screen.dart';
 
 enum TankSortOption {
   name,
@@ -435,6 +437,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                           );
                           break;
+                        case 'recommendations':
+                          _getTankStockingRecommendations(context, ref, tank);
+                          break;
                         case 'duplicate':
                           _duplicateTank(context, ref, tank);
                           break;
@@ -454,6 +459,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ],
                         ),
                       ),
+                      if (tank.inhabitants.isNotEmpty)
+                        const PopupMenuItem(
+                          value: 'recommendations',
+                          child: Row(
+                            children: [
+                              Icon(Icons.auto_awesome, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                            ],
+                          ),
+                        ),
                       const PopupMenuItem(
                         value: 'duplicate',
                         child: Row(
@@ -1088,5 +1104,38 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     return widgets;
+  }
+
+  void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
+    if (tank.inhabitants.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tank must have existing inhabitants to get stocking recommendations.'),
+        ),
+      );
+      return;
+    }
+
+    // Listen for stocking recommendations
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              existingTankName: tank.name,
+            ),
+          ),
+        );
+      }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!)),
+        );
+      }
+    });
+
+    // Get recommendations for this tank
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
   }
 }
