@@ -202,7 +202,7 @@ class _RecommendationTabView extends StatelessWidget {
         ],
 
         const Divider(height: 32),
-        _SectionHeader(title: 'AI Recommended Tank Mates'),
+        _SectionHeader(title: 'Recommended Tank Mates'),
         const SizedBox(height: 12),
         Text(
           report.aiTankMatesSummary,

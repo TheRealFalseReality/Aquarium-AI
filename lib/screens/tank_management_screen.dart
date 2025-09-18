@@ -806,12 +806,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               
               const SizedBox(height: 16),
               Text(
-                'Created: ${_formatDateTime(tank.createdAt)}',
+                'Created: ${_formatDate(tank.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (tank.updatedAt != tank.createdAt)
                 Text(
-                  'Updated: ${_formatDateTime(tank.updatedAt)}',
+                  'Updated: ${_formatDate(tank.updatedAt)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
             ],
@@ -911,10 +911,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } else {
       return '${date.month}/${date.day}/${date.year}';
     }
-  }
-
-  String _formatDateTime(DateTime date) {
-    return '${date.month}/${date.day}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   String _getCalculationBreakdown(Tank tank) {
