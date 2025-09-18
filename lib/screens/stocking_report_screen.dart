@@ -59,7 +59,7 @@ class StockingReportScreen extends StatelessWidget {
                 children: reports.map((report) {
                   return _RecommendationTabView(
                     report: report,
-                    isForExistingTank: existingTankName != null,
+                    isForExistingTank: report.isAdditionRecommendation,
                     existingFish: existingFish,
                   );
                 }).toList(),
