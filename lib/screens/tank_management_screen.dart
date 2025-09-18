@@ -308,7 +308,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         return 'Manual';
     }
   }
-  }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
     return Card(
