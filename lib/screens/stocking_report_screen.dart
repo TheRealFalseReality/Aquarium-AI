@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -351,16 +352,23 @@ class _RecommendationTabView extends StatelessWidget {
             color: cs.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
+        Text(
+          "(Click a fish to search)",
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 14),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: report.aiRecommendedTankMates.map((mate) {
-            return ActionChip(
-              avatar: const Icon(Icons.search, size: 16),
-              label: Text(mate),
-              onPressed: () => _launchSearch(mate),
-              backgroundColor: cs.secondaryContainer.withOpacity(0.4),
+            return ModernSelectableChip(
+              label: mate,
+              onTap: () => _launchSearch(mate),
+              selected: false,
             );
           }).toList(),
         ),
@@ -480,7 +488,6 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(title, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(width: 8),
-        Icon(Icons.search, size: 18, color: Theme.of(context).textTheme.bodySmall?.color),
       ],
     );
   }
