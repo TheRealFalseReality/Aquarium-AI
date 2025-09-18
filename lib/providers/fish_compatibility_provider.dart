@@ -9,6 +9,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'model_provider.dart';
 import '../prompts/fish_compatibility_prompt.dart';
+import '../utils/tank_harmony_calculator.dart';
 
 // Helper class for cancellable operations
 class CancellableCompleter<T> {
@@ -212,7 +213,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     );
 
     final models = ref.read(modelProvider);
-    final harmonyScore = _calculateHarmonyScore(state.selectedFish);
+    final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(state.selectedFish);
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore);
@@ -244,7 +245,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       final reportJson = json.decode(cleanedResponse);
       
       // EDITED: Generate the calculation breakdown string here.
-      final calculationBreakdown = _generateCalculationBreakdown(state.selectedFish);
+      final calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(state.selectedFish);
 
       final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel'],
@@ -283,75 +284,5 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         return '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
     }
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
-  }
-
-  double _getWeightedScore(double score) {
-    final randomFactor = Random().nextDouble() * 0.1 - 0.05;
-    return (score + randomFactor).clamp(0.0, 1.0);
-  }
-
-  double _getPairwiseProbability(Fish fishA, Fish fishB) {
-    if (fishA.compatible.contains(fishB.name) &&
-        fishB.compatible.contains(fishA.name)) {
-      return _getWeightedScore(1.0);
-    }
-    if (fishA.notCompatible.contains(fishB.name) ||
-        fishB.notCompatible.contains(fishA.name)) {
-      return _getWeightedScore(0.0);
-    }
-    if (fishA.notRecommended.contains(fishB.name) ||
-        fishB.notRecommended.contains(fishA.name)) {
-      return _getWeightedScore(0.25);
-    }
-    if (fishA.withCaution.contains(fishB.name) ||
-        fishB.withCaution.contains(fishA.name)) {
-      return _getWeightedScore(0.75);
-    }
-    return _getWeightedScore(0.5);
-  }
-
-  double _calculateHarmonyScore(List<Fish> fishList) {
-    if (fishList.length < 2) return 1.0;
-
-    double minProb = 1.0;
-    for (int i = 0; i < fishList.length; i++) {
-      for (int j = i + 1; j < fishList.length; j++) {
-        final prob = _getPairwiseProbability(fishList[i], fishList[j]);
-        if (prob < minProb) {
-          minProb = prob;
-        }
-      }
-    }
-    return minProb;
-  }
-  
-  // ADDED: New function to generate the breakdown string.
-  String _generateCalculationBreakdown(List<Fish> fishList) {
-    if (fishList.length < 2) {
-      return "Select at least two fish to see a compatibility breakdown.";
-    }
-
-    final buffer = StringBuffer();
-    buffer.writeln("Pairwise Compatibility:");
-
-    final probabilities = <double>[];
-    for (int i = 0; i < fishList.length; i++) {
-      for (int j = i + 1; j < fishList.length; j++) {
-        final fishA = fishList[i];
-        final fishB = fishList[j];
-        final prob = _getPairwiseProbability(fishA, fishB);
-        probabilities.add(prob);
-
-        buffer.writeln(
-            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
-      }
-    }
-    
-    buffer.writeln("\nGroup Harmony Score:");
-    final minScore = probabilities.reduce(min);
-    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
-    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
-
-    return buffer.toString();
   }
 }

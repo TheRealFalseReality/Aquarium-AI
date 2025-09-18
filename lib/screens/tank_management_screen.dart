@@ -288,6 +288,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                           );
                           break;
+                        case 'duplicate':
+                          _duplicateTank(context, ref, tank);
+                          break;
                         case 'delete':
                           _confirmDelete(context, ref, tank);
                           break;
@@ -301,6 +304,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             Icon(Icons.edit),
                             SizedBox(width: 8),
                             Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'duplicate',
+                        child: Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(width: 8),
+                            Text('Duplicate'),
                           ],
                         ),
                       ),
@@ -366,6 +379,69 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
+                    // Fish Thumbnails Row
+                    if (tank.inhabitants.isNotEmpty) ...[
+                      SizedBox(
+                        height: 40,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: tank.inhabitants.take(5).length,
+                          itemBuilder: (context, index) {
+                            final inhabitant = tank.inhabitants[index];
+                            final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage: fishImageUrl != null 
+                                      ? NetworkImage(fishImageUrl) 
+                                      : null,
+                                    backgroundColor: fishImageUrl == null 
+                                      ? Theme.of(context).colorScheme.primaryContainer 
+                                      : null,
+                                    child: fishImageUrl == null 
+                                      ? Icon(
+                                          Icons.pets,
+                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                          size: 20,
+                                        ) 
+                                      : null,
+                                  ),
+                                  if (inhabitant.quantity > 1)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 16,
+                                          minHeight: 16,
+                                        ),
+                                        child: Text(
+                                          '${inhabitant.quantity}',
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimary,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Wrap(
                       spacing: 8,
                       runSpacing: 4,
@@ -563,10 +639,53 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                         ),
+                        PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'duplicate') {
+                              _duplicateInhabitant(context, tank, inhabitant);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'duplicate',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.copy),
+                                  SizedBox(width: 8),
+                                  Text('Duplicate'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   );
                 }),
+              
+              // Calculation Breakdown Expandable Section
+              if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: Text(
+                    'Compatibility Calculation Breakdown',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Text(
+                        _getCalculationBreakdown(tank),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               
               const SizedBox(height: 16),
               Text(
@@ -599,6 +718,53 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             child: const Text('Edit'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _duplicateTank(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final duplicatedTank = Tank.create(
+        name: '${tank.name} (Copy)',
+        type: tank.type,
+        inhabitants: List.from(tank.inhabitants),
+        sizeGallons: tank.sizeGallons,
+        sizeLiters: tank.sizeLiters,
+      );
+      
+      await ref.read(tankProvider.notifier).addTank(duplicatedTank);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tank "${tank.name}" duplicated successfully')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to duplicate tank: $e')),
+        );
+      }
+    }
+  }
+
+  void _duplicateInhabitant(BuildContext context, Tank tank, TankInhabitant inhabitant) {
+    // This would be a simple notification since we can't modify the tank from here
+    // In a real implementation, you'd probably navigate to edit screen or add to tank provider
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('To duplicate "${inhabitant.customName}", please edit the tank and add a new fish'),
+        action: SnackBarAction(
+          label: 'Edit Tank',
+          onPressed: () {
+            Navigator.of(context).pop(); // Close details dialog
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => TankCreationScreen(existingTank: tank),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -653,6 +819,34 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _getCalculationBreakdown(Tank tank) {
+    if (_fishData == null || tank.inhabitants.isEmpty) return 'No calculation available';
+    
+    // Get fish data for the tank
+    final categoryFish = _fishData![tank.type] ?? [];
+    final tankFish = <Fish>[];
+    
+    for (final inhabitant in tank.inhabitants) {
+      final fish = categoryFish.firstWhere(
+        (f) => f.name == inhabitant.fishUnit,
+        orElse: () => Fish(
+          name: inhabitant.fishUnit,
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        ),
+      );
+      if (!tankFish.any((f) => f.name == fish.name)) {
+        tankFish.add(fish);
+      }
+    }
+    
+    return TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
   }
 
   String _formatTankSize(Tank tank) {

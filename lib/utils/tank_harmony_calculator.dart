@@ -92,4 +92,34 @@ class TankHarmonyCalculator {
     if (score >= 0.6) return '#FF9800'; // Orange
     return '#F44336'; // Red
   }
+
+  /// Generate a detailed breakdown of the harmony calculation
+  static String generateCalculationBreakdown(List<Fish> fishList) {
+    if (fishList.length < 2) {
+      return "Select at least two fish to see a compatibility breakdown.";
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln("Pairwise Compatibility:");
+
+    final probabilities = <double>[];
+    for (int i = 0; i < fishList.length; i++) {
+      for (int j = i + 1; j < fishList.length; j++) {
+        final fishA = fishList[i];
+        final fishB = fishList[j];
+        final prob = _getPairwiseProbability(fishA, fishB);
+        probabilities.add(prob);
+
+        buffer.writeln(
+            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+      }
+    }
+    
+    buffer.writeln("\nGroup Harmony Score:");
+    final minScore = probabilities.reduce((a, b) => a < b ? a : b);
+    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
+    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+
+    return buffer.toString();
+  }
 }

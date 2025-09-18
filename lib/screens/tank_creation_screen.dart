@@ -198,7 +198,10 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 children: [
                   // Custom Page Header with X Button
                   Padding(
-                    padding: const EdgeInsets.only(top: 30, bottom: 16),
+                    padding: EdgeInsets.only(
+                      top: widget.existingTank != null ? 50 : 30, 
+                      bottom: 16
+                    ),
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -505,12 +508,16 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   final _formKey = GlobalKey<FormState>();
   final _customNameController = TextEditingController();
   final _quantityController = TextEditingController();
+  final _searchController = TextEditingController();
   
   String? _selectedFishUnit;
+  List<Fish> _filteredFish = [];
 
   @override
   void initState() {
     super.initState();
+    _filteredFish = widget.availableFish;
+    _searchController.addListener(_filterFish);
     if (widget.existingInhabitant != null) {
       _customNameController.text = widget.existingInhabitant!.customName;
       _quantityController.text = widget.existingInhabitant!.quantity.toString();
@@ -524,7 +531,18 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   void dispose() {
     _customNameController.dispose();
     _quantityController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterFish() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredFish = widget.availableFish.where((fish) {
+        return fish.name.toLowerCase().contains(query) ||
+               fish.commonNames.any((name) => name.toLowerCase().contains(query));
+      }).toList();
+    });
   }
 
   void _save() {
@@ -548,13 +566,32 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.existingInhabitant != null ? 'Edit Inhabitant' : 'Add Inhabitant', textAlign: TextAlign.center),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              // Title
+              Text(
+                widget.existingInhabitant != null ? 'Edit Inhabitant' : 'Add Inhabitant',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              
+              // Scrollable Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
             TextFormField(
               controller: _customNameController,
               decoration: const InputDecoration(
@@ -580,18 +617,33 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
               ),
             ),
             const SizedBox(height: 8),
+            // Search Field
+            TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Search Fish',
+                hintText: 'Search by name...',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            const SizedBox(height: 12),
             Container(
               constraints: const BoxConstraints(maxHeight: 200),
               child: SingleChildScrollView(
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: widget.availableFish.map((fish) {
+                  children: _filteredFish.map((fish) {
                     final isSelected = _selectedFishUnit == fish.name;
                     return GestureDetector(
                       onTap: () {
                         setState(() {
                           _selectedFishUnit = fish.name;
+                          // Prefill custom name if not editing an existing inhabitant
+                          if (widget.existingInhabitant == null && _customNameController.text.isEmpty) {
+                            _customNameController.text = 'My ${fish.name}';
+                          }
                         });
                       },
                       child: Container(
@@ -685,19 +737,36 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
               },
               textAlign: TextAlign.center,
             ),
-          ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Action Buttons
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      child: Text(widget.existingInhabitant != null ? 'Update' : 'Add'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _save,
-          child: Text(widget.existingInhabitant != null ? 'Update' : 'Add'),
-        ),
-      ],
     );
   }
 
