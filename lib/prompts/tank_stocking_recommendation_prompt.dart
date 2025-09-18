@@ -53,7 +53,7 @@ String buildTankStockingRecommendationPrompt(
     - "title": A creative title describing what this addition would bring to the tank (e.g., "Bottom Dweller Cleanup Crew", "Colorful Mid-Water Community")
     - "summary": A detailed 2-3 sentence summary explaining how these additions will enhance the tank ecosystem, their behavior, and where they'll position in the water column
     - "coreFish": A list of 1-3 fish names from the database that are the main additions and compatible with ALL existing fish
-    - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely
+    - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely and compatible or listed "With Caution" with ALL existing fish
     - "aiTankMatesSummary": Explanation of why these additions work well with the existing community
     - "aiRecommendedTankMates": A list of 3-7 common fish names (not from the database) that would also be good additions
     - "compatibilityNotes": Specific notes about how these additions interact with the existing fish and any special considerations
