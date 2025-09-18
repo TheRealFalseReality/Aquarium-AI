@@ -82,51 +82,27 @@ class StockingReportScreen extends ConsumerWidget {
           : 'Stocking Recommendations',
         child: Column(
           children: [
-            // Add page title as requested
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Text(
-                reports.isNotEmpty && reports.first.isAdditionRecommendation
-                  ? 'Stocking Ideas for "$existingTankName"'
-                  : 'Stocking Recommendations',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 8),
+            // Merged header with title, tabs, and close button
             Container(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
                 children: [
-                  const SizedBox(width: 50),
-                  Expanded(
-                    child: Center(
-                      child: TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.center,
-                        tabs: List.generate(reports.length, (index) {
-                          final harmony = (reports[index].harmonyScore * 100).toInt();
-                          return Tab(text: 'Option ${index + 1} ($harmony%)');
-                        }),
-                      ),
-                    ),
-                  ),
+                  // Page title with close button
                   Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Regenerate button
-                      SizedBox(
-                        width: 50,
-                        child: IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () => _regenerateRecommendations(context, ref),
-                          tooltip: 'Regenerate Recommendations',
+                      Expanded(
+                        child: Text(
+                          reports.isNotEmpty && reports.first.isAdditionRecommendation
+                            ? 'Stocking Ideas for "$existingTankName"'
+                            : 'Stocking Recommendations',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
                       ),
-                      // Close button
+                      // Close button - stays at top right
                       SizedBox(
                         width: 50,
                         child: IconButton(
@@ -136,6 +112,16 @@ class StockingReportScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Tab bar centered
+                  TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.center,
+                    tabs: List.generate(reports.length, (index) {
+                      final harmony = (reports[index].harmonyScore * 100).toInt();
+                      return Tab(text: 'Option ${index + 1} ($harmony%)');
+                    }),
                   ),
                 ],
               ),
@@ -148,6 +134,7 @@ class StockingReportScreen extends ConsumerWidget {
                     isForExistingTank: report.isAdditionRecommendation,
                     existingFish: existingFish,
                     existingTankName: existingTankName,
+                    onRegenerate: () => _regenerateRecommendations(context, ref),
                   );
                 }).toList(),
               ),
@@ -164,12 +151,14 @@ class _RecommendationTabView extends StatelessWidget {
   final bool isForExistingTank;
   final List<Fish>? existingFish;
   final String? existingTankName;
+  final VoidCallback? onRegenerate;
 
   const _RecommendationTabView({
     required this.report,
     this.isForExistingTank = false,
     this.existingFish,
     this.existingTankName,
+    this.onRegenerate,
   });
 
   @override
@@ -194,6 +183,19 @@ class _RecommendationTabView extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: cs.onSurfaceVariant,
+          ),
+        ),
+        
+        // Regenerate button - moved from header
+        const SizedBox(height: 16),
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: onRegenerate,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Regenerate Recommendations'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
           ),
         ),
         
@@ -249,7 +251,7 @@ class _RecommendationTabView extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
                 // Existing fish confirmation list
-                if (existingFish != null && existingFish!.isNotEmpty) ...[
+                if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
