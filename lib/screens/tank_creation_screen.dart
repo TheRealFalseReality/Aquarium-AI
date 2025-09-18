@@ -614,20 +614,50 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                     key: _formKey,
                     child: Column(
                       children: [
-            TextFormField(
-              controller: _customNameController,
-              decoration: const InputDecoration(
-                labelText: 'Custom Name',
-                hintText: 'My Angelfish',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a name';
-                }
-                return null;
-              },
-              textAlign: TextAlign.center,
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextFormField(
+                    controller: _customNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Custom Name',
+                      hintText: 'My Angelfish',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    controller: _quantityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter quantity';
+                      }
+                      final quantity = int.tryParse(value);
+                      if (quantity == null || quantity < 1) {
+                        return 'Please enter a valid quantity';
+                      }
+                      return null;
+                    },
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             
@@ -662,8 +692,8 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                       onTap: () {
                         setState(() {
                           _selectedFishUnit = fish.name;
-                          // Prefill custom name if not editing an existing inhabitant
-                          if (widget.existingInhabitant == null && _customNameController.text.isEmpty) {
+                          // Prefill custom name when fish is selected (update if new inhabitant)
+                          if (widget.existingInhabitant == null) {
                             _customNameController.text = 'My ${fish.name}';
                           }
                         });
@@ -738,27 +768,6 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                   ),
                 ),
               ),
-            const SizedBox(height: 8),
-            
-            TextFormField(
-              controller: _quantityController,
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter quantity';
-                }
-                final quantity = int.tryParse(value);
-                if (quantity == null || quantity < 1) {
-                  return 'Please enter a valid quantity';
-                }
-                return null;
-              },
-              textAlign: TextAlign.center,
-            ),
                       ],
                     ),
                   ),
@@ -766,7 +775,6 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
               ),
               
               // Action Buttons
-              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
