@@ -213,7 +213,7 @@ class _RecommendationTabView extends StatelessWidget {
                 if (existingTankName != null) ...[
                   Row(
                     children: [
-                      Icon(Icons.aquarium, size: 14, color: cs.onSurfaceVariant),
+                      Icon(Icons.water, size: 14, color: cs.onSurfaceVariant),
                       const SizedBox(width: 6),
                       Text(
                         'Tank: ',
