@@ -52,10 +52,10 @@ String buildTankStockingRecommendationPrompt(
     For each recommendation, provide a JSON object with:
     - "title": A creative title describing what this addition would bring to the tank (e.g., "Bottom Dweller Cleanup Crew", "Colorful Mid-Water Community")
     - "summary": A detailed 2-3 sentence summary explaining how these additions will enhance the tank ecosystem, their behavior, and where they'll position in the water column
-    - "coreFish": A list of 1-3 fish names from the database that are the main additions and compatible with ALL existing fish
-    - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely and compatible or listed "With Caution" with ALL existing fish
+    - "coreFish": A list of 2-7 (at least 3 preferred) fish names from the database that are the main additions and compatible with ALL existing fish. These should form the core of the new additions.
+    - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely and compatible or listed "With Caution" with most of the existing fish
     - "aiTankMatesSummary": Explanation of why these additions work well with the existing community
-    - "aiRecommendedTankMates": A list of 3-7 common fish names (not from the database) that would also be good additions
+    - "aiRecommendedTankMates": A list of 3-10 common fish names (not from the database) that would also be good additions
     - "compatibilityNotes": Specific notes about how these additions interact with the existing fish and any special considerations
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
