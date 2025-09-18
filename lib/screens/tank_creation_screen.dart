@@ -29,6 +29,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   bool _isLoadingFish = true;
+  DateTime _creationDate = DateTime.now();
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
+      _creationDate = widget.existingTank!.createdAt;
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!.toString();
       }
@@ -159,6 +161,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                createdAt: _creationDate,
               )
             : Tank.create(
                 name: _tankNameController.text.trim(),
@@ -166,6 +169,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                createdAt: _creationDate,
               );
 
         if (widget.existingTank != null) {
@@ -357,6 +361,64 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
+                  
+                  // Creation Date Selection
+                  Text(
+                    'Creation Date',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () async {
+                      final selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: _creationDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (selectedDate != null) {
+                        setState(() {
+                          _creationDate = selectedDate;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Theme.of(context).colorScheme.outline),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Selected Date',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${_creationDate.day}/${_creationDate.month}/${_creationDate.year}',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.calendar_today,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   // Tank Type Selection
                   Text(
                     'Tank Type',
@@ -438,8 +500,50 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: CircleAvatar(
-                            child: Text('${inhabitant.quantity}'),
+                          leading: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundImage: _getFishImageUrl(inhabitant.fishUnit) != null
+                                  ? NetworkImage(_getFishImageUrl(inhabitant.fishUnit)!)
+                                  : null,
+                                backgroundColor: _getFishImageUrl(inhabitant.fishUnit) == null
+                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  : null,
+                                child: _getFishImageUrl(inhabitant.fishUnit) == null
+                                  ? Icon(
+                                      Icons.pets,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      size: 24,
+                                    )
+                                  : null,
+                              ),
+                              if (inhabitant.quantity > 1)
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    child: Text(
+                                      '${inhabitant.quantity}',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           title: Text(inhabitant.customName),
                           subtitle: Text('Fish Type: ${inhabitant.fishUnit}'),
@@ -465,23 +569,52 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                     }),
                   const SizedBox(height: 32),
                   // Save Button
-                  ElevatedButton.icon(
-                    onPressed: tankState.isLoading ? null : _saveTank,
-                    icon: tankState.isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save),
-                    label: Text(widget.existingTank != null
-                        ? 'Update Tank'
-                        : 'Save Tank'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: tankState.isLoading ? null : _saveTank,
+                      icon: tankState.isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(Icons.save, color: Colors.white),
+                      label: Text(
+                        widget.existingTank != null ? 'Update Tank' : 'Save Tank',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
@@ -508,6 +641,15 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       ),
       bottomNavigationBar: const AdBanner(),
     );
+  }
+
+  String? _getFishImageUrl(String fishName) {
+    try {
+      final fish = _availableFish.firstWhere((f) => f.name == fishName);
+      return fish.imageURL.isNotEmpty ? fish.imageURL : null;
+    } catch (e) {
+      return null;
+    }
   }
 }
 

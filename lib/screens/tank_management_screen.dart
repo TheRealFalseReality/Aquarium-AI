@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -14,7 +15,7 @@ enum TankSortOption {
   name,
   type,
   size,
-  manual,
+  date,
 }
 
 class TankManagementScreen extends ConsumerStatefulWidget {
@@ -32,6 +33,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   void initState() {
     super.initState();
     _loadFishData();
+    _loadSortPreference();
+  }
+
+  Future<void> _loadSortPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sortIndex = prefs.getInt('tank_sort_option') ?? 0;
+      if (sortIndex < TankSortOption.values.length) {
+        setState(() {
+          _currentSortOption = TankSortOption.values[sortIndex];
+        });
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  Future<void> _saveSortPreference(TankSortOption option) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('tank_sort_option', option.index);
+    } catch (e) {
+      // Handle error silently
+    }
   }
 
   Future<void> _loadFishData() async {
@@ -215,9 +240,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
         });
         break;
-      case TankSortOption.manual:
-        // For manual sorting, use creation date as default (user can rearrange later if needed)
-        sortedTanks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      case TankSortOption.date:
+        // Sort by creation date (newest first)
+        sortedTanks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
     }
     
@@ -271,6 +296,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               setState(() {
                                 _currentSortOption = option;
                               });
+                              _saveSortPreference(option);
                             }
                           },
                           backgroundColor: Colors.transparent,
@@ -304,8 +330,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         return 'Type';
       case TankSortOption.size:
         return 'Size';
-      case TankSortOption.manual:
-        return 'Manual';
+      case TankSortOption.date:
+        return 'Date';
     }
   }
 

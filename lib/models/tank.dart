@@ -73,6 +73,7 @@ class Tank {
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
+    DateTime? createdAt,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -82,7 +83,7 @@ class Tank {
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
       sizeLiters: sizeLiters,
-      createdAt: now,
+      createdAt: createdAt ?? now,
       updatedAt: now,
     );
   }
