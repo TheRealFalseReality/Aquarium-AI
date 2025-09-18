@@ -92,8 +92,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Listen for stocking recommendations globally
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
-        // Hide any existing snackbars
-        ScaffoldMessenger.of(context).clearSnackBars();
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
         
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -110,7 +112,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         _currentExistingFish = null;
       }
       if (next.error != null) {
-        // Hide loading snackbar and show error
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
+        
+        // Show error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${next.error}'),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+          ),
+        );
+      }
+    });
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1204,21 +1222,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       _currentExistingFish = existingFish;
     }
 
-    // Show loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false, // Prevent back button during loading
+        child: const Dialog(
+          backgroundColor: Colors.transparent,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Getting stocking recommendations...'),
+                    SizedBox(height: 8),
+                    Text(
+                      'This may take up to 60 seconds',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            SizedBox(width: 16),
-            Text('Getting stocking recommendations...'),
-          ],
+          ),
         ),
-        duration: Duration(seconds: 3),
       ),
     );
 

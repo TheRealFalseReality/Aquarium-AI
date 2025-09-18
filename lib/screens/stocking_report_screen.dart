@@ -8,7 +8,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 
-class StockingReportScreen extends ConsumerWidget {
+class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
   final String? existingTankName; // Optional tank name for tank-based recommendations
   final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
@@ -30,119 +30,231 @@ class StockingReportScreen extends ConsumerWidget {
     this.userNotes,
   });
 
-  void _regenerateRecommendations(BuildContext context, WidgetRef ref) {
-    if (originalTank != null) {
+  @override
+  ConsumerState<StockingReportScreen> createState() => _StockingReportScreenState();
+}
+
+class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
+  bool _isRegenerating = false;
+
+  void _regenerateRecommendations() {
+    if (_isRegenerating) return; // Prevent multiple calls
+    
+    setState(() {
+      _isRegenerating = true;
+    });
+
+    if (widget.originalTank != null) {
       // Tank-based regeneration
-      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: originalTank!);
-    } else if (tankSize != null && tankType != null) {
+      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: widget.originalTank!);
+    } else if (widget.tankSize != null && widget.tankType != null) {
       // General stocking regeneration  
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
-        tankSize: tankSize!,
-        tankType: tankType!,
-        userNotes: userNotes ?? '',
+        tankSize: widget.tankSize!,
+        tankType: widget.tankType!,
+        userNotes: widget.userNotes ?? '',
       );
     } else {
       // Show error if we don't have enough data to regenerate
+      setState(() {
+        _isRegenerating = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot regenerate recommendations - missing original parameters.'),
+        SnackBar(
+          content: const Text('Cannot regenerate - missing original parameters.'),
+          action: SnackBarAction(
+            label: 'Dismiss',
+            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+          ),
         ),
       );
     }
   }
 
+  String get _getDisplayTitle {
+    // Check if it's a tank-based recommendation
+    if (widget.reports.isNotEmpty && widget.reports.first.isAdditionRecommendation) {
+      // Use original tank name if available, otherwise existing tank name
+      final tankName = widget.originalTank?.name ?? widget.existingTankName ?? 'Unknown Tank';
+      return 'Stocking Ideas for "$tankName"';
+    }
+    return 'Stocking Recommendations';
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Listen for new recommendations and replace current screen
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       if (next.recommendations != null && 
           next.recommendations!.isNotEmpty && 
-          next.recommendations != reports) {
+          next.recommendations != widget.reports) {
+        // Stop regenerating state
+        setState(() {
+          _isRegenerating = false;
+        });
+        
         // Replace current screen with new recommendations
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => StockingReportScreen(
               reports: next.recommendations!,
-              existingTankName: existingTankName,
-              existingFish: existingFish,
-              originalTank: originalTank,
-              tankSize: tankSize,
-              tankType: tankType,
-              userNotes: userNotes,
+              existingTankName: widget.existingTankName,
+              existingFish: widget.existingFish,
+              originalTank: widget.originalTank,
+              tankSize: widget.tankSize,
+              tankType: widget.tankType,
+              userNotes: widget.userNotes,
+            ),
+          ),
+        );
+      }
+      
+      if (next.error != null) {
+        setState(() {
+          _isRegenerating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${next.error}'),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
             ),
           ),
         );
       }
     });
 
-    return DefaultTabController(
-      length: reports.length,
-      child: MainLayout(
-        title: reports.isNotEmpty && reports.first.isAdditionRecommendation
-          ? 'Stocking Ideas for "$existingTankName"'
-          : 'Stocking Recommendations',
-        child: Column(
-          children: [
-            // Merged header with title, tabs, and close button
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                children: [
-                  // Page title with close button
-                  Row(
+    return Stack(
+      children: [
+        DefaultTabController(
+          length: widget.reports.length,
+          child: MainLayout(
+            title: _getDisplayTitle,
+            child: Column(
+              children: [
+                // Merged header with title, tabs, and close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    children: [
+                      // Page title with close button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _getDisplayTitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          // Close button - stays at top right
+                          SizedBox(
+                            width: 50,
+                            child: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.of(context).pop(),
+                              tooltip: 'Close Report',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Tab bar centered
+                      TabBar(
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.center,
+                        tabs: List.generate(widget.reports.length, (index) {
+                          final harmony = (widget.reports[index].harmonyScore * 100).toInt();
+                          return Tab(text: 'Option ${index + 1} ($harmony%)');
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: widget.reports.map((report) {
+                      return _RecommendationTabView(
+                        report: report,
+                        isForExistingTank: report.isAdditionRecommendation,
+                        existingFish: widget.existingFish,
+                        existingTankName: widget.originalTank?.name ?? widget.existingTankName,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                // Bottom buttons
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          reports.isNotEmpty && reports.first.isAdditionRecommendation
-                            ? 'Stocking Ideas for "$existingTankName"'
-                            : 'Stocking Recommendations',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                        child: OutlinedButton.icon(
+                          onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                          icon: _isRegenerating 
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.refresh),
+                          label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
                         ),
                       ),
-                      // Close button - stays at top right
-                      SizedBox(
-                        width: 50,
-                        child: IconButton(
-                          icon: const Icon(Icons.close),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
                           onPressed: () => Navigator.of(context).pop(),
-                          tooltip: 'Close Report',
+                          icon: const Icon(Icons.close),
+                          label: const Text('Close'),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Tab bar centered
-                  TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.center,
-                    tabs: List.generate(reports.length, (index) {
-                      final harmony = (reports[index].harmonyScore * 100).toInt();
-                      return Tab(text: 'Option ${index + 1} ($harmony%)');
-                    }),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Expanded(
-              child: TabBarView(
-                children: reports.map((report) {
-                  return _RecommendationTabView(
-                    report: report,
-                    isForExistingTank: report.isAdditionRecommendation,
-                    existingFish: existingFish,
-                    existingTankName: existingTankName,
-                    onRegenerate: () => _regenerateRecommendations(context, ref),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        // Loading overlay
+        if (_isRegenerating)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: const Center(
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Generating new recommendations...'),
+                      SizedBox(height: 8),
+                      Text(
+                        'This may take up to 60 seconds',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -152,14 +264,12 @@ class _RecommendationTabView extends StatelessWidget {
   final bool isForExistingTank;
   final List<Fish>? existingFish;
   final String? existingTankName;
-  final VoidCallback? onRegenerate;
 
   const _RecommendationTabView({
     required this.report,
     this.isForExistingTank = false,
     this.existingFish,
     this.existingTankName,
-    this.onRegenerate,
   });
 
   @override
@@ -184,19 +294,6 @@ class _RecommendationTabView extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: cs.onSurfaceVariant,
-          ),
-        ),
-        
-        // Regenerate button - moved from header
-        const SizedBox(height: 16),
-        Center(
-          child: ElevatedButton.icon(
-            onPressed: onRegenerate,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Regenerate Recommendations'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
           ),
         ),
         
