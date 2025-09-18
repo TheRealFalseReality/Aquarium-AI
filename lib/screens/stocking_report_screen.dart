@@ -61,6 +61,7 @@ class StockingReportScreen extends StatelessWidget {
                     report: report,
                     isForExistingTank: report.isAdditionRecommendation,
                     existingFish: existingFish,
+                    existingTankName: existingTankName,
                   );
                 }).toList(),
               ),
@@ -76,11 +77,13 @@ class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
   final bool isForExistingTank;
   final List<Fish>? existingFish;
+  final String? existingTankName;
 
   const _RecommendationTabView({
     required this.report,
     this.isForExistingTank = false,
     this.existingFish,
+    this.existingTankName,
   });
 
   @override
