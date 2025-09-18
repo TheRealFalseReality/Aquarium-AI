@@ -397,6 +397,26 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                         ],
+                        // Water Weight Display
+                        if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.line_weight,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Water Weight: ${_formatWaterWeight(tank)}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         // Harmony Score Display
                         if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
                           const SizedBox(height: 4),
@@ -506,80 +526,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Fish Thumbnails Row
+                    // Fish Display by Type
                     if (tank.inhabitants.isNotEmpty) ...[
-                      SizedBox(
-                        height: 40,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: tank.inhabitants.take(5).length,
-                          itemBuilder: (context, index) {
-                            final inhabitant = tank.inhabitants[index];
-                            final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Tooltip(
-                                message: '${inhabitant.quantity}x ${inhabitant.customName}',
-                                child: Stack(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 20,
-                                      backgroundImage: fishImageUrl != null 
-                                        ? NetworkImage(fishImageUrl) 
-                                        : null,
-                                      backgroundColor: fishImageUrl == null 
-                                        ? Theme.of(context).colorScheme.primaryContainer 
-                                        : null,
-                                      child: fishImageUrl == null 
-                                        ? Icon(
-                                            Icons.pets,
-                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                            size: 20,
-                                          ) 
-                                        : null,
-                                    ),
-                                    if (inhabitant.quantity > 1)
-                                      Positioned(
-                                        right: 0,
-                                        bottom: 0,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(2),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 16,
-                                            minHeight: 16,
-                                          ),
-                                          child: Text(
-                                            '${inhabitant.quantity}',
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.onPrimary,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      if (tank.inhabitants.length > 5)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            '+${tank.inhabitants.length - 5} more fish',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
+                      ..._buildFishGroupDisplay(tank),
                     ],
                   ],
                 ),
@@ -871,12 +820,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } else if (difference.inDays < 7) {
       return '${difference.inDays} days ago';
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return '${date.month}/${date.day}/${date.year}';
     }
   }
 
   String _formatDateTime(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    return '${date.month}/${date.day}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   String _getCalculationBreakdown(Tank tank) {
@@ -914,6 +863,21 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return '${tank.sizeGallons!.toStringAsFixed(0)} gallons';
     } else if (tank.sizeLiters != null) {
       return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
+    }
+    return '';
+  }
+
+  String _formatWaterWeight(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      final pounds = tank.sizeGallons! * 8.34;
+      final kilograms = tank.sizeLiters!; // 1 liter = 1 kg approximately
+      return '${pounds.toStringAsFixed(0)} lbs (${kilograms.toStringAsFixed(0)} kg)';
+    } else if (tank.sizeGallons != null) {
+      final pounds = tank.sizeGallons! * 8.34;
+      return '${pounds.toStringAsFixed(0)} pounds';
+    } else if (tank.sizeLiters != null) {
+      final kilograms = tank.sizeLiters!;
+      return '${kilograms.toStringAsFixed(0)} kilograms';
     }
     return '';
   }
@@ -983,5 +947,107 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
     
     return fish.imageURL.isNotEmpty ? fish.imageURL : null;
+  }
+
+  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
+    final grouped = <String, List<TankInhabitant>>{};
+    for (final inhabitant in inhabitants) {
+      final fishType = inhabitant.fishUnit;
+      if (!grouped.containsKey(fishType)) {
+        grouped[fishType] = [];
+      }
+      grouped[fishType]!.add(inhabitant);
+    }
+    return grouped;
+  }
+
+  List<Widget> _buildFishGroupDisplay(Tank tank) {
+    final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
+    final widgets = <Widget>[];
+    
+    int displayedGroups = 0;
+    const maxGroups = 3; // Limit to 3 fish types to keep card compact
+    
+    for (final entry in groupedFish.entries) {
+      if (displayedGroups >= maxGroups) break;
+      
+      final fishType = entry.key;
+      final inhabitants = entry.value;
+      final fishImageUrl = _getFishImageUrl(tank.type, fishType);
+      
+      // Calculate total quantity for this fish type
+      final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
+      
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(
+            children: [
+              // Fish image
+              CircleAvatar(
+                radius: 12,
+                backgroundImage: fishImageUrl != null ? NetworkImage(fishImageUrl) : null,
+                backgroundColor: fishImageUrl == null 
+                  ? Theme.of(context).colorScheme.primaryContainer 
+                  : null,
+                child: fishImageUrl == null 
+                  ? Icon(
+                      Icons.pets,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      size: 12,
+                    ) 
+                  : null,
+              ),
+              const SizedBox(width: 8),
+              // Fish type and names
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$fishType ($totalQuantity)',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      inhabitants.map((i) => '${i.quantity}x ${i.customName}').join(', '),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      
+      displayedGroups++;
+    }
+    
+    // Add "more fish types" indicator if needed
+    if (groupedFish.length > maxGroups) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            '+${groupedFish.length - maxGroups} more fish type${groupedFish.length - maxGroups == 1 ? '' : 's'}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    return widgets;
   }
 }

@@ -401,7 +401,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                           Row(
                             children: [
                               Text(
-                                '${_creationDate.day}/${_creationDate.month}/${_creationDate.year}',
+                                '${_creationDate.month}/${_creationDate.day}/${_creationDate.year}',
                                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
