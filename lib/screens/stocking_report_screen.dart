@@ -77,11 +77,26 @@ class StockingReportScreen extends ConsumerWidget {
     return DefaultTabController(
       length: reports.length,
       child: MainLayout(
-        title: existingTankName != null 
+        title: reports.isNotEmpty && reports.first.isAdditionRecommendation
           ? 'Stocking Ideas for "$existingTankName"'
           : 'Stocking Recommendations',
         child: Column(
           children: [
+            // Add page title as requested
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(
+                reports.isNotEmpty && reports.first.isAdditionRecommendation
+                  ? 'Stocking Ideas for "$existingTankName"'
+                  : 'Stocking Recommendations',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.only(top: 8),
               child: Row(
@@ -210,7 +225,7 @@ class _RecommendationTabView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Tank name confirmation
-                if (existingTankName != null) ...[
+                if (isForExistingTank && existingTankName != null) ...[
                   Row(
                     children: [
                       Icon(Icons.water, size: 14, color: cs.onSurfaceVariant),
