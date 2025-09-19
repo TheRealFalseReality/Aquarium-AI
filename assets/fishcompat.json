@@ -14,7 +14,7 @@
         "Hatchets",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Snails"
       ],
@@ -57,7 +57,7 @@
         "Hatchets",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Snails"
       ],
@@ -102,7 +102,7 @@
         "Freshwater Sharks",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Snails"
@@ -144,7 +144,7 @@
         "Hatchets",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Snails"
       ],
       "notRecommended": [
@@ -186,7 +186,7 @@
         "Cory Cats",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Snails"
       ],
       "notRecommended": [
@@ -229,7 +229,7 @@
       "compatible": [
         "Cichlids - American, Large",
         "Larger Catfish",
-        "Plecos (Suckerfish)"
+        "Plecos / Catfish"
       ],
       "notRecommended": [
         "Barbs",
@@ -302,7 +302,7 @@
       "withCaution": [
         "Cichlids - Lake Malawian/Victoria",
         "Larger Catfish",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Snails"
       ]
     },
@@ -346,7 +346,7 @@
       ],
       "withCaution": [
         "Larger Catfish",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Snails"
       ]
     },
@@ -372,7 +372,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Shrimp",
@@ -409,7 +409,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Snails",
@@ -478,7 +478,7 @@
         "Gouramis",
         "Larger Catfish",
         "Loaches",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Tetras"
       ]
     },
@@ -521,7 +521,7 @@
         "Larger Catfish",
         "Loaches",
         "Mollies / Platies / Swordtails",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Shrimp",
         "Tetras"
       ]
@@ -535,7 +535,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Gold_fish1.jpg/250px-Gold_fish1.jpg",
       "compatible": [
         "Goldfish",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Pond Fish",
         "Snails"
       ],
@@ -584,7 +584,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Snails",
         "Tetras"
@@ -629,7 +629,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Shrimp",
         "Snails"
@@ -679,7 +679,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Shrimp",
         "Snails",
@@ -717,7 +717,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Snails"
       ],
@@ -784,7 +784,7 @@
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Freshwater Sharks",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish"
       ]
     },
@@ -810,7 +810,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Tetras"
@@ -850,7 +850,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Shrimp",
@@ -916,14 +916,14 @@
       "notCompatible": [],
       "withCaution": [
         "Goldfish",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Pond Fish"
       ]
     },
     {
-      "name": "Plecos (Suckerfish)",
+      "name": "Plecos / Catfish",
       "commonNames": [
-        "Plecostomus",
+        "Suckerfish",
         "Bristlenose Pleco"
       ],
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ancistrus_cirrhosus.jpg/250px-Ancistrus_cirrhosus.jpg",
@@ -944,7 +944,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Pond Fish",
         "Rainbowfish",
         "Rasboras",
@@ -970,7 +970,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Ojiya_Nishikigoi_no_Sato_ac_%283%29.jpg/250px-Ojiya_Nishikigoi_no_Sato_ac_%283%29.jpg",
       "compatible": [
         "Goldfish",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Pond Fish",
         "Snails"
       ],
@@ -1022,7 +1022,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Snails"
@@ -1069,7 +1069,7 @@
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rainbowfish",
         "Rasboras",
         "Shrimp",
@@ -1106,7 +1106,7 @@
         "Hatchets",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Shrimp",
         "Snails"
@@ -1162,7 +1162,7 @@
         "Larger Catfish",
         "Mollies / Platies / Swordtails",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Pond Fish",
         "Rainbowfish",
         "Rasboras",
@@ -1194,7 +1194,7 @@
         "Hatchets",
         "Loaches",
         "Plants",
-        "Plecos (Suckerfish)",
+        "Plecos / Catfish",
         "Rasboras",
         "Snails",
         "Tetras"

@@ -8,6 +8,8 @@ class StockingRecommendation {
   final String aiTankMatesSummary;
   final List<String> aiRecommendedTankMates;
   final double harmonyScore;
+  final String? compatibilityNotes;
+  final bool isAdditionRecommendation;
 
   StockingRecommendation({
     required this.title,
@@ -17,5 +19,7 @@ class StockingRecommendation {
     required this.aiTankMatesSummary,
     required this.aiRecommendedTankMates,
     required this.harmonyScore,
+    this.compatibilityNotes,
+    this.isAdditionRecommendation = false,
   });
 }

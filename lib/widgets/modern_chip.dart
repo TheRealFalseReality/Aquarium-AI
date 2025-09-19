@@ -74,8 +74,8 @@ class ModernSelectableChip extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: padding ??
             (dense
-                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
-                : const EdgeInsets.symmetric(horizontal: 22, vertical: 14)),
+                ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+                : const EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
         decoration: BoxDecoration(
           color: finalBackgroundColor,
           gradient: finalGradient,
@@ -116,7 +116,6 @@ class ModernSelectableChip extends StatelessWidget {
                       letterSpacing: 0.25,
                       color: finalLabelColor,
                     ),
-                // MODIFIED: Allow text to wrap up to 2 lines.
                 maxLines: 2,
                 textAlign: TextAlign.center,
               ),

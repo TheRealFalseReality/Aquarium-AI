@@ -42,7 +42,12 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(reports: next.recommendations!),
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              tankSize: _tankSizeController.text,
+              tankType: _selectedCategory,
+              userNotes: _notesController.text,
+            ),
           ),
         );
       }
@@ -109,6 +114,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   labelText: 'Tank Size (e.g., "55" or "200 liters")',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a tank size';
@@ -137,6 +144,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
+              const SizedBox(height: 16),
+              const NativeAdWidget(),
               if (state.error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),

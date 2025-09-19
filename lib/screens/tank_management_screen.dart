@@ -7,9 +7,11 @@ import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
 import 'tank_creation_screen.dart';
+import 'stocking_report_screen.dart';
 
 enum TankSortOption {
   name,
@@ -28,6 +30,8 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Map<String, List<Fish>>? _fishData;
   TankSortOption _currentSortOption = TankSortOption.name;
+  Tank? _currentTankForRecommendations; // Track current tank for recommendations
+  List<Fish>? _currentExistingFish; // Track existing fish for recommendations
 
   @override
   void initState() {
@@ -84,6 +88,47 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+
+    // Listen for stocking recommendations globally
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
+        
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StockingReportScreen(
+              reports: next.recommendations!,
+              existingTankName: _currentTankForRecommendations?.name,
+              existingFish: _currentExistingFish,
+              originalTank: _currentTankForRecommendations, // For regeneration
+            ),
+          ),
+        );
+        // Clear the current tank reference
+        _currentTankForRecommendations = null;
+        _currentExistingFish = null;
+      }
+      if (next.error != null) {
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
+        
+        // Show error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${next.error}'),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+          ),
+        );
+      }
+    });
 
     return MainLayout(
       title: 'My Tanks',
@@ -435,6 +480,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                           );
                           break;
+                        case 'recommendations':
+                          _getTankStockingRecommendations(context, ref, tank);
+                          break;
                         case 'duplicate':
                           _duplicateTank(context, ref, tank);
                           break;
@@ -454,6 +502,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ],
                         ),
                       ),
+                      if (tank.inhabitants.isNotEmpty)
+                        const PopupMenuItem(
+                          value: 'recommendations',
+                          child: Row(
+                            children: [
+                              Icon(Icons.auto_awesome, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                            ],
+                          ),
+                        ),
                       const PopupMenuItem(
                         value: 'duplicate',
                         child: Row(
@@ -533,6 +592,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ],
                 ),
               const SizedBox(height: 8),
+              
+              // Stocking recommendations button
+              if (tank.inhabitants.isNotEmpty) ...[
+                ElevatedButton.icon(
+                  onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                  icon: Icon(
+                    Icons.auto_awesome,
+                    size: 16,
+                  ),
+                  label: const Text('Get Stocking Ideas'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               
               // Created date
               Text(
@@ -727,12 +808,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               
               const SizedBox(height: 16),
               Text(
-                'Created: ${_formatDateTime(tank.createdAt)}',
+                'Created: ${_formatDate(tank.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (tank.updatedAt != tank.createdAt)
                 Text(
-                  'Updated: ${_formatDateTime(tank.updatedAt)}',
+                  'Updated: ${_formatDate(tank.updatedAt)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
             ],
@@ -832,10 +913,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } else {
       return '${date.month}/${date.day}/${date.year}';
     }
-  }
-
-  String _formatDateTime(DateTime date) {
-    return '${date.month}/${date.day}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   String _getCalculationBreakdown(Tank tank) {
@@ -1088,5 +1165,79 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     return widgets;
+  }
+
+  void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
+    if (tank.inhabitants.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tank must have existing inhabitants to get stocking recommendations.'),
+        ),
+      );
+      return;
+    }
+
+    // Store the current tank for the listener
+    _currentTankForRecommendations = tank;
+    
+    // Calculate and store existing fish for the listener
+    if (_fishData != null) {
+      final categoryFish = _fishData![tank.type] ?? [];
+      final existingFish = <Fish>[];
+      
+      for (final inhabitant in tank.inhabitants) {
+        final fish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+        if (!existingFish.any((f) => f.name == fish.name)) {
+          existingFish.add(fish);
+        }
+      }
+      _currentExistingFish = existingFish;
+    }
+
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button during loading
+        child: const Dialog(
+          backgroundColor: Colors.transparent,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Getting stocking recommendations...'),
+                    SizedBox(height: 8),
+                    Text(
+                      'This may take up to 60 seconds',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Get recommendations for this tank
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
   }
 }

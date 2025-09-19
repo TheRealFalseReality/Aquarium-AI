@@ -26,10 +26,10 @@ String buildStockingRecommendationPrompt(
     For each recommendation, provide a JSON object with:
     - "title": A creative and descriptive title for the aquarium setup.
     - "summary": An elaborate, detailed summary (2-3 sentences) describing the tank's atmosphere, activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers).
-    - "coreFish": A list of 2-4 fish names that form the main, high-harmony group for this recommendation.
-    - "otherDataBasedFish": A list of other fish from the provided data that are compatible with **all** of the "coreFish".
+    - "coreFish": A list of 2-7 fish names that form the main, high-harmony group for this recommendation.
+    - "otherDataBasedFish": A list of other fish from the provided data that are compatible or listed "With Caution" with **all** of the "coreFish".
     - "aiTankMatesSummary": A detailed summary explaining why the "aiRecommendedTankMates" are a good fit for the core group of fish.
-    - "aiRecommendedTankMates": A list of 5-10 common fish names (not from the provided data) that you, as an AI, would recommend as additional tank mates.
+    - "aiRecommendedTankMates": A list of 5-10 common fish names ONLY (not from the provided data) that you, as an AI, would recommend as additional tank mates.
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
     ''';

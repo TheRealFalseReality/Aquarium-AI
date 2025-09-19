@@ -315,7 +315,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                             maxLines: 6,
                             textInputAction: TextInputAction.newline,
                             decoration: InputDecoration(
-                              hintText: 'Ask Fish.AI anything...',
+                              hintText: 'Ask Aquarium AI anything...',
                               border: InputBorder.none,
                               hintStyle: TextStyle(
                                 color: cs.onSurface.withOpacity(0.45),
@@ -771,8 +771,8 @@ class MessageBubble extends ConsumerWidget {
                       isUser
                           ? 'You'
                           : isError
-                              ? 'Fish.AI - Error'
-                              : 'Fish.AI',
+                              ? 'Aquarium AI - Error'
+                              : 'Aquarium AI',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,
