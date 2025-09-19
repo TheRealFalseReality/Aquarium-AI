@@ -148,7 +148,28 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     }
   }
 
-  Future<void> _deleteFish(Fish fish) async {
+  Future<void> _duplicateFish(Fish fish) async {
+    final result = await showDialog<Fish>(
+      context: context,
+      builder: (context) => DuplicateFishDialog(
+        originalFish: fish,
+        existingNames: _currentCategory == 'freshwater'
+            ? _freshwaterFish.map((f) => f.name).toList()
+            : _marineFish.map((f) => f.name).toList(),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        if (_currentCategory == 'freshwater') {
+          _freshwaterFish.add(result);
+        } else {
+          _marineFish.add(result);
+        }
+        _filterFish();
+      });
+    }
+  }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -199,6 +220,8 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
             backgroundColor: Colors.green,
           ),
         );
+        
+        _showJsonPreviewDialog(jsonString);
       }
     } catch (e) {
       if (mounted) {
@@ -210,6 +233,203 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         );
       }
     }
+  }
+
+  Future<void> _importFromClipboard() async {
+    try {
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      if (clipboardData?.text == null || clipboardData!.text!.trim().isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Clipboard is empty'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final Map<String, dynamic> data = json.decode(clipboardData.text!);
+      
+      if (!data.containsKey('freshwater') || !data.containsKey('marine')) {
+        throw Exception('Invalid format: missing freshwater or marine data');
+      }
+
+      final freshwater = (data['freshwater'] as List)
+          .map((json) => Fish.fromJson(json))
+          .toList();
+      final marine = (data['marine'] as List)
+          .map((json) => Fish.fromJson(json))
+          .toList();
+
+      // Show confirmation dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Import Data'),
+          content: Text(
+            'This will replace all current data with:\n'
+            '• ${freshwater.length} freshwater fish\n'
+            '• ${marine.length} marine fish\n\n'
+            'Continue?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Import'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        setState(() {
+          _freshwaterFish = freshwater;
+          _marineFish = marine;
+          _filterFish();
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data imported successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _resetToDefault() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset to Default'),
+        content: const Text(
+          'This will reset all data to the original fishcompat.json file. '
+          'All changes will be lost. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _loadFishData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data reset to default successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showStatsDialog() {
+    final totalFreshwater = _freshwaterFish.length;
+    final totalMarine = _marineFish.length;
+    final totalFish = totalFreshwater + totalMarine;
+    
+    // Calculate average compatibility numbers
+    double avgCompatible = 0;
+    double avgCaution = 0;
+    double avgNotRecommended = 0;
+    double avgNotCompatible = 0;
+    
+    if (totalFish > 0) {
+      final allFish = [..._freshwaterFish, ..._marineFish];
+      avgCompatible = allFish.map((f) => f.compatible.length).reduce((a, b) => a + b) / totalFish;
+      avgCaution = allFish.map((f) => f.withCaution.length).reduce((a, b) => a + b) / totalFish;
+      avgNotRecommended = allFish.map((f) => f.notRecommended.length).reduce((a, b) => a + b) / totalFish;
+      avgNotCompatible = allFish.map((f) => f.notCompatible.length).reduce((a, b) => a + b) / totalFish;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Database Statistics'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Total Fish: $totalFish'),
+            Text('• Freshwater: $totalFreshwater'),
+            Text('• Marine: $totalMarine'),
+            const SizedBox(height: 16),
+            const Text('Average Compatibility Entries:', 
+              style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('• Compatible: ${avgCompatible.toStringAsFixed(1)}'),
+            Text('• With Caution: ${avgCaution.toStringAsFixed(1)}'),
+            Text('• Not Recommended: ${avgNotRecommended.toStringAsFixed(1)}'),
+            Text('• Not Compatible: ${avgNotCompatible.toStringAsFixed(1)}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showJsonPreviewDialog(String jsonString) {
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exported JSON Data'),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              jsonString,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: jsonString));
+              Navigator.of(context).pop();
+            },
+            child: const Text('Copy Again'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -246,6 +466,11 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                     ),
                     const SizedBox(width: 8),
                     IconButton(
+                      onPressed: _importFromClipboard,
+                      icon: const Icon(Icons.upload),
+                      tooltip: 'Import from Clipboard',
+                    ),
+                    IconButton(
                       onPressed: _exportData,
                       icon: const Icon(Icons.download),
                       tooltip: 'Export Data',
@@ -254,6 +479,36 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                       onPressed: _addNewFish,
                       icon: const Icon(Icons.add),
                       tooltip: 'Add Fish',
+                    ),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'reset':
+                            _resetToDefault();
+                            break;
+                          case 'stats':
+                            _showStatsDialog();
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'stats',
+                          child: ListTile(
+                            leading: Icon(Icons.bar_chart),
+                            title: Text('Statistics'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'reset',
+                          child: ListTile(
+                            leading: Icon(Icons.refresh, color: Colors.red),
+                            title: Text('Reset to Default'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -338,6 +593,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         return FishCard(
           fish: fish,
           onEdit: () => _editFish(fish),
+          onDuplicate: () => _duplicateFish(fish),
           onDelete: () => _deleteFish(fish),
         );
       },
@@ -348,12 +604,14 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 class FishCard extends StatelessWidget {
   final Fish fish;
   final VoidCallback onEdit;
+  final VoidCallback onDuplicate;
   final VoidCallback onDelete;
 
   const FishCard({
     super.key,
     required this.fish,
     required this.onEdit,
+    required this.onDuplicate,
     required this.onDelete,
   });
 
@@ -376,6 +634,24 @@ class FishCard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      },
                       errorBuilder: (context, error, stackTrace) =>
                           Container(
                             width: 60,
@@ -384,8 +660,21 @@ class FishCard extends StatelessWidget {
                               color: Colors.grey[300],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.broken_image),
+                            child: const Icon(Icons.broken_image, color: Colors.grey),
                           ),
+                    ),
+                  )
+                else
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.pets,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 const SizedBox(width: 12),
@@ -414,6 +703,11 @@ class FishCard extends StatelessWidget {
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit),
                   tooltip: 'Edit',
+                ),
+                IconButton(
+                  onPressed: onDuplicate,
+                  icon: const Icon(Icons.copy),
+                  tooltip: 'Duplicate',
                 ),
                 IconButton(
                   onPressed: onDelete,
@@ -600,6 +894,80 @@ class _AddFishDialogState extends State<AddFishDialog> {
             }
           },
           child: const Text('Add Fish'),
+        ),
+      ],
+    );
+  }
+}
+
+class DuplicateFishDialog extends StatefulWidget {
+  final Fish originalFish;
+  final List<String> existingNames;
+
+  const DuplicateFishDialog({
+    super.key,
+    required this.originalFish,
+    required this.existingNames,
+  });
+
+  @override
+  State<DuplicateFishDialog> createState() => _DuplicateFishDialogState();
+}
+
+class _DuplicateFishDialogState extends State<DuplicateFishDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: '${widget.originalFish.name} (Copy)');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Duplicate ${widget.originalFish.name}'),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _nameController,
+          decoration: const InputDecoration(
+            labelText: 'New Fish Name *',
+            border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Fish name is required';
+            }
+            if (widget.existingNames.contains(value.trim())) {
+              return 'Fish with this name already exists';
+            }
+            return null;
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              final duplicatedFish = widget.originalFish.copyWith(
+                name: _nameController.text.trim(),
+              );
+              Navigator.of(context).pop(duplicatedFish);
+            }
+          },
+          child: const Text('Duplicate'),
         ),
       ],
     );
