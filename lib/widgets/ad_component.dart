@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_helper.dart';
 
+// Conditional import for AdSense components
+import 'adsense_component.dart' if (dart.library.io) 'adsense_component_stub.dart';
+
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
 
@@ -52,7 +55,11 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    if (kIsWeb) {
+      return const SafeArea(child: AdSenseBannerWidget());
+    }
+
+    if (!_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -124,7 +131,11 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _nativeAd == null) {
+    if (kIsWeb) {
+      return const AdSenseDisplayWidget();
+    }
+
+    if (!_isAdLoaded || _nativeAd == null) {
       return const SizedBox.shrink();
     }
 
@@ -189,7 +200,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    if (kIsWeb) {
+      return const AdSenseBannerWidget();
+    }
+
+    if (!_isAdLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 

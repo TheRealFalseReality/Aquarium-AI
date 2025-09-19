@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../widgets/ad_component.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
   const PhotoAnalysisScreen({super.key});
@@ -65,6 +66,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     final cs = Theme.of(context).colorScheme;
     return MainLayout(
       title: 'Photo Analyzer',
+      bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -166,6 +168,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 24),
+            // Add native ad in content flow
+            const NativeAdWidget(),
             const SizedBox(height: 24),
             if (_error != null)
               Text(
