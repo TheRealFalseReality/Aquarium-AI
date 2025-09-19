@@ -403,6 +403,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
   }
 
   void _showJsonPreviewDialog(String jsonString) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exported JSON Data'),
