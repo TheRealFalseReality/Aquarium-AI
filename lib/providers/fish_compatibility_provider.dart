@@ -109,11 +109,15 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
   @override
   FishCompatibilityState build() {
+    // Start loading fish data immediately
     _loadFishData();
     return FishCompatibilityState();
   }
 
   Future<void> _loadFishData() async {
+    // Ensure state shows loading during the actual loading process
+    state = state.copyWith(fishData: const AsyncValue.loading());
+    
     try {
       final jsonString =
           await rootBundle.loadString('assets/fishcompat.json');

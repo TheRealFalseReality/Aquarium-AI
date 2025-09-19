@@ -97,14 +97,26 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(
         isLoading: true, clearError: true, clearRecommendation: true);
 
-    final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
+    // Wait for fish data to load if it's still loading
+    var fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
     if (fishDataAsync.isLoading) {
+      // Wait up to 5 seconds for fish data to load
+      for (int i = 0; i < 10; i++) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
+        if (!fishDataAsync.isLoading) break;
+      }
+      
+      // If still loading after waiting, show error
+      if (fishDataAsync.isLoading) {
         state = state.copyWith(
             error: 'Fish data is still loading, please wait a moment and try again.',
             isLoading: false,
         );
         return;
+      }
     }
+    
     final fishData = fishDataAsync.valueOrNull;
     if (fishData == null) {
         state = state.copyWith(
@@ -230,14 +242,26 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return;
     }
 
-    final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
+    // Wait for fish data to load if it's still loading
+    var fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
     if (fishDataAsync.isLoading) {
+      // Wait up to 5 seconds for fish data to load
+      for (int i = 0; i < 10; i++) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
+        if (!fishDataAsync.isLoading) break;
+      }
+      
+      // If still loading after waiting, show error
+      if (fishDataAsync.isLoading) {
         state = state.copyWith(
             error: 'Fish data is still loading, please wait a moment and try again.',
             isLoading: false,
         );
         return;
+      }
     }
+    
     final fishData = fishDataAsync.valueOrNull;
     if (fishData == null) {
         state = state.copyWith(
