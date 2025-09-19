@@ -130,12 +130,12 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
         DefaultTabController(
           length: widget.reports.length,
           child: MainLayout(
-            title: 'Recommendations',
+            title: _getDisplayTitle,
             child: Column(
               children: [
                 // Merged header with title, tabs, and close button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: Column(
                     children: [
                       // Page title with close button
@@ -143,7 +143,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Recommendations',
+                              _getDisplayTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineLarge
@@ -162,7 +162,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
                       // Tab bar centered
                       TabBar(
                         isScrollable: true,
