@@ -1048,18 +1048,40 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    
     return Dialog(
+      insetPadding: isSmallScreen 
+          ? const EdgeInsets.all(16) 
+          : const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.8,
+        width: isSmallScreen 
+            ? double.infinity 
+            : MediaQuery.of(context).size.width * 0.9,
+        height: isSmallScreen 
+            ? MediaQuery.of(context).size.height * 0.95
+            : MediaQuery.of(context).size.height * 0.8,
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              'Edit ${widget.fish.name}',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Edit ${widget.fish.name}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (isSmallScreen)
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             TabBar(
@@ -1083,14 +1105,18 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _saveFish,
-                  child: const Text('Save'),
+                if (!isSmallScreen) ...[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _saveFish,
+                    child: const Text('Save'),
+                  ),
                 ),
               ],
             ),
@@ -1144,6 +1170,37 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
   }
 
   Widget _buildCompatibilityTab() {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    
+    if (isSmallScreen) {
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            // Available Fish Section
+            _buildMobileCompatibilitySection('Available Fish', _available, Colors.grey, true),
+            const SizedBox(height: 16),
+            // Compatibility Sections in 2x2 grid
+            Row(
+              children: [
+                Expanded(child: _buildMobileCompatibilitySection('Compatible', _compatible, Colors.green, false)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildMobileCompatibilitySection('With Caution', _withCaution, Colors.orange, false)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _buildMobileCompatibilitySection('Not Recommended', _notRecommended, Colors.red[300]!, false)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildMobileCompatibilitySection('Not Compatible', _notCompatible, Colors.red, false)),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Original desktop layout
     return Row(
       children: [
         Expanded(
@@ -1199,6 +1256,64 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMobileCompatibilitySection(String title, List<String> items, Color color, bool isAvailable) {
+    return Container(
+      height: isAvailable ? 200 : 150,
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8),
+        color: color.withOpacity(0.05),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            ),
+            child: Text(
+              '$title (${items.length})',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(4),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final fishName = items[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 2),
+                  child: ListTile(
+                    title: Text(
+                      fishName,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    onTap: isAvailable 
+                        ? () => _showCompatibilityOptionsDialog(fishName)
+                        : () => _removeFishFromList(items, fishName),
+                    trailing: isAvailable 
+                        ? const Icon(Icons.add, size: 16)
+                        : const Icon(Icons.close, size: 16),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
