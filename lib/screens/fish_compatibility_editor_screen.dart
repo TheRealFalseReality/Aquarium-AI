@@ -404,6 +404,133 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     );
   }
 
+  void _performFileValidation() {
+    List<String> allErrors = [];
+    
+    // Validate freshwater fish
+    for (final fish in _freshwaterFish) {
+      final errors = _validateIndividualFish(fish, _freshwaterFish);
+      if (errors.isNotEmpty) {
+        allErrors.add('${fish.name}: ${errors.join(', ')}');
+      }
+    }
+    
+    // Validate marine fish
+    for (final fish in _marineFish) {
+      final errors = _validateIndividualFish(fish, _marineFish);
+      if (errors.isNotEmpty) {
+        allErrors.add('${fish.name}: ${errors.join(', ')}');
+      }
+    }
+    
+    // Show results
+    if (allErrors.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(width: 8),
+              Text('Validation Passed'),
+            ],
+          ),
+          content: const Text(
+            'All fish data is valid! No integrity issues found.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Validation Errors'),
+            ],
+          ),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Found ${allErrors.length} validation errors:'),
+                  const SizedBox(height: 16),
+                  ...allErrors.map((error) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '• $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  List<String> _validateIndividualFish(Fish fish, List<Fish> fishInCategory) {
+    List<String> errors = [];
+    final allFishNames = fishInCategory.map((f) => f.name).toSet();
+    
+    // Get all fish names mentioned in compatibility lists
+    final allMentioned = <String>{
+      ...fish.compatible,
+      ...fish.withCaution,
+      ...fish.notRecommended,
+      ...fish.notCompatible,
+    };
+    
+    // Check for duplicates across lists
+    final Map<String, List<String>> fishLists = {
+      'compatible': fish.compatible,
+      'withCaution': fish.withCaution,
+      'notRecommended': fish.notRecommended,
+      'notCompatible': fish.notCompatible,
+    };
+    
+    for (final fishName in allMentioned) {
+      final foundInLists = <String>[];
+      fishLists.forEach((listName, list) {
+        if (list.contains(fishName)) {
+          foundInLists.add(listName);
+        }
+      });
+      
+      if (foundInLists.length > 1) {
+        errors.add('$fishName appears in multiple lists: ${foundInLists.join(', ')}');
+      }
+    }
+    
+    // Check for fish mentioned that don't exist in the category
+    for (final mentionedFish in allMentioned) {
+      if (!allFishNames.contains(mentionedFish)) {
+        errors.add('References non-existent fish: $mentionedFish');
+      }
+    }
+    
+    return errors;
+  }
+
   void _showJsonPreviewDialog(String jsonString) {
     showDialog(
       context: context,
@@ -487,6 +614,9 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                     PopupMenuButton<String>(
                       onSelected: (value) {
                         switch (value) {
+                          case 'validate':
+                            _performFileValidation();
+                            break;
                           case 'reset':
                             _resetToDefault();
                             break;
@@ -496,6 +626,14 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                         }
                       },
                       itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'validate',
+                          child: ListTile(
+                            leading: Icon(Icons.check_circle_outline, color: Colors.green),
+                            title: Text('Validate Database'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
                         const PopupMenuItem(
                           value: 'stats',
                           child: ListTile(
@@ -1197,54 +1335,6 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
     );
   }
 
-  void _performValidationCheck() {
-    final errors = _validateFishData();
-    if (errors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validation passed! No issues found.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      _showValidationErrors(errors);
-    }
-  }
-
-  Future<void> _resetFishToDefault() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Fish to Default'),
-        content: Text(
-          'This will reset "${widget.fish.name}" to its original data from the database. '
-          'All current changes will be lost. Continue?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      _resetToDefaults();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.fish.name} reset to default values'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -1284,46 +1374,11 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Row(
-                  children: [
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'validate':
-                            _performValidationCheck();
-                            break;
-                          case 'reset':
-                            _resetFishToDefault();
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'validate',
-                          child: ListTile(
-                            leading: Icon(Icons.check_circle_outline),
-                            title: Text('Validate Data'),
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'reset',
-                          child: ListTile(
-                            leading: Icon(Icons.restore, color: Colors.orange),
-                            title: Text('Reset to Default'),
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ],
-                      icon: const Icon(Icons.more_vert),
-                    ),
-                    if (isSmallScreen)
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
-                      ),
-                  ],
-                ),
+                if (isSmallScreen)
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -1752,35 +1807,39 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
   }
 
   void _saveFish() {
-    if (_formKey.currentState!.validate()) {
-      // Handle fish name changes in compatibility lists
-      final newName = _nameController.text.trim();
-      final oldName = widget.fish.name;
-      if (oldName != newName) {
-        _updateFishNameInLists(oldName, newName);
-      }
-      
-      // Validate data before saving
-      final errors = _validateFishData();
-      if (errors.isNotEmpty) {
-        _showValidationErrors(errors);
-        return;
-      }
-      
-      final updatedFish = widget.fish.copyWith(
-        name: newName,
-        commonNames: _commonNamesController.text
-            .split(',')
-            .map((s) => s.trim())
-            .where((s) => s.isNotEmpty)
-            .toList(),
-        imageURL: _imageUrlController.text.trim(),
-        compatible: _compatible,
-        withCaution: _withCaution,
-        notRecommended: _notRecommended,
-        notCompatible: _notCompatible,
-      );
-      Navigator.of(context).pop(updatedFish);
+    // Check if form state exists and validate only if it's available
+    final formState = _formKey.currentState;
+    if (formState != null && !formState.validate()) {
+      return;
     }
+    
+    // Handle fish name changes in compatibility lists
+    final newName = _nameController.text.trim();
+    final oldName = widget.fish.name;
+    if (oldName != newName) {
+      _updateFishNameInLists(oldName, newName);
+    }
+    
+    // Validate data before saving
+    final errors = _validateFishData();
+    if (errors.isNotEmpty) {
+      _showValidationErrors(errors);
+      return;
+    }
+    
+    final updatedFish = widget.fish.copyWith(
+      name: newName,
+      commonNames: _commonNamesController.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList(),
+      imageURL: _imageUrlController.text.trim(),
+      compatible: _compatible,
+      withCaution: _withCaution,
+      notRecommended: _notRecommended,
+      notCompatible: _notCompatible,
+    );
+    Navigator.of(context).pop(updatedFish);
   }
 }
