@@ -106,6 +106,7 @@ class FishCompatibilityState {
 
 class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   CancellableCompleter<dynamic>? _cancellableCompleter;
+  Completer<void>? _dataLoadingCompleter;
 
   @override
   FishCompatibilityState build() {
@@ -117,6 +118,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   Future<void> _loadFishData() async {
     // Ensure state shows loading during the actual loading process
     state = state.copyWith(fishData: const AsyncValue.loading());
+    _dataLoadingCompleter = Completer<void>();
     
     try {
       final jsonString =
@@ -129,8 +131,25 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       state = state.copyWith(
           fishData: AsyncValue.data(
               {'freshwater': freshwater, 'marine': marine}));
+      _dataLoadingCompleter?.complete();
     } catch (e, stackTrace) {
       state = state.copyWith(fishData: AsyncValue.error(e, stackTrace));
+      _dataLoadingCompleter?.completeError(e, stackTrace);
+    }
+  }
+
+  /// Wait for fish data to be loaded, with a timeout
+  Future<void> waitForFishData({Duration timeout = const Duration(seconds: 10)}) async {
+    if (!state.fishData.isLoading && state.fishData.hasValue) {
+      return; // Already loaded
+    }
+    
+    if (_dataLoadingCompleter != null && !_dataLoadingCompleter!.isCompleted) {
+      try {
+        await _dataLoadingCompleter!.future.timeout(timeout);
+      } catch (e) {
+        // Timeout or other error - let caller handle the still-loading state
+      }
     }
   }
 
