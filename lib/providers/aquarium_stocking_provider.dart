@@ -97,6 +97,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(
         isLoading: true, clearError: true, clearRecommendation: true);
 
+    // Wait for fish data to load if it's still loading
+    final fishCompatibilityNotifier = ref.read(fishCompatibilityProvider.notifier);
+    await fishCompatibilityNotifier.waitForFishData();
+    
     final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
     if (fishDataAsync.isLoading) {
         state = state.copyWith(
@@ -105,6 +109,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
+    
     final fishData = fishDataAsync.valueOrNull;
     if (fishData == null) {
         state = state.copyWith(
@@ -230,6 +235,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return;
     }
 
+    // Wait for fish data to load if it's still loading
+    final fishCompatibilityNotifier = ref.read(fishCompatibilityProvider.notifier);
+    await fishCompatibilityNotifier.waitForFishData();
+    
     final fishDataAsync = ref.read(fishCompatibilityProvider).fishData;
     if (fishDataAsync.isLoading) {
         state = state.copyWith(
@@ -238,6 +247,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
+    
     final fishData = fishDataAsync.valueOrNull;
     if (fishData == null) {
         state = state.copyWith(
