@@ -129,23 +129,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
       }
     });
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error!}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            action: SnackBarAction(
-              label: 'Dismiss',
-              textColor: Theme.of(context).colorScheme.onError,
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            ),
-          ),
-        );
-        // Clear the current tank reference
-        _currentTankForRecommendations = null;
-        _currentExistingFish = null;
-      }
-    });
 
     return MainLayout(
       title: 'My Tanks',

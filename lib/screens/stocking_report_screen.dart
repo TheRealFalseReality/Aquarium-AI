@@ -71,16 +71,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
     }
   }
 
-  String get _getDisplayTitle {
-    // Check if it's a tank-based recommendation
-    if (widget.reports.isNotEmpty && widget.reports.first.isAdditionRecommendation) {
-      // Use original tank name if available, otherwise existing tank name
-      final tankName = widget.originalTank?.name ?? widget.existingTankName ?? 'Unknown Tank';
-      return 'Stocking Ideas for "$tankName"';
-    }
-    return 'Stocking Recommendations';
-  }
-
   @override
   Widget build(BuildContext context) {
     // Listen for new recommendations and replace current screen
@@ -130,7 +120,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
         DefaultTabController(
           length: widget.reports.length,
           child: MainLayout(
-            title: _getDisplayTitle,
+            title: 'Stocking Recommendations',
             child: Column(
               children: [
                 // Merged header with title, tabs, and close button
@@ -143,7 +133,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              _getDisplayTitle,
+                              'Recommendations',
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineLarge
