@@ -76,10 +76,18 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
     // Check if it's a tank-based recommendation
     if (widget.reports.isNotEmpty && widget.reports.first.isAdditionRecommendation) {
       // Use original tank name if available, otherwise existing tank name
-      final tankName = widget.originalTank?.name ?? widget.existingTankName ?? 'Unknown Tank';
+      final tankName = widget.originalTank?.name ?? widget.existingTankName;
+      if (tankName != null && tankName.isNotEmpty) {
+        return 'Stocking Ideas for "$tankName"';
+      }
+      return 'Tank Stocking Ideas';
+    }
+    // Check if we have tank name from any source for non-addition recommendations  
+    final tankName = widget.originalTank?.name ?? widget.existingTankName;
+    if (tankName != null && tankName.isNotEmpty) {
       return 'Stocking Ideas for "$tankName"';
     }
-    return 'Recommendations';
+    return 'Stocking Recommendations';
   }
 
   @override
@@ -392,12 +400,14 @@ class _RecommendationTabView extends StatelessWidget {
         
         const Divider(height: 32),
         
-        // Show existing fish for tank-based recommendations
-        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
+        // Show existing fish for tank-based recommendations  
+        if (existingFish != null && existingFish!.isNotEmpty) ...[
           _SectionHeader(title: 'Current Tank Inhabitants'),
           const SizedBox(height: 8),
           Text(
-            'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
+            isForExistingTank 
+              ? 'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.'
+              : 'Your current tank inhabitants:',
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
             ),
