@@ -169,6 +169,8 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       });
     }
   }
+
+  Future<void> _deleteFish(Fish fish) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

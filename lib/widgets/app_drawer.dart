@@ -135,16 +135,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 275),
-                  child: ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: const Text('Fish Data Editor'),
-                    subtitle:
-                        const Text('Edit and customize fish compatibility data.'),
-                    onTap: () => navigate('/fish-editor'),
-                  ),
-                ),
-                AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 200),
                   child: ListTile(
                     leading: const Icon(Icons.chat),
@@ -158,7 +148,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 300),
                   child: ListTile(
                     leading: const Icon(Icons.auto_awesome),
-                    title: const Text('Stocking Assistant'),
+                    title: const Text('AI Stocking Assistant'),
                     subtitle: const Text(
                         'Get personalized stocking recommendations for your aquarium.'),
                     onTap: () => navigate('/stocking'),
@@ -182,6 +172,16 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     subtitle:
                         const Text('Calculate the volume of your aquarium.'),
                     onTap: () => navigate('/tank-volume'),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 275),
+                  child: ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Fish Data Editor'),
+                    subtitle:
+                        const Text('Edit and customize fish compatibility data.'),
+                    onTap: () => navigate('/fish-editor'),
                   ),
                 ),
               ],
