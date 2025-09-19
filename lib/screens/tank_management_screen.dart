@@ -1209,8 +1209,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false, // Prevent back button during loading
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button during loading
         child: const Dialog(
           backgroundColor: Colors.transparent,
           child: Center(
