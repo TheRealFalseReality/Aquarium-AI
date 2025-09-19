@@ -1318,4 +1318,3 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
     }
   }
 }
-}
