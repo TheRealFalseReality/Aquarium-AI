@@ -14,8 +14,8 @@ void main() {
       ),
     );
 
-    // Verify that the 'About Fish.AI' title is displayed.
-    expect(find.text('About Fish.AI'), findsOneWidget);
+    // Verify that the 'About Aquarium AI' title is displayed.
+    expect(find.text('About Aquarium AI'), findsOneWidget);
 
     // Tap on the 'Contact & Feedback' button and verify that the dialog appears.
     await tester.tap(find.text('Contact & Feedback'));
