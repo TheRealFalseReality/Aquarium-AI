@@ -87,7 +87,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
     if (tankName != null && tankName.isNotEmpty) {
       return 'Stocking Ideas for "$tankName"';
     }
-    return 'Stocking Recommendations';
+    return 'Stocking Ideas';
   }
 
   @override
