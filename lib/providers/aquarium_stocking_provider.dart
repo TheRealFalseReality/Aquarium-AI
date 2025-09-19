@@ -49,6 +49,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   AquariumStockingNotifier(this.ref) : super(AquariumStockingState());
 
+  void cancel() {
+    state = state.copyWith(isLoading: false, clearError: true);
+  }
+
   // Helper function for OpenAI calls with retry logic
   Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
     int retries = 0;

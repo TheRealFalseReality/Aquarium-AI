@@ -175,22 +175,30 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       barrierDismissible: false,
       builder: (context) => PopScope(
         canPop: false, // Prevent back button during loading
-        child: const Dialog(
+        child: Dialog(
           backgroundColor: Colors.transparent,
           child: Center(
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Getting stocking recommendations...'),
-                    SizedBox(height: 8),
-                    Text(
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Getting stocking recommendations...'),
+                    const SizedBox(height: 8),
+                    const Text(
                       'This may take up to 60 seconds',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        ref.read(aquariumStockingProvider.notifier).cancel();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'),
                     ),
                   ],
                 ),
