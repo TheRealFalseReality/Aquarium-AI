@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
+import '../providers/fish_compatibility_provider.dart';
+import '../utils/tank_harmony_calculator.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
@@ -28,6 +30,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final tankCount = tankState.tanks.length;
     final lastTank = tankState.tanks.isNotEmpty ? tankState.tanks.last : null;
 
+    // Get fish data for harmony calculation
+    final fishCompatibilityState = ref.watch(fishCompatibilityProvider);
+    final fishData = fishCompatibilityState.fishData.value;
+
     void navigate(String routeName) {
       Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
@@ -36,6 +42,45 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           Navigator.pushNamed(context, routeName);
         }
       });
+    }
+
+    // Build harmony score widget for last tank
+    Widget? harmonyScoreWidget;
+    if (lastTank != null && lastTank.inhabitants.isNotEmpty && fishData != null) {
+      final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(lastTank, fishData);
+      if (harmonyScore != null) {
+        final percentage = (harmonyScore * 100).toStringAsFixed(0);
+        final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
+        
+        Color chipColor;
+        Color textColor;
+        if (harmonyScore >= 0.8) {
+          chipColor = Colors.green.shade100;
+          textColor = Colors.green.shade800;
+        } else if (harmonyScore >= 0.6) {
+          chipColor = Colors.orange.shade100;
+          textColor = Colors.orange.shade800;
+        } else {
+          chipColor = Colors.red.shade100;
+          textColor = Colors.red.shade800;
+        }
+
+        harmonyScoreWidget = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: chipColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '$label $percentage%',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
     }
 
     return Drawer(
@@ -59,10 +104,19 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                       subtitle: tankCount == 0
                           ? const Text('No tanks yet. Tap to add one!')
-                          : Text(
-                              'Total: $tankCount\n'
-                              '${lastTank != null ? "Latest: ${lastTank.name}" : ""}',
-                              style: Theme.of(context).textTheme.bodySmall,
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Total: $tankCount\n'
+                                  '${lastTank != null ? "Latest: ${lastTank.name}" : ""}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                if (harmonyScoreWidget != null) ...[
+                                  const SizedBox(height: 4),
+                                  harmonyScoreWidget,
+                                ],
+                              ],
                             ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => navigate('/tank-management'),

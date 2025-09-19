@@ -187,9 +187,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                     }).toList(),
                   ),
                 ),
-                // Bottom buttons
+                // Bottom buttons with extra padding
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
@@ -199,29 +199,34 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                       ),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _isRegenerating ? null : _regenerateRecommendations,
-                          icon: _isRegenerating 
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.refresh),
-                          label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                              icon: _isRegenerating 
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.refresh),
+                              label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.close),
+                              label: const Text('Close'),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close),
-                          label: const Text('Close'),
-                        ),
-                      ),
+                      const SizedBox(height: 8), // Extra padding below buttons
                     ],
                   ),
                 ),
