@@ -44,7 +44,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'contactus@capitalcityaquatics.com',
-      query: 'subject=Fish.AI Feedback',
+      query: 'subject=Aquarium AI Feedback',
     );
 
     if (!await launchUrl(emailLaunchUri)) {
@@ -71,7 +71,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: [
                       const TextSpan(
-                          text: 'Fish.AI is proudly brought to you by '),
+                          text: 'Aquarium AI is proudly brought to you by '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: InkWell(
@@ -153,7 +153,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'About Fish.AI',
+                'About Aquarium AI',
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge

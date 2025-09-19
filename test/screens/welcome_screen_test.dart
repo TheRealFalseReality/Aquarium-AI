@@ -17,8 +17,8 @@ void main() {
       ),
     );
 
-    // Verify that the 'Fish.AI' title is displayed.
-    expect(find.text('Fish.AI'), findsOneWidget);
+    // Verify that the 'Aquarium AI' title is displayed.
+    expect(find.text('Aquarium AI'), findsOneWidget);
 
     // Tap on the 'AI Compatibility Calculator' card and verify that it navigates to the correct screen.
     await tester.tap(find.text('AI Compatibility Calculator'));

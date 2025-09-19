@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: ChatbotScreen())));
 
     // Verify that the initial welcome message is displayed.
-    expect(find.textContaining('Welcome to Fish.AI!'), findsOneWidget);
+    expect(find.textContaining('Welcome to Aquarium AI!'), findsOneWidget);
 
     // Tap on the 'Aquarium Questions' button and verify that the suggestion chips appear.
     await tester.tap(find.byTooltip('Aquarium Questions'));
