@@ -1069,10 +1069,21 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
   }
 
   void _resetToDefaults() {
+    // Reset this fish to its original data from the JSON file
     setState(() {
-      _nameController.text = '';
-      _commonNamesController.text = '';
-      _imageUrlController.text = '';
+      _nameController.text = widget.fish.name;
+      _commonNamesController.text = widget.fish.commonNames.join(', ');
+      _imageUrlController.text = widget.fish.imageURL;
+      _compatible = List.from(widget.fish.compatible);
+      _withCaution = List.from(widget.fish.withCaution);
+      _notRecommended = List.from(widget.fish.notRecommended);
+      _notCompatible = List.from(widget.fish.notCompatible);
+      _updateAvailableList();
+    });
+  }
+
+  void _clearAllCategories() {
+    setState(() {
       _compatible.clear();
       _withCaution.clear();
       _notRecommended.clear();
@@ -1224,21 +1235,38 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                OutlinedButton.icon(
-                  onPressed: _undoChanges,
-                  icon: const Icon(Icons.undo, size: 18),
-                  label: const Text('Undo'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _undoChanges,
+                    icon: const Icon(Icons.undo, size: 16),
+                    label: const Text('Undo', style: TextStyle(fontSize: 12)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    ),
                   ),
                 ),
-                OutlinedButton.icon(
-                  onPressed: _resetToDefaults,
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Reset'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _resetToDefaults,
+                    icon: const Icon(Icons.restore, size: 16),
+                    label: const Text('Reset', style: TextStyle(fontSize: 12)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _clearAllCategories,
+                    icon: const Icon(Icons.clear_all, size: 16),
+                    label: const Text('Clear', style: TextStyle(fontSize: 12)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    ),
                   ),
                 ),
               ],
@@ -1286,10 +1314,20 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
             const SizedBox(width: 16),
             OutlinedButton.icon(
               onPressed: _resetToDefaults,
-              icon: const Icon(Icons.refresh, size: 18),
+              icon: const Icon(Icons.restore, size: 18),
               label: const Text('Reset to Defaults'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+            const SizedBox(width: 16),
+            OutlinedButton.icon(
+              onPressed: _clearAllCategories,
+              icon: const Icon(Icons.clear_all, size: 18),
+              label: const Text('Clear All'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
