@@ -15,7 +15,8 @@ Ever wonder if that new fish will get along with your current ones? Our tool has
 
 ### 🦐 AI Stocking Assistant
 Plan your dream aquarium with confidence. Our AI assistant helps you choose the right fish for your tank.
-* **Custom Stocking Plans:** Get personalized stocking recommendations based on3 your tank size, experience level, and desired fish type (e.g., community, aggressive).
+* **Custom Stocking Plans:** Get personalized stocking recommendations based on your tank size, experience level, and desired fish type (e.g., community, aggressive).
+* **Tank-Specific Recommendations:** Get targeted fish suggestions for your existing tanks with current inhabitants.
 * **Avoid Overcrowding:** Ensure a balanced and healthy environment for your aquatic pets.
 
 ### 📸 Photo Analysis

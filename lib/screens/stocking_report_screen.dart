@@ -76,10 +76,18 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
     // Check if it's a tank-based recommendation
     if (widget.reports.isNotEmpty && widget.reports.first.isAdditionRecommendation) {
       // Use original tank name if available, otherwise existing tank name
-      final tankName = widget.originalTank?.name ?? widget.existingTankName ?? 'Unknown Tank';
+      final tankName = widget.originalTank?.name ?? widget.existingTankName;
+      if (tankName != null && tankName.isNotEmpty) {
+        return 'Stocking Ideas for "$tankName"';
+      }
+      return 'Tank Stocking Ideas';
+    }
+    // Check if we have tank name from any source for non-addition recommendations  
+    final tankName = widget.originalTank?.name ?? widget.existingTankName;
+    if (tankName != null && tankName.isNotEmpty) {
       return 'Stocking Ideas for "$tankName"';
     }
-    return 'Recommendations';
+    return 'Stocking Ideas';
   }
 
   @override
@@ -187,9 +195,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                     }).toList(),
                   ),
                 ),
-                // Bottom buttons
+                // Bottom buttons with extra padding
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
@@ -199,29 +207,34 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                       ),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _isRegenerating ? null : _regenerateRecommendations,
-                          icon: _isRegenerating 
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.refresh),
-                          label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                              icon: _isRegenerating 
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.refresh),
+                              label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.close),
+                              label: const Text('Close'),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close),
-                          label: const Text('Close'),
-                        ),
-                      ),
+                      const SizedBox(height: 8), // Extra padding below buttons
                     ],
                   ),
                 ),
@@ -387,12 +400,14 @@ class _RecommendationTabView extends StatelessWidget {
         
         const Divider(height: 32),
         
-        // Show existing fish for tank-based recommendations
-        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
+        // Show existing fish for tank-based recommendations  
+        if (existingFish != null && existingFish!.isNotEmpty) ...[
           _SectionHeader(title: 'Current Tank Inhabitants'),
           const SizedBox(height: 8),
           Text(
-            'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
+            isForExistingTank 
+              ? 'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.'
+              : 'Your current tank inhabitants:',
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
             ),

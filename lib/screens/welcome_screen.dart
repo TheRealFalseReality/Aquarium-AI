@@ -102,7 +102,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       FeatureInfo(
         icon: '🏠',
         title: 'My Tanks',
-        description: 'Create and manage your custom tanks with inhabitants. Design your perfect aquarium setups.',
+        description: 'Create and manage your custom tanks with inhabitants. Get personalized stocking recommendations for your tanks.',
         routeName: '/tank-management',
         delay: const Duration(milliseconds: 750),
       ),

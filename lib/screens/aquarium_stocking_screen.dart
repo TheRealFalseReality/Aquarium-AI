@@ -39,6 +39,13 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   @override
   Widget build(BuildContext context) {
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      // Show/hide loading overlay
+      if (next.isLoading && !(previous?.isLoading ?? false)) {
+        _showLoadingOverlay(context);
+      } else if (!next.isLoading && (previous?.isLoading ?? false)) {
+        _hideLoadingOverlay();
+      }
+
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -160,5 +167,52 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
         ),
       ),
     );
+  }
+
+  void _showLoadingOverlay(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button during loading
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Getting stocking recommendations...'),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'This may take up to 60 seconds',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        ref.read(aquariumStockingProvider.notifier).cancel();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _hideLoadingOverlay() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 }
