@@ -1006,6 +1006,15 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
   late List<String> _notRecommended;
   late List<String> _notCompatible;
   late List<String> _available;
+  
+  // Original values for undo functionality
+  late String _originalName;
+  late String _originalCommonNames;
+  late String _originalImageURL;
+  late List<String> _originalCompatible;
+  late List<String> _originalWithCaution;
+  late List<String> _originalNotRecommended;
+  late List<String> _originalNotCompatible;
 
   @override
   void initState() {
@@ -1014,6 +1023,15 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
     _nameController = TextEditingController(text: widget.fish.name);
     _commonNamesController = TextEditingController(text: widget.fish.commonNames.join(', '));
     _imageUrlController = TextEditingController(text: widget.fish.imageURL);
+    
+    // Store original values for undo functionality
+    _originalName = widget.fish.name;
+    _originalCommonNames = widget.fish.commonNames.join(', ');
+    _originalImageURL = widget.fish.imageURL;
+    _originalCompatible = List.from(widget.fish.compatible);
+    _originalWithCaution = List.from(widget.fish.withCaution);
+    _originalNotRecommended = List.from(widget.fish.notRecommended);
+    _originalNotCompatible = List.from(widget.fish.notCompatible);
     
     _compatible = List.from(widget.fish.compatible);
     _withCaution = List.from(widget.fish.withCaution);
@@ -1035,6 +1053,32 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
         .where((name) => name != widget.fish.name && !allAssigned.contains(name))
         .toList();
     _available.sort();
+  }
+
+  void _undoChanges() {
+    setState(() {
+      _nameController.text = _originalName;
+      _commonNamesController.text = _originalCommonNames;
+      _imageUrlController.text = _originalImageURL;
+      _compatible = List.from(_originalCompatible);
+      _withCaution = List.from(_originalWithCaution);
+      _notRecommended = List.from(_originalNotRecommended);
+      _notCompatible = List.from(_originalNotCompatible);
+      _updateAvailableList();
+    });
+  }
+
+  void _resetToDefaults() {
+    setState(() {
+      _nameController.text = '';
+      _commonNamesController.text = '';
+      _imageUrlController.text = '';
+      _compatible.clear();
+      _withCaution.clear();
+      _notRecommended.clear();
+      _notCompatible.clear();
+      _updateAvailableList();
+    });
   }
 
   @override
@@ -1176,6 +1220,30 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
       return SingleChildScrollView(
         child: Column(
           children: [
+            // Action buttons for mobile
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _undoChanges,
+                  icon: const Icon(Icons.undo, size: 18),
+                  label: const Text('Undo'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _resetToDefaults,
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Reset'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Available Fish Section
             _buildMobileCompatibilitySection('Available Fish', _available, Colors.grey, true),
             const SizedBox(height: 16),
@@ -1201,57 +1269,88 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
     }
     
     // Original desktop layout
-    return Row(
+    return Column(
       children: [
+        // Action buttons for desktop
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _undoChanges,
+              icon: const Icon(Icons.undo, size: 18),
+              label: const Text('Undo Changes'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+            const SizedBox(width: 16),
+            OutlinedButton.icon(
+              onPressed: _resetToDefaults,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Reset to Defaults'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text('Available Fish (${_available.length})',
-                style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListView.builder(
-                    itemCount: _available.length,
-                    itemBuilder: (context, index) {
-                      final fishName = _available[index];
-                      return ListTile(
-                        title: Text(fishName),
-                        dense: true,
-                        onTap: () => _showCompatibilityOptionsDialog(fishName),
-                      );
-                    },
-                  ),
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Available Fish (${_available.length})',
+                      style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ListView.builder(
+                          itemCount: _available.length,
+                          itemBuilder: (context, index) {
+                            final fishName = _available[index];
+                            return ListTile(
+                              title: Text(fishName),
+                              dense: true,
+                              onTap: () => _showCompatibilityOptionsDialog(fishName),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              Expanded(child: _buildCompatibilityList('Compatible', _compatible, Colors.green)),
-              const SizedBox(height: 8),
-              Expanded(child: _buildCompatibilityList('With Caution', _withCaution, Colors.orange)),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              Expanded(child: _buildCompatibilityList('Not Recommended', _notRecommended, Colors.red[300]!)),
-              const SizedBox(height: 8),
-              Expanded(child: _buildCompatibilityList('Not Compatible', _notCompatible, Colors.red)),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  children: [
+                    Expanded(child: _buildCompatibilityList('Compatible', _compatible, Colors.green)),
+                    const SizedBox(height: 8),
+                    Expanded(child: _buildCompatibilityList('With Caution', _withCaution, Colors.orange)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  children: [
+                    Expanded(child: _buildCompatibilityList('Not Recommended', _notRecommended, Colors.red[300]!)),
+                    const SizedBox(height: 8),
+                    Expanded(child: _buildCompatibilityList('Not Compatible', _notCompatible, Colors.red)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -1261,7 +1360,7 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
 
   Widget _buildMobileCompatibilitySection(String title, List<String> items, Color color, bool isAvailable) {
     return Container(
-      height: isAvailable ? 200 : 150,
+      height: isAvailable ? 250 : 180,
       decoration: BoxDecoration(
         border: Border.all(color: color.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(8),
