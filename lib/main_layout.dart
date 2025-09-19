@@ -33,7 +33,7 @@ class MainLayout extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               GradientText(
-                'Fish.AI',
+                'Aquarium AI',
                 style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,

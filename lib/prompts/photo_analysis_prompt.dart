@@ -1,6 +1,6 @@
 String buildPhotoAnalysisPrompt(String userNote) {
   return '''
-    You are Fish.AI — aquarium & fish identification assistant.
+    You are Aquarium AI — aquarium & fish identification assistant.
 
     TASKS:
     1. Identify fish species (best guess if uncertain) with confidence 0–1.

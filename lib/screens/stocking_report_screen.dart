@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -439,7 +440,9 @@ class _RecommendationTabView extends StatelessWidget {
           ),
         ],
 
-        const Divider(height: 32),
+        const Divider(height: 16),
+        const NativeAdWidget(),
+        const Divider(height: 8),
         _SectionHeader(title: 'Recommended Tank Mates'),
         const SizedBox(height: 12),
         Text(

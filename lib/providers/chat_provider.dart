@@ -113,7 +113,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = ChatState(messages: [
       ChatMessage(
         text:
-            "# Welcome to Fish.AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
+            "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
         isUser: false,
       ),
       ChatMessage(text: 'ad', isUser: false, isAd: true),

@@ -1,6 +1,6 @@
-# Fish.AI: Your Intelligent Aquatic Assistant 🐠
+# Aquarium AI: Your Intelligent Aquatic Assistant 🐠
 
-Ready to level up your aquarium? **Fish.AI** offers a suite of powerful, AI-driven tools to help both new and seasoned aquarists create a thriving underwater ecosystem. Our goal is to take the guesswork out of aquarium keeping, making it a more enjoyable and successful hobby for everyone.
+Ready to level up your aquarium? **Aquarium AI** offers a suite of powerful, AI-driven tools to help both new and seasoned aquarists create a thriving underwater ecosystem. Our goal is to take the guesswork out of aquarium keeping, making it a more enjoyable and successful hobby for everyone.
 
 ## 🚀 Key Features
 
@@ -24,12 +24,12 @@ Analyze photos of your fish for personalized feedback. Our AI can help identify 
 ### 📐 Aquarium Calculators
 Access essential tools for managing your aquarium's technical details. The app includes a handy **Tank Volume Calculator** to help you accurately determine the water capacity of your aquarium, with more tools on the way.
 
-## 🌟 Why Fish.AI?
+## 🌟 Why Aquarium AI?
 
 * **Data-Driven Decisions:** Make informed decisions based on a vast database of aquatic knowledge and AI-powered insights.
 * **Easy to Use:** Our intuitive interface makes it simple to get the information you need, when you need it.
-* **Comprehensive Solution:** From compatibility checks to personalized advice, Fish.AI is your all-in-one solution for a healthier aquarium.
+* **Comprehensive Solution:** From compatibility checks to personalized advice, Aquarium AI is your all-in-one solution for a healthier aquarium.
 
 ## 🌊 Dive In!
 
-Stop guessing and start thriving! Try **Fish.AI** now and let it be your guide to a healthier, more beautiful aquarium.
+Stop guessing and start thriving! Try **Aquarium AI** now and let it be your guide to a healthier, more beautiful aquarium.

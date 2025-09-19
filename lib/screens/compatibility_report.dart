@@ -85,7 +85,6 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   const SizedBox(height: 16),
                   ...sections.entries.map((entry) {
                     final index = sections.keys.toList().indexOf(entry.key);
-                    // Injecting the ad after the Detailed Summary
                     if (entry.key == 'Detailed Summary') {
                       return Column(
                         children: [

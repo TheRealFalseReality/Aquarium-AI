@@ -263,12 +263,12 @@ class AnimatedHeaderState extends State<AnimatedHeader> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset('assets/AquaPi Logo.png', height: 100),
+          Image.asset('assets/AquaPi Logo.png', height: 125),
           const SizedBox(width: 16),
           GradientText(
-            'Fish.AI',
+            'Aquarium\nAI',
             style: const TextStyle(
-              fontSize: 80,
+              fontSize: 40,
               fontWeight: FontWeight.bold,
             ),
             gradient: LinearGradient(colors: [

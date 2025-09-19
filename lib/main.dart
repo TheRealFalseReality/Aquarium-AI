@@ -213,7 +213,7 @@ class MyApp extends ConsumerWidget {
         );
 
         return MaterialApp(
-          title: 'Fish.AI',
+          title: 'Aquarium AI',
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
