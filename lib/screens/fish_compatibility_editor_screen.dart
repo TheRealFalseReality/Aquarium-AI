@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -365,10 +364,12 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     
     if (totalFish > 0) {
       final allFish = [..._freshwaterFish, ..._marineFish];
-      avgCompatible = allFish.map((f) => f.compatible.length).reduce((a, b) => a + b) / totalFish;
-      avgCaution = allFish.map((f) => f.withCaution.length).reduce((a, b) => a + b) / totalFish;
-      avgNotRecommended = allFish.map((f) => f.notRecommended.length).reduce((a, b) => a + b) / totalFish;
-      avgNotCompatible = allFish.map((f) => f.notCompatible.length).reduce((a, b) => a + b) / totalFish;
+      if (allFish.isNotEmpty) {
+        avgCompatible = allFish.map((f) => f.compatible.length).reduce((a, b) => a + b) / totalFish;
+        avgCaution = allFish.map((f) => f.withCaution.length).reduce((a, b) => a + b) / totalFish;
+        avgNotRecommended = allFish.map((f) => f.notRecommended.length).reduce((a, b) => a + b) / totalFish;
+        avgNotCompatible = allFish.map((f) => f.notCompatible.length).reduce((a, b) => a + b) / totalFish;
+      }
     }
 
     showDialog(
@@ -1262,7 +1263,7 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
               },
             ),
             ListTile(
-              leading: Icon(Icons.priority_high, color: Colors.red[300]),
+              leading: Icon(Icons.priority_high, color: Colors.red[300]!),
               title: const Text('Not Recommended'),
               onTap: () {
                 _addFishToList(_notRecommended, fishName);
@@ -1316,4 +1317,5 @@ class _EditFishDialogState extends State<EditFishDialog> with SingleTickerProvid
       Navigator.of(context).pop(updatedFish);
     }
   }
+}
 }
