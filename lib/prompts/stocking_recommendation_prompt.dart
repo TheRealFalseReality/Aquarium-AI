@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/prompt_provider.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish, [WidgetRef? ref]) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish, [Ref? ref]) {
   final fishListWithCompat = allFish.map((f) => {
     'name': f.name,
     'compatible': f.compatible,

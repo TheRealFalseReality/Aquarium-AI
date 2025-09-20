@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/prompt_provider.dart';
 
-String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore, [WidgetRef? ref]) {
+String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore, [Ref? ref]) {
   final fishList = fishNames.join(', ');
   final harmonyPercentage = (harmonyScore * 100).toStringAsFixed(0);
   
