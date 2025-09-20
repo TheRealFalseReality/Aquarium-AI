@@ -23,7 +23,6 @@
         "Bettas (Female) ♀",
         "Bettas (Male) ♂",
         "Gouramis",
-        "Larger Catfish",
         "Pond Fish",
         "Shrimp",
         "Tetras"
@@ -40,6 +39,7 @@
         "Freshwater Sharks",
         "Goldfish",
         "Killifish",
+        "Larger Catfish",
         "Mollies / Platies / Swordtails",
         "Rasboras"
       ]
@@ -139,7 +139,6 @@
       ],
       "imageURL": "https://thailandbettafish.com/cdn/shop/collections/Rare_Koi_Betta_Fish_1.png?v=1690009934",
       "compatible": [
-        "Bettas (Female) ♀",
         "Cory Cats",
         "Hatchets",
         "Loaches",
@@ -150,7 +149,6 @@
       "notRecommended": [
         "Angelfish (Female) ♀",
         "Angelfish (Male) ♂",
-        "Bettas (Male) ♂",
         "Goldfish",
         "Gouramis",
         "Pond Fish"
@@ -163,6 +161,7 @@
       "withCaution": [
         "Barbs",
         "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Danios / Minnows",
         "Discus",
         "Freshwater Sharks",
@@ -192,7 +191,6 @@
       "notRecommended": [
         "Angelfish (Female) ♀",
         "Angelfish (Male) ♂",
-        "Bettas (Female) ♀",
         "Discus",
         "Goldfish",
         "Gouramis",
@@ -207,6 +205,7 @@
         "Pond Fish"
       ],
       "withCaution": [
+        "Bettas (Female) ♀",
         "Danios / Minnows",
         "Freshwater Sharks",
         "Hatchets",
@@ -544,8 +543,7 @@
         "Bettas (Male) ♂",
         "Cichlids - American, Large",
         "Cory Cats",
-        "Discus",
-        "Larger Catfish"
+        "Discus"
       ],
       "notCompatible": [
         "Cichlids - Lake Malawian/Victoria",
@@ -561,6 +559,7 @@
         "Guppies",
         "Hatchets",
         "Killifish",
+        "Larger Catfish",
         "Loaches",
         "Mollies / Platies / Swordtails",
         "Plants",
@@ -781,9 +780,11 @@
         "Shrimp"
       ],
       "withCaution": [
+        "Angelfish (Female) ♀",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Freshwater Sharks",
+        "Goldfish",
         "Plecos / Catfish",
         "Rainbowfish"
       ]
@@ -952,6 +953,7 @@
         "Snails",
         "Tetras"
       ],
+      "notRecommended": [],
       "notCompatible": [],
       "withCaution": [
         "Cichlids - Lake Malawian/Victoria",
@@ -1411,7 +1413,6 @@
         "Filefish",
         "Foxface / Rabbitfish",
         "Gobies",
-        "Grunts / Sweetlips",
         "Hawkfish",
         "Jawfish",
         "Shrimp",
@@ -1421,6 +1422,7 @@
       ],
       "notRecommended": [
         "Batfish",
+        "Grunts / Sweetlips",
         "Parrotfish",
         "Squirrelfish"
       ],
@@ -1456,7 +1458,6 @@
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
-        "Basslets",
         "Boxfish",
         "Butterflyfish",
         "Cardinalfish",
@@ -1464,14 +1465,15 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Grunts / Sweetlips",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
+        "Basslets",
         "Batfish",
+        "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
         "Pseudochromis",
@@ -1488,7 +1490,6 @@
       ],
       "withCaution": [
         "Angelfish",
-        "Basslets",
         "Blennies",
         "Clownfish (Female) ♀",
         "Clownfish (Male) ♂",
@@ -1511,13 +1512,13 @@
       "imageURL": "https://www.thesmilingseahorse.com/uploads/1/0/1/8/10183628/dsc-2797_orig.jpg",
       "compatible": [
         "Anglers / Frogs",
+        "Batfish",
         "Boxfish",
         "Butterflyfish",
         "Filefish",
         "Foxface / Rabbitfish",
         "Grunts / Sweetlips",
         "Hawkfish",
-        "Lionfish / Scorpionfish",
         "Parrotfish",
         "Puffers",
         "Squirrelfish",
@@ -1744,7 +1745,6 @@
         "Filefish",
         "Foxface / Rabbitfish",
         "Gobies",
-        "Grunts / Sweetlips",
         "Hawkfish",
         "Jawfish",
         "Snails",
@@ -1752,6 +1752,7 @@
       ],
       "notRecommended": [
         "Batfish",
+        "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
         "Shrimp",
@@ -2022,7 +2023,6 @@
         "Butterflyfish",
         "Clownfish (Female) ♀",
         "Clownfish (Male) ♂",
-        "Damselfish",
         "Gobies",
         "Hogfish",
         "Jawfish",
@@ -2102,7 +2102,6 @@
         "Clownfish (Female) ♀",
         "Clownfish (Male) ♂",
         "Damselfish",
-        "Dartfish",
         "Filefish",
         "Pseudochromis",
         "Puffers",
@@ -2174,7 +2173,6 @@
       "imageURL": "https://www.pbs.org/wnet/nature/files/2021/09/david-clode-yBraeHiDXi8-unsplash-scaled-e1630589780218.jpg",
       "compatible": [
         "Angelfish",
-        "Eels",
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
         "Tangs / Surgeons"
@@ -2301,7 +2299,6 @@
         "Dartfish",
         "Dragonets",
         "Filefish",
-        "Foxface / Rabbitfish",
         "Gobies",
         "Grunts / Sweetlips",
         "Hawkfish",
@@ -2313,6 +2310,7 @@
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
+        "Foxface / Rabbitfish",
         "Groupers",
         "Lionfish / Scorpionfish"
       ],
@@ -2322,7 +2320,6 @@
       "withCaution": [
         "Corals",
         "Eels",
-        "Foxface / Rabbitfish",
         "Pseudochromis",
         "Sharks / Rays",
         "Shrimp",
@@ -2351,7 +2348,6 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Gobies",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
@@ -2465,17 +2461,17 @@
         "Tangs / Surgeons"
       ],
       "notRecommended": [
+        "Anthias",
+        "Basslets",
         "Butterflyfish",
+        "Cardinalfish",
         "Clownfish (Female) ♀",
         "Clownfish (Male) ♂",
         "Corals",
         "Filefish"
       ],
       "notCompatible": [
-        "Anthias",
-        "Basslets",
         "Blennies",
-        "Cardinalfish",
         "Dartfish",
         "Dragonets",
         "Gobies",
@@ -2627,7 +2623,6 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Jawfish",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons"
@@ -2674,7 +2669,6 @@
       "compatible": [
         "Angelfish",
         "Anglers / Frogs",
-        "Batfish",
         "Eels",
         "Groupers"
       ],
@@ -2706,6 +2700,7 @@
       ],
       "withCaution": [
         "Anthias",
+        "Batfish",
         "Boxfish",
         "Grunts / Sweetlips",
         "Hogfish",
@@ -2895,6 +2890,7 @@
         "Dragonets",
         "Seahorse / Pipefish"
       ],
+      "notRecommended": [],
       "notCompatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -2947,6 +2943,7 @@
       "compatible": [
         "Sharks / Rays"
       ],
+      "notRecommended": [],
       "notCompatible": [
         "Angelfish - Dwarf",
         "Anglers / Frogs",
@@ -3112,8 +3109,6 @@
         "Anglers / Frogs",
         "Batfish",
         "Boxfish",
-        "Clownfish (Female) ♀",
-        "Clownfish (Male) ♂",
         "Foxface / Rabbitfish",
         "Grunts / Sweetlips",
         "Parrotfish",
