@@ -22,6 +22,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
   String _error = '';
   String _searchQuery = '';
   String _currentCategory = 'freshwater';
+  bool _hasUnsavedChanges = false;
   
   final TextEditingController _searchController = TextEditingController();
 
@@ -111,6 +112,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 
     if (result != null) {
       setState(() {
+        _hasUnsavedChanges = true; // Mark that changes have been made
         if (_currentCategory == 'freshwater') {
           _freshwaterFish.add(result);
         } else {
@@ -137,6 +139,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 
     if (result != null) {
       setState(() {
+        _hasUnsavedChanges = true; // Mark that changes have been made
         final fishList = _currentCategory == 'freshwater' ? _freshwaterFish : _marineFish;
         
         // Find fish by ID instead of name to handle name changes properly
@@ -220,14 +223,14 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       List<String> newNotRecommended = List.from(fish.notRecommended);
       List<String> newNotCompatible = List.from(fish.notCompatible);
       
-      // Handle additions
+      // Handle additions - when fishName matches this fish, add newFish to the corresponding list
       for (String fishName in addedToCompatible) {
         if (fishName == fish.name) {
-          // Remove from other lists first
+          // Remove newFish from other lists first
           newWithCaution.remove(newFish.name);
           newNotRecommended.remove(newFish.name);
           newNotCompatible.remove(newFish.name);
-          // Add to compatible if not already there
+          // Add newFish to compatible if not already there
           if (!newCompatible.contains(newFish.name)) {
             newCompatible.add(newFish.name);
             needsUpdate = true;
@@ -237,11 +240,11 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       
       for (String fishName in addedToCaution) {
         if (fishName == fish.name) {
-          // Remove from other lists first
+          // Remove newFish from other lists first
           newCompatible.remove(newFish.name);
           newNotRecommended.remove(newFish.name);
           newNotCompatible.remove(newFish.name);
-          // Add to caution if not already there
+          // Add newFish to caution if not already there
           if (!newWithCaution.contains(newFish.name)) {
             newWithCaution.add(newFish.name);
             needsUpdate = true;
@@ -251,11 +254,11 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       
       for (String fishName in addedToNotRecommended) {
         if (fishName == fish.name) {
-          // Remove from other lists first
+          // Remove newFish from other lists first
           newCompatible.remove(newFish.name);
           newWithCaution.remove(newFish.name);
           newNotCompatible.remove(newFish.name);
-          // Add to not recommended if not already there
+          // Add newFish to not recommended if not already there
           if (!newNotRecommended.contains(newFish.name)) {
             newNotRecommended.add(newFish.name);
             needsUpdate = true;
@@ -265,11 +268,11 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       
       for (String fishName in addedToNotCompatible) {
         if (fishName == fish.name) {
-          // Remove from other lists first
+          // Remove newFish from other lists first
           newCompatible.remove(newFish.name);
           newWithCaution.remove(newFish.name);
           newNotRecommended.remove(newFish.name);
-          // Add to not compatible if not already there
+          // Add newFish to not compatible if not already there
           if (!newNotCompatible.contains(newFish.name)) {
             newNotCompatible.add(newFish.name);
             needsUpdate = true;
@@ -317,6 +320,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 
     if (result != null) {
       setState(() {
+        _hasUnsavedChanges = true; // Mark that changes have been made
         if (_currentCategory == 'freshwater') {
           _freshwaterFish.add(result);
         } else {
@@ -349,6 +353,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 
     if (confirmed == true) {
       setState(() {
+        _hasUnsavedChanges = true; // Mark that changes have been made
         if (_currentCategory == 'freshwater') {
           _freshwaterFish.removeWhere((f) => f.name == fish.name);
         } else {
@@ -386,87 +391,6 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to export data: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _importFromClipboard() async {
-    try {
-      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-      if (clipboardData?.text == null || clipboardData!.text!.trim().isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Clipboard is empty'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
-      final Map<String, dynamic> data = json.decode(clipboardData.text!);
-      
-      if (!data.containsKey('freshwater') || !data.containsKey('marine')) {
-        throw Exception('Invalid format: missing freshwater or marine data');
-      }
-
-      final freshwater = (data['freshwater'] as List)
-          .map((json) => Fish.fromJson(json))
-          .toList();
-      final marine = (data['marine'] as List)
-          .map((json) => Fish.fromJson(json))
-          .toList();
-
-      // Show confirmation dialog
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Import Data'),
-          content: Text(
-            'This will replace all current data with:\n'
-            '• ${freshwater.length} freshwater fish\n'
-            '• ${marine.length} marine fish\n\n'
-            'Continue?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Import'),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmed == true) {
-        setState(() {
-          _freshwaterFish = freshwater;
-          _marineFish = marine;
-          _filterFish();
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Data imported successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to import data: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -572,6 +496,9 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       }
     }
     
+    // Check for unassigned freshwater fish
+    _checkForUnassignedFish(_freshwaterFish, allErrors, 'Freshwater');
+    
     // Validate marine fish
     for (final fish in _marineFish) {
       final errors = _validateIndividualFish(fish, _marineFish);
@@ -579,6 +506,14 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         allErrors.add('${fish.name}: ${errors.join(', ')}');
       }
     }
+    
+    // Check for unassigned marine fish
+    _checkForUnassignedFish(_marineFish, allErrors, 'Marine');
+    
+    // Reset changes indicator after validation
+    setState(() {
+      _hasUnsavedChanges = false;
+    });
     
     // Show results
     if (allErrors.isEmpty) {
@@ -704,6 +639,31 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     
     return errors;
   }
+
+  void _checkForUnassignedFish(List<Fish> fishList, List<String> allErrors, String categoryName) {
+    final allFishNames = fishList.map((f) => f.name).toSet();
+    
+    for (final fish in fishList) {
+      // Get all fish mentioned in this fish's compatibility lists
+      final mentionedFish = {
+        ...fish.compatible,
+        ...fish.withCaution,
+        ...fish.notRecommended,
+        ...fish.notCompatible,
+      };
+      
+      // Find fish that exist in the category but are not mentioned in any compatibility list
+      final unassignedFish = allFishNames.difference(mentionedFish);
+      
+      if (unassignedFish.isNotEmpty) {
+        for (final unassigned in unassignedFish) {
+          if (unassigned != fish.name) { // Don't report the fish itself as unassigned
+            allErrors.add('${fish.name}: Fish "$unassigned" in $categoryName is not assigned to any compatibility category (should be in Compatible, With Caution, Not Recommended, or Not Compatible)');
+          }
+        }
+      }
+    }
+  }
   
   void _checkCompatibilityContradictions(Fish fish1, Fish fish2, List<String> errors) {
     // Check if fish1 lists fish2 as compatible, but fish2 doesn't have any relationship with fish1
@@ -795,11 +755,6 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      onPressed: _importFromClipboard,
-                      icon: const Icon(Icons.upload),
-                      tooltip: 'Import from Clipboard',
-                    ),
-                    IconButton(
                       onPressed: _exportData,
                       icon: const Icon(Icons.download),
                       tooltip: 'Export Data',
@@ -824,11 +779,29 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'validate',
                           child: ListTile(
-                            leading: Icon(Icons.check_circle_outline, color: Colors.green),
-                            title: Text('Validate Database'),
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.check_circle_outline, color: Colors.green),
+                                if (_hasUnsavedChanges) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.orange,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            title: Text(_hasUnsavedChanges 
+                                ? 'Validate Database (Changes Detected)'
+                                : 'Validate Database'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
