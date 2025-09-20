@@ -15,6 +15,6 @@ String buildFishCompatibilityPrompt(String category, List<String> fishNames, dou
       5. "decorations": "Recommended decorations and setup.",
       6. "careGuide": "A general care guide for this group.",
       7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
-      8. "compatibleFish": [{"name": "List of other fish that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
+      8. "compatibleFish": [{"name": "List of other common fish names that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
       ''';
 }
