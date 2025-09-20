@@ -19,5 +19,5 @@ const String admobBannerAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/243528117
 const String admobNativeAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/3986624511';
 
 // Real AdMob IDs
-const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/5466510018';
-const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/1709391540';
+const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/8630162735';
+const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
