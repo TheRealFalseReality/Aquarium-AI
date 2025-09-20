@@ -148,14 +148,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 300),
                   child: ListTile(
                     leading: const Icon(Icons.auto_awesome),
-                    title: const Text('Stocking Assistant'),
+                    title: const Text('AI Stocking Assistant'),
                     subtitle: const Text(
                         'Get personalized stocking recommendations for your aquarium.'),
                     onTap: () => navigate('/stocking'),
                   ),
                 ),
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 300),
+                  delay: const Duration(milliseconds: 325),
                   child: ListTile(
                     leading: const Icon(Icons.science),
                     title: const Text('Aquarium Calculators'),
@@ -174,12 +174,22 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 275),
+                  child: ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Fish Data Editor'),
+                    subtitle:
+                        const Text('Edit and customize fish compatibility data.'),
+                    onTap: () => navigate('/fish-editor'),
+                  ),
+                ),
               ],
             ),
           ),
           const Divider(height: 1),
           AnimatedDrawerItem(
-            delay: const Duration(milliseconds: 400),
+            delay: const Duration(milliseconds: 425),
             child: _buildCollapsibleThemeMenu(),
           ),
           const Divider(height: 1),
@@ -338,7 +348,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       padding: EdgeInsets.fromLTRB(
           16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
-        delay: const Duration(milliseconds: 450),
+        delay: const Duration(milliseconds: 475),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

@@ -16,6 +16,7 @@ import './screens/chatbot_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import './widgets/transitions.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/fish_compatibility_editor_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/tank_management_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -247,6 +248,9 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
+                break;
+              case '/fish-editor':
+                page = const FishCompatibilityEditorScreen();
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();

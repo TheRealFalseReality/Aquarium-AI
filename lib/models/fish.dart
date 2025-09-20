@@ -31,7 +31,7 @@ class Fish {
     return Fish(
       name: json['name'] as String,
       commonNames: List<String>.from(json['commonNames'] ?? []),
-      imageURL: json['imageURL'] as String,
+      imageURL: json['imageURL'] as String? ?? '',
       // Use the new helper function to parse each list
       compatible: parseStringList(json['compatible']),
       notRecommended: parseStringList(json['notRecommended']),
@@ -39,4 +39,38 @@ class Fish {
       withCaution: parseStringList(json['withCaution']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'commonNames': commonNames,
+      'imageURL': imageURL,
+      'compatible': compatible,
+      'notRecommended': notRecommended,
+      'notCompatible': notCompatible,
+      'withCaution': withCaution,
+    };
+  }
+
+  Fish copyWith({
+    String? name,
+    List<String>? commonNames,
+    String? imageURL,
+    List<String>? compatible,
+    List<String>? notRecommended,
+    List<String>? notCompatible,
+    List<String>? withCaution,
+  }) {
+    return Fish(
+      name: name ?? this.name,
+      commonNames: commonNames ?? this.commonNames,
+      imageURL: imageURL ?? this.imageURL,
+      compatible: compatible ?? this.compatible,
+      notRecommended: notRecommended ?? this.notRecommended,
+      notCompatible: notCompatible ?? this.notCompatible,
+      withCaution: withCaution ?? this.withCaution,
+    );
+  }
+
+  String get id => name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 }
