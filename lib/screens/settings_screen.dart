@@ -538,13 +538,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             final title = promptTitles[promptType] ?? promptType.name;
             final hasCustom = promptNotifier.hasCustomPrompt(promptType);
             
+            // Disable system prompt editing
+            final isSystemPrompt = promptType == PromptType.system;
+            final isDisabled = isSystemPrompt;
+            
             return Card(
               margin: const EdgeInsets.only(bottom: 8.0),
               child: ExpansionTile(
                 title: Row(
                   children: [
-                    Expanded(child: Text(title)),
-                    if (hasCustom)
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(title),
+                          if (isSystemPrompt) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                              ),
+                              child: const Text(
+                                'DISABLED',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (hasCustom && !isDisabled)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
@@ -582,6 +611,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final defaultPrompt = promptNotifier.getDefaultPrompt(promptType);
     final hasCustom = promptNotifier.hasCustomPrompt(promptType);
     
+    // Disable system prompt editing
+    final isSystemPrompt = promptType == PromptType.system;
+    final isDisabled = isSystemPrompt;
+    
     final TextEditingController controller = TextEditingController(text: currentPrompt);
     
     return Padding(
@@ -589,15 +622,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (isSystemPrompt) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning, color: Colors.orange, size: 16),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'System Prompt editing is disabled for security reasons',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (!isSystemPrompt && !hasCustom) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning, color: Colors.red, size: 16),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'USE WITH CAUTION!! Modifying prompts may affect AI behavior',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Row(
             children: [
               Expanded(
                 child: Text(
-                  hasCustom ? 'Custom Prompt' : 'Default Prompt (Read-only)',
+                  hasCustom && !isDisabled ? 'Custom Prompt' : 'Default Prompt (Read-only)',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              if (hasCustom)
+              if (hasCustom && !isDisabled)
                 TextButton.icon(
                   onPressed: () {
                     _showRestorePromptDialog(promptType, ref);
@@ -622,27 +709,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
-              readOnly: !hasCustom,
+              readOnly: !hasCustom || isDisabled,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(12),
-                hintText: hasCustom ? 'Enter your custom prompt...' : 'This is the default prompt (read-only)',
+                hintText: hasCustom && !isDisabled ? 'Enter your custom prompt...' : 'This is the default prompt (read-only)',
               ),
               onChanged: (value) {
-                promptNotifier.setCustomPrompt(promptType, value);
+                if (!isDisabled) {
+                  promptNotifier.setCustomPrompt(promptType, value);
+                }
               },
             ),
           ),
           const SizedBox(height: 12),
-          if (!hasCustom)
+          if (!hasCustom && !isDisabled)
             ElevatedButton.icon(
-              onPressed: () {
-                promptNotifier.setCustomPrompt(promptType, defaultPrompt);
+              onPressed: () async {
+                await promptNotifier.setCustomPrompt(promptType, defaultPrompt);
+                // Force rebuild by calling setState
+                setState(() {});
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Custom prompt created! You can now edit it.')),
+                  );
+                }
               },
               icon: const Icon(Icons.edit),
               label: const Text('Create Custom Version'),
             )
-          else
+          else if (hasCustom && !isDisabled)
             Row(
               children: [
                 Expanded(
@@ -669,10 +765,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-          if (hasCustom) ...[
+          if ((hasCustom || isSystemPrompt) && !isDisabled) ...[
             const SizedBox(height: 8),
             ExpansionTile(
               title: const Text('View Default Prompt'),
+              children: [
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      defaultPrompt,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (isSystemPrompt) ...[
+            const SizedBox(height: 8),
+            ExpansionTile(
+              title: const Text('View System Prompt'),
               children: [
                 Container(
                   height: 150,
@@ -715,6 +833,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () {
               ref.read(promptProvider.notifier).resetPromptToDefault(promptType);
               Navigator.of(context).pop();
+              setState(() {}); // Force rebuild
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('$title restored to default')),
               );
@@ -741,6 +860,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () {
               ref.read(promptProvider.notifier).resetAllPromptsToDefaults();
               Navigator.of(context).pop();
+              setState(() {}); // Force rebuild
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('All prompts reset to defaults')),
               );
