@@ -582,6 +582,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final defaultPrompt = promptNotifier.getDefaultPrompt(promptType);
     final hasCustom = promptNotifier.hasCustomPrompt(promptType);
     
+    final TextEditingController controller = TextEditingController(text: currentPrompt);
+    
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -616,7 +618,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: TextField(
-              controller: TextEditingController(text: currentPrompt),
+              controller: controller,
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
@@ -646,7 +648,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      _showPromptPreview(promptType, currentPrompt);
+                      _showPromptPreview(promptType, controller.text);
                     },
                     icon: const Icon(Icons.preview),
                     label: const Text('Preview'),
@@ -656,6 +658,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      promptNotifier.setCustomPrompt(promptType, controller.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Custom prompt saved!')),
                       );

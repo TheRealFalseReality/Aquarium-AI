@@ -215,7 +215,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(state.selectedFish);
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
-    final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore);
+    final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, ref);
 
     _cancellableCompleter = CancellableCompleter();
 
