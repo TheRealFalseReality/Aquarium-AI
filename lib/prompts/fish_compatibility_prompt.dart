@@ -1,12 +1,24 @@
-String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore) {
+import 'dart:convert';
+import 'package:fish_ai/models/fish.dart';
+
+String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore, List<Fish> allFish) {
   final fishList = fishNames.join(', ');
   final harmonyPercentage = (harmonyScore * 100).toStringAsFixed(0);
+  
+  final fishListWithCompat = allFish.map((f) => {
+    'name': f.name,
+    'compatible': f.compatible,
+  }).toList();
 
   return '''
       You are an aquarium expert. A user has selected a group of fish. Your task is to generate a tailored care guide and compatibility summary.
       Selected Fish: $fishList
       Fish Type: $category
       Group Harmony Score: $harmonyPercentage%
+      
+      Available Fish Database (do NOT include these in compatibleFish recommendations):
+      ${json.encode(fishListWithCompat)}
+      
       Please provide a JSON object with the following:
       1. "harmonyLabel": "Based on the Group Harmony Score of $harmonyPercentage%, provide a one-word label (e.g., Excellent, Good, Fair, Poor).",
       2. "harmonySummary": "Based on the Group Harmony Score of $harmonyPercentage%, write a brief summary of the overall compatibility of this group.",
@@ -15,6 +27,6 @@ String buildFishCompatibilityPrompt(String category, List<String> fishNames, dou
       5. "decorations": "Recommended decorations and setup.",
       6. "careGuide": "A general care guide for this group.",
       7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
-      8. "compatibleFish": [{"name": "List of other common fish names that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
+      8. "compatibleFish": [{"name": "List of other common fish names ONLY (not from the provided database) that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish. These should be fish that would make good additions but are not listed in the database above."}]
       ''';
 }
