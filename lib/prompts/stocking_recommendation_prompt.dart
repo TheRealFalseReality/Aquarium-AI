@@ -1,25 +1,33 @@
 import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/prompt_provider.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish, [WidgetRef? ref]) {
   final fishListWithCompat = allFish.map((f) => {
     'name': f.name,
     'compatible': f.compatible,
   }).toList();
 
-  return '''
+  String basePrompt;
+  
+  if (ref != null) {
+    basePrompt = ref.read(promptProvider.notifier).getPrompt(PromptType.stockingRecommendation);
+  } else {
+    // Fallback to default for backward compatibility
+    basePrompt = '''
     You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
 
     A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
 
     User's Input:
-    - Tank Size: "$tankSize"
-    - Tank Type: "$tankType"
-    - Notes: "$userNotes"
+    - Tank Size: "{tankSize}"
+    - Tank Type: "{tankType}"
+    - Notes: "{userNotes}"
 
     Available Fish and their compatibility data (use this for "coreFish" and "otherDataBasedFish"):
-    ${json.encode(fishListWithCompat)}
+    {fishListWithCompat}
 
     Based on the user's input, provide 3 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
 
@@ -33,4 +41,11 @@ String buildStockingRecommendationPrompt(
 
     Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
     ''';
+  }
+  
+  return basePrompt
+      .replaceAll('{tankSize}', tankSize)
+      .replaceAll('{tankType}', tankType)
+      .replaceAll('{userNotes}', userNotes)
+      .replaceAll('{fishListWithCompat}', json.encode(fishListWithCompat));
 }

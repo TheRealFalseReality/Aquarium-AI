@@ -1,15 +1,24 @@
-String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore) {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/prompt_provider.dart';
+
+String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore, [WidgetRef? ref]) {
   final fishList = fishNames.join(', ');
   final harmonyPercentage = (harmonyScore * 100).toStringAsFixed(0);
-
-  return '''
+  
+  String basePrompt;
+  
+  if (ref != null) {
+    basePrompt = ref.read(promptProvider.notifier).getPrompt(PromptType.fishCompatibility);
+  } else {
+    // Fallback to default for backward compatibility
+    basePrompt = '''
       You are an aquarium expert. A user has selected a group of fish. Your task is to generate a tailored care guide and compatibility summary.
-      Selected Fish: $fishList
-      Fish Type: $category
-      Group Harmony Score: $harmonyPercentage%
+      Selected Fish: {fishList}
+      Fish Type: {category}
+      Group Harmony Score: {harmonyPercentage}%
       Please provide a JSON object with the following:
-      1. "harmonyLabel": "Based on the Group Harmony Score of $harmonyPercentage%, provide a one-word label (e.g., Excellent, Good, Fair, Poor).",
-      2. "harmonySummary": "Based on the Group Harmony Score of $harmonyPercentage%, write a brief summary of the overall compatibility of this group.",
+      1. "harmonyLabel": "Based on the Group Harmony Score of {harmonyPercentage}%, provide a one-word label (e.g., Excellent, Good, Fair, Poor).",
+      2. "harmonySummary": "Based on the Group Harmony Score of {harmonyPercentage}%, write a brief summary of the overall compatibility of this group.",
       3. "detailedSummary": "A detailed summary of the potential interactions in this specific group of fish.",
       4. "tankSize": "A recommended minimum tank size.",
       5. "decorations": "Recommended decorations and setup.",
@@ -17,4 +26,10 @@ String buildFishCompatibilityPrompt(String category, List<String> fishNames, dou
       7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
       8. "compatibleFish": [{"name": "List of other fish that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish."}]
       ''';
+  }
+  
+  return basePrompt
+      .replaceAll('{fishList}', fishList)
+      .replaceAll('{category}', category)
+      .replaceAll('{harmonyPercentage}', harmonyPercentage);
 }

@@ -1,3 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/prompt_provider.dart';
+
 const String systemPrompt = '''
 My Role: I am Aquarium AI, a specialized AI chatbot for aquarium and fish keeping, with expert knowledge of the AquaPi monitoring and automation system.
 
@@ -48,3 +51,8 @@ Behaviors and Rules:
 - Emphasize the open-source and community-driven nature of the project.
 - Be encouraging but realistic about the DIY nature of the product and its support limitations.
 ''';
+
+// Helper function to get the system prompt (custom or default)
+String getSystemPrompt(WidgetRef ref) {
+  return ref.read(promptProvider.notifier).getPrompt(PromptType.system);
+}

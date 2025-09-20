@@ -10,6 +10,7 @@ import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
 import 'model_provider.dart';
+import 'prompt_provider.dart';
 import '../prompts/system_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';

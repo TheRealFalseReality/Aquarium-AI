@@ -1,7 +1,16 @@
-String buildAutomationScriptPrompt(String description) {
-  return '''
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/prompt_provider.dart';
+
+String buildAutomationScriptPrompt(String description, [WidgetRef? ref]) {
+  String basePrompt;
+  
+  if (ref != null) {
+    basePrompt = ref.read(promptProvider.notifier).getPrompt(PromptType.automationScript);
+  } else {
+    // Fallback to default for backward compatibility
+    basePrompt = '''
     You are an expert on Home Assistant and ESPHome. A user wants to create a simple automation for their aquarium. Based on the user's description, provide a valid and well-commented YAML code snippet for either a Home Assistant automation or an ESPHome configuration. Also, provide a brief, friendly explanation of what the code does and where it should be placed.
-    User's request: "$description"
+    User's request: "{description}"
     Respond with a JSON object with this exact structure:
     {
       "title": "Automation for [User's Request]",
@@ -10,4 +19,7 @@ String buildAutomationScriptPrompt(String description) {
     }
     Ensure the YAML code is valid and can be directly used in Home Assistant or ESPHome.
     ''';
+  }
+  
+  return basePrompt.replaceAll('{description}', description);
 }

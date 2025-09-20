@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
+import '../providers/prompt_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -228,6 +229,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: _saveSettings, // Call the save function.
                         icon: const Icon(Icons.save),
                         label: const Text('Save Settings'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Prompt Settings Card
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Text(
+                      'AI Prompt Settings',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Customize the prompts used by the AI for different tasks.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPromptSettings(),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          _showResetPromptsDialog();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset All Prompts'),
                       ),
                     ],
                   ),
@@ -474,6 +519,255 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildPromptSettings() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final promptState = ref.watch(promptProvider);
+        final promptNotifier = ref.read(promptProvider.notifier);
+        final promptTitles = promptNotifier.getPromptTitles();
+        
+        if (promptState.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Column(
+          children: PromptType.values.map((promptType) {
+            final title = promptTitles[promptType] ?? promptType.name;
+            final hasCustom = promptNotifier.hasCustomPrompt(promptType);
+            
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8.0),
+              child: ExpansionTile(
+                title: Row(
+                  children: [
+                    Expanded(child: Text(title)),
+                    if (hasCustom)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          'Custom',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                children: [
+                  _buildPromptEditor(promptType, ref),
+                ],
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildPromptEditor(PromptType promptType, WidgetRef ref) {
+    final promptNotifier = ref.read(promptProvider.notifier);
+    final currentPrompt = promptNotifier.getPrompt(promptType);
+    final defaultPrompt = promptNotifier.getDefaultPrompt(promptType);
+    final hasCustom = promptNotifier.hasCustomPrompt(promptType);
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  hasCustom ? 'Custom Prompt' : 'Default Prompt (Read-only)',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              if (hasCustom)
+                TextButton.icon(
+                  onPressed: () {
+                    _showRestorePromptDialog(promptType, ref);
+                  },
+                  icon: const Icon(Icons.restore, size: 16),
+                  label: const Text('Restore Default'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextField(
+              controller: TextEditingController(text: currentPrompt),
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              readOnly: !hasCustom,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.all(12),
+                hintText: hasCustom ? 'Enter your custom prompt...' : 'This is the default prompt (read-only)',
+              ),
+              onChanged: (value) {
+                promptNotifier.setCustomPrompt(promptType, value);
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (!hasCustom)
+            ElevatedButton.icon(
+              onPressed: () {
+                promptNotifier.setCustomPrompt(promptType, defaultPrompt);
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('Create Custom Version'),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _showPromptPreview(promptType, currentPrompt);
+                    },
+                    icon: const Icon(Icons.preview),
+                    label: const Text('Preview'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Custom prompt saved!')),
+                      );
+                    },
+                    icon: const Icon(Icons.save),
+                    label: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          if (hasCustom) ...[
+            const SizedBox(height: 8),
+            ExpansionTile(
+              title: const Text('View Default Prompt'),
+              children: [
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      defaultPrompt,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showRestorePromptDialog(PromptType promptType, WidgetRef ref) {
+    final promptTitles = ref.read(promptProvider.notifier).getPromptTitles();
+    final title = promptTitles[promptType] ?? promptType.name;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore Default Prompt'),
+        content: Text('Are you sure you want to restore the default prompt for "$title"? This will delete your custom prompt.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(promptProvider.notifier).resetPromptToDefault(promptType);
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$title restored to default')),
+              );
+            },
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResetPromptsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset All Prompts'),
+        content: const Text('Are you sure you want to reset all prompts to their defaults? This will delete all your custom prompts.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(promptProvider.notifier).resetAllPromptsToDefaults();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('All prompts reset to defaults')),
+              );
+            },
+            child: const Text('Reset All'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPromptPreview(PromptType promptType, String prompt) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Prompt Preview'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: SingleChildScrollView(
+            child: Text(prompt),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

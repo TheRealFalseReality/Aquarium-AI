@@ -1,5 +1,14 @@
-String buildPhotoAnalysisPrompt(String userNote) {
-  return '''
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/prompt_provider.dart';
+
+String buildPhotoAnalysisPrompt(String userNote, [WidgetRef? ref]) {
+  String basePrompt;
+  
+  if (ref != null) {
+    basePrompt = ref.read(promptProvider.notifier).getPrompt(PromptType.photoAnalysis);
+  } else {
+    // Fallback to default for backward compatibility
+    basePrompt = '''
     You are Aquarium AI — aquarium & fish identification assistant.
 
     TASKS:
@@ -30,6 +39,9 @@ String buildPhotoAnalysisPrompt(String userNote) {
     }
 
     If no fish identified confidently: identifiedFish = [] and explain uncertainty in summary.
-    User context: $userNote
+    User context: {userNote}
     ''';
+  }
+  
+  return basePrompt.replaceAll('{userNote}', userNote);
 }
