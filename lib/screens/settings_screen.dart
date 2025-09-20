@@ -709,31 +709,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
-              readOnly: !hasCustom || isDisabled,
+              readOnly: true, // Always read-only, editing happens in dialog
               decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(12),
-                hintText: hasCustom && !isDisabled ? 'Enter your custom prompt...' : 'This is the default prompt (read-only)',
+                hintText: hasCustom && !isDisabled ? 'Custom prompt (click Edit to modify)' : 'Default prompt (read-only)',
               ),
-              onChanged: (value) {
-                if (!isDisabled) {
-                  promptNotifier.setCustomPrompt(promptType, value);
-                }
-              },
             ),
           ),
           const SizedBox(height: 12),
           if (!hasCustom && !isDisabled)
             ElevatedButton.icon(
-              onPressed: () async {
-                await promptNotifier.setCustomPrompt(promptType, defaultPrompt);
-                // Force rebuild by calling setState
-                setState(() {});
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Custom prompt created! You can now edit it.')),
-                  );
-                }
+              onPressed: () {
+                _showPromptEditor(promptType, ref);
               },
               icon: const Icon(Icons.edit),
               label: const Text('Create Custom Version'),
@@ -744,23 +732,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      _showPromptPreview(promptType, controller.text);
+                      _showPromptEditor(promptType, ref);
                     },
-                    icon: const Icon(Icons.preview),
-                    label: const Text('Preview'),
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Edit'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: () {
-                      promptNotifier.setCustomPrompt(promptType, controller.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Custom prompt saved!')),
-                      );
+                      _showPromptPreview(promptType, controller.text);
                     },
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save'),
+                    icon: const Icon(Icons.preview),
+                    label: const Text('Preview'),
                   ),
                 ),
               ],
@@ -890,6 +875,149 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showPromptEditor(PromptType promptType, WidgetRef ref) {
+    final promptNotifier = ref.read(promptProvider.notifier);
+    final promptTitles = promptNotifier.getPromptTitles();
+    final title = promptTitles[promptType] ?? promptType.name;
+    final defaultPrompt = promptNotifier.getDefaultPrompt(promptType);
+    
+    // Use existing custom prompt if available, otherwise use default
+    final initialPrompt = promptNotifier.hasCustomPrompt(promptType) 
+        ? promptNotifier.getPrompt(promptType)
+        : defaultPrompt;
+    
+    final TextEditingController editorController = TextEditingController(text: initialPrompt);
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Edit $title',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.red, size: 16),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'USE WITH CAUTION!! Modifying prompts may affect AI behavior',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Template Variables:',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Use variables like {userNote}, {temp}, {tempUnit}, {tankType}, etc. in your prompt. These will be replaced with actual values when the prompt is used.',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    controller: editorController,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(16),
+                      hintText: 'Enter your custom prompt here...',
+                    ),
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final customPrompt = editorController.text.trim();
+                        if (customPrompt.isNotEmpty) {
+                          await promptNotifier.setCustomPrompt(promptType, customPrompt);
+                          Navigator.of(context).pop();
+                          setState(() {}); // Force rebuild
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Custom $title saved and is now active!')),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Prompt cannot be empty')),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.save),
+                      label: const Text('Save & Use'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
