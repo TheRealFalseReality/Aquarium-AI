@@ -280,7 +280,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         }
       }
       
-      // Handle removals - move to available (remove from all lists)
+      // Handle removals - remove from all lists (they will be available for assignment)
       for (String fishName in [...removedFromCompatible, ...removedFromCaution, ...removedFromNotRecommended, ...removedFromNotCompatible]) {
         if (fishName == fish.name) {
           if (newCompatible.remove(newFish.name)) needsUpdate = true;
@@ -661,6 +661,16 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
             allErrors.add('${fish.name}: Fish "$unassigned" in $categoryName is not assigned to any compatibility category (should be in Compatible, With Caution, Not Recommended, or Not Compatible)');
           }
         }
+      }
+      
+      // Check if this fish includes itself in at least one compatibility category (not just available)
+      final fishIncludesItself = fish.compatible.contains(fish.name) ||
+                                fish.withCaution.contains(fish.name) ||
+                                fish.notRecommended.contains(fish.name) ||
+                                fish.notCompatible.contains(fish.name);
+      
+      if (!fishIncludesItself) {
+        allErrors.add('${fish.name}: Fish should include itself in at least one compatibility category (Compatible, With Caution, Not Recommended, or Not Compatible)');
       }
     }
   }
