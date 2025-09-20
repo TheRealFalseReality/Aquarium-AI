@@ -204,6 +204,15 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   Future<void> getCompatibilityReport(String category) async {
     if (state.selectedFish.isEmpty) return;
 
+    // Check if fish data is available
+    if (state.fishData.value == null) {
+      state = state.copyWith(
+        error: 'Fish data not loaded yet. Please try again.',
+        isLoading: false,
+      );
+      return;
+    }
+
     state = state.copyWith(
       isLoading: true,
       clearReport: true,
