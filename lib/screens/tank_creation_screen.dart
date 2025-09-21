@@ -1170,10 +1170,10 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _setImageFromUrl,
-                  child: const Text('Set'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
+                  child: const Text('Set'),
                 ),
               ],
             ),
