@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
@@ -106,6 +107,7 @@ class AutomationScriptScreenState
                       )
                     : const Text('Generate Script'),
               ),
+            const NativeAdWidget(),
             ],
           ),
         ),
