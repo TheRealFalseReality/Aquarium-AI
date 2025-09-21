@@ -717,52 +717,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: fishImageUrl != null 
-                                ? (fishImageUrl.startsWith('http')
-                                    ? NetworkImage(fishImageUrl)
-                                    : FileImage(File(fishImageUrl)) as ImageProvider)
-                                : null,
-                              backgroundColor: fishImageUrl == null 
-                                ? Theme.of(context).colorScheme.primaryContainer 
-                                : null,
-                              child: fishImageUrl == null 
-                                ? Icon(
-                                    Icons.shape_line,
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                    size: 20,
-                                  ) 
-                                : null,
-                            ),
-                            if (inhabitant.quantity > 1)
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 18,
-                                    minHeight: 18,
-                                  ),
-                                  child: Text(
-                                    '${inhabitant.quantity}',
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: fishImageUrl != null 
+                            ? (fishImageUrl.startsWith('http')
+                                ? NetworkImage(fishImageUrl)
+                                : FileImage(File(fishImageUrl)) as ImageProvider)
+                            : null,
+                          backgroundColor: fishImageUrl == null 
+                            ? Theme.of(context).colorScheme.primaryContainer 
+                            : null,
+                          child: fishImageUrl == null 
+                            ? Icon(
+                                Icons.shape_line,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                size: 20,
+                              ) 
+                            : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -774,7 +745,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(
-                                inhabitant.fishUnit,
+                                inhabitant.quantity > 1 
+                                  ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                  : inhabitant.customName,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
@@ -1085,52 +1058,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           child: Row(
             children: [
               // Fish image
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundImage: fishImageUrl != null 
-                      ? (fishImageUrl.startsWith('http')
-                          ? NetworkImage(fishImageUrl)
-                          : FileImage(File(fishImageUrl)) as ImageProvider)
-                      : null,
-                    backgroundColor: fishImageUrl == null 
-                      ? Theme.of(context).colorScheme.primaryContainer 
-                      : null,
-                    child: fishImageUrl == null 
-                      ? Icon(
-                          Icons.pets,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          size: 12,
-                        ) 
-                      : null,
-                  ),
-                  if (totalQuantity > 1)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: Text(
-                          '$totalQuantity',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
+              CircleAvatar(
+                radius: 12,
+                backgroundImage: fishImageUrl != null 
+                  ? (fishImageUrl.startsWith('http')
+                      ? NetworkImage(fishImageUrl)
+                      : FileImage(File(fishImageUrl)) as ImageProvider)
+                  : null,
+                backgroundColor: fishImageUrl == null 
+                  ? Theme.of(context).colorScheme.primaryContainer 
+                  : null,
+                child: fishImageUrl == null 
+                  ? Icon(
+                      Icons.pets,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      size: 12,
+                    ) 
+                  : null,
               ),
               const SizedBox(width: 8),
               // Fish type and names
@@ -1147,7 +1091,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      inhabitants.map((i) => '${i.quantity}x ${i.customName}').join(', '),
+                      inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,
