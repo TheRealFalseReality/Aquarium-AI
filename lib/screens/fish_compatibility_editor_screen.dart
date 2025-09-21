@@ -575,6 +575,8 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       }
     }
   }
+
+  void _showStatsDialog() {
     final totalFreshwater = _freshwaterFish.length;
     final totalMarine = _marineFish.length;
     final totalFish = totalFreshwater + totalMarine;
