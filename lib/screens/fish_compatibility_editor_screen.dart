@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
 
@@ -490,19 +489,17 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       const encoder = JsonEncoder.withIndent('  ');
       final jsonString = encoder.convert(data);
       
-      // Get the app's documents directory
-      final directory = await getApplicationDocumentsDirectory();
-      final fishCompatFile = File('${directory.path}/fishcompat.json');
-      final backupFile = File('${directory.path}/fishcompat_backup.json');
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
       
-      // Create backup of current file if it exists
-      if (await fishCompatFile.exists()) {
-        final currentContent = await fishCompatFile.readAsString();
-        await backupFile.writeAsString(currentContent);
+      // Create backup of current data if it exists
+      final currentData = prefs.getString('fishcompat_data');
+      if (currentData != null) {
+        await prefs.setString('fishcompat_backup', currentData);
       }
       
-      // Write the new data
-      await fishCompatFile.writeAsString(jsonString);
+      // Save the new data
+      await prefs.setString('fishcompat_data', jsonString);
       
       setState(() {
         _hasUnsavedChanges = false;
@@ -652,10 +649,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     // Check for unassigned marine fish
     _checkForUnassignedFish(_marineFish, allErrors, 'Marine');
     
-    // Reset changes indicator after validation
-    setState(() {
-      _hasUnsavedChanges = false;
-    });
+    // DO NOT reset changes indicator after validation - only reset after successful save
     
     // Show results
     if (allErrors.isEmpty) {
@@ -875,7 +869,37 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
 
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvoked: (didPop) async {
+        if (!didPop && _hasUnsavedChanges) {
+          final shouldPop = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Unsaved Changes'),
+              content: const Text(
+                'You have unsaved changes. Are you sure you want to leave without saving?'
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text('Leave'),
+                ),
+              ],
+            ),
+          );
+          
+          if (shouldPop == true && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: MainLayout(
       title: 'Fish Compatibility Editor',
       child: Column(
         children: [
@@ -1035,6 +1059,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
           ),
         ],
       ),
+    ),
     );
   }
 
