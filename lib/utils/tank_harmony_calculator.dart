@@ -29,26 +29,46 @@ class TankHarmonyCalculator {
     return _getWeightedScore(0.5);
   }
 
-  static double calculateHarmonyScore(List<Fish> fishList) {
-    if (fishList.length < 2) return 1.0;
+  static double _geometricMean(List<double> values) {
+    if (values.isEmpty) return 1.0;
+    // If any value is 0, the geometric mean is 0.
+    if (values.any((v) => v <= 0.0)) return 0.0;
+    final logSum = values.fold<double>(0.0, (sum, v) => sum + log(v));
+    return exp(logSum / values.length);
+  }
 
-    double minProb = 1.0;
+  /// Geometric mean for harmony (robust but fair: a few bad pairs lower score).
+  /// Special-cases:
+  /// - 0 fish: return 1.0 (no conflicts possible)
+  /// - 1 fish: return its pairwise probability with itself
+  /// - 2 fish: return their pairwise probability
+  static double calculateHarmonyScore(List<Fish> fishList) {
+    if (fishList.isEmpty) return 1.0;
+
+    if (fishList.length == 1) {
+      final fish = fishList.first;
+      return _getPairwiseProbability(fish, fish);
+    }
+
+    if (fishList.length == 2) {
+      return _getPairwiseProbability(fishList[0], fishList[1]);
+    }
+
+    final probabilities = <double>[];
     for (int i = 0; i < fishList.length; i++) {
       for (int j = i + 1; j < fishList.length; j++) {
-        final prob = _getPairwiseProbability(fishList[i], fishList[j]);
-        if (prob < minProb) {
-          minProb = prob;
-        }
+        probabilities.add(_getPairwiseProbability(fishList[i], fishList[j]));
       }
     }
-    return minProb;
+
+    return _geometricMean(probabilities);
   }
 
   /// Calculate harmony score for a tank based on its inhabitants
   /// Returns null if fish data is not available
   static double? calculateTankHarmonyScore(Tank tank, Map<String, List<Fish>>? fishData) {
     if (fishData == null || tank.inhabitants.isEmpty) return null;
-    
+
     // Get all fish types from the tank's category
     final categoryFish = fishData[tank.type] ?? [];
     if (categoryFish.isEmpty) return null;
@@ -95,11 +115,40 @@ class TankHarmonyCalculator {
 
   /// Generate a detailed breakdown of the harmony calculation
   static String generateCalculationBreakdown(List<Fish> fishList) {
-    if (fishList.length < 2) {
-      return "Select at least two fish to see a compatibility breakdown.";
+    final buffer = StringBuffer();
+
+    if (fishList.isEmpty) {
+      return "Select at least one fish to see compatibility.";
     }
 
-    final buffer = StringBuffer();
+    if (fishList.length == 1) {
+      final fish = fishList.first;
+      final selfProb = _getPairwiseProbability(fish, fish);
+
+      buffer.writeln("Single Fish Selected:");
+      buffer.writeln(fish.name);
+
+      buffer.writeln("\nGroup Harmony Score:");
+      buffer.writeln(
+        "pair(${fish.name}, ${fish.name}) = ${(selfProb * 100).toStringAsFixed(1)}%",
+      );
+      return buffer.toString();
+    }
+
+    if (fishList.length == 2) {
+      final fishA = fishList[0];
+      final fishB = fishList[1];
+      final prob = _getPairwiseProbability(fishA, fishB);
+
+      buffer.writeln("Pairwise Compatibility:");
+      buffer.writeln("${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+
+      buffer.writeln("\nGroup Harmony Score:");
+      buffer.writeln("pair(${fishA.name}, ${fishB.name}) = ${(prob * 100).toStringAsFixed(1)}%");
+      return buffer.toString();
+    }
+
+    // 3+ fish: list all pairs and compute geometric mean
     buffer.writeln("Pairwise Compatibility:");
 
     final probabilities = <double>[];
@@ -110,15 +159,14 @@ class TankHarmonyCalculator {
         final prob = _getPairwiseProbability(fishA, fishB);
         probabilities.add(prob);
 
-        buffer.writeln(
-            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+        buffer.writeln("${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
       }
     }
-    
+
     buffer.writeln("\nGroup Harmony Score:");
-    final minScore = probabilities.reduce((a, b) => a < b ? a : b);
+    final geometricMean = _geometricMean(probabilities);
     final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
-    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+    buffer.writeln("geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%");
 
     return buffer.toString();
   }
