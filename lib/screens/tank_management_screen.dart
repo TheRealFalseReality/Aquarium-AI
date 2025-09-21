@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -711,7 +712,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const Text('No inhabitants added yet.')
               else
                 ...tank.inhabitants.map((inhabitant) {
-                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
+                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, inhabitant: inhabitant);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -721,7 +722,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             CircleAvatar(
                               radius: 20,
                               backgroundImage: fishImageUrl != null 
-                                ? NetworkImage(fishImageUrl) 
+                                ? (fishImageUrl.startsWith('http')
+                                    ? NetworkImage(fishImageUrl)
+                                    : FileImage(File(fishImageUrl)) as ImageProvider)
                                 : null,
                               backgroundColor: fishImageUrl == null 
                                 ? Theme.of(context).colorScheme.primaryContainer 
@@ -1016,7 +1019,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  String? _getFishImageUrl(String tankType, String fishName) {
+  String? _getFishImageUrl(String tankType, String fishName, {TankInhabitant? inhabitant}) {
+    // Prioritize custom images if inhabitant is provided
+    if (inhabitant != null) {
+      if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+        return inhabitant.customImageUrl;
+      }
+      if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+        return inhabitant.customImagePath;
+      }
+    }
+    
+    // Fall back to default fish image
     if (_fishData == null) return null;
     
     final categoryFish = _fishData![tankType] ?? [];
@@ -1060,7 +1074,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       final fishType = entry.key;
       final inhabitants = entry.value;
-      final fishImageUrl = _getFishImageUrl(tank.type, fishType);
+      final fishImageUrl = _getFishImageUrl(tank.type, fishType, inhabitant: inhabitants.first);
       
       // Calculate total quantity for this fish type
       final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
@@ -1075,7 +1089,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   CircleAvatar(
                     radius: 12,
-                    backgroundImage: fishImageUrl != null ? NetworkImage(fishImageUrl) : null,
+                    backgroundImage: fishImageUrl != null 
+                      ? (fishImageUrl.startsWith('http')
+                          ? NetworkImage(fishImageUrl)
+                          : FileImage(File(fishImageUrl)) as ImageProvider)
+                      : null,
                     backgroundColor: fishImageUrl == null 
                       ? Theme.of(context).colorScheme.primaryContainer 
                       : null,
