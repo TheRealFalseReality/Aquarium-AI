@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -132,6 +134,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       customName: '${originalInhabitant.customName} (Copy)',
       fishUnit: originalInhabitant.fishUnit,
       quantity: originalInhabitant.quantity,
+      customImageUrl: originalInhabitant.customImageUrl,
+      customImagePath: originalInhabitant.customImagePath,
     );
     
     setState(() {
@@ -503,13 +507,15 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 24,
-                                backgroundImage: _getFishImageUrl(inhabitant.fishUnit) != null
-                                  ? NetworkImage(_getFishImageUrl(inhabitant.fishUnit)!)
+                                backgroundImage: _getFishImageUrl(inhabitant) != null
+                                  ? (_getFishImageUrl(inhabitant)!.startsWith('http')
+                                      ? NetworkImage(_getFishImageUrl(inhabitant)!)
+                                      : FileImage(File(_getFishImageUrl(inhabitant)!)) as ImageProvider)
                                   : null,
-                                backgroundColor: _getFishImageUrl(inhabitant.fishUnit) == null
+                                backgroundColor: _getFishImageUrl(inhabitant) == null
                                   ? Theme.of(context).colorScheme.primaryContainer
                                   : null,
-                                child: _getFishImageUrl(inhabitant.fishUnit) == null
+                                child: _getFishImageUrl(inhabitant) == null
                                   ? Icon(
                                       Icons.pets,
                                       color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -642,9 +648,18 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     );
   }
 
-  String? _getFishImageUrl(String fishName) {
+  String? _getFishImageUrl(TankInhabitant inhabitant) {
+    // Prioritize custom image URL, then custom image path, then default fish image
+    if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+      return inhabitant.customImageUrl;
+    }
+    if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+      return inhabitant.customImagePath;
+    }
+    
+    // Fall back to default fish image
     try {
-      final fish = _availableFish.firstWhere((f) => f.name == fishName);
+      final fish = _availableFish.firstWhere((f) => f.name == inhabitant.fishUnit);
       return fish.imageURL.isNotEmpty ? fish.imageURL : null;
     } catch (e) {
       return null;
@@ -672,9 +687,13 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   final _customNameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _searchController = TextEditingController();
+  final _urlController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
   
   String? _selectedFishUnit;
   List<Fish> _filteredFish = [];
+  String? _customImageUrl;
+  String? _customImagePath;
 
   @override
   void initState() {
@@ -685,6 +704,9 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       _customNameController.text = widget.existingInhabitant!.customName;
       _quantityController.text = widget.existingInhabitant!.quantity.toString();
       _selectedFishUnit = widget.existingInhabitant!.fishUnit;
+      _customImageUrl = widget.existingInhabitant!.customImageUrl;
+      _customImagePath = widget.existingInhabitant!.customImagePath;
+      _urlController.text = _customImageUrl ?? '';
     } else {
       _quantityController.text = '1';
     }
@@ -695,6 +717,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
     _customNameController.dispose();
     _quantityController.dispose();
     _searchController.dispose();
+    _urlController.dispose();
     super.dispose();
   }
 
@@ -708,6 +731,80 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
     });
   }
 
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (image != null) {
+        setState(() {
+          _customImagePath = image.path;
+          _customImageUrl = null; // Clear URL if file is selected
+          _urlController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (image != null) {
+        setState(() {
+          _customImagePath = image.path;
+          _customImageUrl = null; // Clear URL if file is selected
+          _urlController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to take photo: $e')),
+        );
+      }
+    }
+  }
+
+  void _setImageFromUrl() {
+    final url = _urlController.text.trim();
+    if (url.isNotEmpty) {
+      setState(() {
+        _customImageUrl = url;
+        _customImagePath = null; // Clear file path if URL is set
+      });
+    }
+  }
+
+  void _clearCustomImage() {
+    setState(() {
+      _customImageUrl = null;
+      _customImagePath = null;
+      _urlController.clear();
+    });
+  }
+
+  String? _getDisplayImageUrl() {
+    if (_customImageUrl != null && _customImageUrl!.isNotEmpty) {
+      return _customImageUrl;
+    }
+    if (_customImagePath != null && _customImagePath!.isNotEmpty) {
+      return _customImagePath;
+    }
+    return null;
+  }
+
   void _save() {
     if (_formKey.currentState!.validate() && _selectedFishUnit != null) {
       final inhabitant = TankInhabitant(
@@ -715,6 +812,8 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
         customName: _customNameController.text.trim(),
         fishUnit: _selectedFishUnit!,
         quantity: int.parse(_quantityController.text),
+        customImageUrl: _customImageUrl,
+        customImagePath: _customImagePath,
       );
       
       widget.onAdd(inhabitant);
@@ -909,6 +1008,175 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                   ),
                 ),
               ),
+            
+            const SizedBox(height: 24),
+            
+            // Custom Image Section
+            Text(
+              'Custom Image (Optional)',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Image Preview
+            Container(
+              width: double.infinity,
+              height: 120,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _getDisplayImageUrl() == null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.image_outlined,
+                            size: 32,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No custom image selected',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(11),
+                      child: _customImageUrl != null
+                          ? Image.network(
+                              _customImageUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: Theme.of(context).colorScheme.errorContainer,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Theme.of(context).colorScheme.onErrorContainer,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Failed to load image',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onErrorContainer,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Image.file(
+                              File(_customImagePath!),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: Theme.of(context).colorScheme.errorContainer,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Theme.of(context).colorScheme.onErrorContainer,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Failed to load image',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onErrorContainer,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Image Source Options
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _pickImageFromGallery,
+                  icon: const Icon(Icons.photo_library_outlined, size: 18),
+                  label: const Text('Gallery'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _pickImageFromCamera,
+                  icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                  label: const Text('Camera'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                if (_getDisplayImageUrl() != null)
+                  OutlinedButton.icon(
+                    onPressed: _clearCustomImage,
+                    icon: const Icon(Icons.clear, size: 18),
+                    label: const Text('Clear'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            
+            // URL Input Field
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _urlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Or enter image URL',
+                      hintText: 'https://example.com/image.jpg',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.link),
+                    ),
+                    onSubmitted: (_) => _setImageFromUrl(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _setImageFromUrl,
+                  child: const Text('Set'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+              ],
+            ),
                       ],
                     ),
                   ),

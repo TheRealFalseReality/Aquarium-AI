@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -711,55 +712,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const Text('No inhabitants added yet.')
               else
                 ...tank.inhabitants.map((inhabitant) {
-                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit);
+                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, inhabitant: inhabitant);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: fishImageUrl != null 
-                                ? NetworkImage(fishImageUrl) 
-                                : null,
-                              backgroundColor: fishImageUrl == null 
-                                ? Theme.of(context).colorScheme.primaryContainer 
-                                : null,
-                              child: fishImageUrl == null 
-                                ? Icon(
-                                    Icons.shape_line,
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                    size: 20,
-                                  ) 
-                                : null,
-                            ),
-                            if (inhabitant.quantity > 1)
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 18,
-                                    minHeight: 18,
-                                  ),
-                                  child: Text(
-                                    '${inhabitant.quantity}',
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: fishImageUrl != null 
+                            ? (fishImageUrl.startsWith('http')
+                                ? NetworkImage(fishImageUrl)
+                                : FileImage(File(fishImageUrl)) as ImageProvider)
+                            : null,
+                          backgroundColor: fishImageUrl == null 
+                            ? Theme.of(context).colorScheme.primaryContainer 
+                            : null,
+                          child: fishImageUrl == null 
+                            ? Icon(
+                                Icons.shape_line,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                size: 20,
+                              ) 
+                            : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -771,7 +745,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(
-                                inhabitant.fishUnit,
+                                inhabitant.quantity > 1 
+                                  ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                  : inhabitant.customName,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
@@ -1016,7 +992,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  String? _getFishImageUrl(String tankType, String fishName) {
+  String? _getFishImageUrl(String tankType, String fishName, {TankInhabitant? inhabitant}) {
+    // Prioritize custom images if inhabitant is provided
+    if (inhabitant != null) {
+      if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+        return inhabitant.customImageUrl;
+      }
+      if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+        return inhabitant.customImagePath;
+      }
+    }
+    
+    // Fall back to default fish image
     if (_fishData == null) return null;
     
     final categoryFish = _fishData![tankType] ?? [];
@@ -1060,7 +1047,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       final fishType = entry.key;
       final inhabitants = entry.value;
-      final fishImageUrl = _getFishImageUrl(tank.type, fishType);
+      final fishImageUrl = _getFishImageUrl(tank.type, fishType, inhabitant: inhabitants.first);
       
       // Calculate total quantity for this fish type
       final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
@@ -1071,48 +1058,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           child: Row(
             children: [
               // Fish image
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundImage: fishImageUrl != null ? NetworkImage(fishImageUrl) : null,
-                    backgroundColor: fishImageUrl == null 
-                      ? Theme.of(context).colorScheme.primaryContainer 
-                      : null,
-                    child: fishImageUrl == null 
-                      ? Icon(
-                          Icons.pets,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          size: 12,
-                        ) 
-                      : null,
-                  ),
-                  if (totalQuantity > 1)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: Text(
-                          '$totalQuantity',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
+              CircleAvatar(
+                radius: 12,
+                backgroundImage: fishImageUrl != null 
+                  ? (fishImageUrl.startsWith('http')
+                      ? NetworkImage(fishImageUrl)
+                      : FileImage(File(fishImageUrl)) as ImageProvider)
+                  : null,
+                backgroundColor: fishImageUrl == null 
+                  ? Theme.of(context).colorScheme.primaryContainer 
+                  : null,
+                child: fishImageUrl == null 
+                  ? Icon(
+                      Icons.pets,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      size: 12,
+                    ) 
+                  : null,
               ),
               const SizedBox(width: 8),
               // Fish type and names
@@ -1129,7 +1091,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      inhabitants.map((i) => '${i.quantity}x ${i.customName}').join(', '),
+                      inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,

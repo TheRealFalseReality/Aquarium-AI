@@ -5,12 +5,16 @@ class TankInhabitant {
   final String customName;
   final String fishUnit; // Matches fish name from fishcompat.json
   final int quantity;
+  final String? customImageUrl; // User-provided image URL
+  final String? customImagePath; // User-provided image file path (for local images)
 
   TankInhabitant({
     required this.id,
     required this.customName,
     required this.fishUnit,
     required this.quantity,
+    this.customImageUrl,
+    this.customImagePath,
   });
 
   Map<String, dynamic> toJson() {
@@ -19,6 +23,8 @@ class TankInhabitant {
       'customName': customName,
       'fishUnit': fishUnit,
       'quantity': quantity,
+      'customImageUrl': customImageUrl,
+      'customImagePath': customImagePath,
     };
   }
 
@@ -28,6 +34,8 @@ class TankInhabitant {
       customName: json['customName'] as String,
       fishUnit: json['fishUnit'] as String,
       quantity: json['quantity'] as int,
+      customImageUrl: json['customImageUrl'] as String?,
+      customImagePath: json['customImagePath'] as String?,
     );
   }
 
@@ -36,12 +44,16 @@ class TankInhabitant {
     String? customName,
     String? fishUnit,
     int? quantity,
+    String? customImageUrl,
+    String? customImagePath,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
       customName: customName ?? this.customName,
       fishUnit: fishUnit ?? this.fishUnit,
       quantity: quantity ?? this.quantity,
+      customImageUrl: customImageUrl ?? this.customImageUrl,
+      customImagePath: customImagePath ?? this.customImagePath,
     );
   }
 }
