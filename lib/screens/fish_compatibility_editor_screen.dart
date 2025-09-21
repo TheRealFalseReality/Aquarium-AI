@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
 
@@ -22,6 +24,11 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
   String _searchQuery = '';
   String _currentCategory = 'freshwater';
   bool _hasUnsavedChanges = false;
+  bool _isSaving = false;
+  
+  // Store original data for backup/restore functionality
+  List<Fish> _originalFreshwaterFish = [];
+  List<Fish> _originalMarineFish = [];
   
   final TextEditingController _searchController = TextEditingController();
 
@@ -64,8 +71,14 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
         _marineFish = (data['marine'] as List)
             .map((json) => Fish.fromJson(json))
             .toList();
+            
+        // Store original data as backup
+        _originalFreshwaterFish = _freshwaterFish.map((f) => Fish.fromJson(f.toJson())).toList();
+        _originalMarineFish = _marineFish.map((f) => Fish.fromJson(f.toJson())).toList();
+        
         _filterFish();
         _isLoading = false;
+        _hasUnsavedChanges = false;
       });
     } catch (e) {
       setState(() {
@@ -369,11 +382,162 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     }
   }
 
+  Future<void> _saveChanges() async {
+    // First, perform validation
+    List<String> allErrors = [];
+    
+    // Validate freshwater fish
+    for (final fish in _freshwaterFish) {
+      final errors = _validateIndividualFish(fish, _freshwaterFish);
+      if (errors.isNotEmpty) {
+        allErrors.add('${fish.name}: ${errors.join(', ')}');
+      }
+    }
+    
+    // Check for unassigned freshwater fish
+    _checkForUnassignedFish(_freshwaterFish, allErrors, 'Freshwater');
+    
+    // Validate marine fish
+    for (final fish in _marineFish) {
+      final errors = _validateIndividualFish(fish, _marineFish);
+      if (errors.isNotEmpty) {
+        allErrors.add('${fish.name}: ${errors.join(', ')}');
+      }
+    }
+    
+    // Check for unassigned marine fish
+    _checkForUnassignedFish(_marineFish, allErrors, 'Marine');
+    
+    // If there are validation errors, show them and don't save
+    if (allErrors.isNotEmpty) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Validation Errors'),
+            ],
+          ),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Cannot save due to ${allErrors.length} validation errors:'),
+                  const SizedBox(height: 16),
+                  ...allErrors.map((error) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '• $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    
+    // Confirm save with user
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Changes'),
+        content: const Text(
+          'This will save your changes to the fish compatibility database. '
+          'The original data will be backed up and can be restored later. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true) return;
+    
+    setState(() {
+      _isSaving = true;
+    });
+    
+    try {
+      // Create the updated JSON data
+      final data = {
+        'freshwater': _freshwaterFish.map((f) => f.toJson()).toList(),
+        'marine': _marineFish.map((f) => f.toJson()).toList(),
+      };
+      
+      const encoder = JsonEncoder.withIndent('  ');
+      final jsonString = encoder.convert(data);
+      
+      // Get the app's documents directory
+      final directory = await getApplicationDocumentsDirectory();
+      final fishCompatFile = File('${directory.path}/fishcompat.json');
+      final backupFile = File('${directory.path}/fishcompat_backup.json');
+      
+      // Create backup of current file if it exists
+      if (await fishCompatFile.exists()) {
+        final currentContent = await fishCompatFile.readAsString();
+        await backupFile.writeAsString(currentContent);
+      }
+      
+      // Write the new data
+      await fishCompatFile.writeAsString(jsonString);
+      
+      setState(() {
+        _hasUnsavedChanges = false;
+        _isSaving = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Changes saved successfully! Backup created.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isSaving = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save changes: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _resetToDefault() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset to Default'),
+        title: const Text('Reset to Original'),
         content: const Text(
           'This will reset all data to the original fishcompat.json file. '
           'All changes will be lost. Continue?',
@@ -393,19 +557,24 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
     );
 
     if (confirmed == true) {
-      await _loadFishData();
+      setState(() {
+        // Restore from original backup data
+        _freshwaterFish = _originalFreshwaterFish.map((f) => Fish.fromJson(f.toJson())).toList();
+        _marineFish = _originalMarineFish.map((f) => Fish.fromJson(f.toJson())).toList();
+        _filterFish();
+        _hasUnsavedChanges = false;
+      });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Data reset to default successfully'),
+            content: Text('Data reset to original successfully'),
             backgroundColor: Colors.green,
           ),
         );
       }
     }
   }
-
-  void _showStatsDialog() {
     final totalFreshwater = _freshwaterFish.length;
     final totalMarine = _marineFish.length;
     final totalFish = totalFreshwater + totalMarine;
@@ -735,6 +904,24 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
                       ),
                     ),
                     const SizedBox(width: 8),
+                    if (_hasUnsavedChanges) ...[
+                      ElevatedButton.icon(
+                        onPressed: _isSaving ? null : _saveChanges,
+                        icon: _isSaving 
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save),
+                        label: Text(_isSaving ? 'Saving...' : 'Save'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     IconButton(
                       onPressed: _exportData,
                       icon: const Icon(Icons.download),
