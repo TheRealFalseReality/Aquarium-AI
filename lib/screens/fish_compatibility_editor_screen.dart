@@ -198,20 +198,7 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
   }
 
   void _updateBidirectionalCompatibility(Fish oldFish, Fish newFish, List<Fish> fishList) {
-    // Find fish that were added or removed from compatibility lists
-    final addedToCompatible = newFish.compatible.where((name) => !oldFish.compatible.contains(name)).toList();
-    final removedFromCompatible = oldFish.compatible.where((name) => !newFish.compatible.contains(name)).toList();
-    
-    final addedToCaution = newFish.withCaution.where((name) => !oldFish.withCaution.contains(name)).toList();
-    final removedFromCaution = oldFish.withCaution.where((name) => !newFish.withCaution.contains(name)).toList();
-    
-    final addedToNotRecommended = newFish.notRecommended.where((name) => !oldFish.notRecommended.contains(name)).toList();
-    final removedFromNotRecommended = oldFish.notRecommended.where((name) => !newFish.notRecommended.contains(name)).toList();
-    
-    final addedToNotCompatible = newFish.notCompatible.where((name) => !oldFish.notCompatible.contains(name)).toList();
-    final removedFromNotCompatible = oldFish.notCompatible.where((name) => !newFish.notCompatible.contains(name)).toList();
-
-    // Update all affected fish
+    // For each fish in the database, check if it needs updates based on the changes to newFish
     for (int i = 0; i < fishList.length; i++) {
       final fish = fishList[i];
       if (fish.name == newFish.name) continue; // Skip the fish being edited
@@ -222,70 +209,55 @@ class _FishCompatibilityEditorScreenState extends State<FishCompatibilityEditorS
       List<String> newNotRecommended = List.from(fish.notRecommended);
       List<String> newNotCompatible = List.from(fish.notCompatible);
       
-      // Handle additions - when fishName matches this fish, add newFish to the corresponding list
-      for (String fishName in addedToCompatible) {
-        if (fishName == fish.name) {
-          // Remove newFish from other lists first
-          newWithCaution.remove(newFish.name);
-          newNotRecommended.remove(newFish.name);
-          newNotCompatible.remove(newFish.name);
-          // Add newFish to compatible if not already there
-          if (!newCompatible.contains(newFish.name)) {
-            newCompatible.add(newFish.name);
-            needsUpdate = true;
-          }
-        }
+      // Check what category this fish (fish.name) is now in within newFish's compatibility lists
+      String? newCategory;
+      if (newFish.compatible.contains(fish.name)) {
+        newCategory = 'compatible';
+      } else if (newFish.withCaution.contains(fish.name)) {
+        newCategory = 'withCaution';
+      } else if (newFish.notRecommended.contains(fish.name)) {
+        newCategory = 'notRecommended';
+      } else if (newFish.notCompatible.contains(fish.name)) {
+        newCategory = 'notCompatible';
       }
       
-      for (String fishName in addedToCaution) {
-        if (fishName == fish.name) {
-          // Remove newFish from other lists first
-          newCompatible.remove(newFish.name);
-          newNotRecommended.remove(newFish.name);
-          newNotCompatible.remove(newFish.name);
-          // Add newFish to caution if not already there
-          if (!newWithCaution.contains(newFish.name)) {
-            newWithCaution.add(newFish.name);
-            needsUpdate = true;
-          }
-        }
+      // Check what category this fish was in within oldFish's compatibility lists
+      String? oldCategory;
+      if (oldFish.compatible.contains(fish.name)) {
+        oldCategory = 'compatible';
+      } else if (oldFish.withCaution.contains(fish.name)) {
+        oldCategory = 'withCaution';
+      } else if (oldFish.notRecommended.contains(fish.name)) {
+        oldCategory = 'notRecommended';
+      } else if (oldFish.notCompatible.contains(fish.name)) {
+        oldCategory = 'notCompatible';
       }
       
-      for (String fishName in addedToNotRecommended) {
-        if (fishName == fish.name) {
-          // Remove newFish from other lists first
-          newCompatible.remove(newFish.name);
-          newWithCaution.remove(newFish.name);
-          newNotCompatible.remove(newFish.name);
-          // Add newFish to not recommended if not already there
-          if (!newNotRecommended.contains(newFish.name)) {
-            newNotRecommended.add(newFish.name);
-            needsUpdate = true;
-          }
+      // If the category changed, update this fish's relationship with newFish
+      if (newCategory != oldCategory) {
+        // First, remove newFish from all lists in this fish
+        newCompatible.remove(newFish.name);
+        newWithCaution.remove(newFish.name);
+        newNotRecommended.remove(newFish.name);
+        newNotCompatible.remove(newFish.name);
+        
+        // Then add newFish to the corresponding category
+        if (newCategory == 'compatible') {
+          newCompatible.add(newFish.name);
+          needsUpdate = true;
+        } else if (newCategory == 'withCaution') {
+          newWithCaution.add(newFish.name);
+          needsUpdate = true;
+        } else if (newCategory == 'notRecommended') {
+          newNotRecommended.add(newFish.name);
+          needsUpdate = true;
+        } else if (newCategory == 'notCompatible') {
+          newNotCompatible.add(newFish.name);
+          needsUpdate = true;
         }
-      }
-      
-      for (String fishName in addedToNotCompatible) {
-        if (fishName == fish.name) {
-          // Remove newFish from other lists first
-          newCompatible.remove(newFish.name);
-          newWithCaution.remove(newFish.name);
-          newNotRecommended.remove(newFish.name);
-          // Add newFish to not compatible if not already there
-          if (!newNotCompatible.contains(newFish.name)) {
-            newNotCompatible.add(newFish.name);
-            needsUpdate = true;
-          }
-        }
-      }
-      
-      // Handle removals - remove from all lists (they will be available for assignment)
-      for (String fishName in [...removedFromCompatible, ...removedFromCaution, ...removedFromNotRecommended, ...removedFromNotCompatible]) {
-        if (fishName == fish.name) {
-          if (newCompatible.remove(newFish.name)) needsUpdate = true;
-          if (newWithCaution.remove(newFish.name)) needsUpdate = true;
-          if (newNotRecommended.remove(newFish.name)) needsUpdate = true;
-          if (newNotCompatible.remove(newFish.name)) needsUpdate = true;
+        // If newCategory is null, newFish is removed from all lists (available)
+        if (newCategory == null) {
+          needsUpdate = true;
         }
       }
       
