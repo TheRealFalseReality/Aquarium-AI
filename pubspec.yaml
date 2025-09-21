@@ -13,7 +13,7 @@ dependencies:
   url_launcher: ^6.2.6
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.3
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.6
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.6.1
