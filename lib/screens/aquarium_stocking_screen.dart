@@ -118,7 +118,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
               TextFormField(
                 controller: _tankSizeController,
                 decoration: const InputDecoration(
-                  labelText: 'Tank Size (e.g., "55" or "200 liters")',
+                  labelText: 'Tank Size (e.g., "55" (for gallons) or "200 liters")',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
