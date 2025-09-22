@@ -121,8 +121,6 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   labelText: 'Tank Size (e.g., "55" or "200 liters")',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a tank size';
