@@ -59,7 +59,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       
       if (!hasShownPromotion && mounted) {
         // Show the popup after a short delay to allow the screen to load
-        Timer(const Duration(seconds: 3), () {
+        Timer(const Duration(seconds: 2), () {
           if (mounted) {
             _showPromotionDialog();
           }
@@ -85,6 +85,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
     } catch (e) {
       debugPrint('Error showing promotion dialog: $e');
+    }
+  }
+
+  // Debug method to reset promotion dialog preference
+  // This can be called from settings or debug menu if needed
+  static Future<void> resetPromotionDialog() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_promotionDialogShownKey);
+    } catch (e) {
+      debugPrint('Error resetting promotion dialog preference: $e');
     }
   }
 
