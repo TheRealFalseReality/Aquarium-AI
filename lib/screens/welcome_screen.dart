@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
+import '../widgets/app_promotion_dialog.dart';
 
 class FeatureInfo {
   final String icon;
@@ -38,10 +41,51 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  static const String _promotionDialogShownKey = 'promotion_dialog_shown';
+  
   @override
   void initState() {
     super.initState();
-    // No need for the API key check here anymore.
+    // Check if we should show the app promotion dialog on web
+    if (kIsWeb) {
+      _checkShowPromotionDialog();
+    }
+  }
+
+  Future<void> _checkShowPromotionDialog() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasShownPromotion = prefs.getBool(_promotionDialogShownKey) ?? false;
+      
+      if (!hasShownPromotion && mounted) {
+        // Show the popup after a short delay to allow the screen to load
+        Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            _showPromotionDialog();
+          }
+        });
+      }
+    } catch (e) {
+      // If there's an error with SharedPreferences, silently continue
+      debugPrint('Error checking promotion dialog preference: $e');
+    }
+  }
+
+  Future<void> _showPromotionDialog() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_promotionDialogShownKey, true);
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => const AppPromotionDialog(),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error showing promotion dialog: $e');
+    }
   }
 
   Future<void> _launchURL(String url) async {
