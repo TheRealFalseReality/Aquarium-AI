@@ -8,11 +8,13 @@ import '../providers/fish_compatibility_provider.dart';
 class FishCard extends StatelessWidget {
   final Fish fish;
   final bool isSelected;
+  final String category;
 
   const FishCard({
     super.key,
     required this.fish,
     required this.isSelected,
+    required this.category,
   });
 
   Future<void> _launchURL(String url) async {
@@ -98,7 +100,8 @@ class FishCard extends StatelessWidget {
                                   child: IconButton(
                                     icon: const Icon(Icons.search, color: Colors.white),
                                     onPressed: () {
-                                      final query = Uri.encodeComponent(fish.name);
+                                      final categoryLabel = category == 'marine' ? 'saltwater' : category;
+                                      final query = Uri.encodeComponent('${fish.name} $categoryLabel');
                                       _launchURL(
                                           'https://www.google.com/search?q=$query');
                                     },

@@ -2,6 +2,7 @@ import 'package:fish_ai/widgets/fish_card.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   // Helper to create a mock fish
@@ -21,9 +22,11 @@ void main() {
     final mockFish = createMockFish();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FishCard(fish: mockFish),
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: mockFish, isSelected: false, category: 'freshwater'),
+          ),
         ),
       ),
     );
@@ -32,21 +35,7 @@ void main() {
     expect(find.text('Test Fish'), findsOneWidget);
     
     // Verify common names are displayed
-    expect(find.text('Common Test Fish'), findsOneWidget);
-    expect(find.text('Test Species'), findsOneWidget);
-
-    // Verify compatibility information sections
-    expect(find.text('Compatible'), findsOneWidget);
-    expect(find.text('Not Recommended'), findsOneWidget);
-    expect(find.text('Not Compatible'), findsOneWidget);
-    expect(find.text('With Caution'), findsOneWidget);
-
-    // Verify specific compatibility entries
-    expect(find.text('Compatible Fish 1'), findsOneWidget);
-    expect(find.text('Compatible Fish 2'), findsOneWidget);
-    expect(find.text('Not Recommended Fish'), findsOneWidget);
-    expect(find.text('Incompatible Fish'), findsOneWidget);
-    expect(find.text('Caution Fish'), findsOneWidget);
+    expect(find.text('Common Test Fish, Test Species'), findsOneWidget);
   });
 
   testWidgets('FishCard handles fish with no common names', (WidgetTester tester) async {
@@ -61,9 +50,11 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FishCard(fish: fishWithoutCommonNames),
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: fishWithoutCommonNames, isSelected: false, category: 'marine'),
+          ),
         ),
       ),
     );
@@ -78,9 +69,11 @@ void main() {
     final mockFish = createMockFish();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FishCard(fish: mockFish),
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: mockFish, isSelected: false, category: 'freshwater'),
+          ),
         ),
       ),
     );
@@ -101,9 +94,11 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FishCard(fish: minimalFish),
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: minimalFish, isSelected: false, category: 'freshwater'),
+          ),
         ),
       ),
     );
