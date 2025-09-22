@@ -1255,8 +1255,10 @@
         "Dragonets"
       ],
       "notCompatible": [
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
-        "Shrimp"
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Angelfish",
@@ -1314,9 +1316,11 @@
         "Batfish",
         "Groupers",
         "Lionfish / Scorpionfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Squirrelfish",
-        "Triggerfish"
+        "Triggerfish",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
@@ -1358,9 +1362,11 @@
       "notRecommended": [
         "Eels",
         "Puffers",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Basslets",
@@ -1415,9 +1421,11 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1465,9 +1473,11 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1537,7 +1547,9 @@
         "Gobies",
         "Jawfish",
         "Pseudochromis",
-        "Shrimp"
+        "Sea Star / Urchin",
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Groupers",
@@ -1575,9 +1587,11 @@
         "Dartfish",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1662,9 +1676,11 @@
         "Hawkfish",
         "Lionfish / Scorpionfish",
         "Puffers",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only"
       ]
     },
@@ -1717,9 +1733,11 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Triggerfish",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only"
       ]
     },
@@ -1747,15 +1765,16 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
+        "Shrimp",
         "Snails",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
       ],
       "notRecommended": [
         "Batfish",
         "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
-        "Shrimp",
         "Squirrelfish"
       ],
       "notCompatible": [
@@ -1774,6 +1793,7 @@
         "Damselfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
       ]
@@ -1804,9 +1824,11 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1851,9 +1873,11 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1907,9 +1931,11 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -1966,9 +1992,11 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -2027,7 +2055,6 @@
         "Hogfish",
         "Jawfish",
         "Parrotfish",
-        "Shrimp",
         "Squirrelfish",
         "Triggerfish"
       ],
@@ -2051,7 +2078,10 @@
         "Dartfish",
         "Dragonets",
         "Filefish",
-        "Grunts / Sweetlips"
+        "Grunts / Sweetlips",
+        "Sea Star / Urchin",
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ]
     },
     {
@@ -2074,9 +2104,11 @@
         "Foxface / Rabbitfish",
         "Gobies",
         "Jawfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -2127,9 +2159,11 @@
         "Foxface / Rabbitfish",
         "Gobies",
         "Jawfish",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
-        "Snails"
+        "Snails",
+        "Worms / Misc. Inverts"
       ],
       "notRecommended": [
         "Angelfish",
@@ -2197,8 +2231,10 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
-        "Shrimp"
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2250,7 +2286,8 @@
         "Grunts / Sweetlips",
         "Hogfish",
         "Lionfish / Scorpionfish",
-        "Parrotfish"
+        "Parrotfish",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Eels",
@@ -2270,6 +2307,7 @@
         "Hawkfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Squirrelfish",
         "Wrasse - Fish Only"
       ]
@@ -2321,11 +2359,13 @@
         "Corals",
         "Eels",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Sharks / Rays",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
         "Triggerfish",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only"
       ]
     },
@@ -2348,9 +2388,11 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
@@ -2419,9 +2461,11 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Anglers / Frogs",
@@ -2478,8 +2522,10 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "withCaution": [
@@ -2531,7 +2577,8 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Shrimp"
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Anglers / Frogs",
@@ -2544,6 +2591,7 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
+        "Sea Star / Urchin",
         "Snails",
         "Triggerfish",
         "Wrasse - Reef Safe"
@@ -2584,8 +2632,10 @@
         "Pseudochromis"
       ],
       "notCompatible": [
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
-        "Shrimp"
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Anglers / Frogs",
@@ -2623,9 +2673,11 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
       ],
       "notRecommended": [
         "Batfish",
@@ -2695,8 +2747,10 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
-        "Shrimp"
+        "Shrimp",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Anthias",
@@ -2754,9 +2808,11 @@
       ],
       "notCompatible": [
         "Corals",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
-        "Snails"
+        "Snails",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2781,6 +2837,7 @@
         "Corals",
         "Damselfish",
         "Hawkfish",
+        "Shrimp",
         "Snails"
       ],
       "notRecommended": [
@@ -2790,7 +2847,6 @@
         "Gobies",
         "Hogfish",
         "Parrotfish",
-        "Shrimp",
         "Squirrelfish"
       ],
       "notCompatible": [
@@ -2819,7 +2875,9 @@
         "Jawfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
       ]
@@ -2849,10 +2907,12 @@
         "Butterflyfish"
       ],
       "notCompatible": [
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Shrimp",
-        "Snails"
+        "Snails",
+        "Worms / Misc. Inverts"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2929,8 +2989,10 @@
         "Dartfish",
         "Gobies",
         "Jawfish",
+        "Sea Star / Urchin",
         "Shrimp",
-        "Snails"
+        "Snails",
+        "Worms / Misc. Inverts"
       ]
     },
     {
@@ -2966,10 +3028,12 @@
         "Jawfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
         "Snails",
         "Triggerfish",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "withCaution": [
@@ -2998,6 +3062,7 @@
         "Anthias",
         "Basslets",
         "Blennies",
+        "Cardinalfish",
         "Chromis",
         "Clownfish (Female) ♀",
         "Clownfish (Male) ♂",
@@ -3006,17 +3071,17 @@
         "Dragonets",
         "Gobies",
         "Jawfish",
+        "Pseudochromis",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
         "Anglers / Frogs",
-        "Batfish",
-        "Cardinalfish",
-        "Damselfish",
-        "Pseudochromis"
+        "Batfish"
       ],
       "notCompatible": [
         "Angelfish",
@@ -3037,6 +3102,7 @@
       "withCaution": [
         "Boxfish",
         "Butterflyfish",
+        "Damselfish",
         "Foxface / Rabbitfish",
         "Seahorse / Pipefish",
         "Wrasse - Reef Safe"
@@ -3064,9 +3130,11 @@
         "Gobies",
         "Jawfish",
         "Pseudochromis",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
       ],
       "notRecommended": [
         "Anglers / Frogs",
@@ -3135,8 +3203,10 @@
       ],
       "notCompatible": [
         "Groupers",
+        "Sea Star / Urchin",
         "Seahorse / Pipefish",
         "Shrimp",
+        "Worms / Misc. Inverts",
         "Wrasse - Reef Safe"
       ],
       "withCaution": [
@@ -3182,10 +3252,12 @@
         "Jawfish",
         "Parrotfish",
         "Puffers",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Squirrelfish",
         "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
       ],
@@ -3226,7 +3298,8 @@
         "Clownfish (Male) ♂",
         "Damselfish",
         "Gobies",
-        "Jawfish"
+        "Jawfish",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Anglers / Frogs",
@@ -3256,6 +3329,7 @@
         "Lionfish / Scorpionfish",
         "Parrotfish",
         "Puffers",
+        "Sea Star / Urchin",
         "Squirrelfish",
         "Tangs / Surgeons",
         "Wrasse - Fish Only",
@@ -3280,7 +3354,8 @@
         "Clownfish (Male) ♂",
         "Corals",
         "Snails",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Worms / Misc. Inverts"
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
@@ -3312,6 +3387,7 @@
         "Parrotfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Sharks / Rays",
         "Triggerfish",
         "Wrasse - Reef Safe"
@@ -3366,10 +3442,125 @@
         "Jawfish",
         "Pseudochromis",
         "Puffers",
+        "Sea Star / Urchin",
         "Shrimp",
         "Snails",
         "Triggerfish",
+        "Worms / Misc. Inverts",
         "Wrasse - Fish Only"
+      ]
+    },
+    {
+      "name": "Sea Star / Urchin",
+      "commonNames": [
+        "Chocolate Star Fish",
+        "Pencil Urchin"
+      ],
+      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Starfish_montage.png/1280px-Starfish_montage.png",
+      "compatible": [
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Dartfish",
+        "Dragonets",
+        "Gobies",
+        "Jawfish",
+        "Sea Star / Urchin",
+        "Shrimp",
+        "Snails",
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
+      ],
+      "notRecommended": [
+        "Angelfish - Dwarf",
+        "Anglers / Frogs",
+        "Batfish"
+      ],
+      "notCompatible": [
+        "Angelfish",
+        "Eels",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hogfish",
+        "Lionfish / Scorpionfish",
+        "Parrotfish",
+        "Puffers",
+        "Sharks / Rays",
+        "Squirrelfish"
+      ],
+      "withCaution": [
+        "Boxfish",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Damselfish",
+        "Filefish",
+        "Foxface / Rabbitfish",
+        "Hawkfish",
+        "Pseudochromis",
+        "Seahorse / Pipefish",
+        "Triggerfish",
+        "Wrasse - Fish Only",
+        "Wrasse - Reef Safe"
+      ]
+    },
+    {
+      "name": "Worms / Misc. Inverts",
+      "commonNames": [
+        "Feather Duster"
+      ],
+      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Feather_duster_worm.jpg/250px-Feather_duster_worm.jpg",
+      "compatible": [
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Dartfish",
+        "Dragonets",
+        "Gobies",
+        "Jawfish",
+        "Sea Star / Urchin",
+        "Shrimp",
+        "Snails",
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts"
+      ],
+      "notRecommended": [
+        "Angelfish - Dwarf",
+        "Anglers / Frogs",
+        "Batfish",
+        "Filefish",
+        "Triggerfish",
+        "Wrasse - Fish Only"
+      ],
+      "notCompatible": [
+        "Angelfish",
+        "Eels",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Lionfish / Scorpionfish",
+        "Parrotfish",
+        "Puffers",
+        "Sharks / Rays",
+        "Squirrelfish"
+      ],
+      "withCaution": [
+        "Boxfish",
+        "Butterflyfish",
+        "Damselfish",
+        "Foxface / Rabbitfish",
+        "Pseudochromis",
+        "Seahorse / Pipefish",
+        "Wrasse - Reef Safe"
       ]
     }
   ]
