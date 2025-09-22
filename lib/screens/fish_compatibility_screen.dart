@@ -296,6 +296,7 @@ class FishCompatibilityScreenState
                           return FishCard(
                             fish: fish,
                             isSelected: isSelected,
+                            category: _selectedCategory,
                           );
                         },
                         childCount: _filteredFishList.length,
