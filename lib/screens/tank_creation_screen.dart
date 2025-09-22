@@ -25,6 +25,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
+  final _notesController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
@@ -48,6 +49,9 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       if (widget.existingTank!.sizeLiters != null) {
         _sizeLitersController.text = widget.existingTank!.sizeLiters!.toString();
       }
+      if (widget.existingTank!.notes != null) {
+        _notesController.text = widget.existingTank!.notes!;
+      }
     }
   }
 
@@ -56,6 +60,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     _tankNameController.dispose();
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -164,6 +169,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -172,6 +178,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 createdAt: _creationDate,
               );
 
@@ -362,6 +369,28 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Tank Notes Section
+                  Text(
+                    'Tank Notes (Optional)',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _notesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tank Notes',
+                      hintText: 'Special considerations, water parameters, equipment, etc.',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    maxLength: 500,
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: 24),
                   

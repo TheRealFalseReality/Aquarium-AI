@@ -783,6 +783,29 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
               
               const SizedBox(height: 16),
+              if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                Text(
+                  'Notes:',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: Text(
+                    tank.notes!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               Text(
                 'Created: ${_formatDate(tank.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall,

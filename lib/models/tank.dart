@@ -65,6 +65,7 @@ class Tank {
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
   final double? sizeLiters;  // Tank size in liters
+  final String? notes; // User notes about the tank
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -75,6 +76,7 @@ class Tank {
     required this.inhabitants,
     this.sizeGallons,
     this.sizeLiters,
+    this.notes,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -85,6 +87,7 @@ class Tank {
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
+    String? notes,
     DateTime? createdAt,
   }) {
     final now = DateTime.now();
@@ -95,6 +98,7 @@ class Tank {
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
       sizeLiters: sizeLiters,
+      notes: notes,
       createdAt: createdAt ?? now,
       updatedAt: now,
     );
@@ -108,6 +112,7 @@ class Tank {
       'inhabitants': inhabitants.map((i) => i.toJson()).toList(),
       'sizeGallons': sizeGallons,
       'sizeLiters': sizeLiters,
+      'notes': notes,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -123,6 +128,7 @@ class Tank {
           .toList(),
       sizeGallons: json['sizeGallons']?.toDouble(),
       sizeLiters: json['sizeLiters']?.toDouble(),
+      notes: json['notes'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -135,6 +141,7 @@ class Tank {
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
+    String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -145,6 +152,7 @@ class Tank {
       inhabitants: inhabitants ?? this.inhabitants,
       sizeGallons: sizeGallons ?? this.sizeGallons,
       sizeLiters: sizeLiters ?? this.sizeLiters,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
