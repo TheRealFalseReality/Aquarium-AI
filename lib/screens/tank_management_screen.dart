@@ -741,7 +741,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                inhabitant.customName,
+                                '${inhabitant.fishUnit} (${inhabitant.quantity})',
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(

@@ -54,6 +54,34 @@ String _extractJson(String text) {
   return text;
 }
 
+// Helper function to safely parse compatible fish array from AI response
+List<String> parseCompatibleFish(dynamic compatibleFishData) {
+  if (compatibleFishData == null) return [];
+  
+  if (compatibleFishData is List) {
+    return compatibleFishData.map((item) {
+      if (item is String) {
+        // Direct string in array
+        return item;
+      } else if (item is Map<String, dynamic> && item['name'] is String) {
+        // Object with name property
+        return item['name'] as String;
+      } else {
+        // Fallback: convert to string
+        return item.toString();
+      }
+    }).toList();
+  } else if (compatibleFishData is String) {
+    // If it's a single string, split by comma or return as single item
+    if (compatibleFishData.contains(',')) {
+      return compatibleFishData.split(',').map((s) => s.trim()).toList();
+    }
+    return [compatibleFishData];
+  }
+  
+  return [];
+}
+
 final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier,
     FishCompatibilityState>(FishCompatibilityNotifier.new);
 
@@ -247,18 +275,16 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       final calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(state.selectedFish);
 
       final report = CompatibilityReport(
-        harmonyLabel: reportJson['harmonyLabel'],
-        harmonySummary: reportJson['harmonySummary'],
-        detailedSummary: reportJson['detailedSummary'],
-        tankSize: reportJson['tankSize'],
-        decorations: reportJson['decorations'],
-        careGuide: reportJson['careGuide'],
-        compatibleFish: List<String>.from(
-          reportJson['compatibleFish'].map((f) => f['name']),
-        ),
+        harmonyLabel: reportJson['harmonyLabel']?.toString() ?? 'Unknown',
+        harmonySummary: reportJson['harmonySummary']?.toString() ?? '',
+        detailedSummary: reportJson['detailedSummary']?.toString() ?? '',
+        tankSize: reportJson['tankSize']?.toString() ?? 'Not specified',
+        decorations: reportJson['decorations']?.toString() ?? '',
+        careGuide: reportJson['careGuide']?.toString() ?? '',
+        compatibleFish: parseCompatibleFish(reportJson['compatibleFish']),
         groupHarmonyScore: harmonyScore,
         selectedFish: state.selectedFish,
-        tankMatesSummary: reportJson['tankMatesSummary'],
+        tankMatesSummary: reportJson['tankMatesSummary']?.toString() ?? '',
         calculationBreakdown: calculationBreakdown, // Use the generated string.
       );
       state = state.copyWith(

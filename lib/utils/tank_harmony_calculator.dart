@@ -3,7 +3,6 @@ import '../models/fish.dart';
 import '../models/tank.dart';
 
 class TankHarmonyCalculator {
-  // Reuse the same calculation logic from fish compatibility provider
   static double _getWeightedScore(double score) {
     final randomFactor = Random().nextDouble() * 0.1 - 0.05;
     return (score + randomFactor).clamp(0.0, 1.0);

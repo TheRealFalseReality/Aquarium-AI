@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -41,6 +42,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildCodeBlock(context, script.code),
           const SizedBox(height: 16),
+          const NativeAdWidget(),
           MarkdownBody(
             data: script.explanation,
             onTapLink: (text, href, title) {
@@ -54,6 +56,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text('Close'),
           ),
+          const BannerAdWidget(),
         ],
       ),
     );

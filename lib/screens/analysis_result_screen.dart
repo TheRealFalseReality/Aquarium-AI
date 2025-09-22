@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -212,6 +213,7 @@ class AnalysisResultScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const BannerAdWidget(),
             Text("How AquaPi Can Help",
                 style: Theme.of(context)
                     .textTheme
