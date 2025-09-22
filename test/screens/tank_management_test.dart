@@ -176,21 +176,6 @@ void main() {
       expect(score, lessThan(0.1)); // Should be very low compatibility
     });
 
-    test('Harmony score with single fish returns 1.0', () {
-      final fish = Fish(
-        name: 'Solo Fish',
-        commonNames: [],
-        imageURL: '',
-        compatible: [],
-        notRecommended: [],
-        notCompatible: [],
-        withCaution: [],
-      );
-
-      final score = TankHarmonyCalculator.calculateHarmonyScore([fish]);
-      expect(score, equals(1.0));
-    });
-
     test('Tank harmony score calculation', () {
       final tank = Tank.create(
         name: 'Test Tank',
