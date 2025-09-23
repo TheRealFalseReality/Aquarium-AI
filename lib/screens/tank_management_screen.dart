@@ -151,7 +151,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           : tankState.error != null
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
-                  ? _buildEmptyState(context)
+                  ? _buildEmptyState(context, ref)
                   : _buildTankList(context, ref, tankState.tanks),
     );
   }
@@ -196,7 +196,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -224,22 +224,54 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const TankCreationScreen(),
+            
+            // Action buttons
+            Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const TankCreationScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create Your First Tank'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                   ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Create Your First Tank'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
                 ),
-              ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Or restore from backup:',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => _importTanks(context, ref),
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: const Text('Restore'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.green,
+                        side: const BorderSide(color: Colors.green),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
