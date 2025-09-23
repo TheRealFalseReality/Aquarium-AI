@@ -199,69 +199,79 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             runSpacing: 12.0,
             children: shapeIcons.keys.map((shapeName) {
               final selected = _shape == shapeName;
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ModernSelectableChip(
-                    label: shapeName,
-                    icon: shapeIcons[shapeName],
-                    selected: selected,
-                    selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                    selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                    onTap: () {
-                      setState(() {
-                        _shape = shapeName;
-                        if (shapeName != 'Cylinder') {
-                          _cylinderType = 'Full';
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () => _showDimensionImage(context, shapeDimensionImages[shapeName]!),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-                          width: 1,
+              return IntrinsicWidth(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ModernSelectableChip(
+                          label: shapeName,
+                          icon: shapeIcons[shapeName],
+                          selected: selected,
+                          selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                          selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                          onTap: () {
+                            setState(() {
+                              _shape = shapeName;
+                              if (shapeName != 'Cylinder') {
+                                _cylinderType = 'Full';
+                              }
+                            });
+                          },
                         ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(7),
-                        child: Stack(
-                          children: [
-                            Image.asset(
-                              shapeDimensionImages[shapeName]!,
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _showDimensionImage(context, shapeDimensionImages[shapeName]!),
+                          child: Tooltip(
+                            message: 'View $shapeName dimensions',
+                            child: Container(
                               width: 40,
                               height: 40,
-                              fit: BoxFit.cover,
-                            ),
-                            Positioned(
-                              bottom: 2,
-                              right: 2,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                                  width: 1,
                                 ),
-                                child: const Icon(
-                                  Icons.zoom_in,
-                                  size: 12,
-                                  color: Colors.white,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(7),
+                                child: Stack(
+                                  children: [
+                                    Image.asset(
+                                      shapeDimensionImages[shapeName]!,
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Positioned(
+                                      bottom: 2,
+                                      right: 2,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: const Icon(
+                                          Icons.zoom_in,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }).toList(),
           ),
