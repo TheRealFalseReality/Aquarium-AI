@@ -701,7 +701,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               const SizedBox(height: 16),
               
               Text(
-                'Inhabitants (${tank.inhabitants.length})',
+                'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -741,7 +741,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${inhabitant.fishUnit} (${inhabitant.quantity})',
+                                inhabitant.fishUnit,
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(
@@ -783,6 +783,29 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
               
               const SizedBox(height: 16),
+              if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                Text(
+                  'Notes:',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: Text(
+                    tank.notes!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               Text(
                 'Created: ${_formatDate(tank.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -946,7 +969,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildHarmonyScoreChip(Tank tank) {
-    final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, _fishData);
+    final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
 
     final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
@@ -1023,6 +1046,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return fish.imageURL.isNotEmpty ? fish.imageURL : null;
   }
 
+  int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
+    return inhabitants.fold(0, (total, inhabitant) => total + inhabitant.quantity);
+  }
+
   Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
     final grouped = <String, List<TankInhabitant>>{};
     for (final inhabitant in inhabitants) {
@@ -1083,7 +1110,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$fishType ($totalQuantity)',
+                      fishType,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1091,7 +1118,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      inhabitants.map((i) => i.customName).join(', '),
+                      totalQuantity > 1
+                        ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
+                        : inhabitants.map((i) => i.customName).join(', '),
+                  
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,

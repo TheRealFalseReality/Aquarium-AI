@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../utils/tank_harmony_calculator.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ad_component.dart';
 
@@ -25,6 +26,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
+  final _notesController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
@@ -48,6 +50,9 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       if (widget.existingTank!.sizeLiters != null) {
         _sizeLitersController.text = widget.existingTank!.sizeLiters!.toString();
       }
+      if (widget.existingTank!.notes != null) {
+        _notesController.text = widget.existingTank!.notes!;
+      }
     }
   }
 
@@ -56,6 +61,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     _tankNameController.dispose();
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -157,6 +163,23 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ? double.tryParse(_sizeLitersController.text.trim()) 
           : null;
 
+        // Calculate harmony score for the tank
+        final fishData = {_selectedCategory: _availableFish};
+        final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
+          Tank(
+            id: 'temp',
+            name: _tankNameController.text.trim(),
+            type: _selectedCategory,
+            inhabitants: _inhabitants,
+            sizeGallons: sizeGallons,
+            sizeLiters: sizeLiters,
+            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+            createdAt: _creationDate,
+            updatedAt: DateTime.now(),
+          ),
+          fishData,
+        );
+
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
@@ -164,6 +187,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -172,6 +197,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               );
 
@@ -362,6 +389,28 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Tank Notes Section
+                  Text(
+                    'Tank Notes (Optional)',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _notesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tank Notes',
+                      hintText: 'Special considerations, water parameters, equipment, etc.',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    maxLength: 500,
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: 24),
                   
