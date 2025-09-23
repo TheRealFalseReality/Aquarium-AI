@@ -741,7 +741,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${inhabitant.fishUnit} (${inhabitant.quantity})',
+                                inhabitant.fishUnit,
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(
@@ -1106,7 +1106,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$fishType ($totalQuantity)',
+                      fishType,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1114,7 +1114,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      inhabitants.map((i) => i.customName).join(', '),
+                      totalQuantity > 1
+                        ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
+                        : inhabitants.map((i) => i.customName).join(', '),
+                  
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,
