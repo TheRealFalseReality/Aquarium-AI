@@ -578,7 +578,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${_getTotalInhabitantCount(tank.inhabitants)} fish',
+                          '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'} of fish',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
