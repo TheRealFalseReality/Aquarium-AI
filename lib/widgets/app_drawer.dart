@@ -167,7 +167,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 350),
                   child: ListTile(
-                    leading: const Icon(Icons.opacity),
+                    leading: const Icon(Icons.view_in_ar),
                     title: const Text('Tank Volume'),
                     subtitle:
                         const Text('Calculate the volume of your aquarium.'),

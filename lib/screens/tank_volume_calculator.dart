@@ -36,6 +36,14 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     'BowFront': Icons.architecture_outlined,
   };
 
+  final Map<String, String> shapeDimensionImages = {
+    'Rectangle': 'assets/rectangle_calc.webp',
+    'Cube': 'assets/cube_calc.webp',
+    'Cylinder': 'assets/cylinder_calc.webp',
+    'Hexagonal': 'assets/hexagonal_prism.webp',
+    'BowFront': 'assets/bowfront_calc.webp',
+  };
+
   @override
   void dispose() {
     _lengthController.dispose();
@@ -45,6 +53,112 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     _edgeController.dispose();
     _fullWidthController.dispose();
     super.dispose();
+  }
+
+  void _showDimensionImage(BuildContext context, String imagePath) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkTheme 
+        ? Colors.black.withOpacity(0.95)
+        : Colors.white.withOpacity(0.95);
+    final iconColor = isDarkTheme ? Colors.white : Colors.black;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Scaffold(
+            backgroundColor: backgroundColor,
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: InteractiveViewer(
+                      maxScale: 5,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDarkTheme 
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(20),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 300,
+                                height: 300,
+                                decoration: BoxDecoration(
+                                  color: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 64,
+                                      color: isDarkTheme ? Colors.grey[400] : Colors.grey[600],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Image not available',
+                                      style: TextStyle(
+                                        color: isDarkTheme ? Colors.grey[400] : Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Path: $imagePath',
+                                      style: TextStyle(
+                                        color: isDarkTheme ? Colors.grey[600] : Colors.grey[500],
+                                        fontSize: 12,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.close, color: iconColor),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _calculateVolume() {
@@ -226,20 +340,106 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             ),
           ),
           const SizedBox(height: 22),
-          ElevatedButton.icon(
-            onPressed: _calculateVolume,
-            icon: const Icon(Icons.calculate_outlined),
-            style: ElevatedButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
-              textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.4),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            label: const Text('Calculate'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                onPressed: _calculateVolume,
+                icon: const Icon(Icons.calculate_outlined),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                  textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.4),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                label: const Text('Calculate'),
+              ),
+              if (shapeDimensionImages.containsKey(_shape)) ...[
+                const SizedBox(width: 16),
+                GestureDetector(
+                  onTap: () => _showDimensionImage(context, shapeDimensionImages[_shape]!),
+                  child: Tooltip(
+                    message: 'View $_shape dimensions',
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.grey[100],
+                          ),
+                          child: Stack(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Image.asset(
+                                  shapeDimensionImages[_shape]!,
+                                  width: 42,
+                                  height: 42,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        size: 20,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 2,
+                                right: 2,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Icon(
+                                    Icons.zoom_in,
+                                    size: 12,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 22),
           if (_gallons.isNotEmpty) _buildResultsCard(),
