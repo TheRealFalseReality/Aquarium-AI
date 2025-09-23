@@ -11,7 +11,6 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
-import '../widgets/app_drawer.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 
@@ -34,6 +33,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   TankSortOption _currentSortOption = TankSortOption.name;
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
+  bool _isSortMenuExpanded = false; // Track sort menu expansion
 
   @override
   void initState() {
@@ -132,78 +132,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          onTap: () {
-            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/AquaPi Logo.png',
-                height: 40,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'My Tanks',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        centerTitle: true,
-        toolbarHeight: 80,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'backup':
-                  _exportTanks(context, ref);
-                  break;
-                case 'restore':
-                  _importTanks(context, ref);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'backup',
-                child: Row(
-                  children: [
-                    Icon(Icons.backup, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('Backup Tanks'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'restore',
-                child: Row(
-                  children: [
-                    Icon(Icons.restore, color: Colors.green),
-                    SizedBox(width: 8),
-                    Text('Restore Tanks'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      drawer: const AppDrawer(),
-      body: tankState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : tankState.error != null
-              ? _buildErrorState(context, ref, tankState.error!)
-              : tankState.tanks.isEmpty
-                  ? _buildEmptyState(context)
-                  : _buildTankList(context, ref, tankState.tanks),
+    return MainLayout(
+      title: 'My Tanks',
       bottomNavigationBar: const AdBanner(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -216,6 +146,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Create Tank'),
       ),
+      child: tankState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : tankState.error != null
+              ? _buildErrorState(context, ref, tankState.error!)
+              : tankState.tanks.isEmpty
+                  ? _buildEmptyState(context)
+                  : _buildTankList(context, ref, tankState.tanks),
     );
   }
 
@@ -380,52 +317,129 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
           const SizedBox(height: 16),
           
-          // Sort Options
+          // Action buttons row
           Row(
             children: [
-              Text(
-                'Sort by:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+              // Backup/Restore section
+              Expanded(
+                child: Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _exportTanks(context, ref),
+                      icon: const Icon(Icons.backup, size: 18),
+                      label: const Text('Backup'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _importTanks(context, ref),
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: const Text('Restore'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: TankSortOption.values.map((option) {
-                      final isSelected = _currentSortOption == option;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(_getSortOptionLabel(option)),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                _currentSortOption = option;
-                              });
-                              _saveSortPreference(option);
-                            }
-                          },
-                          backgroundColor: Colors.transparent,
-                          selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                          checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                          labelStyle: TextStyle(
-                            color: isSelected 
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                              : Theme.of(context).colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+              
+              // Sort menu
+              OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _isSortMenuExpanded = !_isSortMenuExpanded;
+                  });
+                },
+                icon: Icon(
+                  _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: 18,
+                ),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                    const SizedBox(width: 4),
+                    Text(_getSortOptionLabel(_currentSortOption)),
+                  ],
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ],
           ),
+          
+          // Expandable sort options
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: _isSortMenuExpanded ? null : 0,
+            child: _isSortMenuExpanded
+                ? Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sort Options',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: TankSortOption.values.map((option) {
+                            final isSelected = _currentSortOption == option;
+                            return ActionChip(
+                              avatar: Icon(
+                                _getSortOptionIcon(option),
+                                size: 16,
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              label: Text(_getSortOptionLabel(option)),
+                              backgroundColor: isSelected 
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _currentSortOption = option;
+                                  _isSortMenuExpanded = false;
+                                });
+                                _saveSortPreference(option);
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          
           const SizedBox(height: 8),
         ],
       ),
@@ -442,6 +456,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         return 'Size';
       case TankSortOption.date:
         return 'Date';
+    }
+  }
+
+  IconData _getSortOptionIcon(TankSortOption option) {
+    switch (option) {
+      case TankSortOption.name:
+        return Icons.sort_by_alpha;
+      case TankSortOption.type:
+        return Icons.category;
+      case TankSortOption.size:
+        return Icons.straighten;
+      case TankSortOption.date:
+        return Icons.schedule;
     }
   }
 
@@ -1380,12 +1407,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to create backup. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // Check if there's an actual error or if user just cancelled
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to create backup: $error'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          // If no error, user probably cancelled the save dialog - no message needed
         }
       }
     }

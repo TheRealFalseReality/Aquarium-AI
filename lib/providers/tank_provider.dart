@@ -134,7 +134,7 @@ class TankNotifier extends StateNotifier<TankState> {
     state = state.copyWith(clearError: true);
   }
 
-  /// Export all tanks to a backup file
+  /// Export all tanks to a backup file with user-selected location
   Future<String?> exportTanksToFile() async {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
@@ -151,27 +151,29 @@ class TankNotifier extends StateNotifier<TankState> {
       // Convert to formatted JSON
       final jsonString = const JsonEncoder.withIndent('  ').convert(backupData);
 
-      // Get the downloads directory (or fallback to app documents directory)
-      Directory? directory;
-      try {
-        directory = await getDownloadsDirectory();
-      } catch (e) {
-        directory = await getApplicationDocumentsDirectory();
-      }
+      // Create filename with timestamp
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
+      final fileName = 'aquarium_ai_backup_$timestamp.json';
 
-      if (directory != null) {
-        // Create filename with timestamp
-        final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
-        final fileName = 'aquarium_ai_backup_$timestamp.json';
-        final file = File('${directory.path}/$fileName');
+      // Let user choose save location
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Tank Backup',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
 
+      if (outputPath != null) {
+        final file = File(outputPath);
         // Write the backup file
         await file.writeAsString(jsonString);
         
         state = state.copyWith(isLoading: false);
-        return file.path;
+        return outputPath;
       } else {
-        throw Exception('Could not access file system');
+        // User cancelled
+        state = state.copyWith(isLoading: false);
+        return null;
       }
     } catch (e) {
       state = state.copyWith(
