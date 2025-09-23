@@ -253,89 +253,6 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
               );
             }).toList(),
           ),
-          if (shapeDimensionImages.containsKey(_shape)) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'View $_shape dimensions:',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () => _showDimensionImage(context, shapeDimensionImages[_shape]!),
-                  child: Tooltip(
-                    message: 'View $_shape dimensions',
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: [
-                            Image.asset(
-                              shapeDimensionImages[_shape]!,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceVariant,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    Icons.image_outlined,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    size: 24,
-                                  ),
-                                );
-                              },
-                            ),
-                            Positioned(
-                              bottom: 4,
-                              right: 4,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Icon(
-                                  Icons.zoom_in,
-                                  size: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
           if (_shape == 'Cylinder') ...[
             const SizedBox(height: 16),
             _buildSectionTitle(context, 'Cylinder Type'),
@@ -392,20 +309,96 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             ),
           ),
           const SizedBox(height: 22),
-          ElevatedButton.icon(
-            onPressed: _calculateVolume,
-            icon: const Icon(Icons.calculate_outlined),
-            style: ElevatedButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
-              textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.4),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            label: const Text('Calculate'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                onPressed: _calculateVolume,
+                icon: const Icon(Icons.calculate_outlined),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                  textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.4),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                label: const Text('Calculate'),
+              ),
+              if (shapeDimensionImages.containsKey(_shape)) ...[
+                const SizedBox(width: 16),
+                GestureDetector(
+                  onTap: () => _showDimensionImage(context, shapeDimensionImages[_shape]!),
+                  child: Tooltip(
+                    message: 'View $_shape dimensions',
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              shapeDimensionImages[_shape]!,
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceVariant,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.image_outlined,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    size: 20,
+                                  ),
+                                );
+                              },
+                            ),
+                            Positioned(
+                              bottom: 2,
+                              right: 2,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(
+                                  Icons.zoom_in,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 22),
           if (_gallons.isNotEmpty) _buildResultsCard(),
