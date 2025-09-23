@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../utils/tank_harmony_calculator.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ad_component.dart';
 
@@ -162,6 +163,23 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ? double.tryParse(_sizeLitersController.text.trim()) 
           : null;
 
+        // Calculate harmony score for the tank
+        final fishData = {_selectedCategory: _availableFish};
+        final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
+          Tank(
+            id: 'temp',
+            name: _tankNameController.text.trim(),
+            type: _selectedCategory,
+            inhabitants: _inhabitants,
+            sizeGallons: sizeGallons,
+            sizeLiters: sizeLiters,
+            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+            createdAt: _creationDate,
+            updatedAt: DateTime.now(),
+          ),
+          fishData,
+        );
+
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
@@ -170,6 +188,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -179,6 +198,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               );
 

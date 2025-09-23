@@ -578,7 +578,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'} of fish',
+                          '${_getTotalInhabitantCount(tank.inhabitants)} fish',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -701,7 +701,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               const SizedBox(height: 16),
               
               Text(
-                'Inhabitants (${tank.inhabitants.length})',
+                'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -969,7 +969,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildHarmonyScoreChip(Tank tank) {
-    final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, _fishData);
+    final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
 
     final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
@@ -1044,6 +1044,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
     
     return fish.imageURL.isNotEmpty ? fish.imageURL : null;
+  }
+
+  int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
+    return inhabitants.fold(0, (total, inhabitant) => total + inhabitant.quantity);
   }
 
   Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
