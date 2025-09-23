@@ -170,7 +170,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 800),
       ),
       FeatureInfo(
-        icon: '🧊',
+        icon: '📏',
         title: 'Tank Volume Calculator',
         description:
             'Quickly calculate volume & water weight for many tank shapes.',
