@@ -37,11 +37,11 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   };
 
   final Map<String, String> shapeDimensionImages = {
-    'Rectangle': 'assets/tank_volume/rectangle_calc.webp',
-    'Cube': 'assets/tank_volume/cube_calc.webp',
-    'Cylinder': 'assets/tank_volume/cylinder_calc.webp',
-    'Hexagonal': 'assets/tank_volume/hexagonal_prism.webp',
-    'BowFront': 'assets/tank_volume/bowfront_calc.webp',
+    'Rectangle': 'assets/rectangle_calc.webp',
+    'Cube': 'assets/cube_calc.webp',
+    'Cylinder': 'assets/cylinder_calc.webp',
+    'Hexagonal': 'assets/hexagonal_prism.webp',
+    'BowFront': 'assets/bowfront_calc.webp',
   };
 
   @override
