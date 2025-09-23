@@ -190,10 +190,9 @@ class TankNotifier extends StateNotifier<TankState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      // Pick a file
+      // Pick a file - use FileType.any for better compatibility
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
+        type: FileType.any,
         allowMultiple: false,
       );
 
@@ -202,7 +201,12 @@ class TankNotifier extends StateNotifier<TankState> {
         return false;
       }
 
-      final file = File(result.files.single.path!);
+      final filePath = result.files.single.path;
+      if (filePath == null) {
+        throw Exception('Could not access selected file');
+      }
+
+      final file = File(filePath);
       final jsonString = await file.readAsString();
       final backupData = json.decode(jsonString) as Map<String, dynamic>;
 
