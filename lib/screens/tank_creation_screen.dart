@@ -250,7 +250,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Tank Name
-                  TextFormField(
+                    TextFormField(
                     controller: _tankNameController,
                     decoration: const InputDecoration(
                       labelText: 'Tank Name',
