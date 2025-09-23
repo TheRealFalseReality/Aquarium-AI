@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/tank.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
@@ -129,5 +132,106 @@ class TankNotifier extends StateNotifier<TankState> {
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  /// Export all tanks to a backup file
+  Future<String?> exportTanksToFile() async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Create backup data with metadata
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': state.tanks.length,
+        'tanks': state.tanks.map((tank) => tank.toJson()).toList(),
+      };
+
+      // Convert to formatted JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(backupData);
+
+      // Get the downloads directory (or fallback to app documents directory)
+      Directory? directory;
+      try {
+        directory = await getDownloadsDirectory();
+      } catch (e) {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory != null) {
+        // Create filename with timestamp
+        final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
+        final fileName = 'aquarium_ai_backup_$timestamp.json';
+        final file = File('${directory.path}/$fileName');
+
+        // Write the backup file
+        await file.writeAsString(jsonString);
+        
+        state = state.copyWith(isLoading: false);
+        return file.path;
+      } else {
+        throw Exception('Could not access file system');
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to export tanks: $e',
+      );
+      return null;
+    }
+  }
+
+  /// Import tanks from a backup file
+  Future<bool> importTanksFromFile() async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Pick a file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        return false;
+      }
+
+      final file = File(result.files.single.path!);
+      final jsonString = await file.readAsString();
+      final backupData = json.decode(jsonString) as Map<String, dynamic>;
+
+      // Validate backup format
+      if (!backupData.containsKey('tanks') || !backupData.containsKey('version')) {
+        throw const FormatException('Invalid backup file format');
+      }
+
+      // Parse tanks
+      final tanksList = backupData['tanks'] as List;
+      final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+
+      // For now, replace all tanks (we could add merge options later)
+      state = state.copyWith(tanks: importedTanks, isLoading: false);
+      await _saveTanks();
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to import tanks: $e',
+      );
+      return false;
+    }
+  }
+
+  /// Get backup file info for display purposes
+  Map<String, dynamic> createBackupInfo() {
+    return {
+      'tankCount': state.tanks.length,
+      'exportDate': DateTime.now().toIso8601String(),
+      'version': '1.0.0',
+    };
   }
 }

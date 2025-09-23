@@ -11,6 +11,7 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/app_drawer.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 
@@ -131,8 +132,78 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       }
     });
 
-    return MainLayout(
-      title: 'My Tanks',
+    return Scaffold(
+      appBar: AppBar(
+        title: GestureDetector(
+          onTap: () {
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/AquaPi Logo.png',
+                height: 40,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'My Tanks',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        toolbarHeight: 80,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'backup':
+                  _exportTanks(context, ref);
+                  break;
+                case 'restore':
+                  _importTanks(context, ref);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'backup',
+                child: Row(
+                  children: [
+                    Icon(Icons.backup, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Backup Tanks'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'restore',
+                child: Row(
+                  children: [
+                    Icon(Icons.restore, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text('Restore Tanks'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      drawer: const AppDrawer(),
+      body: tankState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : tankState.error != null
+              ? _buildErrorState(context, ref, tankState.error!)
+              : tankState.tanks.isEmpty
+                  ? _buildEmptyState(context)
+                  : _buildTankList(context, ref, tankState.tanks),
       bottomNavigationBar: const AdBanner(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -145,13 +216,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Create Tank'),
       ),
-      child: tankState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : tankState.error != null
-              ? _buildErrorState(context, ref, tankState.error!)
-              : tankState.tanks.isEmpty
-                  ? _buildEmptyState(context)
-                  : _buildTankList(context, ref, tankState.tanks),
     );
   }
 
@@ -1239,5 +1303,165 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Get recommendations for this tank
     ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
+  }
+
+  Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {
+    final tankNotifier = ref.read(tankProvider.notifier);
+    final tankState = ref.read(tankProvider);
+
+    if (tankState.tanks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No tanks to backup'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Show confirmation dialog with backup info
+    final backupInfo = tankNotifier.createBackupInfo();
+    final shouldExport = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.backup, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Backup Tanks'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This will create a backup file containing:'),
+            const SizedBox(height: 8),
+            Text('• ${backupInfo['tankCount']} tank(s)'),
+            Text('• All fish and tank configurations'),
+            Text('• Export date: ${DateTime.now().toString().split('.')[0]}'),
+            const SizedBox(height: 16),
+            Text(
+              'The backup file will be saved to your device.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Create Backup'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExport == true) {
+      final filePath = await tankNotifier.exportTanksToFile();
+      
+      if (context.mounted) {
+        if (filePath != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Backup created successfully!\nSaved to: ${filePath.split('/').last}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to create backup. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _importTanks(BuildContext context, WidgetRef ref) async {
+    // Show warning dialog first
+    final shouldImport = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.restore, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Restore Tanks'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '⚠️ Important',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+            ),
+            SizedBox(height: 8),
+            Text('Restoring from backup will:'),
+            SizedBox(height: 8),
+            Text('• Replace ALL current tanks'),
+            Text('• Cannot be undone'),
+            SizedBox(height: 16),
+            Text('Make sure you have a current backup before proceeding.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Choose File'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldImport == true) {
+      final success = await ref.read(tankProvider.notifier).importTanksFromFile();
+      
+      if (context.mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tanks restored successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Error message will be shown from the provider's error state
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 }
