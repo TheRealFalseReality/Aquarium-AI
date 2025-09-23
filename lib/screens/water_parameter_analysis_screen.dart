@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
@@ -161,6 +162,8 @@ class TankVolumeCalculatorState
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
+              const BannerAdWidget(),
+              const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitAnalysis,
                 style: ElevatedButton.styleFrom(

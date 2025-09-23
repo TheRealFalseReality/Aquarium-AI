@@ -293,6 +293,8 @@ class _RecommendationTabView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
+        const BannerAdWidget(),
+        const SizedBox(height: 16),
         Text(
           report.title,
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -485,6 +487,33 @@ class _RecommendationTabView extends StatelessWidget {
               selected: false,
             );
           }).toList(),
+        ),
+
+        const SizedBox(height: 16),
+        const BannerAdWidget(),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cs.errorContainer.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.error.withOpacity(0.5)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'AI can make mistakes. Please verify the information provided in this report before making any stocking decisions.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         
         // Calculation Breakdown for tank-based recommendations
