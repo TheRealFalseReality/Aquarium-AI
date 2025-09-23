@@ -91,6 +91,8 @@ class _PhotoAnalysisResultScreenState
         children: [
           _header(context),
           const SizedBox(height: 12),
+          const BannerAdWidget(),
+          const SizedBox(height: 12),
           _thumbnail(context),
           const SizedBox(height: 16),
           _summaryCard(context),
@@ -108,9 +110,12 @@ class _PhotoAnalysisResultScreenState
           _waterGuessesCard(context),
           const SizedBox(height: 16),
           _howAquaPiHelps(context),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
+          const BannerAdWidget(),
+          const SizedBox(height: 14),
           Row(
             children: [
+              const SizedBox(height: 12),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: _regenerating ? null : _regenerate,
@@ -505,15 +510,28 @@ class _PhotoAnalysisResultScreenState
   Widget _howAquaPiHelps(BuildContext context) {
     return Card(
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: MarkdownBody(
-          data: widget.result.howAquaPiHelps,
-          selectable: true,
-          onTapLink: (text, href, title) {
-            if (href != null) launchUrl(Uri.parse(href));
-          },
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+            child: Text('How AquaPi Helps',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: MarkdownBody(
+              data: widget.result.howAquaPiHelps,
+              selectable: true,
+              onTapLink: (text, href, title) {
+                if (href != null) launchUrl(Uri.parse(href));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

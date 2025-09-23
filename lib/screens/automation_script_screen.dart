@@ -92,6 +92,8 @@ class AutomationScriptScreenState
                     : null,
               ),
               const SizedBox(height: 24),
+              const BannerAdWidget(),
+            const SizedBox(height: 14),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitScriptRequest,
                 style: ElevatedButton.styleFrom(
@@ -107,6 +109,8 @@ class AutomationScriptScreenState
                       )
                     : const Text('Generate Script'),
               ),
+              
+            const SizedBox(height: 14),
             const NativeAdWidget(),
             ],
           ),

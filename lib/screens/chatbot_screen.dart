@@ -542,7 +542,7 @@ Widget _suggestionMenu(BuildContext context) {
           label: 'Photo Analyzer',
           icon: Icons.camera_alt_outlined,
           customGradient: LinearGradient(
-            colors: [Colors.deepOrange.shade400, Colors.amber.shade400],
+            colors: [Colors.deepOrange.shade400, const Color.fromARGB(255, 160, 88, 6)],
           ),
           onTap: () {
             // Already in chatbot; just open analyzer

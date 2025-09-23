@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -176,6 +177,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const BannerAdWidget(),
+              const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: (_imageBytes == null || _isSubmitting) ? null : _submit,
               icon: _isSubmitting
