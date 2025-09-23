@@ -33,6 +33,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   TankSortOption _currentSortOption = TankSortOption.name;
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
+  bool _isSortMenuExpanded = false; // Track sort menu expansion
 
   @override
   void initState() {
@@ -150,7 +151,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           : tankState.error != null
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
-                  ? _buildEmptyState(context)
+                  ? _buildEmptyState(context, ref)
                   : _buildTankList(context, ref, tankState.tanks),
     );
   }
@@ -195,7 +196,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -223,22 +224,54 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const TankCreationScreen(),
+            
+            // Action buttons
+            Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const TankCreationScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create Your First Tank'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                   ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Create Your First Tank'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
                 ),
-              ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Or restore from backup:',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => _importTanks(context, ref),
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: const Text('Restore'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.green,
+                        side: const BorderSide(color: Colors.green),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -316,52 +349,129 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
           const SizedBox(height: 16),
           
-          // Sort Options
+          // Action buttons row
           Row(
             children: [
-              Text(
-                'Sort by:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+              // Backup/Restore section
+              Expanded(
+                child: Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _exportTanks(context, ref),
+                      icon: const Icon(Icons.backup, size: 18),
+                      label: const Text('Backup'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _importTanks(context, ref),
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: const Text('Restore'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: TankSortOption.values.map((option) {
-                      final isSelected = _currentSortOption == option;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(_getSortOptionLabel(option)),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                _currentSortOption = option;
-                              });
-                              _saveSortPreference(option);
-                            }
-                          },
-                          backgroundColor: Colors.transparent,
-                          selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                          checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                          labelStyle: TextStyle(
-                            color: isSelected 
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                              : Theme.of(context).colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+              
+              // Sort menu
+              OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _isSortMenuExpanded = !_isSortMenuExpanded;
+                  });
+                },
+                icon: Icon(
+                  _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: 18,
+                ),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                    const SizedBox(width: 4),
+                    Text(_getSortOptionLabel(_currentSortOption)),
+                  ],
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ],
           ),
+          
+          // Expandable sort options
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: _isSortMenuExpanded ? null : 0,
+            child: _isSortMenuExpanded
+                ? Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sort Options',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: TankSortOption.values.map((option) {
+                            final isSelected = _currentSortOption == option;
+                            return ActionChip(
+                              avatar: Icon(
+                                _getSortOptionIcon(option),
+                                size: 16,
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              label: Text(_getSortOptionLabel(option)),
+                              backgroundColor: isSelected 
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _currentSortOption = option;
+                                  _isSortMenuExpanded = false;
+                                });
+                                _saveSortPreference(option);
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          
           const SizedBox(height: 8),
         ],
       ),
@@ -378,6 +488,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         return 'Size';
       case TankSortOption.date:
         return 'Date';
+    }
+  }
+
+  IconData _getSortOptionIcon(TankSortOption option) {
+    switch (option) {
+      case TankSortOption.name:
+        return Icons.sort_by_alpha;
+      case TankSortOption.type:
+        return Icons.category;
+      case TankSortOption.size:
+        return Icons.straighten;
+      case TankSortOption.date:
+        return Icons.schedule;
     }
   }
 
@@ -1239,5 +1362,171 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Get recommendations for this tank
     ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
+  }
+
+  Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {
+    final tankNotifier = ref.read(tankProvider.notifier);
+    final tankState = ref.read(tankProvider);
+
+    if (tankState.tanks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No tanks to backup'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Show confirmation dialog with backup info
+    final backupInfo = tankNotifier.createBackupInfo();
+    final shouldExport = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.backup, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Backup Tanks'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This will create a backup file containing:'),
+            const SizedBox(height: 8),
+            Text('• ${backupInfo['tankCount']} tank(s)'),
+            Text('• All fish and tank configurations'),
+            Text('• Export date: ${DateTime.now().toString().split('.')[0]}'),
+            const SizedBox(height: 16),
+            Text(
+              'The backup file will be saved to your device.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Create Backup'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExport == true) {
+      final filePath = await tankNotifier.exportTanksToFile();
+      
+      if (context.mounted) {
+        if (filePath != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Backup created successfully!\nSaved to: ${filePath.split('/').last}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          // Check if there's an actual error or if user just cancelled
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to create backup: $error'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          // If no error, user probably cancelled the save dialog - no message needed
+        }
+      }
+    }
+  }
+
+  Future<void> _importTanks(BuildContext context, WidgetRef ref) async {
+    // Show warning dialog first
+    final shouldImport = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.restore, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Restore Tanks'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '⚠️ Important',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+            ),
+            SizedBox(height: 8),
+            Text('Restoring from backup will:'),
+            SizedBox(height: 8),
+            Text('• Replace ALL current tanks'),
+            Text('• Cannot be undone'),
+            SizedBox(height: 16),
+            Text('Make sure you have a current backup before proceeding.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Choose File'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldImport == true) {
+      final success = await ref.read(tankProvider.notifier).importTanksFromFile();
+      
+      if (context.mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tanks restored successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Error message will be shown from the provider's error state
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 }
