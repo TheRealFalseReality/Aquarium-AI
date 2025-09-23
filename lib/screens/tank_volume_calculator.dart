@@ -36,6 +36,14 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     'BowFront': Icons.architecture_outlined,
   };
 
+  final Map<String, String> shapeDimensionImages = {
+    'Rectangle': 'assets/tank_volume/rectangle_calc.webp',
+    'Cube': 'assets/tank_volume/cube_calc.webp',
+    'Cylinder': 'assets/tank_volume/cylinder_calc.webp',
+    'Hexagonal': 'assets/tank_volume/hexagonal_prism.webp',
+    'BowFront': 'assets/tank_volume/bowfront_calc.webp',
+  };
+
   @override
   void dispose() {
     _lengthController.dispose();
@@ -45,6 +53,44 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     _edgeController.dispose();
     _fullWidthController.dispose();
     super.dispose();
+  }
+
+  void _showDimensionImage(BuildContext context, String imagePath) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Scaffold(
+            backgroundColor: Colors.black.withOpacity(0.95),
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: InteractiveViewer(
+                      maxScale: 5,
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _calculateVolume() {
@@ -153,20 +199,69 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             runSpacing: 12.0,
             children: shapeIcons.keys.map((shapeName) {
               final selected = _shape == shapeName;
-              return ModernSelectableChip(
-                label: shapeName,
-                icon: shapeIcons[shapeName],
-                selected: selected,
-                selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                onTap: () {
-                  setState(() {
-                    _shape = shapeName;
-                    if (shapeName != 'Cylinder') {
-                      _cylinderType = 'Full';
-                    }
-                  });
-                },
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ModernSelectableChip(
+                    label: shapeName,
+                    icon: shapeIcons[shapeName],
+                    selected: selected,
+                    selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                    selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                    onTap: () {
+                      setState(() {
+                        _shape = shapeName;
+                        if (shapeName != 'Cylinder') {
+                          _cylinderType = 'Full';
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => _showDimensionImage(context, shapeDimensionImages[shapeName]!),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                          width: 1,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(7),
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              shapeDimensionImages[shapeName]!,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              bottom: 2,
+                              right: 2,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(
+                                  Icons.zoom_in,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               );
             }).toList(),
           ),
