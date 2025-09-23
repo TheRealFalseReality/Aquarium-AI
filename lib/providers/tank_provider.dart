@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -150,24 +151,24 @@ class TankNotifier extends StateNotifier<TankState> {
 
       // Convert to formatted JSON
       final jsonString = const JsonEncoder.withIndent('  ').convert(backupData);
+      
+      // Convert string to bytes for mobile platforms
+      final bytes = Uint8List.fromList(utf8.encode(jsonString));
 
       // Create filename with timestamp
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
       final fileName = 'aquarium_ai_backup_$timestamp.json';
 
-      // Let user choose save location
+      // Let user choose save location with bytes for mobile compatibility
       final outputPath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Tank Backup',
         fileName: fileName,
         type: FileType.custom,
         allowedExtensions: ['json'],
+        bytes: bytes, // Required for Android & iOS
       );
 
       if (outputPath != null) {
-        final file = File(outputPath);
-        // Write the backup file
-        await file.writeAsString(jsonString);
-        
         state = state.copyWith(isLoading: false);
         return outputPath;
       } else {
