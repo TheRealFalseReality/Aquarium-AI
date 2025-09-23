@@ -59,7 +59,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       
       if (!hasShownPromotion && mounted) {
         // Show the popup after a short delay to allow the screen to load
-        Timer(const Duration(seconds: 2), () {
+        Timer(const Duration(seconds: 1), () {
           if (mounted) {
             _showPromotionDialog();
           }
