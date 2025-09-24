@@ -310,7 +310,7 @@ class AnalyticsService {
     
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
-        name: 'session_start',
+        name: 'app_session_start',
         parameters: {
           'timestamp': DateTime.now().millisecondsSinceEpoch,
         },
@@ -325,7 +325,7 @@ class AnalyticsService {
     
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
-        name: 'session_end',
+        name: 'app_session_end',
         parameters: {
           'duration_seconds': durationSeconds,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
