@@ -452,8 +452,8 @@ class FeatureCard extends ConsumerWidget {
           ),
           gradient: LinearGradient(
             colors: [
-              cs.surfaceVariant.withOpacity(0.3),
-              cs.surface.withOpacity(0.8),
+              cs.secondary.withOpacity(0.3),
+              cs.primaryContainer.withOpacity(0.8),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

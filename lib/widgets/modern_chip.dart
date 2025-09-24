@@ -46,11 +46,11 @@ class ModernSelectableChip extends ConsumerWidget {
     Color finalIconColor;
 
     if (selected) {
-      finalBackgroundColor = selectedColor ?? (isMaterialYou ? cs.primaryContainer : cs.primary);
+      finalBackgroundColor = selectedColor ?? (isMaterialYou ? cs.primary : cs.primary);
       finalBorderColor = selectedColor?.withOpacity(0.5) ?? 
           (isMaterialYou ? cs.outline.withOpacity(0.6) : cs.primary.withOpacity(0.75));
-      finalLabelColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimaryContainer : cs.onPrimary);
-      finalIconColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimaryContainer : cs.onPrimary);
+      finalLabelColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
+      finalIconColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
     } else {
       finalBackgroundColor = isMaterialYou ? cs.surfaceVariant : cs.surfaceContainerHighest;
       finalBorderColor = cs.outline.withOpacity(isMaterialYou ? 0.4 : 0.2);
@@ -116,8 +116,7 @@ class ModernSelectableChip extends ConsumerWidget {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      letterSpacing: 0.25,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                       color: finalLabelColor,
                     ),
                 maxLines: 2,

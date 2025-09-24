@@ -85,8 +85,8 @@ class FishCard extends ConsumerWidget {
               )
             : isMaterialYou && !isSelected ? LinearGradient(
                 colors: [
-                  cs.surfaceVariant,
-                  cs.surface.withOpacity(0.9),
+                  cs.surfaceContainer,
+                  cs.primaryContainer.withOpacity(0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
