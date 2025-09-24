@@ -30,27 +30,40 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize Analytics session tracking
-  await AnalyticsService.logSessionStart();
+  // Initialize Analytics session tracking (non-blocking)
+  // Don't await this to prevent blocking app startup
+  AnalyticsService.logSessionStart().catchError((error) {
+    if (kDebugMode) {
+      print('Analytics session start error: $error');
+    }
+  });
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    // Also log to Analytics
+    // Also log to Analytics (non-blocking)
     AnalyticsService.logError(
       errorType: 'flutter_fatal_error',
       errorMessage: errorDetails.exception.toString(),
-    );
+    ).catchError((error) {
+      if (kDebugMode) {
+        print('Analytics error logging failed: $error');
+      }
+    });
   };
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    // Also log to Analytics
+    // Also log to Analytics (non-blocking)
     AnalyticsService.logError(
       errorType: 'platform_error',
       errorMessage: error.toString(),
-    );
+    ).catchError((analyticsError) {
+      if (kDebugMode) {
+        print('Analytics error logging failed: $analyticsError');
+      }
+    });
     return true;
   };
 
@@ -84,6 +97,18 @@ void main() async {
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
+
+  // Helper method to safely get navigator observers
+  List<NavigatorObserver> _getNavigatorObservers() {
+    try {
+      return [AnalyticsService.observer];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to initialize analytics observer: $e');
+      }
+      return []; // Return empty list if analytics observer fails
+    }
+  }
 
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF005f73),
@@ -263,7 +288,7 @@ class MyApp extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
-          navigatorObservers: [AnalyticsService.observer],
+          navigatorObservers: _getNavigatorObservers(),
           // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
@@ -320,8 +345,12 @@ class MyApp extends ConsumerWidget {
                 screenName = 'welcome_screen';
             }
             
-            // Log screen view
-            AnalyticsService.logScreenView(screenName: screenName);
+            // Log screen view (non-blocking)
+            AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
+              if (kDebugMode) {
+                print('Analytics screen view error: $error');
+              }
+            });
             
             return FadeSlideRoute(page: page);
           },

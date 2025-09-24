@@ -3,9 +3,33 @@ import 'package:flutter/foundation.dart';
 
 class AnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-  static final FirebaseAnalyticsObserver _observer = FirebaseAnalyticsObserver(analytics: _analytics);
+  static FirebaseAnalyticsObserver? _observer;
 
-  static FirebaseAnalyticsObserver get observer => _observer;
+  static FirebaseAnalyticsObserver get observer {
+    try {
+      _observer ??= FirebaseAnalyticsObserver(analytics: _analytics);
+      return _observer!;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Analytics observer creation error: $e');
+      }
+      // Return a fallback observer or null
+      _observer ??= FirebaseAnalyticsObserver(analytics: _analytics);
+      return _observer!;
+    }
+  }
+
+  // Helper method to safely execute analytics calls
+  static Future<void> _safeAnalyticsCall(Future<void> Function() analyticsCall, String eventName) async {
+    try {
+      await analyticsCall();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Analytics error for $eventName: $e');
+      }
+      // Don't rethrow - we don't want analytics failures to crash the app
+    }
+  }
 
   // Screen views
   static Future<void> logScreenView({
@@ -16,10 +40,12 @@ class AnalyticsService {
       print('Analytics: Screen view - $screenName');
     }
     
-    await _analytics.logScreenView(
-      screenName: screenName,
-      screenClass: screenClass ?? screenName,
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logScreenView(
+        screenName: screenName,
+        screenClass: screenClass ?? screenName,
+      );
+    }, 'logScreenView');
   }
 
   // Navigation events
@@ -32,14 +58,16 @@ class AnalyticsService {
       print('Analytics: Navigation from $from to $to');
     }
     
-    await _analytics.logEvent(
-      name: 'navigation',
-      parameters: {
-        'from_screen': from,
-        'to_screen': to,
-        'method': method ?? 'tap',
-      },
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'navigation',
+        parameters: {
+          'from_screen': from,
+          'to_screen': to,
+          'method': method ?? 'tap',
+        },
+      );
+    }, 'logNavigation');
   }
 
   // Feature usage
@@ -51,13 +79,15 @@ class AnalyticsService {
       print('Analytics: Feature used - $featureName');
     }
     
-    await _analytics.logEvent(
-      name: 'feature_used',
-      parameters: {
-        'feature_name': featureName,
-        ...?parameters,
-      },
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'feature_used',
+        parameters: {
+          'feature_name': featureName,
+          ...?parameters,
+        },
+      );
+    }, 'logFeatureUsed');
   }
 
   // AI interactions
@@ -71,15 +101,17 @@ class AnalyticsService {
       print('Analytics: AI interaction - $interactionType');
     }
     
-    await _analytics.logEvent(
-      name: 'ai_interaction',
-      parameters: {
-        'interaction_type': interactionType,
-        'model': model ?? 'unknown',
-        'feature': feature ?? 'unknown',
-        ...?additionalData,
-      },
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'ai_interaction',
+        parameters: {
+          'interaction_type': interactionType,
+          'model': model ?? 'unknown',
+          'feature': feature ?? 'unknown',
+          ...?additionalData,
+        },
+      );
+    }, 'logAIInteraction');
   }
 
   // Calculator usage
@@ -234,12 +266,14 @@ class AnalyticsService {
       print('Analytics: Session start');
     }
     
-    await _analytics.logEvent(
-      name: 'session_start',
-      parameters: {
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      },
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'session_start',
+        parameters: {
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
+      );
+    }, 'logSessionStart');
   }
 
   static Future<void> logSessionEnd({required int durationSeconds}) async {
@@ -247,13 +281,15 @@ class AnalyticsService {
       print('Analytics: Session end - ${durationSeconds}s');
     }
     
-    await _analytics.logEvent(
-      name: 'session_end',
-      parameters: {
-        'duration_seconds': durationSeconds,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      },
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'session_end',
+        parameters: {
+          'duration_seconds': durationSeconds,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
+      );
+    }, 'logSessionEnd');
   }
 
   // Error tracking
@@ -273,9 +309,11 @@ class AnalyticsService {
     if (errorMessage != null) parameters['error_message'] = errorMessage;
     if (screen != null) parameters['screen'] = screen;
     
-    await _analytics.logEvent(
-      name: 'app_error',
-      parameters: parameters,
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'app_error',
+        parameters: parameters,
+      );
+    }, 'logError');
   }
 }
