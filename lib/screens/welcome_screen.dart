@@ -11,6 +11,7 @@ import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
+import '../theme_provider.dart';
 
 class FeatureInfo {
   final String icon;
@@ -417,7 +418,7 @@ class AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
   }
 }
 
-class FeatureCard extends StatelessWidget {
+class FeatureCard extends ConsumerWidget {
   final String icon;
   final String title;
   final String description;
@@ -432,36 +433,60 @@ class FeatureCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
+    
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        splashColor: cs.primary.withOpacity(0.15),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 40)),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: cs.primary,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
+      elevation: isMaterialYou ? 3 : 2,
+      shadowColor: cs.shadow.withOpacity(0.2),
+      color: isMaterialYou ? cs.surface : null,
+      child: Container(
+        decoration: isMaterialYou ? BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.4),
+            width: 1,
+          ),
+          gradient: LinearGradient(
+            colors: [
+              cs.surfaceVariant.withOpacity(0.3),
+              cs.surface.withOpacity(0.8),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ) : null,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: cs.primary.withOpacity(0.15),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(icon, style: const TextStyle(fontSize: 40)),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: isMaterialYou ? cs.onSurface : cs.primary,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isMaterialYou ? cs.onSurfaceVariant : null,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ),

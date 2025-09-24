@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
+import '../theme_provider.dart';
 import 'stocking_report_screen.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
@@ -61,6 +62,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     });
 
     final state = ref.watch(aquariumStockingProvider);
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
+    final cs = Theme.of(context).colorScheme;
     final hasLastReport = state.lastRecommendations != null && state.lastRecommendations!.isNotEmpty;
 
     return MainLayout(
@@ -147,6 +151,17 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  backgroundColor: isMaterialYou ? cs.primaryContainer : cs.primary,
+                  foregroundColor: isMaterialYou ? cs.onPrimaryContainer : cs.onPrimary,
+                  elevation: isMaterialYou ? 2 : 1,
+                  shadowColor: cs.shadow.withOpacity(0.3),
+                  side: isMaterialYou ? BorderSide(
+                    color: cs.outline.withOpacity(0.4), 
+                    width: 1,
+                  ) : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
