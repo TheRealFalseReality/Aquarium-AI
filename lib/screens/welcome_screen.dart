@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -12,6 +14,7 @@ import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
 import '../theme_provider.dart';
+import '../services/analytics_service.dart';
 
 class FeatureInfo {
   final String icon;
@@ -76,6 +79,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_promotionDialogShownKey, true);
+      
+      // Log app promotion dialog shown
+      AnalyticsService.logAppPromotion(
+        action: 'dialog_shown',
+        source: 'welcome_screen_auto',
+      );
       
       if (mounted) {
         showDialog(
@@ -221,6 +230,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 title: feature.title,
                                 description: feature.description,
                                 onTap: () {
+                                  // Log feature usage
+                                  AnalyticsService.logFeatureUsed(
+                                    featureName: feature.title.toLowerCase().replaceAll(' ', '_'),
+                                    parameters: {
+                                      'source': 'welcome_screen',
+                                      'route': feature.routeName,
+                                    },
+                                  );
+                                  
                                   if (feature.url != null) {
                                     _launchURL(feature.url!);
                                   } else if (feature.openPhotoAnalyzer) {

@@ -11,6 +11,7 @@ import '../providers/tank_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ad_component.dart';
+import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
   final Tank? existingTank; // For editing existing tanks
@@ -204,8 +205,31 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
 
         if (widget.existingTank != null) {
           await ref.read(tankProvider.notifier).updateTank(tank);
+          
+          // Log tank update analytics
+          AnalyticsService.logTankAction(
+            action: 'update_tank',
+            tankType: tank.type,
+            tankSize: tank.sizeGallons?.toInt(),
+          );
         } else {
           await ref.read(tankProvider.notifier).addTank(tank);
+          
+          // Log tank creation analytics
+          AnalyticsService.logTankAction(
+            action: 'create_tank',
+            tankType: tank.type,
+            tankSize: tank.sizeGallons?.toInt(),
+          );
+          AnalyticsService.logFeatureUsed(
+            featureName: 'tank_creation',
+            parameters: {
+              'tank_type': tank.type,
+              'inhabitant_count': tank.inhabitants.length,
+              'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
+              'has_size': (tank.sizeGallons != null || tank.sizeLiters != null) ? 'true' : 'false',
+            },
+          );
         }
 
         if (mounted) {

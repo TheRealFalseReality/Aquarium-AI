@@ -21,6 +21,7 @@ import './screens/tank_management_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import './services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,14 +29,43 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Initialize Analytics session tracking (non-blocking)
+  // Don't await this to prevent blocking app startup
+  AnalyticsService.logSessionStart().catchError((error) {
+    if (kDebugMode) {
+      print('Analytics session start error: $error');
+    }
+  });
+
+  // Set initial screen
+  AnalyticsService.setCurrentScreen('welcome_screen');
+
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // Also log to Analytics (non-blocking)
+    AnalyticsService.logError(
+      errorType: 'flutter_fatal_error',
+      errorMessage: errorDetails.exception.toString(),
+    ).catchError((error) {
+      if (kDebugMode) {
+        print('Analytics error logging failed: $error');
+      }
+    });
   };
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    // Also log to Analytics (non-blocking)
+    AnalyticsService.logError(
+      errorType: 'platform_error',
+      errorMessage: error.toString(),
+    ).catchError((analyticsError) {
+      if (kDebugMode) {
+        print('Analytics error logging failed: $analyticsError');
+      }
+    });
     return true;
   };
 
@@ -69,6 +99,18 @@ void main() async {
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
+
+  // Helper method to safely get navigator observers
+  List<NavigatorObserver> _getNavigatorObservers() {
+    try {
+      return [AnalyticsService.observer];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to initialize analytics observer: $e');
+      }
+      return []; // Return empty list if analytics observer fails
+    }
+  }
 
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF005f73),
@@ -248,25 +290,33 @@ class MyApp extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
+          navigatorObservers: _getNavigatorObservers(),
           // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             Widget page;
+            String screenName;
+            
             switch (settings.name) {
               case '/':
                 page = const WelcomeScreen();
+                screenName = 'welcome_screen';
                 break;
               case '/about':
                 page = const AboutScreen();
+                screenName = 'about_screen';
                 break;
               case '/tank-volume':
                 page = const TankVolumeCalculator();
+                screenName = 'tank_volume_calculator';
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();
+                screenName = 'calculators_screen';
                 break;
               case '/stocking':
                 page = const AquariumStockingScreen();
+                screenName = 'aquarium_stocking_screen';
                 break;
               case '/chatbot':
                 bool autoOpen = false;
@@ -274,22 +324,36 @@ class MyApp extends ConsumerWidget {
                   autoOpen = true;
                 }
                 page = ChatbotScreen(autoOpenPhotoAnalyzer: autoOpen);
+                screenName = 'chatbot_screen';
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
+                screenName = 'fish_compatibility_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();
+                screenName = 'photo_analysis_screen';
                 break;
               case '/settings':
                 page = const SettingsScreen();
+                screenName = 'settings_screen';
                 break;
               case '/tank-management':
                 page = const TankManagementScreen();
+                screenName = 'tank_management_screen';
                 break;
               default:
                 page = const WelcomeScreen();
+                screenName = 'welcome_screen';
             }
+            
+            // Log screen view (non-blocking)
+            AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
+              if (kDebugMode) {
+                print('Analytics screen view error: $error');
+              }
+            });
+            
             return FadeSlideRoute(page: page);
           },
         );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
+import '../services/analytics_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -87,6 +88,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
       return; // Stop the function
     }
+
+    // Log settings save
+    AnalyticsService.logFeatureUsed(
+      featureName: 'settings_save',
+      parameters: {
+        'provider': _selectedProvider.toString(),
+        'has_api_key': 'true', // We validated it exists above
+      },
+    );
 
     // If validation passes, proceed to save the settings.
     ref.read(modelProvider.notifier).setModels(
@@ -183,8 +193,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                     selected: {_selectedProvider},
                     onSelectionChanged: (newSelection) {
+                      final oldProvider = _selectedProvider;
+                      final newProvider = newSelection.first;
+                      
+                      // Log settings change
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'ai_provider',
+                        newValue: newProvider.toString(),
+                        oldValue: oldProvider.toString(),
+                      );
+                      
                       setState(() {
-                        _selectedProvider = newSelection.first;
+                        _selectedProvider = newProvider;
                       });
                     },
                   ),

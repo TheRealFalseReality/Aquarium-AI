@@ -11,6 +11,7 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
+import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 
@@ -1090,6 +1091,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
+              
+              // Log tank deletion
+              AnalyticsService.logTankAction(
+                action: 'delete_tank',
+                tankType: tank.type,
+                tankSize: tank.sizeGallons?.toInt() ?? 0,
+              );
+              
               await ref.read(tankProvider.notifier).deleteTank(tank.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1444,6 +1453,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ),
       ),
+    );
+
+    // Log tank stocking recommendations request
+    AnalyticsService.logFeatureUsed(
+      featureName: 'tank_stocking_recommendations',
+      parameters: {
+        'tank_type': tank.type,
+        'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
+        'existing_inhabitants_count': tank.inhabitants.length,
+        'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
+        'source': 'tank_management',
+      },
+    );
+    AnalyticsService.logTankAction(
+      action: 'get_stocking_recommendations',
+      tankType: tank.type,
+      tankSize: tank.sizeGallons?.toInt(),
     );
 
     // Get recommendations for this tank

@@ -8,8 +8,8 @@ import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
-import '../theme_provider.dart';
 import 'compatibility_report.dart';
+import '../services/analytics_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -177,9 +177,6 @@ class FishCompatibilityScreenState
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
-    final cs = Theme.of(context).colorScheme;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -486,8 +483,6 @@ class FishCompatibilityScreenState
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
     final cs = Theme.of(context).colorScheme;
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
@@ -557,7 +552,19 @@ class FishCompatibilityScreenState
                 child: ElevatedButton.icon(
                   onPressed: provider.isLoading
                       ? null
-                      : () => notifier.getCompatibilityReport(_selectedCategory),
+                      : () {
+                          // Log fish compatibility report generation analytics
+                          AnalyticsService.logFeatureUsed(
+                            featureName: 'fish_compatibility_report',
+                            parameters: {
+                              'selected_category': _selectedCategory,
+                              'selected_fish_count': provider.selectedFish.length,
+                              'has_fish_selected': provider.selectedFish.isNotEmpty ? 'true' : 'false',
+                            },
+                          );
+                          
+                          notifier.getCompatibilityReport(_selectedCategory);
+                        },
                   icon: provider.isLoading
                       ? const SizedBox(
                           width: 18,
