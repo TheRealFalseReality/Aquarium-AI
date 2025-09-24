@@ -9,6 +9,7 @@ import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
 import 'compatibility_report.dart';
+import '../services/analytics_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -551,7 +552,19 @@ class FishCompatibilityScreenState
                 child: ElevatedButton.icon(
                   onPressed: provider.isLoading
                       ? null
-                      : () => notifier.getCompatibilityReport(_selectedCategory),
+                      : () {
+                          // Log fish compatibility report generation analytics
+                          AnalyticsService.logFeatureUsed(
+                            featureName: 'fish_compatibility_report',
+                            parameters: {
+                              'selected_category': _selectedCategory,
+                              'selected_fish_count': selectedFish.length,
+                              'has_fish_selected': selectedFish.isNotEmpty ? 'true' : 'false',
+                            },
+                          );
+                          
+                          notifier.getCompatibilityReport(_selectedCategory);
+                        },
                   icon: provider.isLoading
                       ? const SizedBox(
                           width: 18,
