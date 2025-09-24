@@ -8,6 +8,7 @@ import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
+import '../theme_provider.dart';
 import 'compatibility_report.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
@@ -176,6 +177,9 @@ class FishCompatibilityScreenState
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
+    final cs = Theme.of(context).colorScheme;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -541,6 +545,17 @@ class FishCompatibilityScreenState
                       horizontal: 20, vertical: 16),
                   textStyle: const TextStyle(
                       fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                  backgroundColor: isMaterialYou ? cs.primaryContainer : cs.primary,
+                  foregroundColor: isMaterialYou ? cs.onPrimaryContainer : cs.onPrimary,
+                  elevation: isMaterialYou ? 2 : 1,
+                  shadowColor: cs.shadow.withOpacity(0.3),
+                  side: isMaterialYou ? BorderSide(
+                    color: cs.outline.withOpacity(0.4), 
+                    width: 1,
+                  ) : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ],
