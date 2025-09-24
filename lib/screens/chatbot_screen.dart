@@ -525,10 +525,6 @@ Widget _suggestionMenu(BuildContext context) {
             colors: [Colors.blue.shade400, Colors.teal.shade300],
           ),
           onTap: () {
-            AnalyticsService.logFeatureUsed(
-              featureName: 'water_parameter_analysis',
-              parameters: {'source': 'chatbot_ai_tools'},
-            );
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -545,10 +541,6 @@ Widget _suggestionMenu(BuildContext context) {
             colors: [Colors.purple.shade400, Colors.indigo.shade300],
           ),
           onTap: () {
-            AnalyticsService.logFeatureUsed(
-              featureName: 'automation_script',
-              parameters: {'source': 'chatbot_ai_tools'},
-            );
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -566,10 +558,6 @@ Widget _suggestionMenu(BuildContext context) {
           ),
           onTap: () {
             // Already in chatbot; just open analyzer
-            AnalyticsService.logFeatureUsed(
-              featureName: 'photo_analysis',
-              parameters: {'source': 'chatbot_ai_tools'},
-            );
             Navigator.push(
               context,
               MaterialPageRoute(

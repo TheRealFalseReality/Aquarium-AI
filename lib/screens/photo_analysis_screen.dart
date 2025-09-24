@@ -29,10 +29,6 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       analysisType: 'image_picker',
       success: null,
     );
-    AnalyticsService.logFeatureUsed(
-      featureName: 'photo_picker',
-      parameters: {'source': source.toString()},
-    );
     
     try {
       final x = await _picker.pickImage(
@@ -73,6 +69,13 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     AnalyticsService.logPhotoAnalysis(
       analysisType: 'photo_analysis_submit',
       success: null,
+    );
+    AnalyticsService.logFeatureUsed(
+      featureName: 'photo_analysis',
+      parameters: {
+        'has_note': _noteController.text.isNotEmpty ? 'true' : 'false',
+        'note_length': _noteController.text.length,
+      },
     );
     AnalyticsService.logAIInteraction(
       interactionType: 'photo_analysis',
