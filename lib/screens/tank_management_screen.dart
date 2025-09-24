@@ -334,27 +334,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Your Aquarium Collection',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'You have $tankCount tank${tankCount == 1 ? '' : 's'} in your collection',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
           
           // Header with 3-dot menu
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Tanks (${tanks.length})',
+                  'My Tanks ($tankCount)',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
