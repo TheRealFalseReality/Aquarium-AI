@@ -182,17 +182,23 @@ class AnalyticsService {
       print('Analytics: User engagement - $engagementType');
     }
     
-    final parameters = <String, Object>{
-      'engagement_type': engagementType,
-    };
-    
-    if (content != null) parameters['content'] = content;
-    if (duration != null) parameters['duration_seconds'] = duration;
-    
-    await _analytics.logEvent(
-      name: 'user_engagement',
-      parameters: parameters,
-    );
+    await _safeAnalyticsCall(() async {
+      final parameters = <String, Object>{
+        'engagement_type': engagementType,
+      };
+      
+      // Truncate content if too long to prevent Firebase parameter issues
+      if (content != null) {
+        final truncatedContent = content.length > 100 ? content.substring(0, 100) : content;
+        parameters['content'] = truncatedContent;
+      }
+      if (duration != null) parameters['duration_seconds'] = duration;
+      
+      await _analytics.logEvent(
+        name: 'user_engagement',
+        parameters: parameters,
+      );
+    }, 'logUserEngagement');
   }
 
   // Settings changes
