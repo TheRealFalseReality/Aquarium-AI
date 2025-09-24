@@ -256,7 +256,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             'Tank Volume Calculator',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -512,7 +512,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
             ),
         textAlign: TextAlign.center,
       ),
