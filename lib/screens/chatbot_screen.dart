@@ -504,6 +504,20 @@ Widget _suggestionMenu(BuildContext context) {
           label: q,
           dense: true,
           onTap: () {
+            // Log suggested question usage
+            AnalyticsService.logFeatureUsed(
+              featureName: 'suggested_question',
+              parameters: {
+                'question': q,
+                'question_length': q.length,
+                'menu_type': _expandedMenu ?? 'unknown',
+              },
+            );
+            AnalyticsService.logUserEngagement(
+              engagementType: 'suggested_question_click',
+              content: q,
+            );
+            
             chatNotifier.sendMessage(q);
             setState(() => _expandedMenu = null);
           },
@@ -934,6 +948,19 @@ class MessageBubble extends ConsumerWidget {
                     label: q,
                     dense: true,
                     onTap: () {
+                      // Log follow-up question usage
+                      AnalyticsService.logFeatureUsed(
+                        featureName: 'followup_question',
+                        parameters: {
+                          'question': q,
+                          'question_length': q.length,
+                        },
+                      );
+                      AnalyticsService.logUserEngagement(
+                        engagementType: 'followup_question_click',
+                        content: q,
+                      );
+                      
                       ref.read(chatProvider.notifier).sendMessage(q);
                     },
                   );
