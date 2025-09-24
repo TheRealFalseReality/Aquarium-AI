@@ -152,7 +152,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
                   ? _buildEmptyState(context, ref)
-                  : _buildTankList(context, ref, tankState.tanks),
+                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks),
     );
   }
 
@@ -276,6 +276,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+    return Stack(
+      children: [
+        _buildTankList(context, ref, tanks),
+        if (_isSortMenuExpanded) 
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isSortMenuExpanded = false;
+              });
+            },
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        if (_isSortMenuExpanded) _buildFloatingSortMenu(context),
+      ],
     );
   }
 
@@ -411,71 +433,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ],
           ),
           
-          // Expandable sort options
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: _isSortMenuExpanded ? null : 0,
-            child: _isSortMenuExpanded
-                ? Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Sort Options',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: TankSortOption.values.map((option) {
-                            final isSelected = _currentSortOption == option;
-                            return ActionChip(
-                              avatar: Icon(
-                                _getSortOptionIcon(option),
-                                size: 16,
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                              label: Text(_getSortOptionLabel(option)),
-                              backgroundColor: isSelected 
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.surface,
-                              labelStyle: TextStyle(
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _currentSortOption = option;
-                                  _isSortMenuExpanded = false;
-                                });
-                                _saveSortPreference(option);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          
           const SizedBox(height: 8),
         ],
       ),
@@ -506,6 +463,108 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       case TankSortOption.date:
         return Icons.schedule;
     }
+  }
+
+  Widget _buildFloatingSortMenu(BuildContext context) {
+    return Positioned(
+      top: 100, // Position below the header
+      left: 16,
+      right: 16,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: _isSortMenuExpanded ? 1.0 : 0.0,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 200),
+          scale: _isSortMenuExpanded ? 1.0 : 0.8,
+          child: Container(
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Sort Options',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _isSortMenuExpanded = false;
+                        });
+                      },
+                      icon: const Icon(Icons.close),
+                      iconSize: 20,
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: TankSortOption.values.map((option) {
+                    final isSelected = _currentSortOption == option;
+                    return ActionChip(
+                      avatar: Icon(
+                        _getSortOptionIcon(option),
+                        size: 16,
+                        color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      label: Text(_getSortOptionLabel(option)),
+                      backgroundColor: isSelected 
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceVariant,
+                      labelStyle: TextStyle(
+                        color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _currentSortOption = option;
+                          _isSortMenuExpanded = false;
+                        });
+                        _saveSortPreference(option);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
