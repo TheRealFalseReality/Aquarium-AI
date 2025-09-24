@@ -123,10 +123,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${next.error}'),
-            action: SnackBarAction(
-              label: 'Dismiss',
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            ),
+            action: next.error!.toLowerCase().contains('api key not set')
+                ? SnackBarAction(
+                    label: 'Settings',
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  )
+                : SnackBarAction(
+                    label: 'Dismiss',
+                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                  ),
           ),
         );
       }

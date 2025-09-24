@@ -200,24 +200,35 @@ class FishCompatibilityScreenState
       if (next.error != null && previous?.error != next.error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
+            // Check if the error is related to API key not being set
+            final isApiKeyError = next.error!.toLowerCase().contains('api key not set');
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(next.error!),
                 duration: const Duration(seconds: 6),
-                action: next.isRetryable
+                action: isApiKeyError
                     ? SnackBarAction(
-                        label: 'Retry',
+                        label: 'Settings',
                         onPressed: () {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          notifier.retryCompatibilityReport();
+                          Navigator.pushNamed(context, '/settings');
                         },
                       )
-                    : SnackBarAction(
-                        label: 'Dismiss',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        },
-                      ),
+                    : next.isRetryable
+                        ? SnackBarAction(
+                            label: 'Retry',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                              notifier.retryCompatibilityReport();
+                            },
+                          )
+                        : SnackBarAction(
+                            label: 'Dismiss',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            },
+                          ),
               ),
             );
             notifier.clearError();
