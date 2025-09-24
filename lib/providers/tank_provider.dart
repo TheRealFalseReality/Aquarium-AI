@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
+import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
   return TankNotifier();
@@ -161,12 +162,11 @@ class TankNotifier extends StateNotifier<TankState> {
       String? outputPath;
       
       if (kIsWeb) {
-        // On web, use downloadFile to trigger browser download
-        outputPath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Save Tank Backup',
-          fileName: fileName,
-          bytes: bytes,
-        );
+        // On web, trigger direct browser download
+        downloadFile(bytes, fileName);
+        
+        // For web, we return the filename since there's no file path
+        outputPath = fileName;
       } else {
         // On mobile/desktop, use saveFile with all parameters
         outputPath = await FilePicker.platform.saveFile(
