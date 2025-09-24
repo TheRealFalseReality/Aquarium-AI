@@ -177,7 +177,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         'shape': _shape,
         'units': _units,
         'cylinder_type': _cylinderType,
-        'has_dimensions': (length > 0 || width > 0 || height > 0 || diameter > 0 || edge > 0),
+        'has_dimensions': (length > 0 || width > 0 || height > 0 || diameter > 0 || edge > 0) ? 'true' : 'false',
       },
     );
 

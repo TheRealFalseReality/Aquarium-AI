@@ -78,7 +78,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       interactionType: 'photo_analysis',
       feature: 'photo_analyzer',
       additionalData: {
-        'has_note': _noteController.text.isNotEmpty,
+        'has_note': _noteController.text.isNotEmpty ? 'true' : 'false',
         'note_length': _noteController.text.length,
       },
     );

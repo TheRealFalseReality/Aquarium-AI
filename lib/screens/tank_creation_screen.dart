@@ -226,8 +226,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
             parameters: {
               'tank_type': tank.type,
               'inhabitant_count': tank.inhabitants.length,
-              'has_notes': tank.notes?.isNotEmpty ?? false,
-              'has_size': tank.sizeGallons != null || tank.sizeLiters != null,
+              'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
+              'has_size': (tank.sizeGallons != null || tank.sizeLiters != null) ? 'true' : 'false',
             },
           );
         }

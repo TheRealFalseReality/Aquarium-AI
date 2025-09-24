@@ -94,7 +94,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       featureName: 'settings_save',
       parameters: {
         'provider': _selectedProvider.toString(),
-        'has_api_key': true, // We validated it exists above
+        'has_api_key': 'true', // We validated it exists above
       },
     );
 

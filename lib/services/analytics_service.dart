@@ -232,13 +232,15 @@ class AnalyticsService {
       'analysis_type': analysisType,
     };
     
-    if (success != null) parameters['success'] = success;
+    if (success != null) parameters['success'] = success ? 'true' : 'false';
     if (errorType != null) parameters['error_type'] = errorType;
     
-    await _analytics.logEvent(
-      name: 'photo_analysis',
-      parameters: parameters,
-    );
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'photo_analysis',
+        parameters: parameters,
+      );
+    }, 'logPhotoAnalysis');
   }
 
   // Tank management

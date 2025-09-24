@@ -100,7 +100,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       feature: 'chatbot',
       additionalData: {
         'message_length': text.length,
-        'has_question_mark': text.contains('?'),
+        'has_question_mark': text.contains('?') ? 'true' : 'false',
       },
     );
     

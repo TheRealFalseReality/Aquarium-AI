@@ -47,7 +47,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
       featureName: 'stocking_report_regenerate',
       parameters: {
         'regeneration_type': widget.originalTank != null ? 'tank_based' : 'general',
-        'has_existing_fish': widget.existingFish?.isNotEmpty ?? false,
+        'has_existing_fish': (widget.existingFish?.isNotEmpty ?? false) ? 'true' : 'false',
       },
     );
     
