@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -158,14 +158,25 @@ class TankNotifier extends StateNotifier<TankState> {
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
       final fileName = 'aquarium_ai_backup_$timestamp.json';
 
-      // Let user choose save location with bytes for mobile compatibility
-      final outputPath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Tank Backup',
-        fileName: fileName,
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-        bytes: bytes, // Required for Android & iOS
-      );
+      String? outputPath;
+      
+      if (kIsWeb) {
+        // On web, use downloadFile to trigger browser download
+        outputPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Tank Backup',
+          fileName: fileName,
+          bytes: bytes,
+        );
+      } else {
+        // On mobile/desktop, use saveFile with all parameters
+        outputPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Tank Backup',
+          fileName: fileName,
+          type: FileType.custom,
+          allowedExtensions: ['json'],
+          bytes: bytes, // Required for Android & iOS
+        );
+      }
 
       if (outputPath != null) {
         state = state.copyWith(isLoading: false);
@@ -200,13 +211,26 @@ class TankNotifier extends StateNotifier<TankState> {
         return false;
       }
 
-      final filePath = result.files.single.path;
-      if (filePath == null) {
-        throw Exception('Could not access selected file');
+      final platformFile = result.files.single;
+      String jsonString;
+
+      if (kIsWeb) {
+        // On web, use bytes property
+        final bytes = platformFile.bytes;
+        if (bytes == null) {
+          throw Exception('Could not read file content on web platform');
+        }
+        jsonString = utf8.decode(bytes);
+      } else {
+        // On mobile/desktop, use path property
+        final filePath = platformFile.path;
+        if (filePath == null) {
+          throw Exception('Could not access selected file');
+        }
+        final file = File(filePath);
+        jsonString = await file.readAsString();
       }
 
-      final file = File(filePath);
-      final jsonString = await file.readAsString();
       final backupData = json.decode(jsonString) as Map<String, dynamic>;
 
       // Validate backup format
