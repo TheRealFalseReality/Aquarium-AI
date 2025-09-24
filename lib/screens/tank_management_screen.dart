@@ -1455,6 +1455,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
     );
 
+    // Log tank stocking recommendations request
+    AnalyticsService.logFeatureUsed(
+      featureName: 'tank_stocking_recommendations',
+      parameters: {
+        'tank_type': tank.type,
+        'tank_size_gallons': tank.sizeGallons?.toInt(),
+        'existing_inhabitants_count': tank.inhabitants.length,
+        'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
+        'source': 'tank_management',
+      },
+    );
+    AnalyticsService.logTankAction(
+      action: 'get_stocking_recommendations',
+      tankType: tank.type,
+      tankSize: tank.sizeGallons?.toInt(),
+    );
+
     // Get recommendations for this tank
     ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
   }
