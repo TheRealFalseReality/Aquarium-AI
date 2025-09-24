@@ -8,6 +8,7 @@ import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
+import '../theme_provider.dart';
 import 'compatibility_report.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
@@ -176,6 +177,9 @@ class FishCompatibilityScreenState
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
+    final cs = Theme.of(context).colorScheme;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -196,24 +200,35 @@ class FishCompatibilityScreenState
       if (next.error != null && previous?.error != next.error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
+            // Check if the error is related to API key not being set
+            final isApiKeyError = next.error!.toLowerCase().contains('api key not set');
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(next.error!),
                 duration: const Duration(seconds: 6),
-                action: next.isRetryable
+                action: isApiKeyError
                     ? SnackBarAction(
-                        label: 'Retry',
+                        label: 'Settings',
                         onPressed: () {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          notifier.retryCompatibilityReport();
+                          Navigator.pushNamed(context, '/settings');
                         },
                       )
-                    : SnackBarAction(
-                        label: 'Dismiss',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        },
-                      ),
+                    : next.isRetryable
+                        ? SnackBarAction(
+                            label: 'Retry',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                              notifier.retryCompatibilityReport();
+                            },
+                          )
+                        : SnackBarAction(
+                            label: 'Dismiss',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            },
+                          ),
               ),
             );
             notifier.clearError();
@@ -471,6 +486,8 @@ class FishCompatibilityScreenState
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
     final cs = Theme.of(context).colorScheme;
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
@@ -524,23 +541,43 @@ class FishCompatibilityScreenState
                 ),
               ),
               const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: provider.isLoading
-                    ? null
-                    : () => notifier.getCompatibilityReport(_selectedCategory),
-                icon: provider.isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : const Icon(Icons.analytics_outlined),
-                label: const Text('Get Report'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, letterSpacing: 0.3),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade400,
+                      Colors.blue.shade500,
+                      Colors.cyan.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => notifier.getCompatibilityReport(_selectedCategory),
+                  icon: provider.isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                        )
+                      : const Icon(Icons.analytics_outlined),
+                  label: const Text('Get Report'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
             ],

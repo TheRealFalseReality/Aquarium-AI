@@ -47,7 +47,7 @@ class _MiniAIChipState extends State<MiniAIChip> {
         LinearGradient(
           colors: isSelected
               ? [cs.primary, cs.secondary]
-              : [cs.surfaceVariant, cs.surface],
+              : [cs.primaryContainer, cs.secondaryContainer],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );

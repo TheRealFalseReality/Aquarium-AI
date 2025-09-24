@@ -204,6 +204,8 @@ class SalinityConverterState extends State<SalinityConverter> {
             return ModernSelectableChip(
               label: entry.value,
               selected: isSelected,
+              selectedColor: Theme.of(context).colorScheme.secondary,
+              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = entry.key),
             );
@@ -495,6 +497,8 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             return ModernSelectableChip(
               label: unitName,
               selected: isSelected,
+              selectedColor: Theme.of(context).colorScheme.secondary,
+              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = unitName),
             );
@@ -633,6 +637,8 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             return ModernSelectableChip(
               label: unitName,
               selected: isSelected,
+              selectedColor: Theme.of(context).colorScheme.secondary,
+              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = unitName),
             );

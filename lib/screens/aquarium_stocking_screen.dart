@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
+import '../theme_provider.dart';
 import 'stocking_report_screen.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
@@ -61,6 +62,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     });
 
     final state = ref.watch(aquariumStockingProvider);
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
+    final cs = Theme.of(context).colorScheme;
     final hasLastReport = state.lastRecommendations != null && state.lastRecommendations!.isNotEmpty;
 
     return MainLayout(
@@ -138,15 +142,35 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: state.isLoading ? null : _getRecommendations,
-                icon: state.isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3))
-                    : const Icon(Icons.auto_awesome),
-                label: const Text('Get Recommendations'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade400,
+                      Colors.blue.shade500,
+                      Colors.cyan.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: state.isLoading ? null : _getRecommendations,
+                  icon: state.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
+                      : const Icon(Icons.auto_awesome),
+                  label: const Text('Get Recommendations'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

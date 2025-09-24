@@ -123,10 +123,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${next.error}'),
-            action: SnackBarAction(
-              label: 'Dismiss',
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            ),
+            action: next.error!.toLowerCase().contains('api key not set')
+                ? SnackBarAction(
+                    label: 'Settings',
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  )
+                : SnackBarAction(
+                    label: 'Dismiss',
+                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                  ),
           ),
         );
       }
@@ -152,7 +160,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
                   ? _buildEmptyState(context, ref)
-                  : _buildTankList(context, ref, tankState.tanks),
+                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks),
     );
   }
 
@@ -279,6 +287,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
+  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+    return Stack(
+      children: [
+        _buildTankList(context, ref, tanks),
+        if (_isSortMenuExpanded) 
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isSortMenuExpanded = false;
+              });
+            },
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        if (_isSortMenuExpanded) _buildFloatingSortMenu(context),
+      ],
+    );
+  }
+
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks) {
     final sortedTanks = _sortTanks(tanks);
     return ListView.builder(
@@ -334,50 +364,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Your Aquarium Collection',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'You have $tankCount tank${tankCount == 1 ? '' : 's'} in your collection',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
           
-          // Action buttons row
+          // Header with 3-dot menu
           Row(
             children: [
-              // Backup/Restore section
               Expanded(
-                child: Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _exportTanks(context, ref),
-                      icon: const Icon(Icons.backup, size: 18),
-                      label: const Text('Backup'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () => _importTanks(context, ref),
-                      icon: const Icon(Icons.restore, size: 18),
-                      label: const Text('Restore'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'My Tanks ($tankCount)',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               
@@ -404,72 +400,45 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
-            ],
-          ),
-          
-          // Expandable sort options
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: _isSortMenuExpanded ? null : 0,
-            child: _isSortMenuExpanded
-                ? Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 8),
+              
+              // 3-dot menu for backup/restore
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'backup':
+                      _exportTanks(context, ref);
+                      break;
+                    case 'restore':
+                      _importTanks(context, ref);
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'backup',
+                    child: Row(
                       children: [
-                        Text(
-                          'Sort Options',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: TankSortOption.values.map((option) {
-                            final isSelected = _currentSortOption == option;
-                            return ActionChip(
-                              avatar: Icon(
-                                _getSortOptionIcon(option),
-                                size: 16,
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                              label: Text(_getSortOptionLabel(option)),
-                              backgroundColor: isSelected 
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.surface,
-                              labelStyle: TextStyle(
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _currentSortOption = option;
-                                  _isSortMenuExpanded = false;
-                                });
-                                _saveSortPreference(option);
-                              },
-                            );
-                          }).toList(),
-                        ),
+                        Icon(Icons.backup, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Backup Tanks'),
                       ],
                     ),
-                  )
-                : const SizedBox.shrink(),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'restore',
+                    child: Row(
+                      children: [
+                        Icon(Icons.restore, color: Colors.green),
+                        SizedBox(width: 8),
+                        Text('Restore Tanks'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           
           const SizedBox(height: 8),
@@ -502,6 +471,108 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       case TankSortOption.date:
         return Icons.schedule;
     }
+  }
+
+  Widget _buildFloatingSortMenu(BuildContext context) {
+    return Positioned(
+      top: 100, // Position below the header
+      left: 16,
+      right: 16,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: _isSortMenuExpanded ? 1.0 : 0.0,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 200),
+          scale: _isSortMenuExpanded ? 1.0 : 0.8,
+          child: Container(
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Sort Options',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _isSortMenuExpanded = false;
+                        });
+                      },
+                      icon: const Icon(Icons.close),
+                      iconSize: 20,
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: TankSortOption.values.map((option) {
+                    final isSelected = _currentSortOption == option;
+                    return ActionChip(
+                      avatar: Icon(
+                        _getSortOptionIcon(option),
+                        size: 16,
+                        color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      label: Text(_getSortOptionLabel(option)),
+                      backgroundColor: isSelected 
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceVariant,
+                      labelStyle: TextStyle(
+                        color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _currentSortOption = option;
+                          _isSortMenuExpanded = false;
+                        });
+                        _saveSortPreference(option);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
@@ -719,20 +790,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               
               // Stocking recommendations button
               if (tank.inhabitants.isNotEmpty) ...[
-                ElevatedButton.icon(
-                  onPressed: () => _getTankStockingRecommendations(context, ref, tank),
-                  icon: Icon(
-                    Icons.auto_awesome,
-                    size: 16,
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.purple.shade400,
+                        Colors.blue.shade500,
+                        Colors.cyan.shade400,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  label: const Text('Get Stocking Ideas'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                  child: ElevatedButton.icon(
+                    onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                    icon: Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                    ),
+                    label: const Text('Get Stocking Ideas'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                 ),

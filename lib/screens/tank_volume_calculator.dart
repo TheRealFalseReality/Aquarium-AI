@@ -256,7 +256,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             'Tank Volume Calculator',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -271,8 +271,6 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                 label: shapeName,
                 icon: shapeIcons[shapeName],
                 selected: selected,
-                selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
                 onTap: () {
                   setState(() {
                     _shape = shapeName;
@@ -297,8 +295,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                   label: typeName,
                   selected: selected,
                   dense: true,
-                  selectedColor: Theme.of(context).colorScheme.secondaryContainer,
-                  selectedTextColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                  selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                  selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
                   onTap: () {
                     setState(() {
                       _cylinderType = typeName;
@@ -320,8 +318,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                 label: unitName,
                 selected: selected,
                 dense: true,
-                selectedColor: Theme.of(context).colorScheme.tertiaryContainer,
-                selectedTextColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                selectedColor: Theme.of(context).colorScheme.secondary,
+                selectedTextColor: Theme.of(context).colorScheme.onSecondary,
                 onTap: () {
                   setState(() {
                     _units = unitName;
@@ -514,7 +512,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
             ),
         textAlign: TextAlign.center,
       ),

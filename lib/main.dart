@@ -135,8 +135,8 @@ class MyApp extends ConsumerWidget {
           scaffoldBackgroundColor: lightColorScheme.background,
           colorScheme: lightColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: const Color(0xFF343a40),
-            displayColor: const Color(0xFF212529),
+            bodyColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF343a40),
+            displayColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF212529),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -147,27 +147,42 @@ class MyApp extends ConsumerWidget {
               color: lightColorScheme.outlineVariant.withOpacity(0.25),
             ),
           ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: lightColorScheme.primary,
+              foregroundColor: lightColorScheme.onPrimary,
+              elevation: themeProvider.useMaterialYou ? 3 : 1,
+              shadowColor: lightColorScheme.shadow.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: themeProvider.useMaterialYou 
+                  ? BorderSide(color: lightColorScheme.outline.withOpacity(0.3), width: 1)
+                  : BorderSide.none,
+              ),
+            ),
+          ),
           appBarTheme: AppBarTheme(
             backgroundColor: lightColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: const Border(
+            shape: Border(
               bottom: BorderSide(
-                color: Color(0xFFdee2e6),
+                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant : const Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
           ),
           cardTheme: CardThemeData(
-            elevation: 1,
+            elevation: themeProvider.useMaterialYou ? 2 : 1,
+            shadowColor: lightColorScheme.shadow.withOpacity(0.2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(
-                color: Color(0xFFdee2e6),
+              side: BorderSide(
+                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
-            color: Colors.white,
+            color: themeProvider.useMaterialYou ? lightColorScheme.surfaceVariant : Colors.white,
           ),
         );
 
@@ -176,8 +191,8 @@ class MyApp extends ConsumerWidget {
           scaffoldBackgroundColor: darkColorScheme.background,
           colorScheme: darkColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: const Color(0xFFf8f9fa),
-            displayColor: const Color(0xFFe9ecef),
+            bodyColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFf8f9fa),
+            displayColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFe9ecef),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -188,27 +203,42 @@ class MyApp extends ConsumerWidget {
               color: darkColorScheme.outlineVariant.withOpacity(0.3),
             ),
           ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: darkColorScheme.primary,
+              foregroundColor: darkColorScheme.onPrimary,
+              elevation: themeProvider.useMaterialYou ? 3 : 1,
+              shadowColor: darkColorScheme.shadow.withOpacity(0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: themeProvider.useMaterialYou 
+                  ? BorderSide(color: darkColorScheme.outline.withOpacity(0.3), width: 1)
+                  : BorderSide.none,
+              ),
+            ),
+          ),
           appBarTheme: AppBarTheme(
             backgroundColor: darkColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: const Border(
+            shape: Border(
               bottom: BorderSide(
-                color: Color(0xFF495057),
+                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant : const Color(0xFF495057),
                 width: 1,
               ),
             ),
           ),
           cardTheme: CardThemeData(
-            elevation: 1,
+            elevation: themeProvider.useMaterialYou ? 2 : 1,
+            shadowColor: darkColorScheme.shadow.withOpacity(0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(
-                color: Color(0xFF495057),
+              side: BorderSide(
+                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFF495057),
                 width: 1,
               ),
             ),
-            color: const Color(0xFF4A5568),
+            color: themeProvider.useMaterialYou ? darkColorScheme.surfaceVariant : const Color(0xFF4A5568),
           ),
         );
 
