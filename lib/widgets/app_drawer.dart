@@ -37,10 +37,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
     void navigate(String routeName) {
       // Log navigation analytics
-      final currentRoute = ModalRoute.of(context)?.settings.name ?? 'unknown';
+      final currentRoute = AnalyticsService.currentScreen;
+      final targetScreen = AnalyticsService.routeToScreenName(routeName);
       AnalyticsService.logNavigation(
         from: currentRoute,
-        to: routeName,
+        to: targetScreen,
         method: 'drawer_menu',
       );
       

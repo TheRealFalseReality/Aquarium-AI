@@ -38,6 +38,9 @@ void main() async {
     }
   });
 
+  // Set initial screen
+  AnalyticsService.setCurrentScreen('welcome_screen');
+
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);

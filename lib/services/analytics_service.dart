@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 class AnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver? _observer;
+  static String _currentScreen = 'unknown';
 
   static FirebaseAnalyticsObserver get observer {
     try {
@@ -16,6 +17,42 @@ class AnalyticsService {
       // Return a fallback observer or null
       _observer ??= FirebaseAnalyticsObserver(analytics: _analytics);
       return _observer!;
+    }
+  }
+
+  // Get current screen name
+  static String get currentScreen => _currentScreen;
+
+  // Set current screen name
+  static void setCurrentScreen(String screenName) {
+    _currentScreen = screenName;
+  }
+
+  // Convert route names to screen names
+  static String routeToScreenName(String routeName) {
+    switch (routeName) {
+      case '/':
+        return 'welcome_screen';
+      case '/about':
+        return 'about_screen';
+      case '/tank-volume':
+        return 'tank_volume_calculator';
+      case '/calculators':
+        return 'calculators_screen';
+      case '/stocking':
+        return 'aquarium_stocking_screen';
+      case '/chatbot':
+        return 'chatbot_screen';
+      case '/compat-ai':
+        return 'fish_compatibility_screen';
+      case '/photo-analyzer':
+        return 'photo_analysis_screen';
+      case '/settings':
+        return 'settings_screen';
+      case '/tank-management':
+        return 'tank_management_screen';
+      default:
+        return routeName.replaceAll('/', '').replaceAll('-', '_') + '_screen';
     }
   }
 
@@ -39,6 +76,9 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Screen view - $screenName');
     }
+    
+    // Update current screen tracker
+    setCurrentScreen(screenName);
     
     await _safeAnalyticsCall(() async {
       await _analytics.logScreenView(
