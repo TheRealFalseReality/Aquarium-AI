@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
+import '../services/analytics_service.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
@@ -80,10 +81,24 @@ class TankNotifier extends StateNotifier<TankState> {
       final updatedTanks = [...state.tanks, tank];
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
+      
+      // Log tank creation
+      AnalyticsService.logTankAction(
+        action: 'tank_created',
+        tankType: tank.type,
+        tankSize: tank.sizeGallons?.round(),
+      );
+      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to add tank: $e',
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'tank_creation_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
       );
     }
   }
@@ -112,13 +127,28 @@ class TankNotifier extends StateNotifier<TankState> {
     state = state.copyWith(isLoading: true, clearError: true);
     
     try {
+      final tankToDelete = state.tanks.firstWhere((tank) => tank.id == tankId);
       final updatedTanks = state.tanks.where((tank) => tank.id != tankId).toList();
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
+      
+      // Log tank deletion
+      AnalyticsService.logTankAction(
+        action: 'tank_deleted',
+        tankType: tankToDelete.type,
+        tankSize: tankToDelete.sizeGallons?.round(),
+      );
+      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to delete tank: $e',
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'tank_deletion_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
       );
     }
   }
@@ -139,6 +169,12 @@ class TankNotifier extends StateNotifier<TankState> {
   Future<String?> exportTanksToFile() async {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
+
+      // Log backup attempt
+      AnalyticsService.logTankAction(
+        action: 'backup_start',
+        tankSize: state.tanks.length,
+      );
 
       // Create backup data with metadata
       final backupData = {
@@ -180,10 +216,34 @@ class TankNotifier extends StateNotifier<TankState> {
 
       if (outputPath != null) {
         state = state.copyWith(isLoading: false);
+        
+        // Log successful backup
+        AnalyticsService.logTankAction(
+          action: 'backup_success',
+          tankSize: state.tanks.length,
+        );
+        
+        // Log feature usage
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_backup',
+          parameters: {
+            'platform': kIsWeb ? 'web' : 'mobile',
+            'tank_count': state.tanks.length,
+            'file_size_kb': (bytes.length / 1024).round(),
+          },
+        );
+        
         return outputPath;
       } else {
         // User cancelled
         state = state.copyWith(isLoading: false);
+        
+        // Log backup cancellation
+        AnalyticsService.logTankAction(
+          action: 'backup_cancelled',
+          tankSize: state.tanks.length,
+        );
+        
         return null;
       }
     } catch (e) {
@@ -191,6 +251,19 @@ class TankNotifier extends StateNotifier<TankState> {
         isLoading: false,
         error: 'Failed to export tanks: $e',
       );
+      
+      // Log backup failure
+      AnalyticsService.logTankAction(
+        action: 'backup_failed',
+        tankSize: state.tanks.length,
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'backup_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      
       return null;
     }
   }
@@ -200,6 +273,12 @@ class TankNotifier extends StateNotifier<TankState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
+      // Log restore attempt
+      AnalyticsService.logTankAction(
+        action: 'restore_start',
+        tankSize: state.tanks.length, // Current tank count before restore
+      );
+
       // Pick a file - use FileType.any for better compatibility
       final result = await FilePicker.platform.pickFiles(
         type: FileType.any,
@@ -208,6 +287,13 @@ class TankNotifier extends StateNotifier<TankState> {
 
       if (result == null || result.files.isEmpty) {
         state = state.copyWith(isLoading: false);
+        
+        // Log restore cancellation
+        AnalyticsService.logTankAction(
+          action: 'restore_cancelled',
+          tankSize: state.tanks.length,
+        );
+        
         return false;
       }
 
@@ -242,9 +328,29 @@ class TankNotifier extends StateNotifier<TankState> {
       final tanksList = backupData['tanks'] as List;
       final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
 
+      final previousTankCount = state.tanks.length;
+      
       // For now, replace all tanks (we could add merge options later)
       state = state.copyWith(tanks: importedTanks, isLoading: false);
       await _saveTanks();
+
+      // Log successful restore
+      AnalyticsService.logTankAction(
+        action: 'restore_success',
+        tankSize: importedTanks.length,
+      );
+      
+      // Log feature usage with detailed metrics
+      AnalyticsService.logFeatureUsed(
+        featureName: 'tank_restore',
+        parameters: {
+          'platform': kIsWeb ? 'web' : 'mobile',
+          'previous_tank_count': previousTankCount,
+          'restored_tank_count': importedTanks.length,
+          'backup_version': backupData['version'] ?? 'unknown',
+          'file_size_kb': (jsonString.length / 1024).round(),
+        },
+      );
 
       return true;
     } catch (e) {
@@ -252,6 +358,19 @@ class TankNotifier extends StateNotifier<TankState> {
         isLoading: false,
         error: 'Failed to import tanks: $e',
       );
+      
+      // Log restore failure
+      AnalyticsService.logTankAction(
+        action: 'restore_failed',
+        tankSize: state.tanks.length,
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'restore_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      
       return false;
     }
   }
