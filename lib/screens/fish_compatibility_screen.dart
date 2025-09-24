@@ -558,8 +558,8 @@ class FishCompatibilityScreenState
                             featureName: 'fish_compatibility_report',
                             parameters: {
                               'selected_category': _selectedCategory,
-                              'selected_fish_count': selectedFish.length,
-                              'has_fish_selected': selectedFish.isNotEmpty ? 'true' : 'false',
+                              'selected_fish_count': provider.selectedFish.length,
+                              'has_fish_selected': provider.selectedFish.isNotEmpty ? 'true' : 'false',
                             },
                           );
                           
