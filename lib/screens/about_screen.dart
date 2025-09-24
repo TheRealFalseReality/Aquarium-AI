@@ -106,11 +106,10 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                                     'https://www.capitalcityaquatics.com/'),
                                 child: Text(
                                   'Capital City Aquatics',
-                                  style: GoogleFonts.playfairDisplay(
+                                  style: GoogleFonts.karla(
                                     color: Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                    fontSize: 16,
+                                    fontSize: 26,
                                   ),
                                 ),
                               ),
