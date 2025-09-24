@@ -89,6 +89,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return; // Stop the function
     }
 
+    // Log settings save
+    AnalyticsService.logFeatureUsed(
+      featureName: 'settings_save',
+      parameters: {
+        'provider': _selectedProvider.toString(),
+        'has_api_key': true, // We validated it exists above
+      },
+    );
+
     // If validation passes, proceed to save the settings.
     ref.read(modelProvider.notifier).setModels(
           newGeminiModel: _geminiModelController.text,

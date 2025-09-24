@@ -78,6 +78,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_promotionDialogShownKey, true);
       
+      // Log app promotion dialog shown
+      AnalyticsService.logAppPromotion(
+        action: 'dialog_shown',
+        source: 'welcome_screen_auto',
+      );
+      
       if (mounted) {
         showDialog(
           context: context,

@@ -11,6 +11,7 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/ad_component.dart';
+import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 
@@ -1090,6 +1091,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
+              
+              // Log tank deletion
+              AnalyticsService.logTankAction(
+                action: 'delete_tank',
+                tankType: tank.type,
+                tankSize: tank.sizeGallons.toInt(),
+              );
+              
               await ref.read(tankProvider.notifier).deleteTank(tank.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
