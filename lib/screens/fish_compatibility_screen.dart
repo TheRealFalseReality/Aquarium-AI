@@ -530,33 +530,42 @@ class FishCompatibilityScreenState
                 ),
               ),
               const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: provider.isLoading
-                    ? null
-                    : () => notifier.getCompatibilityReport(_selectedCategory),
-                icon: provider.isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : const Icon(Icons.analytics_outlined),
-                label: const Text('Get Report'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, letterSpacing: 0.3),
-                  backgroundColor: isMaterialYou ? cs.primaryContainer : cs.primary,
-                  foregroundColor: isMaterialYou ? cs.onPrimaryContainer : cs.onPrimary,
-                  elevation: isMaterialYou ? 2 : 1,
-                  shadowColor: cs.shadow.withOpacity(0.3),
-                  side: isMaterialYou ? BorderSide(
-                    color: cs.outline.withOpacity(0.4), 
-                    width: 1,
-                  ) : null,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade400,
+                      Colors.blue.shade500,
+                      Colors.cyan.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => notifier.getCompatibilityReport(_selectedCategory),
+                  icon: provider.isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                        )
+                      : const Icon(Icons.analytics_outlined),
+                  label: const Text('Get Report'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),

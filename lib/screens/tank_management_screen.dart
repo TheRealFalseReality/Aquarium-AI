@@ -349,35 +349,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
           const SizedBox(height: 16),
           
-          // Action buttons row
+          // Header with 3-dot menu
           Row(
             children: [
-              // Backup/Restore section
               Expanded(
-                child: Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _exportTanks(context, ref),
-                      icon: const Icon(Icons.backup, size: 18),
-                      label: const Text('Backup'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () => _importTanks(context, ref),
-                      icon: const Icon(Icons.restore, size: 18),
-                      label: const Text('Restore'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Tanks (${tanks.length})',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               
@@ -403,6 +383,44 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
+              ),
+              const SizedBox(width: 8),
+              
+              // 3-dot menu for backup/restore
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'backup':
+                      _exportTanks(context, ref);
+                      break;
+                    case 'restore':
+                      _importTanks(context, ref);
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'backup',
+                    child: Row(
+                      children: [
+                        Icon(Icons.backup, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Backup Tanks'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'restore',
+                    child: Row(
+                      children: [
+                        Icon(Icons.restore, color: Colors.green),
+                        SizedBox(width: 8),
+                        Text('Restore Tanks'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -719,20 +737,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               
               // Stocking recommendations button
               if (tank.inhabitants.isNotEmpty) ...[
-                ElevatedButton.icon(
-                  onPressed: () => _getTankStockingRecommendations(context, ref, tank),
-                  icon: Icon(
-                    Icons.auto_awesome,
-                    size: 16,
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.purple.shade400,
+                        Colors.blue.shade500,
+                        Colors.cyan.shade400,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  label: const Text('Get Stocking Ideas'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                  child: ElevatedButton.icon(
+                    onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                    icon: Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                    ),
+                    label: const Text('Get Stocking Ideas'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                 ),
