@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../services/analytics_service.dart';
 
 class AppPromotionDialog extends StatelessWidget {
   const AppPromotionDialog({super.key});
@@ -7,6 +8,13 @@ class AppPromotionDialog extends StatelessWidget {
   Future<void> _launchPlayStore() async {
     const url = 'https://play.google.com/store/apps/details?id=com.cca.fishai';
     final Uri uri = Uri.parse(url);
+    
+    // Log app promotion click
+    AnalyticsService.logAppPromotion(
+      action: 'play_store_click',
+      source: 'promotion_dialog',
+    );
+    
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
@@ -93,7 +101,14 @@ class AppPromotionDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Log dismissal
+            AnalyticsService.logAppPromotion(
+              action: 'dialog_dismissed',
+              source: 'promotion_dialog',
+            );
+            Navigator.of(context).pop();
+          },
           child: Text(
             'Maybe Later',
             style: TextStyle(color: colorScheme.onSurfaceVariant),

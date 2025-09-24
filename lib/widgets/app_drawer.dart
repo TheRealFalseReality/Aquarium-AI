@@ -8,6 +8,7 @@ import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
@@ -35,6 +36,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final fishData = fishCompatibilityState.fishData.value;
 
     void navigate(String routeName) {
+      // Log navigation analytics
+      final currentRoute = ModalRoute.of(context)?.settings.name ?? 'unknown';
+      AnalyticsService.logNavigation(
+        from: currentRoute,
+        to: routeName,
+        method: 'drawer_menu',
+      );
+      
       Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
         if (!mounted) return;

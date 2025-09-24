@@ -8,6 +8,7 @@ import '../models/tank.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../services/analytics_service.dart';
 
 class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
@@ -40,6 +41,15 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
   void _regenerateRecommendations() {
     if (_isRegenerating) return; // Prevent multiple calls
+    
+    // Log regeneration analytics
+    AnalyticsService.logFeatureUsed(
+      featureName: 'stocking_report_regenerate',
+      parameters: {
+        'regeneration_type': widget.originalTank != null ? 'tank_based' : 'general',
+        'has_existing_fish': widget.existingFish?.isNotEmpty ?? false,
+      },
+    );
     
     setState(() {
       _isRegenerating = true;
@@ -558,6 +568,19 @@ class _RecommendationTabView extends StatelessWidget {
   }
 
   Future<void> _launchSearch(String query) async {
+    // Log external search usage
+    AnalyticsService.logFeatureUsed(
+      featureName: 'external_search',
+      parameters: {
+        'query': query,
+        'source': 'stocking_report',
+      },
+    );
+    AnalyticsService.logUserEngagement(
+      engagementType: 'external_link_click',
+      content: query,
+    );
+    
     final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');

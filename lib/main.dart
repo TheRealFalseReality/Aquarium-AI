@@ -21,6 +21,8 @@ import './screens/tank_management_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import './services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,14 +30,27 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Initialize Analytics session tracking
+  await AnalyticsService.logSessionStart();
+
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // Also log to Analytics
+    AnalyticsService.logError(
+      errorType: 'flutter_fatal_error',
+      errorMessage: errorDetails.exception.toString(),
+    );
   };
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    // Also log to Analytics
+    AnalyticsService.logError(
+      errorType: 'platform_error',
+      errorMessage: error.toString(),
+    );
     return true;
   };
 
@@ -248,25 +263,33 @@ class MyApp extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
+          navigatorObservers: [AnalyticsService.observer],
           // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             Widget page;
+            String screenName;
+            
             switch (settings.name) {
               case '/':
                 page = const WelcomeScreen();
+                screenName = 'welcome_screen';
                 break;
               case '/about':
                 page = const AboutScreen();
+                screenName = 'about_screen';
                 break;
               case '/tank-volume':
                 page = const TankVolumeCalculator();
+                screenName = 'tank_volume_calculator';
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();
+                screenName = 'calculators_screen';
                 break;
               case '/stocking':
                 page = const AquariumStockingScreen();
+                screenName = 'aquarium_stocking_screen';
                 break;
               case '/chatbot':
                 bool autoOpen = false;
@@ -274,22 +297,32 @@ class MyApp extends ConsumerWidget {
                   autoOpen = true;
                 }
                 page = ChatbotScreen(autoOpenPhotoAnalyzer: autoOpen);
+                screenName = 'chatbot_screen';
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
+                screenName = 'fish_compatibility_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();
+                screenName = 'photo_analysis_screen';
                 break;
               case '/settings':
                 page = const SettingsScreen();
+                screenName = 'settings_screen';
                 break;
               case '/tank-management':
                 page = const TankManagementScreen();
+                screenName = 'tank_management_screen';
                 break;
               default:
                 page = const WelcomeScreen();
+                screenName = 'welcome_screen';
             }
+            
+            // Log screen view
+            AnalyticsService.logScreenView(screenName: screenName);
+            
             return FadeSlideRoute(page: page);
           },
         );

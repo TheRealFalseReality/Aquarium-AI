@@ -3,6 +3,7 @@ import 'dart:math';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
+import '../services/analytics_service.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
   const TankVolumeCalculator({super.key});
@@ -168,6 +169,17 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
     final diameter = double.tryParse(_diameterController.text) ?? 0;
     final edge = double.tryParse(_edgeController.text) ?? 0;
     final fullWidth = double.tryParse(_fullWidthController.text) ?? 0;
+
+    // Log calculator usage
+    AnalyticsService.logCalculatorUsed(
+      calculatorType: 'tank_volume',
+      inputData: {
+        'shape': _shape,
+        'units': _units,
+        'cylinder_type': _cylinderType,
+        'has_dimensions': (length > 0 || width > 0 || height > 0 || diameter > 0 || edge > 0),
+      },
+    );
 
     double volume = 0;
     final radius = diameter / 2.0;

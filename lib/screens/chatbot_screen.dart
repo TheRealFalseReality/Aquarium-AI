@@ -17,6 +17,7 @@ import './photo_analysis_screen.dart';
 import './photo_analysis_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
+import '../services/analytics_service.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
@@ -92,6 +93,17 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     final chatNotifier = ref.read(chatProvider.notifier);
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
+    
+    // Log AI interaction
+    AnalyticsService.logAIInteraction(
+      interactionType: 'chat_message',
+      feature: 'chatbot',
+      additionalData: {
+        'message_length': text.length,
+        'has_question_mark': text.contains('?'),
+      },
+    );
+    
     setState(() => _sending = true);
     _sendIconController.forward(from: 0);
     chatNotifier.sendMessage(text);
@@ -513,6 +525,10 @@ Widget _suggestionMenu(BuildContext context) {
             colors: [Colors.blue.shade400, Colors.teal.shade300],
           ),
           onTap: () {
+            AnalyticsService.logFeatureUsed(
+              featureName: 'water_parameter_analysis',
+              parameters: {'source': 'chatbot_ai_tools'},
+            );
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -529,6 +545,10 @@ Widget _suggestionMenu(BuildContext context) {
             colors: [Colors.purple.shade400, Colors.indigo.shade300],
           ),
           onTap: () {
+            AnalyticsService.logFeatureUsed(
+              featureName: 'automation_script',
+              parameters: {'source': 'chatbot_ai_tools'},
+            );
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -546,6 +566,10 @@ Widget _suggestionMenu(BuildContext context) {
           ),
           onTap: () {
             // Already in chatbot; just open analyzer
+            AnalyticsService.logFeatureUsed(
+              featureName: 'photo_analysis',
+              parameters: {'source': 'chatbot_ai_tools'},
+            );
             Navigator.push(
               context,
               MaterialPageRoute(

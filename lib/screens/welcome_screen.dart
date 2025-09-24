@@ -12,6 +12,7 @@ import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
 import '../theme_provider.dart';
+import '../services/analytics_service.dart';
 
 class FeatureInfo {
   final String icon;
@@ -221,6 +222,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 title: feature.title,
                                 description: feature.description,
                                 onTap: () {
+                                  // Log feature usage
+                                  AnalyticsService.logFeatureUsed(
+                                    featureName: feature.title.toLowerCase().replaceAll(' ', '_'),
+                                    parameters: {
+                                      'source': 'welcome_screen',
+                                      'route': feature.routeName,
+                                    },
+                                  );
+                                  
                                   if (feature.url != null) {
                                     _launchURL(feature.url!);
                                   } else if (feature.openPhotoAnalyzer) {
