@@ -1460,7 +1460,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       featureName: 'tank_stocking_recommendations',
       parameters: {
         'tank_type': tank.type,
-        'tank_size_gallons': tank.sizeGallons?.toInt(),
+        'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
