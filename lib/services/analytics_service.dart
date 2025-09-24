@@ -52,7 +52,7 @@ class AnalyticsService {
       case '/tank-management':
         return 'tank_management_screen';
       default:
-        return routeName.replaceAll('/', '').replaceAll('-', '_') + '_screen';
+        return '${routeName.replaceAll('/', '').replaceAll('-', '_')}_screen';
     }
   }
 
