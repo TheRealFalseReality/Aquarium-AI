@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
-import '../theme_provider.dart';
 import 'stocking_report_screen.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
@@ -62,8 +61,6 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     });
 
     final state = ref.watch(aquariumStockingProvider);
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
     final cs = Theme.of(context).colorScheme;
     final hasLastReport = state.lastRecommendations != null && state.lastRecommendations!.isNotEmpty;
 
@@ -180,7 +177,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
                     state.error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(color: cs.error),
                     textAlign: TextAlign.center,
                   ),
                 ),

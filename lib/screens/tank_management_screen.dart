@@ -1096,7 +1096,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               AnalyticsService.logTankAction(
                 action: 'delete_tank',
                 tankType: tank.type,
-                tankSize: tank.sizeGallons.toInt(),
+                tankSize: tank.sizeGallons?.toInt() ?? 0,
               );
               
               await ref.read(tankProvider.notifier).deleteTank(tank.id);

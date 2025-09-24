@@ -8,7 +8,6 @@ import '../models/compatibility_report.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
-import '../theme_provider.dart';
 import 'compatibility_report.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
@@ -177,9 +176,6 @@ class FishCompatibilityScreenState
   Widget build(BuildContext context) {
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
-    final cs = Theme.of(context).colorScheme;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -486,8 +482,6 @@ class FishCompatibilityScreenState
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
     final cs = Theme.of(context).colorScheme;
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
