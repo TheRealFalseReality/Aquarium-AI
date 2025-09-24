@@ -195,7 +195,7 @@ class AnalyticsService {
       if (duration != null) parameters['duration_seconds'] = duration;
       
       await _analytics.logEvent(
-        name: 'user_engagement',
+        name: 'app_user_engagement',
         parameters: parameters,
       );
     }, 'logUserEngagement');
