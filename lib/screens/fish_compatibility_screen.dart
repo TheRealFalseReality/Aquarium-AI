@@ -475,6 +475,8 @@ class FishCompatibilityScreenState
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
     final cs = Theme.of(context).colorScheme;
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),

@@ -33,7 +33,7 @@ class FishCard extends ConsumerWidget {
     final notifier = ref.read(fishCompatibilityProvider.notifier);
     
     // Different background colors for Material You vs standard themes
-    Color getCardColor() {
+    Color? getCardColor() {
       if (isSelected) return null; // Use gradient for selected
       if (isMaterialYou) {
         return cs.surfaceVariant;
