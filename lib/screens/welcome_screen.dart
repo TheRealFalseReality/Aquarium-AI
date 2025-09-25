@@ -42,10 +42,51 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+
+  // Static method to reset promotion dialog preference for testing and debugging
+  static Future<void> resetPromotionDialog() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_WelcomeScreenState._promotionDialogTimestampKey);
+      debugPrint('Promotion dialog timestamp reset');
+    } catch (e) {
+      debugPrint('Error resetting promotion dialog preference: $e');
+    }
+  }
+
+  // Static method to manually set timestamp for testing (useful for debugging)
+  static Future<void> setPromotionDialogTimestamp(int timestamp) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_WelcomeScreenState._promotionDialogTimestampKey, timestamp);
+      debugPrint('Promotion dialog timestamp set to: $timestamp');
+    } catch (e) {
+      debugPrint('Error setting promotion dialog timestamp: $e');
+    }
+  }
+
+  // Static method to check current timestamp for debugging
+  static Future<void> checkPromotionDialogStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastShownTimestamp = prefs.getInt(_WelcomeScreenState._promotionDialogTimestampKey) ?? 0;
+      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
+      
+      debugPrint('Promotion dialog status:');
+      debugPrint('  Last shown timestamp: $lastShownTimestamp');
+      debugPrint('  Current timestamp: $currentTimestamp');
+      debugPrint('  Hours since last shown: ${hoursSinceLastShown.toStringAsFixed(1)}');
+      debugPrint('  Will show dialog: ${hoursSinceLastShown >= _WelcomeScreenState._promotionDialogCooldownHours}');
+    } catch (e) {
+      debugPrint('Error checking promotion dialog status: $e');
+    }
+  }
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  static const String _promotionDialogShownKey = 'promotion_dialog_shown';
+  static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
+  static const int _promotionDialogCooldownHours = 48;
   
   @override
   void initState() {
@@ -59,15 +100,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _checkShowPromotionDialog() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final hasShownPromotion = prefs.getBool(_promotionDialogShownKey) ?? false;
+      final lastShownTimestamp = prefs.getInt(_promotionDialogTimestampKey) ?? 0;
+      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
       
-      if (!hasShownPromotion && mounted) {
+      debugPrint('Promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_promotionDialogCooldownHours hours');
+      
+      // Show the dialog if it has never been shown or if 48 hours have passed
+      if (hoursSinceLastShown >= _promotionDialogCooldownHours && mounted) {
+        debugPrint('Promotion dialog will be shown (cooldown period elapsed)');
         // Show the popup after a short delay to allow the screen to load
         Timer(const Duration(seconds: 1), () {
           if (mounted) {
             _showPromotionDialog();
           }
         });
+      } else {
+        debugPrint('Promotion dialog will not be shown (cooldown period not elapsed)');
       }
     } catch (e) {
       // If there's an error with SharedPreferences, silently continue
@@ -78,7 +127,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _showPromotionDialog() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_promotionDialogShownKey, true);
+      // Store the current timestamp when showing the dialog
+      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      await prefs.setInt(_promotionDialogTimestampKey, currentTimestamp);
+      debugPrint('Promotion dialog shown, timestamp saved: $currentTimestamp');
       
       // Log app promotion dialog shown
       AnalyticsService.logAppPromotion(
@@ -100,10 +152,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   // Debug method to reset promotion dialog preference
   // This can be called from settings or debug menu if needed
+  // Note: This is now also available as WelcomeScreen.resetPromotionDialog()
   static Future<void> resetPromotionDialog() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_promotionDialogShownKey);
+      await prefs.remove(_promotionDialogTimestampKey);
     } catch (e) {
       debugPrint('Error resetting promotion dialog preference: $e');
     }
