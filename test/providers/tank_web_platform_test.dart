@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:fish_ai/models/tank.dart';
 import 'package:fish_ai/providers/tank_provider.dart';
 import 'package:flutter/foundation.dart';

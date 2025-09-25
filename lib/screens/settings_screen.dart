@@ -321,13 +321,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 'https://aistudio.google.com/app/apikey',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
               ),
             ),
             const Text('2. Sign in with your Google account.'),
             const Text(
                 '3. Click "Create API key in new project" or "Get API key".'),
             const Text('4. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
+              ),
+            ),
           ],
         ),
       ],
@@ -397,12 +411,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Text(
                 'https://platform.openai.com/api-keys',
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const Text('2. Sign in and create a new secret key.'),
             const Text('3. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ],
@@ -468,12 +495,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 'https://console.groq.com/keys',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
               ),
             ),
             const Text('2. Sign in and navigate to the API Keys section.'),
             const Text('3. Click "Create API Key" to create a new secret key.'),
             const Text('4. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ],
