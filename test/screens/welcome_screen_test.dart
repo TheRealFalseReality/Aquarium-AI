@@ -102,5 +102,25 @@ void main() {
       // Verify timestamp is cleared
       expect(prefs.containsKey('promotion_dialog_timestamp'), isFalse);
     });
+
+    test('setPromotionDialogTimestamp sets timestamp correctly', () async {
+      // Set a specific timestamp
+      final testTimestamp = DateTime.now().millisecondsSinceEpoch - (25 * 60 * 60 * 1000); // 25 hours ago
+      await WelcomeScreen.setPromotionDialogTimestamp(testTimestamp);
+
+      // Verify timestamp was set
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt('promotion_dialog_timestamp'), equals(testTimestamp));
+    });
+
+    test('checkPromotionDialogStatus works without throwing', () async {
+      // This is mainly to ensure the debug method doesn't crash
+      await WelcomeScreen.checkPromotionDialogStatus();
+      
+      // Set a timestamp and check again
+      final testTimestamp = DateTime.now().millisecondsSinceEpoch;
+      await WelcomeScreen.setPromotionDialogTimestamp(testTimestamp);
+      await WelcomeScreen.checkPromotionDialogStatus();
+    });
   });
 }
