@@ -124,6 +124,21 @@ class MyApp extends ConsumerWidget {
     }
   }
 
+  // Helper method to update system UI overlay based on theme
+  void _updateSystemUIOverlay(ThemeMode themeMode, ColorScheme lightColorScheme, ColorScheme darkColorScheme) {
+    final isDarkMode = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+    
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+      ),
+    );
+  }
+
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF005f73),
     brightness: Brightness.light,
@@ -295,6 +310,9 @@ class MyApp extends ConsumerWidget {
             color: themeProvider.useMaterialYou ? darkColorScheme.surfaceVariant : const Color(0xFF4A5568),
           ),
         );
+
+        // Update system UI overlay based on current theme
+        _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
 
         return MaterialApp(
           title: 'Aquarium AI',
