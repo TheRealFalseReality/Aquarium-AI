@@ -951,13 +951,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                inhabitant.fishUnit,
+                                inhabitant.quantity > 1
+                                    ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                    : inhabitant.customName,
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Text(
-                                inhabitant.quantity > 1 
-                                  ? '${inhabitant.quantity}x ${inhabitant.customName}'
-                                  : inhabitant.customName,
+                                inhabitant.fishUnit,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
@@ -1328,7 +1328,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      fishType,
+                      totalQuantity > 1
+                          ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
+                          : inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1336,9 +1338,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      totalQuantity > 1
-                        ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
-                        : inhabitants.map((i) => i.customName).join(', '),
+                      fishType,
                   
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
