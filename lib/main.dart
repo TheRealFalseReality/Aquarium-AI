@@ -4,6 +4,7 @@ import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -25,6 +26,17 @@ import './services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Configure system UI overlay for edge-to-edge display
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -110,6 +122,21 @@ class MyApp extends ConsumerWidget {
       }
       return []; // Return empty list if analytics observer fails
     }
+  }
+
+  // Helper method to update system UI overlay based on theme
+  void _updateSystemUIOverlay(ThemeMode themeMode, ColorScheme lightColorScheme, ColorScheme darkColorScheme) {
+    final isDarkMode = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+    
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+      ),
+    );
   }
 
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
@@ -283,6 +310,9 @@ class MyApp extends ConsumerWidget {
             color: themeProvider.useMaterialYou ? darkColorScheme.surfaceVariant : const Color(0xFF4A5568),
           ),
         );
+
+        // Update system UI overlay based on current theme
+        _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
 
         return MaterialApp(
           title: 'Aquarium AI',
