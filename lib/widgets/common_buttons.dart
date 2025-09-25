@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 /// to maintain consistency and reduce code duplication.
 
 /// Standard Close button with consistent styling
-class CloseButton extends StatelessWidget {
+class CommonCloseButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String? label;
   final bool isIconButton;
 
-  const CloseButton({
+  const CommonCloseButton({
     super.key,
     this.onPressed,
     this.label,
@@ -102,7 +102,7 @@ class ActionButtonRow extends StatelessWidget {
           const SizedBox(width: 16),
         ],
         Expanded(
-          child: CloseButton(
+          child: CommonCloseButton(
             onPressed: onClose,
             label: closeLabel,
           ),
