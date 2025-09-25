@@ -340,7 +340,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
+          const BannerAdWidget(),
+          const SizedBox(height: 16),
           Card(
             elevation: 4,
             child: Padding(
