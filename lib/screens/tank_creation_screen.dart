@@ -9,6 +9,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
@@ -83,9 +84,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
         _isLoadingFish = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load fish data: $e')),
-        );
+        context.showAccessibleMessage('Failed to load fish data: $e');
       }
     }
   }
@@ -183,9 +182,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _inhabitants.insert(index + 1, duplicatedInhabitant);
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Duplicated "${originalInhabitant.customName}"')),
-    );
+    context.showAccessibleMessage('Duplicated "${originalInhabitant.customName}"');
   }
 
   Future<void> _saveTank() async {
@@ -267,20 +264,24 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
         }
 
         if (mounted) {
+          // Show success message before navigation
+          final parentContext = context;
+          final successMessage = widget.existingTank != null 
+              ? 'Tank updated successfully!' 
+              : 'Tank created successfully!';
+          
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(widget.existingTank != null 
-                  ? 'Tank updated successfully!' 
-                  : 'Tank created successfully!'),
-            ),
-          );
+          
+          // Use a delayed message to ensure it shows after navigation
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (parentContext.mounted) {
+              parentContext.showAccessibleMessage(successMessage);
+            }
+          });
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save tank: $e')),
-          );
+          context.showAccessibleMessage('Failed to save tank: $e');
         }
       }
     }
@@ -899,9 +900,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
-        );
+        context.showAccessibleMessage('Failed to pick image: $e');
       }
     }
   }
@@ -922,9 +921,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take photo: $e')),
-        );
+        context.showAccessibleMessage('Failed to take photo: $e');
       }
     }
   }
@@ -972,9 +969,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       Navigator.of(context).pop();
     } else if (_selectedFishUnit == null) {
       // Show snackbar if no fish type selected
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a fish type')),
-      );
+      context.showAccessibleMessage('Please select a fish type');
     }
   }
 

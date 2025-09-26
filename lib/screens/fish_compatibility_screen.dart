@@ -5,6 +5,7 @@ import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
@@ -200,33 +201,23 @@ class FishCompatibilityScreenState
             // Check if the error is related to API key not being set
             final isApiKeyError = next.error!.toLowerCase().contains('api key not set');
             
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(next.error!),
-                duration: const Duration(seconds: 6),
-                action: isApiKeyError
-                    ? SnackBarAction(
-                        label: 'Settings',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          Navigator.pushNamed(context, '/settings');
-                        },
-                      )
-                    : next.isRetryable
-                        ? SnackBarAction(
-                            label: 'Retry',
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              notifier.retryCompatibilityReport();
-                            },
-                          )
-                        : SnackBarAction(
-                            label: 'Dismiss',
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            },
-                          ),
-              ),
+            // Determine the action based on error type
+            VoidCallback? onAction;
+            String? actionLabel;
+            
+            if (isApiKeyError) {
+              onAction = () => Navigator.pushNamed(context, '/settings');
+              actionLabel = 'Settings';
+            } else if (next.isRetryable) {
+              onAction = () => notifier.retryCompatibilityReport();
+              actionLabel = 'Retry';
+            }
+            
+            context.showAccessibleMessage(
+              next.error!,
+              duration: const Duration(seconds: 6),
+              onAction: onAction,
+              actionLabel: actionLabel,
             );
             notifier.clearError();
           }

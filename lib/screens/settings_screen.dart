@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../services/analytics_service.dart';
+import '../widgets/accessible_feedback.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -66,26 +67,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Validation Check: Ensure the API key for the selected provider is not empty.
     if (_selectedProvider == AIProvider.gemini &&
         _geminiApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Gemini API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Gemini API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.openAI &&
         _openAIApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter an OpenAI API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter an OpenAI API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Groq API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Groq API key before saving.');
       return; // Stop the function
     }
 
@@ -112,9 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveProvider: _selectedProvider,
         );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings updated successfully!')),
-    );
+    context.showAccessibleMessage('Settings updated successfully!');
   }
 
   @override
@@ -182,7 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       gradient: LinearGradient(
                         colors: [
                           Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -210,6 +200,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   SegmentedButton<AIProvider>(
+                    showSelectedIcon: false, // Remove checkmarks
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      selectedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      selectedForegroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
                     segments: [
                       ButtonSegment(
                         value: AIProvider.gemini, 
@@ -292,7 +293,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()
@@ -309,10 +309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref
                               .read(modelProvider.notifier)
                               .resetModelsToDefaults();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Models reset to default.')),
-                          );
+                          context.showAccessibleMessage('Models reset to default.');
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Reset Models'),
@@ -339,7 +336,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
