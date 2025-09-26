@@ -1,4 +1,5 @@
 import 'package:fish_ai/widgets/ad_component.dart';
+import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,15 +73,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
       setState(() {
         _isRegenerating = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Cannot regenerate - missing original parameters.'),
-          action: SnackBarAction(
-            label: 'Dismiss',
-            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-          ),
-        ),
-      );
+      context.showAccessibleMessage('Cannot regenerate - missing original parameters.');
     }
   }
 
@@ -134,22 +127,14 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
         setState(() {
           _isRegenerating = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error}'),
-            action: next.error!.toLowerCase().contains('api key not set')
-                ? SnackBarAction(
-                    label: 'Settings',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                  )
-                : SnackBarAction(
-                    label: 'Dismiss',
-                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-                  ),
-          ),
+        context.showAccessibleMessage(
+          'Error: ${next.error}',
+          onAction: next.error!.toLowerCase().contains('api key not set')
+              ? () => Navigator.pushNamed(context, '/settings')
+              : null,
+          actionLabel: next.error!.toLowerCase().contains('api key not set')
+              ? 'Settings'
+              : null,
         );
       }
     });

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../services/analytics_service.dart';
+import '../widgets/accessible_feedback.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -66,26 +67,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Validation Check: Ensure the API key for the selected provider is not empty.
     if (_selectedProvider == AIProvider.gemini &&
         _geminiApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Gemini API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Gemini API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.openAI &&
         _openAIApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter an OpenAI API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter an OpenAI API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Groq API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Groq API key before saving.');
       return; // Stop the function
     }
 
@@ -112,9 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveProvider: _selectedProvider,
         );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings updated successfully!')),
-    );
+    context.showAccessibleMessage('Settings updated successfully!');
   }
 
   @override
@@ -309,10 +299,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref
                               .read(modelProvider.notifier)
                               .resetModelsToDefaults();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Models reset to default.')),
-                          );
+                          context.showAccessibleMessage('Models reset to default.');
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Reset Models'),
