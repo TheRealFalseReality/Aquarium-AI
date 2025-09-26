@@ -91,6 +91,40 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   }
 
   void _onCategoryChanged(String category) {
+    // If no inhabitants or same category, just proceed
+    if (_inhabitants.isEmpty || _selectedCategory == category) {
+      _performCategoryChange(category);
+      return;
+    }
+
+    // Show confirmation dialog if there are inhabitants
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Tank Type'),
+        content: Text(
+          'Changing the tank type from ${_selectedCategory == 'freshwater' ? 'Freshwater' : 'Saltwater'} '
+          'to ${category == 'freshwater' ? 'Freshwater' : 'Saltwater'} will remove all current inhabitants.\n\n'
+          'Are you sure you want to continue?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _performCategoryChange(category);
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _performCategoryChange(String category) {
     setState(() {
       _selectedCategory = category;
       _isLoadingFish = true;
