@@ -1152,7 +1152,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           withCaution: [],
         ),
       );
-      if (!tankFish.any((f) => f.name == fish.name)) {
+      // Add individual fish based on quantity for proper compatibility calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
         tankFish.add(fish);
       }
     }
@@ -1408,7 +1409,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             withCaution: [],
           ),
         );
-        if (!existingFish.any((f) => f.name == fish.name)) {
+        // Add individual fish based on quantity for proper compatibility calculations
+        for (int i = 0; i < inhabitant.quantity; i++) {
           existingFish.add(fish);
         }
       }

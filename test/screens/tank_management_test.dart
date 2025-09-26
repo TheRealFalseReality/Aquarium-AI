@@ -224,6 +224,68 @@ void main() {
       expect(score!, greaterThan(0.9));
     });
 
+    test('Harmony score calculation with multiple individual fish of same type', () {
+      // Test scenario: 1 Betta male + 2 Betta females should calculate 3 pairwise comparisons
+      // instead of just 1 comparison between the two fish types
+      final betaMale = Fish(
+        name: 'Betta Male',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Betta Female'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final betaFemale = Fish(
+        name: 'Betta Female',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Betta Male', 'Betta Female'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+
+      // Create tank with 1 male and 2 females
+      final tank = Tank.create(
+        name: 'Betta Tank',
+        type: 'freshwater',
+        inhabitants: [
+          TankInhabitant(
+            id: 'id1',
+            customName: 'Male Betta',
+            fishUnit: 'Betta Male',
+            quantity: 1,
+          ),
+          TankInhabitant(
+            id: 'id2',
+            customName: 'Female Bettas',
+            fishUnit: 'Betta Female',
+            quantity: 2,
+          ),
+        ],
+      );
+
+      final fishData = {
+        'freshwater': [betaMale, betaFemale]
+      };
+
+      // Calculate harmony score using the tank method (which should now account for individual fish)
+      final tankScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData);
+      
+      // Also test direct calculation with individual fish list
+      final individualFishList = [betaMale, betaFemale, betaFemale]; // 1 male + 2 females
+      final directScore = TankHarmonyCalculator.calculateHarmonyScore(individualFishList);
+      
+      expect(tankScore, isNotNull);
+      expect(tankScore, equals(directScore));
+      
+      // The score should be based on 3 pairwise comparisons:
+      // 1. Male-Female1, 2. Male-Female2, 3. Female1-Female2
+      // All should be compatible (high score)
+      expect(tankScore!, greaterThan(0.9));
+    });
+
     test('Harmony labels', () {
       expect(TankHarmonyCalculator.getHarmonyLabel(0.95), equals('Excellent'));
       expect(TankHarmonyCalculator.getHarmonyLabel(0.85), equals('Good'));
