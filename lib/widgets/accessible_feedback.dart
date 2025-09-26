@@ -141,7 +141,7 @@ class _AccessibleFeedbackWidgetState extends State<_AccessibleFeedbackWidget>
           child: Semantics(
             // Use live region for accessibility announcements
             liveRegion: true,
-            announcement: widget.message,
+            label: widget.message,
             child: Material(
               color: widget.backgroundColor,
               borderRadius: BorderRadius.circular(4),

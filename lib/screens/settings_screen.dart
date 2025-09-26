@@ -172,7 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       gradient: LinearGradient(
                         colors: [
                           Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -283,7 +283,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()
@@ -327,7 +326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
