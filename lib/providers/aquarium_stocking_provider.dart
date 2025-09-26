@@ -271,7 +271,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           withCaution: [],
         ),
       );
-      if (!existingFish.any((f) => f.name == fish.name)) {
+      // Add individual fish based on quantity for proper compatibility calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
         existingFish.add(fish);
       }
     }
