@@ -200,6 +200,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   SegmentedButton<AIProvider>(
+                    showSelectedIcon: false, // Remove checkmarks
                     segments: [
                       ButtonSegment(
                         value: AIProvider.gemini, 
@@ -282,7 +283,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()

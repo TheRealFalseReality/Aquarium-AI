@@ -964,24 +964,32 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               // Calculation Breakdown Expandable Section
               if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
                 const SizedBox(height: 16),
-                ExpansionTile(
-                  title: Text(
-                    'Compatibility Calculation Breakdown',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        _getCalculationBreakdown(tank),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
+                Semantics(
+                  button: true,
+                  hint: 'Tap to view compatibility calculation breakdown',
+                  excludeSemantics: false,
+                  child: ExpansionTile(
+                    title: Text(
+                      'Compatibility Calculation Breakdown',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
+                    children: [
+                      Semantics(
+                        liveRegion: true,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Text(
+                            _getCalculationBreakdown(tank),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
               
