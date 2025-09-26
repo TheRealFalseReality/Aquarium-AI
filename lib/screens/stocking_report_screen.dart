@@ -9,6 +9,8 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../services/analytics_service.dart';
+import '../widgets/common_buttons.dart';
+import '../widgets/helper_text.dart';
 
 class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
@@ -227,30 +229,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _isRegenerating ? null : _regenerateRecommendations,
-                              icon: _isRegenerating 
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.refresh),
-                              label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.close),
-                              label: const Text('Close'),
-                            ),
-                          ),
-                        ],
+                      ActionButtonRow(
+                        onRegenerate: _regenerateRecommendations,
+                        isRegenerating: _isRegenerating,
                       ),
                       const SizedBox(height: 8), // Extra padding below buttons
                     ],
@@ -487,12 +468,8 @@ class _RecommendationTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          "(Click a fish to search)",
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
-          textAlign: TextAlign.center,
+        const InstructionText(
+          text: "(Click a fish to search)",
         ),
         const SizedBox(height: 14),
         Wrap(

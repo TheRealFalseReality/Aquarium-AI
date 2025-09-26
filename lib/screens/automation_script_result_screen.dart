@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/automation_script.dart';
 import '../main_layout.dart';
+import '../widgets/common_cards.dart';
 
 class AutomationScriptResultScreen extends StatelessWidget {
   final AutomationScript script;
@@ -18,26 +19,9 @@ class AutomationScriptResultScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Spacer to balance the IconButton on the right
-              const SizedBox(width: 48), 
-              Expanded(
-                child: Text(
-                  script.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+          SectionHeader(
+            title: script.title,
+            showCloseButton: true,
           ),
           const SizedBox(height: 16),
           _buildCodeBlock(context, script.code),

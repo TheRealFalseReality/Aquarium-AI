@@ -4,6 +4,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
+import '../widgets/common_buttons.dart';
+import '../widgets/common_cards.dart';
 
 class AnalysisResultScreen extends StatelessWidget {
   final WaterAnalysisResult result;
@@ -39,33 +41,16 @@ class AnalysisResultScreen extends StatelessWidget {
           const SizedBox(height: 18),
           _howAquaPiHelpsCard(context, result.howAquaPiHelps),
           const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close),
-            label: const Text('Close'),
-          ),
+          const CommonCloseButton(),
         ],
       ),
     );
   }
 
   Widget _header(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            'Water Parameter Analysis',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
+    return const SectionHeader(
+      title: 'Water Parameter Analysis',
+      showCloseButton: true,
     );
   }
 
