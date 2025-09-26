@@ -201,6 +201,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 16),
                   SegmentedButton<AIProvider>(
                     showSelectedIcon: false, // Remove checkmarks
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      selectedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      selectedForegroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
                     segments: [
                       ButtonSegment(
                         value: AIProvider.gemini, 
