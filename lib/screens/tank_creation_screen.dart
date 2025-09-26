@@ -547,7 +547,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ElevatedButton.icon(
                         onPressed: _isLoadingFish ? null : _addInhabitant,
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Fish'),
+                        label: const Text('Add'),
                       ),
                     ],
                   ),
@@ -763,7 +763,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ),
         ),
       ],
-    );
+    ));
   }
 
   String? _getFishImageUrl(TankInhabitant inhabitant) {

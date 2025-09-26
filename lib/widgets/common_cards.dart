@@ -10,7 +10,7 @@ class ContentCard extends StatelessWidget {
   final double? elevation;
   final Color? backgroundColor;
   final BorderRadius? borderRadius;
-  final Border? border;
+  final BorderSide? border;
 
   const ContentCard({
     super.key,
