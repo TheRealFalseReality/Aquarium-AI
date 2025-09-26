@@ -10,6 +10,7 @@ import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
@@ -120,23 +121,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           Navigator.of(context).pop(); // Close loading dialog
         }
         
-        // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error}'),
-            action: next.error!.toLowerCase().contains('api key not set')
-                ? SnackBarAction(
-                    label: 'Settings',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                  )
-                : SnackBarAction(
-                    label: 'Dismiss',
-                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-                  ),
-          ),
+        // Show error with appropriate action
+        context.showAccessibleMessage(
+          'Error: ${next.error}',
+          onAction: next.error!.toLowerCase().contains('api key not set')
+              ? () => Navigator.pushNamed(context, '/settings')
+              : null,
+          actionLabel: next.error!.toLowerCase().contains('api key not set')
+              ? 'Settings'
+              : null,
         );
       }
     });
@@ -1063,15 +1056,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);
       
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tank "${tank.name}" duplicated successfully')),
-        );
+        context.showAccessibleMessage('Tank "${tank.name}" duplicated successfully');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to duplicate tank: $e')),
-        );
+        context.showAccessibleMessage('Failed to duplicate tank: $e');
       }
     }
   }
@@ -1101,9 +1090,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               
               await ref.read(tankProvider.notifier).deleteTank(tank.id);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Tank "${tank.name}" deleted')),
-                );
+                context.showAccessibleMessage('Tank "${tank.name}" deleted');
               }
             },
             style: ElevatedButton.styleFrom(
@@ -1380,10 +1367,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
     if (tank.inhabitants.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tank must have existing inhabitants to get stocking recommendations.'),
-        ),
+      context.showAccessibleMessage(
+        'Tank must have existing inhabitants to get stocking recommendations.'
       );
       return;
     }
@@ -1483,12 +1468,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final tankState = ref.read(tankProvider);
 
     if (tankState.tanks.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No tanks to backup'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      context.showAccessibleMessage('No tanks to backup');
       return;
     }
 
@@ -1545,23 +1525,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       if (context.mounted) {
         if (filePath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Backup created successfully!\nSaved to: ${filePath.split('/').last}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 4),
-            ),
+          context.showAccessibleMessage(
+            'Backup created successfully!\nSaved to: ${filePath.split('/').last}',
+            duration: const Duration(seconds: 4),
           );
         } else {
           // Check if there's an actual error or if user just cancelled
           final error = ref.read(tankProvider).error;
           if (error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to create backup: $error'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 4),
-              ),
+            context.showAccessibleMessage(
+              'Failed to create backup: $error',
+              duration: const Duration(seconds: 4),
             );
           }
           // If no error, user probably cancelled the save dialog - no message needed
@@ -1621,22 +1595,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       if (context.mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tanks restored successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showAccessibleMessage('Tanks restored successfully!');
         } else {
           // Error message will be shown from the provider's error state
           final error = ref.read(tankProvider).error;
           if (error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(error),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 4),
-              ),
+            context.showAccessibleMessage(
+              error,
+              duration: const Duration(seconds: 4),
             );
           }
         }

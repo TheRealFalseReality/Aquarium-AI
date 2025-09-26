@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -68,9 +69,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
               icon: const Icon(Icons.copy),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: code));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard!')),
-                );
+                context.showAccessibleMessage('Copied to clipboard!');
               },
             ),
           ),
