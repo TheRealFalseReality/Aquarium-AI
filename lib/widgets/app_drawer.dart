@@ -104,7 +104,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 180),
                   child: Card(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: ListTile(
                       leading: const Icon(Icons.water, size: 36),
