@@ -204,8 +204,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     style: SegmentedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       foregroundColor: Theme.of(context).colorScheme.onSurface,
-                      selectedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      selectedForegroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      selectedBackgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+                      selectedForegroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
                       side: BorderSide(
                         color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                         width: 1,
@@ -473,7 +473,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -610,7 +610,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
