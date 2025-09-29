@@ -16,21 +16,15 @@ void main() {
     // Verify that the settings screen loads
     expect(find.text('Settings'), findsOneWidget);
     
-    // Verify AI Provider section
-    expect(find.text('AI Provider'), findsOneWidget);
+    // Verify Active AI Provider section
+    expect(find.text('Active AI Provider'), findsOneWidget);
     expect(find.text('Gemini'), findsOneWidget);
-    expect(find.text('ChatGPT'), findsOneWidget);
+    expect(find.text('OpenAI'), findsOneWidget);
     expect(find.text('Groq'), findsOneWidget);
 
-    // Verify API Key sections
-    expect(find.text('Gemini API Key'), findsOneWidget);
-    expect(find.text('OpenAI API Key'), findsOneWidget);
-    expect(find.text('Groq API Key'), findsOneWidget);
-
-    // Verify model configuration sections
-    expect(find.text('Gemini Models'), findsOneWidget);
-    expect(find.text('ChatGPT Models'), findsOneWidget);
-    expect(find.text('Groq Models'), findsOneWidget);
+    // Verify the clarification note is displayed
+    expect(find.textContaining('Tank management (including harmony score)'), findsOneWidget);
+    expect(find.textContaining('work without an AI key'), findsOneWidget);
   });
 
   testWidgets('SettingsScreen AI provider selection', (WidgetTester tester) async {
@@ -43,7 +37,7 @@ void main() {
     );
 
     // Test switching between AI providers
-    await tester.tap(find.text('ChatGPT'));
+    await tester.tap(find.text('OpenAI'));
     await tester.pump();
 
     await tester.tap(find.text('Groq'));
