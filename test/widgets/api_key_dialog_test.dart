@@ -21,6 +21,8 @@ void main() {
     expect(find.textContaining('Unlimited Features'), findsOneWidget);
     expect(find.textContaining('Gemini 2.5 flash'), findsOneWidget);
     expect(find.textContaining('unlimited number of tanks'), findsOneWidget);
+    expect(find.textContaining('Tank management (including harmony score)'), findsOneWidget);
+    expect(find.textContaining('work without an AI key'), findsOneWidget);
 
     // Verify the buttons are still present
     expect(find.text('Dismiss'), findsOneWidget);
