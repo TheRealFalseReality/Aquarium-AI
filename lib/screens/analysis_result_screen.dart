@@ -6,7 +6,6 @@ import '../models/analysis_result.dart';
 import '../main_layout.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
-import '../widgets/ad_component.dart';
 
 class AnalysisResultScreen extends StatelessWidget {
   final WaterAnalysisResult result;
@@ -31,16 +30,12 @@ class AnalysisResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Analysis Result',
-      bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           _header(context),
           const SizedBox(height: 12),
           _summaryCard(context, result.summary),
-          const SizedBox(height: 18),
-          // Add native ad after summary
-          const NativeAdWidget(),
           const SizedBox(height: 18),
           ...result.parameters.map((p) => _parameterCard(context, p)),
           const SizedBox(height: 18),

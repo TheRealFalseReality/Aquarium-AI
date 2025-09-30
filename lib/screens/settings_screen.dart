@@ -5,7 +5,6 @@ import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/accessible_feedback.dart';
-import '../widgets/ad_component.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -148,7 +147,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return MainLayout(
       title: 'Settings',
-      bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [

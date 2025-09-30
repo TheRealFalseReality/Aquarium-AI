@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
-import '../widgets/ad_component.dart';
 
 class WaterParameterAnalysisScreen extends ConsumerStatefulWidget {
   const WaterParameterAnalysisScreen({super.key});
@@ -80,7 +79,6 @@ class TankVolumeCalculatorState
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Water Analysis',
-      bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -169,9 +167,6 @@ class TankVolumeCalculatorState
                   }),
                 ],
               ),
-              const SizedBox(height: 16),
-              // Add native ad in the middle of the form
-              const NativeAdWidget(),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _additionalInfoController,
