@@ -237,8 +237,6 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
-          ),
-        ),
       ),
     );
   }
