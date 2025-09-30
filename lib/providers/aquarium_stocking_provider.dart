@@ -11,6 +11,7 @@ import 'dart:async';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/json_utils.dart';
 import '../models/tank.dart';
 
 class AquariumStockingState {
@@ -146,7 +147,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         throw Exception('Received no response from the AI service after multiple retries.');
       }
 
-      final cleanedResponse = _extractJson(responseText);
+      final cleanedResponse = extractJson(responseText);
       final recommendationsJson = json.decode(cleanedResponse) as Map<String, dynamic>;
 
       final List<StockingRecommendation> allGeneratedRecs = [];
@@ -310,7 +311,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         throw Exception('Received no response from the AI service after multiple retries.');
       }
 
-      final cleanedResponse = _extractJson(responseText);
+      final cleanedResponse = extractJson(responseText);
       final recommendationsJson = json.decode(cleanedResponse) as Map<String, dynamic>;
 
       final List<StockingRecommendation> allGeneratedRecs = [];
@@ -392,12 +393,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
     return tankSize;
   }
-
-  String _extractJson(String text) {
-    final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
-    final match = regExp.firstMatch(text);
-    return match?.group(1) ?? text;
-  }
+  
+  // Note: extractJson is now imported from json_utils.dart
 }
 
 final aquariumStockingProvider =

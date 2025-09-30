@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main_layout.dart';
@@ -9,6 +7,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
@@ -31,7 +30,6 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
-  Map<String, List<Fish>>? _fishData;
   TankSortOption _currentSortOption = TankSortOption.name;
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
@@ -40,7 +38,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFishData();
     _loadSortPreference();
   }
 
@@ -67,31 +64,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  Future<void> _loadFishData() async {
-    try {
-      final jsonString = await rootBundle.loadString('assets/fishcompat.json');
-      final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-      
-      final fishData = <String, List<Fish>>{};
-      for (final category in ['freshwater', 'marine']) {
-        if (jsonResponse.containsKey(category)) {
-          fishData[category] = (jsonResponse[category] as List)
-              .map((f) => Fish.fromJson(f))
-              .toList();
-        }
-      }
-      
-      setState(() {
-        _fishData = fishData;
-      });
-    } catch (e) {
-      // Handle error silently for now
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+    // Watch the centralized fish data provider
+    final fishDataAsync = ref.watch(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
 
     // Listen for stocking recommendations globally
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
@@ -652,7 +633,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ],
                         // Harmony Score Display
-                        if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                        if (tank.inhabitants.isNotEmpty && fishData != null) ...[
                           const SizedBox(height: 4),
                           _buildHarmonyScoreChip(tank),
                         ],
@@ -892,7 +873,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ],
               // Harmony Score Info
-              if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+              if (tank.inhabitants.isNotEmpty && fishData != null) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -962,7 +943,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 }),
               
               // Calculation Breakdown Expandable Section
-              if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+              if (tank.inhabitants.isNotEmpty && fishData != null) ...[
                 const SizedBox(height: 16),
                 Semantics(
                   button: true,
@@ -1128,10 +1109,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   String _getCalculationBreakdown(Tank tank) {
-    if (_fishData == null || tank.inhabitants.isEmpty) return 'No calculation available';
+    if (fishData == null || tank.inhabitants.isEmpty) return 'No calculation available';
     
     // Get fish data for the tank
-    final categoryFish = _fishData![tank.type] ?? [];
+    final categoryFish = fishData![tank.type] ?? [];
     final tankFish = <Fish>[];
     
     for (final inhabitant in tank.inhabitants) {
@@ -1241,9 +1222,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     // Fall back to default fish image
-    if (_fishData == null) return null;
+    if (fishData == null) return null;
     
-    final categoryFish = _fishData![tankType] ?? [];
+    final categoryFish = fishData![tankType] ?? [];
     final fish = categoryFish.firstWhere(
       (f) => f.name == fishName,
       orElse: () => Fish(
@@ -1385,8 +1366,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     _currentTankForRecommendations = tank;
     
     // Calculate and store existing fish for the listener
-    if (_fishData != null) {
-      final categoryFish = _fishData![tank.type] ?? [];
+    if (fishData != null) {
+      final categoryFish = fishData![tank.type] ?? [];
       final existingFish = <Fish>[];
       
       for (final inhabitant in tank.inhabitants) {
