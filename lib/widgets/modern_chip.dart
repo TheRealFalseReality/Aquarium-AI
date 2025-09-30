@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme_provider.dart';
 
 /// ModernSelectableChip
 /// Large, rounded, animated chip used for primary selections (e.g., categories, calculators).
 /// Updated: Now supports custom selectedColor and selectedTextColor for more versatile styling.
-class ModernSelectableChip extends StatelessWidget {
+class ModernSelectableChip extends ConsumerWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -30,8 +32,10 @@ class ModernSelectableChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final isMaterialYou = themeState.useMaterialYou;
     final baseRadius = dense ? 20.0 : 28.0;
 
     // Determine colors based on selection and custom properties
@@ -42,16 +46,16 @@ class ModernSelectableChip extends StatelessWidget {
     Color finalIconColor;
 
     if (selected) {
-      finalBackgroundColor = selectedColor ?? cs.primary;
-      finalBorderColor =
-          selectedColor?.withOpacity(0.5) ?? cs.primary.withOpacity(0.75);
-      finalLabelColor = selectedTextColor ?? cs.onPrimary;
-      finalIconColor = selectedTextColor ?? cs.onPrimary;
+      finalBackgroundColor = selectedColor ?? (isMaterialYou ? cs.primary : cs.primary);
+      finalBorderColor = selectedColor?.withOpacity(0.5) ?? 
+          (isMaterialYou ? cs.outline.withOpacity(0.6) : cs.primary.withOpacity(0.75));
+      finalLabelColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
+      finalIconColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
     } else {
-      finalBackgroundColor = cs.surfaceContainerHighest;
-      finalBorderColor = cs.outline.withOpacity(0.2);
-      finalLabelColor = cs.onSurfaceVariant;
-      finalIconColor = cs.onSurfaceVariant;
+      finalBackgroundColor = isMaterialYou ? cs.surfaceVariant : cs.surfaceContainerHighest;
+      finalBorderColor = cs.outline.withOpacity(isMaterialYou ? 0.4 : 0.2);
+      finalLabelColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
+      finalIconColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
     }
 
     Widget? leading;
@@ -87,7 +91,7 @@ class ModernSelectableChip extends StatelessWidget {
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: (selectedColor ?? cs.primary).withOpacity(0.35),
+                    color: (selectedColor ?? (isMaterialYou ? cs.primaryContainer : cs.primary)).withOpacity(0.35),
                     blurRadius: 14,
                     spreadRadius: 1,
                     offset: const Offset(0, 4),
@@ -95,7 +99,7 @@ class ModernSelectableChip extends StatelessWidget {
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(isMaterialYou ? 0.08 : 0.05),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   )
@@ -112,8 +116,7 @@ class ModernSelectableChip extends StatelessWidget {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      letterSpacing: 0.25,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                       color: finalLabelColor,
                     ),
                 maxLines: 2,

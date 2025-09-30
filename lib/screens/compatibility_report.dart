@@ -74,6 +74,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
               ),
             ],
           ),
+          
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -81,6 +82,8 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const BannerAdWidget(),
+                  const SizedBox(height: 12),
                   _buildHarmonyCard(context, report),
                   const SizedBox(height: 16),
                   ...sections.entries.map((entry) {

@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
+import '../services/analytics_service.dart';
+import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
   return TankNotifier();
@@ -76,10 +81,24 @@ class TankNotifier extends StateNotifier<TankState> {
       final updatedTanks = [...state.tanks, tank];
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
+      
+      // Log tank creation
+      AnalyticsService.logTankAction(
+        action: 'tank_created',
+        tankType: tank.type,
+        tankSize: tank.sizeGallons?.round(),
+      );
+      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to add tank: $e',
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'tank_creation_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
       );
     }
   }
@@ -108,13 +127,28 @@ class TankNotifier extends StateNotifier<TankState> {
     state = state.copyWith(isLoading: true, clearError: true);
     
     try {
+      final tankToDelete = state.tanks.firstWhere((tank) => tank.id == tankId);
       final updatedTanks = state.tanks.where((tank) => tank.id != tankId).toList();
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
+      
+      // Log tank deletion
+      AnalyticsService.logTankAction(
+        action: 'tank_deleted',
+        tankType: tankToDelete.type,
+        tankSize: tankToDelete.sizeGallons?.round(),
+      );
+      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to delete tank: $e',
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'tank_deletion_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
       );
     }
   }
@@ -129,5 +163,224 @@ class TankNotifier extends StateNotifier<TankState> {
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  /// Export all tanks to a backup file with user-selected location
+  Future<String?> exportTanksToFile() async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Log backup attempt
+      AnalyticsService.logTankAction(
+        action: 'backup_start',
+        tankSize: state.tanks.length,
+      );
+
+      // Create backup data with metadata
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': state.tanks.length,
+        'tanks': state.tanks.map((tank) => tank.toJson()).toList(),
+      };
+
+      // Convert to formatted JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(backupData);
+      
+      // Convert string to bytes for mobile platforms
+      final bytes = Uint8List.fromList(utf8.encode(jsonString));
+
+      // Create filename with timestamp
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
+      final fileName = 'aquarium_ai_backup_$timestamp.json';
+
+      String? outputPath;
+      
+      if (kIsWeb) {
+        // On web, trigger direct browser download
+        downloadFile(bytes, fileName);
+        
+        // For web, we return the filename since there's no file path
+        outputPath = fileName;
+      } else {
+        // On mobile/desktop, use saveFile with all parameters
+        outputPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Tank Backup',
+          fileName: fileName,
+          type: FileType.custom,
+          allowedExtensions: ['json'],
+          bytes: bytes, // Required for Android & iOS
+        );
+      }
+
+      if (outputPath != null) {
+        state = state.copyWith(isLoading: false);
+        
+        // Log successful backup
+        AnalyticsService.logTankAction(
+          action: 'backup_success',
+          tankSize: state.tanks.length,
+        );
+        
+        // Log feature usage
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_backup',
+          parameters: {
+            'platform': kIsWeb ? 'web' : 'mobile',
+            'tank_count': state.tanks.length,
+            'file_size_kb': (bytes.length / 1024).round(),
+          },
+        );
+        
+        return outputPath;
+      } else {
+        // User cancelled
+        state = state.copyWith(isLoading: false);
+        
+        // Log backup cancellation
+        AnalyticsService.logTankAction(
+          action: 'backup_cancelled',
+          tankSize: state.tanks.length,
+        );
+        
+        return null;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to export tanks: $e',
+      );
+      
+      // Log backup failure
+      AnalyticsService.logTankAction(
+        action: 'backup_failed',
+        tankSize: state.tanks.length,
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'backup_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      
+      return null;
+    }
+  }
+
+  /// Import tanks from a backup file
+  Future<bool> importTanksFromFile() async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Log restore attempt
+      AnalyticsService.logTankAction(
+        action: 'restore_start',
+        tankSize: state.tanks.length, // Current tank count before restore
+      );
+
+      // Pick a file - use FileType.any for better compatibility
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        
+        // Log restore cancellation
+        AnalyticsService.logTankAction(
+          action: 'restore_cancelled',
+          tankSize: state.tanks.length,
+        );
+        
+        return false;
+      }
+
+      final platformFile = result.files.single;
+      String jsonString;
+
+      if (kIsWeb) {
+        // On web, use bytes property
+        final bytes = platformFile.bytes;
+        if (bytes == null) {
+          throw Exception('Could not read file content on web platform');
+        }
+        jsonString = utf8.decode(bytes);
+      } else {
+        // On mobile/desktop, use path property
+        final filePath = platformFile.path;
+        if (filePath == null) {
+          throw Exception('Could not access selected file');
+        }
+        final file = File(filePath);
+        jsonString = await file.readAsString();
+      }
+
+      final backupData = json.decode(jsonString) as Map<String, dynamic>;
+
+      // Validate backup format
+      if (!backupData.containsKey('tanks') || !backupData.containsKey('version')) {
+        throw const FormatException('Invalid backup file format');
+      }
+
+      // Parse tanks
+      final tanksList = backupData['tanks'] as List;
+      final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+
+      final previousTankCount = state.tanks.length;
+      
+      // For now, replace all tanks (we could add merge options later)
+      state = state.copyWith(tanks: importedTanks, isLoading: false);
+      await _saveTanks();
+
+      // Log successful restore
+      AnalyticsService.logTankAction(
+        action: 'restore_success',
+        tankSize: importedTanks.length,
+      );
+      
+      // Log feature usage with detailed metrics
+      AnalyticsService.logFeatureUsed(
+        featureName: 'tank_restore',
+        parameters: {
+          'platform': kIsWeb ? 'web' : 'mobile',
+          'previous_tank_count': previousTankCount,
+          'restored_tank_count': importedTanks.length,
+          'backup_version': backupData['version'] ?? 'unknown',
+          'file_size_kb': (jsonString.length / 1024).round(),
+        },
+      );
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to import tanks: $e',
+      );
+      
+      // Log restore failure
+      AnalyticsService.logTankAction(
+        action: 'restore_failed',
+        tankSize: state.tanks.length,
+      );
+      
+      AnalyticsService.logError(
+        errorType: 'restore_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      
+      return false;
+    }
+  }
+
+  /// Get backup file info for display purposes
+  Map<String, dynamic> createBackupInfo() {
+    return {
+      'tankCount': state.tanks.length,
+      'exportDate': DateTime.now().toIso8601String(),
+      'version': '1.0.0',
+    };
   }
 }

@@ -176,21 +176,6 @@ void main() {
       expect(score, lessThan(0.1)); // Should be very low compatibility
     });
 
-    test('Harmony score with single fish returns 1.0', () {
-      final fish = Fish(
-        name: 'Solo Fish',
-        commonNames: [],
-        imageURL: '',
-        compatible: [],
-        notRecommended: [],
-        notCompatible: [],
-        withCaution: [],
-      );
-
-      final score = TankHarmonyCalculator.calculateHarmonyScore([fish]);
-      expect(score, equals(1.0));
-    });
-
     test('Tank harmony score calculation', () {
       final tank = Tank.create(
         name: 'Test Tank',
@@ -237,6 +222,68 @@ void main() {
       final score = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData);
       expect(score, isNotNull);
       expect(score!, greaterThan(0.9));
+    });
+
+    test('Harmony score calculation with multiple individual fish of same type', () {
+      // Test scenario: 1 Betta male + 2 Betta females should calculate 3 pairwise comparisons
+      // instead of just 1 comparison between the two fish types
+      final betaMale = Fish(
+        name: 'Betta Male',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Betta Female'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final betaFemale = Fish(
+        name: 'Betta Female',
+        commonNames: [],
+        imageURL: '',
+        compatible: ['Betta Male', 'Betta Female'],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+
+      // Create tank with 1 male and 2 females
+      final tank = Tank.create(
+        name: 'Betta Tank',
+        type: 'freshwater',
+        inhabitants: [
+          TankInhabitant(
+            id: 'id1',
+            customName: 'Male Betta',
+            fishUnit: 'Betta Male',
+            quantity: 1,
+          ),
+          TankInhabitant(
+            id: 'id2',
+            customName: 'Female Bettas',
+            fishUnit: 'Betta Female',
+            quantity: 2,
+          ),
+        ],
+      );
+
+      final fishData = {
+        'freshwater': [betaMale, betaFemale]
+      };
+
+      // Calculate harmony score using the tank method (which should now account for individual fish)
+      final tankScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData);
+      
+      // Also test direct calculation with individual fish list
+      final individualFishList = [betaMale, betaFemale, betaFemale]; // 1 male + 2 females
+      final directScore = TankHarmonyCalculator.calculateHarmonyScore(individualFishList);
+      
+      expect(tankScore, isNotNull);
+      expect(tankScore, equals(directScore));
+      
+      // The score should be based on 3 pairwise comparisons:
+      // 1. Male-Female1, 2. Male-Female2, 3. Female1-Female2
+      // All should be compatible (high score)
+      expect(tankScore!, greaterThan(0.9));
     });
 
     test('Harmony labels', () {

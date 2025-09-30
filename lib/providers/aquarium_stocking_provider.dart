@@ -49,6 +49,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   AquariumStockingNotifier(this.ref) : super(AquariumStockingState());
 
+  void cancel() {
+    state = state.copyWith(isLoading: false, clearError: true);
+  }
+
   // Helper function for OpenAI calls with retry logic
   Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
     int retries = 0;
@@ -267,7 +271,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           withCaution: [],
         ),
       );
-      if (!existingFish.any((f) => f.name == fish.name)) {
+      // Add individual fish based on quantity for proper compatibility calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
         existingFish.add(fish);
       }
     }
