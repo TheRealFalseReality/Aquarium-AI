@@ -293,7 +293,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()
@@ -368,7 +367,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -505,7 +504,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -642,7 +641,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
