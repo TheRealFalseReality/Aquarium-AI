@@ -962,7 +962,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           child: Text(
-                            _getCalculationBreakdown(tank),
+                            tank.calculationBreakdown ?? 'No calculation available',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontFamily: 'monospace',
                             ),
@@ -1040,6 +1040,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         inhabitants: List.from(tank.inhabitants),
         sizeGallons: tank.sizeGallons,
         sizeLiters: tank.sizeLiters,
+        notes: tank.notes,
+        harmonyScore: tank.harmonyScore,
+        calculationBreakdown: tank.calculationBreakdown,
       );
       
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);
@@ -1106,35 +1109,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } else {
       return '${date.month}/${date.day}/${date.year}';
     }
-  }
-
-  String _getCalculationBreakdown(Tank tank) {
-    if (fishData == null || tank.inhabitants.isEmpty) return 'No calculation available';
-    
-    // Get fish data for the tank
-    final categoryFish = fishData![tank.type] ?? [];
-    final tankFish = <Fish>[];
-    
-    for (final inhabitant in tank.inhabitants) {
-      final fish = categoryFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-        orElse: () => Fish(
-          name: inhabitant.fishUnit,
-          commonNames: [],
-          imageURL: '',
-          compatible: [],
-          notRecommended: [],
-          notCompatible: [],
-          withCaution: [],
-        ),
-      );
-      // Add individual fish based on quantity for proper compatibility calculations
-      for (int i = 0; i < inhabitant.quantity; i++) {
-        tankFish.add(fish);
-      }
-    }
-    
-    return TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
   }
 
   String _formatTankSize(Tank tank) {

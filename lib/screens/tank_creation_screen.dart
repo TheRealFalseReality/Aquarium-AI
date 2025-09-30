@@ -189,22 +189,49 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ? double.tryParse(_sizeLitersController.text.trim()) 
           : null;
 
-        // Calculate harmony score for the tank
+        // Build temporary tank for calculations
+        final tempTank = Tank(
+          id: 'temp',
+          name: _tankNameController.text.trim(),
+          type: _selectedCategory,
+          inhabitants: _inhabitants,
+          sizeGallons: sizeGallons,
+          sizeLiters: sizeLiters,
+          notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+          createdAt: _creationDate,
+          updatedAt: DateTime.now(),
+        );
+
+        // Calculate harmony score and breakdown for the tank (only once during save)
         final fishData = {_selectedCategory: _availableFish};
         final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
-          Tank(
-            id: 'temp',
-            name: _tankNameController.text.trim(),
-            type: _selectedCategory,
-            inhabitants: _inhabitants,
-            sizeGallons: sizeGallons,
-            sizeLiters: sizeLiters,
-            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-            createdAt: _creationDate,
-            updatedAt: DateTime.now(),
-          ),
+          tempTank,
           fishData,
         );
+
+        // Calculate breakdown string (only once during save)
+        String? calculationBreakdown;
+        if (_inhabitants.isNotEmpty && _availableFish.isNotEmpty) {
+          final tankFish = <Fish>[];
+          for (final inhabitant in _inhabitants) {
+            final fish = _availableFish.firstWhere(
+              (f) => f.name == inhabitant.fishUnit,
+              orElse: () => Fish(
+                name: inhabitant.fishUnit,
+                commonNames: [],
+                imageURL: '',
+                compatible: [],
+                notRecommended: [],
+                notCompatible: [],
+                withCaution: [],
+              ),
+            );
+            for (int i = 0; i < inhabitant.quantity; i++) {
+              tankFish.add(fish);
+            }
+          }
+          calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
+        }
 
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
@@ -215,6 +242,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -225,6 +253,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
               );
 
