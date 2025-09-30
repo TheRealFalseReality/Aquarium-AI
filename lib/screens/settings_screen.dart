@@ -293,6 +293,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
+                  // Display settings based on the selected provider.
+                  if (_selectedProvider == AIProvider.gemini)
+                    _buildGeminiSettings()
+                  else if (_selectedProvider == AIProvider.openAI)
+                    _buildOpenAISettings()
+                  else
+                    _buildGroqSettings(),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(modelProvider.notifier)
+                              .resetModelsToDefaults();
+                          context.showAccessibleMessage('Models reset to default.');
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset Models'),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: _saveSettings, // Call the save function.
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save Settings'),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -324,35 +353,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  // Display settings based on the selected provider.
-                  if (_selectedProvider == AIProvider.gemini)
-                    _buildGeminiSettings()
-                  else if (_selectedProvider == AIProvider.openAI)
-                    _buildOpenAISettings()
-                  else
-                    _buildGroqSettings(),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(modelProvider.notifier)
-                              .resetModelsToDefaults();
-                          context.showAccessibleMessage('Models reset to default.');
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reset Models'),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: _saveSettings, // Call the save function.
-                        icon: const Icon(Icons.save),
-                        label: const Text('Save Settings'),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -367,7 +367,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -504,7 +504,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -641,7 +641,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
