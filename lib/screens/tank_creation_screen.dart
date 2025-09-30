@@ -11,7 +11,6 @@ import '../providers/tank_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
-import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
