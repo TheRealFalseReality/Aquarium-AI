@@ -633,7 +633,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ],
                         // Harmony Score Display
-                        if (tank.inhabitants.isNotEmpty && fishData != null) ...[
+                        if (tank.inhabitants.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           _buildHarmonyScoreChip(tank),
                         ],
@@ -757,7 +757,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     const SizedBox(height: 8),
                     // Fish Display by Type
                     if (tank.inhabitants.isNotEmpty) ...[
-                      ..._buildFishGroupDisplay(tank),
+                      ..._buildFishGroupDisplay(tank, fishData),
                     ],
                   ],
                 ),
@@ -873,7 +873,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ],
               // Harmony Score Info
-              if (tank.inhabitants.isNotEmpty && fishData != null) ...[
+              if (tank.inhabitants.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -896,7 +896,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const Text('No inhabitants added yet.')
               else
                 ...tank.inhabitants.map((inhabitant) {
-                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, inhabitant: inhabitant);
+                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -943,7 +943,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 }),
               
               // Calculation Breakdown Expandable Section
-              if (tank.inhabitants.isNotEmpty && fishData != null) ...[
+              if (tank.inhabitants.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Semantics(
                   button: true,
@@ -1184,7 +1184,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  String? _getFishImageUrl(String tankType, String fishName, {TankInhabitant? inhabitant}) {
+  String? _getFishImageUrl(String tankType, String fishName, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
     // Prioritize custom images if inhabitant is provided
     if (inhabitant != null) {
       if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
@@ -1198,7 +1198,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Fall back to default fish image
     if (fishData == null) return null;
     
-    final categoryFish = fishData![tankType] ?? [];
+    final categoryFish = fishData[tankType] ?? [];
     final fish = categoryFish.firstWhere(
       (f) => f.name == fishName,
       orElse: () => Fish(
@@ -1231,7 +1231,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return grouped;
   }
 
-  List<Widget> _buildFishGroupDisplay(Tank tank) {
+  List<Widget> _buildFishGroupDisplay(Tank tank, Map<String, List<Fish>>? fishData) {
     final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
     final widgets = <Widget>[];
     
@@ -1243,7 +1243,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       final fishType = entry.key;
       final inhabitants = entry.value;
-      final fishImageUrl = _getFishImageUrl(tank.type, fishType, inhabitant: inhabitants.first);
+      final fishImageUrl = _getFishImageUrl(tank.type, fishType, fishData, inhabitant: inhabitants.first);
       
       // Calculate total quantity for this fish type
       final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
@@ -1339,9 +1339,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
     
+    // Get fish data from provider
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    
     // Calculate and store existing fish for the listener
     if (fishData != null) {
-      final categoryFish = fishData![tank.type] ?? [];
+      final categoryFish = fishData[tank.type] ?? [];
       final existingFish = <Fish>[];
       
       for (final inhabitant in tank.inhabitants) {
