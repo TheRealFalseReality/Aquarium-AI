@@ -2,6 +2,14 @@
 
 Ready to level up your aquarium? **Aquarium AI** offers a suite of powerful, AI-driven tools to help both new and seasoned aquarists create a thriving underwater ecosystem. Our goal is to take the guesswork out of aquarium keeping, making it a more enjoyable and successful hobby for everyone.
 
+## Unlock the Power of AI with Your Own API Key!
+
+Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:
+
+Higher AI API Call Limits: Enjoy significantly more interactions with our AI, including the powerful Gemini 2.5 flash.
+
+Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.
+
 ## 🚀 Key Features
 
 ### 🤖 Intelligent AI Chatbot

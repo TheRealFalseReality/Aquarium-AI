@@ -72,7 +72,7 @@ class TankHarmonyCalculator {
     final categoryFish = fishData[tank.type] ?? [];
     if (categoryFish.isEmpty) return null;
 
-    // Map tank inhabitants to Fish objects
+    // Map tank inhabitants to Fish objects, accounting for individual fish quantities
     final tankFish = <Fish>[];
     for (final inhabitant in tank.inhabitants) {
       final fish = categoryFish.firstWhere(
@@ -87,8 +87,8 @@ class TankHarmonyCalculator {
           withCaution: [],
         ),
       );
-      // Add each fish based on quantity (but for harmony calculation, treat as unique types)
-      if (!tankFish.any((f) => f.name == fish.name)) {
+      // Add individual fish based on quantity for proper pairwise calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
         tankFish.add(fish);
       }
     }

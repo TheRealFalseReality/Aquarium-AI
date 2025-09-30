@@ -17,6 +17,7 @@ import './photo_analysis_screen.dart';
 import './photo_analysis_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
+import '../services/analytics_service.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
@@ -92,6 +93,17 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     final chatNotifier = ref.read(chatProvider.notifier);
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
+    
+    // Log AI interaction
+    AnalyticsService.logAIInteraction(
+      interactionType: 'chat_message',
+      feature: 'chatbot',
+      additionalData: {
+        'message_length': text.length,
+        'has_question_mark': text.contains('?') ? 'true' : 'false',
+      },
+    );
+    
     setState(() => _sending = true);
     _sendIconController.forward(from: 0);
     chatNotifier.sendMessage(text);
@@ -492,6 +504,21 @@ Widget _suggestionMenu(BuildContext context) {
           label: q,
           dense: true,
           onTap: () {
+            // Log suggested question usage with safer parameters
+            final questionText = q.length > 100 ? q.substring(0, 100) : q;
+            AnalyticsService.logFeatureUsed(
+              featureName: 'suggested_question',
+              parameters: {
+                'question_text': questionText,
+                'question_length': q.length,
+                'menu_type': _expandedMenu ?? 'unknown',
+              },
+            );
+            AnalyticsService.logUserEngagement(
+              engagementType: 'suggested_question_click',
+              content: questionText,
+            );
+            
             chatNotifier.sendMessage(q);
             setState(() => _expandedMenu = null);
           },
@@ -542,7 +569,7 @@ Widget _suggestionMenu(BuildContext context) {
           label: 'Photo Analyzer',
           icon: Icons.camera_alt_outlined,
           customGradient: LinearGradient(
-            colors: [Colors.deepOrange.shade400, Colors.amber.shade400],
+            colors: [Colors.deepOrange.shade400, const Color.fromARGB(255, 160, 88, 6)],
           ),
           onTap: () {
             // Already in chatbot; just open analyzer
@@ -922,6 +949,20 @@ class MessageBubble extends ConsumerWidget {
                     label: q,
                     dense: true,
                     onTap: () {
+                      // Log follow-up question usage with safer parameters
+                      final questionText = q.length > 100 ? q.substring(0, 100) : q;
+                      AnalyticsService.logFeatureUsed(
+                        featureName: 'followup_question',
+                        parameters: {
+                          'question_text': questionText,
+                          'question_length': q.length,
+                        },
+                      );
+                      AnalyticsService.logUserEngagement(
+                        engagementType: 'followup_question_click',
+                        content: questionText,
+                      );
+                      
                       ref.read(chatProvider.notifier).sendMessage(q);
                     },
                   );

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
+import '../services/analytics_service.dart';
+import '../widgets/accessible_feedback.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -65,28 +67,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Validation Check: Ensure the API key for the selected provider is not empty.
     if (_selectedProvider == AIProvider.gemini &&
         _geminiApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Gemini API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Gemini API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.openAI &&
         _openAIApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter an OpenAI API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter an OpenAI API key before saving.');
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a Groq API key before saving.')),
-      );
+      context.showAccessibleMessage('Please enter a Groq API key before saving.');
       return; // Stop the function
     }
+
+    // Log settings save
+    AnalyticsService.logFeatureUsed(
+      featureName: 'settings_save',
+      parameters: {
+        'provider': _selectedProvider.toString(),
+        'has_api_key': 'true', // We validated it exists above
+      },
+    );
 
     // If validation passes, proceed to save the settings.
     ref.read(modelProvider.notifier).setModels(
@@ -102,9 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveProvider: _selectedProvider,
         );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings updated successfully!')),
-    );
+    context.showAccessibleMessage('Settings updated successfully!');
   }
 
   @override
@@ -166,39 +166,164 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Text(
-                      'Active AI Provider',
-                      style: Theme.of(context).textTheme.titleLarge,
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.smart_toy,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Active AI Provider',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
                   SegmentedButton<AIProvider>(
-                    segments: const [
+                    showSelectedIcon: false, // Remove checkmarks
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      selectedBackgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+                      selectedForegroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    segments: [
                       ButtonSegment(
-                          value: AIProvider.gemini, label: Text('Gemini')),
+                        value: AIProvider.gemini, 
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.auto_awesome, size: 16),
+                            SizedBox(width: 4),
+                            Text('Gemini'),
+                          ],
+                        ),
+                      ),
                       ButtonSegment(
-                          value: AIProvider.openAI, label: Text('OpenAI')),
-                      ButtonSegment(value: AIProvider.groq, label: Text('Groq')),
+                        value: AIProvider.openAI, 
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.psychology, size: 16),
+                            SizedBox(width: 4),
+                            Text('OpenAI'),
+                          ],
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: AIProvider.groq, 
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.flash_on, size: 16),
+                            SizedBox(width: 4),
+                            Text('Groq'),
+                          ],
+                        ),
+                      ),
                     ],
                     selected: {_selectedProvider},
                     onSelectionChanged: (newSelection) {
+                      final oldProvider = _selectedProvider;
+                      final newProvider = newSelection.first;
+                      
+                      // Log settings change
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'ai_provider',
+                        newValue: newProvider.toString(),
+                        oldValue: oldProvider.toString(),
+                      );
+                      
                       setState(() {
-                        _selectedProvider = newSelection.first;
+                        _selectedProvider = newProvider;
                       });
                     },
                   ),
                   const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      'Gemini is recommended and free.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.green.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Gemini is recommended and free',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w500,
                           ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
                     _buildGeminiSettings()
@@ -215,10 +340,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref
                               .read(modelProvider.notifier)
                               .resetModelsToDefaults();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Models reset to default.')),
-                          );
+                          context.showAccessibleMessage('Models reset to default.');
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Reset Models'),
@@ -245,11 +367,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            'Google Gemini Settings',
-            style: Theme.of(context).textTheme.titleLarge,
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue.withOpacity(0.1),
+                Colors.purple.withOpacity(0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.blue.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.blue,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Google Gemini',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    Text(
+                      'Google\'s most capable AI model',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -301,13 +472,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 'https://aistudio.google.com/app/apikey',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
               ),
             ),
             const Text('2. Sign in with your Google account.'),
             const Text(
                 '3. Click "Create API key in new project" or "Get API key".'),
             const Text('4. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
+              ),
+            ),
           ],
         ),
       ],
@@ -319,11 +504,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            'OpenAI Settings',
-            style: Theme.of(context).textTheme.titleLarge,
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.green.withOpacity(0.1),
+                Colors.teal.withOpacity(0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.green.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.psychology,
+                  color: Colors.green,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'OpenAI',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                    Text(
+                      'ChatGPT and GPT models by OpenAI',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -377,12 +611,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Text(
                 'https://platform.openai.com/api-keys',
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const Text('2. Sign in and create a new secret key.'),
             const Text('3. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ],
@@ -394,11 +641,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            'Groq Settings',
-            style: Theme.of(context).textTheme.titleLarge,
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.orange.withOpacity(0.1),
+                Colors.red.withOpacity(0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.orange.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.flash_on,
+                  color: Colors.orange,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Groq',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    Text(
+                      'Lightning-fast LLM inference',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -448,12 +744,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 'https://console.groq.com/keys',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline),
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
               ),
             ),
             const Text('2. Sign in and navigate to the API Keys section.'),
             const Text('3. Click "Create API Key" to create a new secret key.'),
             const Text('4. Copy the generated API key and paste it above.'),
+            InkWell(
+              onTap: () =>
+                  launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+              child: Text(
+                'See Guide',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ],

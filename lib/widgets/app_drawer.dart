@@ -8,6 +8,7 @@ import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 
@@ -35,6 +36,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final fishData = fishCompatibilityState.fishData.value;
 
     void navigate(String routeName) {
+      // Log navigation analytics
+      final currentRoute = AnalyticsService.currentScreen;
+      final targetScreen = AnalyticsService.routeToScreenName(routeName);
+      AnalyticsService.logNavigation(
+        from: currentRoute,
+        to: targetScreen,
+        method: 'drawer_menu',
+      );
+      
       Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
         if (!mounted) return;
@@ -94,7 +104,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 180),
                   child: Card(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: ListTile(
                       leading: const Icon(Icons.water, size: 36),
@@ -167,7 +177,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 350),
                   child: ListTile(
-                    leading: const Icon(Icons.opacity),
+                    leading: const Icon(Icons.view_in_ar),
                     title: const Text('Tank Volume'),
                     subtitle:
                         const Text('Calculate the volume of your aquarium.'),

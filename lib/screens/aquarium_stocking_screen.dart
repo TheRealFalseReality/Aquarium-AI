@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
+import '../services/analytics_service.dart';
 import 'stocking_report_screen.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
@@ -28,6 +29,17 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
 
   void _getRecommendations() {
     if (_formKey.currentState!.validate()) {
+      // Log actual feature usage
+      AnalyticsService.logFeatureUsed(
+        featureName: 'aquarium_stocking_assistant',
+        parameters: {
+          'tank_size': _tankSizeController.text,
+          'tank_type': _selectedCategory,
+          'has_notes': _notesController.text.isNotEmpty ? 'true' : 'false',
+          'notes_length': _notesController.text.length,
+        },
+      );
+      
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
             tankSize: _tankSizeController.text,
             tankType: _selectedCategory,
@@ -61,6 +73,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     });
 
     final state = ref.watch(aquariumStockingProvider);
+    final cs = Theme.of(context).colorScheme;
     final hasLastReport = state.lastRecommendations != null && state.lastRecommendations!.isNotEmpty;
 
     return MainLayout(
@@ -118,11 +131,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
               TextFormField(
                 controller: _tankSizeController,
                 decoration: const InputDecoration(
-                  labelText: 'Tank Size (e.g., "55" or "200 liters")',
+                  labelText: 'Tank Size (e.g., "55" (for gallons) or "200 liters")',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a tank size';
@@ -140,15 +151,35 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: state.isLoading ? null : _getRecommendations,
-                icon: state.isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3))
-                    : const Icon(Icons.auto_awesome),
-                label: const Text('Get Recommendations'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade400,
+                      Colors.blue.shade500,
+                      Colors.cyan.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: state.isLoading ? null : _getRecommendations,
+                  icon: state.isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
+                      : const Icon(Icons.auto_awesome),
+                  label: const Text('Get Recommendations'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -158,7 +189,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
                     state.error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(color: cs.error),
                     textAlign: TextAlign.center,
                   ),
                 ),

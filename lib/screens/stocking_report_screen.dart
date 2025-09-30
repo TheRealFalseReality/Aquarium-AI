@@ -1,4 +1,5 @@
 import 'package:fish_ai/widgets/ad_component.dart';
+import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,9 @@ import '../models/tank.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../services/analytics_service.dart';
+import '../widgets/common_buttons.dart';
+import '../widgets/helper_text.dart';
 
 class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
@@ -41,6 +45,15 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
   void _regenerateRecommendations() {
     if (_isRegenerating) return; // Prevent multiple calls
     
+    // Log regeneration analytics
+    AnalyticsService.logFeatureUsed(
+      featureName: 'stocking_report_regenerate',
+      parameters: {
+        'regeneration_type': widget.originalTank != null ? 'tank_based' : 'general',
+        'has_existing_fish': (widget.existingFish?.isNotEmpty ?? false) ? 'true' : 'false',
+      },
+    );
+    
     setState(() {
       _isRegenerating = true;
     });
@@ -60,15 +73,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
       setState(() {
         _isRegenerating = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Cannot regenerate - missing original parameters.'),
-          action: SnackBarAction(
-            label: 'Dismiss',
-            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-          ),
-        ),
-      );
+      context.showAccessibleMessage('Cannot regenerate - missing original parameters.');
     }
   }
 
@@ -122,14 +127,14 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
         setState(() {
           _isRegenerating = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error}'),
-            action: SnackBarAction(
-              label: 'Dismiss',
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            ),
-          ),
+        context.showAccessibleMessage(
+          'Error: ${next.error}',
+          onAction: next.error!.toLowerCase().contains('api key not set')
+              ? () => Navigator.pushNamed(context, '/settings')
+              : null,
+          actionLabel: next.error!.toLowerCase().contains('api key not set')
+              ? 'Settings'
+              : null,
         );
       }
     });
@@ -209,30 +214,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _isRegenerating ? null : _regenerateRecommendations,
-                              icon: _isRegenerating 
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.refresh),
-                              label: Text(_isRegenerating ? 'Regenerating...' : 'Regenerate'),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.close),
-                              label: const Text('Close'),
-                            ),
-                          ),
-                        ],
+                      ActionButtonRow(
+                        onRegenerate: _regenerateRecommendations,
+                        isRegenerating: _isRegenerating,
                       ),
                       const SizedBox(height: 8), // Extra padding below buttons
                     ],
@@ -293,6 +277,8 @@ class _RecommendationTabView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
+        const BannerAdWidget(),
+        const SizedBox(height: 16),
         Text(
           report.title,
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -467,12 +453,8 @@ class _RecommendationTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          "(Click a fish to search)",
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
-          textAlign: TextAlign.center,
+        const InstructionText(
+          text: "(Click a fish to search)",
         ),
         const SizedBox(height: 14),
         Wrap(
@@ -485,6 +467,33 @@ class _RecommendationTabView extends StatelessWidget {
               selected: false,
             );
           }).toList(),
+        ),
+
+        const SizedBox(height: 16),
+        const BannerAdWidget(),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cs.errorContainer.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.error.withOpacity(0.5)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'AI can make mistakes. Please verify the information provided in this report before making any stocking decisions.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         
         // Calculation Breakdown for tank-based recommendations
@@ -521,6 +530,19 @@ class _RecommendationTabView extends StatelessWidget {
   }
 
   Future<void> _launchSearch(String query) async {
+    // Log external search usage
+    AnalyticsService.logFeatureUsed(
+      featureName: 'external_search',
+      parameters: {
+        'query': query,
+        'source': 'stocking_report',
+      },
+    );
+    AnalyticsService.logUserEngagement(
+      engagementType: 'external_link_click',
+      content: query,
+    );
+    
     final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');

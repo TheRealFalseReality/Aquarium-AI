@@ -51,3 +51,4 @@ flutter.tar.xz
 
 # Firebase build artifacts
 .firebase/
+flutter/

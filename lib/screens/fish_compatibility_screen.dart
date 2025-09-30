@@ -5,10 +5,12 @@ import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
 import 'compatibility_report.dart';
+import '../services/analytics_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -196,25 +198,26 @@ class FishCompatibilityScreenState
       if (next.error != null && previous?.error != next.error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(next.error!),
-                duration: const Duration(seconds: 6),
-                action: next.isRetryable
-                    ? SnackBarAction(
-                        label: 'Retry',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          notifier.retryCompatibilityReport();
-                        },
-                      )
-                    : SnackBarAction(
-                        label: 'Dismiss',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        },
-                      ),
-              ),
+            // Check if the error is related to API key not being set
+            final isApiKeyError = next.error!.toLowerCase().contains('api key not set');
+            
+            // Determine the action based on error type
+            VoidCallback? onAction;
+            String? actionLabel;
+            
+            if (isApiKeyError) {
+              onAction = () => Navigator.pushNamed(context, '/settings');
+              actionLabel = 'Settings';
+            } else if (next.isRetryable) {
+              onAction = () => notifier.retryCompatibilityReport();
+              actionLabel = 'Retry';
+            }
+            
+            context.showAccessibleMessage(
+              next.error!,
+              duration: const Duration(seconds: 6),
+              onAction: onAction,
+              actionLabel: actionLabel,
             );
             notifier.clearError();
           }
@@ -296,6 +299,7 @@ class FishCompatibilityScreenState
                           return FishCard(
                             fish: fish,
                             isSelected: isSelected,
+                            category: _selectedCategory,
                           );
                         },
                         childCount: _filteredFishList.length,
@@ -523,23 +527,55 @@ class FishCompatibilityScreenState
                 ),
               ),
               const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: provider.isLoading
-                    ? null
-                    : () => notifier.getCompatibilityReport(_selectedCategory),
-                icon: provider.isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : const Icon(Icons.analytics_outlined),
-                label: const Text('Get Report'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, letterSpacing: 0.3),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade400,
+                      Colors.blue.shade500,
+                      Colors.cyan.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: provider.isLoading
+                      ? null
+                      : () {
+                          // Log fish compatibility report generation analytics
+                          AnalyticsService.logFeatureUsed(
+                            featureName: 'fish_compatibility_report',
+                            parameters: {
+                              'selected_category': _selectedCategory,
+                              'selected_fish_count': provider.selectedFish.length,
+                              'has_fish_selected': provider.selectedFish.isNotEmpty ? 'true' : 'false',
+                            },
+                          );
+                          
+                          notifier.getCompatibilityReport(_selectedCategory);
+                        },
+                  icon: provider.isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                        )
+                      : const Icon(Icons.analytics_outlined),
+                  label: const Text('Get Report'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
             ],

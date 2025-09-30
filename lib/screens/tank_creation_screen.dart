@@ -8,8 +8,10 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../utils/tank_harmony_calculator.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
-import '../widgets/ad_component.dart';
+import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
   final Tank? existingTank; // For editing existing tanks
@@ -25,6 +27,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
+  final _notesController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
@@ -48,6 +51,9 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       if (widget.existingTank!.sizeLiters != null) {
         _sizeLitersController.text = widget.existingTank!.sizeLiters!.toString();
       }
+      if (widget.existingTank!.notes != null) {
+        _notesController.text = widget.existingTank!.notes!;
+      }
     }
   }
 
@@ -56,6 +62,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     _tankNameController.dispose();
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -76,14 +83,46 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
         _isLoadingFish = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load fish data: $e')),
-        );
+        context.showAccessibleMessage('Failed to load fish data: $e');
       }
     }
   }
 
   void _onCategoryChanged(String category) {
+    // If no inhabitants or same category, just proceed
+    if (_inhabitants.isEmpty || _selectedCategory == category) {
+      _performCategoryChange(category);
+      return;
+    }
+
+    // Show confirmation dialog if there are inhabitants
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Tank Type'),
+        content: Text(
+          'Changing the tank type from ${_selectedCategory == 'freshwater' ? 'Freshwater' : 'Saltwater'} '
+          'to ${category == 'freshwater' ? 'Freshwater' : 'Saltwater'} will remove all current inhabitants.\n\n'
+          'Are you sure you want to continue?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _performCategoryChange(category);
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _performCategoryChange(String category) {
     setState(() {
       _selectedCategory = category;
       _isLoadingFish = true;
@@ -142,9 +181,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _inhabitants.insert(index + 1, duplicatedInhabitant);
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Duplicated "${originalInhabitant.customName}"')),
-    );
+    context.showAccessibleMessage('Duplicated "${originalInhabitant.customName}"');
   }
 
   Future<void> _saveTank() async {
@@ -157,6 +194,23 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ? double.tryParse(_sizeLitersController.text.trim()) 
           : null;
 
+        // Calculate harmony score for the tank
+        final fishData = {_selectedCategory: _availableFish};
+        final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
+          Tank(
+            id: 'temp',
+            name: _tankNameController.text.trim(),
+            type: _selectedCategory,
+            inhabitants: _inhabitants,
+            sizeGallons: sizeGallons,
+            sizeLiters: sizeLiters,
+            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+            createdAt: _creationDate,
+            updatedAt: DateTime.now(),
+          ),
+          fishData,
+        );
+
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
@@ -164,6 +218,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -172,30 +228,59 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
+                notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+                harmonyScore: harmonyScore,
                 createdAt: _creationDate,
               );
 
         if (widget.existingTank != null) {
           await ref.read(tankProvider.notifier).updateTank(tank);
+          
+          // Log tank update analytics
+          AnalyticsService.logTankAction(
+            action: 'update_tank',
+            tankType: tank.type,
+            tankSize: tank.sizeGallons?.toInt(),
+          );
         } else {
           await ref.read(tankProvider.notifier).addTank(tank);
+          
+          // Log tank creation analytics
+          AnalyticsService.logTankAction(
+            action: 'create_tank',
+            tankType: tank.type,
+            tankSize: tank.sizeGallons?.toInt(),
+          );
+          AnalyticsService.logFeatureUsed(
+            featureName: 'tank_creation',
+            parameters: {
+              'tank_type': tank.type,
+              'inhabitant_count': tank.inhabitants.length,
+              'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
+              'has_size': (tank.sizeGallons != null || tank.sizeLiters != null) ? 'true' : 'false',
+            },
+          );
         }
 
         if (mounted) {
+          // Show success message before navigation
+          final parentContext = context;
+          final successMessage = widget.existingTank != null 
+              ? 'Tank updated successfully!' 
+              : 'Tank created successfully!';
+          
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(widget.existingTank != null 
-                  ? 'Tank updated successfully!' 
-                  : 'Tank created successfully!'),
-            ),
-          );
+          
+          // Use a delayed message to ensure it shows after navigation
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (parentContext.mounted) {
+              parentContext.showAccessibleMessage(successMessage);
+            }
+          });
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save tank: $e')),
-          );
+          context.showAccessibleMessage('Failed to save tank: $e');
         }
       }
     }
@@ -209,77 +294,88 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
 
-    // Move the X from the AppBar to the page's header
     return Scaffold(
-      // Remove the AppBar completely
-      body: Stack(
+      body: Column(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Custom Page Header with X Button
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 50, 
-                      bottom: 16
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Centered Title
-                        Column(
-                          children: [
-                            Text(
-                              widget.existingTank != null
-                                  ? 'Edit Your Tank'
-                                  : 'Create Your Tank',
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Design and save your custom aquarium with inhabitants.',
-                              style: Theme.of(context).textTheme.titleMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                        // X Button on the right
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: _cancelAndReturn,
-                            tooltip: 'Close',
+          // Sticky Header
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              right: 16,
+              bottom: 16,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Centered Title
+                Column(
+                  children: [
+                    Text(
+                      widget.existingTank != null
+                          ? 'Edit Your Tank'
+                          : 'Create Your Tank',
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                      ],
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Tank Name
-                  TextFormField(
-                    controller: _tankNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tank Name',
-                      hintText: 'My Community Tank',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Design and save your custom aquarium with inhabitants.',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a tank name';
-                      }
-                      return null;
-                    },
+                  ],
+                ),
+                // X Button on the right
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _cancelAndReturn,
+                    tooltip: 'Close',
                   ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Scrollable Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Tank Name
+                    TextFormField(
+                      controller: _tankNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tank Name',
+                        hintText: 'My Community Tank',
+                        border: OutlineInputBorder(),
+                      ),
+                      textAlign: TextAlign.center,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter a tank name';
+                        }
+                        return null;
+                      },
+                    ),
                   const SizedBox(height: 24),
                   // Tank Size Section
                   Text(
@@ -362,6 +458,28 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Tank Notes Section
+                  Text(
+                    'Tank Notes (Optional)',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _notesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tank Notes',
+                      hintText: 'Special considerations, water parameters, equipment, etc.',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    maxLength: 500,
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: 24),
                   
@@ -463,7 +581,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ElevatedButton.icon(
                         onPressed: _isLoadingFish ? null : _addInhabitant,
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Fish'),
+                        label: const Text('Add'),
                       ),
                     ],
                   ),
@@ -572,80 +690,114 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         ),
                       );
                     }),
+                  // Add bottom padding to ensure content doesn't get hidden behind sticky buttons
                   const SizedBox(height: 32),
-                  // Save Button
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: tankState.isLoading ? null : _saveTank,
-                      icon: tankState.isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.save, color: Colors.white),
-                      label: Text(
-                        widget.existingTank != null ? 'Update Tank' : 'Save Tank',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Cancel Button
-                  OutlinedButton.icon(
-                    onPressed: tankState.isLoading ? null : _cancelAndReturn,
-                    icon: const Icon(Icons.cancel),
-                    label: const Text('Cancel'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: const AdBanner(),
-    );
+        ),
+        
+        // Sticky Bottom Action Buttons
+        Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+            top: 16,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Cancel Button
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: tankState.isLoading ? null : _cancelAndReturn,
+                  icon: const Icon(Icons.cancel),
+                  label: const Text('Cancel'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Save Button
+              Expanded(
+                flex: 2, // Give save button more space
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: tankState.isLoading ? null : _saveTank,
+                    icon: tankState.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.save, color: Colors.white),
+                    label: Text(
+                      widget.existingTank != null ? 'Update Tank' : 'Save Tank',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ));
   }
 
   String? _getFishImageUrl(TankInhabitant inhabitant) {
@@ -747,9 +899,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
-        );
+        context.showAccessibleMessage('Failed to pick image: $e');
       }
     }
   }
@@ -770,9 +920,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take photo: $e')),
-        );
+        context.showAccessibleMessage('Failed to take photo: $e');
       }
     }
   }
@@ -820,9 +968,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       Navigator.of(context).pop();
     } else if (_selectedFishUnit == null) {
       // Show snackbar if no fish type selected
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a fish type')),
-      );
+      context.showAccessibleMessage('Please select a fish type');
     }
   }
 

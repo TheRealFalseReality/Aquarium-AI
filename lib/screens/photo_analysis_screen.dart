@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../services/analytics_service.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
   const PhotoAnalysisScreen({super.key});
@@ -21,6 +23,13 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
 
   Future<void> _pick(ImageSource source) async {
     setState(() => _error = null);
+    
+    // Log photo picker usage
+    AnalyticsService.logPhotoAnalysis(
+      analysisType: 'image_picker',
+      success: null,
+    );
+    
     try {
       final x = await _picker.pickImage(
         source: source,
@@ -30,9 +39,22 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       if (x != null) {
         final bytes = await x.readAsBytes();
         setState(() => _imageBytes = bytes);
+        
+        // Log successful image selection
+        AnalyticsService.logPhotoAnalysis(
+          analysisType: 'image_selected',
+          success: true,
+        );
       }
     } catch (e) {
       setState(() => _error = 'Failed to pick image: $e');
+      
+      // Log image selection error
+      AnalyticsService.logPhotoAnalysis(
+        analysisType: 'image_selected',
+        success: false,
+        errorType: 'picker_error',
+      );
     }
   }
 
@@ -42,6 +64,27 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       _isSubmitting = true;
       _error = null;
     });
+
+    // Log photo analysis submission
+    AnalyticsService.logPhotoAnalysis(
+      analysisType: 'photo_analysis_submit',
+      success: null,
+    );
+    AnalyticsService.logFeatureUsed(
+      featureName: 'photo_analysis',
+      parameters: {
+        'has_note': _noteController.text.isNotEmpty ? 'true' : 'false',
+        'note_length': _noteController.text.length,
+      },
+    );
+    AnalyticsService.logAIInteraction(
+      interactionType: 'photo_analysis',
+      feature: 'photo_analyzer',
+      additionalData: {
+        'has_note': _noteController.text.isNotEmpty ? 'true' : 'false',
+        'note_length': _noteController.text.length,
+      },
+    );
 
     await ref.read(chatProvider.notifier).analyzePhoto(
           imageBytes: _imageBytes!,
@@ -176,6 +219,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const BannerAdWidget(),
+              const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: (_imageBytes == null || _isSubmitting) ? null : _submit,
               icon: _isSubmitting
