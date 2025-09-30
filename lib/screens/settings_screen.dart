@@ -294,6 +294,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  // Display settings based on the selected provider.
+                  if (_selectedProvider == AIProvider.gemini)
+                    _buildGeminiSettings()
+                  else if (_selectedProvider == AIProvider.openAI)
+                    _buildOpenAISettings()
+                  else
+                    _buildGroqSettings(),
+                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -324,13 +332,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
-                  // Display settings based on the selected provider.
-                  if (_selectedProvider == AIProvider.gemini)
-                    _buildGeminiSettings()
-                  else if (_selectedProvider == AIProvider.openAI)
-                    _buildOpenAISettings()
-                  else
-                    _buildGroqSettings(),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
