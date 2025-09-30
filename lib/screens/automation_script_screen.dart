@@ -1,9 +1,7 @@
-import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
-import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 
 class AutomationScriptScreen extends ConsumerStatefulWidget {
@@ -28,15 +26,6 @@ class AutomationScriptScreenState
   void _submitScriptRequest() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      
-      // Log actual feature usage
-      AnalyticsService.logFeatureUsed(
-        featureName: 'automation_script',
-        parameters: {
-          'description_length': _descriptionController.text.length,
-          'has_description': _descriptionController.text.isNotEmpty ? 'true' : 'false',
-        },
-      );
       
       // Start the script generation
       await ref
@@ -104,8 +93,6 @@ class AutomationScriptScreenState
                     : null,
               ),
               const SizedBox(height: 24),
-              const BannerAdWidget(),
-            const SizedBox(height: 14),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitScriptRequest,
                 style: ElevatedButton.styleFrom(
@@ -121,9 +108,6 @@ class AutomationScriptScreenState
                       )
                     : const Text('Generate Script'),
               ),
-              
-            const SizedBox(height: 14),
-            const NativeAdWidget(),
             ],
           ),
         ),

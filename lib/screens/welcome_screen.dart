@@ -1,20 +1,13 @@
-// ignore_for_file: unused_element
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
-import '../widgets/app_promotion_dialog.dart';
-import '../theme_provider.dart';
-import '../services/analytics_service.dart';
 
 class FeatureInfo {
   final String icon;
@@ -42,124 +35,13 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
-
-  // Static method to reset promotion dialog preference for testing and debugging
-  static Future<void> resetPromotionDialog() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_WelcomeScreenState._promotionDialogTimestampKey);
-      debugPrint('Promotion dialog timestamp reset');
-    } catch (e) {
-      debugPrint('Error resetting promotion dialog preference: $e');
-    }
-  }
-
-  // Static method to manually set timestamp for testing (useful for debugging)
-  static Future<void> setPromotionDialogTimestamp(int timestamp) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_WelcomeScreenState._promotionDialogTimestampKey, timestamp);
-      debugPrint('Promotion dialog timestamp set to: $timestamp');
-    } catch (e) {
-      debugPrint('Error setting promotion dialog timestamp: $e');
-    }
-  }
-
-  // Static method to check current timestamp for debugging
-  static Future<void> checkPromotionDialogStatus() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp = prefs.getInt(_WelcomeScreenState._promotionDialogTimestampKey) ?? 0;
-      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-      
-      debugPrint('Promotion dialog status:');
-      debugPrint('  Last shown timestamp: $lastShownTimestamp');
-      debugPrint('  Current timestamp: $currentTimestamp');
-      debugPrint('  Hours since last shown: ${hoursSinceLastShown.toStringAsFixed(1)}');
-      debugPrint('  Will show dialog: ${hoursSinceLastShown >= _WelcomeScreenState._promotionDialogCooldownHours}');
-    } catch (e) {
-      debugPrint('Error checking promotion dialog status: $e');
-    }
-  }
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
-  static const int _promotionDialogCooldownHours = 48;
-  
   @override
   void initState() {
     super.initState();
-    // Check if we should show the app promotion dialog on web
-    if (kIsWeb) {
-      _checkShowPromotionDialog();
-    }
-  }
-
-  Future<void> _checkShowPromotionDialog() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp = prefs.getInt(_promotionDialogTimestampKey) ?? 0;
-      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-      
-      debugPrint('Promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_promotionDialogCooldownHours hours');
-      
-      // Show the dialog if it has never been shown or if 48 hours have passed
-      if (hoursSinceLastShown >= _promotionDialogCooldownHours && mounted) {
-        debugPrint('Promotion dialog will be shown (cooldown period elapsed)');
-        // Show the popup after a short delay to allow the screen to load
-        Timer(const Duration(seconds: 1), () {
-          if (mounted) {
-            _showPromotionDialog();
-          }
-        });
-      } else {
-        debugPrint('Promotion dialog will not be shown (cooldown period not elapsed)');
-      }
-    } catch (e) {
-      // If there's an error with SharedPreferences, silently continue
-      debugPrint('Error checking promotion dialog preference: $e');
-    }
-  }
-
-  Future<void> _showPromotionDialog() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      // Store the current timestamp when showing the dialog
-      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      await prefs.setInt(_promotionDialogTimestampKey, currentTimestamp);
-      debugPrint('Promotion dialog shown, timestamp saved: $currentTimestamp');
-      
-      // Log app promotion dialog shown
-      AnalyticsService.logAppPromotion(
-        action: 'dialog_shown',
-        source: 'welcome_screen_auto',
-      );
-      
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (context) => const AppPromotionDialog(),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error showing promotion dialog: $e');
-    }
-  }
-
-  // Debug method to reset promotion dialog preference
-  // This can be called from settings or debug menu if needed
-  // Note: This is now also available as WelcomeScreen.resetPromotionDialog()
-  static Future<void> resetPromotionDialog() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_promotionDialogTimestampKey);
-    } catch (e) {
-      debugPrint('Error resetting promotion dialog preference: $e');
-    }
+    // No need for the API key check here anymore.
   }
 
   Future<void> _launchURL(String url) async {
@@ -220,7 +102,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       FeatureInfo(
         icon: '🏠',
         title: 'My Tanks',
-        description: 'Create and manage your custom tanks with inhabitants. Get personalized stocking recommendations for your tanks.',
+        description: 'Create and manage your custom tanks with inhabitants. Design your perfect aquarium setups.',
         routeName: '/tank-management',
         delay: const Duration(milliseconds: 750),
       ),
@@ -233,7 +115,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 800),
       ),
       FeatureInfo(
-        icon: '📏',
+        icon: '🧊',
         title: 'Tank Volume Calculator',
         description:
             'Quickly calculate volume & water weight for many tank shapes.',
@@ -283,15 +165,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 title: feature.title,
                                 description: feature.description,
                                 onTap: () {
-                                  // Log feature usage
-                                  AnalyticsService.logFeatureUsed(
-                                    featureName: feature.title.toLowerCase().replaceAll(' ', '_'),
-                                    parameters: {
-                                      'source': 'welcome_screen',
-                                      'route': feature.routeName,
-                                    },
-                                  );
-                                  
                                   if (feature.url != null) {
                                     _launchURL(feature.url!);
                                   } else if (feature.openPhotoAnalyzer) {
@@ -489,7 +362,7 @@ class AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
   }
 }
 
-class FeatureCard extends ConsumerWidget {
+class FeatureCard extends StatelessWidget {
   final String icon;
   final String title;
   final String description;
@@ -504,60 +377,36 @@ class FeatureCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
-    
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: isMaterialYou ? 3 : 2,
-      shadowColor: cs.shadow.withOpacity(0.2),
-      color: isMaterialYou ? cs.surface : null,
-      child: Container(
-        decoration: isMaterialYou ? BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: cs.outlineVariant.withOpacity(0.4),
-            width: 1,
-          ),
-          gradient: LinearGradient(
-            colors: [
-              cs.secondary.withOpacity(0.3),
-              cs.primaryContainer.withOpacity(0.8),
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: cs.primary.withOpacity(0.15),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 40)),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.primary,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
             ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ) : null,
-        child: InkWell(
-          onTap: onTap,
-          splashColor: cs.primary.withOpacity(0.15),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(icon, style: const TextStyle(fontSize: 40)),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: isMaterialYou ? cs.onSurface : cs.primary,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isMaterialYou ? cs.onSurfaceVariant : null,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
           ),
         ),
       ),

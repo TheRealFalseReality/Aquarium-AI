@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import './services/analytics_service.dart';
 
 final themeProviderNotifierProvider =
     StateNotifierProvider<ThemeProviderNotifier, ThemeProviderState>((ref) {
@@ -51,31 +50,15 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    final oldMode = state.themeMode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('themeMode', mode.index);
     state = ThemeProviderState(themeMode: mode, useMaterialYou: state.useMaterialYou);
-    
-    // Log theme change
-    AnalyticsService.logSettingsChange(
-      settingName: 'theme_mode',
-      newValue: mode.toString(),
-      oldValue: oldMode.toString(),
-    );
   }
 
   Future<void> toggleMaterialYou(bool value) async {
-    final oldValue = state.useMaterialYou;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('useMaterialYou', value);
     state = ThemeProviderState(themeMode: state.themeMode, useMaterialYou: value);
-    
-    // Log Material You toggle
-    AnalyticsService.logSettingsChange(
-      settingName: 'material_you',
-      newValue: value.toString(),
-      oldValue: oldValue.toString(),
-    );
   }
 }
 

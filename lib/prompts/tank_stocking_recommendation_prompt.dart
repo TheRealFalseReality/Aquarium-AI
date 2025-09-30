@@ -28,7 +28,6 @@ String buildTankStockingRecommendationPrompt(
     - Tank Name: "${tank.name}"
     - Tank Size: "$tankSizeText"
     - Tank Type: "${tank.type}"
-    - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage% (THIS MUST BE MAINTAINED OR IMPROVED)
     - Current Inhabitants: ${json.encode(existingFishNames)}
 

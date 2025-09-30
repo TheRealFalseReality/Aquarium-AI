@@ -8,9 +8,6 @@ import '../models/photo_analysis_result.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/ad_component.dart';
-import '../widgets/common_buttons.dart';
-import '../widgets/common_cards.dart';
-import '../widgets/helper_text.dart';
 
 class PhotoAnalysisResultScreen extends ConsumerStatefulWidget {
   final PhotoAnalysisResult result;
@@ -94,8 +91,6 @@ class _PhotoAnalysisResultScreenState
         children: [
           _header(context),
           const SizedBox(height: 12),
-          const BannerAdWidget(),
-          const SizedBox(height: 12),
           _thumbnail(context),
           const SizedBox(height: 16),
           _summaryCard(context),
@@ -113,17 +108,49 @@ class _PhotoAnalysisResultScreenState
           _waterGuessesCard(context),
           const SizedBox(height: 16),
           _howAquaPiHelps(context),
-          const SizedBox(height: 14),
-          const BannerAdWidget(),
-          const SizedBox(height: 14),
-          ActionButtonRow(
-            onRegenerate: _regenerate,
-            isRegenerating: _regenerating,
-            regenerateLabel: 'Regenerate Analysis',
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _regenerating ? null : _regenerate,
+                  icon: _regenerating
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : const Icon(Icons.refresh_rounded),
+                  label: Text(
+                      _regenerating ? 'Regenerating...' : 'Regenerate Analysis'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 14, horizontal: 20),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close),
+                label: const Text('Close'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          const TipText(
-            text: 'Tip: Regenerating may produce slightly different identifications or wording.',
+          Text(
+            'Tip: Regenerating may produce slightly different identifications or wording.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: cs.onSurface.withOpacity(0.65),
+                ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -131,9 +158,23 @@ class _PhotoAnalysisResultScreenState
   }
 
   Widget _header(BuildContext context) {
-    return const SectionHeader(
-      title: 'Aquarium Photo Analysis',
-      showCloseButton: true,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Aquarium Photo Analysis',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
     );
   }
 
@@ -326,28 +367,76 @@ class _PhotoAnalysisResultScreenState
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (th.observations.isNotEmpty)
-              SectionCard(
-                title: 'Observations',
-                items: th.observations,
-                icon: Icons.visibility_outlined,
-                color: cs.primary.withOpacity(0.8),
-              ),
+              _sectionList(context, 'Observations', th.observations,
+                  icon: Icons.visibility_outlined,
+                  color: cs.primary.withOpacity(0.8)),
             if (th.potentialIssues.isNotEmpty)
-              SectionCard(
-                title: 'Potential Issues',
-                items: th.potentialIssues,
-                icon: Icons.warning_amber_rounded,
-                color: Colors.orangeAccent,
-              ),
+              _sectionList(context, 'Potential Issues', th.potentialIssues,
+                  icon: Icons.warning_amber_rounded,
+                  color: Colors.orangeAccent),
             if (th.recommendedActions.isNotEmpty)
-              SectionCard(
-                title: 'Recommended Actions',
-                items: th.recommendedActions,
-                icon: Icons.check_circle_outline,
-                color: Colors.green,
-              ),
+              _sectionList(context, 'Recommended Actions',
+                  th.recommendedActions,
+                  icon: Icons.check_circle_outline, color: Colors.green),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _sectionList(BuildContext context, String title, List<String> items,
+      {IconData? icon, Color? color}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: color?.withOpacity(0.08),
+        border: Border.all(
+          color: (color ?? Theme.of(context).colorScheme.primary)
+              .withOpacity(0.4),
+          width: 1.1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              if (icon != null)
+                Icon(icon, size: 18, color: color ?? Colors.white),
+              if (icon != null) const SizedBox(width: 6),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color ?? Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ...items.map(
+            (e) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• ',
+                      style: TextStyle(
+                        color: color ?? Theme.of(context).colorScheme.primary,
+                      )),
+                  Expanded(
+                    child: Text(
+                      e,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -366,12 +455,18 @@ class _PhotoAnalysisResultScreenState
                     .titleLarge
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            InfoRow(label: 'Clarity', value: g.clarity),
-            InfoRow(label: 'Algae Level', value: g.algaeLevel),
-            InfoRow(label: 'Stocking', value: g.stockingAssessment),
+            _kvRow(context, 'Clarity', g.clarity),
+            _kvRow(context, 'Algae Level', g.algaeLevel),
+            _kvRow(context, 'Stocking', g.stockingAssessment),
             const SizedBox(height: 10),
-            const DisclaimerText(
-              text: 'Visual impressions only — not actual measurements.',
+            Text(
+              'Visual impressions only — not actual measurements.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  ),
+              textAlign: TextAlign.center,
             )
           ],
         ),
@@ -379,31 +474,46 @@ class _PhotoAnalysisResultScreenState
     );
   }
 
+  Widget _kvRow(BuildContext context, String k, String v) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: cs.surfaceVariant.withOpacity(0.25),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              k,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Text(
+            v,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _howAquaPiHelps(BuildContext context) {
     return Card(
       elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-            child: Text('How AquaPi Helps',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: MarkdownBody(
-              data: widget.result.howAquaPiHelps,
-              selectable: true,
-              onTapLink: (text, href, title) {
-                if (href != null) launchUrl(Uri.parse(href));
-              },
-            ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: MarkdownBody(
+          data: widget.result.howAquaPiHelps,
+          selectable: true,
+          onTapLink: (text, href, title) {
+            if (href != null) launchUrl(Uri.parse(href));
+          },
+        ),
       ),
     );
   }

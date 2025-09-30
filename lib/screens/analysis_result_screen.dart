@@ -1,11 +1,8 @@
-import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
-import '../widgets/common_buttons.dart';
-import '../widgets/common_cards.dart';
 import '../widgets/ad_component.dart';
 
 class AnalysisResultScreen extends StatelessWidget {
@@ -46,16 +43,33 @@ class AnalysisResultScreen extends StatelessWidget {
           const SizedBox(height: 18),
           _howAquaPiHelpsCard(context, result.howAquaPiHelps),
           const SizedBox(height: 20),
-          const CommonCloseButton(),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close),
+            label: const Text('Close'),
+          ),
         ],
       ),
     );
   }
 
   Widget _header(BuildContext context) {
-    return const SectionHeader(
-      title: 'Water Parameter Analysis',
-      showCloseButton: true,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Water Parameter Analysis',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
     );
   }
 
@@ -203,7 +217,6 @@ class AnalysisResultScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const BannerAdWidget(),
             Text("How AquaPi Can Help",
                 style: Theme.of(context)
                     .textTheme

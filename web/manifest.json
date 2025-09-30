@@ -1,11 +1,11 @@
 {
-    "name": "Aquarium AI",
-    "short_name": "Aquarium AI",
+    "name": "Fish.AI",
+    "short_name": "Fish.AI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Your intelligent assistant for all things aquatic.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

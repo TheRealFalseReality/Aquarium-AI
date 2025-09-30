@@ -1,9 +1,7 @@
-import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
-import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 
 class WaterParameterAnalysisScreen extends ConsumerStatefulWidget {
@@ -40,18 +38,6 @@ class TankVolumeCalculatorState
   void _submitAnalysis() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      
-      // Log actual feature usage
-      AnalyticsService.logFeatureUsed(
-        featureName: 'water_parameter_analysis',
-        parameters: {
-          'tank_type': _tankTypeController.text,
-          'has_ph': _phController.text.isNotEmpty ? 'true' : 'false',
-          'has_temp': _tempController.text.isNotEmpty ? 'true' : 'false',
-          'has_salinity': _salinityController.text.isNotEmpty ? 'true' : 'false',
-          'temp_unit': _isTempFahrenheit ? 'fahrenheit' : 'celsius',
-        },
-      );
       
       final params = {
         'tankType': _tankTypeController.text,
@@ -180,8 +166,6 @@ class TankVolumeCalculatorState
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              const BannerAdWidget(),
-              const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitAnalysis,
                 style: ElevatedButton.styleFrom(

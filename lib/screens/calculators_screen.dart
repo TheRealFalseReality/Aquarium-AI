@@ -3,7 +3,6 @@ import 'dart:math';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
-import '../services/analytics_service.dart';
 
 class CalculatorsScreen extends StatefulWidget {
   const CalculatorsScreen({super.key});
@@ -165,17 +164,6 @@ class SalinityConverterState extends State<SalinityConverter> {
   }
 
   void _calculate() {
-    // Log calculator usage analytics
-    AnalyticsService.logFeatureUsed(
-      featureName: 'aquarium_calculator',
-      parameters: {
-        'calculator_type': 'salinity',
-        'from_unit': _fromUnit,
-        'has_value': _valueController.text.isNotEmpty ? 'true' : 'false',
-        'has_temperature': _tempController.text.isNotEmpty ? 'true' : 'false',
-      },
-    );
-    
     final double inputValue = double.tryParse(_valueController.text) ?? 0.0;
     final double temp = double.tryParse(_tempController.text) ?? 25.0;
     if (inputValue <= 0) {
@@ -216,8 +204,6 @@ class SalinityConverterState extends State<SalinityConverter> {
             return ModernSelectableChip(
               label: entry.value,
               selected: isSelected,
-              selectedColor: Theme.of(context).colorScheme.secondary,
-              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = entry.key),
             );
@@ -339,16 +325,6 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
   String _result = '';
 
   void _calculateCO2() {
-    // Log calculator usage analytics
-    AnalyticsService.logFeatureUsed(
-      featureName: 'aquarium_calculator',
-      parameters: {
-        'calculator_type': 'co2',
-        'has_ph_value': _phController.text.isNotEmpty ? 'true' : 'false',
-        'has_dkh_value': _dkhController.text.isNotEmpty ? 'true' : 'false',
-      },
-    );
-    
     final phValue = double.tryParse(_phController.text) ?? 0;
     final dkhValue = double.tryParse(_dkhController.text) ?? 0;
     if (phValue > 0 && dkhValue > 0) {
@@ -462,16 +438,6 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
   Map<String, String> _results = {'dkh': '', 'ppm': '', 'meq': ''};
 
   void _convertAlkalinity() {
-    // Log calculator usage analytics
-    AnalyticsService.logFeatureUsed(
-      featureName: 'aquarium_calculator',
-      parameters: {
-        'calculator_type': 'alkalinity',
-        'from_unit': _fromUnit,
-        'has_value': _inputValueController.text.isNotEmpty ? 'true' : 'false',
-      },
-    );
-    
     final value = double.tryParse(_inputValueController.text) ?? 0;
     double dkh = 0, ppm = 0, meq = 0;
 
@@ -529,8 +495,6 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             return ModernSelectableChip(
               label: unitName,
               selected: isSelected,
-              selectedColor: Theme.of(context).colorScheme.secondary,
-              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = unitName),
             );
@@ -626,16 +590,6 @@ class TemperatureConverterState extends State<TemperatureConverter> {
   Map<String, String> _results = {'toValue': '', 'kelvin': ''};
 
   void _convertTemp() {
-    // Log calculator usage analytics
-    AnalyticsService.logFeatureUsed(
-      featureName: 'aquarium_calculator',
-      parameters: {
-        'calculator_type': 'temperature',
-        'from_unit': _fromUnit,
-        'has_value': _inputValueController.text.isNotEmpty ? 'true' : 'false',
-      },
-    );
-    
     final temp = double.tryParse(_inputValueController.text);
     if (temp == null) {
       setState(() => _results = {'toValue': '', 'kelvin': ''});
@@ -679,8 +633,6 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             return ModernSelectableChip(
               label: unitName,
               selected: isSelected,
-              selectedColor: Theme.of(context).colorScheme.secondary,
-              selectedTextColor: Theme.of(context).colorScheme.onSecondary,
               dense: true,
               onTap: () => setState(() => _fromUnit = unitName),
             );

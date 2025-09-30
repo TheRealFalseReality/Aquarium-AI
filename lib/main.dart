@@ -4,7 +4,6 @@ import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -22,62 +21,21 @@ import './screens/tank_management_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import './services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configure system UI overlay for edge-to-edge display
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
-  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize Analytics session tracking (non-blocking)
-  // Don't await this to prevent blocking app startup
-  AnalyticsService.logSessionStart().catchError((error) {
-    if (kDebugMode) {
-      print('Analytics session start error: $error');
-    }
-  });
-
-  // Set initial screen
-  AnalyticsService.setCurrentScreen('welcome_screen');
-
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    // Also log to Analytics (non-blocking)
-    AnalyticsService.logError(
-      errorType: 'flutter_fatal_error',
-      errorMessage: errorDetails.exception.toString(),
-    ).catchError((error) {
-      if (kDebugMode) {
-        print('Analytics error logging failed: $error');
-      }
-    });
   };
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    // Also log to Analytics (non-blocking)
-    AnalyticsService.logError(
-      errorType: 'platform_error',
-      errorMessage: error.toString(),
-    ).catchError((analyticsError) {
-      if (kDebugMode) {
-        print('Analytics error logging failed: $analyticsError');
-      }
-    });
     return true;
   };
 
@@ -111,33 +69,6 @@ void main() async {
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
-
-  // Helper method to safely get navigator observers
-  List<NavigatorObserver> _getNavigatorObservers() {
-    try {
-      return [AnalyticsService.observer];
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to initialize analytics observer: $e');
-      }
-      return []; // Return empty list if analytics observer fails
-    }
-  }
-
-  // Helper method to update system UI overlay based on theme
-  void _updateSystemUIOverlay(ThemeMode themeMode, ColorScheme lightColorScheme, ColorScheme darkColorScheme) {
-    final isDarkMode = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system && WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
-    
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
-        systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
-      ),
-    );
-  }
 
   static final _defaultLightColorScheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF005f73),
@@ -204,8 +135,8 @@ class MyApp extends ConsumerWidget {
           scaffoldBackgroundColor: lightColorScheme.background,
           colorScheme: lightColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF343a40),
-            displayColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF212529),
+            bodyColor: const Color(0xFF343a40),
+            displayColor: const Color(0xFF212529),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -216,42 +147,27 @@ class MyApp extends ConsumerWidget {
               color: lightColorScheme.outlineVariant.withOpacity(0.25),
             ),
           ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: lightColorScheme.primary,
-              foregroundColor: lightColorScheme.onPrimary,
-              elevation: themeProvider.useMaterialYou ? 3 : 1,
-              shadowColor: lightColorScheme.shadow.withOpacity(0.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: themeProvider.useMaterialYou 
-                  ? BorderSide(color: lightColorScheme.outline.withOpacity(0.3), width: 1)
-                  : BorderSide.none,
-              ),
-            ),
-          ),
           appBarTheme: AppBarTheme(
             backgroundColor: lightColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: Border(
+            shape: const Border(
               bottom: BorderSide(
-                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant : const Color(0xFFdee2e6),
+                color: Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
           ),
           cardTheme: CardThemeData(
-            elevation: themeProvider.useMaterialYou ? 2 : 1,
-            shadowColor: lightColorScheme.shadow.withOpacity(0.2),
+            elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFFdee2e6),
+              side: const BorderSide(
+                color: Color(0xFFdee2e6),
                 width: 1,
               ),
             ),
-            color: themeProvider.useMaterialYou ? lightColorScheme.surfaceVariant : Colors.white,
+            color: Colors.white,
           ),
         );
 
@@ -260,8 +176,8 @@ class MyApp extends ConsumerWidget {
           scaffoldBackgroundColor: darkColorScheme.background,
           colorScheme: darkColorScheme,
           textTheme: textTheme.apply(
-            bodyColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFf8f9fa),
-            displayColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFe9ecef),
+            bodyColor: const Color(0xFFf8f9fa),
+            displayColor: const Color(0xFFe9ecef),
           ),
           chipTheme: ChipThemeData(
             shape: baseChipShape,
@@ -272,47 +188,29 @@ class MyApp extends ConsumerWidget {
               color: darkColorScheme.outlineVariant.withOpacity(0.3),
             ),
           ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: darkColorScheme.primary,
-              foregroundColor: darkColorScheme.onPrimary,
-              elevation: themeProvider.useMaterialYou ? 3 : 1,
-              shadowColor: darkColorScheme.shadow.withOpacity(0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: themeProvider.useMaterialYou 
-                  ? BorderSide(color: darkColorScheme.outline.withOpacity(0.3), width: 1)
-                  : BorderSide.none,
-              ),
-            ),
-          ),
           appBarTheme: AppBarTheme(
             backgroundColor: darkColorScheme.surface.withOpacity(0.95),
             elevation: 0,
             scrolledUnderElevation: 1,
-            shape: Border(
+            shape: const Border(
               bottom: BorderSide(
-                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant : const Color(0xFF495057),
+                color: Color(0xFF495057),
                 width: 1,
               ),
             ),
           ),
           cardTheme: CardThemeData(
-            elevation: themeProvider.useMaterialYou ? 2 : 1,
-            shadowColor: darkColorScheme.shadow.withOpacity(0.3),
+            elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFF495057),
+              side: const BorderSide(
+                color: Color(0xFF495057),
                 width: 1,
               ),
             ),
-            color: themeProvider.useMaterialYou ? darkColorScheme.surfaceVariant : const Color(0xFF4A5568),
+            color: const Color(0xFF4A5568),
           ),
         );
-
-        // Update system UI overlay based on current theme
-        _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
 
         return MaterialApp(
           title: 'Aquarium AI',
@@ -320,33 +218,25 @@ class MyApp extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: '/',
-          navigatorObservers: _getNavigatorObservers(),
           // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             Widget page;
-            String screenName;
-            
             switch (settings.name) {
               case '/':
                 page = const WelcomeScreen();
-                screenName = 'welcome_screen';
                 break;
               case '/about':
                 page = const AboutScreen();
-                screenName = 'about_screen';
                 break;
               case '/tank-volume':
                 page = const TankVolumeCalculator();
-                screenName = 'tank_volume_calculator';
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();
-                screenName = 'calculators_screen';
                 break;
               case '/stocking':
                 page = const AquariumStockingScreen();
-                screenName = 'aquarium_stocking_screen';
                 break;
               case '/chatbot':
                 bool autoOpen = false;
@@ -354,36 +244,22 @@ class MyApp extends ConsumerWidget {
                   autoOpen = true;
                 }
                 page = ChatbotScreen(autoOpenPhotoAnalyzer: autoOpen);
-                screenName = 'chatbot_screen';
                 break;
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
-                screenName = 'fish_compatibility_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();
-                screenName = 'photo_analysis_screen';
                 break;
               case '/settings':
                 page = const SettingsScreen();
-                screenName = 'settings_screen';
                 break;
               case '/tank-management':
                 page = const TankManagementScreen();
-                screenName = 'tank_management_screen';
                 break;
               default:
                 page = const WelcomeScreen();
-                screenName = 'welcome_screen';
             }
-            
-            // Log screen view (non-blocking)
-            AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
-              if (kDebugMode) {
-                print('Analytics screen view error: $error');
-              }
-            });
-            
             return FadeSlideRoute(page: page);
           },
         );

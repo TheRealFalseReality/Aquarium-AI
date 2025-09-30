@@ -11,7 +11,6 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-firebase-tools-instant-win.exe
 
 # IntelliJ related
 *.iml
@@ -48,7 +47,3 @@ app.*.map.json
 # Backup files
 *.backup
 flutter.tar.xz
-
-# Firebase build artifacts
-.firebase/
-flutter/

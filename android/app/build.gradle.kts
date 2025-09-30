@@ -59,7 +59,7 @@ android {
             resValue(
                 type = "string",
                 name = "app_name",
-                value = "Aquarium AI dev")
+                value = "Fish.AI dev")
             applicationIdSuffix = ".dev"
         }
         create("production") {
@@ -67,7 +67,7 @@ android {
             resValue(
                 type = "string",
                 name = "app_name",
-                value = "Aquarium AI")
+                value = "Fish.AI")
         }
     }
 
@@ -79,7 +79,6 @@ flutter {
 
 dependencies {
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.core:core-ktx:1.12.0")
 
     // Add the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))

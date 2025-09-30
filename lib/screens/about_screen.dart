@@ -44,7 +44,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'contactus@capitalcityaquatics.com',
-      query: 'subject=Aquarium AI Feedback',
+      query: 'subject=Fish.AI Feedback',
     );
 
     if (!await launchUrl(emailLaunchUri)) {
@@ -54,8 +54,95 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     }
   }
 
+  void _showFeedbackModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Contact & Feedback', textAlign: TextAlign.center),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: [
+                      const TextSpan(
+                          text: 'Fish.AI is proudly brought to you by '),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: InkWell(
+                          onTap: () => _launchURL(
+                              'https://www.capitalcityaquatics.com/'),
+                          child: Text(
+                            'Capital City Aquatics',
+                            style: GoogleFonts.playfairDisplay(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Please create an issue on GitHub for feedback, bug reports, or questions.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _launchEmail,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'contactus@capitalcityaquatics.com',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton.icon(
+              icon: const Icon(Icons.bug_report),
+              label: const Text('Create Issue on GitHub'),
+              onPressed: () => _launchURL(
+                  'https://github.com/TheRealFalseReality/TheRealFalseReality.github.io/issues'),
+            ),
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+          actionsAlignment: MainAxisAlignment.center,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return MainLayout(
       title: 'About',
       bottomNavigationBar: const AdBanner(),
@@ -66,7 +153,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'About Aquarium AI',
+                'About Fish.AI',
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge
@@ -79,155 +166,23 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Unlock the Power of AI with Your Own API Key!',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '• ',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              'Higher AI API Call Limits: Enjoy significantly more interactions with our AI, including the powerful Gemini 2.5 flash.',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '• ',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              'Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Text(
-                          'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontStyle: FontStyle.italic,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Card(
-                clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Contact & Feedback',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text.rich(
-                        TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          children: [
-                            const TextSpan(
-                                text: 'Aquarium AI is proudly brought to you by '),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: InkWell(
-                                onTap: () => _launchURL(
-                                    'https://www.capitalcityaquatics.com/'),
-                                child: Text(
-                                  'Capital City Aquatics',
-                                  style: GoogleFonts.karla(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 26,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'For feedback, bug reports, or questions, please create an issue on GitHub or email us.',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        leading: const Icon(Icons.bug_report),
-                        title: const Text('Create Issue on GitHub'),
-                        subtitle: const Text(
-                            'Report bugs or suggest features on our GitHub repository'),
-                        onTap: () => _launchURL(
-                            'https://github.com/TheRealFalseReality/aquarium-ai/issues'),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.email),
-                        title: const Text('Contact Us'),
-                        subtitle: const Text('contactus@capitalcityaquatics.com'),
-                        onTap: _launchEmail,
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 48),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.feedback),
+                label: const Text('Contact & Feedback'),
+                onPressed: () => _showFeedbackModal(context),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 icon: const Icon(Icons.code),
-                label: const Text('TheRealFalseReality/Aquarium-AI'),
+                label: const Text('View on Github'),
                 onPressed: () => _launchURL(
-                    'https://github.com/TheRealFalseReality/aquarium-ai'),
+                    'https://github.com/TheRealFalseReality/TheRealFalseReality.github.io'),
                 style: OutlinedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
