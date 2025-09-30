@@ -235,6 +235,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
           Text(
             'Version $_version',
             style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
           ),
         ],
       ),

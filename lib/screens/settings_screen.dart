@@ -300,6 +300,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _buildOpenAISettings()
                   else
                     _buildGroqSettings(),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(modelProvider.notifier)
+                              .resetModelsToDefaults();
+                          context.showAccessibleMessage('Models reset to default.');
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset Models'),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: _saveSettings, // Call the save function.
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save Settings'),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -330,28 +352,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(modelProvider.notifier)
-                              .resetModelsToDefaults();
-                          context.showAccessibleMessage('Models reset to default.');
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reset Models'),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: _saveSettings, // Call the save function.
-                        icon: const Icon(Icons.save),
-                        label: const Text('Save Settings'),
-                      ),
-                    ],
                   ),
                 ],
               ),
