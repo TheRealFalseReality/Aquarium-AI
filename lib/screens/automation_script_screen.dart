@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
+import '../widgets/ad_component.dart';
 
 class AutomationScriptScreen extends ConsumerStatefulWidget {
   const AutomationScriptScreen({super.key});
@@ -55,6 +56,7 @@ class AutomationScriptScreenState
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Script Generator',
+      bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
