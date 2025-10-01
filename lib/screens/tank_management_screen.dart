@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -31,6 +32,7 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   TankSortOption _currentSortOption = TankSortOption.name;
+  bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
@@ -286,6 +288,44 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
     final sortedTanks = _sortTanks(tanks);
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Use grid layout for larger screens (tablets and desktops)
+    final useGridLayout = screenWidth >= 900;
+    
+    if (useGridLayout) {
+      // Use masonry grid for larger screens
+      final int columnCount = screenWidth >= 1400 ? 3 : 2;
+      
+      return CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildHeader(context, sortedTanks.length),
+            ),
+          ),
+          // Masonry grid layout
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            sliver: SliverMasonryGrid.count(
+              crossAxisCount: columnCount,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childCount: sortedTanks.length,
+              itemBuilder: (context, index) {
+                return _buildTankCard(context, ref, sortedTanks[index]);
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 16),
+          ),
+        ],
+      );
+    }
+    
+    // Use list layout for mobile devices
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: sortedTanks.length + 1, // +1 for header
@@ -305,14 +345,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     switch (_currentSortOption) {
       case TankSortOption.name:
-        sortedTanks.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        sortedTanks.sort((a, b) {
+          final comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          return _isSortAscending ? comparison : -comparison;
+        });
         break;
       case TankSortOption.type:
         sortedTanks.sort((a, b) {
           final typeOrder = {'freshwater': 0, 'marine': 1};
           final aOrder = typeOrder[a.type] ?? 2;
           final bOrder = typeOrder[b.type] ?? 2;
-          if (aOrder != bOrder) return aOrder.compareTo(bOrder);
+          if (aOrder != bOrder) {
+            final comparison = aOrder.compareTo(bOrder);
+            return _isSortAscending ? comparison : -comparison;
+          }
           return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
         });
         break;
@@ -320,13 +366,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         sortedTanks.sort((a, b) {
           final aSize = a.sizeGallons ?? 0;
           final bSize = b.sizeGallons ?? 0;
-          if (aSize != bSize) return bSize.compareTo(aSize); // Largest first
+          if (aSize != bSize) {
+            final comparison = bSize.compareTo(aSize); // Default largest first
+            return _isSortAscending ? comparison : -comparison;
+          }
           return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
         });
         break;
       case TankSortOption.date:
-        // Sort by creation date (newest first)
-        sortedTanks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        // Sort by creation date (default newest first)
+        sortedTanks.sort((a, b) {
+          final comparison = b.createdAt.compareTo(a.createdAt);
+          return _isSortAscending ? comparison : -comparison;
+        });
         break;
     }
     
@@ -369,6 +421,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     Icon(_getSortOptionIcon(_currentSortOption), size: 16),
                     const SizedBox(width: 4),
                     Text(_getSortOptionLabel(_currentSortOption)),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                      size: 14,
+                    ),
                   ],
                 ),
                 style: OutlinedButton.styleFrom(
@@ -534,7 +591,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ),
                       onPressed: () {
                         setState(() {
-                          _currentSortOption = option;
+                          // If selecting the same option, toggle ascending/descending
+                          if (_currentSortOption == option) {
+                            _isSortAscending = !_isSortAscending;
+                          } else {
+                            _currentSortOption = option;
+                            _isSortAscending = true; // Reset to ascending for new option
+                          }
                           _isSortMenuExpanded = false;
                         });
                         _saveSortPreference(option);
@@ -550,484 +613,826 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _showTankDetails(context, tank, fishData),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tank.name,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                              size: 16,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Tank Size Display
-                        if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.straighten,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _formatTankSize(tank),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        // Water Weight Display
-                        if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.line_weight,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Water Weight: ${_formatWaterWeight(tank)}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        // Harmony Score Display
-                        if (tank.inhabitants.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          _buildHarmonyScoreChip(tank),
-                        ],
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => TankCreationScreen(existingTank: tank),
-                            ),
-                          );
-                          break;
-                        case 'recommendations':
-                          _getTankStockingRecommendations(context, ref, tank);
-                          break;
-                        case 'duplicate':
-                          _duplicateTank(context, ref, tank);
-                          break;
-                        case 'delete':
-                          _confirmDelete(context, ref, tank);
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      if (tank.inhabitants.isNotEmpty)
-                        const PopupMenuItem(
-                          value: 'recommendations',
-                          child: Row(
-                            children: [
-                              Icon(Icons.auto_awesome, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
-                            ],
-                          ),
-                        ),
-                      const PopupMenuItem(
-                        value: 'duplicate',
-                        child: Row(
-                          children: [
-                            Icon(Icons.copy),
-                            SizedBox(width: 8),
-                            Text('Duplicate'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              
-              // Inhabitants summary
-              if (tank.inhabitants.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.pets,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'No inhabitants added',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Column(
+  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
+    final cs = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth >= 900;
+    
+    // AI-inspired gradient colors based on tank type
+    final gradientColors = tank.type == 'freshwater'
+        ? [
+            Colors.blue.shade400.withOpacity(0.15),
+            Colors.cyan.shade300.withOpacity(0.15),
+            cs.surfaceContainerHighest.withOpacity(0.5),
+          ]
+        : [
+            Colors.indigo.shade400.withOpacity(0.15),
+            Colors.purple.shade300.withOpacity(0.15),
+            cs.surfaceContainerHighest.withOpacity(0.5),
+          ];
+    
+    return Container(
+      margin: isLargeScreen ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _showTankDetails(context, tank),
+          child: Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with tank name and menu
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // Tank icon with gradient background
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: tank.type == 'freshwater'
+                              ? [Colors.blue.shade300, Colors.cyan.shade400]
+                              : [Colors.indigo.shade300, Colors.purple.shade400],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (tank.type == 'freshwater' 
+                                ? Colors.blue 
+                                : Colors.purple).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        size: 24,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tank.name,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.more_vert, size: 18),
+                      ),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TankCreationScreen(existingTank: tank),
+                              ),
+                            );
+                            break;
+                          case 'recommendations':
+                            _getTankStockingRecommendations(context, ref, tank);
+                            break;
+                          case 'duplicate':
+                            _duplicateTank(context, ref, tank);
+                            break;
+                          case 'delete':
+                            _confirmDelete(context, ref, tank);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        if (tank.inhabitants.isNotEmpty)
+                          const PopupMenuItem(
+                            value: 'recommendations',
+                            child: Row(
+                              children: [
+                                Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                                SizedBox(width: 8),
+                                Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
+                          value: 'duplicate',
+                          child: Row(
+                            children: [
+                              Icon(Icons.copy, size: 18),
+                              SizedBox(width: 8),
+                              Text('Duplicate'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red, size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 14),
+                
+                // Tank stats row
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    if (tank.sizeGallons != null || tank.sizeLiters != null)
+                      _buildStatChip(
+                        context,
+                        Icons.straighten,
+                        _formatTankSize(tank),
+                      ),
+                    if (tank.inhabitants.isNotEmpty && _fishData != null)
+                      _buildHarmonyScoreChip(tank),
+                  ],
+                ),
+                
+                const SizedBox(height: 14),
+                
+                // Inhabitants section with modern styling
+                if (tank.inhabitants.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: cs.outlineVariant.withOpacity(0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
                       children: [
                         Icon(
-                          Icons.category,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
+                          Icons.pets,
+                          color: cs.onSurfaceVariant,
+                          size: 18,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 10),
                         Text(
-                          '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'} of inhabitant${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'} ',
+                          'No inhabitants yet',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    // Fish Display by Type
-                    if (tank.inhabitants.isNotEmpty) ...[
-                      ..._buildFishGroupDisplay(tank, fishData),
+                  )
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.pets,
+                              size: 14,
+                              color: cs.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: cs.onPrimaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ..._buildFishGroupDisplay(tank),
                     ],
-                  ],
-                ),
-              const SizedBox(height: 8),
-              
-              // Stocking recommendations button
-              if (tank.inhabitants.isNotEmpty) ...[
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.purple.shade400,
-                        Colors.blue.shade500,
-                        Colors.cyan.shade400,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _getTankStockingRecommendations(context, ref, tank),
-                    icon: Icon(
-                      Icons.auto_awesome,
-                      size: 16,
-                    ),
-                    label: const Text('Get Stocking Ideas'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      minimumSize: Size.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                
+                const SizedBox(height: 14),
+                
+                // Tank notes section (if notes exist)
+                if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: cs.outlineVariant.withOpacity(0.4),
+                        width: 1,
                       ),
                     ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.note_outlined,
+                          size: 16,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tank.notes!,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                
+                // Action buttons area (space for future parameters/dosing)
+                Row(
+                  children: [
+                    // AI stocking button
+                    if (tank.inhabitants.isNotEmpty)
+                      Expanded(
+                        child: Container(
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.purple.shade400,
+                                Colors.blue.shade500,
+                                Colors.cyan.shade400,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.purple.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                            icon: const Icon(Icons.auto_awesome, size: 16),
+                            label: Text(
+                              'AI Stocking Recommendations',
+                              style: TextStyle(
+                                fontSize: isLargeScreen ? 13 : 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Space for future buttons (dosing, parameters, etc.)
+                    if (tank.inhabitants.isNotEmpty) const SizedBox(width: 8),
+                  ],
+                ),
+                
+                const SizedBox(height: 10),
+                
+                // Footer with date
+                Text(
+                  'Created ${_formatDate(tank.createdAt)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 8),
               ],
-              
-              // Created date
-              Text(
-                'Created ${_formatDate(tank.createdAt)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+  
+  Widget _buildStatChip(BuildContext context, IconData icon, String label) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: cs.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
+  void _showTankDetails(BuildContext context, Tank tank) {
+    final cs = Theme.of(context).colorScheme;
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
+    // AI-inspired gradient colors based on tank type with higher opacity
+    final gradientColors = tank.type == 'freshwater'
+        ? [
+            Colors.blue.shade400.withOpacity(0.95),
+            Colors.cyan.shade300.withOpacity(0.95),
+            cs.surfaceContainerHighest.withOpacity(0.98),
+          ]
+        : [
+            Colors.indigo.shade400.withOpacity(0.95),
+            Colors.purple.shade300.withOpacity(0.95),
+            cs.surfaceContainerHighest.withOpacity(0.98),
+          ];
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(tank.name, textAlign: TextAlign.center),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    tank.type == 'freshwater' ? 'Freshwater Tank' : 'Saltwater Tank',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: isMobile 
+            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 24)
+            : const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 700,
+            maxHeight: screenSize.height - 48,
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: gradientColors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
-              // Tank Size Info
-              if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.straighten,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Tank Size: ${_formatTankSize(tank)}',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ],
-              // Water Weight Display
-              if (tank.sizeGallons != null || tank.sizeLiters != null) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.line_weight,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Weight: ${_formatWaterWeight(tank)}',
-                      style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                  ],
-                ),
-              ],
-              // Harmony Score Info
-              if (tank.inhabitants.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const SizedBox(width: 8),
-                    _buildHarmonyScoreChip(tank),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 16),
-              
-              Text(
-                'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              
-              if (tank.inhabitants.isEmpty)
-                const Text('No inhabitants added yet.')
-              else
-                ...tank.inhabitants.map((inhabitant) {
-                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: fishImageUrl != null 
-                            ? (fishImageUrl.startsWith('http')
-                                ? NetworkImage(fishImageUrl)
-                                : FileImage(File(fishImageUrl)) as ImageProvider)
-                            : null,
-                          backgroundColor: fishImageUrl == null 
-                            ? Theme.of(context).colorScheme.primaryContainer 
-                            : null,
-                          child: fishImageUrl == null 
-                            ? Icon(
-                                Icons.shape_line,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                size: 20,
-                              ) 
-                            : null,
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with gradient badge
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Row(
+                    children: [
+                      // Tank icon with gradient background
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: tank.type == 'freshwater'
+                                ? [Colors.blue.shade300, Colors.cyan.shade400]
+                                : [Colors.indigo.shade300, Colors.purple.shade400],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (tank.type == 'freshwater' 
+                                  ? Colors.blue 
+                                  : Colors.purple).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        child: Icon(
+                          tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tank.name,
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              tank.type == 'freshwater' ? 'Freshwater Tank' : 'Saltwater Tank',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHighest.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.close, size: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Scrollable content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Stats chips
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            if (tank.sizeGallons != null || tank.sizeLiters != null)
+                              _buildStatChip(context, Icons.straighten, _formatTankSize(tank)),
+                            if (tank.sizeGallons != null || tank.sizeLiters != null)
+                              _buildStatChip(context, Icons.line_weight, _formatWaterWeight(tank)),
+                            if (tank.inhabitants.isNotEmpty && _fishData != null)
+                              _buildHarmonyScoreChip(tank),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 20),
+                        
+                        // Inhabitants section
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHigh.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: cs.outlineVariant.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                inhabitant.quantity > 1
-                                    ? '${inhabitant.quantity}x ${inhabitant.customName}'
-                                    : inhabitant.customName,
-                                style: const TextStyle(fontWeight: FontWeight.w500),
+                              Row(
+                                children: [
+                                  Icon(Icons.pets, size: 18, color: cs.onSurfaceVariant),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                inhabitant.fishUnit,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
+                              const SizedBox(height: 12),
+                              
+                              if (tank.inhabitants.isEmpty)
+                                Text(
+                                  'No inhabitants added yet.',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                )
+                              else
+                                ...tank.inhabitants.map((inhabitant) {
+                                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, inhabitant: inhabitant);
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6),
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 22,
+                                          backgroundImage: fishImageUrl != null 
+                                            ? (fishImageUrl.startsWith('http')
+                                                ? NetworkImage(fishImageUrl)
+                                                : FileImage(File(fishImageUrl)) as ImageProvider)
+                                            : null,
+                                          backgroundColor: fishImageUrl == null 
+                                            ? cs.primaryContainer 
+                                            : null,
+                                          child: fishImageUrl == null 
+                                            ? Icon(
+                                                Icons.shape_line,
+                                                color: cs.onPrimaryContainer,
+                                                size: 22,
+                                              ) 
+                                            : null,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                inhabitant.quantity > 1
+                                                    ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                                    : inhabitant.customName,
+                                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                              ),
+                                              Text(
+                                                inhabitant.fishUnit,
+                                                style: Theme.of(context).textTheme.bodySmall,
+                                              ),
+                                              if (inhabitant.dateAdded != null)
+                                                Text(
+                                                  'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }),
-              
-              // Calculation Breakdown Expandable Section
-              if (tank.inhabitants.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Semantics(
-                  button: true,
-                  hint: 'Tap to view compatibility calculation breakdown',
-                  excludeSemantics: false,
-                  child: ExpansionTile(
-                    title: Text(
-                      'Compatibility Calculation Breakdown',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    children: [
-                      Semantics(
-                        liveRegion: true,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Text(
-                            tank.calculationBreakdown ?? 'No calculation available',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
+                        
+                        // Notes section
+                        if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.note_outlined, size: 18, color: cs.onSurfaceVariant),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Notes',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  tank.notes!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ],
+                        
+                        // Calculation Breakdown Expandable Section
+                        if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: ExpansionTile(
+                              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              leading: Icon(Icons.calculate, size: 18, color: cs.onSurfaceVariant),
+                              title: Text(
+                                'Compatibility Calculation',
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: cs.surfaceContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      _getCalculationBreakdown(tank),
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        fontFamily: 'monospace',
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        
+                        // Dates
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 6,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.event, size: 14, color: cs.onSurface),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Created ${_formatDate(tank.createdAt)}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (tank.updatedAt != tank.createdAt)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.update, size: 14, color: cs.onSurface),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Updated ${_formatDate(tank.updatedAt)}',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Action buttons
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: cs.outlineVariant.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Close'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => TankCreationScreen(existingTank: tank),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.edit, size: 18),
+                        label: const Text('Edit Tank'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         ),
                       ),
                     ],
                   ),
                 ),
               ],
-              
-              const SizedBox(height: 16),
-              if (tank.notes != null && tank.notes!.isNotEmpty) ...[
-                Text(
-                  'Notes:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
-                  child: Text(
-                    tank.notes!,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              Text(
-                'Created: ${_formatDate(tank.createdAt)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (tank.updatedAt != tank.createdAt)
-                Text(
-                  'Updated: ${_formatDate(tank.updatedAt)}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-            ],
+            ),
           ),
         ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TankCreationScreen(existingTank: tank),
-                ),
-              );
-            },
-            child: const Text('Edit'),
-          ),
-        ],
       ),
     );
   }

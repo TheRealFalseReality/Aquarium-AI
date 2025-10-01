@@ -170,6 +170,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       quantity: originalInhabitant.quantity,
       customImageUrl: originalInhabitant.customImageUrl,
       customImagePath: originalInhabitant.customImagePath,
+      dateAdded: DateTime.now(), // Use current date for duplicated inhabitant
     );
     
     setState(() {
@@ -870,6 +871,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
   List<Fish> _filteredFish = [];
   String? _customImageUrl;
   String? _customImagePath;
+  DateTime? _dateAdded;
 
   @override
   void initState() {
@@ -882,9 +884,11 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
       _selectedFishUnit = widget.existingInhabitant!.fishUnit;
       _customImageUrl = widget.existingInhabitant!.customImageUrl;
       _customImagePath = widget.existingInhabitant!.customImagePath;
+      _dateAdded = widget.existingInhabitant!.dateAdded;
       _urlController.text = _customImageUrl ?? '';
     } else {
       _quantityController.text = '1';
+      _dateAdded = DateTime.now(); // Default to now for new inhabitants
     }
   }
 
@@ -986,6 +990,7 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
         quantity: int.parse(_quantityController.text),
         customImageUrl: _customImageUrl,
         customImagePath: _customImagePath,
+        dateAdded: _dateAdded,
       );
       
       widget.onAdd(inhabitant);
@@ -1068,6 +1073,38 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Date Added Field
+            InkWell(
+              onTap: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: _dateAdded ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                  helpText: 'Select Date Added',
+                );
+                if (picked != null) {
+                  setState(() {
+                    _dateAdded = picked;
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Date Added',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+                child: Text(
+                  _dateAdded != null 
+                      ? '${_dateAdded!.month}/${_dateAdded!.day}/${_dateAdded!.year}'
+                      : 'Select date',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             
