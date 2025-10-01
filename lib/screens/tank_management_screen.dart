@@ -312,6 +312,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final useGridLayout = screenWidth >= 900;
     
     if (useGridLayout) {
+      // Calculate card width for grid layout
+      final int columnCount = screenWidth >= 1400 ? 3 : 2;
+      final double horizontalPadding = 16.0 * 2; // Left and right padding
+      final double spacing = 16.0 * (columnCount - 1); // Spacing between cards
+      final double availableWidth = screenWidth - horizontalPadding - spacing;
+      final double cardWidth = availableWidth / columnCount;
+      
       return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -322,19 +329,33 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: screenWidth >= 1400 ? 3 : 2,
-                childAspectRatio: 1.2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
+            sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final tank = sortedTanks[index];
-                  return _buildTankCard(context, ref, tank);
+                  // Calculate row and column
+                  final rowIndex = index ~/ columnCount;
+                  final startIndex = rowIndex * columnCount;
+                  final endIndex = (startIndex + columnCount).clamp(0, sortedTanks.length);
+                  
+                  if (index % columnCount != 0) return const SizedBox.shrink();
+                  
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: index < sortedTanks.length - columnCount ? 16.0 : 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = startIndex; i < endIndex; i++) ...[
+                          SizedBox(
+                            width: cardWidth,
+                            child: _buildTankCard(context, ref, sortedTanks[i]),
+                          ),
+                          if (i < endIndex - 1) const SizedBox(width: 16),
+                        ],
+                      ],
+                    ),
+                  );
                 },
-                childCount: sortedTanks.length,
+                childCount: ((sortedTanks.length + columnCount - 1) ~/ columnCount) * columnCount,
               ),
             ),
           ),
