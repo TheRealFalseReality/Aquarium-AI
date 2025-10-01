@@ -295,7 +295,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
         
         final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank);
+        return _buildTankCard(context, ref, tank, fishData);
       },
     );
   }
@@ -550,12 +550,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
+  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => _showTankDetails(context, tank),
+        onTap: () => _showTankDetails(context, tank, fishData),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -814,7 +814,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _showTankDetails(BuildContext context, Tank tank) {
+  void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
