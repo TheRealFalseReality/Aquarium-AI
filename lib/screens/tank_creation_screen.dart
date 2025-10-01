@@ -28,10 +28,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
   final _notesController = TextEditingController();
+  final _tagController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
+  List<String> _tags = [];
   bool _isLoadingFish = true;
   DateTime _creationDate = DateTime.now();
 
@@ -44,6 +46,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
+      _tags = List.from(widget.existingTank!.tags);
       _creationDate = widget.existingTank!.createdAt;
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!.toString();
@@ -63,6 +66,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
     _notesController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -205,6 +209,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
             sizeGallons: sizeGallons,
             sizeLiters: sizeLiters,
             notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+            tags: _tags,
             createdAt: _creationDate,
             updatedAt: DateTime.now(),
           ),
@@ -220,6 +225,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                tags: _tags,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -230,6 +236,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                tags: _tags,
                 createdAt: _creationDate,
               );
 
@@ -481,6 +488,81 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                     maxLength: 500,
                     textAlign: TextAlign.start,
                   ),
+                  const SizedBox(height: 24),
+                  
+                  // Tags Section
+                  Text(
+                    'Tags (Optional)',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add tags to help organize and search your tanks',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _tagController,
+                          decoration: const InputDecoration(
+                            labelText: 'Add Tag',
+                            hintText: 'e.g., Planted, Reef, Breeding',
+                            border: OutlineInputBorder(),
+                          ),
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (value) {
+                            if (value.trim().isNotEmpty && !_tags.contains(value.trim())) {
+                              setState(() {
+                                _tags.add(value.trim());
+                                _tagController.clear();
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () {
+                          final value = _tagController.text.trim();
+                          if (value.isNotEmpty && !_tags.contains(value)) {
+                            setState(() {
+                              _tags.add(value);
+                              _tagController.clear();
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.add),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_tags.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _tags.map((tag) {
+                        return Chip(
+                          label: Text(tag),
+                          deleteIcon: const Icon(Icons.close, size: 18),
+                          onDeleted: () {
+                            setState(() {
+                              _tags.remove(tag);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   const SizedBox(height: 24),
                   
                   // Creation Date Selection

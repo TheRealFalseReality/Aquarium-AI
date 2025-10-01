@@ -36,12 +36,29 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
+  bool _isSearchVisible = false; // Track search visibility
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _loadFishData();
     _loadSortPreference();
+    _searchController.addListener(_onSearchChanged);
+  }
+  
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+  
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+    });
   }
 
   Future<void> _loadSortPreference() async {
@@ -299,14 +316,85 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
           ),
         if (_isSortMenuExpanded) _buildFloatingSortMenu(context),
+        // Search widget positioned at the bottom
+        Positioned(
+          bottom: 24,
+          left: 16,
+          right: 16,
+          child: _buildSearchWidget(),
+        ),
       ],
+    );
+  }
+  
+  Widget _buildSearchWidget() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: _isSearchVisible
+          ? _buildSearchBar()
+          : Align(
+              alignment: Alignment.bottomLeft,
+              child: FloatingActionButton(
+                key: const ValueKey('search_fab'),
+                heroTag: 'search_fab',
+                onPressed: () {
+                  setState(() {
+                    _isSearchVisible = true;
+                  });
+                },
+                child: const Icon(Icons.search),
+              ),
+            ),
+    );
+  }
+  
+  Widget _buildSearchBar() {
+    return Material(
+      key: const ValueKey('search_bar'),
+      elevation: 6,
+      borderRadius: BorderRadius.circular(30),
+      child: TextField(
+        controller: _searchController,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: 'Search tanks...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _isSearchVisible = false;
+              });
+              FocusScope.of(context).unfocus();
+            },
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.surface,
+        ),
+      ),
     );
   }
 
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks) {
-    final sortedTanks = _sortTanks(tanks);
+    final filteredTanks = _filterTanks(tanks);
+    final sortedTanks = _sortTanks(filteredTanks);
     return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0), // Added bottom padding
       itemCount: sortedTanks.length + 1, // +1 for header
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -350,6 +438,52 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     return sortedTanks;
+  }
+  
+  List<Tank> _filterTanks(List<Tank> tanks) {
+    if (_searchQuery.isEmpty) {
+      return tanks;
+    }
+    
+    return tanks.where((tank) {
+      // Search in tank name
+      if (tank.name.toLowerCase().contains(_searchQuery)) {
+        return true;
+      }
+      
+      // Search in tank type
+      final tankType = tank.type == 'freshwater' ? 'freshwater' : 'saltwater';
+      if (tankType.contains(_searchQuery) || tank.type.toLowerCase().contains(_searchQuery)) {
+        return true;
+      }
+      
+      // Search in tank size
+      if (tank.sizeGallons != null) {
+        if (tank.sizeGallons.toString().contains(_searchQuery)) {
+          return true;
+        }
+      }
+      if (tank.sizeLiters != null) {
+        if (tank.sizeLiters.toString().contains(_searchQuery)) {
+          return true;
+        }
+      }
+      
+      // Search in tags
+      if (tank.tags.any((tag) => tag.toLowerCase().contains(_searchQuery))) {
+        return true;
+      }
+      
+      // Search in inhabitants
+      if (tank.inhabitants.any((inhabitant) {
+        return inhabitant.customName.toLowerCase().contains(_searchQuery) ||
+               inhabitant.fishUnit.toLowerCase().contains(_searchQuery);
+      })) {
+        return true;
+      }
+      
+      return false;
+    }).toList();
   }
 
   Widget _buildHeader(BuildContext context, int tankCount) {
@@ -782,6 +916,29 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               const SizedBox(height: 8),
               
+              // Tags display
+              if (tank.tags.isNotEmpty) ...[
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: tank.tags.map((tag) {
+                    return Chip(
+                      label: Text(
+                        tag,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                        ),
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 8),
+              ],
+              
               // Stocking recommendations button
               if (tank.inhabitants.isNotEmpty) ...[
                 Container(
@@ -994,6 +1151,26 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
               
               const SizedBox(height: 16),
+              if (tank.tags.isNotEmpty) ...[
+                Text(
+                  'Tags:',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: tank.tags.map((tag) {
+                    return Chip(
+                      label: Text(tag),
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
               if (tank.notes != null && tank.notes!.isNotEmpty) ...[
                 Text(
                   'Notes:',
@@ -1059,6 +1236,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         inhabitants: List.from(tank.inhabitants),
         sizeGallons: tank.sizeGallons,
         sizeLiters: tank.sizeLiters,
+        tags: List.from(tank.tags),
       );
       
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);

@@ -67,6 +67,7 @@ class Tank {
   final double? sizeLiters;  // Tank size in liters
   final String? notes; // User notes about the tank
   final double? harmonyScore; // Cached harmony score (0.0 to 1.0)
+  final List<String> tags; // User-created tags for organizing/searching tanks
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -79,9 +80,10 @@ class Tank {
     this.sizeLiters,
     this.notes,
     this.harmonyScore,
+    List<String>? tags,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : tags = tags ?? [];
 
   factory Tank.create({
     required String name,
@@ -91,6 +93,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    List<String>? tags,
     DateTime? createdAt,
   }) {
     final now = DateTime.now();
@@ -103,6 +106,7 @@ class Tank {
       sizeLiters: sizeLiters,
       notes: notes,
       harmonyScore: harmonyScore,
+      tags: tags,
       createdAt: createdAt ?? now,
       updatedAt: now,
     );
@@ -118,6 +122,7 @@ class Tank {
       'sizeLiters': sizeLiters,
       'notes': notes,
       'harmonyScore': harmonyScore,
+      'tags': tags,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -135,6 +140,7 @@ class Tank {
       sizeLiters: json['sizeLiters']?.toDouble(),
       notes: json['notes'] as String?,
       harmonyScore: json['harmonyScore']?.toDouble(),
+      tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -149,6 +155,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    List<String>? tags,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -161,6 +168,7 @@ class Tank {
       sizeLiters: sizeLiters ?? this.sizeLiters,
       notes: notes ?? this.notes,
       harmonyScore: harmonyScore ?? this.harmonyScore,
+      tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
