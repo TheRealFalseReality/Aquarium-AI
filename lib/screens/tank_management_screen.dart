@@ -1071,13 +1071,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    // Fish Display by Type
-                    if (tank.inhabitants.isNotEmpty) ...[
-                      ..._buildFishGroupDisplay(tank),
-                    ],
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               const SizedBox(height: 8),
               
               // Tags display
@@ -1106,9 +1102,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const SizedBox(height: 8),
               ],
               
-              // Stocking recommendations button
+              // Action buttons area
               if (tank.inhabitants.isNotEmpty) ...[
                 Container(
+                  height: 36,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -1119,77 +1116,48 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Action buttons area (space for future parameters/dosing)
-                Row(
-                  children: [
-                    // AI stocking button
-                    if (tank.inhabitants.isNotEmpty)
-                      Expanded(
-                        child: Container(
-                          height: 36,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.purple.shade400,
-                                Colors.blue.shade500,
-                                Colors.cyan.shade400,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.purple.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _getTankStockingRecommendations(context, ref, tank),
-                            icon: const Icon(Icons.auto_awesome, size: 16),
-                            label: Text(
-                              'AI Stocking Recommendations',
-                              style: TextStyle(
-                                fontSize: isLargeScreen ? 13 : 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shadowColor: Colors.transparent,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.purple.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    // Space for future buttons (dosing, parameters, etc.)
-                    if (tank.inhabitants.isNotEmpty) const SizedBox(width: 8),
-                  ],
-                ),
-                
-                const SizedBox(height: 10),
-                
-                // Footer with date
-                Text(
-                  'Created ${_formatDate(tank.createdAt)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant.withOpacity(0.7),
-                    fontSize: 11,
+                    ],
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                    icon: const Icon(Icons.auto_awesome, size: 16),
+                    label: Text(
+                      'AI Stocking Recommendations',
+                      style: TextStyle(
+                        fontSize: isLargeScreen ? 13 : 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 10),
               ],
+              
+              // Footer with date
+              Text(
+                'Created ${_formatDate(tank.createdAt)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(0.7),
+                  fontSize: 11,
+                ),
+              ),
             ),
           ),
         ),
