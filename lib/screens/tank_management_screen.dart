@@ -908,7 +908,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             onPressed: () => _getTankStockingRecommendations(context, ref, tank),
                             icon: const Icon(Icons.auto_awesome, size: 16),
                             label: Text(
-                              'AI Stocking',
+                              'AI Stocking Recommendations',
                               style: TextStyle(
                                 fontSize: isLargeScreen ? 13 : 14,
                                 fontWeight: FontWeight.w600,
