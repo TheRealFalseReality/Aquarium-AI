@@ -314,7 +314,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               crossAxisSpacing: 16,
               childCount: sortedTanks.length,
               itemBuilder: (context, index) {
-                return _buildTankCard(context, ref, sortedTanks[index]);
+                return _buildTankCard(context, ref, sortedTanks[index], fishData);
               },
             ),
           ),
@@ -613,7 +613,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank) {
+  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData) {
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
@@ -656,7 +656,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => _showTankDetails(context, tank),
+          onTap: () => _showTankDetails(context, tank, fishData),
           child: Padding(
             padding: const EdgeInsets.all(18.0),
             child: Column(
@@ -875,7 +875,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ..._buildFishGroupDisplay(tank),
+                      ..._buildFishGroupDisplay(tank, fishData),
                     ],
                   ),
                 
@@ -1021,7 +1021,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _showTankDetails(BuildContext context, Tank tank) {
+  void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
     final cs = Theme.of(context).colorScheme;
     final screenSize = MediaQuery.of(context).size;
     final isMobile = screenSize.width < 600;
@@ -1208,7 +1208,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 )
                               else
                                 ...tank.inhabitants.map((inhabitant) {
-                                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, inhabitant: inhabitant);
+                                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: Row(
