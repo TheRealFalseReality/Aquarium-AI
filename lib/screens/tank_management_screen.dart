@@ -885,7 +885,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${_getTotalInhabitantCount(tank.inhabitants)} fish, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                              '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: cs.onPrimaryContainer,
@@ -1270,6 +1270,46 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                         
+                        // Notes section
+                        if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.note_outlined, size: 18, color: cs.onSurfaceVariant),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Notes',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  tank.notes!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        
                         // Calculation Breakdown Expandable Section
                         if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
                           const SizedBox(height: 16),
@@ -1308,46 +1348,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                         fontSize: 11,
                                       ),
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        
-                        // Notes section
-                        if (tank.notes != null && tank.notes!.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: cs.outlineVariant.withOpacity(0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.note_outlined, size: 18, color: cs.onSurfaceVariant),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Notes',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  tank.notes!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    height: 1.5,
                                   ),
                                 ),
                               ],
