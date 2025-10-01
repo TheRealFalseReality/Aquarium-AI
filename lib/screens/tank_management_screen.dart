@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -312,12 +313,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final useGridLayout = screenWidth >= 900;
     
     if (useGridLayout) {
-      // Calculate card width for grid layout
+      // Use masonry grid for larger screens
       final int columnCount = screenWidth >= 1400 ? 3 : 2;
-      final double horizontalPadding = 16.0 * 2; // Left and right padding
-      final double spacing = 16.0 * (columnCount - 1); // Spacing between cards
-      final double availableWidth = screenWidth - horizontalPadding - spacing;
-      final double cardWidth = availableWidth / columnCount;
       
       return CustomScrollView(
         slivers: [
@@ -327,36 +324,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               child: _buildHeader(context, sortedTanks.length),
             ),
           ),
+          // Masonry grid layout
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  // Calculate row and column
-                  final rowIndex = index ~/ columnCount;
-                  final startIndex = rowIndex * columnCount;
-                  final endIndex = (startIndex + columnCount).clamp(0, sortedTanks.length);
-                  
-                  if (index % columnCount != 0) return const SizedBox.shrink();
-                  
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: index < sortedTanks.length - columnCount ? 16.0 : 0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (var i = startIndex; i < endIndex; i++) ...[
-                          SizedBox(
-                            width: cardWidth,
-                            child: _buildTankCard(context, ref, sortedTanks[i]),
-                          ),
-                          if (i < endIndex - 1) const SizedBox(width: 16),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-                childCount: ((sortedTanks.length + columnCount - 1) ~/ columnCount) * columnCount,
-              ),
+            sliver: SliverMasonryGrid.count(
+              crossAxisCount: columnCount,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childCount: sortedTanks.length,
+              itemBuilder: (context, index) {
+                return _buildTankCard(context, ref, sortedTanks[index]);
+              },
             ),
           ),
           const SliverToBoxAdapter(
@@ -1401,12 +1379,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.event, size: 14, color: cs.onSurfaceVariant.withOpacity(0.7)),
+                                Icon(Icons.event, size: 14, color: cs.onSurface),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Created ${_formatDate(tank.createdAt)}',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -1415,12 +1394,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.update, size: 14, color: cs.onSurfaceVariant.withOpacity(0.7)),
+                                  Icon(Icons.update, size: 14, color: cs.onSurface),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Updated ${_formatDate(tank.updatedAt)}',
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: cs.onSurfaceVariant.withOpacity(0.7),
+                                      color: cs.onSurface,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
