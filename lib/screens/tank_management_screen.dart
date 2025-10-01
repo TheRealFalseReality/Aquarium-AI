@@ -135,7 +135,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
                   ? _buildEmptyState(context, ref)
-                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks),
+                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks, fishData),
     );
   }
 
@@ -262,10 +262,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
     return Stack(
       children: [
-        _buildTankList(context, ref, tanks),
+        _buildTankList(context, ref, tanks, fishData),
         if (_isSortMenuExpanded) 
           GestureDetector(
             onTap: () {
@@ -284,7 +284,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
     final sortedTanks = _sortTanks(tanks);
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
