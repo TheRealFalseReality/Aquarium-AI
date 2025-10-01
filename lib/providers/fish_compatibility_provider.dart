@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'model_provider.dart';
 import '../prompts/fish_compatibility_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/json_utils.dart';
+import '../services/fish_data_service.dart';
 
 // Helper class for cancellable operations
 class CancellableCompleter<T> {
@@ -44,15 +45,7 @@ class CancelledException implements Exception {
   String toString() => 'Future was cancelled';
 }
 
-// Helper function to extract JSON from a markdown code block
-String _extractJson(String text) {
-  final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
-  final match = regExp.firstMatch(text);
-  if (match != null) {
-    return match.group(1) ?? text;
-  }
-  return text;
-}
+// Note: extractJson is now imported from json_utils.dart
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -137,25 +130,12 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
   @override
   FishCompatibilityState build() {
-    _loadFishData();
-    return FishCompatibilityState();
-  }
-
-  Future<void> _loadFishData() async {
-    try {
-      final jsonString =
-          await rootBundle.loadString('assets/fishcompat.json');
-      final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-      final freshwater =
-          (jsonResponse['freshwater'] as List).map((f) => Fish.fromJson(f)).toList();
-      final marine =
-          (jsonResponse['marine'] as List).map((f) => Fish.fromJson(f)).toList();
-      state = state.copyWith(
-          fishData: AsyncValue.data(
-              {'freshwater': freshwater, 'marine': marine}));
-    } catch (e, stackTrace) {
-      state = state.copyWith(fishData: AsyncValue.error(e, stackTrace));
-    }
+    // Use the centralized fish data provider instead of loading data directly
+    final fishDataAsync = ref.watch(fishDataProvider);
+    
+    return FishCompatibilityState(
+      fishData: fishDataAsync,
+    );
   }
 
   void selectFish(Fish fish) {
@@ -268,7 +248,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         throw Exception('Received no response from the AI service after multiple retries.');
       }
 
-      final cleanedResponse = _extractJson(responseText);
+      final cleanedResponse = extractJson(responseText);
       final reportJson = json.decode(cleanedResponse);
       
       // EDITED: Generate the calculation breakdown string here.

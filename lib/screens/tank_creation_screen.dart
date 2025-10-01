@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
@@ -32,13 +31,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   String _selectedCategory = 'freshwater';
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
-  bool _isLoadingFish = true;
   DateTime _creationDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _loadFishData();
     
     if (widget.existingTank != null) {
       _tankNameController.text = widget.existingTank!.name;
@@ -55,6 +52,9 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
         _notesController.text = widget.existingTank!.notes!;
       }
     }
+    
+    // Load fish data after initialization
+    _loadFishData();
   }
 
   @override
@@ -68,20 +68,16 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
 
   Future<void> _loadFishData() async {
     try {
-      final jsonString = await rootBundle.loadString('assets/fishcompat.json');
-      final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-      final fishList = (jsonResponse[_selectedCategory] as List)
-          .map((f) => Fish.fromJson(f))
-          .toList();
+      final fishDataService = ref.read(fishDataServiceProvider);
+      final fishData = await fishDataService.loadFishData();
+      final fishList = fishData[_selectedCategory] ?? [];
       
-      setState(() {
-        _availableFish = fishList;
-        _isLoadingFish = false;
-      });
+      if (mounted) {
+        setState(() {
+          _availableFish = fishList;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoadingFish = false;
-      });
       if (mounted) {
         context.showAccessibleMessage('Failed to load fish data: $e');
       }
@@ -125,7 +121,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   void _performCategoryChange(String category) {
     setState(() {
       _selectedCategory = category;
-      _isLoadingFish = true;
       _inhabitants.clear(); // Clear inhabitants when changing category
     });
     _loadFishData();
@@ -195,22 +190,49 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
           ? double.tryParse(_sizeLitersController.text.trim()) 
           : null;
 
-        // Calculate harmony score for the tank
+        // Build temporary tank for calculations
+        final tempTank = Tank(
+          id: 'temp',
+          name: _tankNameController.text.trim(),
+          type: _selectedCategory,
+          inhabitants: _inhabitants,
+          sizeGallons: sizeGallons,
+          sizeLiters: sizeLiters,
+          notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+          createdAt: _creationDate,
+          updatedAt: DateTime.now(),
+        );
+
+        // Calculate harmony score and breakdown for the tank (only once during save)
         final fishData = {_selectedCategory: _availableFish};
         final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
-          Tank(
-            id: 'temp',
-            name: _tankNameController.text.trim(),
-            type: _selectedCategory,
-            inhabitants: _inhabitants,
-            sizeGallons: sizeGallons,
-            sizeLiters: sizeLiters,
-            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-            createdAt: _creationDate,
-            updatedAt: DateTime.now(),
-          ),
+          tempTank,
           fishData,
         );
+
+        // Calculate breakdown string (only once during save)
+        String? calculationBreakdown;
+        if (_inhabitants.isNotEmpty && _availableFish.isNotEmpty) {
+          final tankFish = <Fish>[];
+          for (final inhabitant in _inhabitants) {
+            final fish = _availableFish.firstWhere(
+              (f) => f.name == inhabitant.fishUnit,
+              orElse: () => Fish(
+                name: inhabitant.fishUnit,
+                commonNames: [],
+                imageURL: '',
+                compatible: [],
+                notRecommended: [],
+                notCompatible: [],
+                withCaution: [],
+              ),
+            );
+            for (int i = 0; i < inhabitant.quantity; i++) {
+              tankFish.add(fish);
+            }
+          }
+          calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
+        }
 
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
@@ -221,6 +243,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
               )
             : Tank.create(
@@ -231,6 +254,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 sizeLiters: sizeLiters,
                 notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
                 harmonyScore: harmonyScore,
+                calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
               );
 
@@ -580,7 +604,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                             ),
                       ),
                       ElevatedButton.icon(
-                        onPressed: _isLoadingFish ? null : _addInhabitant,
+                        onPressed: _availableFish.isEmpty ? null : _addInhabitant,
                         icon: const Icon(Icons.add),
                         label: const Text('Add'),
                       ),

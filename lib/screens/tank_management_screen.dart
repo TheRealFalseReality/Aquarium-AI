@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -10,6 +8,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
@@ -32,7 +31,6 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
-  Map<String, List<Fish>>? _fishData;
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
@@ -42,7 +40,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFishData();
     _loadSortPreference();
   }
 
@@ -69,31 +66,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  Future<void> _loadFishData() async {
-    try {
-      final jsonString = await rootBundle.loadString('assets/fishcompat.json');
-      final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-      
-      final fishData = <String, List<Fish>>{};
-      for (final category in ['freshwater', 'marine']) {
-        if (jsonResponse.containsKey(category)) {
-          fishData[category] = (jsonResponse[category] as List)
-              .map((f) => Fish.fromJson(f))
-              .toList();
-        }
-      }
-      
-      setState(() {
-        _fishData = fishData;
-      });
-    } catch (e) {
-      // Handle error silently for now
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+    // Watch the centralized fish data provider
+    final fishDataAsync = ref.watch(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
 
     // Listen for stocking recommendations globally
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
@@ -156,7 +137,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
                   ? _buildEmptyState(context, ref)
-                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks),
+                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks, fishData),
     );
   }
 
@@ -283,10 +264,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
     return Stack(
       children: [
-        _buildTankList(context, ref, tanks),
+        _buildTankList(context, ref, tanks, fishData),
         if (_isSortMenuExpanded) 
           GestureDetector(
             onTap: () {
@@ -305,7 +286,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks) {
+  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
     final sortedTanks = _sortTanks(tanks);
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -354,7 +335,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
         
         final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank);
+        return _buildTankCard(context, ref, tank, fishData);
       },
     );
   }
@@ -1057,7 +1038,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Colors.purple.shade300.withOpacity(0.95),
             cs.surfaceContainerHighest.withOpacity(0.98),
           ];
-    
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -1465,6 +1445,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         inhabitants: List.from(tank.inhabitants),
         sizeGallons: tank.sizeGallons,
         sizeLiters: tank.sizeLiters,
+        notes: tank.notes,
+        harmonyScore: tank.harmonyScore,
+        calculationBreakdown: tank.calculationBreakdown,
       );
       
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);
@@ -1531,35 +1514,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } else {
       return '${date.month}/${date.day}/${date.year}';
     }
-  }
-
-  String _getCalculationBreakdown(Tank tank) {
-    if (_fishData == null || tank.inhabitants.isEmpty) return 'No calculation available';
-    
-    // Get fish data for the tank
-    final categoryFish = _fishData![tank.type] ?? [];
-    final tankFish = <Fish>[];
-    
-    for (final inhabitant in tank.inhabitants) {
-      final fish = categoryFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-        orElse: () => Fish(
-          name: inhabitant.fishUnit,
-          commonNames: [],
-          imageURL: '',
-          compatible: [],
-          notRecommended: [],
-          notCompatible: [],
-          withCaution: [],
-        ),
-      );
-      // Add individual fish based on quantity for proper compatibility calculations
-      for (int i = 0; i < inhabitant.quantity; i++) {
-        tankFish.add(fish);
-      }
-    }
-    
-    return TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
   }
 
   String _formatTankSize(Tank tank) {
@@ -1635,7 +1589,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  String? _getFishImageUrl(String tankType, String fishName, {TankInhabitant? inhabitant}) {
+  String? _getFishImageUrl(String tankType, String fishName, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
     // Prioritize custom images if inhabitant is provided
     if (inhabitant != null) {
       if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
@@ -1647,9 +1601,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     // Fall back to default fish image
-    if (_fishData == null) return null;
+    if (fishData == null) return null;
     
-    final categoryFish = _fishData![tankType] ?? [];
+    final categoryFish = fishData[tankType] ?? [];
     final fish = categoryFish.firstWhere(
       (f) => f.name == fishName,
       orElse: () => Fish(
@@ -1682,7 +1636,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return grouped;
   }
 
-  List<Widget> _buildFishGroupDisplay(Tank tank) {
+  List<Widget> _buildFishGroupDisplay(Tank tank, Map<String, List<Fish>>? fishData) {
     final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
     final widgets = <Widget>[];
     
@@ -1694,7 +1648,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       final fishType = entry.key;
       final inhabitants = entry.value;
-      final fishImageUrl = _getFishImageUrl(tank.type, fishType, inhabitant: inhabitants.first);
+      final fishImageUrl = _getFishImageUrl(tank.type, fishType, fishData, inhabitant: inhabitants.first);
       
       // Calculate total quantity for this fish type
       final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
@@ -1790,9 +1744,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
     
+    // Get fish data from provider
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    
     // Calculate and store existing fish for the listener
-    if (_fishData != null) {
-      final categoryFish = _fishData![tank.type] ?? [];
+    if (fishData != null) {
+      final categoryFish = fishData[tank.type] ?? [];
       final existingFish = <Fish>[];
       
       for (final inhabitant in tank.inhabitants) {
