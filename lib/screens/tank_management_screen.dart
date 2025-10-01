@@ -1043,26 +1043,34 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   void _showTankDetails(BuildContext context, Tank tank) {
     final cs = Theme.of(context).colorScheme;
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
     
-    // AI-inspired gradient colors based on tank type
+    // AI-inspired gradient colors based on tank type with higher opacity
     final gradientColors = tank.type == 'freshwater'
         ? [
-            Colors.blue.shade400.withOpacity(0.15),
-            Colors.cyan.shade300.withOpacity(0.15),
-            cs.surfaceContainerHighest.withOpacity(0.5),
+            Colors.blue.shade400.withOpacity(0.95),
+            Colors.cyan.shade300.withOpacity(0.95),
+            cs.surfaceContainerHighest.withOpacity(0.98),
           ]
         : [
-            Colors.indigo.shade400.withOpacity(0.15),
-            Colors.purple.shade300.withOpacity(0.15),
-            cs.surfaceContainerHighest.withOpacity(0.5),
+            Colors.indigo.shade400.withOpacity(0.95),
+            Colors.purple.shade300.withOpacity(0.95),
+            cs.surfaceContainerHighest.withOpacity(0.98),
           ];
     
     showDialog(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: isMobile 
+            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 24)
+            : const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 700,
+            maxHeight: screenSize.height - 48,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: gradientColors,
