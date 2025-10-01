@@ -18,7 +18,14 @@ String buildWaterAnalysisPrompt({
     The status for each parameter and the overall summary MUST be one of "Good", "Needs Attention", or "Bad".
     The 'howAquaPiHelps' section should conclude with a subtle link to our store: [Shop AquaPi](https://www.capitalcityaquatics.com/store).
 
-    The JSON structure must be:
+    When considering the parameters, use the following guidelines for healthy ranges:
+    - Temperature: 22-28°C (72-82°F) for most fish, 24-28°C (76-82°F) acceptable for tropical fish, 20-24°C (68-75°F) for coldwater fish, 24-26°C (75-79°F) for reef tanks
+    - Water Level: 80%+ if percentage, otherwise ensure within acceptable range for tank size
+    - pH: 6.5-8.0 for freshwater, 8.0-8.4 for saltwater/marine
+    - Salinity: 30-35 ppt/psu for saltwater, 1.020-1.025 SG or 46.25-53.06 mS/cm for saltwater specific gravity/conductivity
+    - Dissolved Oxygen: 6+ mg/L, 85%+ saturation, 7+ ppm. But Higher levels (up to 120% saturation or 12+ mg/L) can lead to gas bubble disease
+    - ORP: 250-400 mV for freshwater, 300-400 mV for saltwater/marine
+        The JSON structure must be:
     {
       "summary": { "status": "Good" | "Needs Attention" | "Bad", "title": "...", "message": "..." },
       "parameters": [
