@@ -1,18 +1,15 @@
 import 'dart:convert';
 import 'package:fish_ai/models/tank.dart';
-import 'package:fish_ai/providers/tank_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('Tank Provider Analytics Tests', () {
-    late TankNotifier tankNotifier;
     
     setUp(() async {
       // Mock shared preferences
       SharedPreferences.setMockInitialValues({});
-      tankNotifier = TankNotifier();
       // Wait for initial load to complete
       await Future.delayed(const Duration(milliseconds: 100));
     });

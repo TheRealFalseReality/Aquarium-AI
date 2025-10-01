@@ -86,7 +86,6 @@ class _PhotoAnalysisResultScreenState
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return MainLayout(
       title: 'Photo Analysis',
       child: ListView(
