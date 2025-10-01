@@ -40,7 +40,6 @@ void main() {
         'promotion_dialog_timestamp': moreThan48HoursAgo,
       });
 
-      int dialogShownCount = 0;
       
       await tester.pumpWidget(
         ProviderScope(
