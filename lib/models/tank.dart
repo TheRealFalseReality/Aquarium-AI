@@ -7,6 +7,7 @@ class TankInhabitant {
   final int quantity;
   final String? customImageUrl; // User-provided image URL
   final String? customImagePath; // User-provided image file path (for local images)
+  final DateTime? dateAdded; // Date when inhabitant was added to tank
 
   TankInhabitant({
     required this.id,
@@ -15,6 +16,7 @@ class TankInhabitant {
     required this.quantity,
     this.customImageUrl,
     this.customImagePath,
+    this.dateAdded,
   });
 
   Map<String, dynamic> toJson() {
@@ -25,6 +27,7 @@ class TankInhabitant {
       'quantity': quantity,
       'customImageUrl': customImageUrl,
       'customImagePath': customImagePath,
+      'dateAdded': dateAdded?.toIso8601String(),
     };
   }
 
@@ -36,6 +39,9 @@ class TankInhabitant {
       quantity: json['quantity'] as int,
       customImageUrl: json['customImageUrl'] as String?,
       customImagePath: json['customImagePath'] as String?,
+      dateAdded: json['dateAdded'] != null 
+          ? DateTime.parse(json['dateAdded'] as String)
+          : null,
     );
   }
 
@@ -46,6 +52,7 @@ class TankInhabitant {
     int? quantity,
     String? customImageUrl,
     String? customImagePath,
+    DateTime? dateAdded,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
@@ -54,6 +61,7 @@ class TankInhabitant {
       quantity: quantity ?? this.quantity,
       customImageUrl: customImageUrl ?? this.customImageUrl,
       customImagePath: customImagePath ?? this.customImagePath,
+      dateAdded: dateAdded ?? this.dateAdded,
     );
   }
 }
