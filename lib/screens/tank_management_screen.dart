@@ -325,7 +325,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                   child: _buildHeader(context, sortedTanks.length),
                 ),
               ),
@@ -351,18 +351,39 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
     }
     
-    // Use list layout for mobile devices
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: sortedTanks.length + 1, // +1 for header
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return _buildHeader(context, sortedTanks.length);
-        }
-        
-        final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank);
-      },
+    // Use list layout with sticky header for mobile devices
+    return CustomScrollView(
+      slivers: [
+        // Sticky header for mobile
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _StickyHeaderDelegate(
+            child: Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                child: _buildHeader(context, sortedTanks.length),
+              ),
+            ),
+          ),
+        ),
+        // Tank cards list
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final tank = sortedTanks[index];
+                return _buildTankCard(context, ref, tank);
+              },
+              childCount: sortedTanks.length,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 16),
+        ),
+      ],
     );
   }
 
@@ -2029,10 +2050,10 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   _StickyHeaderDelegate({required this.child});
 
   @override
-  double get minExtent => 120.0; // Minimum height when scrolled
+  double get minExtent => 112.0; // Minimum height when scrolled (reduced from 120)
 
   @override
-  double get maxExtent => 120.0; // Maximum height
+  double get maxExtent => 112.0; // Maximum height (reduced from 120)
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
