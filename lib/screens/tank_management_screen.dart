@@ -808,7 +808,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         Icons.straighten,
                         _formatTankSize(tank),
                       ),
-                    if (tank.inhabitants.isNotEmpty && _fishData != null)
+                    if (tank.inhabitants.isNotEmpty && fishData != null)
                       _buildHarmonyScoreChip(tank),
                   ],
                 ),
@@ -1164,7 +1164,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               _buildStatChip(context, Icons.straighten, _formatTankSize(tank)),
                             if (tank.sizeGallons != null || tank.sizeLiters != null)
                               _buildStatChip(context, Icons.line_weight, _formatWaterWeight(tank)),
-                            if (tank.inhabitants.isNotEmpty && _fishData != null)
+                            if (tank.inhabitants.isNotEmpty && fishData != null)
                               _buildHarmonyScoreChip(tank),
                           ],
                         ),
@@ -1306,7 +1306,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                         
                         // Calculation Breakdown Expandable Section
-                        if (tank.inhabitants.isNotEmpty && _fishData != null) ...[
+                        if (tank.inhabitants.isNotEmpty && fishData != null) ...[
                           const SizedBox(height: 16),
                           Container(
                             decoration: BoxDecoration(
@@ -1337,7 +1337,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      _getCalculationBreakdown(tank),
+                                      tank.calculationBreakdown ?? 'No calculation available',
                                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                         fontFamily: 'monospace',
                                         fontSize: 11,
