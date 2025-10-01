@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -313,35 +312,51 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final useGridLayout = screenWidth >= 900;
     
     if (useGridLayout) {
-      // Use masonry grid for larger screens
+      // Calculate card width for grid layout
       final int columnCount = screenWidth >= 1400 ? 3 : 2;
+      final double horizontalPadding = 16.0 * 2; // Left and right padding
+      final double spacing = 16.0 * (columnCount - 1); // Spacing between cards
+      final double availableWidth = screenWidth - horizontalPadding - spacing;
+      final double cardWidth = availableWidth / columnCount;
       
       return CustomScrollView(
         slivers: [
-          // Sticky header
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _StickyHeaderDelegate(
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                  child: _buildHeader(context, sortedTanks.length),
-                ),
-              ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildHeader(context, sortedTanks.length),
             ),
           ),
-          // Masonry grid layout
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverMasonryGrid.count(
-              crossAxisCount: columnCount,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childCount: sortedTanks.length,
-              itemBuilder: (context, index) {
-                return _buildTankCard(context, ref, sortedTanks[index]);
-              },
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  // Calculate row and column
+                  final rowIndex = index ~/ columnCount;
+                  final startIndex = rowIndex * columnCount;
+                  final endIndex = (startIndex + columnCount).clamp(0, sortedTanks.length);
+                  
+                  if (index % columnCount != 0) return const SizedBox.shrink();
+                  
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: index < sortedTanks.length - columnCount ? 16.0 : 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = startIndex; i < endIndex; i++) ...[
+                          SizedBox(
+                            width: cardWidth,
+                            child: _buildTankCard(context, ref, sortedTanks[i]),
+                          ),
+                          if (i < endIndex - 1) const SizedBox(width: 16),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+                childCount: ((sortedTanks.length + columnCount - 1) ~/ columnCount) * columnCount,
+              ),
             ),
           ),
           const SliverToBoxAdapter(
@@ -351,39 +366,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
     }
     
-    // Use list layout with sticky header for mobile devices
-    return CustomScrollView(
-      slivers: [
-        // Sticky header for mobile
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _StickyHeaderDelegate(
-            child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                child: _buildHeader(context, sortedTanks.length),
-              ),
-            ),
-          ),
-        ),
-        // Tank cards list
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final tank = sortedTanks[index];
-                return _buildTankCard(context, ref, tank);
-              },
-              childCount: sortedTanks.length,
-            ),
-          ),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 16),
-        ),
-      ],
+    // Use list layout for mobile devices
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: sortedTanks.length + 1, // +1 for header
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return _buildHeader(context, sortedTanks.length);
+        }
+        
+        final tank = sortedTanks[index - 1];
+        return _buildTankCard(context, ref, tank);
+      },
     );
   }
 
@@ -1294,6 +1288,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                                 inhabitant.fishUnit,
                                                 style: Theme.of(context).textTheme.bodySmall,
                                               ),
+                                              if (inhabitant.dateAdded != null)
+                                                Text(
+                                                  'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -2040,28 +2042,5 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
       }
     }
-  }
-}
-
-// Sticky header delegate for pinned header
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-
-  _StickyHeaderDelegate({required this.child});
-
-  @override
-  double get minExtent => 112.0; // Minimum height when scrolled (reduced from 120)
-
-  @override
-  double get maxExtent => 112.0; // Maximum height (reduced from 120)
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
-    return false;
   }
 }
