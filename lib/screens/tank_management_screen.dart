@@ -358,33 +358,37 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
   
   Widget _buildSearchBar() {
-    return Material(
+    return Container(
       key: const ValueKey('search_bar'),
-      elevation: 6,
-      borderRadius: BorderRadius.circular(30),
-      child: TextField(
-        controller: _searchController,
-        autofocus: true,
-        decoration: InputDecoration(
-          hintText: 'Search tanks...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              _searchController.clear();
-              setState(() {
-                _isSearchVisible = false;
-              });
-              FocusScope.of(context).unfocus();
-            },
+      // Add right padding to prevent overlap with Create Tank button
+      margin: const EdgeInsets.only(right: 100),
+      child: Material(
+        elevation: 6,
+        borderRadius: BorderRadius.circular(30),
+        child: TextField(
+          controller: _searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search tanks...',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                _searchController.clear();
+                setState(() {
+                  _isSearchVisible = false;
+                });
+                FocusScope.of(context).unfocus();
+              },
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface,
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surface,
         ),
       ),
     );
@@ -922,14 +926,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   spacing: 6,
                   runSpacing: 6,
                   children: tank.tags.map((tag) {
+                    final tagColor = _getTagColor(tag);
                     return Chip(
                       label: Text(
                         tag,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontSize: 11,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      backgroundColor: tagColor,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1163,9 +1170,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: tank.tags.map((tag) {
+                    final tagColor = _getTagColor(tag);
                     return Chip(
-                      label: Text(tag),
-                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      label: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      backgroundColor: tagColor,
                     );
                   }).toList(),
                 ),
@@ -1794,5 +1808,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
       }
     }
+  }
+  
+  // Generate a consistent color for a tag based on its text
+  Color _getTagColor(String tag) {
+    // Use a simple hash function to generate consistent colors for tags
+    int hash = 0;
+    for (int i = 0; i < tag.length; i++) {
+      hash = tag.codeUnitAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Define a palette of nice, vibrant colors
+    final colors = [
+      Colors.blue.shade400,
+      Colors.green.shade400,
+      Colors.orange.shade400,
+      Colors.purple.shade400,
+      Colors.pink.shade400,
+      Colors.teal.shade400,
+      Colors.indigo.shade400,
+      Colors.amber.shade400,
+      Colors.cyan.shade400,
+      Colors.lime.shade400,
+      Colors.deepOrange.shade400,
+      Colors.lightBlue.shade400,
+      Colors.lightGreen.shade400,
+      Colors.deepPurple.shade400,
+      Colors.red.shade400,
+    ];
+    
+    return colors[hash.abs() % colors.length];
   }
 }
