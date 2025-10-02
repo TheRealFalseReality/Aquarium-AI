@@ -22,6 +22,7 @@ class AppDrawer extends ConsumerStatefulWidget {
 
 class _AppDrawerState extends ConsumerState<AppDrawer> {
   bool _isAppearanceExpanded = false;
+  int? _randomTankIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +32,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final tankState = ref.watch(tankProvider);
     final tankCount = tankState.tanks.length;
     // Show a random tank instead of the last tank
-    final randomTank = tankState.tanks.isNotEmpty 
-        ? tankState.tanks[Random().nextInt(tankState.tanks.length)]
+    // Initialize random index on first build or when tank count changes
+    if (_randomTankIndex == null || _randomTankIndex! >= tankCount) {
+      _randomTankIndex = tankCount > 0 ? Random().nextInt(tankCount) : null;
+    }
+    final randomTank = _randomTankIndex != null && tankCount > 0
+        ? tankState.tanks[_randomTankIndex!]
         : null;
 
     // Get fish data for harmony calculation
