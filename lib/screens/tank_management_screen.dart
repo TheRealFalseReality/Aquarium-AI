@@ -618,6 +618,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
     
+    // Get custom background photo if set
+    TankPhoto? backgroundPhoto;
+    if (tank.customBackgroundPhotoId != null) {
+      try {
+        backgroundPhoto = tank.photos.firstWhere(
+          (photo) => photo.id == tank.customBackgroundPhotoId,
+        );
+      } catch (e) {
+        // Photo not found, use default
+      }
+    }
+    
     // AI-inspired gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
         ? [
@@ -634,11 +646,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return Container(
       margin: isLargeScreen ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: backgroundPhoto == null ? LinearGradient(
           colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-        ),
+        ) : null,
+        image: backgroundPhoto != null ? DecorationImage(
+          image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
+              ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
+              : FileImage(File(backgroundPhoto.imagePath!)),
+          fit: BoxFit.cover,
+          opacity: 0.3,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.3),
+            BlendMode.darken,
+          ),
+        ) : null,
+        color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: cs.outlineVariant.withOpacity(0.3),
@@ -689,7 +713,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                       child: Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        tank.customIconCodePoint != null 
+                            ? IconData(tank.customIconCodePoint!, fontFamily: 'MaterialIcons')
+                            : (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
                         size: 24,
                         color: Colors.white,
                       ),
@@ -737,6 +763,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'set_background':
+                            _showSetBackgroundDialog(context, ref, tank);
+                            break;
+                          case 'set_icon':
+                            _showSetIconDialog(context, ref, tank);
+                            break;
+                          case 'reset_customization':
+                            _resetTankCustomization(context, ref, tank);
+                            break;
                           case 'recommendations':
                             _getTankStockingRecommendations(context, ref, tank);
                             break;
@@ -759,6 +794,38 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                         ),
+                        if (tank.photos.isNotEmpty)
+                          const PopupMenuItem(
+                            value: 'set_background',
+                            child: Row(
+                              children: [
+                                Icon(Icons.wallpaper, size: 18),
+                                SizedBox(width: 8),
+                                Text('Set Card Background'),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
+                          value: 'set_icon',
+                          child: Row(
+                            children: [
+                              Icon(Icons.emoji_emotions_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Change Icon'),
+                            ],
+                          ),
+                        ),
+                        if (tank.customBackgroundPhotoId != null || tank.customIconCodePoint != null)
+                          const PopupMenuItem(
+                            value: 'reset_customization',
+                            child: Row(
+                              children: [
+                                Icon(Icons.restore, size: 18),
+                                SizedBox(width: 8),
+                                Text('Reset to Default'),
+                              ],
+                            ),
+                          ),
                         if (tank.inhabitants.isNotEmpty)
                           const PopupMenuItem(
                             value: 'recommendations',
@@ -910,7 +977,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         final photo = tank.photos[index];
                         final imageUrl = photo.imageUrl ?? photo.imagePath;
                         return GestureDetector(
-                          onTap: () => _showPhotoMaximized(context, photo),
+                          onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
                           child: Container(
                             width: 60,
                             height: 60,
@@ -1283,7 +1350,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                   children: tank.photos.map((photo) {
                                     final imageUrl = photo.imageUrl ?? photo.imagePath;
                                     return GestureDetector(
-                                      onTap: () => _showPhotoMaximized(context, photo),
+                                      onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
                                       child: Container(
                                         width: 100,
                                         height: 100,
@@ -1629,7 +1696,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _showPhotoMaximized(BuildContext context, TankPhoto photo) {
+  void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
     
@@ -1694,6 +1761,72 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ),
             ),
+            if (tank != null && ref != null)
+              Positioned(
+                top: 40,
+                right: 70,
+                child: PopupMenuButton<String>(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  onSelected: (value) {
+                    Navigator.of(context).pop(); // Close maximized view first
+                    switch (value) {
+                      case 'set_background':
+                        _setTankBackground(context, ref, tank, photo.id);
+                        break;
+                      case 'set_icon':
+                        _showSetIconDialog(context, ref, tank);
+                        break;
+                      case 'reset_customization':
+                        _resetTankCustomization(context, ref, tank);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'set_background',
+                      child: Row(
+                        children: [
+                          Icon(Icons.wallpaper, size: 18),
+                          SizedBox(width: 8),
+                          Text('Set as Card Background'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'set_icon',
+                      child: Row(
+                        children: [
+                          Icon(Icons.emoji_emotions_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Change Tank Icon'),
+                        ],
+                      ),
+                    ),
+                    if (tank.customBackgroundPhotoId != null || tank.customIconCodePoint != null)
+                      const PopupMenuItem(
+                        value: 'reset_customization',
+                        child: Row(
+                          children: [
+                            Icon(Icons.restore, size: 18),
+                            SizedBox(width: 8),
+                            Text('Reset to Default'),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             Positioned(
               top: 40,
               right: 16,
@@ -1717,6 +1850,185 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       ),
     );
+  }
+
+  void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    if (tank.photos.isEmpty) {
+      context.showAccessibleMessage('No photos available. Add photos to your tank first.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Card Background'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: tank.photos.length,
+            itemBuilder: (context, index) {
+              final photo = tank.photos[index];
+              final imageUrl = photo.imageUrl ?? photo.imagePath;
+              final isSelected = tank.customBackgroundPhotoId == photo.id;
+              
+              return GestureDetector(
+                onTap: () {
+                  _setTankBackground(context, ref, tank, photo.id);
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                      width: isSelected ? 3 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: imageUrl != null
+                        ? (imageUrl.startsWith('http')
+                            ? Image.network(imageUrl, fit: BoxFit.cover)
+                            : Image.file(File(imageUrl), fit: BoxFit.cover))
+                        : Container(color: Colors.grey),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankBackground(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+    try {
+      final updatedTank = tank.copyWith(customBackgroundPhotoId: photoId);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Card background updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update background: $e');
+      }
+    }
+  }
+
+  void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    // Predefined icons for tanks
+    final icons = [
+      Icons.water_drop,
+      Icons.waves,
+      Icons.pool,
+      Icons.bubble_chart,
+      Icons.water,
+      Icons.shower,
+      Icons.opacity,
+      Icons.water_damage,
+      Icons.pets,
+      Icons.set_meal,
+      Icons.spa,
+      Icons.emoji_nature,
+      Icons.grass,
+      Icons.eco,
+      Icons.forest,
+      Icons.park,
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Tank Icon'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: icons.length,
+            itemBuilder: (context, index) {
+              final icon = icons[index];
+              final isSelected = tank.customIconCodePoint == icon.codePoint;
+              
+              return GestureDetector(
+                onTap: () {
+                  _setTankIcon(context, ref, tank, icon.codePoint);
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Theme.of(context).colorScheme.surfaceVariant,
+                    border: Border.all(
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Colors.grey,
+                      width: isSelected ? 2 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 32),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankIcon(BuildContext context, WidgetRef ref, Tank tank, int codePoint) async {
+    try {
+      final updatedTank = tank.copyWith(customIconCodePoint: codePoint);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _resetTankCustomization(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final updatedTank = tank.copyWith(
+        clearCustomBackgroundPhotoId: true,
+        clearCustomIconCodePoint: true,
+      );
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Reset to default appearance');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to reset: $e');
+      }
+    }
   }
 
   void _duplicateTank(BuildContext context, WidgetRef ref, Tank tank) async {
