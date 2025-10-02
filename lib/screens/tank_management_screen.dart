@@ -695,7 +695,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        gradient: tank.customIconCodePoint == null && tank.customBackgroundPhotoId == null
+                        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
                             ? LinearGradient(
                                 colors: tank.type == 'freshwater'
                                     ? [Colors.blue.shade300, Colors.cyan.shade400]
@@ -704,7 +704,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 end: Alignment.bottomRight,
                               )
                             : null,
-                        color: tank.customIconCodePoint == null && tank.customBackgroundPhotoId != null
+                        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
                             ? Colors.grey.shade300
                             : null,
                         borderRadius: BorderRadius.circular(14),
@@ -737,13 +737,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : (tank.customBackgroundPhotoId != null
+                          : (tank.customIconPhotoId != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(14),
                                   child: () {
                                     try {
                                       final photo = tank.photos.firstWhere(
-                                        (p) => p.id == tank.customBackgroundPhotoId,
+                                        (p) => p.id == tank.customIconPhotoId,
                                       );
                                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                                       return imageUrl != null
@@ -2019,8 +2019,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     itemBuilder: (context, index) {
                       final photo = tank.photos[index];
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
-                      final isSelected = tank.customBackgroundPhotoId == photo.id && 
-                                        tank.customIconCodePoint == null;
+                      final isSelected = tank.customIconPhotoId == photo.id;
                       
                       return GestureDetector(
                         onTap: () {
@@ -2100,7 +2099,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ),
         actions: [
-          if (tank.customIconCodePoint != null || tank.customBackgroundPhotoId != null)
+          if (tank.customIconCodePoint != null || tank.customIconPhotoId != null)
             TextButton(
               onPressed: () {
                 _resetTankIcon(context, ref, tank);
@@ -2133,9 +2132,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   void _setTankIconFromPhoto(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
     try {
-      // Set the background photo and clear custom icon to use photo as icon
+      // Set the icon photo and clear custom icon code point to use photo as icon
       final updatedTank = tank.copyWith(
-        customBackgroundPhotoId: photoId,
+        customIconPhotoId: photoId,
         clearCustomIconCodePoint: true,
       );
       await ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -2151,7 +2150,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   void _resetTankIcon(BuildContext context, WidgetRef ref, Tank tank) async {
     try {
-      final updatedTank = tank.copyWith(clearCustomIconCodePoint: true);
+      final updatedTank = tank.copyWith(
+        clearCustomIconCodePoint: true,
+        clearCustomIconPhotoId: true,
+      );
       await ref.read(tankProvider.notifier).updateTank(updatedTank);
       if (context.mounted) {
         context.showAccessibleMessage('Tank icon reset to default');

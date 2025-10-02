@@ -126,6 +126,7 @@ class Tank {
   final DateTime updatedAt;
   final List<TankPhoto> photos; // Photos of the tank (not fish)
   final String? customBackgroundPhotoId; // ID of photo to use as card background
+  final String? customIconPhotoId; // ID of photo to use as tank icon
   final int? customIconCodePoint; // Custom icon code point for tank card
 
   Tank({
@@ -142,6 +143,7 @@ class Tank {
     required this.updatedAt,
     List<TankPhoto>? photos,
     this.customBackgroundPhotoId,
+    this.customIconPhotoId,
     this.customIconCodePoint,
   }) : photos = photos ?? [];
 
@@ -157,6 +159,7 @@ class Tank {
     DateTime? createdAt,
     List<TankPhoto>? photos,
     String? customBackgroundPhotoId,
+    String? customIconPhotoId,
     int? customIconCodePoint,
   }) {
     final now = DateTime.now();
@@ -174,6 +177,7 @@ class Tank {
       updatedAt: now,
       photos: photos,
       customBackgroundPhotoId: customBackgroundPhotoId,
+      customIconPhotoId: customIconPhotoId,
       customIconCodePoint: customIconCodePoint,
     );
   }
@@ -193,6 +197,7 @@ class Tank {
       'updatedAt': updatedAt.toIso8601String(),
       'photos': photos.map((p) => p.toJson()).toList(),
       'customBackgroundPhotoId': customBackgroundPhotoId,
+      'customIconPhotoId': customIconPhotoId,
       'customIconCodePoint': customIconCodePoint,
     };
   }
@@ -216,6 +221,7 @@ class Tank {
           ?.map((p) => TankPhoto.fromJson(p))
           .toList() ?? [],
       customBackgroundPhotoId: json['customBackgroundPhotoId'] as String?,
+      customIconPhotoId: json['customIconPhotoId'] as String?,
       customIconCodePoint: json['customIconCodePoint'] as int?,
     );
   }
@@ -234,8 +240,10 @@ class Tank {
     DateTime? updatedAt,
     List<TankPhoto>? photos,
     String? customBackgroundPhotoId,
+    String? customIconPhotoId,
     int? customIconCodePoint,
     bool clearCustomBackgroundPhotoId = false,
+    bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
   }) {
     return Tank(
@@ -252,6 +260,7 @@ class Tank {
       updatedAt: updatedAt ?? this.updatedAt,
       photos: photos ?? this.photos,
       customBackgroundPhotoId: clearCustomBackgroundPhotoId ? null : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
+      customIconPhotoId: clearCustomIconPhotoId ? null : (customIconPhotoId ?? this.customIconPhotoId),
       customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
     );
   }
