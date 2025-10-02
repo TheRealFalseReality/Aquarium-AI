@@ -798,57 +798,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                     ),
-                    // Quick action buttons
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Quick add photo button
-                          InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => TankCreationScreen(existingTank: tank),
-                                ),
-                              ).then((_) {
-                                // Focus on adding a photo by opening the dialog
-                                // This will be handled by the user manually opening the dialog
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Icon(Icons.add_a_photo, size: 18, color: cs.onSurfaceVariant),
-                            ),
-                          ),
-                          // Quick add inhabitant button
-                          InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => TankCreationScreen(existingTank: tank),
-                                ),
-                              ).then((_) {
-                                // Focus on adding an inhabitant by opening the dialog
-                                // This will be handled by the user manually opening the dialog
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Icon(Icons.add, size: 18, color: cs.onSurfaceVariant),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    PopupMenuButton<String>(
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PopupMenuButton<String>(
                       icon: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
@@ -957,6 +910,53 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               Icon(Icons.delete, color: Colors.red, size: 18),
                               SizedBox(width: 8),
                               Text('Delete', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                        const SizedBox(height: 4),
+                        // Quick action buttons (vertical)
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHighest.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Quick add photo button
+                              InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TankCreationScreen(existingTank: tank),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(6),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: Icon(Icons.add_a_photo, size: 18, color: cs.onSurfaceVariant),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              // Quick add inhabitant button
+                              InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TankCreationScreen(existingTank: tank),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(6),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: Icon(Icons.add, size: 18, color: cs.onSurfaceVariant),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -2232,7 +2232,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           return p;
         }).toList();
         
-        final updatedTank = tank.copyWith(photos: updatedPhotos);
+        final updatedTank = tank.copyWith(
+          photos: updatedPhotos,
+          updatedAt: DateTime.now(),
+        );
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
         
         if (context.mounted) {
