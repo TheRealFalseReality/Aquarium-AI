@@ -656,7 +656,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
               : FileImage(File(backgroundPhoto.imagePath!)),
           fit: BoxFit.cover,
-          opacity: 0.3,
+          opacity: 0.8,
           colorFilter: ColorFilter.mode(
             Colors.black.withOpacity(0.3),
             BlendMode.darken,
