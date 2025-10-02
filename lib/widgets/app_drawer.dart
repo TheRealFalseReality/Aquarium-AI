@@ -131,7 +131,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                               children: [
                                 Text(
                                   'Total: $tankCount\n'
-                                  '${randomTank != null ? "Random: ${randomTank.name}" : ""}',
+                                  '${randomTank != null ? randomTank.name : ""}',
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
                                 if (harmonyScoreWidget != null) ...[
