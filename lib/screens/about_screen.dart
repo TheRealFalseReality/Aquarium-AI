@@ -1,3 +1,4 @@
+import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,20 +84,18 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         padding: const EdgeInsets.all(24.0),
         children: <Widget>[
           // Header Section
-          Icon(
-            Icons.waves,
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
-          ),
           const SizedBox(height: 16),
-          Text(
-            'Aquarium AI',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
+              GradientText(
+                'Aquarium AI',
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+                gradient: LinearGradient(colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.secondary,
+                ]),
+              ),
           const SizedBox(height: 8),
           Text(
             'Your intelligent assistant for aquatic compatibility.',
