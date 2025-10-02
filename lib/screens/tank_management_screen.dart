@@ -919,6 +919,81 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   const SizedBox(height: 14),
                 ],
                 
+                // Tank photos section (if photos exist)
+                if (tank.photos.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library_outlined,
+                        size: 14,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tank Photos (${tank.photos.length})',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 60,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: tank.photos.length,
+                      itemBuilder: (context, index) {
+                        final photo = tank.photos[index];
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: cs.outline,
+                              width: 1,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: imageUrl != null
+                                ? (imageUrl.startsWith('http')
+                                    ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Container(
+                                          color: cs.errorContainer,
+                                          child: Icon(
+                                            Icons.error_outline,
+                                            size: 20,
+                                            color: cs.onErrorContainer,
+                                          ),
+                                        ),
+                                      )
+                                    : Image.file(
+                                        File(imageUrl),
+                                        fit: BoxFit.cover,
+                                      ))
+                                : Container(
+                                    color: cs.surfaceVariant,
+                                    child: Icon(
+                                      Icons.image_outlined,
+                                      size: 20,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                
                 // Action buttons area (space for future parameters/dosing)
                 Row(
                   children: [

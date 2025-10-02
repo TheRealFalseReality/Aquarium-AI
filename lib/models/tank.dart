@@ -1,5 +1,51 @@
 import 'package:uuid/uuid.dart';
 
+class TankPhoto {
+  final String id;
+  final String? imageUrl; // User-provided image URL
+  final String? imagePath; // User-provided image file path (for local images)
+  final DateTime dateTaken; // Date when photo was taken
+
+  TankPhoto({
+    required this.id,
+    this.imageUrl,
+    this.imagePath,
+    required this.dateTaken,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'imageUrl': imageUrl,
+      'imagePath': imagePath,
+      'dateTaken': dateTaken.toIso8601String(),
+    };
+  }
+
+  factory TankPhoto.fromJson(Map<String, dynamic> json) {
+    return TankPhoto(
+      id: json['id'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      imagePath: json['imagePath'] as String?,
+      dateTaken: DateTime.parse(json['dateTaken'] as String),
+    );
+  }
+
+  TankPhoto copyWith({
+    String? id,
+    String? imageUrl,
+    String? imagePath,
+    DateTime? dateTaken,
+  }) {
+    return TankPhoto(
+      id: id ?? this.id,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imagePath: imagePath ?? this.imagePath,
+      dateTaken: dateTaken ?? this.dateTaken,
+    );
+  }
+}
+
 class TankInhabitant {
   final String id;
   final String customName;
@@ -78,6 +124,7 @@ class Tank {
   final String? calculationBreakdown; // Cached calculation breakdown string
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<TankPhoto> photos; // Photos of the tank (not fish)
 
   Tank({
     required this.id,
@@ -91,7 +138,8 @@ class Tank {
     this.calculationBreakdown,
     required this.createdAt,
     required this.updatedAt,
-  });
+    List<TankPhoto>? photos,
+  }) : photos = photos ?? [];
 
   factory Tank.create({
     required String name,
@@ -103,6 +151,7 @@ class Tank {
     double? harmonyScore,
     String? calculationBreakdown,
     DateTime? createdAt,
+    List<TankPhoto>? photos,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -117,6 +166,7 @@ class Tank {
       calculationBreakdown: calculationBreakdown,
       createdAt: createdAt ?? now,
       updatedAt: now,
+      photos: photos,
     );
   }
 
@@ -133,6 +183,7 @@ class Tank {
       'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'photos': photos.map((p) => p.toJson()).toList(),
     };
   }
 
@@ -151,6 +202,9 @@ class Tank {
       calculationBreakdown: json['calculationBreakdown'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      photos: (json['photos'] as List?)
+          ?.map((p) => TankPhoto.fromJson(p))
+          .toList() ?? [],
     );
   }
 
@@ -166,6 +220,7 @@ class Tank {
     String? calculationBreakdown,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<TankPhoto>? photos,
   }) {
     return Tank(
       id: id ?? this.id,
@@ -179,6 +234,7 @@ class Tank {
       calculationBreakdown: calculationBreakdown ?? this.calculationBreakdown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      photos: photos ?? this.photos,
     );
   }
 }
