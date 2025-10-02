@@ -798,6 +798,56 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                     ),
+                    // Quick action buttons
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Quick add photo button
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => TankCreationScreen(existingTank: tank),
+                                ),
+                              ).then((_) {
+                                // Focus on adding a photo by opening the dialog
+                                // This will be handled by the user manually opening the dialog
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Icon(Icons.add_a_photo, size: 18, color: cs.onSurfaceVariant),
+                            ),
+                          ),
+                          // Quick add inhabitant button
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => TankCreationScreen(existingTank: tank),
+                                ),
+                              ).then((_) {
+                                // Focus on adding an inhabitant by opening the dialog
+                                // This will be handled by the user manually opening the dialog
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Icon(Icons.add, size: 18, color: cs.onSurfaceVariant),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     PopupMenuButton<String>(
                       icon: Container(
                         padding: const EdgeInsets.all(6),
@@ -1840,6 +1890,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       case 'set_as_icon':
                         _setTankIconFromPhoto(context, ref, tank, photo.id);
                         break;
+                      case 'edit_date':
+                        _editPhotoDateTaken(context, ref, tank, photo);
+                        break;
                     }
                   },
                   itemBuilder: (context) => [
@@ -1860,6 +1913,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           Icon(Icons.image_aspect_ratio, size: 18),
                           SizedBox(width: 8),
                           Text('Set as Tank Icon'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'edit_date',
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today, size: 18),
+                          SizedBox(width: 8),
+                          Text('Edit Date Taken'),
                         ],
                       ),
                     ),
@@ -2144,6 +2207,41 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } catch (e) {
       if (context.mounted) {
         context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _editPhotoDateTaken(BuildContext context, WidgetRef ref, Tank tank, TankPhoto photo) async {
+    DateTime selectedDate = photo.dateTaken;
+    
+    final newDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      helpText: 'Select Date Taken',
+    );
+    
+    if (newDate != null && context.mounted) {
+      try {
+        // Find and update the photo in the tank's photos list
+        final updatedPhotos = tank.photos.map((p) {
+          if (p.id == photo.id) {
+            return p.copyWith(dateTaken: newDate);
+          }
+          return p;
+        }).toList();
+        
+        final updatedTank = tank.copyWith(photos: updatedPhotos);
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        
+        if (context.mounted) {
+          context.showAccessibleMessage('Photo date updated');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          context.showAccessibleMessage('Failed to update photo date: $e');
+        }
       }
     }
   }
