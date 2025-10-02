@@ -99,6 +99,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   Future<void> _checkShowPromotionDialog() async {
     try {
+      // Check if user has chosen to never show the dialog again
+      final shouldShow = await AppPromotionDialog.shouldShowDialog();
+      if (!shouldShow) {
+        debugPrint('Promotion dialog will not be shown (user selected never show again)');
+        return;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final lastShownTimestamp = prefs.getInt(_promotionDialogTimestampKey) ?? 0;
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -172,13 +179,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen to the provider for changes.
-    ref.listen<ModelState>(modelProvider, (previous, next) {
+    ref.listen<ModelState>(modelProvider, (previous, next) async {
       // If the provider is no longer loading and the API key is empty, show the dialog.
       if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty && next.groqApiKey.isEmpty) {
-        showDialog(
-          context: context,
-          builder: (context) => const ApiKeyDialog(),
-        );
+        // Check if user has chosen to never show the dialog again
+        final shouldShow = await ApiKeyDialog.shouldShowDialog();
+        if (shouldShow && mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => const ApiKeyDialog(),
+          );
+        }
       }
     });
 

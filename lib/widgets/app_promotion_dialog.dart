@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/analytics_service.dart';
 
 class AppPromotionDialog extends StatelessWidget {
   const AppPromotionDialog({super.key});
+
+  static const String _neverShowAgainKey = 'app_promotion_never_show_again';
+
+  static Future<void> setNeverShowAgain() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_neverShowAgainKey, true);
+  }
+
+  static Future<bool> shouldShowDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_neverShowAgainKey) ?? false);
+  }
 
   Future<void> _launchPlayStore() async {
     const url = 'https://play.google.com/store/apps/details?id=com.cca.fishai';
@@ -112,6 +125,23 @@ class AppPromotionDialog extends StatelessWidget {
           child: Text(
             'Maybe Later',
             style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            // Log never show again
+            AnalyticsService.logAppPromotion(
+              action: 'never_show_again',
+              source: 'promotion_dialog',
+            );
+            await setNeverShowAgain();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(
+            'Never Show Again',
+            style: TextStyle(color: colorScheme.error),
           ),
         ),
         ElevatedButton(
