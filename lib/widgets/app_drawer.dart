@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,7 @@ class AppDrawer extends ConsumerStatefulWidget {
 
 class _AppDrawerState extends ConsumerState<AppDrawer> {
   bool _isAppearanceExpanded = false;
+  int? _randomTankIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     // Tank quick summary from provider
     final tankState = ref.watch(tankProvider);
     final tankCount = tankState.tanks.length;
-    final lastTank = tankState.tanks.isNotEmpty ? tankState.tanks.last : null;
+    // Show a random tank instead of the last tank
+    // Initialize random index on first build or when tank count changes
+    if (_randomTankIndex == null || _randomTankIndex! >= tankCount) {
+      _randomTankIndex = tankCount > 0 ? Random().nextInt(tankCount) : null;
+    }
+    final randomTank = _randomTankIndex != null && tankCount > 0
+        ? tankState.tanks[_randomTankIndex!]
+        : null;
 
     // Get fish data for harmony calculation
     final fishCompatibilityState = ref.watch(fishCompatibilityProvider);
@@ -54,10 +63,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       });
     }
 
-    // Build harmony score widget for last tank
+    // Build harmony score widget for random tank
     Widget? harmonyScoreWidget;
-    if (lastTank != null && lastTank.inhabitants.isNotEmpty && fishData != null) {
-      final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(lastTank, fishData);
+    if (randomTank != null && randomTank.inhabitants.isNotEmpty && fishData != null) {
+      final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(randomTank, fishData);
       if (harmonyScore != null) {
         final percentage = (harmonyScore * 100).toStringAsFixed(0);
         final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
@@ -67,6 +76,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         if (harmonyScore >= 0.8) {
           chipColor = Colors.green.shade100;
           textColor = Colors.green.shade800;
+        } else if (harmonyScore >= 0.7) {
+          chipColor = Colors.yellow.shade100;
+          textColor = Colors.yellow.shade800;
         } else if (harmonyScore >= 0.6) {
           chipColor = Colors.orange.shade100;
           textColor = Colors.orange.shade800;
@@ -119,7 +131,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                               children: [
                                 Text(
                                   'Total: $tankCount\n'
-                                  '${lastTank != null ? "Latest: ${lastTank.name}" : ""}',
+                                  '${randomTank != null ? randomTank.name : ""}',
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
                                 if (harmonyScoreWidget != null) ...[

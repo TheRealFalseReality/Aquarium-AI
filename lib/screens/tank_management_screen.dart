@@ -1554,6 +1554,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     if (harmonyScore >= 0.8) {
       chipColor = Colors.green.shade100;
       textColor = Colors.green.shade800;
+    } else if (harmonyScore >= 0.7) {
+      chipColor = Colors.yellow.shade100;
+      textColor = Colors.yellow.shade800;
     } else if (harmonyScore >= 0.6) {
       chipColor = Colors.orange.shade100;
       textColor = Colors.orange.shade800;
