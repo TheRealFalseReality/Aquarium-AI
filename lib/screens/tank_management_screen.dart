@@ -618,6 +618,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
     
+    // Get custom background photo if set
+    TankPhoto? backgroundPhoto;
+    if (tank.customBackgroundPhotoId != null) {
+      try {
+        backgroundPhoto = tank.photos.firstWhere(
+          (photo) => photo.id == tank.customBackgroundPhotoId,
+        );
+      } catch (e) {
+        // Photo not found, use default
+      }
+    }
+    
     // AI-inspired gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
         ? [
@@ -634,11 +646,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return Container(
       margin: isLargeScreen ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: backgroundPhoto == null ? LinearGradient(
           colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-        ),
+        ) : null,
+        image: backgroundPhoto != null ? DecorationImage(
+          image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
+              ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
+              : FileImage(File(backgroundPhoto.imagePath!)),
+          fit: BoxFit.cover,
+          opacity: 0.8,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.3),
+            BlendMode.darken,
+          ),
+        ) : null,
+        color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: cs.outlineVariant.withOpacity(0.3),
@@ -666,17 +690,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tank icon with gradient background
+                    // Tank icon with gradient background or photo
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: tank.type == 'freshwater'
-                              ? [Colors.blue.shade300, Colors.cyan.shade400]
-                              : [Colors.indigo.shade300, Colors.purple.shade400],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+                            ? LinearGradient(
+                                colors: tank.type == 'freshwater'
+                                    ? [Colors.blue.shade300, Colors.cyan.shade400]
+                                    : [Colors.indigo.shade300, Colors.purple.shade400],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+                            ? Colors.grey.shade300
+                            : null,
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
@@ -688,11 +718,60 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                        size: 24,
-                        color: Colors.white,
-                      ),
+                      child: tank.customIconCodePoint != null
+                          ? Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: tank.type == 'freshwater'
+                                      ? [Colors.blue.shade300, Colors.cyan.shade400]
+                                      : [Colors.indigo.shade300, Colors.purple.shade400],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                IconData(tank.customIconCodePoint!, fontFamily: 'MaterialIcons'),
+                                size: 24,
+                                color: Colors.white,
+                              ),
+                            )
+                          : (tank.customIconPhotoId != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: () {
+                                    try {
+                                      final photo = tank.photos.firstWhere(
+                                        (p) => p.id == tank.customIconPhotoId,
+                                      );
+                                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                                      return imageUrl != null
+                                          ? (imageUrl.startsWith('http')
+                                              ? Image.network(imageUrl, fit: BoxFit.cover)
+                                              : Image.file(File(imageUrl), fit: BoxFit.cover))
+                                          : Icon(
+                                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                              size: 24,
+                                              color: Colors.white,
+                                            );
+                                    } catch (e) {
+                                      return Icon(
+                                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                        size: 24,
+                                        color: Colors.white,
+                                      );
+                                    }
+                                  }(),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                )),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -737,6 +816,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'set_background':
+                            _showSetBackgroundDialog(context, ref, tank);
+                            break;
+                          case 'set_icon':
+                            _showSetIconDialog(context, ref, tank);
+                            break;
+                          case 'reset_background':
+                            _resetTankBackground(context, ref, tank);
+                            break;
                           case 'recommendations':
                             _getTankStockingRecommendations(context, ref, tank);
                             break;
@@ -759,6 +847,38 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                         ),
+                        if (tank.photos.isNotEmpty)
+                          const PopupMenuItem(
+                            value: 'set_background',
+                            child: Row(
+                              children: [
+                                Icon(Icons.wallpaper, size: 18),
+                                SizedBox(width: 8),
+                                Text('Set Card Background'),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
+                          value: 'set_icon',
+                          child: Row(
+                            children: [
+                              Icon(Icons.emoji_emotions_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Change Icon'),
+                            ],
+                          ),
+                        ),
+                        if (tank.customBackgroundPhotoId != null)
+                          const PopupMenuItem(
+                            value: 'reset_background',
+                            child: Row(
+                              children: [
+                                Icon(Icons.restore, size: 18),
+                                SizedBox(width: 8),
+                                Text('Reset Background'),
+                              ],
+                            ),
+                          ),
                         if (tank.inhabitants.isNotEmpty)
                           const PopupMenuItem(
                             value: 'recommendations',
@@ -880,6 +1000,84 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 
                 const SizedBox(height: 14),
+                
+                // Tank photos section (if photos exist)
+                if (tank.photos.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library_outlined,
+                        size: 14,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tank Photos (${tank.photos.length})',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 60,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: tank.photos.length,
+                      itemBuilder: (context, index) {
+                        final photo = tank.photos[index];
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return GestureDetector(
+                          onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: cs.outline,
+                                width: 1,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(7),
+                              child: imageUrl != null
+                                  ? (imageUrl.startsWith('http')
+                                      ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Container(
+                                            color: cs.errorContainer,
+                                            child: Icon(
+                                              Icons.error_outline,
+                                              size: 20,
+                                              color: cs.onErrorContainer,
+                                            ),
+                                          ),
+                                        )
+                                      : Image.file(
+                                          File(imageUrl),
+                                          fit: BoxFit.cover,
+                                        ))
+                                  : Container(
+                                      color: cs.surfaceVariant,
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 20,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 
                 // Tank notes section (if notes exist)
                 if (tank.notes != null && tank.notes!.isNotEmpty) ...[
@@ -1171,6 +1369,120 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         
                         const SizedBox(height: 20),
                         
+                        // Tank photos section (if photos exist)
+                        if (tank.photos.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.photo_library_outlined, size: 18, color: cs.onSurfaceVariant),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Tank Photos (${tank.photos.length})',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: tank.photos.map((photo) {
+                                    final imageUrl = photo.imageUrl ?? photo.imagePath;
+                                    return GestureDetector(
+                                      onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
+                                      child: Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: cs.outline,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(6),
+                                              child: imageUrl != null
+                                                  ? (imageUrl.startsWith('http')
+                                                      ? Image.network(
+                                                          imageUrl,
+                                                          fit: BoxFit.cover,
+                                                          width: double.infinity,
+                                                          height: double.infinity,
+                                                          errorBuilder: (context, error, stackTrace) => Container(
+                                                            color: cs.errorContainer,
+                                                            child: Icon(
+                                                              Icons.error_outline,
+                                                              color: cs.onErrorContainer,
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : Image.file(
+                                                          File(imageUrl),
+                                                          fit: BoxFit.cover,
+                                                          width: double.infinity,
+                                                          height: double.infinity,
+                                                        ))
+                                                  : Container(
+                                                      color: cs.surfaceVariant,
+                                                      child: Icon(
+                                                        Icons.image_outlined,
+                                                        color: cs.onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                            ),
+                                            Positioned(
+                                              bottom: 0,
+                                              left: 0,
+                                              right: 0,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withOpacity(0.7),
+                                                  borderRadius: const BorderRadius.only(
+                                                    bottomLeft: Radius.circular(6),
+                                                    bottomRight: Radius.circular(6),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  '${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        
                         // Inhabitants section
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -1435,6 +1747,436 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       ),
     );
+  }
+
+  void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
+    final imageUrl = photo.imageUrl ?? photo.imagePath;
+    if (imageUrl == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(0),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.black,
+                          child: const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Failed to load image',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.contain,
+                      ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Date taken: ${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            if (tank != null && ref != null)
+              Positioned(
+                top: 40,
+                right: 70,
+                child: PopupMenuButton<String>(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  onSelected: (value) {
+                    Navigator.of(context).pop(); // Close maximized view first
+                    switch (value) {
+                      case 'set_background':
+                        _setTankBackground(context, ref, tank, photo.id);
+                        break;
+                      case 'set_as_icon':
+                        _setTankIconFromPhoto(context, ref, tank, photo.id);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'set_background',
+                      child: Row(
+                        children: [
+                          Icon(Icons.wallpaper, size: 18),
+                          SizedBox(width: 8),
+                          Text('Set as Card Background'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'set_as_icon',
+                      child: Row(
+                        children: [
+                          Icon(Icons.image_aspect_ratio, size: 18),
+                          SizedBox(width: 8),
+                          Text('Set as Tank Icon'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    if (tank.photos.isEmpty) {
+      context.showAccessibleMessage('No photos available. Add photos to your tank first.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Card Background'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: tank.photos.length,
+            itemBuilder: (context, index) {
+              final photo = tank.photos[index];
+              final imageUrl = photo.imageUrl ?? photo.imagePath;
+              final isSelected = tank.customBackgroundPhotoId == photo.id;
+              
+              return GestureDetector(
+                onTap: () {
+                  _setTankBackground(context, ref, tank, photo.id);
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                      width: isSelected ? 3 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: imageUrl != null
+                        ? (imageUrl.startsWith('http')
+                            ? Image.network(imageUrl, fit: BoxFit.cover)
+                            : Image.file(File(imageUrl), fit: BoxFit.cover))
+                        : Container(color: Colors.grey),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankBackground(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+    try {
+      final updatedTank = tank.copyWith(customBackgroundPhotoId: photoId);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Card background updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update background: $e');
+      }
+    }
+  }
+
+  void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    // Predefined icons for tanks
+    final icons = [
+      Icons.water_drop,
+      Icons.waves,
+      Icons.pool,
+      Icons.bubble_chart,
+      Icons.water,
+      Icons.shower,
+      Icons.opacity,
+      Icons.water_damage,
+      Icons.pets,
+      Icons.set_meal,
+      Icons.spa,
+      Icons.emoji_nature,
+      Icons.grass,
+      Icons.eco,
+      Icons.forest,
+      Icons.park,
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Tank Icon'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tank photos section (if available)
+                if (tank.photos.isNotEmpty) ...[
+                  Text(
+                    'Tank Photos',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: tank.photos.length,
+                    itemBuilder: (context, index) {
+                      final photo = tank.photos[index];
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      final isSelected = tank.customIconPhotoId == photo.id;
+                      
+                      return GestureDetector(
+                        onTap: () {
+                          _setTankIconFromPhoto(context, ref, tank, photo.id);
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected 
+                                  ? Theme.of(context).colorScheme.primary 
+                                  : Colors.grey,
+                              width: isSelected ? 3 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: imageUrl != null
+                                ? (imageUrl.startsWith('http')
+                                    ? Image.network(imageUrl, fit: BoxFit.cover)
+                                    : Image.file(File(imageUrl), fit: BoxFit.cover))
+                                : Container(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                // Material icons section
+                Text(
+                  'Material Icons',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: icons.length,
+                  itemBuilder: (context, index) {
+                    final icon = icons[index];
+                    final isSelected = tank.customIconCodePoint == icon.codePoint;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        _setTankIcon(context, ref, tank, icon.codePoint);
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surfaceVariant,
+                          border: Border.all(
+                            color: isSelected 
+                                ? Theme.of(context).colorScheme.primary 
+                                : Colors.grey,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(icon, size: 32),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          if (tank.customIconCodePoint != null || tank.customIconPhotoId != null)
+            TextButton(
+              onPressed: () {
+                _resetTankIcon(context, ref, tank);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Reset Icon'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankIcon(BuildContext context, WidgetRef ref, Tank tank, int codePoint) async {
+    try {
+      final updatedTank = tank.copyWith(customIconCodePoint: codePoint);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _setTankIconFromPhoto(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+    try {
+      // Set the icon photo and clear custom icon code point to use photo as icon
+      final updatedTank = tank.copyWith(
+        customIconPhotoId: photoId,
+        clearCustomIconCodePoint: true,
+      );
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon set to photo');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _resetTankIcon(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final updatedTank = tank.copyWith(
+        clearCustomIconCodePoint: true,
+        clearCustomIconPhotoId: true,
+      );
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon reset to default');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to reset icon: $e');
+      }
+    }
+  }
+
+  void _resetTankBackground(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final updatedTank = tank.copyWith(clearCustomBackgroundPhotoId: true);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Background reset to default');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to reset background: $e');
+      }
+    }
   }
 
   void _duplicateTank(BuildContext context, WidgetRef ref, Tank tank) async {

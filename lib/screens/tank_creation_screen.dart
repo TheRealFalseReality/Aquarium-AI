@@ -32,6 +32,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
+  List<TankPhoto> _tankPhotos = [];
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
       _selectedCategory = widget.existingTank!.type;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
       _creationDate = widget.existingTank!.createdAt;
+      _tankPhotos = List.from(widget.existingTank!.photos);
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!.toString();
       }
@@ -180,6 +182,158 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     context.showAccessibleMessage('Duplicated "${originalInhabitant.customName}"');
   }
 
+  void _addTankPhoto() {
+    showDialog(
+      context: context,
+      builder: (context) => _TankPhotoDialog(
+        onAdd: (photo) {
+          setState(() {
+            _tankPhotos.add(photo);
+          });
+        },
+      ),
+    );
+  }
+
+  void _editTankPhoto(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => _TankPhotoDialog(
+        existingPhoto: _tankPhotos[index],
+        onAdd: (photo) {
+          setState(() {
+            _tankPhotos[index] = photo;
+          });
+        },
+      ),
+    );
+  }
+
+  void _removeTankPhoto(int index) {
+    setState(() {
+      _tankPhotos.removeAt(index);
+    });
+  }
+
+  Widget _buildTankPhotoThumbnail(TankPhoto photo, int index) {
+    final imageUrl = photo.imageUrl ?? photo.imagePath;
+    
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline,
+          width: 2,
+        ),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: imageUrl != null
+                ? (imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: Icon(
+                            Icons.error_outline,
+                            color: Theme.of(context).colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      )
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ))
+                : Container(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    child: Icon(
+                      Icons.image_outlined,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+          ),
+          // Date taken badge
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
+              ),
+              child: Text(
+                '${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          // Action buttons
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, size: 16),
+                    color: Colors.white,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    onPressed: () => _editTankPhoto(index),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete, size: 16),
+                    color: Colors.white,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    onPressed: () => _removeTankPhoto(index),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _saveTank() async {
     if (_formKey.currentState!.validate()) {
       try {
@@ -245,6 +399,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 harmonyScore: harmonyScore,
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
+                photos: _tankPhotos,
               )
             : Tank.create(
                 name: _tankNameController.text.trim(),
@@ -256,6 +411,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 harmonyScore: harmonyScore,
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
+                photos: _tankPhotos,
               );
 
         if (widget.existingTank != null) {
@@ -592,6 +748,63 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24),
+                  // Tank Photos Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Tank Photos',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _addTankPhoto,
+                        icon: const Icon(Icons.add_a_photo),
+                        label: const Text('Add Photo'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_tankPhotos.isEmpty)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No tank photos added yet',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add photos of your tank to track its progress over time',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _tankPhotos.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final photo = entry.value;
+                        return _buildTankPhotoThumbnail(photo, index);
+                      }).toList(),
+                    ),
                   const SizedBox(height: 24),
                   // Inhabitants Section
                   Row(
@@ -1416,4 +1629,350 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
     );
   }
 
+}
+
+// Dialog for adding/editing tank photos
+class _TankPhotoDialog extends StatefulWidget {
+  final TankPhoto? existingPhoto;
+  final Function(TankPhoto) onAdd;
+
+  const _TankPhotoDialog({
+    this.existingPhoto,
+    required this.onAdd,
+  });
+
+  @override
+  State<_TankPhotoDialog> createState() => _TankPhotoDialogState();
+}
+
+class _TankPhotoDialogState extends State<_TankPhotoDialog> {
+  final _picker = ImagePicker();
+  final _urlController = TextEditingController();
+  String? _customImageUrl;
+  String? _customImagePath;
+  DateTime _dateTaken = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingPhoto != null) {
+      _customImageUrl = widget.existingPhoto!.imageUrl;
+      _customImagePath = widget.existingPhoto!.imagePath;
+      _dateTaken = widget.existingPhoto!.dateTaken;
+      if (_customImageUrl != null) {
+        _urlController.text = _customImageUrl!;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (image != null) {
+        setState(() {
+          _customImagePath = image.path;
+          _customImageUrl = null;
+          _urlController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showAccessibleMessage('Failed to pick image: $e');
+      }
+    }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (image != null) {
+        setState(() {
+          _customImagePath = image.path;
+          _customImageUrl = null;
+          _urlController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showAccessibleMessage('Failed to take photo: $e');
+      }
+    }
+  }
+
+  void _setImageFromUrl() {
+    final url = _urlController.text.trim();
+    if (url.isNotEmpty) {
+      setState(() {
+        _customImageUrl = url;
+        _customImagePath = null;
+      });
+    }
+  }
+
+  void _clearCustomImage() {
+    setState(() {
+      _customImageUrl = null;
+      _customImagePath = null;
+      _urlController.clear();
+    });
+  }
+
+  String? _getDisplayImageUrl() {
+    if (_customImageUrl != null && _customImageUrl!.isNotEmpty) {
+      return _customImageUrl;
+    }
+    if (_customImagePath != null && _customImagePath!.isNotEmpty) {
+      return _customImagePath;
+    }
+    return null;
+  }
+
+  void _save() {
+    if (_customImageUrl == null && _customImagePath == null) {
+      context.showAccessibleMessage('Please add an image');
+      return;
+    }
+
+    final photo = TankPhoto(
+      id: widget.existingPhoto?.id ?? const Uuid().v4(),
+      imageUrl: _customImageUrl,
+      imagePath: _customImagePath,
+      dateTaken: _dateTaken,
+    );
+
+    widget.onAdd(photo);
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.95,
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Title
+              Text(
+                widget.existingPhoto != null ? 'Edit Tank Photo' : 'Add Tank Photo',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image Preview
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: _getDisplayImageUrl() == null
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_outlined,
+                                      size: 48,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'No image selected',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(11),
+                                child: _customImageUrl != null
+                                    ? Image.network(
+                                        _customImageUrl!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        errorBuilder: (context, error, stackTrace) => Container(
+                                          color: Theme.of(context).colorScheme.errorContainer,
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.error_outline,
+                                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  'Failed to load image',
+                                                  style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.onErrorContainer,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Image.file(
+                                        File(_customImagePath!),
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      ),
+                              ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Image Source Options
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: _pickImageFromGallery,
+                            icon: const Icon(Icons.photo_library_outlined, size: 18),
+                            label: const Text('Gallery'),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: _pickImageFromCamera,
+                            icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                            label: const Text('Camera'),
+                          ),
+                          if (_getDisplayImageUrl() != null)
+                            OutlinedButton.icon(
+                              onPressed: _clearCustomImage,
+                              icon: const Icon(Icons.clear, size: 18),
+                              label: const Text('Clear'),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // URL Input
+                      Text(
+                        'Or enter image URL:',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _urlController,
+                              decoration: const InputDecoration(
+                                hintText: 'https://example.com/image.jpg',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.link),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _setImageFromUrl,
+                            child: const Text('Load'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Date Taken Field
+                      Text(
+                        'Date Taken',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _dateTaken,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                            helpText: 'Select Date Taken',
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _dateTaken = picked;
+                            });
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_today),
+                          ),
+                          child: Text(
+                            '${_dateTaken.month}/${_dateTaken.day}/${_dateTaken.year}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      child: Text(widget.existingPhoto != null ? 'Update' : 'Add'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
