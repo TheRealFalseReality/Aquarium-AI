@@ -749,6 +749,63 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
+                  // Tank Photos Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Tank Photos',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _addTankPhoto,
+                        icon: const Icon(Icons.add_a_photo),
+                        label: const Text('Add Photo'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_tankPhotos.isEmpty)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No tank photos added yet',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add photos of your tank to track its progress over time',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _tankPhotos.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final photo = entry.value;
+                        return _buildTankPhotoThumbnail(photo, index);
+                      }).toList(),
+                    ),
+                  const SizedBox(height: 24),
                   // Inhabitants Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -871,63 +928,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         ),
                       );
                     }),
-                  const SizedBox(height: 24),
-                  // Tank Photos Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Tank Photos',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: _addTankPhoto,
-                        icon: const Icon(Icons.add_a_photo),
-                        label: const Text('Add Photo'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  if (_tankPhotos.isEmpty)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              size: 48,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No tank photos added yet',
-                              style: Theme.of(context).textTheme.titleMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Add photos of your tank to track its progress over time',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _tankPhotos.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final photo = entry.value;
-                        return _buildTankPhotoThumbnail(photo, index);
-                      }).toList(),
-                    ),
                   // Add bottom padding to ensure content doesn't get hidden behind sticky buttons
                   const SizedBox(height: 32),
                 ],

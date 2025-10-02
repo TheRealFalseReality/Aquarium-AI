@@ -881,6 +881,84 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 
                 const SizedBox(height: 14),
                 
+                // Tank photos section (if photos exist)
+                if (tank.photos.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library_outlined,
+                        size: 14,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tank Photos (${tank.photos.length})',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 60,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: tank.photos.length,
+                      itemBuilder: (context, index) {
+                        final photo = tank.photos[index];
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return GestureDetector(
+                          onTap: () => _showPhotoMaximized(context, photo),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: cs.outline,
+                                width: 1,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(7),
+                              child: imageUrl != null
+                                  ? (imageUrl.startsWith('http')
+                                      ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Container(
+                                            color: cs.errorContainer,
+                                            child: Icon(
+                                              Icons.error_outline,
+                                              size: 20,
+                                              color: cs.onErrorContainer,
+                                            ),
+                                          ),
+                                        )
+                                      : Image.file(
+                                          File(imageUrl),
+                                          fit: BoxFit.cover,
+                                        ))
+                                  : Container(
+                                      color: cs.surfaceVariant,
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 20,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                
                 // Tank notes section (if notes exist)
                 if (tank.notes != null && tank.notes!.isNotEmpty) ...[
                   Container(
@@ -914,81 +992,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Tank photos section (if photos exist)
-                if (tank.photos.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.photo_library_outlined,
-                        size: 14,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Tank Photos (${tank.photos.length})',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 60,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: tank.photos.length,
-                      itemBuilder: (context, index) {
-                        final photo = tank.photos[index];
-                        final imageUrl = photo.imageUrl ?? photo.imagePath;
-                        return Container(
-                          width: 60,
-                          height: 60,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: cs.outline,
-                              width: 1,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(7),
-                            child: imageUrl != null
-                                ? (imageUrl.startsWith('http')
-                                    ? Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Container(
-                                          color: cs.errorContainer,
-                                          child: Icon(
-                                            Icons.error_outline,
-                                            size: 20,
-                                            color: cs.onErrorContainer,
-                                          ),
-                                        ),
-                                      )
-                                    : Image.file(
-                                        File(imageUrl),
-                                        fit: BoxFit.cover,
-                                      ))
-                                : Container(
-                                    color: cs.surfaceVariant,
-                                    child: Icon(
-                                      Icons.image_outlined,
-                                      size: 20,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                          ),
-                        );
-                      },
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -1245,6 +1248,120 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                         
                         const SizedBox(height: 20),
+                        
+                        // Tank photos section (if photos exist)
+                        if (tank.photos.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.photo_library_outlined, size: 18, color: cs.onSurfaceVariant),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Tank Photos (${tank.photos.length})',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: tank.photos.map((photo) {
+                                    final imageUrl = photo.imageUrl ?? photo.imagePath;
+                                    return GestureDetector(
+                                      onTap: () => _showPhotoMaximized(context, photo),
+                                      child: Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: cs.outline,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(6),
+                                              child: imageUrl != null
+                                                  ? (imageUrl.startsWith('http')
+                                                      ? Image.network(
+                                                          imageUrl,
+                                                          fit: BoxFit.cover,
+                                                          width: double.infinity,
+                                                          height: double.infinity,
+                                                          errorBuilder: (context, error, stackTrace) => Container(
+                                                            color: cs.errorContainer,
+                                                            child: Icon(
+                                                              Icons.error_outline,
+                                                              color: cs.onErrorContainer,
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : Image.file(
+                                                          File(imageUrl),
+                                                          fit: BoxFit.cover,
+                                                          width: double.infinity,
+                                                          height: double.infinity,
+                                                        ))
+                                                  : Container(
+                                                      color: cs.surfaceVariant,
+                                                      child: Icon(
+                                                        Icons.image_outlined,
+                                                        color: cs.onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                            ),
+                                            Positioned(
+                                              bottom: 0,
+                                              left: 0,
+                                              right: 0,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withOpacity(0.7),
+                                                  borderRadius: const BorderRadius.only(
+                                                    bottomLeft: Radius.circular(6),
+                                                    bottomRight: Radius.circular(6),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  '${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                         
                         // Inhabitants section
                         Container(
@@ -1507,6 +1624,96 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showPhotoMaximized(BuildContext context, TankPhoto photo) {
+    final imageUrl = photo.imageUrl ?? photo.imagePath;
+    if (imageUrl == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(0),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.black,
+                          child: const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Failed to load image',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.contain,
+                      ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Date taken: ${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
