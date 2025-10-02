@@ -75,6 +75,7 @@ class Tank {
   final double? sizeLiters;  // Tank size in liters
   final String? notes; // User notes about the tank
   final double? harmonyScore; // Cached harmony score (0.0 to 1.0)
+  final String? calculationBreakdown; // Cached calculation breakdown string
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -87,6 +88,7 @@ class Tank {
     this.sizeLiters,
     this.notes,
     this.harmonyScore,
+    this.calculationBreakdown,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -99,6 +101,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    String? calculationBreakdown,
     DateTime? createdAt,
   }) {
     final now = DateTime.now();
@@ -111,6 +114,7 @@ class Tank {
       sizeLiters: sizeLiters,
       notes: notes,
       harmonyScore: harmonyScore,
+      calculationBreakdown: calculationBreakdown,
       createdAt: createdAt ?? now,
       updatedAt: now,
     );
@@ -126,6 +130,7 @@ class Tank {
       'sizeLiters': sizeLiters,
       'notes': notes,
       'harmonyScore': harmonyScore,
+      'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -143,6 +148,7 @@ class Tank {
       sizeLiters: json['sizeLiters']?.toDouble(),
       notes: json['notes'] as String?,
       harmonyScore: json['harmonyScore']?.toDouble(),
+      calculationBreakdown: json['calculationBreakdown'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -157,6 +163,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    String? calculationBreakdown,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -169,6 +176,7 @@ class Tank {
       sizeLiters: sizeLiters ?? this.sizeLiters,
       notes: notes ?? this.notes,
       harmonyScore: harmonyScore ?? this.harmonyScore,
+      calculationBreakdown: calculationBreakdown ?? this.calculationBreakdown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
