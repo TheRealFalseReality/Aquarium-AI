@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiKeyDialog extends StatelessWidget {
   const ApiKeyDialog({super.key});
+
+  static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
+
+  static Future<void> setNeverShowAgain() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_neverShowAgainKey, true);
+  }
+
+  static Future<bool> shouldShowDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_neverShowAgainKey) ?? false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +112,18 @@ class ApiKeyDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Dismiss'),
+        ),
+        TextButton(
+          onPressed: () async {
+            await setNeverShowAgain();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(
+            'Never Show Again',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ),
         ElevatedButton(
           onPressed: () {

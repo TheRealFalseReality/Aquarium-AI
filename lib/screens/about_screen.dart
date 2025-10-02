@@ -54,6 +54,26 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     }
   }
 
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+          size: 24,
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
@@ -62,21 +82,32 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
       child: ListView(
         padding: const EdgeInsets.all(24.0),
         children: <Widget>[
+          // Header Section
+          Icon(
+            Icons.waves,
+            size: 64,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
           Text(
-            'About Aquarium AI',
+            'Aquarium AI',
             style: Theme.of(context)
                 .textTheme
                 .headlineLarge
                 ?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
             'Your intelligent assistant for aquatic compatibility.',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
+          
+          // Get the App Section
           Card(
             elevation: 2,
             child: Padding(
@@ -84,13 +115,53 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildSectionTitle(context, 'Get the Mobile App', Icons.phone_android),
+                  const SizedBox(height: 16),
                   Text(
-                    'Unlock the Power of AI with Your Own API Key!',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+                    'Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
+                          icon: const Icon(Icons.android),
+                          label: const Text('Google Play'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _launchURL('https://apps.apple.com/app/aquarium-ai/id6738661112'),
+                          icon: const Icon(Icons.apple),
+                          label: const Text('App Store'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // API Key Section
+          Card(
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(context, 'Bring Your Own API Key', Icons.key),
                   const SizedBox(height: 16),
                   Text(
                     'Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:',
@@ -157,18 +228,16 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          
+          // Contact & Feedback Section
           Card(
-            clipBehavior: Clip.antiAlias,
+            elevation: 2,
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Contact & Feedback',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
+                  _buildSectionTitle(context, 'Contact & Feedback', Icons.contact_support),
                   const SizedBox(height: 16),
                   Text.rich(
                     TextSpan(
@@ -219,24 +288,55 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.code),
-            label: const Text('TheRealFalseReality/Aquarium-AI'),
-            onPressed: () => _launchURL(
-                'https://github.com/TheRealFalseReality/aquarium-ai'),
-            style: OutlinedButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              textStyle: const TextStyle(fontSize: 16),
+          const SizedBox(height: 24),
+          
+          // Source Code Section
+          Card(
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(context, 'Open Source', Icons.code),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Aquarium AI is open source! Check out our code, contribute, or report issues on GitHub.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.code),
+                    label: const Text('TheRealFalseReality/Aquarium-AI'),
+                    onPressed: () => _launchURL(
+                        'https://github.com/TheRealFalseReality/aquarium-ai'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Version
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Version $_version',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Version $_version',
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
-          ),
         ],
       ),
     );
