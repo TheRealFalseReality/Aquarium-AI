@@ -122,31 +122,15 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
-                          icon: const Icon(Icons.android),
-                          label: const Text('Google Play'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
+                      child: Image.asset(
+                        'assets/google_play_badge.png',
+                        height: 60,
+                        fit: BoxFit.contain,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _launchURL('https://apps.apple.com/app/aquarium-ai/id6738661112'),
-                          icon: const Icon(Icons.apple),
-                          label: const Text('App Store'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
