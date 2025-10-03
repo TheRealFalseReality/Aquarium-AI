@@ -678,18 +678,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => _showTankDetails(context, tank, fishData),
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with tank name and menu
-                Row(
+        child: Stack(
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => _showTankDetails(context, tank, fishData),
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header with tank name and menu
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     // Tank icon with gradient background or photo
                     Container(
                       width: 48,
@@ -798,11 +800,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                     ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        PopupMenuButton<String>(
+                    PopupMenuButton<String>(
                       icon: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
@@ -911,53 +909,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               Icon(Icons.delete, color: Colors.red, size: 18),
                               SizedBox(width: 8),
                               Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                        const SizedBox(height: 2),
-                        // Quick action buttons (vertical)
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHighest.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Quick add photo button
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => TankCreationScreen(existingTank: tank),
-                                    ),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(6),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(Icons.add_a_photo, size: 16, color: cs.onSurfaceVariant),
-                                ),
-                              ),
-                              const SizedBox(height: 1),
-                              // Quick add inhabitant button
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => TankCreationScreen(existingTank: tank),
-                                    ),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(6),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(Icons.add, size: 16, color: cs.onSurfaceVariant),
-                                ),
-                              ),
                             ],
                           ),
                         ),
@@ -1236,6 +1187,49 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
             ),
           ),
+            ),
+            // Floating quick action buttons
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Quick add photo button
+                  FloatingActionButton.small(
+                    heroTag: 'photo_${tank.id}',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => TankCreationScreen(existingTank: tank),
+                        ),
+                      );
+                    },
+                    backgroundColor: cs.primaryContainer,
+                    foregroundColor: cs.onPrimaryContainer,
+                    elevation: 4,
+                    child: const Icon(Icons.add_a_photo, size: 20),
+                  ),
+                  const SizedBox(height: 8),
+                  // Quick add inhabitant button
+                  FloatingActionButton.small(
+                    heroTag: 'inhabitant_${tank.id}',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => TankCreationScreen(existingTank: tank),
+                        ),
+                      );
+                    },
+                    backgroundColor: cs.primaryContainer,
+                    foregroundColor: cs.onPrimaryContainer,
+                    elevation: 4,
+                    child: const Icon(Icons.add, size: 20),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
