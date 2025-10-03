@@ -678,18 +678,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => _showTankDetails(context, tank, fishData),
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with tank name and menu
-                Row(
+        child: Stack(
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => _showTankDetails(context, tank, fishData),
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header with tank name and menu
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     // Tank icon with gradient background or photo
                     Container(
                       width: 48,
@@ -1185,6 +1187,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
             ),
           ),
+            ),
+          ],
         ),
       ),
     );

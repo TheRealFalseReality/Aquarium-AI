@@ -721,34 +721,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Tank Type Selection
-                  Text(
-                    'Tank Type',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 12,
-                    children: [
-                      ModernSelectableChip(
-                        label: 'Freshwater',
-                        emoji: '🐟',
-                        selected: _selectedCategory == 'freshwater',
-                        onTap: () => _onCategoryChanged('freshwater'),
-                      ),
-                      ModernSelectableChip(
-                        label: 'Saltwater',
-                        emoji: '🐠',
-                        selected: _selectedCategory == 'marine',
-                        onTap: () => _onCategoryChanged('marine'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
                   // Tank Photos Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -805,6 +777,34 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                         return _buildTankPhotoThumbnail(photo, index);
                       }).toList(),
                     ),
+                  const SizedBox(height: 24),
+                  // Tank Type Selection
+                  Text(
+                    'Tank Type',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    children: [
+                      ModernSelectableChip(
+                        label: 'Freshwater',
+                        emoji: '🐟',
+                        selected: _selectedCategory == 'freshwater',
+                        onTap: () => _onCategoryChanged('freshwater'),
+                      ),
+                      ModernSelectableChip(
+                        label: 'Saltwater',
+                        emoji: '🐠',
+                        selected: _selectedCategory == 'marine',
+                        onTap: () => _onCategoryChanged('marine'),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   // Inhabitants Section
                   Row(
