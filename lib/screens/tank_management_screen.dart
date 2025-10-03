@@ -36,6 +36,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
+  Tank? _selectedTankForStocking; // Track selected tank for FAB
 
   @override
   void initState() {
@@ -265,6 +266,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
+    // Check if there are any tanks with inhabitants
+    final tanksWithInhabitants = tanks.where((tank) => tank.inhabitants.isNotEmpty).toList();
+    final hasInhabitants = tanksWithInhabitants.isNotEmpty;
+    
     return Stack(
       children: [
         _buildTankList(context, ref, tanks, fishData),
@@ -282,6 +287,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
           ),
         if (_isSortMenuExpanded) _buildFloatingSortMenu(context),
+        // AI Stocking FAB in bottom right
+        if (hasInhabitants)
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _buildAIStockingFAB(context, ref, tanksWithInhabitants.first),
+          ),
       ],
     );
   }
@@ -606,6 +618,47 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   }).toList(),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIStockingFAB(BuildContext context, WidgetRef ref, Tank tank) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.purple.shade400,
+            Colors.blue.shade500,
+            Colors.cyan.shade400,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _getTankStockingRecommendations(context, ref, tank),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: 56,
+            height: 56,
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 28,
             ),
           ),
         ),
@@ -1118,63 +1171,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                   const SizedBox(height: 14),
                 ],
-                
-                // Action buttons area (space for future parameters/dosing)
-                Row(
-                  children: [
-                    // AI stocking button
-                    if (tank.inhabitants.isNotEmpty)
-                      Expanded(
-                        child: Container(
-                          height: 36,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.purple.shade400,
-                                Colors.blue.shade500,
-                                Colors.cyan.shade400,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.purple.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _getTankStockingRecommendations(context, ref, tank),
-                            icon: const Icon(Icons.auto_awesome, size: 16),
-                            label: Text(
-                              'AI Stocking Recommendations',
-                              style: TextStyle(
-                                fontSize: isLargeScreen ? 13 : 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shadowColor: Colors.transparent,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    // Space for future buttons (dosing, parameters, etc.)
-                    if (tank.inhabitants.isNotEmpty) const SizedBox(width: 8),
-                  ],
-                ),
-                
-                const SizedBox(height: 10),
                 
                 // Footer with date
                 Text(
