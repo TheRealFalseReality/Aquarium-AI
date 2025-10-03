@@ -1,0 +1,152 @@
+═══════════════════════════════════════════════════════════════════
+                    AI STOCKING FAB - FINAL DESIGN
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ≡  My Tanks                                          [Sort ▼]  │ App Bar
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  🐟  My Community Tank                            [⋮]     │ │
+│  │  Freshwater                                               │ │
+│  │                                                           │ │
+│  │  📏 55 gal  |  🎯 Harmony: 85%                            │ │
+│  │                                                           │ │
+│  │  🐟 12 inhabitants, 4 types                              │ │
+│  │  • 5× Neon Tetra                                         │ │
+│  │  • 3× Guppy                                              │ │
+│  │  • 2× Corydoras                                          │ │
+│  │  • 2× Angelfish                                          │ │
+│  │                                                           │ │
+│  │  📷 Tank Photos (3)                                      │ │
+│  │  [IMG] [IMG] [IMG]                                       │ │
+│  │                                                           │ │
+│  │  📝 Notes: Beautiful community tank...                   │ │
+│  │                                                           │ │ ← BUTTON
+│  │  Created 2024-01-15                                      │ │   REMOVED!
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  🐠  Reef Paradise                                [⋮]     │ │
+│  │  Saltwater                                                │ │
+│  │  ...                                                      │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  🐟  Planted Tank                                 [⋮]     │ │
+│  │  Freshwater                                               │ │
+│  │  ...                                                      │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                            ┌──┐ │ ← NEW
+│                                                            │✨│ │   FAB!
+│                                                            └──┘ │
+│  [+ Create Tank]                                                │
+└─────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════
+                         FAB SPECIFICATIONS
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│                          FAB DETAILS                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Dimensions:                                                    │
+│    • Width:  56px                                               │
+│    • Height: 56px                                               │
+│    • Border Radius: 16px                                        │
+│                                                                 │
+│  Position:                                                      │
+│    • Right:  16px from screen edge                              │
+│    • Bottom: 16px from screen edge                              │
+│    • Z-index: Positioned in Stack (above content)               │
+│                                                                 │
+│  Icon:                                                          │
+│    • Type: Icons.auto_awesome                                   │
+│    • Size: 28px                                                 │
+│    • Color: White (#FFFFFF)                                     │
+│                                                                 │
+│  Gradient:                                                      │
+│    ╔════════════════════════════════╗                           │
+│    ║ 🟣 Purple (Colors.purple.shade400)  #AB47BC              ║ │
+│    ║   ↘                                                      ║ │
+│    ║     🔵 Blue (Colors.blue.shade500)    #2196F3           ║ │
+│    ║       ↘                                                  ║ │
+│    ║         🔷 Cyan (Colors.cyan.shade400)  #26C6DA          ║ │
+│    ╚════════════════════════════════╝                           │
+│    Direction: Top-Left → Bottom-Right                           │
+│                                                                 │
+│  Shadow:                                                        │
+│    • Color: Purple with 40% opacity                             │
+│    • Blur: 12px                                                 │
+│    • Offset: (0, 4) - 4px down                                  │
+│                                                                 │
+│  Interaction:                                                   │
+│    • Tap: InkWell with ripple effect                            │
+│    • Action: Opens AI stocking recommendations                  │
+│    • Target: First tank with inhabitants                        │
+│                                                                 │
+│  Visibility Logic:                                              │
+│    if (hasInhabitants)                                          │
+│      Show FAB                                                   │
+│    else                                                         │
+│      Hide FAB                                                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════
+                        COMPARISON METRICS
+═══════════════════════════════════════════════════════════════════
+
+                          BEFORE    →    AFTER
+                        ─────────────────────────────
+Button Location:         In Card    →    Floating
+Button Type:             Extended   →    Icon-only
+Button Width:            Full       →    56px
+Button Height:           36px       →    56px
+Text Label:              Yes        →    No
+Repeats per Tank:        Each       →    Single
+Card Height Saved:       ~50px      →    Per tank
+Touch Target:            Good       →    Better (56×56)
+Accessibility:           48×36      →    56×56 (✓)
+Discoverability:         Medium     →    High
+Code Lines:              54 lines   →    40 lines
+Net Change:              -          →    -14 lines
+
+═══════════════════════════════════════════════════════════════════
+                        INTERACTION FLOW
+═══════════════════════════════════════════════════════════════════
+
+User Action:
+  ┌─────────────────────────────────────────────────────────────┐
+  │ 1. User opens Tank Management screen                        │
+  │    ↓                                                         │
+  │ 2. System checks if any tank has inhabitants                │
+  │    ↓                                                         │
+  │ 3. If YES → Show FAB in bottom right                        │
+  │    If NO  → Hide FAB                                        │
+  │    ↓                                                         │
+  │ 4. User taps FAB                                            │
+  │    ↓                                                         │
+  │ 5. System triggers AI recommendations for first tank        │
+  │    with inhabitants                                          │
+  │    ↓                                                         │
+  │ 6. Loading dialog appears                                   │
+  │    ↓                                                         │
+  │ 7. AI recommendations screen opens                          │
+  └─────────────────────────────────────────────────────────────┘
+
+Alternative Access:
+  ┌─────────────────────────────────────────────────────────────┐
+  │ User can also access via:                                   │
+  │   • Three-dot menu on tank card                             │
+  │   • Select "Get Stocking Ideas"                             │
+  └─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════
