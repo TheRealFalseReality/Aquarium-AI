@@ -1,6 +1,6 @@
 // Default model constants
-const String geminiModelDefault = 'gemini-2.5-flash-lite';
-const String geminiImageModelDefault = 'gemini-2.5-flash';
+const String geminiModelDefault = 'gemini-flash-lite-latest';
+const String geminiImageModelDefault = 'gemini-flash-latest';
 const String openAIModelDefault = 'gpt-4o';
 const String openAIImageModelDefault = 'gpt-4-vision-preview';
 const String groqModelDefault = 'llama-3.1-8b-instant';
