@@ -736,7 +736,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(
-                                IconData(tank.customIconCodePoint!, fontFamily: 'MaterialIcons'),
+                                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
                                 size: 24,
                                 color: Colors.white,
                               ),
@@ -1972,26 +1973,38 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
+  // Predefined icons for tanks - keeping this as a static constant list
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.shower,
+    Icons.opacity,
+    Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
+  // Helper method to get const IconData from codePoint
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return _tankIcons.firstWhere((icon) => icon.codePoint == codePoint);
+    } catch (e) {
+      return null;
+    }
+  }
+
   void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
-    // Predefined icons for tanks
-    final icons = [
-      Icons.water_drop,
-      Icons.waves,
-      Icons.pool,
-      Icons.bubble_chart,
-      Icons.water,
-      Icons.shower,
-      Icons.opacity,
-      Icons.water_damage,
-      Icons.pets,
-      Icons.set_meal,
-      Icons.spa,
-      Icons.emoji_nature,
-      Icons.grass,
-      Icons.eco,
-      Icons.forest,
-      Icons.park,
-    ];
+    final icons = _tankIcons;
 
     showDialog(
       context: context,
