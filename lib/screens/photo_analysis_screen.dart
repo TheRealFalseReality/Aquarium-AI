@@ -8,7 +8,9 @@ import '../providers/chat_provider.dart';
 import '../services/analytics_service.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
-  const PhotoAnalysisScreen({super.key});
+  final Uint8List? initialImageBytes;
+  
+  const PhotoAnalysisScreen({super.key, this.initialImageBytes});
 
   @override
   PhotoAnalysisScreenState createState() => PhotoAnalysisScreenState();
@@ -20,6 +22,14 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialImageBytes != null) {
+      _imageBytes = widget.initialImageBytes;
+    }
+  }
 
   Future<void> _pick(ImageSource source) async {
     setState(() => _error = null);

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
+import 'photo_analysis_screen.dart';
 
 enum TankSortOption {
   name,
@@ -1817,6 +1819,87 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 40,
+              right: 16,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
+                    Navigator.of(context).pop(); // Close maximized view first
+                    
+                    // Load image bytes
+                    Uint8List? imageBytes;
+                    try {
+                      if (imageUrl.startsWith('http')) {
+                        // For network images, we'd need to download them
+                        // For simplicity, we'll show a message that this is not supported
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('AI analysis is not supported for cloud-stored images. Please use local images.'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                        return;
+                      } else {
+                        // Read local file
+                        final file = File(imageUrl);
+                        imageBytes = await file.readAsBytes();
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to load image: $e'),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    
+                    if (context.mounted && imageBytes != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PhotoAnalysisScreen(
+                            initialImageBytes: imageBytes,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(28),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.purple.withOpacity(0.9),
+                          Colors.blue.withOpacity(0.9),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.purple.withOpacity(0.4),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.psychology,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
                 ),
               ),
