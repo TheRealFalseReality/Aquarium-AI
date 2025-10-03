@@ -800,6 +800,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                     Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         PopupMenuButton<String>(
                       icon: Container(
@@ -915,10 +916,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ],
                     ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         // Quick action buttons (vertical)
                         Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: cs.surfaceContainerHighest.withOpacity(0.6),
                             borderRadius: BorderRadius.circular(8),
@@ -937,11 +938,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 },
                                 borderRadius: BorderRadius.circular(6),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(6),
-                                  child: Icon(Icons.add_a_photo, size: 18, color: cs.onSurfaceVariant),
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(Icons.add_a_photo, size: 16, color: cs.onSurfaceVariant),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               // Quick add inhabitant button
                               InkWell(
                                 onTap: () {
@@ -953,8 +954,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 },
                                 borderRadius: BorderRadius.circular(6),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(6),
-                                  child: Icon(Icons.add, size: 18, color: cs.onSurfaceVariant),
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(Icons.add, size: 16, color: cs.onSurfaceVariant),
                                 ),
                               ),
                             ],
@@ -1890,9 +1891,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       case 'set_as_icon':
                         _setTankIconFromPhoto(context, ref, tank, photo.id);
                         break;
-                      case 'edit_date':
-                        _editPhotoDateTaken(context, ref, tank, photo);
-                        break;
                     }
                   },
                   itemBuilder: (context) => [
@@ -1913,16 +1911,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           Icon(Icons.image_aspect_ratio, size: 18),
                           SizedBox(width: 8),
                           Text('Set as Tank Icon'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'edit_date',
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_today, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit Date Taken'),
                         ],
                       ),
                     ),
@@ -2207,44 +2195,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } catch (e) {
       if (context.mounted) {
         context.showAccessibleMessage('Failed to update icon: $e');
-      }
-    }
-  }
-
-  void _editPhotoDateTaken(BuildContext context, WidgetRef ref, Tank tank, TankPhoto photo) async {
-    DateTime selectedDate = photo.dateTaken;
-    
-    final newDate = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      helpText: 'Select Date Taken',
-    );
-    
-    if (newDate != null && context.mounted) {
-      try {
-        // Find and update the photo in the tank's photos list
-        final updatedPhotos = tank.photos.map((p) {
-          if (p.id == photo.id) {
-            return p.copyWith(dateTaken: newDate);
-          }
-          return p;
-        }).toList();
-        
-        final updatedTank = tank.copyWith(
-          photos: updatedPhotos,
-          updatedAt: DateTime.now(),
-        );
-        await ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
-        if (context.mounted) {
-          context.showAccessibleMessage('Photo date updated');
-        }
-      } catch (e) {
-        if (context.mounted) {
-          context.showAccessibleMessage('Failed to update photo date: $e');
-        }
       }
     }
   }
