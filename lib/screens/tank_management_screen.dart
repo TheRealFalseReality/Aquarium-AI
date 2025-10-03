@@ -36,7 +36,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
-  Tank? _selectedTankForStocking; // Track selected tank for FAB
 
   @override
   void initState() {
