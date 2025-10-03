@@ -23,6 +23,7 @@
     }
   },
   "hosting": {
+    "site": "aquariumai",
     "source": ".",
     "ignore": [
       "firebase.json",
