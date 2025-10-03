@@ -8,6 +8,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
@@ -69,6 +70,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+    final appSettings = ref.watch(appSettingsProvider);
     // Watch the centralized fish data provider
     final fishDataAsync = ref.watch(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -1122,8 +1124,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 // Action buttons area (space for future parameters/dosing)
                 Row(
                   children: [
-                    // AI stocking button
-                    if (tank.inhabitants.isNotEmpty)
+                    // AI stocking button - conditionally shown based on app settings
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
                           height: 36,
@@ -1170,7 +1172,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                     // Space for future buttons (dosing, parameters, etc.)
-                    if (tank.inhabitants.isNotEmpty) const SizedBox(width: 8),
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton) const SizedBox(width: 8),
                   ],
                 ),
                 
