@@ -8,6 +8,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
@@ -69,6 +70,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final tankState = ref.watch(tankProvider);
+    final appSettings = ref.watch(appSettingsProvider);
     // Watch the centralized fish data provider
     final fishDataAsync = ref.watch(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -137,7 +139,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? _buildErrorState(context, ref, tankState.error!)
               : tankState.tanks.isEmpty
                   ? _buildEmptyState(context, ref)
-                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks, fishData),
+                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks, fishData, appSettings),
     );
   }
 
@@ -264,10 +266,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
+  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
     return Stack(
       children: [
-        _buildTankList(context, ref, tanks, fishData),
+        _buildTankList(context, ref, tanks, fishData, appSettings),
         if (_isSortMenuExpanded) 
           GestureDetector(
             onTap: () {
@@ -286,7 +288,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData) {
+  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
     final sortedTanks = _sortTanks(tanks);
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -314,7 +316,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               crossAxisSpacing: 16,
               childCount: sortedTanks.length,
               itemBuilder: (context, index) {
-                return _buildTankCard(context, ref, sortedTanks[index], fishData);
+                return _buildTankCard(context, ref, sortedTanks[index], fishData, appSettings);
               },
             ),
           ),
@@ -335,7 +337,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
         
         final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank, fishData);
+        return _buildTankCard(context, ref, tank, fishData, appSettings);
       },
     );
   }
@@ -613,7 +615,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData) {
+  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
@@ -734,7 +736,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(
-                                IconData(tank.customIconCodePoint!, fontFamily: 'MaterialIcons'),
+                                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
                                 size: 24,
                                 color: Colors.white,
                               ),
@@ -1122,8 +1125,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 // Action buttons area (space for future parameters/dosing)
                 Row(
                   children: [
-                    // AI stocking button
-                    if (tank.inhabitants.isNotEmpty)
+                    // AI stocking button - conditionally shown based on app settings
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
                           height: 36,
@@ -1170,7 +1173,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                     // Space for future buttons (dosing, parameters, etc.)
-                    if (tank.inhabitants.isNotEmpty) const SizedBox(width: 8),
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton) const SizedBox(width: 8),
                   ],
                 ),
                 
@@ -1970,26 +1973,38 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
+  // Predefined icons for tanks - keeping this as a static constant list
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.shower,
+    Icons.opacity,
+    Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
+  // Helper method to get const IconData from codePoint
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return _tankIcons.firstWhere((icon) => icon.codePoint == codePoint);
+    } catch (e) {
+      return null;
+    }
+  }
+
   void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
-    // Predefined icons for tanks
-    final icons = [
-      Icons.water_drop,
-      Icons.waves,
-      Icons.pool,
-      Icons.bubble_chart,
-      Icons.water,
-      Icons.shower,
-      Icons.opacity,
-      Icons.water_damage,
-      Icons.pets,
-      Icons.set_meal,
-      Icons.spa,
-      Icons.emoji_nature,
-      Icons.grass,
-      Icons.eco,
-      Icons.forest,
-      Icons.park,
-    ];
+    final icons = _tankIcons;
 
     showDialog(
       context: context,
