@@ -162,67 +162,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          // App Settings Section
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.settings_applications,
-                          color: Theme.of(context).colorScheme.secondary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'App Settings',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text('Show AI Stocking Button'),
-                    subtitle: const Text('Display the full "AI Stocking Recommendations" button on tank cards. The option remains available in the menu.'),
-                    value: appSettings.showStockingButton,
-                    onChanged: (value) {
-                      // Log settings change
-                      AnalyticsService.logSettingsChange(
-                        settingName: 'show_stocking_button',
-                        newValue: value.toString(),
-                        oldValue: appSettings.showStockingButton.toString(),
-                      );
-                      
-                      ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           // AI Provider Settings Section
           Card(
             clipBehavior: Clip.antiAlias,
@@ -422,6 +361,68 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          // App Settings Section
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.settings_applications,
+                          color: Theme.of(context).colorScheme.secondary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'App Settings',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Show AI Stocking Button'),
+                    subtitle: const Text('Display the full "AI Stocking Recommendations" button on tank cards. The option remains available in the menu.'),
+                    value: appSettings.showStockingButton,
+                    onChanged: (value) {
+                      // Log settings change
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'show_stocking_button',
+                        newValue: value.toString(),
+                        oldValue: appSettings.showStockingButton.toString(),
+                      );
+                      
+                      ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
