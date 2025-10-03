@@ -316,7 +316,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               crossAxisSpacing: 16,
               childCount: sortedTanks.length,
               itemBuilder: (context, index) {
-                return _buildTankCard(context, ref, sortedTanks[index], fishData);
+                return _buildTankCard(context, ref, sortedTanks[index], fishData, appSettings);
               },
             ),
           ),
@@ -337,7 +337,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
         
         final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank, fishData);
+        return _buildTankCard(context, ref, tank, fishData, appSettings);
       },
     );
   }
@@ -615,7 +615,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData) {
+  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
