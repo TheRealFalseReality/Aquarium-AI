@@ -1896,7 +1896,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ],
                     ),
                     child: const Icon(
-                      Icons.psychology,
+                      Icons.auto_awesome,
                       color: Colors.white,
                       size: 32,
                     ),
