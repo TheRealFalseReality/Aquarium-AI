@@ -800,6 +800,120 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                     ),
+                    PopupMenuButton<String>(
+                      icon: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.more_vert, size: 18),
+                      ),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TankCreationScreen(existingTank: tank),
+                              ),
+                            );
+                            break;
+                          case 'set_background':
+                            _showSetBackgroundDialog(context, ref, tank);
+                            break;
+                          case 'set_icon':
+                            _showSetIconDialog(context, ref, tank);
+                            break;
+                          case 'reset_background':
+                            _resetTankBackground(context, ref, tank);
+                            break;
+                          case 'recommendations':
+                            _getTankStockingRecommendations(context, ref, tank);
+                            break;
+                          case 'duplicate':
+                            _duplicateTank(context, ref, tank);
+                            break;
+                          case 'delete':
+                            _confirmDelete(context, ref, tank);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        if (tank.photos.isNotEmpty)
+                          const PopupMenuItem(
+                            value: 'set_background',
+                            child: Row(
+                              children: [
+                                Icon(Icons.wallpaper, size: 18),
+                                SizedBox(width: 8),
+                                Text('Set Card Background'),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
+                          value: 'set_icon',
+                          child: Row(
+                            children: [
+                              Icon(Icons.emoji_emotions_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Change Icon'),
+                            ],
+                          ),
+                        ),
+                        if (tank.customBackgroundPhotoId != null)
+                          const PopupMenuItem(
+                            value: 'reset_background',
+                            child: Row(
+                              children: [
+                                Icon(Icons.restore, size: 18),
+                                SizedBox(width: 8),
+                                Text('Reset Background'),
+                              ],
+                            ),
+                          ),
+                        if (tank.inhabitants.isNotEmpty)
+                          const PopupMenuItem(
+                            value: 'recommendations',
+                            child: Row(
+                              children: [
+                                Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                                SizedBox(width: 8),
+                                Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
+                          value: 'duplicate',
+                          child: Row(
+                            children: [
+                              Icon(Icons.copy, size: 18),
+                              SizedBox(width: 8),
+                              Text('Duplicate'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red, size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 
@@ -1073,180 +1187,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ],
             ),
           ),
-            ),
-            // Floating quick action buttons in top-right
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Quick add photo button
-                    IconButton(
-                      iconSize: 18,
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(
-                        minWidth: 34,
-                        minHeight: 34,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => TankCreationScreen(existingTank: tank),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.add_a_photo, color: cs.onSurfaceVariant),
-                      tooltip: 'Add Photo',
-                    ),
-                    // Quick add inhabitant button
-                    IconButton(
-                      iconSize: 18,
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(
-                        minWidth: 34,
-                        minHeight: 34,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => TankCreationScreen(existingTank: tank),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.add, color: cs.onSurfaceVariant),
-                      tooltip: 'Add Inhabitant',
-                    ),
-                    // 3-dot menu
-                    PopupMenuButton<String>(
-                      iconSize: 18,
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(
-                        minWidth: 34,
-                        minHeight: 34,
-                      ),
-                      icon: Icon(Icons.more_vert, size: 18, color: cs.onSurfaceVariant),
-                      tooltip: 'More options',
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => TankCreationScreen(existingTank: tank),
-                              ),
-                            );
-                            break;
-                          case 'set_background':
-                            _showSetBackgroundDialog(context, ref, tank);
-                            break;
-                          case 'set_icon':
-                            _showSetIconDialog(context, ref, tank);
-                            break;
-                          case 'reset_background':
-                            _resetTankBackground(context, ref, tank);
-                            break;
-                          case 'recommendations':
-                            _getTankStockingRecommendations(context, ref, tank);
-                            break;
-                          case 'duplicate':
-                            _duplicateTank(context, ref, tank);
-                            break;
-                          case 'delete':
-                            _confirmDelete(context, ref, tank);
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        if (tank.photos.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'set_background',
-                            child: Row(
-                              children: [
-                                Icon(Icons.wallpaper, size: 18),
-                                SizedBox(width: 8),
-                                Text('Set Card Background'),
-                              ],
-                            ),
-                          ),
-                        const PopupMenuItem(
-                          value: 'set_icon',
-                          child: Row(
-                            children: [
-                              Icon(Icons.emoji_emotions_outlined, size: 18),
-                              SizedBox(width: 8),
-                              Text('Change Icon'),
-                            ],
-                          ),
-                        ),
-                        if (tank.customBackgroundPhotoId != null)
-                          const PopupMenuItem(
-                            value: 'reset_background',
-                            child: Row(
-                              children: [
-                                Icon(Icons.restore, size: 18),
-                                SizedBox(width: 8),
-                                Text('Reset Background'),
-                              ],
-                            ),
-                          ),
-                        if (tank.inhabitants.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'recommendations',
-                            child: Row(
-                              children: [
-                                Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
-                                SizedBox(width: 8),
-                                Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
-                              ],
-                            ),
-                          ),
-                        const PopupMenuItem(
-                          value: 'duplicate',
-                          child: Row(
-                            children: [
-                              Icon(Icons.copy, size: 18),
-                              SizedBox(width: 8),
-                              Text('Duplicate'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.red, size: 18),
-                              SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),
