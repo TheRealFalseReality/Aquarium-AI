@@ -118,12 +118,13 @@ class _PhotoAnalysisResultScreenState
           ActionButtonRow(
             onRegenerate: _regenerate,
             isRegenerating: _regenerating,
-            regenerateLabel: 'Regenerate Analysis',
+            regenerateLabel: 'Regenerate',
           ),
           const SizedBox(height: 12),
           const TipText(
             text: 'Tip: Regenerating may produce slightly different identifications or wording.',
           ),
+          const SizedBox(height: 12),
         ],
       ),
     );
