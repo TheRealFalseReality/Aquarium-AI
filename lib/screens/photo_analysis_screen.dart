@@ -6,9 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
 import '../services/analytics_service.dart';
+import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
-  const PhotoAnalysisScreen({super.key});
+  final Uint8List? initialImageBytes;
+  
+  const PhotoAnalysisScreen({super.key, this.initialImageBytes});
 
   @override
   PhotoAnalysisScreenState createState() => PhotoAnalysisScreenState();
@@ -20,6 +23,14 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialImageBytes != null) {
+      _imageBytes = widget.initialImageBytes;
+    }
+  }
 
   Future<void> _pick(ImageSource source) async {
     setState(() => _error = null);
@@ -93,7 +104,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
 
     if (mounted) {
       setState(() => _isSubmitting = false);
-      Navigator.pop(context);
+      // Don't pop here - the listener will navigate to the result screen
     }
   }
 
@@ -106,6 +117,30 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    
+    // Listen for photo analysis results
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      if (next.messages.isNotEmpty) {
+        final last = next.messages.last;
+        if (!last.isUser && last.photoAnalysisResult != null && !next.isLoading) {
+          // Navigate to result screen when analysis is complete
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PhotoAnalysisResultScreen(
+                    result: last.photoAnalysisResult!,
+                    photoBytes: last.photoBytes,
+                  ),
+                ),
+              );
+            }
+          });
+        }
+      }
+    });
+    
     return MainLayout(
       title: 'Photo Analyzer',
       child: SingleChildScrollView(
