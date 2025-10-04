@@ -1240,7 +1240,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
     );
   }
-}
 
 class _TankDetailsDialog extends StatefulWidget {
   final Tank tank;
@@ -2213,7 +2212,6 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
       ),
     );
   }
-}
 
   void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
     final imageUrl = photo.imageUrl ?? photo.imagePath;
@@ -2437,6 +2435,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
       ),
     );
   }
+}
 
   void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
     if (tank.photos.isEmpty) {
