@@ -1261,10 +1261,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
     );
   }
-}
 
-// Note: _TankDetailsDialog is defined here within TankManagementScreenState
-// This is a workaround - ideally it should be a top-level class
+  // Dialog helper classes defined here (nested within TankManagementScreenState)
+
 class _TankDetailsDialog extends StatefulWidget {
   final Tank tank;
   final Map<String, List<Fish>>? fishData;
