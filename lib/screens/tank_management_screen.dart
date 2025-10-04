@@ -1842,10 +1842,18 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
     
     final matchingFish = categoryFish.firstWhere(
       (fish) => fish.name == fishUnit,
-      orElse: () => Fish(name: '', imageUrl: ''),
+      orElse: () => Fish(
+        name: '',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      ),
     );
     
-    return matchingFish.imageUrl.isNotEmpty ? matchingFish.imageUrl : null;
+    return matchingFish.imageURL.isNotEmpty ? matchingFish.imageURL : null;
   }
 
   Widget _buildStatChip(BuildContext context, IconData icon, String label) {
