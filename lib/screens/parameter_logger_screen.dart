@@ -148,7 +148,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       
       case 'phosphate':
         if (value == 0) return Colors.green;
-        return Colors.purple;
+        if (value < 1) return Colors.yellow.shade700;
+        if (value < 5) return Colors.orange;
+        return Colors.red;
       
       case 'salinity':
         return Colors.blue;
