@@ -1231,6 +1231,26 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
+  // Predefined icons for tanks
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.shower,
+    Icons.opacity,
+    Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
   void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
     showDialog(
       context: context,
@@ -1243,7 +1263,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 }
 
-// Helper dialog classes for tank details view
+// Note: _TankDetailsDialog is defined here within TankManagementScreenState
+// This is a workaround - ideally it should be a top-level class
 class _TankDetailsDialog extends StatefulWidget {
   final Tank tank;
   final Map<String, List<Fish>>? fishData;
@@ -2877,27 +2898,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
     }
   }
 
-  // Predefined icons for tanks - keeping this as a static constant list
-  static const List<IconData> _tankIcons = [
-    Icons.water_drop,
-    Icons.waves,
-    Icons.pool,
-    Icons.bubble_chart,
-    Icons.water,
-    Icons.shower,
-    Icons.opacity,
-    Icons.water_damage,
-    Icons.pets,
-    Icons.set_meal,
-    Icons.spa,
-    Icons.emoji_nature,
-    Icons.grass,
-    Icons.eco,
-    Icons.forest,
-    Icons.park,
-  ];
-
-  // Helper method to get const IconData from codePoint
+  // Helper method to get const IconData from codePoint (using _tankIcons defined above in the class)
   IconData? _getIconFromCodePoint(int? codePoint) {
     if (codePoint == null) return null;
     try {
