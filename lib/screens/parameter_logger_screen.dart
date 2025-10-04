@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
@@ -160,6 +161,193 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
   }
 
+  List<WaterParameter> _filterLast30Days(List<WaterParameter> parameters) {
+    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+    return parameters.where((p) => p.dateRecorded.isAfter(thirtyDaysAgo)).toList();
+  }
+
+  Widget _buildParameterGraph(List<WaterParameter> parameters, String parameterType) {
+    if (parameters.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Filter to last 30 days
+    final filteredParams = _filterLast30Days(parameters);
+    
+    if (filteredParams.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'No data in the last 30 days',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            fontStyle: FontStyle.italic,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    // Sort by date (oldest first for chart)
+    final sortedParams = List<WaterParameter>.from(filteredParams)
+      ..sort((a, b) => a.dateRecorded.compareTo(b.dateRecorded));
+
+    // Create data spots
+    final spots = <FlSpot>[];
+    final oldestDate = sortedParams.first.dateRecorded;
+    
+    for (var param in sortedParams) {
+      final daysDiff = param.dateRecorded.difference(oldestDate).inDays.toDouble();
+      spots.add(FlSpot(daysDiff, param.value));
+    }
+
+    final color = _getParameterColor(parameterType);
+    final maxY = sortedParams.map((p) => p.value).reduce((a, b) => a > b ? a : b);
+    final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
+    final yRange = maxY - minY;
+    final yPadding = yRange * 0.1;
+
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Last 30 Days Trend',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  horizontalInterval: yRange > 0 ? yRange / 5 : 1,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                      strokeWidth: 1,
+                    );
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                      strokeWidth: 1,
+                    );
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 30,
+                      interval: 5,
+                      getTitlesWidget: (value, meta) {
+                        final date = oldestDate.add(Duration(days: value.toInt()));
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            DateFormat('M/d').format(date),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: yRange > 0 ? yRange / 4 : 1,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toStringAsFixed(1),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 10,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                  ),
+                ),
+                minX: 0,
+                maxX: 30,
+                minY: minY - yPadding,
+                maxY: maxY + yPadding,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    color: color,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: color,
+                          strokeWidth: 2,
+                          strokeColor: Colors.white,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: color.withOpacity(0.1),
+                    ),
+                  ),
+                ],
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        final date = oldestDate.add(Duration(days: spot.x.toInt()));
+                        final param = sortedParams.firstWhere(
+                          (p) => p.dateRecorded.difference(oldestDate).inDays == spot.x.toInt(),
+                          orElse: () => sortedParams.first,
+                        );
+                        return LineTooltipItem(
+                          '${DateFormat('MMM d').format(date)}\n${spot.y.toStringAsFixed(2)}${param.unit ?? ''}',
+                          TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -239,6 +427,17 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                           ),
                           if (isExpanded) ...[
                             const Divider(height: 1),
+                            _buildParameterGraph(parameters, paramType),
+                            const Divider(height: 1),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: Text(
+                                'All Readings',
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
                             ...parameters.map((param) => _buildParameterItem(
                                   context,
                                   param,
