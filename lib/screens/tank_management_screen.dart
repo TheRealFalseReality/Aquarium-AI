@@ -939,7 +939,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         _formatTankSize(tank),
                       ),
                     if (tank.inhabitants.isNotEmpty && fishData != null)
-                      _buildHarmonyScoreChip(tank),
+                      _buildHarmonyScoreChip(context, tank),
                   ],
                 ),
                 
@@ -1243,6 +1243,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 }
 
+// Helper dialog classes for tank details view
 class _TankDetailsDialog extends StatefulWidget {
   final Tank tank;
   final Map<String, List<Fish>>? fishData;
@@ -1456,7 +1457,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
               if (widget.tank.sizeGallons != null || widget.tank.sizeLiters != null)
                 _buildStatChip(context, Icons.line_weight, _formatWaterWeight(widget.tank)),
               if (widget.tank.inhabitants.isNotEmpty && widget.fishData != null)
-                _buildHarmonyScoreChip(widget.tank),
+                _buildHarmonyScoreChip(context, widget.tank),
             ],
           ),
           
@@ -1885,7 +1886,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
     );
   }
 
-  Widget _buildHarmonyScoreChip(Tank tank) {
+  Widget _buildHarmonyScoreChip(BuildContext context, Tank tank) {
     final cs = Theme.of(context).colorScheme;
     final score = tank.harmonyScore ?? 0.0;
     final scoreColor = score >= 0.7
@@ -3206,7 +3207,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
     return '';
   }
 
-  Widget _buildHarmonyScoreChip(Tank tank) {
+  Widget _buildHarmonyScoreChip(BuildContext context, Tank tank) {
     final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
 
