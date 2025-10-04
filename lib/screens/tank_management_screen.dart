@@ -1339,7 +1339,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: tank.type == 'freshwater'
+                            colors: widget.tank.type == 'freshwater'
                                 ? [Colors.blue.shade300, Colors.cyan.shade400]
                                 : [Colors.indigo.shade300, Colors.purple.shade400],
                             begin: Alignment.topLeft,
@@ -1348,7 +1348,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: (tank.type == 'freshwater' 
+                              color: (widget.tank.type == 'freshwater' 
                                   ? Colors.blue 
                                   : Colors.purple).withOpacity(0.3),
                               blurRadius: 8,
@@ -1498,82 +1498,80 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return GestureDetector(
                         onTap: () => _showPhotoMaximized(context, photo, tank: widget.tank, ref: widget.tankManagementRef),
-                                      child: Container(
-                                        width: 100,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: cs.outline,
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius: BorderRadius.circular(6),
-                                              child: imageUrl != null
-                                                  ? (imageUrl.startsWith('http')
-                                                      ? Image.network(
-                                                          imageUrl,
-                                                          fit: BoxFit.cover,
-                                                          width: double.infinity,
-                                                          height: double.infinity,
-                                                          errorBuilder: (context, error, stackTrace) => Container(
-                                                            color: cs.errorContainer,
-                                                            child: Icon(
-                                                              Icons.error_outline,
-                                                              color: cs.onErrorContainer,
-                                                            ),
-                                                          ),
-                                                        )
-                                                      : Image.file(
-                                                          File(imageUrl),
-                                                          fit: BoxFit.cover,
-                                                          width: double.infinity,
-                                                          height: double.infinity,
-                                                        ))
-                                                  : Container(
-                                                      color: cs.surfaceVariant,
-                                                      child: Icon(
-                                                        Icons.image_outlined,
-                                                        color: cs.onSurfaceVariant,
-                                                      ),
-                                                    ),
-                                            ),
-                                            Positioned(
-                                              bottom: 0,
-                                              left: 0,
-                                              right: 0,
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black.withOpacity(0.7),
-                                                  borderRadius: const BorderRadius.only(
-                                                    bottomLeft: Radius.circular(6),
-                                                    bottomRight: Radius.circular(6),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  '${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: cs.outline,
+                              width: 2,
+                            ),
+                          ),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: imageUrl != null
+                                    ? (imageUrl.startsWith('http')
+                                        ? Image.network(
+                                            imageUrl,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            errorBuilder: (context, error, stackTrace) => Container(
+                                              color: cs.errorContainer,
+                                              child: Icon(
+                                                Icons.error_outline,
+                                                color: cs.onErrorContainer,
                                               ),
                                             ),
-                                          ],
+                                          )
+                                        : Image.file(
+                                            File(imageUrl),
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                          ))
+                                    : Container(
+                                        color: cs.surfaceVariant,
+                                        child: Icon(
+                                          Icons.image_outlined,
+                                          color: cs.onSurfaceVariant,
                                         ),
                                       ),
-                                    );
-                                  }).toList(),
-                      ),
-                    ],
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.7),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(6),
+                                      bottomRight: Radius.circular(6),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
