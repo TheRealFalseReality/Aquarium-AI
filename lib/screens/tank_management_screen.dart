@@ -18,6 +18,7 @@ import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
+import 'parameter_logger_screen.dart';
 
 enum TankSortOption {
   name,
@@ -823,6 +824,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'parameters':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ParameterLoggerScreen(tank: tank),
+                              ),
+                            );
+                            break;
                           case 'set_background':
                             _showSetBackgroundDialog(context, ref, tank);
                             break;
@@ -851,6 +859,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               Icon(Icons.edit, size: 18),
                               SizedBox(width: 8),
                               Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'parameters',
+                          child: Row(
+                            children: [
+                              Icon(Icons.science, color: Colors.teal, size: 18),
+                              SizedBox(width: 8),
+                              Text('Parameter Logger', style: TextStyle(color: Colors.teal)),
                             ],
                           ),
                         ),
