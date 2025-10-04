@@ -1241,6 +1241,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
     );
   }
+}
 
 class _TankDetailsDialog extends StatefulWidget {
   final Tank tank;
