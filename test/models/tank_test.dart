@@ -153,5 +153,27 @@ void main() {
 
       expect(tank.photos, isEmpty);
     });
+
+    test('should handle Tank with no waterParameters (backwards compatibility)', () {
+      final json = {
+        'id': 'tank-1',
+        'name': 'My Tank',
+        'type': 'freshwater',
+        'inhabitants': [],
+        'sizeGallons': null,
+        'sizeLiters': null,
+        'notes': null,
+        'harmonyScore': null,
+        'calculationBreakdown': null,
+        'createdAt': '2024-01-01T00:00:00.000',
+        'updatedAt': '2024-01-01T00:00:00.000',
+        'photos': [],
+        // Note: 'waterParameters' field is missing
+      };
+
+      final tank = Tank.fromJson(json);
+
+      expect(tank.waterParameters, isEmpty);
+    });
   });
 }
