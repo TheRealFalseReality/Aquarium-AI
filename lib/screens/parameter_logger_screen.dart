@@ -127,7 +127,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
   }
 
-  Color _getThresholdColor(String parameterType, double value) {
+  Color _getThresholdColor(String parameterType, double value, {String? unit}) {
     switch (parameterType) {
       case 'ammonia':
         if (value == 0) return Colors.green;
@@ -154,7 +154,22 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Colors.red;
       
       case 'salinity':
-        return Colors.blue;
+        // Determine if using ppt or SG
+        final isSG = unit == 'SG';
+        
+        if (isSG) {
+          // SG thresholds (1.020-1.026 is ideal)
+          if (value >= 1.023 && value <= 1.025) return Colors.green;
+          if (value >= 1.021 && value <= 1.027) return Colors.yellow.shade700;
+          if (value >= 1.019 && value <= 1.029) return Colors.orange;
+          return Colors.red;
+        } else {
+          // ppt thresholds
+          if (value >= 32 && value <= 35) return Colors.green;
+          if ((value >= 31 && value < 32) || (value > 35 && value <= 36)) return Colors.yellow.shade700;
+          if ((value >= 29 && value < 31) || (value > 36 && value <= 38)) return Colors.orange;
+          return Colors.red;
+        }
       
       default:
         return Colors.grey;
@@ -192,32 +207,62 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final sortedParams = List<WaterParameter>.from(filteredParams)
       ..sort((a, b) => a.dateRecorded.compareTo(b.dateRecorded));
 
-    // Create data spots
+    // Get latest value for display
+    final latestParam = sortedParams.last;
+    final latestValue = latestParam.value;
+    final latestUnit = latestParam.unit ?? '';
+    final latestColor = _getThresholdColor(parameterType, latestValue, unit: latestUnit);
+
+    // Create data spots with color segments
     final spots = <FlSpot>[];
+    final spotColors = <Color>[];
     final oldestDate = sortedParams.first.dateRecorded;
     
     for (var param in sortedParams) {
       final daysDiff = param.dateRecorded.difference(oldestDate).inDays.toDouble();
       spots.add(FlSpot(daysDiff, param.value));
+      spotColors.add(_getThresholdColor(parameterType, param.value, unit: param.unit));
     }
 
-    final color = _getParameterColor(parameterType);
+    // Use the latest value's threshold color for the line
+    final lineColor = latestColor;
     final maxY = sortedParams.map((p) => p.value).reduce((a, b) => a > b ? a : b);
     final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
     final yRange = maxY - minY;
     final yPadding = yRange * 0.1;
 
     return Container(
-      height: 250,
+      height: 280,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Last 30 Days Trend',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Last 30 Days Trend',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: latestColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: latestColor, width: 1.5),
                 ),
+                child: Text(
+                  'Latest: ${latestValue.toStringAsFixed(2)}$latestUnit',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: latestColor,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Expanded(
@@ -299,15 +344,17 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
-                    color: color,
+                    color: lineColor,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: FlDotData(
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
+                        // Color each dot based on its threshold
+                        final dotColor = spotColors[index];
                         return FlDotCirclePainter(
                           radius: 4,
-                          color: color,
+                          color: dotColor,
                           strokeWidth: 2,
                           strokeColor: Colors.white,
                         );
@@ -315,7 +362,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: color.withOpacity(0.1),
+                      color: lineColor.withOpacity(0.1),
                     ),
                   ),
                 ],
@@ -353,7 +400,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
-    final parameterTypes = ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity'];
+    
+    // Only show salinity for marine tanks
+    final parameterTypes = currentTank.type == 'marine'
+        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity']
+        : ['ammonia', 'nitrite', 'nitrate', 'phosphate'];
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -511,7 +562,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   ) {
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
-    final thresholdColor = _getThresholdColor(parameter.parameterType, parameter.value);
+    final thresholdColor = _getThresholdColor(parameter.parameterType, parameter.value, unit: parameter.unit);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -760,12 +811,14 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   labelText: 'Parameter Type',
                   border: OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'ammonia', child: Text('Ammonia')),
-                  DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
-                  DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
-                  DropdownMenuItem(value: 'phosphate', child: Text('Phosphate')),
-                  DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
+                items: [
+                  const DropdownMenuItem(value: 'ammonia', child: Text('Ammonia')),
+                  const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
+                  const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
+                  const DropdownMenuItem(value: 'phosphate', child: Text('Phosphate')),
+                  // Only show salinity for marine tanks
+                  if (widget.tank.type == 'marine')
+                    const DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
                 ],
                 onChanged: (value) {
                   setState(() {
