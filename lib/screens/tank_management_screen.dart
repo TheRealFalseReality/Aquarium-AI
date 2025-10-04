@@ -1437,8 +1437,7 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildTankInfoTab(BuildContext context, ColorScheme cs) {
