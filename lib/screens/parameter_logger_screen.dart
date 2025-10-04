@@ -36,6 +36,18 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
   }
 
+  void _editParameter(BuildContext context, WaterParameter parameter) {
+    final currentTank = _getCurrentTank();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _AddParameterSheet(
+        tank: currentTank,
+        existingParameter: parameter,
+      ),
+    );
+  }
+
   void _deleteParameter(WaterParameter parameter) {
     final currentTank = _getCurrentTank();
     final updatedParameters = currentTank.waterParameters
@@ -329,10 +341,20 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
               ),
             )
           : null,
-      trailing: IconButton(
-        icon: const Icon(Icons.delete, size: 20),
-        color: Colors.red,
-        onPressed: () => _showDeleteDialog(context, parameter),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit, size: 20),
+            color: cs.primary,
+            onPressed: () => _editParameter(context, parameter),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, size: 20),
+            color: Colors.red,
+            onPressed: () => _showDeleteDialog(context, parameter),
+          ),
+        ],
       ),
     );
   }
@@ -364,8 +386,12 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
 class _AddParameterSheet extends ConsumerStatefulWidget {
   final Tank tank;
+  final WaterParameter? existingParameter;
 
-  const _AddParameterSheet({required this.tank});
+  const _AddParameterSheet({
+    required this.tank,
+    this.existingParameter,
+  });
 
   @override
   _AddParameterSheetState createState() => _AddParameterSheetState();
@@ -373,11 +399,11 @@ class _AddParameterSheet extends ConsumerStatefulWidget {
 
 class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   final _formKey = GlobalKey<FormState>();
-  String _selectedParameter = 'ammonia';
+  late String _selectedParameter;
   final _valueController = TextEditingController();
   final _notesController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-  String _selectedUnit = 'ppm';
+  late DateTime _selectedDate;
+  late String _selectedUnit;
 
   final Map<String, List<String>> _unitOptions = {
     'ammonia': ['ppm', 'mg/L'],
@@ -386,6 +412,24 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'phosphate': ['ppm', 'mg/L'],
     'salinity': ['ppt', 'SG'],
   };
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingParameter != null) {
+      // Initialize with existing parameter data
+      _selectedParameter = widget.existingParameter!.parameterType;
+      _valueController.text = widget.existingParameter!.value.toString();
+      _notesController.text = widget.existingParameter!.notes ?? '';
+      _selectedDate = widget.existingParameter!.dateRecorded;
+      _selectedUnit = widget.existingParameter!.unit ?? 'ppm';
+    } else {
+      // Initialize with default values for new parameter
+      _selectedParameter = 'ammonia';
+      _selectedDate = DateTime.now();
+      _selectedUnit = 'ppm';
+    }
+  }
 
   @override
   void dispose() {
@@ -422,23 +466,52 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
   void _saveParameter() {
     if (_formKey.currentState!.validate()) {
-      final parameter = WaterParameter.create(
-        parameterType: _selectedParameter,
-        value: double.parse(_valueController.text),
-        unit: _selectedUnit,
-        dateRecorded: _selectedDate,
-        notes: _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
-            : null,
-      );
+      final WaterParameter parameter;
+      
+      if (widget.existingParameter != null) {
+        // Update existing parameter
+        parameter = widget.existingParameter!.copyWith(
+          parameterType: _selectedParameter,
+          value: double.parse(_valueController.text),
+          unit: _selectedUnit,
+          dateRecorded: _selectedDate,
+          notes: _notesController.text.trim().isNotEmpty
+              ? _notesController.text.trim()
+              : null,
+        );
+        
+        // Replace the existing parameter in the list
+        final updatedParameters = widget.tank.waterParameters.map((p) {
+          return p.id == parameter.id ? parameter : p;
+        }).toList();
+        
+        final updatedTank = widget.tank.copyWith(
+          waterParameters: updatedParameters,
+          updatedAt: DateTime.now(),
+        );
+        
+        ref.read(tankProvider.notifier).updateTank(updatedTank);
+      } else {
+        // Create new parameter
+        parameter = WaterParameter.create(
+          parameterType: _selectedParameter,
+          value: double.parse(_valueController.text),
+          unit: _selectedUnit,
+          dateRecorded: _selectedDate,
+          notes: _notesController.text.trim().isNotEmpty
+              ? _notesController.text.trim()
+              : null,
+        );
 
-      final updatedParameters = [...widget.tank.waterParameters, parameter];
-      final updatedTank = widget.tank.copyWith(
-        waterParameters: updatedParameters,
-        updatedAt: DateTime.now(),
-      );
+        final updatedParameters = [...widget.tank.waterParameters, parameter];
+        final updatedTank = widget.tank.copyWith(
+          waterParameters: updatedParameters,
+          updatedAt: DateTime.now(),
+        );
 
-      ref.read(tankProvider.notifier).updateTank(updatedTank);
+        ref.read(tankProvider.notifier).updateTank(updatedTank);
+      }
+      
       Navigator.pop(context);
     }
   }
@@ -465,7 +538,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
               Row(
                 children: [
                   Text(
-                    'Add Parameter Reading',
+                    widget.existingParameter != null 
+                        ? 'Edit Parameter Reading'
+                        : 'Add Parameter Reading',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -575,7 +650,11 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Save Reading'),
+                  child: Text(
+                    widget.existingParameter != null 
+                        ? 'Update Reading'
+                        : 'Save Reading'
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
