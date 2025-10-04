@@ -18,28 +18,39 @@ class ParameterLoggerScreen extends ConsumerStatefulWidget {
 class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   String? _expandedParameter;
 
+  Tank _getCurrentTank() {
+    // Get the latest tank state from the provider
+    final tanks = ref.watch(tankProvider).tanks;
+    return tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+  }
+
   void _addParameter(BuildContext context) {
+    final currentTank = _getCurrentTank();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddParameterSheet(tank: widget.tank),
+      builder: (context) => _AddParameterSheet(tank: currentTank),
     );
   }
 
   void _deleteParameter(WaterParameter parameter) {
-    final updatedParameters = widget.tank.waterParameters
+    final currentTank = _getCurrentTank();
+    final updatedParameters = currentTank.waterParameters
         .where((p) => p.id != parameter.id)
         .toList();
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       waterParameters: updatedParameters,
       updatedAt: DateTime.now(),
     );
     ref.read(tankProvider.notifier).updateTank(updatedTank);
   }
 
-  Map<String, List<WaterParameter>> _groupParametersByType() {
+  Map<String, List<WaterParameter>> _groupParametersByType(Tank tank) {
     final grouped = <String, List<WaterParameter>>{};
-    for (var param in widget.tank.waterParameters) {
+    for (var param in tank.waterParameters) {
       if (!grouped.containsKey(param.parameterType)) {
         grouped[param.parameterType] = [];
       }
@@ -103,17 +114,50 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
   }
 
+  Color _getThresholdColor(String parameterType, double value) {
+    switch (parameterType) {
+      case 'ammonia':
+        if (value == 0) return Colors.green;
+        if (value <= 1) return Colors.yellow.shade700;
+        if (value < 4) return Colors.orange;
+        return Colors.red;
+      
+      case 'nitrite':
+        if (value == 0) return Colors.green;
+        if (value <= 1) return Colors.yellow.shade700;
+        if (value < 2) return Colors.orange;
+        return Colors.red;
+      
+      case 'nitrate':
+        if (value == 0) return Colors.green;
+        if (value <= 5) return Colors.green.shade300;
+        if (value <= 40) return Colors.blue.shade400;
+        return Colors.blue.shade900;
+      
+      case 'phosphate':
+        if (value == 0) return Colors.green;
+        return Colors.purple;
+      
+      case 'salinity':
+        return Colors.blue;
+      
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final groupedParameters = _groupParametersByType();
+    final currentTank = _getCurrentTank();
+    final groupedParameters = _groupParametersByType(currentTank);
     final parameterTypes = ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity'];
 
     return MainLayout(
-      title: '${widget.tank.name} - Parameters',
+      title: '${currentTank.name} - Parameters',
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${widget.tank.name}'),
+          title: Text('${currentTank.name}'),
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
@@ -122,7 +166,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             ),
           ],
         ),
-        body: widget.tank.waterParameters.isEmpty
+        body: currentTank.waterParameters.isEmpty
             ? _buildEmptyState(context)
             : ListView(
                 padding: const EdgeInsets.all(16),
@@ -184,7 +228,6 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                             ...parameters.map((param) => _buildParameterItem(
                                   context,
                                   param,
-                                  color,
                                 )),
                           ],
                         ],
@@ -252,24 +295,24 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   Widget _buildParameterItem(
     BuildContext context,
     WaterParameter parameter,
-    Color color,
   ) {
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
+    final thresholdColor = _getThresholdColor(parameter.parameterType, parameter.value);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: thresholdColor.withOpacity(0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           '${parameter.value}${parameter.unit ?? ''}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: color,
+            color: thresholdColor,
           ),
         ),
       ),
