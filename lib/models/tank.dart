@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'parameter_log.dart';
 
 class TankPhoto {
   final String id;
@@ -128,6 +129,7 @@ class Tank {
   final String? customBackgroundPhotoId; // ID of photo to use as card background
   final String? customIconPhotoId; // ID of photo to use as tank icon
   final int? customIconCodePoint; // Custom icon code point for tank card
+  final List<ParameterLog> parameterLogs; // Water parameter logs
 
   Tank({
     required this.id,
@@ -145,7 +147,9 @@ class Tank {
     this.customBackgroundPhotoId,
     this.customIconPhotoId,
     this.customIconCodePoint,
-  }) : photos = photos ?? [];
+    List<ParameterLog>? parameterLogs,
+  }) : photos = photos ?? [],
+       parameterLogs = parameterLogs ?? [];
 
   factory Tank.create({
     required String name,
@@ -161,6 +165,7 @@ class Tank {
     String? customBackgroundPhotoId,
     String? customIconPhotoId,
     int? customIconCodePoint,
+    List<ParameterLog>? parameterLogs,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -179,6 +184,7 @@ class Tank {
       customBackgroundPhotoId: customBackgroundPhotoId,
       customIconPhotoId: customIconPhotoId,
       customIconCodePoint: customIconCodePoint,
+      parameterLogs: parameterLogs,
     );
   }
 
@@ -199,6 +205,7 @@ class Tank {
       'customBackgroundPhotoId': customBackgroundPhotoId,
       'customIconPhotoId': customIconPhotoId,
       'customIconCodePoint': customIconCodePoint,
+      'parameterLogs': parameterLogs.map((p) => p.toJson()).toList(),
     };
   }
 
@@ -223,6 +230,9 @@ class Tank {
       customBackgroundPhotoId: json['customBackgroundPhotoId'] as String?,
       customIconPhotoId: json['customIconPhotoId'] as String?,
       customIconCodePoint: json['customIconCodePoint'] as int?,
+      parameterLogs: (json['parameterLogs'] as List?)
+          ?.map((p) => ParameterLog.fromJson(p))
+          .toList() ?? [],
     );
   }
 
@@ -242,6 +252,7 @@ class Tank {
     String? customBackgroundPhotoId,
     String? customIconPhotoId,
     int? customIconCodePoint,
+    List<ParameterLog>? parameterLogs,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
@@ -262,6 +273,7 @@ class Tank {
       customBackgroundPhotoId: clearCustomBackgroundPhotoId ? null : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
       customIconPhotoId: clearCustomIconPhotoId ? null : (customIconPhotoId ?? this.customIconPhotoId),
       customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
+      parameterLogs: parameterLogs ?? this.parameterLogs,
     );
   }
 }

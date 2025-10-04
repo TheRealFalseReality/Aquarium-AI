@@ -7,6 +7,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
+import '../models/parameter_log.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -18,6 +19,7 @@ import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
+import 'add_parameter_log_screen.dart';
 
 enum TankSortOption {
   name,
@@ -1229,12 +1231,55 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
+    showDialog(
+      context: context,
+      builder: (context) => _TankDetailsDialog(
+        tank: tank,
+        fishData: fishData,
+        tankManagementRef: ref,
+      ),
+    );
+  }
+}
+
+class _TankDetailsDialog extends StatefulWidget {
+  final Tank tank;
+  final Map<String, List<Fish>>? fishData;
+  final WidgetRef tankManagementRef;
+
+  const _TankDetailsDialog({
+    required this.tank,
+    required this.fishData,
+    required this.tankManagementRef,
+  });
+
+  @override
+  State<_TankDetailsDialog> createState() => _TankDetailsDialogState();
+}
+
+class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final screenSize = MediaQuery.of(context).size;
     final isMobile = screenSize.width < 600;
     
     // AI-inspired gradient colors based on tank type with higher opacity
-    final gradientColors = tank.type == 'freshwater'
+    final gradientColors = widget.tank.type == 'freshwater'
         ? [
             Colors.blue.shade400.withOpacity(0.95),
             Colors.cyan.shade300.withOpacity(0.95),
@@ -1245,9 +1290,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Colors.purple.shade300.withOpacity(0.95),
             cs.surfaceContainerHighest.withOpacity(0.98),
           ];
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
+    
+    return Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: isMobile 
             ? const EdgeInsets.symmetric(horizontal: 16, vertical: 24)
@@ -1312,7 +1356,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ],
                         ),
                         child: Icon(
-                          tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                          widget.tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
                           size: 28,
                           color: Colors.white,
                         ),
@@ -1323,7 +1367,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              tank.name,
+                              widget.tank.name,
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
@@ -1331,7 +1375,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              tank.type == 'freshwater' ? 'Freshwater Tank' : 'Saltwater Tank',
+                              widget.tank.type == 'freshwater' ? 'Freshwater Tank' : 'Saltwater Tank',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: cs.primary,
                                 fontWeight: FontWeight.w600,
@@ -1355,64 +1399,104 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 ),
                 
-                // Scrollable content
+                // TabBar
+                TabBar(
+                  controller: _tabController,
+                  labelColor: cs.primary,
+                  unselectedLabelColor: cs.onSurfaceVariant,
+                  indicatorColor: cs.primary,
+                  tabs: const [
+                    Tab(
+                      icon: Icon(Icons.info_outline),
+                      text: 'Tank Info',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.science_outlined),
+                      text: 'Parameters',
+                    ),
+                  ],
+                ),
+                
+                // TabBarView content
                 Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Stats chips
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 8,
-                          children: [
-                            if (tank.sizeGallons != null || tank.sizeLiters != null)
-                              _buildStatChip(context, Icons.straighten, _formatTankSize(tank)),
-                            if (tank.sizeGallons != null || tank.sizeLiters != null)
-                              _buildStatChip(context, Icons.line_weight, _formatWaterWeight(tank)),
-                            if (tank.inhabitants.isNotEmpty && fishData != null)
-                              _buildHarmonyScoreChip(tank),
-                          ],
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Tank Info Tab
+                      _buildTankInfoTab(context, cs),
+                      // Parameters Tab
+                      _buildParametersTab(context, cs),
+                    ],
+                  ),
+                ),
+                
+                // Action buttons
+                _buildActionButtons(context, cs),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTankInfoTab(BuildContext context, ColorScheme cs) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Stats chips
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              if (widget.tank.sizeGallons != null || widget.tank.sizeLiters != null)
+                _buildStatChip(context, Icons.straighten, _formatTankSize(widget.tank)),
+              if (widget.tank.sizeGallons != null || widget.tank.sizeLiters != null)
+                _buildStatChip(context, Icons.line_weight, _formatWaterWeight(widget.tank)),
+              if (widget.tank.inhabitants.isNotEmpty && widget.fishData != null)
+                _buildHarmonyScoreChip(widget.tank),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Tank photos section (if photos exist)
+          if (widget.tank.photos.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: cs.outlineVariant.withOpacity(0.4),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.photo_library_outlined, size: 18, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tank Photos (${widget.tank.photos.length})',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        
-                        const SizedBox(height: 20),
-                        
-                        // Tank photos section (if photos exist)
-                        if (tank.photos.isNotEmpty) ...[
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: cs.outlineVariant.withOpacity(0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.photo_library_outlined, size: 18, color: cs.onSurfaceVariant),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Tank Photos (${tank.photos.length})',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: tank.photos.map((photo) {
-                                    final imageUrl = photo.imageUrl ?? photo.imagePath;
-                                    return GestureDetector(
-                                      onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: widget.tank.photos.map((photo) {
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      return GestureDetector(
+                        onTap: () => _showPhotoMaximized(context, photo, tank: widget.tank, ref: widget.tankManagementRef),
                                       child: Container(
                                         width: 100,
                                         height: 100,
@@ -1485,51 +1569,53 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       ),
                                     );
                                   }).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        
-                        // Inhabitants section
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: cs.outlineVariant.withOpacity(0.4),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.pets, size: 18, color: cs.onSurfaceVariant),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              
-                              if (tank.inhabitants.isEmpty)
-                                Text(
-                                  'No inhabitants added yet.',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                )
-                              else
-                                ...tank.inhabitants.map((inhabitant) {
-                                  final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          // Inhabitants section
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: cs.outlineVariant.withOpacity(0.4),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.pets, size: 18, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Inhabitants (${_getTotalInhabitantCount(widget.tank.inhabitants)})',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                
+                if (widget.tank.inhabitants.isEmpty)
+                  Text(
+                    'No inhabitants added yet.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  ...widget.tank.inhabitants.map((inhabitant) {
+                    final fishImageUrl = _getFishImageUrl(widget.tank.type, inhabitant.fishUnit, widget.fishData, inhabitant: inhabitant);
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: Row(
@@ -1579,184 +1665,555 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                           ),
                                         ),
                                       ],
-                                    ),
-                                  );
-                                }),
-                            ],
-                          ),
-                        ),
-                        
-                        // Notes section
-                        if (tank.notes != null && tank.notes!.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: cs.outlineVariant.withOpacity(0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.note_outlined, size: 18, color: cs.onSurfaceVariant),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Notes',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  tank.notes!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        
-                        // Calculation Breakdown Expandable Section
-                        if (tank.inhabitants.isNotEmpty && fishData != null) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: cs.outlineVariant.withOpacity(0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: ExpansionTile(
-                              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              leading: Icon(Icons.calculate, size: 18, color: cs.onSurfaceVariant),
-                              title: Text(
-                                'Compatibility Calculation',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: cs.surfaceContainer,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      tank.calculationBreakdown ?? 'No calculation available',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        fontFamily: 'monospace',
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        
-                        // Dates
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 6,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.event, size: 14, color: cs.onSurface),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Created ${_formatDate(tank.createdAt)}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (tank.updatedAt != tank.createdAt)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.update, size: 14, color: cs.onSurface),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Updated ${_formatDate(tank.updatedAt)}',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: cs.onSurface,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
                   ),
+                );
+              }),
+            ],
+          ),
+        ),
+        
+        // Notes section
+        if (widget.tank.notes != null && widget.tank.notes!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: cs.outlineVariant.withOpacity(0.4),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.note_outlined, size: 18, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Notes',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                
-                // Action buttons
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: cs.outlineVariant.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Close'),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => TankCreationScreen(existingTank: tank),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.edit, size: 18),
-                        label: const Text('Edit Tank'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 12),
+                Text(
+                  widget.tank.notes!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
+        
+        // Calculation Breakdown Expandable Section
+        if (widget.tank.inhabitants.isNotEmpty && widget.fishData != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: cs.outlineVariant.withOpacity(0.4),
+                width: 1,
+              ),
+            ),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              leading: Icon(Icons.calculate, size: 18, color: cs.onSurfaceVariant),
+              title: Text(
+                'Compatibility Calculation',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.tank.calculationBreakdown ?? 'No calculation available',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+                        
+          // Dates
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.event, size: 14, color: cs.onSurface),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Created ${_formatDate(widget.tank.createdAt)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.tank.updatedAt != widget.tank.createdAt)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.update, size: 14, color: cs.onSurface),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Updated ${_formatDate(widget.tank.updatedAt)}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
+
+  String _formatDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
+  }
+
+  String _formatTankSize(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(1)} gal / ${tank.sizeLiters!.toStringAsFixed(1)} L';
+    } else if (tank.sizeGallons != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(1)} gal';
+    } else if (tank.sizeLiters != null) {
+      return '${tank.sizeLiters!.toStringAsFixed(1)} L';
+    }
+    return 'N/A';
+  }
+
+  String _formatWaterWeight(Tank tank) {
+    if (tank.sizeGallons != null) {
+      final weightLbs = tank.sizeGallons! * 8.34;
+      return '${weightLbs.toStringAsFixed(1)} lbs';
+    }
+    return 'N/A';
+  }
+
+  int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
+    return inhabitants.fold(0, (sum, inhabitant) => sum + inhabitant.quantity);
+  }
+
+  String? _getFishImageUrl(String tankType, String fishUnit, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
+    if (inhabitant?.customImageUrl != null) {
+      return inhabitant!.customImageUrl;
+    }
+    if (inhabitant?.customImagePath != null) {
+      return inhabitant!.customImagePath;
+    }
+    
+    if (fishData == null) return null;
+    
+    final categoryFish = tankType == 'freshwater' 
+        ? fishData['Freshwater']
+        : fishData['Marine'];
+    
+    if (categoryFish == null) return null;
+    
+    final matchingFish = categoryFish.firstWhere(
+      (fish) => fish.name == fishUnit,
+      orElse: () => Fish(name: '', imageUrl: ''),
+    );
+    
+    return matchingFish.imageUrl.isNotEmpty ? matchingFish.imageUrl : null;
+  }
+
+  Widget _buildStatChip(BuildContext context, IconData icon, String label) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: cs.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHarmonyScoreChip(Tank tank) {
+    final cs = Theme.of(context).colorScheme;
+    final score = tank.harmonyScore ?? 0.0;
+    final scoreColor = score >= 0.7
+        ? Colors.green
+        : score >= 0.4
+            ? Colors.orange
+            : Colors.red;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: scoreColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: scoreColor.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_graph, size: 14, color: scoreColor),
+          const SizedBox(width: 6),
+          Text(
+            'Harmony: ${(score * 100).toStringAsFixed(0)}%',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scoreColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParametersTab(BuildContext context, ColorScheme cs) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Parameter Logs',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: () => _addParameterLog(context),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Log'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          if (widget.tank.parameterLogs.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.science_outlined,
+                      size: 64,
+                      color: cs.onSurfaceVariant.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No parameter logs yet',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Start tracking your water parameters\nto monitor tank health over time',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ..._buildParameterLogsList(context, cs),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildParameterLogsList(BuildContext context, ColorScheme cs) {
+    final sortedLogs = List<ParameterLog>.from(widget.tank.parameterLogs)
+      ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
+
+    return sortedLogs.map((log) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: Icon(
+            Icons.science,
+            color: cs.primary,
+          ),
+          title: Text(
+            '${log.dateRecorded.month}/${log.dateRecorded.day}/${log.dateRecorded.year}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            _getParameterSummary(log),
+            style: TextStyle(
+              fontSize: 12,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (log.ammonia != null)
+                    _buildParameterRow('Ammonia', '${log.ammonia} ppm', cs),
+                  if (log.nitrite != null)
+                    _buildParameterRow('Nitrite', '${log.nitrite} ppm', cs),
+                  if (log.nitrate != null)
+                    _buildParameterRow('Nitrate', '${log.nitrate} ppm', cs),
+                  if (log.phosphate != null)
+                    _buildParameterRow('Phosphate', '${log.phosphate} ppm', cs),
+                  if (log.pH != null)
+                    _buildParameterRow('pH', '${log.pH}', cs),
+                  if (log.salinity != null)
+                    _buildParameterRow(
+                      'Salinity',
+                      '${log.salinity} ${log.isSalinitySg ? "SG" : "ppt"}',
+                      cs,
+                    ),
+                  if (log.notes != null && log.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Notes:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      log.notes!,
+                      style: TextStyle(color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => _deleteParameterLog(context, log.id),
+                        icon: const Icon(Icons.delete, size: 18),
+                        label: const Text('Delete'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: cs.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildParameterRow(String label, String value, ColorScheme cs) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getParameterSummary(ParameterLog log) {
+    final parameters = <String>[];
+    if (log.ammonia != null) parameters.add('NH₃');
+    if (log.nitrite != null) parameters.add('NO₂');
+    if (log.nitrate != null) parameters.add('NO₃');
+    if (log.phosphate != null) parameters.add('PO₄');
+    if (log.pH != null) parameters.add('pH');
+    if (log.salinity != null) parameters.add('Salinity');
+    
+    return parameters.isEmpty ? 'No parameters' : parameters.join(' • ');
+  }
+
+  Future<void> _addParameterLog(BuildContext context) async {
+    final log = await Navigator.of(context).push<ParameterLog>(
+      MaterialPageRoute(
+        builder: (context) => AddParameterLogScreen(
+          isSaltwater: widget.tank.type == 'marine',
+        ),
+      ),
+    );
+
+    if (log != null && context.mounted) {
+      final updatedTank = widget.tank.copyWith(
+        parameterLogs: [...widget.tank.parameterLogs, log],
+        updatedAt: DateTime.now(),
+      );
+      
+      await widget.tankManagementRef.read(tankProvider.notifier).updateTank(updatedTank);
+      
+      if (context.mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Parameter log added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteParameterLog(BuildContext context, String logId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Parameter Log'),
+        content: const Text('Are you sure you want to delete this parameter log?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final updatedLogs = widget.tank.parameterLogs
+          .where((log) => log.id != logId)
+          .toList();
+      
+      final updatedTank = widget.tank.copyWith(
+        parameterLogs: updatedLogs,
+        updatedAt: DateTime.now(),
+      );
+      
+      await widget.tankManagementRef.read(tankProvider.notifier).updateTank(updatedTank);
+      
+      if (context.mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Parameter log deleted'),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildActionButtons(BuildContext context, ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TankCreationScreen(existingTank: widget.tank),
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit, size: 18),
+            label: const Text('Edit Tank'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
   void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
     final imageUrl = photo.imageUrl ?? photo.imagePath;
