@@ -110,9 +110,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final parameterTypes = ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity'];
 
     return MainLayout(
+      title: '${widget.tank.name} - Parameters',
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${widget.tank.name} - Parameters'),
+          title: Text('${widget.tank.name}'),
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
