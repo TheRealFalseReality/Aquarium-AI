@@ -2572,6 +2572,229 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
   }
 }
 
+  void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
+    final imageUrl = photo.imageUrl ?? photo.imagePath;
+    if (imageUrl == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(0),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.black,
+                          child: const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Failed to load image',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.contain,
+                      ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Date taken: ${photo.dateTaken.month}/${photo.dateTaken.day}/${photo.dateTaken.year}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 40,
+              right: 16,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
+                    Navigator.of(context).pop(); // Close maximized view first
+                    
+                    // Load image bytes
+                    Uint8List? imageBytes;
+                    try {
+                      if (imageUrl.startsWith('http')) {
+                        // For network images, we'd need to download them
+                        // For simplicity, we'll show a message that this is not supported
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('AI analysis is not supported for cloud-stored images. Please use local images.'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                        return;
+                      } else {
+                        // Read local file
+                        final file = File(imageUrl);
+                        imageBytes = await file.readAsBytes();
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to load image: $e'),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    
+                    if (context.mounted && imageBytes != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PhotoAnalysisScreen(
+                            initialImageBytes: imageBytes,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(28),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.purple.withOpacity(0.9),
+                          Colors.blue.withOpacity(0.9),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.purple.withOpacity(0.4),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (tank != null && ref != null)
+              Positioned(
+                top: 40,
+                right: 70,
+                child: PopupMenuButton<String>(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  onSelected: (value) {
+                    Navigator.of(context).pop(); // Close maximized view first
+                    switch (value) {
+                      case 'set_background':
+                        _setTankBackground(context, ref, tank, photo.id);
+                        break;
+                      case 'set_as_icon':
+                        _setTankIconFromPhoto(context, ref, tank, photo.id);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'set_background',
+                      child: Row(
+                        children: [
+                          Icon(Icons.wallpaper, size: 18),
+                          SizedBox(width: 8),
+                          Text('Set as Card Background'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'set_as_icon',
+                      child: Row(
+                        children: [
+                          Icon(Icons.image_aspect_ratio, size: 18),
+                          SizedBox(width: 8),
+                          Text('Set as Tank Icon'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
     if (tank.photos.isEmpty) {
       context.showAccessibleMessage('No photos available. Add photos to your tank first.');
