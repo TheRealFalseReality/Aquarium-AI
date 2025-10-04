@@ -15,6 +15,7 @@ import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/parameter_chart.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
@@ -1971,9 +1972,143 @@ class _TankDetailsDialogState extends State<_TankDetailsDialog> with SingleTicke
                 ),
               ),
             )
-          else
+          else ...[
+            // Show charts if there are at least 2 logs
+            if (widget.tank.parameterLogs.length >= 2) ...[
+              Text(
+                'Trends',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ..._buildParameterCharts(context, cs),
+              const SizedBox(height: 24),
+              Text(
+                'History',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             ..._buildParameterLogsList(context, cs),
+          ],
         ],
+      ),
+    );
+  }
+
+  List<Widget> _buildParameterCharts(BuildContext context, ColorScheme cs) {
+    final charts = <Widget>[];
+    final logsWithAmmonia = widget.tank.parameterLogs.where((log) => log.ammonia != null).toList();
+    final logsWithNitrite = widget.tank.parameterLogs.where((log) => log.nitrite != null).toList();
+    final logsWithNitrate = widget.tank.parameterLogs.where((log) => log.nitrate != null).toList();
+    final logsWithPhosphate = widget.tank.parameterLogs.where((log) => log.phosphate != null).toList();
+    final logsWithPH = widget.tank.parameterLogs.where((log) => log.pH != null).toList();
+    final logsWithSalinity = widget.tank.parameterLogs.where((log) => log.salinity != null).toList();
+
+    if (logsWithAmmonia.length >= 2) {
+      charts.add(_buildChartCard(
+        context,
+        'Ammonia (ppm)',
+        logsWithAmmonia,
+        'Ammonia',
+        Colors.orange,
+        cs,
+      ));
+    }
+    
+    if (logsWithNitrite.length >= 2) {
+      charts.add(_buildChartCard(
+        context,
+        'Nitrite (ppm)',
+        logsWithNitrite,
+        'Nitrite',
+        Colors.red,
+        cs,
+      ));
+    }
+    
+    if (logsWithNitrate.length >= 2) {
+      charts.add(_buildChartCard(
+        context,
+        'Nitrate (ppm)',
+        logsWithNitrate,
+        'Nitrate',
+        Colors.blue,
+        cs,
+      ));
+    }
+    
+    if (logsWithPhosphate.length >= 2) {
+      charts.add(_buildChartCard(
+        context,
+        'Phosphate (ppm)',
+        logsWithPhosphate,
+        'Phosphate',
+        Colors.purple,
+        cs,
+      ));
+    }
+    
+    if (logsWithPH.length >= 2) {
+      charts.add(_buildChartCard(
+        context,
+        'pH',
+        logsWithPH,
+        'pH',
+        Colors.green,
+        cs,
+      ));
+    }
+    
+    if (logsWithSalinity.length >= 2 && widget.tank.type == 'marine') {
+      charts.add(_buildChartCard(
+        context,
+        'Salinity',
+        logsWithSalinity,
+        'Salinity',
+        Colors.teal,
+        cs,
+      ));
+    }
+
+    return charts;
+  }
+
+  Widget _buildChartCard(
+    BuildContext context,
+    String title,
+    List<ParameterLog> logs,
+    String parameter,
+    Color color,
+    ColorScheme cs,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 200,
+              child: ParameterChart(
+                logs: logs,
+                parameter: parameter,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
