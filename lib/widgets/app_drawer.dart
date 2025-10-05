@@ -250,6 +250,16 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 275),
+                  child: ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Fish Data Editor'),
+                    subtitle:
+                        const Text('Edit and customize fish compatibility data.'),
+                    onTap: () => navigate('/fish-editor'),
+                  ),
+                ),
               ],
             ),
           ),
