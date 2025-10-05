@@ -13,6 +13,21 @@ class AdHelper {
       return false;
     }
   }
+  
+  /// Returns true if running on web platform
+  static bool get isWeb {
+    return kIsWeb;
+  }
+  
+  /// Returns the AdSense App ID for web
+  static String get adSenseAppIdForWeb {
+    return adSenseAppId;
+  }
+  
+  /// Returns the AdSense Ad Unit ID for web
+  static String get adSenseAdUnitIdForWeb {
+    return adSenseAdUnitId;
+  }
 
   static String get bannerAdUnitId {
     // Return an empty string on unsupported platforms to prevent errors.

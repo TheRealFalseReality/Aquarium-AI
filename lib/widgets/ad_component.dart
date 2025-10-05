@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_helper.dart';
 
+// Conditional import for web-specific AdSense implementation
+import 'adsense_stub.dart'
+    if (dart.library.html) 'adsense_web.dart';
+
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
 
@@ -13,13 +17,21 @@ class AdBanner extends StatefulWidget {
 class _AdBannerState extends State<AdBanner> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  String? _webAdViewId;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _initWebAd();
+    } else {
       _loadAd();
     }
+  }
+
+  void _initWebAd() {
+    _webAdViewId = 'adsense-banner-${DateTime.now().millisecondsSinceEpoch}';
+    registerAdSenseView(_webAdViewId!);
   }
 
   void _loadAd() {
@@ -52,7 +64,17 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    if (kIsWeb && _webAdViewId != null) {
+      return SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 90,
+          child: HtmlElementView(viewType: _webAdViewId!),
+        ),
+      );
+    }
+    
+    if (!_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -76,13 +98,21 @@ class NativeAdWidget extends StatefulWidget {
 class _NativeAdWidgetState extends State<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
+  String? _webAdViewId;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _initWebAd();
+    } else {
       _loadAd();
     }
+  }
+
+  void _initWebAd() {
+    _webAdViewId = 'adsense-native-${DateTime.now().millisecondsSinceEpoch}';
+    registerAdSenseView(_webAdViewId!);
   }
 
   void _loadAd() {
@@ -124,7 +154,23 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _nativeAd == null) {
+    if (kIsWeb && _webAdViewId != null) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: 300,
+          minHeight: 250,
+          maxWidth: 500,
+          maxHeight: 400,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 280,
+          child: HtmlElementView(viewType: _webAdViewId!),
+        ),
+      );
+    }
+    
+    if (!_isAdLoaded || _nativeAd == null) {
       return const SizedBox.shrink();
     }
 
@@ -151,13 +197,21 @@ class BannerAdWidget extends StatefulWidget {
 class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  String? _webAdViewId;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _initWebAd();
+    } else {
       _loadAd();
     }
+  }
+
+  void _initWebAd() {
+    _webAdViewId = 'adsense-banner-widget-${DateTime.now().millisecondsSinceEpoch}';
+    registerAdSenseView(_webAdViewId!);
   }
 
   void _loadAd() {
@@ -190,7 +244,15 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    if (kIsWeb && _webAdViewId != null) {
+      return SizedBox(
+        width: double.infinity,
+        height: 90,
+        child: HtmlElementView(viewType: _webAdViewId!),
+      );
+    }
+    
+    if (!_isAdLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 
