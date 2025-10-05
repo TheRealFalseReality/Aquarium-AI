@@ -95,6 +95,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
   static const int _promotionDialogCooldownHours = 48;
   
+  // Store the random tank index to persist across rebuilds (e.g., theme changes)
+  int? _selectedTankIndex;
+  
   @override
   void initState() {
     super.initState();
@@ -102,6 +105,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (kIsWeb) {
       _checkShowPromotionDialog();
     }
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reset selected tank index when navigating back to this screen
+    // This will be null on first build, causing a new random selection
   }
 
   Future<void> _checkShowPromotionDialog() async {
@@ -348,60 +358,69 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   
   Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
     final cs = Theme.of(context).colorScheme;
-    final themeState = ref.watch(themeProviderNotifierProvider);
-    final isMaterialYou = themeState.useMaterialYou;
     
-    // Select a random tank if available
+    // Select a random tank if available, but persist selection across rebuilds
     Tank? randomTank;
     if (tankCount > 0) {
-      final randomIndex = Random().nextInt(tankCount);
-      randomTank = tankState.tanks[randomIndex];
+      // Initialize or validate the selected tank index
+      if (_selectedTankIndex == null || _selectedTankIndex! >= tankCount) {
+        _selectedTankIndex = Random().nextInt(tankCount);
+      }
+      randomTank = tankState.tanks[_selectedTankIndex!];
+    } else {
+      _selectedTankIndex = null;
     }
     
-    // Determine gradient colors based on tank type
+    // Determine gradient colors based on tank type (matching tank management style)
     List<Color> gradientColors;
     if (randomTank != null && randomTank.type == 'freshwater') {
       // Freshwater: blue/cyan gradient
       gradientColors = [
-        Colors.blue.shade300.withOpacity(0.3),
-        Colors.cyan.shade300.withOpacity(0.3),
+        Colors.blue.shade400.withOpacity(0.15),
+        Colors.cyan.shade300.withOpacity(0.15),
+        cs.surfaceContainerHighest.withOpacity(0.5),
       ];
     } else if (randomTank != null) {
       // Saltwater/Marine: indigo/purple gradient
       gradientColors = [
-        Colors.indigo.shade300.withOpacity(0.3),
-        Colors.purple.shade300.withOpacity(0.3),
+        Colors.indigo.shade400.withOpacity(0.15),
+        Colors.purple.shade300.withOpacity(0.15),
+        cs.surfaceContainerHighest.withOpacity(0.5),
       ];
     } else {
       // No tank: default gradient
       gradientColors = [
         cs.secondary.withOpacity(0.3),
-        cs.primaryContainer.withOpacity(0.3),
+        cs.primaryContainer.withOpacity(0.8),
       ];
     }
     
     return AnimatedFeatureCard(
       delay: const Duration(milliseconds: 600),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: isMaterialYou ? 5 : 3,
-        shadowColor: cs.shadow.withOpacity(0.3),
-        color: isMaterialYou ? cs.surface : null,
-        child: Container(
-          decoration: isMaterialYou ? BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: cs.outlineVariant.withOpacity(0.4),
-              width: 1,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            gradient: LinearGradient(
-              colors: gradientColors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ) : null,
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
           child: InkWell(
-            onTap: () {
+            onTap: () async {
               AnalyticsService.logFeatureUsed(
                 featureName: 'my_tanks',
                 parameters: {
@@ -409,7 +428,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   'route': '/tank-management',
                 },
               );
-              Navigator.pushNamed(context, '/tank-management');
+              // Reset tank selection when navigating away
+              await Navigator.pushNamed(context, '/tank-management');
+              // After returning, reset the index so a new random tank is selected
+              if (mounted) {
+                setState(() {
+                  _selectedTankIndex = null;
+                });
+              }
             },
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -435,7 +461,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               'My Tanks',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: isMaterialYou ? cs.onSurface : cs.primary,
+                                    color: cs.onSurface,
                                   ),
                             ),
                             const SizedBox(height: 4),
@@ -444,7 +470,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                   ? 'No tanks yet' 
                                   : '$tankCount ${tankCount == 1 ? 'tank' : 'tanks'}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: isMaterialYou ? cs.onSurfaceVariant : null,
+                                color: cs.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -452,7 +478,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: isMaterialYou ? cs.onSurface : cs.primary,
+                        color: cs.onSurface,
                         size: 20,
                       ),
                     ],
@@ -464,7 +490,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     Text(
                       'Create and manage your custom aquariums with inhabitants. Track compatibility, get personalized stocking recommendations, and maintain optimal conditions for your aquatic community.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isMaterialYou ? cs.onSurfaceVariant : null,
+                        color: cs.onSurfaceVariant,
                         height: 1.5,
                       ),
                     ),
@@ -483,7 +509,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                   ] else if (randomTank != null) ...[
-                    _buildTankPreview(context, randomTank, fishData, isMaterialYou, cs),
+                    _buildTankPreview(context, randomTank, cs),
                   ],
                 ],
               ),
@@ -494,12 +520,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
   
-  Widget _buildTankPreview(BuildContext context, Tank tank, Map<String, List<dynamic>>? fishData, bool isMaterialYou, ColorScheme cs) {
-    // Calculate harmony score if possible
-    double? harmonyScore;
-    if (tank.inhabitants.isNotEmpty && fishData != null) {
-      harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData.cast<String, List<Fish>>());
-    }
+  Widget _buildTankPreview(BuildContext context, Tank tank, ColorScheme cs) {
+    // Use cached harmony score from tank object
+    final harmonyScore = tank.harmonyScore;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,7 +537,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     tank.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isMaterialYou ? cs.onSurface : cs.primary,
+                          color: cs.onSurface,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -523,7 +546,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   Text(
                     tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isMaterialYou ? cs.onSurfaceVariant : null,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -542,7 +565,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       : '${tank.sizeLiters!.toStringAsFixed(0)} L',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isMaterialYou ? cs.onSurface : null,
+                    color: cs.onSurface,
                   ),
                 ),
               ),
@@ -555,13 +578,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               Icon(
                 Icons.pets,
                 size: 16,
-                color: isMaterialYou ? cs.onSurfaceVariant : cs.primary,
+                color: cs.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
               Text(
                 '${tank.inhabitants.length} ${tank.inhabitants.length == 1 ? 'inhabitant' : 'inhabitants'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isMaterialYou ? cs.onSurfaceVariant : null,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               if (harmonyScore != null) ...[
@@ -603,7 +626,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           Text(
             'No inhabitants yet',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isMaterialYou ? cs.onSurfaceVariant : null,
+              color: cs.onSurfaceVariant,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -613,7 +636,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           Text(
             tank.notes!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isMaterialYou ? cs.onSurfaceVariant : null,
+              color: cs.onSurfaceVariant,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
