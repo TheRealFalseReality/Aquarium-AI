@@ -6,6 +6,7 @@ import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../main_layout.dart';
+import '../services/analytics_service.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -59,6 +60,21 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       updatedAt: DateTime.now(),
     );
     ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    // Log parameter deletion
+    AnalyticsService.logFeatureUsed(
+      featureName: 'parameter_deleted',
+      parameters: {
+        'parameter_type': parameter.parameterType,
+        'tank_type': currentTank.type,
+        'remaining_parameters': updatedParameters.length,
+      },
+    );
+    
+    AnalyticsService.logTankAction(
+      action: 'parameter_deleted',
+      tankType: currentTank.type,
+    );
   }
 
   Map<String, List<WaterParameter>> _groupParametersByType(Tank tank) {
@@ -747,8 +763,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   void _saveParameter() {
     if (_formKey.currentState!.validate()) {
       final WaterParameter parameter;
+      final isEditing = widget.existingParameter != null;
       
-      if (widget.existingParameter != null) {
+      if (isEditing) {
         // Update existing parameter
         parameter = widget.existingParameter!.copyWith(
           parameterType: _selectedParameter,
@@ -771,6 +788,18 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         );
         
         ref.read(tankProvider.notifier).updateTank(updatedTank);
+        
+        // Log parameter edit event
+        AnalyticsService.logFeatureUsed(
+          featureName: 'parameter_edited',
+          parameters: {
+            'parameter_type': _selectedParameter,
+            'tank_type': widget.tank.type,
+            'value': parameter.value,
+            'unit': _selectedUnit,
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
+          },
+        );
       } else {
         // Create new parameter
         parameter = WaterParameter.create(
@@ -790,7 +819,26 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         );
 
         ref.read(tankProvider.notifier).updateTank(updatedTank);
+        
+        // Log parameter add event
+        AnalyticsService.logFeatureUsed(
+          featureName: 'parameter_added',
+          parameters: {
+            'parameter_type': _selectedParameter,
+            'tank_type': widget.tank.type,
+            'value': parameter.value,
+            'unit': _selectedUnit,
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
+            'total_parameters': updatedParameters.length,
+          },
+        );
       }
+      
+      // Log general parameter action for analytics
+      AnalyticsService.logTankAction(
+        action: isEditing ? 'parameter_updated' : 'parameter_created',
+        tankType: widget.tank.type,
+      );
       
       Navigator.pop(context);
     }
