@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 
+import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -478,7 +479,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Calculate harmony score if possible
     double? harmonyScore;
     if (tank.inhabitants.isNotEmpty && fishData != null) {
-      harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData);
+      harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(tank, fishData.cast<String, List<Fish>>());
     }
     
     return Column(
@@ -539,7 +540,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                '${tank.inhabitants.length} ${tank.inhabitants.length == 1 ? 'species' : 'species'}',
+                '${tank.inhabitants.length} ${tank.inhabitants.length == 1 ? 'inhabitant' : 'inhabitants'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.9) : null,
                 ),
