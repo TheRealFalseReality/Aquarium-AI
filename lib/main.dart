@@ -363,6 +363,7 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/fish-editor':
                 page = const FishCompatibilityEditorScreen();
+                screenName = 'fish_compatibility_editor_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();

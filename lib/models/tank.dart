@@ -1,4 +1,52 @@
 import 'package:uuid/uuid.dart';
+import 'water_parameter.dart';
+
+class TankPhoto {
+  final String id;
+  final String? imageUrl; // User-provided image URL
+  final String? imagePath; // User-provided image file path (for local images)
+  final DateTime dateTaken; // Date when photo was taken
+
+  TankPhoto({
+    required this.id,
+    this.imageUrl,
+    this.imagePath,
+    required this.dateTaken,
+  });
+
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
+    return {
+      'id': id,
+      'imageUrl': imageUrl,
+      // Exclude imagePath from backup to prevent restore errors
+      if (includeLocalPaths && imagePath != null) 'imagePath': imagePath,
+      'dateTaken': dateTaken.toIso8601String(),
+    };
+  }
+
+  factory TankPhoto.fromJson(Map<String, dynamic> json) {
+    return TankPhoto(
+      id: json['id'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      imagePath: json['imagePath'] as String?,
+      dateTaken: DateTime.parse(json['dateTaken'] as String),
+    );
+  }
+
+  TankPhoto copyWith({
+    String? id,
+    String? imageUrl,
+    String? imagePath,
+    DateTime? dateTaken,
+  }) {
+    return TankPhoto(
+      id: id ?? this.id,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imagePath: imagePath ?? this.imagePath,
+      dateTaken: dateTaken ?? this.dateTaken,
+    );
+  }
+}
 
 class TankInhabitant {
   final String id;
@@ -7,6 +55,7 @@ class TankInhabitant {
   final int quantity;
   final String? customImageUrl; // User-provided image URL
   final String? customImagePath; // User-provided image file path (for local images)
+  final DateTime? dateAdded; // Date when inhabitant was added to tank
 
   TankInhabitant({
     required this.id,
@@ -15,16 +64,19 @@ class TankInhabitant {
     required this.quantity,
     this.customImageUrl,
     this.customImagePath,
+    this.dateAdded,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
     return {
       'id': id,
       'customName': customName,
       'fishUnit': fishUnit,
       'quantity': quantity,
       'customImageUrl': customImageUrl,
-      'customImagePath': customImagePath,
+      // Exclude customImagePath from backup to prevent restore errors
+      if (includeLocalPaths && customImagePath != null) 'customImagePath': customImagePath,
+      'dateAdded': dateAdded?.toIso8601String(),
     };
   }
 
@@ -36,6 +88,9 @@ class TankInhabitant {
       quantity: json['quantity'] as int,
       customImageUrl: json['customImageUrl'] as String?,
       customImagePath: json['customImagePath'] as String?,
+      dateAdded: json['dateAdded'] != null 
+          ? DateTime.parse(json['dateAdded'] as String)
+          : null,
     );
   }
 
@@ -46,6 +101,7 @@ class TankInhabitant {
     int? quantity,
     String? customImageUrl,
     String? customImagePath,
+    DateTime? dateAdded,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
@@ -54,6 +110,7 @@ class TankInhabitant {
       quantity: quantity ?? this.quantity,
       customImageUrl: customImageUrl ?? this.customImageUrl,
       customImagePath: customImagePath ?? this.customImagePath,
+      dateAdded: dateAdded ?? this.dateAdded,
     );
   }
 }
@@ -67,8 +124,14 @@ class Tank {
   final double? sizeLiters;  // Tank size in liters
   final String? notes; // User notes about the tank
   final double? harmonyScore; // Cached harmony score (0.0 to 1.0)
+  final String? calculationBreakdown; // Cached calculation breakdown string
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<TankPhoto> photos; // Photos of the tank (not fish)
+  final String? customBackgroundPhotoId; // ID of photo to use as card background
+  final String? customIconPhotoId; // ID of photo to use as tank icon
+  final int? customIconCodePoint; // Custom icon code point for tank card
+  final List<WaterParameter> waterParameters; // Water parameter logs
 
   Tank({
     required this.id,
@@ -79,9 +142,16 @@ class Tank {
     this.sizeLiters,
     this.notes,
     this.harmonyScore,
+    this.calculationBreakdown,
     required this.createdAt,
     required this.updatedAt,
-  });
+    List<TankPhoto>? photos,
+    this.customBackgroundPhotoId,
+    this.customIconPhotoId,
+    this.customIconCodePoint,
+    List<WaterParameter>? waterParameters,
+  }) : photos = photos ?? [],
+       waterParameters = waterParameters ?? [];
 
   factory Tank.create({
     required String name,
@@ -91,7 +161,13 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    String? calculationBreakdown,
     DateTime? createdAt,
+    List<TankPhoto>? photos,
+    String? customBackgroundPhotoId,
+    String? customIconPhotoId,
+    int? customIconCodePoint,
+    List<WaterParameter>? waterParameters,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -103,23 +179,35 @@ class Tank {
       sizeLiters: sizeLiters,
       notes: notes,
       harmonyScore: harmonyScore,
+      calculationBreakdown: calculationBreakdown,
       createdAt: createdAt ?? now,
       updatedAt: now,
+      photos: photos,
+      customBackgroundPhotoId: customBackgroundPhotoId,
+      customIconPhotoId: customIconPhotoId,
+      customIconCodePoint: customIconCodePoint,
+      waterParameters: waterParameters,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
     return {
       'id': id,
       'name': name,
       'type': type,
-      'inhabitants': inhabitants.map((i) => i.toJson()).toList(),
+      'inhabitants': inhabitants.map((i) => i.toJson(includeLocalPaths: includeLocalPaths)).toList(),
       'sizeGallons': sizeGallons,
       'sizeLiters': sizeLiters,
       'notes': notes,
       'harmonyScore': harmonyScore,
+      'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'photos': photos.map((p) => p.toJson(includeLocalPaths: includeLocalPaths)).toList(),
+      'customBackgroundPhotoId': customBackgroundPhotoId,
+      'customIconPhotoId': customIconPhotoId,
+      'customIconCodePoint': customIconCodePoint,
+      'waterParameters': waterParameters.map((wp) => wp.toJson()).toList(),
     };
   }
 
@@ -135,8 +223,18 @@ class Tank {
       sizeLiters: json['sizeLiters']?.toDouble(),
       notes: json['notes'] as String?,
       harmonyScore: json['harmonyScore']?.toDouble(),
+      calculationBreakdown: json['calculationBreakdown'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      photos: (json['photos'] as List?)
+          ?.map((p) => TankPhoto.fromJson(p))
+          .toList() ?? [],
+      customBackgroundPhotoId: json['customBackgroundPhotoId'] as String?,
+      customIconPhotoId: json['customIconPhotoId'] as String?,
+      customIconCodePoint: json['customIconCodePoint'] as int?,
+      waterParameters: (json['waterParameters'] as List?)
+          ?.map((wp) => WaterParameter.fromJson(wp))
+          .toList() ?? [],
     );
   }
 
@@ -149,8 +247,17 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    String? calculationBreakdown,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<TankPhoto>? photos,
+    String? customBackgroundPhotoId,
+    String? customIconPhotoId,
+    int? customIconCodePoint,
+    List<WaterParameter>? waterParameters,
+    bool clearCustomBackgroundPhotoId = false,
+    bool clearCustomIconPhotoId = false,
+    bool clearCustomIconCodePoint = false,
   }) {
     return Tank(
       id: id ?? this.id,
@@ -161,8 +268,14 @@ class Tank {
       sizeLiters: sizeLiters ?? this.sizeLiters,
       notes: notes ?? this.notes,
       harmonyScore: harmonyScore ?? this.harmonyScore,
+      calculationBreakdown: calculationBreakdown ?? this.calculationBreakdown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      photos: photos ?? this.photos,
+      customBackgroundPhotoId: clearCustomBackgroundPhotoId ? null : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
+      customIconPhotoId: clearCustomIconPhotoId ? null : (customIconPhotoId ?? this.customIconPhotoId),
+      customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
+      waterParameters: waterParameters ?? this.waterParameters,
     );
   }
 }

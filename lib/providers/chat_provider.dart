@@ -14,6 +14,7 @@ import '../prompts/system_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
+import '../utils/json_utils.dart';
 
 // ====================== Cancellable Helper ======================
 class CancellableCompleter<T> {
@@ -90,20 +91,7 @@ final chatProvider =
   return ChatNotifier(modelState: modelState);
 });
 
-// ====================== Utility ======================
-String _extractJson(String text) {
-  final regExp = RegExp(r'```json\s*([\s\S]*?)\s*```');
-  final match = regExp.firstMatch(text);
-  if (match != null) {
-    return match.group(1) ?? text.trim();
-  }
-  try {
-     json.decode(text);
-     return text;
-  } catch(e) {
-    return text;
-  }
-}
+// ====================== Utility (now imported from json_utils.dart) ======================
 
 // ====================== Chat Notifier ======================
 class ChatNotifier extends StateNotifier<ChatState> {
@@ -265,7 +253,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
-      final decoded = json.decode(_extractJson(responseText));
+      final decoded = json.decode(extractJson(responseText));
       final result = WaterAnalysisResult.fromJson(decoded);
       state = ChatState(messages: [...state.messages, ChatMessage(text: 'Here is your water analysis:', isUser: false, analysisResult: result)], isLoading: false);
       return result;
@@ -282,7 +270,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final prompt = buildAutomationScriptPrompt(description);
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
-      final decoded = json.decode(_extractJson(responseText));
+      final decoded = json.decode(extractJson(responseText));
       final script = AutomationScript.fromJson(decoded);
       state = ChatState(messages: [...state.messages, ChatMessage(text: 'Here is your automation script:', isUser: false, automationScript: script)], isLoading: false);
       return script;
@@ -304,7 +292,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final originalMessage = 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
     try {
       final responseText = await _generateContentWithImage(prompt, imageBytes, mimeType);
-      final parsed = PhotoAnalysisResult.tryParseJson(_extractJson(responseText));
+      final parsed = PhotoAnalysisResult.tryParseJson(extractJson(responseText));
       if (parsed == null) throw const FormatException('Malformed JSON from AI photo analysis.');
       _lastPhotoBytes = imageBytes;
       _lastPhotoNote = userNote;

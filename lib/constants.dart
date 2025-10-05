@@ -1,6 +1,6 @@
 // Default model constants
-const String geminiModelDefault = 'gemini-2.5-flash-lite';
-const String geminiImageModelDefault = 'gemini-2.5-flash';
+const String geminiModelDefault = 'gemini-flash-lite-latest';
+const String geminiImageModelDefault = 'gemini-flash-latest';
 const String openAIModelDefault = 'gpt-4o';
 const String openAIImageModelDefault = 'gpt-4-vision-preview';
 const String groqModelDefault = 'llama-3.1-8b-instant';
@@ -21,3 +21,7 @@ const String admobNativeAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/398662451
 // Real AdMob IDs
 const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/8630162735';
 const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
+
+// AdSense constants
+const String adSenseAppId = 'ca-pub-5701077439648731';
+const String adSenseAdUnitId = '9994371406';

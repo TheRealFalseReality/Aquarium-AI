@@ -66,6 +66,131 @@ class FishCompatibilityScreenState
     });
   }
 
+  List<Widget> _buildFishGridWithAds(FishCompatibilityState providerState) {
+    // Configuration for ad placement
+    const int itemsBeforeFirstAd = 6; // Show ad after first 6 fish
+    const int itemsBetweenAds = 8; // Show ad every 8 fish thereafter
+    
+    List<Widget> slivers = [];
+    int fishIndex = 0;
+    final int totalFish = _filteredFishList.length;
+    
+    while (fishIndex < totalFish) {
+      // Determine how many fish to show before the next ad
+      int fishToShow;
+      bool shouldShowAd = false;
+      
+      if (fishIndex == 0) {
+        // First batch of fish
+        fishToShow = itemsBeforeFirstAd.clamp(0, totalFish - fishIndex);
+        shouldShowAd = totalFish > itemsBeforeFirstAd;
+      } else {
+        // Subsequent batches
+        fishToShow = itemsBetweenAds.clamp(0, totalFish - fishIndex);
+        shouldShowAd = fishIndex + fishToShow < totalFish;
+      }
+      
+      // Capture the starting index for this section to avoid issues with list changes
+      final int startIndex = fishIndex;
+      
+      // Add a grid of fish cards
+      slivers.add(
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            startIndex == 0 ? 16 : 0,
+            16,
+            0,
+          ),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 210,
+              childAspectRatio: 3 / 4,
+              crossAxisSpacing: 18,
+              mainAxisSpacing: 18,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final actualIndex = startIndex + index;
+                // Safety check to prevent index out of bounds
+                if (actualIndex >= _filteredFishList.length) {
+                  return const SizedBox.shrink();
+                }
+                final fish = _filteredFishList[actualIndex];
+                final isSelected = providerState.selectedFish.contains(fish);
+                return FishCard(
+                  fish: fish,
+                  isSelected: isSelected,
+                  category: _selectedCategory,
+                );
+              },
+              childCount: fishToShow,
+            ),
+          ),
+        ),
+      );
+      
+      fishIndex += fishToShow;
+      
+      // Add native ad if needed
+      if (shouldShowAd) {
+        slivers.add(
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+            sliver: SliverToBoxAdapter(
+              child: _buildNativeAdCard(),
+            ),
+          ),
+        );
+      }
+    }
+    
+    // Add bottom padding to last sliver
+    if (slivers.isNotEmpty) {
+      slivers.add(
+        const SliverPadding(
+          padding: EdgeInsets.only(bottom: 24),
+        ),
+      );
+    }
+    
+    return slivers;
+  }
+
+  Widget _buildNativeAdCard() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate the width for 2 fish cards plus spacing
+        // maxCrossAxisExtent is 210, spacing is 18
+        // For 2 cards: (210 * 2) + 18 = 438
+        // But we need to be responsive, so we calculate based on available width
+        final availableWidth = constraints.maxWidth;
+        
+        // Calculate approximately how many columns would fit
+        final columns = (availableWidth / (210 + 18)).floor();
+        
+        // Ad should span 2 columns if possible, otherwise full width
+        final adWidth = columns >= 2 
+            ? (2 * 210.0 + 18.0).clamp(0.0, availableWidth)
+            : availableWidth;
+        
+        return Center(
+          child: Container(
+            width: adWidth,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            ),
+            child: const ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              child: NativeAdWidget(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // Renamed for clarity
   void _filterFishList() {
     _updateAndFilterFishList();
@@ -281,51 +406,27 @@ class FishCompatibilityScreenState
                   SliverToBoxAdapter(
                     child: _buildCategorySelector(notifier),
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 210,
-                        childAspectRatio: 3 / 4,
-                        crossAxisSpacing: 18,
-                        mainAxisSpacing: 18,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final fish = _filteredFishList[index];
-                          final isSelected =
-                              providerState.selectedFish.contains(fish);
-                          return FishCard(
-                            fish: fish,
-                            isSelected: isSelected,
-                            category: _selectedCategory,
-                          );
-                        },
-                        childCount: _filteredFishList.length,
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                      child: BannerAdWidget(),
-                    ),
-                  ),
+                  ..._buildFishGridWithAds(providerState),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(24, 0, 24,
                           bottomBarHeight + 80),
-                      child: Text(
-                        'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.7),
-                              fontStyle: FontStyle.italic,
-                            ),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          const BannerAdWidget(),
+                          const SizedBox(height: 16),
+                          Text(
+                            'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -457,7 +558,7 @@ class FishCompatibilityScreenState
           ),
           ModernSelectableChip(
             label: 'Saltwater',
-            emoji: '🐠',
+            emoji: '🪼',
             selected: _selectedCategory == 'marine',
             onTap: () {
               setState(() => _selectedCategory = 'marine');

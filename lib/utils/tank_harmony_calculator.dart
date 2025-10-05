@@ -102,13 +102,15 @@ class TankHarmonyCalculator {
     if (score >= 0.8) return 'Good';
     if (score >= 0.6) return 'Fair';
     if (score >= 0.4) return 'Caution';
+    if (score >= 0.2) return 'Warning';
     return 'Poor';
   }
 
   /// Get a color for the harmony score display
   static String getHarmonyColorHex(double score) {
     if (score >= 0.8) return '#4CAF50'; // Green
-    if (score >= 0.6) return '#FF9800'; // Orange
+    if (score >= 0.6) return '#ffff00'; // Yellow
+    if (score >= 0.4) return '#FF9800'; // Orange
     return '#F44336'; // Red
   }
 
