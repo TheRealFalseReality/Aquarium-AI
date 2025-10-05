@@ -307,8 +307,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                   label: typeName,
                   selected: selected,
                   dense: true,
-                  selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                  selectedTextColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  selectedColor: Theme.of(context).colorScheme.tertiary,
+                  selectedTextColor: Theme.of(context).colorScheme.onTertiary,
                   onTap: () {
                     setState(() {
                       _cylinderType = typeName;

@@ -206,6 +206,7 @@ class SalinityConverterState extends State<SalinityConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+          const BannerAdWidget(),
         _buildSubSectionTitle(context, 'Convert From'),
         Wrap(
           alignment: WrapAlignment.center,
