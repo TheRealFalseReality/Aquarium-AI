@@ -391,14 +391,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       gradientColors = [
         Colors.blue.shade400.withOpacity(0.15),
         Colors.cyan.shade300.withOpacity(0.15),
-        cs.surfaceContainerHighest.withOpacity(0.5),
+        cs.primaryContainer.withOpacity(0.5),
       ];
     } else if (randomTank != null) {
       // Saltwater/Marine: indigo/purple gradient
       gradientColors = [
         Colors.indigo.shade400.withOpacity(0.15),
         Colors.purple.shade300.withOpacity(0.15),
-        cs.surfaceContainerHighest.withOpacity(0.5),
+        cs.secondaryContainer.withOpacity(0.5),
       ];
     } else {
       // No tank: default gradient

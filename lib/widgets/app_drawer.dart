@@ -120,12 +120,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                 ? [
                                     Colors.blue.shade400.withOpacity(0.15),
                                     Colors.cyan.shade300.withOpacity(0.15),
-                                    Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
                                   ]
                                 : [
                                     Colors.indigo.shade400.withOpacity(0.15),
                                     Colors.purple.shade300.withOpacity(0.15),
-                                    Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
                                   ])
                             : [
                                 Theme.of(context).colorScheme.secondary.withOpacity(0.1),
