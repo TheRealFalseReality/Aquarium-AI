@@ -1729,6 +1729,78 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
+                        ] else ...[
+                          // Empty state - no parameters logged yet
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.science_outlined, size: 18, color: cs.onSurfaceVariant),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Parameters',
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Icon(
+                                    Icons.water_drop_outlined,
+                                    size: 48,
+                                    color: cs.onSurfaceVariant.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No parameters logged yet',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Start tracking your water parameters to monitor your aquarium\'s health',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant.withOpacity(0.7),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  FilledButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => ParameterLoggerScreen(tank: tank),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add, size: 18),
+                                    label: const Text('Add Parameter'),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                         ],
                         
                         // Inhabitants section - now collapsable

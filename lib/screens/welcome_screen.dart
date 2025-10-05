@@ -224,7 +224,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
     final List<FeatureInfo> features = [
       FeatureInfo(
-        icon: '🐠',
+        icon: '🐡',
         title: 'AI Compatibility Tool',
         description:
             'Get detailed compatibility reports with care guides and recommendations.',
@@ -475,7 +475,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           color: cs.primary.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('🏠', style: TextStyle(fontSize: 32)),
+                        child: const Text('🐠', style: TextStyle(fontSize: 32)),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -545,6 +545,115 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
   
+  // List of available tank icons (same as in tank_management_screen.dart)
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pets,
+    Icons.grass,
+    Icons.eco,
+    Icons.park,
+    Icons.nature,
+    Icons.spa,
+    Icons.local_florist,
+    Icons.filter_vintage,
+  ];
+
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return _tankIcons.firstWhere((icon) => icon.codePoint == codePoint);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Widget _buildTankIcon(Tank tank, ColorScheme cs) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+            ? LinearGradient(
+                colors: tank.type == 'freshwater'
+                    ? [Colors.blue.shade300, Colors.cyan.shade400]
+                    : [Colors.indigo.shade300, Colors.purple.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+            ? Colors.grey.shade300
+            : null,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: (tank.type == 'freshwater' 
+                ? Colors.blue 
+                : Colors.purple).withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: tank.customIconCodePoint != null
+          ? Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: tank.type == 'freshwater'
+                      ? [Colors.blue.shade300, Colors.cyan.shade400]
+                      : [Colors.indigo.shade300, Colors.purple.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                size: 20,
+                color: Colors.white,
+              ),
+            )
+          : (tank.customIconPhotoId != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: () {
+                    try {
+                      final photo = tank.photos.firstWhere(
+                        (p) => p.id == tank.customIconPhotoId,
+                      );
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      return imageUrl != null
+                          ? (imageUrl.startsWith('http')
+                              ? Image.network(imageUrl, fit: BoxFit.cover)
+                              : Image.file(File(imageUrl), fit: BoxFit.cover))
+                          : Icon(
+                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                              size: 20,
+                              color: Colors.white,
+                            );
+                    } catch (e) {
+                      return Icon(
+                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        size: 20,
+                        color: Colors.white,
+                      );
+                    }
+                  }(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                )),
+    );
+  }
+
   Widget _buildTankPreview(BuildContext context, Tank tank, ColorScheme cs) {
     // Use cached harmony score from tank object
     final harmonyScore = tank.harmonyScore;
@@ -554,6 +663,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       children: [
         Row(
           children: [
+            // Tank icon
+            _buildTankIcon(tank, cs),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

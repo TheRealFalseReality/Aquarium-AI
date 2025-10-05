@@ -562,7 +562,7 @@ class FishCompatibilityScreenState
           ),
           ModernSelectableChip(
             label: 'Saltwater',
-            emoji: '🐠',
+            emoji: '🪼',
             selected: _selectedCategory == 'marine',
             onTap: () {
               setState(() => _selectedCategory = 'marine');

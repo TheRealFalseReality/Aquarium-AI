@@ -799,7 +799,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ),
                       ModernSelectableChip(
                         label: 'Saltwater',
-                        emoji: '🐠',
+                        emoji: '🪼',
                         selected: _selectedCategory == 'marine',
                         onTap: () => _onCategoryChanged('marine'),
                       ),
