@@ -518,54 +518,60 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return const Icon(Icons.water, size: 40);
     }
 
-    return SizedBox(
-      width: 48,
-      height: 76,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          _buildTankIcon(tank, size: 40),
-          const SizedBox(height: 16),
-          if (tank.inhabitants.isNotEmpty)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.pets,
-                  size: 8,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildTankIcon(tank, size: 40),
+        const SizedBox(height: 4),
+        if (tank.inhabitants.isNotEmpty)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.pets,
+                size: 8,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onTertiaryContainer
+                    .withOpacity(0.6),
+              ),
+              const SizedBox(width: 1),
+              Text(
+                '${_getTotalInhabitantCount(tank.inhabitants)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onTertiaryContainer
+                      .withOpacity(0.7),
                 ),
-                const SizedBox(width: 1),
-                Text(
-                  '${_getTotalInhabitantCount(tank.inhabitants)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
-                  ),
+              ),
+              const SizedBox(width: 3),
+              Icon(
+                Icons.category,
+                size: 8,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onTertiaryContainer
+                    .withOpacity(0.6),
+              ),
+              const SizedBox(width: 1),
+              Text(
+                '${_groupInhabitantsByFishType(tank.inhabitants).length}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onTertiaryContainer
+                      .withOpacity(0.7),
                 ),
-                const SizedBox(width: 3),
-                Icon(
-                  Icons.category,
-                  size: 8,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
-                ),
-                const SizedBox(width: 1),
-                Text(
-                  '${_groupInhabitantsByFishType(tank.inhabitants).length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 
@@ -594,8 +600,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final imageUrl = recentPhoto.imageUrl ?? recentPhoto.imagePath;
     
     return Container(
-      width: 32,
-      height: 32,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
