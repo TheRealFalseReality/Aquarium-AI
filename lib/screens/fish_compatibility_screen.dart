@@ -177,10 +177,6 @@ class FishCompatibilityScreenState
         return Center(
           child: Container(
             width: adWidth,
-            constraints: const BoxConstraints(
-              minHeight: 250,
-              maxHeight: 350,
-            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),

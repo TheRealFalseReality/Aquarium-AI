@@ -494,10 +494,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Widget _buildNativeAdCard(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(
-        minHeight: 250,
-        maxHeight: 350,
-      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
