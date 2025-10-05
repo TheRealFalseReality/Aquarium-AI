@@ -139,10 +139,8 @@ class FishCompatibilityScreenState
     
     // Add bottom padding to last sliver
     if (slivers.isNotEmpty) {
-      final double bottomBarHeight =
-          providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
       slivers.add(
-        SliverPadding(
+        const SliverPadding(
           padding: EdgeInsets.only(bottom: 24),
         ),
       );
