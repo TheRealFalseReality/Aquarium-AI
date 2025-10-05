@@ -519,14 +519,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     }
 
     return SizedBox(
-      width: 48,
+      width: 40,
       height: 56,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const SizedBox(height: 4),
-          _buildTankIcon(tank, size: 36),
+          _buildTankIcon(tank, size: 40),
+          const SizedBox(height: 16),
           if (tank.inhabitants.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 3),
