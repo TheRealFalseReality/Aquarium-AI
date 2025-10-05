@@ -515,34 +515,72 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return const Icon(Icons.water, size: 36);
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTankIcon(tank),
-        if (tank.inhabitants.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.pets,
-                size: 10,
-                color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
-              ),
-              const SizedBox(width: 2),
-              Text(
-                '${_getTotalInhabitantCount(tank.inhabitants)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+    return SizedBox(
+      width: 56,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildTankIcon(tank),
+          if (tank.inhabitants.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.pets,
+                  size: 9,
+                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 2),
+                Text(
+                  '${_getTotalInhabitantCount(tank.inhabitants)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 1),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.category,
+                  size: 9,
+                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '${_groupInhabitantsByFishType(tank.inhabitants).length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
-      ],
+      ),
     );
+  }
+
+  Map<String, List<dynamic>> _groupInhabitantsByFishType(List<dynamic> inhabitants) {
+    final grouped = <String, List<dynamic>>{};
+    for (final inhabitant in inhabitants) {
+      final fishType = inhabitant.fishUnit as String? ?? 'unknown';
+      if (!grouped.containsKey(fishType)) {
+        grouped[fishType] = [];
+      }
+      grouped[fishType]!.add(inhabitant);
+    }
+    return grouped;
   }
 
   Widget _buildThumbnail(Tank tank) {
