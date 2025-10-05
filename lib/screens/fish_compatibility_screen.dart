@@ -73,28 +73,32 @@ class FishCompatibilityScreenState
     
     List<Widget> slivers = [];
     int fishIndex = 0;
+    final int totalFish = _filteredFishList.length;
     
-    while (fishIndex < _filteredFishList.length) {
+    while (fishIndex < totalFish) {
       // Determine how many fish to show before the next ad
       int fishToShow;
       bool shouldShowAd = false;
       
       if (fishIndex == 0) {
         // First batch of fish
-        fishToShow = itemsBeforeFirstAd.clamp(0, _filteredFishList.length - fishIndex);
-        shouldShowAd = _filteredFishList.length > itemsBeforeFirstAd;
+        fishToShow = itemsBeforeFirstAd.clamp(0, totalFish - fishIndex);
+        shouldShowAd = totalFish > itemsBeforeFirstAd;
       } else {
         // Subsequent batches
-        fishToShow = itemsBetweenAds.clamp(0, _filteredFishList.length - fishIndex);
-        shouldShowAd = fishIndex + fishToShow < _filteredFishList.length;
+        fishToShow = itemsBetweenAds.clamp(0, totalFish - fishIndex);
+        shouldShowAd = fishIndex + fishToShow < totalFish;
       }
+      
+      // Capture the starting index for this section to avoid issues with list changes
+      final int startIndex = fishIndex;
       
       // Add a grid of fish cards
       slivers.add(
         SliverPadding(
           padding: EdgeInsets.fromLTRB(
             16,
-            fishIndex == 0 ? 16 : 0,
+            startIndex == 0 ? 16 : 0,
             16,
             0,
           ),
@@ -107,7 +111,11 @@ class FishCompatibilityScreenState
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final actualIndex = fishIndex + index;
+                final actualIndex = startIndex + index;
+                // Safety check to prevent index out of bounds
+                if (actualIndex >= _filteredFishList.length) {
+                  return const SizedBox.shrink();
+                }
                 final fish = _filteredFishList[actualIndex];
                 final isSelected = providerState.selectedFish.contains(fish);
                 return FishCard(
