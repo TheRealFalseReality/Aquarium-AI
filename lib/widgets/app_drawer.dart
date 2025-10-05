@@ -189,12 +189,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                               ),
                             ),
                           ),
-                          if (randomTank != null && randomTank.photos.isNotEmpty)
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: _buildThumbnail(randomTank),
-                            ),
+                          // if (randomTank != null && randomTank.photos.isNotEmpty)
+                          //   Positioned(
+                          //     bottom: 8,
+                          //     right: 8,
+                          //     child: _buildThumbnail(randomTank),
+                          //   ),
                         ],
                       ),
                     ),
@@ -483,8 +483,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return Icon(Icons.water, size: size * 0.75);
     }
 
-    final iconSize = size * 0.42;
-    final padding = size * 0.21;
+    final iconSize = size * .75;
+    final padding = size * 0.1;
 
     return Container(
       width: size,
@@ -573,13 +573,13 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   Widget _buildTankIconWithCount(Tank? tank) {
     if (tank == null) {
-      return const Icon(Icons.water, size: 40);
+      return const Icon(Icons.water, size: 52);
     }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildTankIcon(tank, size: 40),
+        _buildTankIcon(tank, size: 52),
         const SizedBox(height: 4),
         if (tank.inhabitants.isNotEmpty)
           Row(
@@ -651,15 +651,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return const SizedBox.shrink();
     }
 
-    final recentPhoto = tank.photos.reduce((a, b) => 
+    final recentPhoto = tank.photos.reduce((a, b) =>
       a.dateTaken.isAfter(b.dateTaken) ? a : b
     );
 
     final imageUrl = recentPhoto.imageUrl ?? recentPhoto.imagePath;
-    
+
     return Container(
-      width: 56,
-      height: 56,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
