@@ -81,7 +81,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
       title: 'About',
       bottomNavigationBar: const AdBanner(),
       child: ListView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(12.0),
         children: <Widget>[
           // Header Section
           const SizedBox(height: 16),
