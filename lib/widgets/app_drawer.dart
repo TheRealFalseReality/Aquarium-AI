@@ -114,59 +114,41 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   child: Card(
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: ListTile(
-                      leading: _buildTankIcon(randomTank),
-                      title: Text(
-                        'My Tanks',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: tankCount == 0
-                          ? const Text('No tanks yet. Tap to add one!')
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total: $tankCount\n'
-                                  '${randomTank != null ? randomTank.name : ""}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                if (randomTank != null && randomTank.inhabitants.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.pets,
-                                        size: 12,
-                                        color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${_getTotalInhabitantCount(randomTank.inhabitants)} inhabitant${_getTotalInhabitantCount(randomTank.inhabitants) == 1 ? '' : 's'}',
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          fontSize: 11,
-                                          color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
-                                        ),
-                                      ),
+                    child: Stack(
+                      children: [
+                        ListTile(
+                          leading: _buildTankIconWithCount(randomTank),
+                          title: Text(
+                            'My Tanks',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: tankCount == 0
+                              ? const Text('No tanks yet. Tap to add one!')
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Total: $tankCount\n'
+                                      '${randomTank != null ? randomTank.name : ""}',
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    if (harmonyScoreWidget != null) ...[
+                                      const SizedBox(height: 4),
+                                      harmonyScoreWidget,
                                     ],
-                                  ),
-                                ],
-                                if (harmonyScoreWidget != null) ...[
-                                  const SizedBox(height: 4),
-                                  harmonyScoreWidget,
-                                ],
-                              ],
-                            ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (randomTank != null && randomTank.photos.isNotEmpty)
-                            _buildThumbnail(randomTank),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right),
-                        ],
-                      ),
-                      onTap: () => navigate('/tank-management'),
-                      isThreeLine: tankCount > 0,
+                                  ],
+                                ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => navigate('/tank-management'),
+                          isThreeLine: tankCount > 0,
+                        ),
+                        if (randomTank != null && randomTank.photos.isNotEmpty)
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: _buildThumbnail(randomTank),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -525,6 +507,41 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     color: Colors.white,
                   ),
                 )),
+    );
+  }
+
+  Widget _buildTankIconWithCount(Tank? tank) {
+    if (tank == null) {
+      return const Icon(Icons.water, size: 36);
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildTankIcon(tank),
+        if (tank.inhabitants.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.pets,
+                size: 10,
+                color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
+              ),
+              const SizedBox(width: 2),
+              Text(
+                '${_getTotalInhabitantCount(tank.inhabitants)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 
