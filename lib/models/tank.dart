@@ -14,11 +14,12 @@ class TankPhoto {
     required this.dateTaken,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
     return {
       'id': id,
       'imageUrl': imageUrl,
-      'imagePath': imagePath,
+      // Exclude imagePath from backup to prevent restore errors
+      if (includeLocalPaths && imagePath != null) 'imagePath': imagePath,
       'dateTaken': dateTaken.toIso8601String(),
     };
   }
@@ -66,14 +67,15 @@ class TankInhabitant {
     this.dateAdded,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
     return {
       'id': id,
       'customName': customName,
       'fishUnit': fishUnit,
       'quantity': quantity,
       'customImageUrl': customImageUrl,
-      'customImagePath': customImagePath,
+      // Exclude customImagePath from backup to prevent restore errors
+      if (includeLocalPaths && customImagePath != null) 'customImagePath': customImagePath,
       'dateAdded': dateAdded?.toIso8601String(),
     };
   }
@@ -188,12 +190,12 @@ class Tank {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
     return {
       'id': id,
       'name': name,
       'type': type,
-      'inhabitants': inhabitants.map((i) => i.toJson()).toList(),
+      'inhabitants': inhabitants.map((i) => i.toJson(includeLocalPaths: includeLocalPaths)).toList(),
       'sizeGallons': sizeGallons,
       'sizeLiters': sizeLiters,
       'notes': notes,
@@ -201,7 +203,7 @@ class Tank {
       'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      'photos': photos.map((p) => p.toJson()).toList(),
+      'photos': photos.map((p) => p.toJson(includeLocalPaths: includeLocalPaths)).toList(),
       'customBackgroundPhotoId': customBackgroundPhotoId,
       'customIconPhotoId': customIconPhotoId,
       'customIconCodePoint': customIconCodePoint,

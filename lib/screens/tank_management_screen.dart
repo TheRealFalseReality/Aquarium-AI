@@ -7,6 +7,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
+import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -1510,9 +1511,65 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           const SizedBox(height: 16),
                         ],
                         
-                        // Inhabitants section
+                        // Water Parameters section
+                        if (tank.waterParameters.isNotEmpty) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.science_outlined, size: 18, color: cs.onSurfaceVariant),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Parameters',
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      FilledButton.icon(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => ParameterLoggerScreen(tank: tank),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.edit, size: 16),
+                                        label: const Text('Manage'),
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: _buildLatestParameters(context, tank, cs),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        
+                        // Inhabitants section - now collapsable
                         Container(
-                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: cs.surfaceContainerHigh.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(12),
@@ -1521,23 +1578,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               width: 1,
                             ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.pets, size: 18, color: cs.onSurfaceVariant),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                          child: ExpansionTile(
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            leading: Icon(Icons.pets, size: 18, color: cs.onSurfaceVariant),
+                            title: Text(
+                              'Inhabitants (${_getTotalInhabitantCount(tank.inhabitants)})',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 12),
-                              
+                            ),
+                            initiallyExpanded: tank.inhabitants.length <= 3,
+                            children: [
                               if (tank.inhabitants.isEmpty)
                                 Text(
                                   'No inhabitants added yet.',
@@ -1882,7 +1934,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       return;
                     }
                     
-                    if (context.mounted && imageBytes != null) {
+                    if (context.mounted) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => PhotoAnalysisScreen(
@@ -2402,6 +2454,92 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return '${kilograms.toStringAsFixed(0)} kilograms';
     }
     return '';
+  }
+
+  Widget _buildLatestParameters(BuildContext context, Tank tank, ColorScheme cs) {
+    if (tank.waterParameters.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Group parameters by type and get latest for each
+    final latestByType = <String, WaterParameter>{};
+    for (var param in tank.waterParameters) {
+      if (!latestByType.containsKey(param.parameterType) ||
+          param.dateRecorded.isAfter(latestByType[param.parameterType]!.dateRecorded)) {
+        latestByType[param.parameterType] = param;
+      }
+    }
+
+    // Define parameter order and get labels/icons
+    final paramOrder = tank.type == 'marine'
+        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium']
+        : ['ammonia', 'nitrite', 'nitrate', 'phosphate'];
+    
+    final paramLabels = {
+      'ammonia': 'NH3',
+      'nitrite': 'NO2',
+      'nitrate': 'NO3',
+      'phosphate': 'PO4',
+      'salinity': 'Sal',
+      'calcium': 'Ca',
+      'magnesium': 'Mg',
+    };
+
+    final paramIcons = {
+      'ammonia': Icons.warning,
+      'nitrite': Icons.science,
+      'nitrate': Icons.analytics,
+      'phosphate': Icons.bubble_chart,
+      'salinity': Icons.water,
+      'calcium': Icons.diamond,
+      'magnesium': Icons.bolt,
+    };
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: paramOrder
+          .where((type) => latestByType.containsKey(type))
+          .map((type) {
+        final param = latestByType[type]!;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: cs.outline.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                paramIcons[type] ?? Icons.water_drop,
+                size: 14,
+                color: cs.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                paramLabels[type] ?? type,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${param.value.toStringAsFixed(param.value < 10 ? 1 : 0)}${param.unit ?? ''}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
   }
 
   Widget _buildHarmonyScoreChip(Tank tank) {
