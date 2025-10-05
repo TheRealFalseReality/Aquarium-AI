@@ -1,7 +1,6 @@
 // ignore_for_file: unused_element
 
 import 'dart:io';
-import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';

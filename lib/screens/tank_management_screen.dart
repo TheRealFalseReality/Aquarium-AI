@@ -447,7 +447,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Calculate actual tank index and whether this should be an ad
     int adjustedIndex = index - 1; // Subtract header
     int tanksSeen = 0;
-    int adsSeen = 0;
     
     // Determine position
     if (adjustedIndex < tanksBeforeFirstAd) {
@@ -465,7 +464,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     if (adjustedIndex > 0) {
       adjustedIndex -= 1; // Account for first ad
-      adsSeen = 1;
     }
     
     // Remaining items alternate between tank batches and ads
