@@ -111,94 +111,142 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               children: <Widget>[
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 180),
-                  child: Card(
-                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Stack(
-                      children: [
-                        ListTile(
-                          leading: _buildTankIconWithCount(randomTank),
-                          title: Text(
-                            'My Tanks',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: tankCount == 0
-                              ? const Text('No tanks yet. Tap to add one!')
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Total: $tankCount\n'
-                                      '${randomTank != null ? randomTank.name : ""}',
-                                      style: Theme.of(context).textTheme.bodySmall,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: randomTank != null
+                            ? (randomTank.type == 'freshwater'
+                                ? [
+                                    Colors.blue.shade400.withOpacity(0.15),
+                                    Colors.cyan.shade300.withOpacity(0.15),
+                                    Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                  ]
+                                : [
+                                    Colors.indigo.shade400.withOpacity(0.15),
+                                    Colors.purple.shade300.withOpacity(0.15),
+                                    Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                  ])
+                            : [
+                                Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                              ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Stack(
+                        children: [
+                          InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => navigate('/tank-management'),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              child: Row(
+                                children: [
+                                  _buildTankIconWithCount(randomTank),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'My Tanks',
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          tankCount == 0
+                                              ? 'No tanks yet. Tap to add one!'
+                                              : 'Total: $tankCount\n${randomTank != null ? randomTank.name : ""}',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        if (harmonyScoreWidget != null) ...[
+                                          const SizedBox(height: 6),
+                                          harmonyScoreWidget,
+                                        ],
+                                      ],
                                     ),
-                                    if (harmonyScoreWidget != null) ...[
-                                      const SizedBox(height: 4),
-                                      harmonyScoreWidget,
-                                    ],
-                                  ],
-                                ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => navigate('/tank-management'),
-                          isThreeLine: tankCount > 0,
-                        ),
-                        if (randomTank != null && randomTank.photos.isNotEmpty)
-                          Positioned(
-                            bottom: 8,
-                            right: 8,
-                            child: _buildThumbnail(randomTank),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                      ],
+                          if (randomTank != null && randomTank.photos.isNotEmpty)
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: _buildThumbnail(randomTank),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 250),
                   child: ListTile(
-                    leading: const Icon(Icons.calculate),
+                    leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
                     title: const Text('AI Compatibility Tool'),
                     subtitle:
-                        const Text('Check fish compatibility with an AI report.'),
+                        const Text('Get detailed compatibility reports with care guides and recommendations.'),
                     onTap: () => navigate('/compat-ai'),
                   ),
                 ),
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 200),
+                  delay: const Duration(milliseconds: 300),
                   child: ListTile(
-                    leading: const Icon(Icons.chat),
+                    leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
                     title: const Text('AI Chatbot'),
                     subtitle: const Text(
-                        'Ask questions, analyze parameters, and more.'),
+                        'Ask questions, analyze water parameters, and get expert advice.'),
                     onTap: () => navigate('/chatbot'),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 300),
-                  child: ListTile(
-                    leading: const Icon(Icons.auto_awesome),
-                    title: const Text('Stocking Assistant'),
-                    subtitle: const Text(
-                        'Get personalized stocking recommendations for your aquarium.'),
-                    onTap: () => navigate('/stocking'),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 300),
-                  child: ListTile(
-                    leading: const Icon(Icons.science),
-                    title: const Text('Aquarium Calculators'),
-                    subtitle:
-                        const Text('Essential tools for salinity, CO₂, and more.'),
-                    onTap: () => navigate('/calculators'),
                   ),
                 ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 350),
                   child: ListTile(
-                    leading: const Icon(Icons.view_in_ar),
-                    title: const Text('Tank Volume'),
+                    leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
+                    title: const Text('AI Stocking Assistant'),
+                    subtitle: const Text(
+                        'Get custom stocking plans to build a harmonious aquatic community.'),
+                    onTap: () => navigate('/stocking'),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 400),
+                  child: ListTile(
+                    leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
+                    title: const Text('Aquarium Calculators'),
                     subtitle:
-                        const Text('Calculate the volume of your aquarium.'),
+                        const Text('Essential tools for salinity, CO₂, alkalinity and more.'),
+                    onTap: () => navigate('/calculators'),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 450),
+                  child: ListTile(
+                    leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
+                    title: const Text('Tank Volume Calculator'),
+                    subtitle:
+                        const Text('Calculate volume and water weight for various tank shapes.'),
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
@@ -207,7 +255,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           ),
           const Divider(height: 1),
           AnimatedDrawerItem(
-            delay: const Duration(milliseconds: 400),
+            delay: const Duration(milliseconds: 500),
             child: _buildCollapsibleThemeMenu(),
           ),
           const Divider(height: 1),
@@ -366,7 +414,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       padding: EdgeInsets.fromLTRB(
           16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
-        delay: const Duration(milliseconds: 450),
+        delay: const Duration(milliseconds: 550),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
