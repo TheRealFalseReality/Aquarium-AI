@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
-import '../providers/fish_compatibility_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import 'gradient_text.dart';
@@ -40,10 +39,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         ? tankState.tanks[_randomTankIndex!]
         : null;
 
-    // Get fish data for harmony calculation
-    final fishCompatibilityState = ref.watch(fishCompatibilityProvider);
-    final fishData = fishCompatibilityState.fishData.value;
-
     void navigate(String routeName) {
       // Log navigation analytics
       final currentRoute = AnalyticsService.currentScreen;
@@ -63,10 +58,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       });
     }
 
-    // Build harmony score widget for random tank
+    // Build harmony score widget for random tank using cached harmony score
     Widget? harmonyScoreWidget;
-    if (randomTank != null && randomTank.inhabitants.isNotEmpty && fishData != null) {
-      final harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(randomTank, fishData);
+    if (randomTank != null && randomTank.inhabitants.isNotEmpty) {
+      final harmonyScore = randomTank.harmonyScore;
       if (harmonyScore != null) {
         final percentage = (harmonyScore * 100).toStringAsFixed(0);
         final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
