@@ -358,25 +358,44 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       randomTank = tankState.tanks[randomIndex];
     }
     
+    // Determine gradient colors based on tank type
+    List<Color> gradientColors;
+    if (randomTank != null && randomTank.type == 'freshwater') {
+      // Freshwater: blue/cyan gradient
+      gradientColors = [
+        Colors.blue.shade300.withOpacity(0.3),
+        Colors.cyan.shade300.withOpacity(0.3),
+      ];
+    } else if (randomTank != null) {
+      // Saltwater/Marine: indigo/purple gradient
+      gradientColors = [
+        Colors.indigo.shade300.withOpacity(0.3),
+        Colors.purple.shade300.withOpacity(0.3),
+      ];
+    } else {
+      // No tank: default gradient
+      gradientColors = [
+        cs.secondary.withOpacity(0.3),
+        cs.primaryContainer.withOpacity(0.3),
+      ];
+    }
+    
     return AnimatedFeatureCard(
       delay: const Duration(milliseconds: 600),
       child: Card(
         clipBehavior: Clip.antiAlias,
         elevation: isMaterialYou ? 5 : 3,
         shadowColor: cs.shadow.withOpacity(0.3),
-        color: isMaterialYou ? cs.primaryContainer : null,
+        color: isMaterialYou ? cs.surface : null,
         child: Container(
           decoration: isMaterialYou ? BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: cs.primary.withOpacity(0.5),
-              width: 2,
+              color: cs.outlineVariant.withOpacity(0.4),
+              width: 1,
             ),
             gradient: LinearGradient(
-              colors: [
-                cs.primary.withOpacity(0.15),
-                cs.secondary.withOpacity(0.15),
-              ],
+              colors: gradientColors,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -416,7 +435,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               'My Tanks',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: isMaterialYou ? cs.onPrimaryContainer : cs.primary,
+                                    color: isMaterialYou ? cs.onSurface : cs.primary,
                                   ),
                             ),
                             const SizedBox(height: 4),
@@ -425,7 +444,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                   ? 'No tanks yet' 
                                   : '$tankCount ${tankCount == 1 ? 'tank' : 'tanks'}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.8) : null,
+                                color: isMaterialYou ? cs.onSurfaceVariant : null,
                               ),
                             ),
                           ],
@@ -433,19 +452,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: isMaterialYou ? cs.onPrimaryContainer : cs.primary,
+                        color: isMaterialYou ? cs.onSurface : cs.primary,
                         size: 20,
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Divider(color: cs.onPrimaryContainer.withOpacity(0.3)),
+                  Divider(color: cs.onSurfaceVariant.withOpacity(0.3)),
                   const SizedBox(height: 16),
                   if (tankCount == 0) ...[
                     Text(
                       'Create and manage your custom aquariums with inhabitants. Track compatibility, get personalized stocking recommendations, and maintain optimal conditions for your aquatic community.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.9) : null,
+                        color: isMaterialYou ? cs.onSurfaceVariant : null,
                         height: 1.5,
                       ),
                     ),
@@ -495,7 +514,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     tank.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isMaterialYou ? cs.onPrimaryContainer : cs.primary,
+                          color: isMaterialYou ? cs.onSurface : cs.primary,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -504,7 +523,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   Text(
                     tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.7) : null,
+                      color: isMaterialYou ? cs.onSurfaceVariant : null,
                     ),
                   ),
                 ],
@@ -523,7 +542,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       : '${tank.sizeLiters!.toStringAsFixed(0)} L',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isMaterialYou ? cs.onPrimaryContainer : null,
+                    color: isMaterialYou ? cs.onSurface : null,
                   ),
                 ),
               ),
@@ -536,13 +555,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               Icon(
                 Icons.pets,
                 size: 16,
-                color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.7) : cs.primary,
+                color: isMaterialYou ? cs.onSurfaceVariant : cs.primary,
               ),
               const SizedBox(width: 6),
               Text(
                 '${tank.inhabitants.length} ${tank.inhabitants.length == 1 ? 'inhabitant' : 'inhabitants'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.9) : null,
+                  color: isMaterialYou ? cs.onSurfaceVariant : null,
                 ),
               ),
               if (harmonyScore != null) ...[
@@ -584,7 +603,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           Text(
             'No inhabitants yet',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.7) : null,
+              color: isMaterialYou ? cs.onSurfaceVariant : null,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -594,7 +613,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           Text(
             tank.notes!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isMaterialYou ? cs.onPrimaryContainer.withOpacity(0.7) : null,
+              color: isMaterialYou ? cs.onSurfaceVariant : null,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -825,15 +844,23 @@ class FeatureCard extends ConsumerWidget {
     
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: isMaterialYou ? 2 : 1,
-      shadowColor: cs.shadow.withOpacity(0.15),
-      color: isMaterialYou ? cs.surfaceContainerHigh : null,
+      elevation: isMaterialYou ? 3 : 2,
+      shadowColor: cs.shadow.withOpacity(0.2),
+      color: isMaterialYou ? cs.surface : null,
       child: Container(
         decoration: isMaterialYou ? BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: cs.outlineVariant.withOpacity(0.3),
+            color: cs.outlineVariant.withOpacity(0.4),
             width: 1,
+          ),
+          gradient: LinearGradient(
+            colors: [
+              cs.secondary.withOpacity(0.3),
+              cs.primaryContainer.withOpacity(0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ) : null,
         child: InkWell(
