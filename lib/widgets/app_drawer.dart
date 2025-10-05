@@ -520,49 +520,54 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
     return SizedBox(
       width: 56,
+      height: 56,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          const SizedBox(height: 2),
           _buildTankIcon(tank, size: 40),
-          if (tank.inhabitants.isNotEmpty) ...[
-            const SizedBox(height: 1),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.pets,
-                  size: 8,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
-                ),
-                const SizedBox(width: 1),
-                Text(
-                  '${_getTotalInhabitantCount(tank.inhabitants)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+          if (tank.inhabitants.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.pets,
+                    size: 8,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
                   ),
-                ),
-                const SizedBox(width: 3),
-                Icon(
-                  Icons.category,
-                  size: 8,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
-                ),
-                const SizedBox(width: 1),
-                Text(
-                  '${_groupInhabitantsByFishType(tank.inhabitants).length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                  const SizedBox(width: 1),
+                  Text(
+                    '${_getTotalInhabitantCount(tank.inhabitants)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 3),
+                  Icon(
+                    Icons.category,
+                    size: 8,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
+                  ),
+                  const SizedBox(width: 1),
+                  Text(
+                    '${_groupInhabitantsByFishType(tank.inhabitants).length}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            const SizedBox(height: 2),
         ],
       ),
     );
