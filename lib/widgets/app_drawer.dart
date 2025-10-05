@@ -189,12 +189,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                               ),
                             ),
                           ),
-                          if (randomTank != null && randomTank.photos.isNotEmpty)
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: _buildThumbnail(randomTank),
-                            ),
+                          // if (randomTank != null && randomTank.photos.isNotEmpty)
+                          //   Positioned(
+                          //     bottom: 8,
+                          //     right: 8,
+                          //     child: _buildThumbnail(randomTank),
+                          //   ),
                         ],
                       ),
                     ),
@@ -563,13 +563,13 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   Widget _buildTankIconWithCount(Tank? tank) {
     if (tank == null) {
-      return const Icon(Icons.water, size: 40);
+      return const Icon(Icons.water, size: 48);
     }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildTankIcon(tank, size: 40),
+        _buildTankIcon(tank, size: 48),
         const SizedBox(height: 4),
         if (tank.inhabitants.isNotEmpty)
           Row(
@@ -641,15 +641,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return const SizedBox.shrink();
     }
 
-    final recentPhoto = tank.photos.reduce((a, b) => 
+    final recentPhoto = tank.photos.reduce((a, b) =>
       a.dateTaken.isAfter(b.dateTaken) ? a : b
     );
 
     final imageUrl = recentPhoto.imageUrl ?? recentPhoto.imagePath;
-    
+
     return Container(
-      width: 56,
-      height: 56,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(

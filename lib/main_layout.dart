@@ -47,7 +47,7 @@ class MainLayout extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        toolbarHeight: 80,
+        // toolbarHeight: 60,
       ),
       drawer: AppDrawer(),
       body: child,
