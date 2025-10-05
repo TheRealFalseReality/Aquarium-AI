@@ -520,7 +520,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
     return SizedBox(
       width: 48,
-      height: 72,
+      height: 76,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
