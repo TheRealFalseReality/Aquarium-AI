@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 
+import 'dart:io';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -371,6 +372,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       _selectedTankIndex = null;
     }
     
+    // Get custom background photo if set
+    TankPhoto? backgroundPhoto;
+    if (randomTank != null && randomTank.customBackgroundPhotoId != null) {
+      try {
+        backgroundPhoto = randomTank.photos.firstWhere(
+          (photo) => photo.id == randomTank.customBackgroundPhotoId,
+        );
+      } catch (e) {
+        // Photo not found, use default
+      }
+    }
+    
     // Determine gradient colors based on tank type (matching tank management style)
     List<Color> gradientColors;
     if (randomTank != null && randomTank.type == 'freshwater') {
@@ -399,11 +412,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       delay: const Duration(milliseconds: 600),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: backgroundPhoto == null ? LinearGradient(
             colors: gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-          ),
+          ) : null,
+          image: backgroundPhoto != null ? DecorationImage(
+            image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
+                ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
+                : FileImage(File(backgroundPhoto.imagePath!)),
+            fit: BoxFit.cover,
+            opacity: 0.8,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.3),
+              BlendMode.darken,
+            ),
+          ) : null,
+          color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: cs.outlineVariant.withOpacity(0.3),
@@ -582,7 +607,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                '${tank.inhabitants.length} ${tank.inhabitants.length == 1 ? 'inhabitant' : 'inhabitants'}',
+                '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -658,6 +683,22 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (score >= 0.6) return Icons.info;
     if (score >= 0.4) return Icons.warning;
     return Icons.error;
+  }
+  
+  int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
+    return inhabitants.fold(0, (total, inhabitant) => total + inhabitant.quantity);
+  }
+
+  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
+    final grouped = <String, List<TankInhabitant>>{};
+    for (final inhabitant in inhabitants) {
+      final fishType = inhabitant.fishUnit;
+      if (!grouped.containsKey(fishType)) {
+        grouped[fishType] = [];
+      }
+      grouped[fishType]!.add(inhabitant);
+    }
+    return grouped;
   }
   
   Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features) {
