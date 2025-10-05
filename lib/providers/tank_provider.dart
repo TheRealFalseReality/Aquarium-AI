@@ -177,12 +177,13 @@ class TankNotifier extends StateNotifier<TankState> {
       );
 
       // Create backup data with metadata
+      // Exclude local image paths to prevent restore errors on different devices
       final backupData = {
         'version': '1.0.0',
         'appName': 'Aquarium AI',
         'exportDate': DateTime.now().toIso8601String(),
         'tankCount': state.tanks.length,
-        'tanks': state.tanks.map((tank) => tank.toJson()).toList(),
+        'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
       };
 
       // Convert to formatted JSON
