@@ -311,19 +311,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               child: _buildHeader(context, sortedTanks.length),
             ),
           ),
-          // Masonry grid layout
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverMasonryGrid.count(
-              crossAxisCount: columnCount,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childCount: sortedTanks.length,
-              itemBuilder: (context, index) {
-                return _buildTankCard(context, ref, sortedTanks[index], fishData, appSettings);
-              },
-            ),
-          ),
+          // Masonry grid layout with native ads
+          ..._buildTankGridWithAds(context, ref, sortedTanks, fishData, appSettings, columnCount),
           const SliverToBoxAdapter(
             child: SizedBox(height: 16),
           ),
@@ -331,18 +320,192 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
     }
     
-    // Use list layout for mobile devices
+    // Use list layout for mobile devices with native ads
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: sortedTanks.length + 1, // +1 for header
+      itemCount: _calculateListItemCount(sortedTanks.length),
       itemBuilder: (context, index) {
-        if (index == 0) {
-          return _buildHeader(context, sortedTanks.length);
-        }
-        
-        final tank = sortedTanks[index - 1];
-        return _buildTankCard(context, ref, tank, fishData, appSettings);
+        return _buildListItem(context, ref, index, sortedTanks, fishData, appSettings);
       },
+    );
+  }
+
+  List<Widget> _buildTankGridWithAds(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings, int columnCount) {
+    // Configuration for ad placement
+    const int tanksBeforeFirstAd = 4; // Show ad after first 4 tanks
+    const int tanksBetweenAds = 6; // Show ad every 6 tanks thereafter
+    
+    List<Widget> slivers = [];
+    int tankIndex = 0;
+    
+    while (tankIndex < tanks.length) {
+      // Determine how many tanks to show before the next ad
+      int tanksToShow;
+      bool shouldShowAd = false;
+      
+      if (tankIndex == 0) {
+        // First batch of tanks
+        tanksToShow = tanksBeforeFirstAd.clamp(0, tanks.length - tankIndex);
+        shouldShowAd = tanks.length > tanksBeforeFirstAd;
+      } else {
+        // Subsequent batches
+        tanksToShow = tanksBetweenAds.clamp(0, tanks.length - tankIndex);
+        shouldShowAd = tankIndex + tanksToShow < tanks.length;
+      }
+      
+      // Capture the starting index for this section
+      final int startIndex = tankIndex;
+      
+      // Add a grid section with N tanks
+      slivers.add(
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            startIndex == 0 ? 0 : 16,
+            16,
+            0,
+          ),
+          sliver: SliverMasonryGrid.count(
+            crossAxisCount: columnCount,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childCount: tanksToShow,
+            itemBuilder: (context, index) {
+              final actualIndex = startIndex + index;
+              if (actualIndex >= tanks.length) {
+                return const SizedBox.shrink();
+              }
+              return _buildTankCard(context, ref, tanks[actualIndex], fishData, appSettings);
+            },
+          ),
+        ),
+      );
+      
+      tankIndex += tanksToShow;
+      
+      // Add native ad if needed
+      if (shouldShowAd) {
+        slivers.add(
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            sliver: SliverToBoxAdapter(
+              child: _buildNativeAdCard(context),
+            ),
+          ),
+        );
+      }
+    }
+    
+    return slivers;
+  }
+
+  int _calculateListItemCount(int tankCount) {
+    // Configuration for ad placement
+    const int tanksBeforeFirstAd = 4;
+    const int tanksBetweenAds = 6;
+    
+    int itemCount = 1; // Start with header
+    int remainingTanks = tankCount;
+    
+    if (remainingTanks <= tanksBeforeFirstAd) {
+      return itemCount + remainingTanks;
+    }
+    
+    // Add first batch
+    itemCount += tanksBeforeFirstAd;
+    remainingTanks -= tanksBeforeFirstAd;
+    
+    // Add ad after first batch
+    if (remainingTanks > 0) {
+      itemCount++; // Native ad
+    }
+    
+    // Add remaining batches with ads
+    while (remainingTanks > 0) {
+      final batch = tanksBetweenAds.clamp(0, remainingTanks);
+      itemCount += batch;
+      remainingTanks -= batch;
+      
+      if (remainingTanks > 0) {
+        itemCount++; // Native ad
+      }
+    }
+    
+    return itemCount;
+  }
+
+  Widget _buildListItem(BuildContext context, WidgetRef ref, int index, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+    // Configuration for ad placement
+    const int tanksBeforeFirstAd = 4;
+    const int tanksBetweenAds = 6;
+    
+    // Header is always at index 0
+    if (index == 0) {
+      return _buildHeader(context, tanks.length);
+    }
+    
+    // Calculate actual tank index and whether this should be an ad
+    int adjustedIndex = index - 1; // Subtract header
+    int tanksSeen = 0;
+    int adsSeen = 0;
+    
+    // Determine position
+    if (adjustedIndex < tanksBeforeFirstAd) {
+      // First batch, no ads yet
+      return _buildTankCard(context, ref, tanks[adjustedIndex], fishData, appSettings);
+    }
+    
+    adjustedIndex -= tanksBeforeFirstAd;
+    tanksSeen = tanksBeforeFirstAd;
+    
+    // Check if we should show first ad
+    if (adjustedIndex == 0 && tanks.length > tanksBeforeFirstAd) {
+      return _buildNativeAdCard(context);
+    }
+    
+    if (adjustedIndex > 0) {
+      adjustedIndex -= 1; // Account for first ad
+      adsSeen = 1;
+    }
+    
+    // Remaining items alternate between tank batches and ads
+    final batchSize = tanksBetweenAds + 1; // tanks + ad
+    final batchNumber = adjustedIndex ~/ batchSize;
+    final positionInBatch = adjustedIndex % batchSize;
+    
+    tanksSeen += batchNumber * tanksBetweenAds;
+    
+    if (positionInBatch < tanksBetweenAds) {
+      // Tank position
+      final tankIndex = tanksSeen + positionInBatch;
+      if (tankIndex < tanks.length) {
+        return _buildTankCard(context, ref, tanks[tankIndex], fishData, appSettings);
+      }
+    } else {
+      // Ad position
+      final tankIndex = tanksSeen + tanksBetweenAds;
+      if (tankIndex < tanks.length) {
+        return _buildNativeAdCard(context);
+      }
+    }
+    
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildNativeAdCard(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: 250,
+        maxHeight: 350,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      ),
+      child: const ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        child: NativeAdWidget(),
+      ),
     );
   }
 
