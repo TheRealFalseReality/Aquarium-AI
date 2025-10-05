@@ -1532,7 +1532,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          'Latest Water Parameters',
+                                          'Parameters',
                                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -1934,7 +1934,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       return;
                     }
                     
-                    if (context.mounted && imageBytes != null) {
+                    if (context.mounted) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => PhotoAnalysisScreen(

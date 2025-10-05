@@ -1,6 +1,5 @@
 import 'package:fish_ai/services/fish_data_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

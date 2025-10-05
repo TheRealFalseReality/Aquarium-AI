@@ -452,7 +452,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       title: '${currentTank.name} - Parameters',
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${currentTank.name}'),
+          title: Text(currentTank.name),
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
@@ -846,7 +846,6 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
 
     return Padding(
