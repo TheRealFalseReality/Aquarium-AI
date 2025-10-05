@@ -420,14 +420,17 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     }
   }
 
-  Widget _buildTankIcon(Tank? tank) {
+  Widget _buildTankIcon(Tank? tank, {double size = 48}) {
     if (tank == null) {
-      return const Icon(Icons.water, size: 36);
+      return Icon(Icons.water, size: size * 0.75);
     }
 
+    final iconSize = size * 0.42;
+    final padding = size * 0.21;
+
     return Container(
-      width: 48,
-      height: 48,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
             ? LinearGradient(
@@ -441,20 +444,20 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
             ? Colors.grey.shade300
             : null,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(size * 0.25),
         boxShadow: [
           BoxShadow(
             color: (tank.type == 'freshwater' 
                 ? Colors.blue 
                 : Colors.purple).withOpacity(0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: size * 0.125,
+            offset: Offset(0, size * 0.042),
           ),
         ],
       ),
       child: tank.customIconCodePoint != null
           ? Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: tank.type == 'freshwater'
@@ -463,18 +466,18 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(size * 0.25),
               ),
               child: Icon(
                 _getIconFromCodePoint(tank.customIconCodePoint) ?? 
                     (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
-                size: 20,
+                size: iconSize,
                 color: Colors.white,
               ),
             )
           : (tank.customIconPhotoId != null
               ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(size * 0.25),
                   child: () {
                     try {
                       final photo = tank.photos.firstWhere(
@@ -483,27 +486,27 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return imageUrl != null
                           ? (imageUrl.startsWith('http')
-                              ? Image.network(imageUrl, fit: BoxFit.cover, width: 48, height: 48)
-                              : Image.file(File(imageUrl), fit: BoxFit.cover, width: 48, height: 48))
+                              ? Image.network(imageUrl, fit: BoxFit.cover, width: size, height: size)
+                              : Image.file(File(imageUrl), fit: BoxFit.cover, width: size, height: size))
                           : Icon(
                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                              size: 20,
+                              size: iconSize,
                               color: Colors.white,
                             );
                     } catch (e) {
                       return Icon(
                         tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                        size: 20,
+                        size: iconSize,
                         color: Colors.white,
                       );
                     }
                   }(),
                 )
               : Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(padding),
                   child: Icon(
                     tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                    size: 20,
+                    size: iconSize,
                     color: Colors.white,
                   ),
                 )),
@@ -521,44 +524,38 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildTankIcon(tank),
+          _buildTankIcon(tank, size: 40),
           if (tank.inhabitants.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.pets,
-                  size: 9,
-                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '${_getTotalInhabitantCount(tank.inhabitants)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 1),
             Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.category,
-                  size: 9,
+                  Icons.pets,
+                  size: 8,
                   color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: 1),
+                Text(
+                  '${_getTotalInhabitantCount(tank.inhabitants)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(width: 3),
+                Icon(
+                  Icons.category,
+                  size: 8,
+                  color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.6),
+                ),
+                const SizedBox(width: 1),
                 Text(
                   '${_groupInhabitantsByFishType(tank.inhabitants).length}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 9,
+                    fontSize: 8,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
                   ),
