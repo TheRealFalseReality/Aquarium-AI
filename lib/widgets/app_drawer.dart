@@ -515,7 +515,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   Widget _buildTankIconWithCount(Tank? tank) {
     if (tank == null) {
-      return const Icon(Icons.water, size: 36);
+      return const Icon(Icons.water, size: 40);
     }
 
     return SizedBox(
@@ -526,7 +526,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(height: 4),
-          _buildTankIcon(tank, size: 36),
+          _buildTankIcon(tank, size: 40),
           const SizedBox(height: 16),
           if (tank.inhabitants.isNotEmpty)
             Row(
