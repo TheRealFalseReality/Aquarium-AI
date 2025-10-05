@@ -224,7 +224,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
     final List<FeatureInfo> features = [
       FeatureInfo(
-        icon: '🐠',
+        icon: '🐡',
         title: 'AI Compatibility Tool',
         description:
             'Get detailed compatibility reports with care guides and recommendations.',
@@ -475,7 +475,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           color: cs.primary.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('🏠', style: TextStyle(fontSize: 32)),
+                        child: const Text('🐠', style: TextStyle(fontSize: 32)),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
