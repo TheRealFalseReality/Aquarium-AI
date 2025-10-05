@@ -88,6 +88,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return 'Phosphate';
       case 'salinity':
         return 'Salinity';
+      case 'calcium':
+        return 'Calcium';
+      case 'magnesium':
+        return 'Magnesium';
       default:
         return parameterType;
     }
@@ -105,6 +109,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Icons.bubble_chart;
       case 'salinity':
         return Icons.water;
+      case 'calcium':
+        return Icons.diamond;
+      case 'magnesium':
+        return Icons.bolt;
       default:
         return Icons.water_drop;
     }
@@ -122,6 +130,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Colors.purple;
       case 'salinity':
         return Colors.blue;
+      case 'calcium':
+        return Colors.teal;
+      case 'magnesium':
+        return Colors.cyan;
       default:
         return Colors.grey;
     }
@@ -170,6 +182,20 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           if ((value >= 29 && value < 31) || (value > 36 && value <= 38)) return Colors.orange;
           return Colors.red;
         }
+      
+      case 'calcium':
+        // Calcium thresholds for marine tanks (ppm)
+        if (value >= 400 && value <= 450) return Colors.green;
+        if ((value >= 380 && value < 400) || (value > 450 && value <= 480)) return Colors.yellow.shade700;
+        if ((value >= 350 && value < 380) || (value > 480 && value <= 520)) return Colors.orange;
+        return Colors.red;
+      
+      case 'magnesium':
+        // Magnesium thresholds for marine tanks (ppm)
+        if (value >= 1250 && value <= 1350) return Colors.green;
+        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400)) return Colors.yellow.shade700;
+        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500)) return Colors.orange;
+        return Colors.red;
       
       default:
         return Colors.grey;
@@ -224,8 +250,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       spotColors.add(_getThresholdColor(parameterType, param.value, unit: param.unit));
     }
 
-    // Use the latest value's threshold color for the line
-    final lineColor = latestColor;
+    // Use the latest value's threshold color for the line, except for salinity which is always blue
+    final lineColor = parameterType == 'salinity' ? Colors.blue : latestColor;
     final maxY = sortedParams.map((p) => p.value).reduce((a, b) => a > b ? a : b);
     final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
     final yRange = maxY - minY;
@@ -401,9 +427,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
     
-    // Only show salinity for marine tanks
+    // Only show salinity, calcium, and magnesium for marine tanks
     final parameterTypes = currentTank.type == 'marine'
-        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity']
+        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium']
         : ['ammonia', 'nitrite', 'nitrate', 'phosphate'];
 
     return MainLayout(
@@ -663,6 +689,8 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'nitrate': ['ppm', 'mg/L'],
     'phosphate': ['ppm', 'mg/L'],
     'salinity': ['ppt', 'SG'],
+    'calcium': ['ppm', 'mg/L'],
+    'magnesium': ['ppm', 'mg/L'],
   };
 
   @override
@@ -816,9 +844,12 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
                   const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
                   const DropdownMenuItem(value: 'phosphate', child: Text('Phosphate')),
-                  // Only show salinity for marine tanks
-                  if (widget.tank.type == 'marine')
+                  // Only show salinity, calcium, and magnesium for marine tanks
+                  if (widget.tank.type == 'marine') ...[
                     const DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
+                    const DropdownMenuItem(value: 'calcium', child: Text('Calcium')),
+                    const DropdownMenuItem(value: 'magnesium', child: Text('Magnesium')),
+                  ],
                 ],
                 onChanged: (value) {
                   setState(() {
