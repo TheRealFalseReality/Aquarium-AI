@@ -128,11 +128,12 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       return const SizedBox.shrink();
     }
 
+    // Use flexible constraints that work well in different contexts
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        minWidth: 320,
-        minHeight: 320,
-        maxWidth: 400,
+        minWidth: 300,
+        minHeight: 250,
+        maxWidth: 500,
         maxHeight: 400,
       ),
       child: AdWidget(ad: _nativeAd!),
