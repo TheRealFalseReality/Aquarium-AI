@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
+import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import 'gradient_text.dart';
@@ -114,7 +115,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: ListTile(
-                      leading: const Icon(Icons.water, size: 36),
+                      leading: _buildTankIcon(randomTank),
                       title: Text(
                         'My Tanks',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -129,13 +130,41 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                   '${randomTank != null ? randomTank.name : ""}',
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                if (randomTank != null && randomTank.inhabitants.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.pets,
+                                        size: 12,
+                                        color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${_getTotalInhabitantCount(randomTank.inhabitants)} inhabitant${_getTotalInhabitantCount(randomTank.inhabitants) == 1 ? '' : 's'}',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          fontSize: 11,
+                                          color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                                 if (harmonyScoreWidget != null) ...[
                                   const SizedBox(height: 4),
                                   harmonyScoreWidget,
                                 ],
                               ],
                             ),
-                      trailing: const Icon(Icons.chevron_right),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (randomTank != null && randomTank.photos.isNotEmpty)
+                            _buildThumbnail(randomTank),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
                       onTap: () => navigate('/tank-management'),
                       isThreeLine: tankCount > 0,
                     ),
@@ -378,5 +407,165 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         ),
       ),
     );
+  }
+
+  // Tank icons list (matching tank management screen)
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.shower,
+    Icons.opacity,
+    Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return _tankIcons.firstWhere((icon) => icon.codePoint == codePoint);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Widget _buildTankIcon(Tank? tank) {
+    if (tank == null) {
+      return const Icon(Icons.water, size: 36);
+    }
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+            ? LinearGradient(
+                colors: tank.type == 'freshwater'
+                    ? [Colors.blue.shade300, Colors.cyan.shade400]
+                    : [Colors.indigo.shade300, Colors.purple.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+            ? Colors.grey.shade300
+            : null,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: (tank.type == 'freshwater' 
+                ? Colors.blue 
+                : Colors.purple).withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: tank.customIconCodePoint != null
+          ? Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: tank.type == 'freshwater'
+                      ? [Colors.blue.shade300, Colors.cyan.shade400]
+                      : [Colors.indigo.shade300, Colors.purple.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                size: 20,
+                color: Colors.white,
+              ),
+            )
+          : (tank.customIconPhotoId != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: () {
+                    try {
+                      final photo = tank.photos.firstWhere(
+                        (p) => p.id == tank.customIconPhotoId,
+                      );
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      return imageUrl != null
+                          ? (imageUrl.startsWith('http')
+                              ? Image.network(imageUrl, fit: BoxFit.cover, width: 48, height: 48)
+                              : Image.file(File(imageUrl), fit: BoxFit.cover, width: 48, height: 48))
+                          : Icon(
+                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                              size: 20,
+                              color: Colors.white,
+                            );
+                    } catch (e) {
+                      return Icon(
+                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        size: 20,
+                        color: Colors.white,
+                      );
+                    }
+                  }(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Icon(
+                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                )),
+    );
+  }
+
+  Widget _buildThumbnail(Tank tank) {
+    // Get the most recent photo
+    if (tank.photos.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final recentPhoto = tank.photos.reduce((a, b) => 
+      a.dateTaken.isAfter(b.dateTaken) ? a : b
+    );
+
+    final imageUrl = recentPhoto.imageUrl ?? recentPhoto.imagePath;
+    
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: imageUrl != null
+            ? (imageUrl.startsWith('http')
+                ? Image.network(imageUrl, fit: BoxFit.cover)
+                : Image.file(File(imageUrl), fit: BoxFit.cover))
+            : Icon(
+                Icons.image,
+                size: 16,
+                color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.5),
+              ),
+      ),
+    );
+  }
+
+  int _getTotalInhabitantCount(List<dynamic> inhabitants) {
+    return inhabitants.fold(0, (total, inhabitant) => total + (inhabitant.quantity as int? ?? 0));
   }
 }
