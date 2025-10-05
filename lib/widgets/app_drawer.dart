@@ -473,8 +473,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       return Icon(Icons.water, size: size * 0.75);
     }
 
-    final iconSize = size * 0.42;
-    final padding = size * 0.21;
+    final iconSize = size * .75;
+    final padding = size * 0.1;
 
     return Container(
       width: size,
@@ -563,13 +563,13 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   Widget _buildTankIconWithCount(Tank? tank) {
     if (tank == null) {
-      return const Icon(Icons.water, size: 48);
+      return const Icon(Icons.water, size: 52);
     }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildTankIcon(tank, size: 48),
+        _buildTankIcon(tank, size: 52),
         const SizedBox(height: 4),
         if (tank.inhabitants.isNotEmpty)
           Row(
