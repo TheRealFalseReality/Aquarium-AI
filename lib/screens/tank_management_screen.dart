@@ -804,12 +804,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ? [
             Colors.blue.shade400.withOpacity(0.15),
             Colors.cyan.shade300.withOpacity(0.15),
-            cs.surfaceContainerHighest.withOpacity(0.5),
+            cs.primaryContainer.withOpacity(0.5),
           ]
         : [
             Colors.indigo.shade400.withOpacity(0.15),
             Colors.purple.shade300.withOpacity(0.15),
-            cs.surfaceContainerHighest.withOpacity(0.5),
+            cs.secondaryContainer.withOpacity(0.5),
           ];
     
     return Container(
@@ -1420,12 +1420,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ? [
             Colors.blue.shade400.withOpacity(0.95),
             Colors.cyan.shade300.withOpacity(0.95),
-            cs.surfaceContainerHighest.withOpacity(0.98),
+            cs.primaryContainer.withOpacity(0.98),
           ]
         : [
             Colors.indigo.shade400.withOpacity(0.95),
             Colors.purple.shade300.withOpacity(0.95),
-            cs.surfaceContainerHighest.withOpacity(0.98),
+            cs.secondaryContainer.withOpacity(0.98),
           ];
     showDialog(
       context: context,

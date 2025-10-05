@@ -27,10 +27,32 @@ void main() {
       // Verify that the 'Aquarium AI' title is displayed.
       expect(find.text('Aquarium AI'), findsOneWidget);
 
-      // Tap on the 'AI Compatibility Calculator' card and verify that it navigates to the correct screen.
-      await tester.tap(find.text('AI Compatibility Calculator'));
+      // Tap on the 'AI Compatibility Tool' card and verify that it navigates to the correct screen.
+      await tester.tap(find.text('AI Compatibility Tool'));
       await tester.pumpAndSettle();
       expect(find.byType(FishCompatibilityScreen), findsOneWidget);
+    });
+
+    testWidgets('WelcomeScreen shows My Tanks section', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: const WelcomeScreen(),
+          ),
+        ),
+      );
+
+      // Wait for animations
+      await tester.pumpAndSettle();
+
+      // Verify that 'My Tanks' section is displayed
+      expect(find.text('My Tanks'), findsWidgets);
+      
+      // When no tanks, should show "No tanks yet"
+      expect(find.text('No tanks yet'), findsOneWidget);
+      
+      // Should show call-to-action button
+      expect(find.text('Create Your First Tank'), findsOneWidget);
     });
 
     testWidgets('Promotion dialog resets after 48 hours', (WidgetTester tester) async {
