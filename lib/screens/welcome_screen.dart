@@ -377,7 +377,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (randomTank != null && randomTank.customBackgroundPhotoId != null) {
       try {
         backgroundPhoto = randomTank.photos.firstWhere(
-          (photo) => photo.id == randomTank.customBackgroundPhotoId,
+          (photo) => photo.id == randomTank?.customBackgroundPhotoId,
         );
       } catch (e) {
         // Photo not found, use default
