@@ -182,14 +182,15 @@ final speciesTagsProvider =
   (ref) {
     final notifier = SpeciesTagsNotifier();
     // Initialize default tags when provider is created
-    _initializeDefaultTagsAsync(ref as ProviderRef, notifier);
+    _initializeDefaultTagsAsync(ref, notifier);
     return notifier;
   },
 );
 
 /// Helper function to initialize default tags asynchronously
 Future<void> _initializeDefaultTagsAsync(
-    ProviderRef ref, SpeciesTagsNotifier notifier) async {
+    StateNotifierProviderRef<SpeciesTagsNotifier, SpeciesTagsState> ref,
+    SpeciesTagsNotifier notifier) async {
   try {
     // Wait a bit for the notifier to load existing tags first
     await Future.delayed(const Duration(milliseconds: 500));
