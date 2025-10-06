@@ -1882,7 +1882,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                             children: [
                                               Text(
                                                 inhabitant.quantity > 1
-                                                    ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                                    ? inhabitant.customName
                                                     : inhabitant.customName,
                                                 style: const TextStyle(fontWeight: FontWeight.w600),
                                               ),
