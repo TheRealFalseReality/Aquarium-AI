@@ -395,7 +395,7 @@ class FishCompatibilityScreenState
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Select two or more fish to generate a compatibility report.',
+                            'Select two or more inhabitants to generate a compatibility report.',
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
