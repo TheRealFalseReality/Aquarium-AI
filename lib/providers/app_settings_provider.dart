@@ -13,12 +13,18 @@ class AppSettingsState {
 }
 
 // Notifier for app settings
-class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
-  AppSettingsNotifier()
-      : super(AppSettingsState(
-          showStockingButton: true, // Default to true (show button)
-        )) {
+class AppSettingsNotifier extends Notifier<AppSettingsState> {
+  @override
+  AppSettingsState build() {
+    // Return initial state with loading true
+    final initialState = AppSettingsState(
+      showStockingButton: true, // Default to true (show button)
+    );
+    
+    // Load settings asynchronously
     _loadSettings();
+    
+    return initialState;
   }
 
   Future<void> _loadSettings() async {
@@ -43,6 +49,6 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
 }
 
 // Provider for app settings
-final appSettingsProvider = StateNotifierProvider<AppSettingsNotifier, AppSettingsState>(
-  (ref) => AppSettingsNotifier(),
+final appSettingsProvider = NotifierProvider<AppSettingsNotifier, AppSettingsState>(
+  AppSettingsNotifier.new,
 );

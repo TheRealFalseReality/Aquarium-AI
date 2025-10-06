@@ -4,15 +4,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './services/analytics_service.dart';
 
 final themeProviderNotifierProvider =
-    StateNotifierProvider<ThemeProviderNotifier, ThemeProviderState>((ref) {
-  return ThemeProviderNotifier();
-});
+    NotifierProvider<ThemeProviderNotifier, ThemeProviderState>(
+  ThemeProviderNotifier.new,
+);
 
-class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
-  ThemeProviderNotifier()
-      : super(ThemeProviderState(
-            themeMode: ThemeMode.system, useMaterialYou: false)) {
+class ThemeProviderNotifier extends Notifier<ThemeProviderState> {
+  @override
+  ThemeProviderState build() {
+    // Return initial state with default values
+    final initialState = ThemeProviderState(
+      themeMode: ThemeMode.system, 
+      useMaterialYou: false,
+    );
+    
+    // Load theme asynchronously
     _loadTheme();
+    
+    return initialState;
   }
 
   ThemeData getLightTheme(ColorScheme? lightDynamic) {

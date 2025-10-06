@@ -43,21 +43,27 @@ class ModelState {
 }
 
 // 2. Create the Notifier
-class ModelNotifier extends StateNotifier<ModelState> {
-  ModelNotifier()
-      : super(ModelState(
-          geminiModel: defaultGeminiModel,
-          geminiImageModel: defaultGeminiImageModel,
-          geminiApiKey: '',
-          chatGPTModel: defaultChatGPTModel,
-          chatGPTImageModel: defaultChatGPTImageModel,
-          openAIApiKey: '',
-          groqModel: defaultGroqModel,
-          groqImageModel: defaultGroqImageModel,
-          groqApiKey: '',
-          activeProvider: defaultAIProvider,
-        )) {
+class ModelNotifier extends Notifier<ModelState> {
+  @override
+  ModelState build() {
+    // Return initial state with default values
+    final initialState = ModelState(
+      geminiModel: defaultGeminiModel,
+      geminiImageModel: defaultGeminiImageModel,
+      geminiApiKey: '',
+      chatGPTModel: defaultChatGPTModel,
+      chatGPTImageModel: defaultChatGPTImageModel,
+      openAIApiKey: '',
+      groqModel: defaultGroqModel,
+      groqImageModel: defaultGroqImageModel,
+      groqApiKey: '',
+      activeProvider: defaultAIProvider,
+    );
+    
+    // Load models asynchronously
     _loadModels();
+    
+    return initialState;
   }
 
   Future<void> _loadModels() async {
@@ -168,8 +174,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
 }
 
 // 3. Create the Provider
-final modelProvider = StateNotifierProvider<ModelNotifier, ModelState>(
-  (ref) => ModelNotifier(),
+final modelProvider = NotifierProvider<ModelNotifier, ModelState>(
+  ModelNotifier.new,
 );
 
 // New provider to easily check the loading state
