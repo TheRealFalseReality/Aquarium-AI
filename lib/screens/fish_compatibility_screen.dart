@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 import '../widgets/accessible_feedback.dart';
@@ -60,7 +61,12 @@ class FishCompatibilityScreenState
               fish.name.toLowerCase().contains(query.toLowerCase());
           final commonNamesMatch = fish.commonNames
               .any((name) => name.toLowerCase().contains(query.toLowerCase()));
-          return nameMatches || commonNamesMatch;
+          
+          // Check species tags
+          final tags = ref.read(speciesTagsProvider).tags[fish.name] ?? [];
+          final tagsMatch = tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
+          
+          return nameMatches || commonNamesMatch || tagsMatch;
         }).toList();
       }
     });
@@ -508,30 +514,65 @@ class FishCompatibilityScreenState
         width: canShowLastReportFab
             ? MediaQuery.of(context).size.width - 180
             : double.infinity,
-        child: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Search by name...',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _isSearchVisible = false;
-                });
-                FocusScope.of(context).unfocus();
-              },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search by name...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _isSearchVisible = false;
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+              ),
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide.none,
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/species-tags');
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.label_outline,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Manage species tags',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surface,
-          ),
+          ],
         ),
       ),
     );
