@@ -168,6 +168,8 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                       return _RecommendationTabView(
                         report: report,
                         tankType: widget.tankType,
+                        tankSize: widget.tankSize,
+                        userNotes: widget.userNotes,
                       );
                     }).toList(),
                   ),
@@ -231,10 +233,14 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
   final String? tankType;
+  final String? tankSize;
+  final String? userNotes;
 
   const _RecommendationTabView({
     required this.report,
     this.tankType,
+    this.tankSize,
+    this.userNotes,
   });
 
   @override
@@ -262,6 +268,84 @@ class _RecommendationTabView extends StatelessWidget {
             color: cs.onSurfaceVariant,
           ),
         ),
+        
+        // Show tank info if available
+        if (tankSize != null || userNotes != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.surfaceVariant.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.outline.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: cs.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Tank Information',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (tankSize != null) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.straighten, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tank Size: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        tankSize!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (userNotes != null && userNotes!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.note_outlined, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Notes: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          userNotes!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
         
         const Divider(height: 32),
         

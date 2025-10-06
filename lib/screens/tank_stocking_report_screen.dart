@@ -440,13 +440,12 @@ class _TankRecommendationTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: existingFish, originalTank: originalTank, isExisting: true),
-        
-        // Show custom names if they were included
-        if (includeCustomNames) ...[
-          const SizedBox(height: 16),
-          _buildCustomNamesSection(context, originalTank),
-        ],
+        _FishCardGrid(
+          fishList: existingFish, 
+          originalTank: originalTank, 
+          isExisting: true,
+          includeCustomNames: includeCustomNames,
+        ),
         
         const Divider(height: 32),
 
@@ -682,81 +681,6 @@ class _TankRecommendationTabView extends StatelessWidget {
     return 0.5;
   }
 
-  Widget _buildCustomNamesSection(BuildContext context, Tank tank) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    
-    // Build map of custom names that differ from fish unit names
-    final customNamesMap = <String, String>{};
-    for (final inhabitant in tank.inhabitants) {
-      if (inhabitant.customName != inhabitant.fishUnit) {
-        customNamesMap[inhabitant.fishUnit] = inhabitant.customName;
-      }
-    }
-    
-    // If no custom names, return empty widget
-    if (customNamesMap.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cs.secondaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cs.secondary.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.label_outline, size: 14, color: cs.secondary),
-              const SizedBox(width: 6),
-              Text(
-                'Custom Names',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: cs.secondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ...customNamesMap.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      entry.key,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward, size: 12, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      entry.value,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.secondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -781,13 +705,28 @@ class _FishCardGrid extends StatelessWidget {
   final bool isAddition;
   final bool isExisting;
   final Tank originalTank;
+  final bool includeCustomNames;
+  
   const _FishCardGrid({
     required this.fishList,
     required this.originalTank,
     this.isCore = false,
     this.isAddition = false,
     this.isExisting = false,
+    this.includeCustomNames = false,
   });
+
+  // Get custom name for a fish if it exists
+  String? _getCustomNameForFish(String fishName) {
+    if (!isExisting || !includeCustomNames) return null;
+    
+    for (final inhabitant in originalTank.inhabitants) {
+      if (inhabitant.fishUnit == fishName && inhabitant.customName != fishName) {
+        return inhabitant.customName;
+      }
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -798,6 +737,8 @@ class _FishCardGrid extends StatelessWidget {
       runSpacing: 16,
       alignment: WrapAlignment.center,
       children: fishList.map((fish) {
+        final customName = _getCustomNameForFish(fish.name);
+        
         return Card(
           elevation: 2,
           color: cs.surfaceContainerHighest,
@@ -824,12 +765,37 @@ class _FishCardGrid extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      fish.name,
-                      style: theme.textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      children: [
+                        Text(
+                          fish.name,
+                          style: theme.textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (customName != null) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: cs.secondaryContainer.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              customName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                                color: cs.secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
