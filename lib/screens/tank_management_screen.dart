@@ -15,6 +15,7 @@ import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/stocking_options_dialog.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
@@ -2965,13 +2966,27 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return widgets;
   }
 
-  void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
+  Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
         'Tank must have existing inhabitants to get stocking recommendations.'
       );
       return;
     }
+
+    // Show options dialog first
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const StockingOptionsDialog(),
+    );
+
+    // User cancelled the dialog
+    if (result == null || !context.mounted) {
+      return;
+    }
+
+    final useCustomNames = result['useCustomNames'] as bool? ?? false;
+    final additionalNotes = result['additionalNotes'] as String? ?? '';
 
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
@@ -3058,6 +3073,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
+        'use_custom_names': useCustomNames.toString(),
+        'has_additional_notes': additionalNotes.isNotEmpty.toString(),
       },
     );
     AnalyticsService.logTankAction(
@@ -3066,8 +3083,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       tankSize: tank.sizeGallons?.toInt(),
     );
 
-    // Get recommendations for this tank
-    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
+    // Get recommendations for this tank with the selected options
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
+      tank: tank,
+      useCustomNames: useCustomNames,
+      additionalNotes: additionalNotes,
+    );
   }
 
   Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {
