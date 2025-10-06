@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
@@ -716,28 +717,74 @@ class _FishCardGrid extends StatelessWidget {
     this.includeCustomNames = false,
   });
 
-  // Get custom name for a fish if it exists
-  String? _getCustomNameForFish(String fishName) {
-    if (!isExisting || !includeCustomNames) return null;
+  // Group inhabitants by unique combination of fishUnit + customName + image
+  List<Map<String, dynamic>> _getGroupedInhabitants() {
+    if (!isExisting) {
+      // For non-existing fish, just show them normally
+      return fishList.map((fish) => {
+        'fish': fish,
+        'quantity': 1,
+        'customName': null,
+        'customImage': null,
+      }).toList();
+    }
+
+    final Map<String, Map<String, dynamic>> grouped = {};
     
     for (final inhabitant in originalTank.inhabitants) {
-      if (inhabitant.fishUnit == fishName && inhabitant.customName != fishName) {
-        return inhabitant.customName;
+      // Create a unique key based on fishUnit, customName, and custom image
+      final customImage = inhabitant.customImageUrl ?? inhabitant.customImagePath;
+      final displayName = includeCustomNames && inhabitant.customName != inhabitant.fishUnit 
+          ? inhabitant.customName 
+          : null;
+      
+      final key = '${inhabitant.fishUnit}|$displayName|$customImage';
+      
+      if (grouped.containsKey(key)) {
+        grouped[key]!['quantity'] = (grouped[key]!['quantity'] as int) + inhabitant.quantity;
+      } else {
+        // Find the fish data
+        final fish = fishList.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+        
+        grouped[key] = {
+          'fish': fish,
+          'quantity': inhabitant.quantity,
+          'customName': displayName,
+          'customImage': customImage,
+        };
       }
     }
-    return null;
+    
+    return grouped.values.toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final items = _getGroupedInhabitants();
+    
     return Wrap(
       spacing: 16,
       runSpacing: 16,
       alignment: WrapAlignment.center,
-      children: fishList.map((fish) {
-        final customName = _getCustomNameForFish(fish.name);
+      children: items.map((item) {
+        final fish = item['fish'] as Fish;
+        final quantity = item['quantity'] as int;
+        final customName = item['customName'] as String?;
+        final customImage = item['customImage'] as String?;
+        final imageUrl = customImage ?? fish.imageURL;
         
         return Card(
           elevation: 2,
@@ -757,11 +804,73 @@ class _FishCardGrid extends StatelessWidget {
               width: 100,
               child: Column(
                 children: [
-                  Image.network(
-                    fish.imageURL,
-                    height: 80,
-                    width: 100,
-                    fit: BoxFit.cover,
+                  Stack(
+                    children: [
+                      imageUrl.isNotEmpty
+                          ? (customImage != null && customImage.startsWith('/'))
+                              ? Image.file(
+                                  File(customImage),
+                                  height: 80,
+                                  width: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.network(
+                                      fish.imageURL,
+                                      height: 80,
+                                      width: 100,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                )
+                              : Image.network(
+                                  imageUrl,
+                                  height: 80,
+                                  width: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 80,
+                                      width: 100,
+                                      color: cs.surfaceVariant,
+                                      child: Icon(Icons.image_not_supported, color: cs.onSurfaceVariant),
+                                    );
+                                  },
+                                )
+                          : Container(
+                              height: 80,
+                              width: 100,
+                              color: cs.surfaceVariant,
+                              child: Icon(Icons.pets, color: cs.onSurfaceVariant),
+                            ),
+                      // Quantity badge
+                      if (quantity > 1)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: cs.primary,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'x$quantity',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                                color: cs.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
