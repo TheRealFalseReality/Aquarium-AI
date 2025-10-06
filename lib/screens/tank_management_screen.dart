@@ -20,6 +20,7 @@ import 'tank_creation_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
+import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
   name,
@@ -2974,7 +2975,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return widgets;
   }
 
-  void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
+  Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
         'Tank must have existing inhabitants to get stocking recommendations.'
@@ -2994,6 +2995,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       context.showAccessibleMessage(
         'Fish data is not available. Please try again later.'
       );
+      return;
+    }
+
+    // Show options dialog first
+    final options = await showDialog<StockingRecommendationOptions>(
+      context: context,
+      builder: (context) => const StockingRecommendationOptionsDialog(),
+    );
+
+    // User cancelled the dialog
+    if (options == null || !context.mounted) {
       return;
     }
     
@@ -3073,6 +3085,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
+        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
       },
     );
     AnalyticsService.logTankAction(
@@ -3082,7 +3096,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // Get recommendations for this tank
-    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
+      tank: tank,
+      includeCustomNames: options.includeCustomNames,
+      additionalNotes: options.additionalNotes,
+    );
   }
 
   Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {
