@@ -17,6 +17,7 @@ class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
   final String? existingTankName; // Optional tank name for tank-based recommendations
   final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
+  final bool useCustomNames; // Whether custom names are included
   
   // For regeneration support
   final Tank? originalTank; // For tank-based regeneration
@@ -29,6 +30,7 @@ class StockingReportScreen extends ConsumerStatefulWidget {
     required this.reports,
     this.existingTankName,
     this.existingFish,
+    this.useCustomNames = false,
     this.originalTank,
     this.tankSize,
     this.tankType,
@@ -114,6 +116,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
               reports: next.recommendations!,
               existingTankName: widget.existingTankName,
               existingFish: widget.existingFish,
+              useCustomNames: widget.useCustomNames,
               originalTank: widget.originalTank,
               tankSize: widget.tankSize,
               tankType: widget.tankType,
@@ -196,6 +199,8 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                         isForExistingTank: report.isAdditionRecommendation,
                         existingFish: widget.existingFish,
                         existingTankName: widget.originalTank?.name ?? widget.existingTankName,
+                        originalTank: widget.originalTank,
+                        useCustomNames: widget.useCustomNames,
                       );
                     }).toList(),
                   ),
@@ -261,12 +266,16 @@ class _RecommendationTabView extends StatelessWidget {
   final bool isForExistingTank;
   final List<Fish>? existingFish;
   final String? existingTankName;
+  final Tank? originalTank;
+  final bool useCustomNames;
 
   const _RecommendationTabView({
     required this.report,
     this.isForExistingTank = false,
     this.existingFish,
     this.existingTankName,
+    this.originalTank,
+    this.useCustomNames = false,
   });
 
   @override
@@ -349,26 +358,56 @@ class _RecommendationTabView extends StatelessWidget {
                 ],
                 // Existing fish confirmation list
                 if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
-                  Row(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Current Fish: ',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          existingFish!.map((fish) => fish.name).join(', '),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Current Fish (Types): ',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                            ),
                           ),
-                        ),
+                          Expanded(
+                            child: Text(
+                              existingFish!.map((fish) => fish.name).join(', '),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      if (useCustomNames && originalTank != null) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.label, size: 14, color: cs.onSurfaceVariant),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Custom Names: ',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                _buildCustomNamesList(originalTank!),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -398,6 +437,43 @@ class _RecommendationTabView extends StatelessWidget {
               color: cs.onSurfaceVariant,
             ),
           ),
+          if (useCustomNames && originalTank != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: cs.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.label, size: 16, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Custom Names Included',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.primary,
+                          ),
+                        ),
+                        Text(
+                          _buildCustomNamesList(originalTank!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           _FishCardGrid(fishList: existingFish!, isExisting: true),
           const Divider(height: 32),
@@ -610,6 +686,15 @@ class _RecommendationTabView extends StatelessWidget {
       return 0.75;
     }
     return 0.5;
+  }
+
+  String _buildCustomNamesList(Tank tank) {
+    // Build a list of custom names from tank inhabitants
+    final customNames = <String>[];
+    for (final inhabitant in tank.inhabitants) {
+      customNames.add(inhabitant.customName);
+    }
+    return customNames.join(', ');
   }
 }
 

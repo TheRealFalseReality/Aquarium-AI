@@ -86,9 +86,11 @@ void main() {
       expect(prompt, contains('freshwater'));
       expect(prompt, contains('Community tank with peaceful fish'));
       expect(prompt, contains('85.0%'));
+      // Fish types should always be included
+      expect(prompt, contains('Current Inhabitants (Fish Types)'));
     });
 
-    test('generates prompt without custom names by default', () {
+    test('generates prompt with fish types but without custom names by default', () {
       final prompt = buildTankStockingRecommendationPrompt(
         testTank,
         allFish,
@@ -96,13 +98,18 @@ void main() {
         0.85,
       );
 
+      // Should include fish types
+      expect(prompt, contains('Current Inhabitants (Fish Types)'));
+      expect(prompt, contains('Guppy'));
+      expect(prompt, contains('Neon Tetra'));
+      
       // Should not include custom names section
       expect(prompt, isNot(contains('Custom Names for Current Inhabitants')));
       expect(prompt, isNot(contains('Blue Beauty')));
       expect(prompt, isNot(contains('Red Flame')));
     });
 
-    test('generates prompt with custom names when requested', () {
+    test('generates prompt with fish types AND custom names when requested', () {
       final prompt = buildTankStockingRecommendationPrompt(
         testTank,
         allFish,
@@ -111,7 +118,10 @@ void main() {
         useCustomNames: true,
       );
 
-      // Should include custom names section
+      // Should include fish types
+      expect(prompt, contains('Current Inhabitants (Fish Types)'));
+      
+      // Should also include custom names section
       expect(prompt, contains('Custom Names for Current Inhabitants'));
       expect(prompt, contains('Blue Beauty'));
       expect(prompt, contains('Red Flame'));

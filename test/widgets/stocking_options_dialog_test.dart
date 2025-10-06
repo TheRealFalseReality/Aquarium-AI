@@ -15,14 +15,12 @@ void main() {
     // Verify the title is displayed
     expect(find.text('AI Stocking Recommendations'), findsOneWidget);
 
-    // Verify fish name options section
-    expect(find.text('Fish Name Options'), findsOneWidget);
-    expect(find.text('Use Fish Species Names'), findsOneWidget);
-    expect(find.text('Use Custom Names'), findsOneWidget);
+    // Verify custom names checkbox
+    expect(find.text('Include Custom Names'), findsOneWidget);
 
-    // Verify descriptions
-    expect(find.textContaining('scientific fish species names'), findsOneWidget);
-    expect(find.textContaining('custom names contain specific fish species'), findsOneWidget);
+    // Verify description
+    expect(find.textContaining('Fish types are always included'), findsOneWidget);
+    expect(find.textContaining('better species-specific results'), findsOneWidget);
 
     // Verify additional notes section
     expect(find.text('Additional Notes (Optional)'), findsOneWidget);
@@ -33,7 +31,7 @@ void main() {
     expect(find.text('Get Recommendations'), findsOneWidget);
   });
 
-  testWidgets('StockingOptionsDialog radio buttons work correctly', (WidgetTester tester) async {
+  testWidgets('StockingOptionsDialog checkbox works correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -42,25 +40,23 @@ void main() {
       ),
     );
 
-    // Find the radio buttons by their values
-    final useSpeciesNamesRadio = find.byWidgetPredicate(
-      (widget) => widget is Radio<bool> && widget.value == false,
-    );
-    final useCustomNamesRadio = find.byWidgetPredicate(
-      (widget) => widget is Radio<bool> && widget.value == true,
-    );
+    // Find the checkbox
+    final checkbox = find.byType(Checkbox);
 
-    // Initially, "Use Fish Species Names" should be selected (default)
-    expect(useSpeciesNamesRadio, findsOneWidget);
-    expect(useCustomNamesRadio, findsOneWidget);
+    // Initially, checkbox should be unchecked (default)
+    expect(checkbox, findsOneWidget);
+    
+    // Get the checkbox widget to verify its state
+    final checkboxWidget = tester.widget<Checkbox>(checkbox);
+    expect(checkboxWidget.value, isFalse);
 
-    // Tap on "Use Custom Names"
-    await tester.tap(useCustomNamesRadio);
+    // Tap on the checkbox
+    await tester.tap(checkbox);
     await tester.pumpAndSettle();
 
-    // The selection should have changed
-    // We can verify this by checking if the widget still exists
-    expect(useCustomNamesRadio, findsOneWidget);
+    // The checkbox should now be checked
+    final updatedCheckboxWidget = tester.widget<Checkbox>(checkbox);
+    expect(updatedCheckboxWidget.value, isTrue);
   });
 
   testWidgets('StockingOptionsDialog returns correct data when confirmed', (WidgetTester tester) async {
@@ -139,7 +135,7 @@ void main() {
     expect(result, isNull);
   });
 
-  testWidgets('StockingOptionsDialog with custom names selected', (WidgetTester tester) async {
+  testWidgets('StockingOptionsDialog with custom names checked', (WidgetTester tester) async {
     Map<String, dynamic>? result;
     
     await tester.pumpWidget(
@@ -166,11 +162,9 @@ void main() {
     await tester.tap(find.text('Show Dialog'));
     await tester.pumpAndSettle();
 
-    // Select "Use Custom Names"
-    final useCustomNamesRadio = find.byWidgetPredicate(
-      (widget) => widget is Radio<bool> && widget.value == true,
-    );
-    await tester.tap(useCustomNamesRadio);
+    // Check the checkbox
+    final checkbox = find.byType(Checkbox);
+    await tester.tap(checkbox);
     await tester.pumpAndSettle();
 
     // Tap the "Get Recommendations" button

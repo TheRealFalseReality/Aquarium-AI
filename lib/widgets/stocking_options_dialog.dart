@@ -42,79 +42,32 @@ class _StockingOptionsDialogState extends State<StockingOptionsDialog> {
                 ),
                 const SizedBox(height: 20),
                 
-                // Fish name option section
-                Text(
-                  'Fish Name Options',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Option 1: Use species names (default)
+                // Include custom names option
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: !_useCustomNames ? cs.primary : cs.outline.withOpacity(0.5),
-                      width: !_useCustomNames ? 2 : 1,
+                      color: cs.outline.withOpacity(0.5),
+                      width: 1,
                     ),
                     borderRadius: BorderRadius.circular(12),
-                    color: !_useCustomNames 
-                        ? cs.primaryContainer.withOpacity(0.3)
-                        : cs.surfaceVariant.withOpacity(0.3),
+                    color: cs.surfaceVariant.withOpacity(0.3),
                   ),
-                  child: RadioListTile<bool>(
-                    value: false,
-                    groupValue: _useCustomNames,
+                  child: CheckboxListTile(
+                    value: _useCustomNames,
                     onChanged: (value) {
                       setState(() {
                         _useCustomNames = value ?? false;
                       });
                     },
                     title: Text(
-                      'Use Fish Species Names',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: !_useCustomNames ? cs.primary : null,
-                      ),
-                    ),
-                    subtitle: const Text(
-                      'AI will use the scientific fish species names from the database for recommendations.',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Option 2: Use custom names
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: _useCustomNames ? cs.primary : cs.outline.withOpacity(0.5),
-                      width: _useCustomNames ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    color: _useCustomNames 
-                        ? cs.primaryContainer.withOpacity(0.3)
-                        : cs.surfaceVariant.withOpacity(0.3),
-                  ),
-                  child: RadioListTile<bool>(
-                    value: true,
-                    groupValue: _useCustomNames,
-                    onChanged: (value) {
-                      setState(() {
-                        _useCustomNames = value ?? false;
-                      });
-                    },
-                    title: Text(
-                      'Use Custom Names',
+                      'Include Custom Names',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: _useCustomNames ? cs.primary : null,
                       ),
                     ),
                     subtitle: const Text(
-                      'AI will use your custom names. Useful when custom names contain specific fish species for better species-specific results.',
+                      'Fish types are always included. Enable this to also include your custom names for better species-specific results.',
                       style: TextStyle(fontSize: 12),
                     ),
                   ),

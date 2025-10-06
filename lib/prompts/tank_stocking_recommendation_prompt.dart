@@ -14,8 +14,8 @@ String buildTankStockingRecommendationPrompt(
 
   final existingFishNames = existingFish.map((f) => f.name).toList();
   
-  // Build custom names mapping if requested
-  final customNamesInfo = useCustomNames ? _buildCustomNamesInfo(tank, existingFish) : '';
+  // Build fish types with custom names information
+  final fishInfo = _buildFishInfo(tank, existingFish, useCustomNames);
   
   final tankSizeText = _formatTankSize(tank);
   final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(1);
@@ -37,9 +37,9 @@ String buildTankStockingRecommendationPrompt(
     - Tank Type: "${tank.type}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage% (THIS MUST BE MAINTAINED OR IMPROVED)
-    - Current Inhabitants: ${json.encode(existingFishNames)}
-    ${customNamesInfo.isNotEmpty ? '\n$customNamesInfo' : ''}
-    ${additionalNotes.isNotEmpty ? '\n\nUser Additional Notes/Preferences:\n$additionalNotes\n' : ''}
+    
+$fishInfo
+    ${additionalNotes.isNotEmpty ? '\nUser Additional Notes/Preferences:\n$additionalNotes\n' : ''}
 
     Current Fish Compatibility Data:
     ${json.encode(existingFish.map((f) => {
@@ -83,28 +83,33 @@ String _formatTankSize(Tank tank) {
   return 'Size not specified';
 }
 
-String _buildCustomNamesInfo(Tank tank, List<Fish> existingFish) {
-  // Build a mapping of fish species to custom names
-  final customNamesMap = <String, List<String>>{};
+String _buildFishInfo(Tank tank, List<Fish> existingFish, bool includeCustomNames) {
+  // Build a mapping of fish types to custom names
+  final fishInfoMap = <String, List<String>>{};
   
   for (final inhabitant in tank.inhabitants) {
-    final fishName = inhabitant.fishUnit;
+    final fishType = inhabitant.fishUnit;
     final customName = inhabitant.customName;
     
-    if (!customNamesMap.containsKey(fishName)) {
-      customNamesMap[fishName] = [];
+    if (!fishInfoMap.containsKey(fishType)) {
+      fishInfoMap[fishType] = [];
     }
-    customNamesMap[fishName]!.add(customName);
+    fishInfoMap[fishType]!.add(customName);
   }
   
   final buffer = StringBuffer();
-  buffer.writeln('\nCustom Names for Current Inhabitants:');
-  buffer.writeln('(User has given custom names to their fish. Use these names when discussing current inhabitants as they may contain species-specific information)');
+  buffer.writeln('Current Inhabitants (Fish Types):');
+  buffer.writeln(json.encode(existingFish.map((f) => f.name).toList()));
   
-  for (final entry in customNamesMap.entries) {
-    final fishSpecies = entry.key;
-    final customNames = entry.value;
-    buffer.writeln('- $fishSpecies: ${customNames.join(", ")}');
+  if (includeCustomNames) {
+    buffer.writeln('\nCustom Names for Current Inhabitants:');
+    buffer.writeln('(User has given custom names to their fish. Use these names when discussing current inhabitants as they may contain species-specific information)');
+    
+    for (final entry in fishInfoMap.entries) {
+      final fishType = entry.key;
+      final customNames = entry.value;
+      buffer.writeln('- $fishType: ${customNames.join(", ")}');
+    }
   }
   
   return buffer.toString();

@@ -41,6 +41,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
+  bool _useCustomNamesForRecommendations = false; // Track if custom names should be used
   bool _isSortMenuExpanded = false; // Track sort menu expansion
 
   @override
@@ -98,6 +99,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               existingTankName: _currentTankForRecommendations?.name,
               existingFish: _currentExistingFish,
               originalTank: _currentTankForRecommendations, // For regeneration
+              useCustomNames: _useCustomNamesForRecommendations, // Pass the custom names flag
             ),
           ),
         );
@@ -2988,8 +2990,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final useCustomNames = result['useCustomNames'] as bool? ?? false;
     final additionalNotes = result['additionalNotes'] as String? ?? '';
 
-    // Store the current tank for the listener
+    // Store the current tank and options for the listener
     _currentTankForRecommendations = tank;
+    _useCustomNamesForRecommendations = useCustomNames;
     
     // Get fish data from provider
     final fishDataAsync = ref.read(fishDataProvider);
