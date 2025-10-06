@@ -108,7 +108,7 @@ class AquariumStockingNotifier extends Notifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',
@@ -241,7 +241,7 @@ class AquariumStockingNotifier extends Notifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',
