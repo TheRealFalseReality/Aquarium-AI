@@ -12,6 +12,8 @@ String buildStockingRecommendationPrompt(
     You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
 
     A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
+    If you cannot find a group of fish that meet the HIGH HARMONY rule, you may include fish that are listed as "With Caution" with **ALL** other fish in the group, but this should be avoided if possible.
+    Fish listed as "Not Compatible" with any other fish in the group are NOT allowed.
 
     User's Input:
     - Tank Size: "$tankSize"
