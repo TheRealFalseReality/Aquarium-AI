@@ -16,7 +16,7 @@ dependencies:
   flutter_native_splash: ^2.4.6
   flutter_riverpod: ^3.0.1
   riverpod_annotation: ^3.0.1
-  flutter_markdown: ^0.7.1
+  flutter_markdown_plus: ^0.0.2
   image_picker: ^1.2.0
   google_generative_ai: ^0.4.0
   dynamic_color: ^1.8.0
