@@ -333,36 +333,6 @@ class _RecommendationTabView extends StatelessWidget {
             ],
           ),
         ),
-        
-        // Calculation Breakdown for tank-based recommendations
-        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
-          const Divider(height: 32),
-          ExpansionTile(
-            title: Row(
-              children: [
-                Icon(Icons.calculate, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Calculation Breakdown',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  _generateCalculationBreakdown(existingFish!, report),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ],
     );
   }
