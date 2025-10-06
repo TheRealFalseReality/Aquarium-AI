@@ -635,42 +635,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     return grouped;
   }
 
-  Widget _buildThumbnail(Tank tank) {
-    // Get the most recent photo
-    if (tank.photos.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final recentPhoto = tank.photos.reduce((a, b) =>
-      a.dateTaken.isAfter(b.dateTaken) ? a : b
-    );
-
-    final imageUrl = recentPhoto.imageUrl ?? recentPhoto.imagePath;
-
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(5),
-        child: imageUrl != null
-            ? (imageUrl.startsWith('http')
-                ? Image.network(imageUrl, fit: BoxFit.cover)
-                : Image.file(File(imageUrl), fit: BoxFit.cover))
-            : Icon(
-                Icons.image,
-                size: 16,
-                color: Theme.of(context).colorScheme.onTertiaryContainer.withOpacity(0.5),
-              ),
-      ),
-    );
-  }
 
   int _getTotalInhabitantCount(List<dynamic> inhabitants) {
     return inhabitants.fold(0, (total, inhabitant) => total + (inhabitant.quantity as int? ?? 0));
