@@ -17,12 +17,16 @@ class TankStockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
   final Tank originalTank;
   final List<Fish> existingFish;
+  final bool includeCustomNames;
+  final String additionalNotes;
 
   const TankStockingReportScreen({
     super.key,
     required this.reports,
     required this.originalTank,
     required this.existingFish,
+    this.includeCustomNames = false,
+    this.additionalNotes = '',
   });
 
   @override
@@ -80,6 +84,8 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
               reports: next.recommendations!,
               originalTank: widget.originalTank,
               existingFish: widget.existingFish,
+              includeCustomNames: widget.includeCustomNames,
+              additionalNotes: widget.additionalNotes,
             ),
           ),
         );
@@ -157,6 +163,8 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                         report: report,
                         originalTank: widget.originalTank,
                         existingFish: widget.existingFish,
+                        includeCustomNames: widget.includeCustomNames,
+                        additionalNotes: widget.additionalNotes,
                       );
                     }).toList(),
                   ),
@@ -221,11 +229,15 @@ class _TankRecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
   final Tank originalTank;
   final List<Fish> existingFish;
+  final bool includeCustomNames;
+  final String additionalNotes;
 
   const _TankRecommendationTabView({
     required this.report,
     required this.originalTank,
     required this.existingFish,
+    this.includeCustomNames = false,
+    this.additionalNotes = '',
   });
 
   @override
@@ -254,6 +266,44 @@ class _TankRecommendationTabView extends StatelessWidget {
             color: cs.onSurfaceVariant,
           ),
         ),
+
+        // Show additional notes if provided
+        if (additionalNotes.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.tertiaryContainer.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.tertiary.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.note_alt_outlined, size: 16, color: cs.tertiary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Your Preferences',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.tertiary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  additionalNotes,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
 
         // Show existing tank info
         const SizedBox(height: 16),
@@ -376,6 +426,13 @@ class _TankRecommendationTabView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _FishCardGrid(fishList: existingFish, originalTank: originalTank, isExisting: true),
+        
+        // Show custom names if they were included
+        if (includeCustomNames) ...[
+          const SizedBox(height: 16),
+          _buildCustomNamesSection(context, originalTank),
+        ],
+        
         const Divider(height: 32),
 
         _SectionHeader(title: 'Fish to Add'),
@@ -597,6 +654,82 @@ class _TankRecommendationTabView extends StatelessWidget {
       return 0.75;
     }
     return 0.5;
+  }
+
+  Widget _buildCustomNamesSection(BuildContext context, Tank tank) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    
+    // Build map of custom names that differ from fish unit names
+    final customNamesMap = <String, String>{};
+    for (final inhabitant in tank.inhabitants) {
+      if (inhabitant.customName != inhabitant.fishUnit) {
+        customNamesMap[inhabitant.fishUnit] = inhabitant.customName;
+      }
+    }
+    
+    // If no custom names, return empty widget
+    if (customNamesMap.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cs.secondary.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.label_outline, size: 14, color: cs.secondary),
+              const SizedBox(width: 6),
+              Text(
+                'Custom Names',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.secondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...customNamesMap.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      entry.key,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward, size: 12, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      entry.value,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.secondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 }
 

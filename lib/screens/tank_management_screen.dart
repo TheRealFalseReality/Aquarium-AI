@@ -42,6 +42,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
+  bool _includeCustomNames = false; // Track if custom names were included
+  String _additionalNotes = ''; // Track additional notes
 
   @override
   void initState() {
@@ -102,12 +104,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 reports: next.recommendations!,
                 originalTank: tank,
                 existingFish: fish,
+                includeCustomNames: _includeCustomNames,
+                additionalNotes: _additionalNotes,
               ),
             ),
           );
-          // Clear the current tank reference
+          // Clear the current tank reference and options
           _currentTankForRecommendations = null;
           _currentExistingFish = null;
+          _includeCustomNames = false;
+          _additionalNotes = '';
         } else {
           context.showAccessibleMessage(
             'Error: Missing tank data. Please try again.'
@@ -3008,6 +3014,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     if (options == null || !context.mounted) {
       return;
     }
+    
+    // Store the options for the listener
+    _includeCustomNames = options.includeCustomNames;
+    _additionalNotes = options.additionalNotes;
     
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
