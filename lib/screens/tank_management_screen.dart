@@ -17,7 +17,7 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
-import 'stocking_report_screen.dart';
+import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
 
@@ -92,11 +92,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(
+            builder: (context) => TankStockingReportScreen(
               reports: next.recommendations!,
-              existingTankName: _currentTankForRecommendations?.name,
-              existingFish: _currentExistingFish,
-              originalTank: _currentTankForRecommendations, // For regeneration
+              originalTank: _currentTankForRecommendations!,
+              existingFish: _currentExistingFish!,
             ),
           ),
         );

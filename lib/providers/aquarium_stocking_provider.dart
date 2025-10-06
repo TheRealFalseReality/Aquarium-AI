@@ -5,6 +5,7 @@ import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dart_openai/dart_openai.dart';
+import 'package:groq/groq.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
 import 'dart:async';
@@ -300,11 +301,27 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         final model = GenerativeModel(model: models.geminiModel, apiKey: models.geminiApiKey);
         final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 45));
         responseText = response.text;
-      } else {
+      } else if (models.activeProvider == AIProvider.openAI) {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
         }
         responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+      } else if (models.activeProvider == AIProvider.groq) {
+        if (models.groqApiKey.isEmpty) {
+          throw Exception('Groq API Key not set. Please go to settings to add your API key.');
+        }
+        final groq = Groq(models.groqApiKey);
+        final chatCompletion = await groq.chat.completions.create(
+          model: models.groqModel,
+          messages: [
+            Message(
+              role: Role.user,
+              content: prompt,
+            ),
+          ],
+          responseFormat: ResponseFormat(type: ResponseFormatType.jsonObject),
+        ).timeout(const Duration(seconds: 45));
+        responseText = chatCompletion.choices.firstOrNull?.message.content;
       }
 
       if (responseText == null) {
