@@ -147,17 +147,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = Groq(apiKey: models.groqApiKey, model: models.groqModel);
-        final chatCompletion = await groq.chat.completions.create(
-          model: models.groqModel,
-          messages: [
-            Message(
-              role: Role.user,
-              content: prompt,
-            ),
-          ],
-          responseFormat: ResponseFormat(type: ResponseFormatType.jsonObject),
-        ).timeout(const Duration(seconds: 45));
-        responseText = chatCompletion.choices.firstOrNull?.message.content;
+        groq.startChat();
+        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
+        responseText = response.choices.first.message.content;
       }
 
       if (responseText == null) {
@@ -327,17 +319,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = Groq(apiKey: models.groqApiKey, model: models.groqModel);
-        final chatCompletion = await groq.chat.completions.create(
-          model: models.groqModel,
-          messages: [
-            Message(
-              role: Role.user,
-              content: prompt,
-            ),
-          ],
-          responseFormat: ResponseFormat(type: ResponseFormatType.jsonObject),
-        ).timeout(const Duration(seconds: 45));
-        responseText = chatCompletion.choices.firstOrNull?.message.content;
+        groq.startChat();
+        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
+        responseText = response.choices.first.message.content;
       }
 
       if (responseText == null) {
