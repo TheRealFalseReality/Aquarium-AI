@@ -1857,23 +1857,59 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: Row(
                                       children: [
-                                        CircleAvatar(
-                                          radius: 22,
-                                          backgroundImage: fishImageUrl != null 
-                                            ? (fishImageUrl.startsWith('http')
-                                                ? NetworkImage(fishImageUrl)
-                                                : FileImage(File(fishImageUrl)) as ImageProvider)
-                                            : null,
-                                          backgroundColor: fishImageUrl == null 
-                                            ? cs.primaryContainer 
-                                            : null,
-                                          child: fishImageUrl == null 
-                                            ? Icon(
-                                                Icons.shape_line,
-                                                color: cs.onPrimaryContainer,
-                                                size: 22,
-                                              ) 
-                                            : null,
+                                        Stack(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 22,
+                                              backgroundImage: fishImageUrl != null 
+                                                ? (fishImageUrl.startsWith('http')
+                                                    ? NetworkImage(fishImageUrl)
+                                                    : FileImage(File(fishImageUrl)) as ImageProvider)
+                                                : null,
+                                              backgroundColor: fishImageUrl == null 
+                                                ? cs.primaryContainer 
+                                                : null,
+                                              child: fishImageUrl == null 
+                                                ? Icon(
+                                                    Icons.shape_line,
+                                                    color: cs.onPrimaryContainer,
+                                                    size: 22,
+                                                  ) 
+                                                : null,
+                                            ),
+                                            // Quantity badge
+                                            if (inhabitant.quantity > 1)
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: cs.primary,
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    border: Border.all(
+                                                      color: cs.surface,
+                                                      width: 1.5,
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withOpacity(0.3),
+                                                        blurRadius: 3,
+                                                        offset: const Offset(0, 1),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Text(
+                                                    '${inhabitant.quantity}',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: cs.onPrimary,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
