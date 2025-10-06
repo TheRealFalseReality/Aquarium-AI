@@ -157,16 +157,24 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                   ),
                 ),
                 Expanded(
-                  child: TabBarView(
-                    children: widget.reports.map((report) {
-                      return _TankRecommendationTabView(
-                        report: report,
-                        originalTank: widget.originalTank,
-                        existingFish: widget.existingFish,
-                        includeCustomNames: widget.includeCustomNames,
-                        additionalNotes: widget.additionalNotes,
+                  child: Builder(
+                    builder: (context) {
+                      // Debug: Print values before creating TabBarView
+                      debugPrint('TankStockingReportScreen build - includeCustomNames: ${widget.includeCustomNames}');
+                      debugPrint('TankStockingReportScreen build - additionalNotes: "${widget.additionalNotes}"');
+                      
+                      return TabBarView(
+                        children: widget.reports.map((report) {
+                          return _TankRecommendationTabView(
+                            report: report,
+                            originalTank: widget.originalTank,
+                            existingFish: widget.existingFish,
+                            includeCustomNames: widget.includeCustomNames,
+                            additionalNotes: widget.additionalNotes,
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
                 // Bottom buttons with extra padding
