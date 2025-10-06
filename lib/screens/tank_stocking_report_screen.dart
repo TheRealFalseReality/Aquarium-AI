@@ -1,5 +1,6 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/accessible_feedback.dart';
+import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -441,34 +442,78 @@ class _TankRecommendationTabView extends StatelessWidget {
           _FishCardGrid(fishList: report.otherDataBasedFish, isAddition: true),
         ],
 
-        if (report.aiRecommendedTankMates.isNotEmpty) ...[
-          const Divider(height: 32),
-          _SectionHeader(title: 'Additional Suggestions (AI Generated)'),
-          const SizedBox(height: 8),
-          Text(
-            report.aiTankMatesSummary,
-            style: theme.textTheme.bodySmall,
+        const Divider(height: 16),
+        const NativeAdWidget(),
+        const Divider(height: 8),
+        _SectionHeader(title: 'Recommended Tank Mates'),
+        const SizedBox(height: 12),
+        Text(
+          report.aiTankMatesSummary,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: cs.onSurfaceVariant,
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: report.aiRecommendedTankMates.map((fishName) {
-              return ActionChip(
-                label: Text(fishName),
-                onPressed: () => _launchSearch(fishName),
-              );
-            }).toList(),
-          ),
-        ],
+        ),
+        const SizedBox(height: 8),
+        const InstructionText(
+          text: "(Click a fish to search)",
+        ),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: report.aiRecommendedTankMates.map((mate) {
+            return ModernSelectableChip(
+              label: mate,
+              onTap: () => _launchSearch(mate),
+              selected: false,
+            );
+          }).toList(),
+        ),
 
+        const SizedBox(height: 16),
+        const BannerAdWidget(),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cs.errorContainer.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.error.withOpacity(0.5)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'AI can make mistakes. Please verify the information provided in this report before making any stocking decisions.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
         if (report.compatibilityNotes != null && report.compatibilityNotes!.isNotEmpty) ...[
           const Divider(height: 32),
           _SectionHeader(title: 'Compatibility Notes'),
-          const SizedBox(height: 8),
-          Text(
-            report.compatibilityNotes!,
-            style: theme.textTheme.bodySmall,
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.primary.withOpacity(0.2)),
+            ),
+            child: Text(
+              report.compatibilityNotes!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface,
+              ),
+            ),
           ),
         ],
       ],
@@ -498,11 +543,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(width: 8),
+      ],
     );
   }
 }

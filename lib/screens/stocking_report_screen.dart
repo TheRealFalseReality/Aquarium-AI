@@ -15,25 +15,15 @@ import '../widgets/helper_text.dart';
 
 class StockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
-  final String? existingTankName; // Optional tank name for tank-based recommendations
-  final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
-  final bool useCustomNames; // Whether custom names are included
-  final String? additionalNotes; // Additional notes for tank-based recommendations
   
-  // For regeneration support
-  final Tank? originalTank; // For tank-based regeneration
-  final String? tankSize; // For general stocking regeneration
-  final String? tankType; // For general stocking regeneration  
-  final String? userNotes; // For general stocking regeneration
+  // For regeneration support (general stocking only)
+  final String? tankSize;
+  final String? tankType;
+  final String? userNotes;
 
   const StockingReportScreen({
     super.key, 
     required this.reports,
-    this.existingTankName,
-    this.existingFish,
-    this.useCustomNames = false,
-    this.additionalNotes,
-    this.originalTank,
     this.tankSize,
     this.tankType,
     this.userNotes,
@@ -53,8 +43,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
     AnalyticsService.logFeatureUsed(
       featureName: 'stocking_report_regenerate',
       parameters: {
-        'regeneration_type': widget.originalTank != null ? 'tank_based' : 'general',
-        'has_existing_fish': (widget.existingFish?.isNotEmpty ?? false) ? 'true' : 'false',
+        'regeneration_type': 'general',
+        'tank_size': widget.tankSize ?? 'unknown',
+        'tank_type': widget.tankType ?? 'unknown',
       },
     );
     
@@ -62,14 +53,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
       _isRegenerating = true;
     });
 
-    if (widget.originalTank != null) {
-      // Tank-based regeneration
-      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
-        tank: widget.originalTank!,
-        useCustomNames: widget.useCustomNames,
-        additionalNotes: widget.additionalNotes ?? '',
-      );
-    } else if (widget.tankSize != null && widget.tankType != null) {
+    if (widget.tankSize != null && widget.tankType != null) {
       // General stocking regeneration  
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
         tankSize: widget.tankSize!,
@@ -86,20 +70,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
   }
 
   String get _getDisplayTitle {
-    // Check if it's a tank-based recommendation
-    if (widget.reports.isNotEmpty && widget.reports.first.isAdditionRecommendation) {
-      // Use original tank name if available, otherwise existing tank name
-      final tankName = widget.originalTank?.name ?? widget.existingTankName;
-      if (tankName != null && tankName.isNotEmpty) {
-        return 'Stocking Ideas for "$tankName"';
-      }
-      return 'Tank Stocking Ideas';
-    }
-    // Check if we have tank name from any source for non-addition recommendations  
-    final tankName = widget.originalTank?.name ?? widget.existingTankName;
-    if (tankName != null && tankName.isNotEmpty) {
-      return 'Stocking Ideas for "$tankName"';
-    }
     return 'Stocking Ideas';
   }
 
@@ -120,11 +90,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
           MaterialPageRoute(
             builder: (context) => StockingReportScreen(
               reports: next.recommendations!,
-              existingTankName: widget.existingTankName,
-              existingFish: widget.existingFish,
-              useCustomNames: widget.useCustomNames,
-              additionalNotes: widget.additionalNotes,
-              originalTank: widget.originalTank,
               tankSize: widget.tankSize,
               tankType: widget.tankType,
               userNotes: widget.userNotes,
@@ -203,11 +168,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                     children: widget.reports.map((report) {
                       return _RecommendationTabView(
                         report: report,
-                        isForExistingTank: report.isAdditionRecommendation,
-                        existingFish: widget.existingFish,
-                        existingTankName: widget.originalTank?.name ?? widget.existingTankName,
-                        originalTank: widget.originalTank,
-                        useCustomNames: widget.useCustomNames,
                       );
                     }).toList(),
                   ),
@@ -270,19 +230,9 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
 class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
-  final bool isForExistingTank;
-  final List<Fish>? existingFish;
-  final String? existingTankName;
-  final Tank? originalTank;
-  final bool useCustomNames;
 
   const _RecommendationTabView({
     required this.report,
-    this.isForExistingTank = false,
-    this.existingFish,
-    this.existingTankName,
-    this.originalTank,
-    this.useCustomNames = false,
   });
 
   @override
@@ -312,214 +262,22 @@ class _RecommendationTabView extends StatelessWidget {
           ),
         ),
         
-        // Show existing tank info for tank-based recommendations
-        if (isForExistingTank) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.surfaceVariant.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: cs.outline.withOpacity(0.2)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 16, color: cs.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Adding to Existing Tank',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: cs.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Tank name confirmation
-                if (isForExistingTank && existingTankName != null) ...[
-                  Row(
-                    children: [
-                      Icon(Icons.water, size: 14, color: cs.onSurfaceVariant),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Tank: ',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      Text(
-                        existingTankName!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: cs.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                // Existing fish confirmation list
-                if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Current Fish (Types): ',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              _getUniqueFish(existingFish!).map((fish) => fish.name).join(', '),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (useCustomNames && originalTank != null) ...[
-                        const SizedBox(height: 6),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.label, size: 14, color: cs.onSurfaceVariant),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Custom Names: ',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                _buildCustomNamesList(originalTank!),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                Text(
-                  'These recommendations are designed to work with your current fish community. All suggested additions have been verified for compatibility.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-        
         const Divider(height: 32),
         
-        // Show existing fish for tank-based recommendations  
-        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
-          _SectionHeader(title: 'Current Tank Inhabitants'),
-          const SizedBox(height: 8),
-          Text(
-            'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          if (useCustomNames && originalTank != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cs.primaryContainer.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: cs.primary.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.label, size: 16, color: cs.primary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Custom Names Included',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: cs.primary,
-                          ),
-                        ),
-                        Text(
-                          _buildCustomNamesList(originalTank!),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          _FishCardGrid(fishList: _getUniqueFish(existingFish!), isExisting: true),
-          const Divider(height: 32),
-        ],
-        
-        _SectionHeader(title: isForExistingTank ? 'Fish to Add' : 'Stocking Options'),
+        _SectionHeader(title: 'Stocking Options'),
         const SizedBox(height: 8),
         Text(
-            isForExistingTank
-                ? 'The "Recommended Additions" are compatible with your existing tank inhabitants. The "Other Options" provide more choices while maintaining harmony.'
-                : 'The "Core Fish" are a highly compatible group. The "Other Options" are additional fish from our database that you can add while maintaining high harmony.',
-            style: theme.textTheme.bodySmall),
+          'The "Core Fish" are a highly compatible group. The "Other Options" are additional fish from our database that you can add while maintaining high harmony.',
+          style: theme.textTheme.bodySmall,
+        ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, isCore: true, isAddition: isForExistingTank),
+        _FishCardGrid(fishList: report.coreFish, isCore: true),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text('Other Options', style: theme.textTheme.titleMedium),
             const SizedBox(height: 16),
-            _FishCardGrid(fishList: report.otherDataBasedFish, isAddition: isForExistingTank),
-        ],
-
-        // Show compatibility notes for tank-based recommendations
-        if (isForExistingTank && report.compatibilityNotes != null) ...[
-          const Divider(height: 32),
-          _SectionHeader(title: 'Compatibility Notes'),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.primaryContainer.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: cs.primary.withOpacity(0.2)),
-            ),
-            child: Text(
-              report.compatibilityNotes!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface,
-              ),
-            ),
-          ),
+            _FishCardGrid(fishList: report.otherDataBasedFish),
         ],
 
         const Divider(height: 16),
@@ -576,36 +334,7 @@ class _RecommendationTabView extends StatelessWidget {
             ],
           ),
         ),
-        
-        // Calculation Breakdown for tank-based recommendations
-        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
-          const Divider(height: 32),
-          ExpansionTile(
-            title: Row(
-              children: [
-                Icon(Icons.calculate, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Calculation Breakdown',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  _generateCalculationBreakdown(existingFish!, report),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+
       ],
     );
   }
@@ -630,20 +359,7 @@ class _RecommendationTabView extends StatelessWidget {
     }
   }
   
-  String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
-    // Combine existing fish with the recommended core fish to show full tank compatibility
-    final uniqueExisting = _getUniqueFish(existingFish);
-    final allTankFish = [...existingFish, ...report.coreFish];
-    
-    final buffer = StringBuffer();
-    buffer.writeln("Current Tank Analysis:");
-    buffer.writeln("Existing Fish: ${uniqueExisting.map((f) => f.name).join(', ')}");
-    buffer.writeln("Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}");
-    buffer.writeln();
-    
-    // Import the harmony calculator method here
-    return buffer.toString() + _calculateCompatibilityBreakdown(allTankFish);
-  }
+
   
   String _calculateCompatibilityBreakdown(List<Fish> fishList) {
     if (fishList.length < 2) {
@@ -694,25 +410,6 @@ class _RecommendationTabView extends StatelessWidget {
     return 0.5;
   }
 
-  String _buildCustomNamesList(Tank tank) {
-    // Build a list of custom names from tank inhabitants
-    final customNames = <String>[];
-    for (final inhabitant in tank.inhabitants) {
-      customNames.add(inhabitant.customName);
-    }
-    return customNames.join(', ');
-  }
-
-  List<Fish> _getUniqueFish(List<Fish> fishList) {
-    // Get unique fish by name to avoid showing duplicates
-    final uniqueFishMap = <String, Fish>{};
-    for (final fish in fishList) {
-      if (!uniqueFishMap.containsKey(fish.name)) {
-        uniqueFishMap[fish.name] = fish;
-      }
-    }
-    return uniqueFishMap.values.toList();
-  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -734,13 +431,9 @@ class _SectionHeader extends StatelessWidget {
 class _FishCardGrid extends StatelessWidget {
     final List<Fish> fishList;
     final bool isCore;
-    final bool isAddition;
-    final bool isExisting;
     const _FishCardGrid({
       required this.fishList, 
       this.isCore = false,
-      this.isAddition = false,
-      this.isExisting = false,
     });
 
     @override
@@ -762,9 +455,7 @@ class _FishCardGrid extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: isExisting
-                          ? BorderSide(color: cs.secondary, width: 2)  // Different color for existing fish
-                          : isCore 
+                      side: isCore 
                           ? BorderSide(color: cs.primary, width: 2)
                           : BorderSide.none,
                     ),

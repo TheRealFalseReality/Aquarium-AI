@@ -94,22 +94,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           Navigator.of(context).pop(); // Close loading dialog
         }
         
-        // Use dedicated tank stocking report screen for better display
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => TankStockingReportScreen(
-              reports: next.recommendations!,
-              tank: _currentTankForRecommendations!,
-              existingFish: _currentExistingFish!,
-              useCustomNames: _useCustomNamesForRecommendations,
-              additionalNotes: _additionalNotesForRecommendations,
+        // Check if this is a tank-based recommendation (we have tank and fish data)
+        if (_currentTankForRecommendations != null && _currentExistingFish != null) {
+          // Use dedicated tank stocking report screen for tank-based recommendations
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => TankStockingReportScreen(
+                reports: next.recommendations!,
+                tank: _currentTankForRecommendations!,
+                existingFish: _currentExistingFish!,
+                useCustomNames: _useCustomNamesForRecommendations,
+                additionalNotes: _additionalNotesForRecommendations,
+              ),
             ),
-          ),
-        );
-        // Clear the current tank reference
-        _currentTankForRecommendations = null;
-        _currentExistingFish = null;
-        _additionalNotesForRecommendations = '';
+          );
+          // Clear the current tank reference
+          _currentTankForRecommendations = null;
+          _currentExistingFish = null;
+          _additionalNotesForRecommendations = '';
+        }
       }
       if (next.error != null) {
         // Hide loading dialog if it's showing
