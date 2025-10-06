@@ -19,6 +19,7 @@ import '../widgets/stocking_options_dialog.dart';
 import '../services/analytics_service.dart';
 import 'tank_creation_screen.dart';
 import 'stocking_report_screen.dart';
+import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
 
@@ -93,15 +94,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           Navigator.of(context).pop(); // Close loading dialog
         }
         
+        // Use dedicated tank stocking report screen for better display
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(
+            builder: (context) => TankStockingReportScreen(
               reports: next.recommendations!,
-              existingTankName: _currentTankForRecommendations?.name,
-              existingFish: _currentExistingFish,
-              originalTank: _currentTankForRecommendations, // For regeneration
-              useCustomNames: _useCustomNamesForRecommendations, // Pass the custom names flag
-              additionalNotes: _additionalNotesForRecommendations, // Pass additional notes
+              tank: _currentTankForRecommendations!,
+              existingFish: _currentExistingFish!,
+              useCustomNames: _useCustomNamesForRecommendations,
+              additionalNotes: _additionalNotesForRecommendations,
             ),
           ),
         );
