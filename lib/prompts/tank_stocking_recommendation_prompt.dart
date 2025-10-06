@@ -3,7 +3,13 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
 
 String buildTankStockingRecommendationPrompt(
-    Tank tank, List<Fish> allFish, List<Fish> existingFish, double currentHarmonyScore) {
+    Tank tank,
+    List<Fish> allFish,
+    List<Fish> existingFish,
+    double currentHarmonyScore, {
+    bool includeCustomNames = false,
+    String additionalNotes = '',
+  }) {
   final fishListWithCompat = allFish.map((f) => {
     'name': f.name,
     'compatible': f.compatible,
@@ -12,6 +18,34 @@ String buildTankStockingRecommendationPrompt(
   final existingFishNames = existingFish.map((f) => f.name).toList();
   final tankSizeText = _formatTankSize(tank);
   final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(1);
+
+  // Build custom names info if included
+  String customNamesInfo = '';
+  if (includeCustomNames) {
+    final customNamesMap = <String, String>{};
+    for (final inhabitant in tank.inhabitants) {
+      if (inhabitant.customName != inhabitant.fishUnit) {
+        customNamesMap[inhabitant.fishUnit] = inhabitant.customName;
+      }
+    }
+    if (customNamesMap.isNotEmpty) {
+      customNamesInfo = '''
+
+    Custom Names (User-provided species information):
+    ${json.encode(customNamesMap)}
+    Note: These custom names may provide more specific species information. Consider them for more precise recommendations.''';
+    }
+  }
+
+  // Build additional notes section if provided
+  String additionalNotesSection = '';
+  if (additionalNotes.isNotEmpty) {
+    additionalNotesSection = '''
+
+    User's Additional Requests/Preferences:
+    "$additionalNotes"
+    Please consider these preferences when making recommendations.''';
+  }
 
   return '''
     You are an expert aquarium stocking advisor. Your goal is to recommend additional fish to ADD to an existing tank while maintaining the highest possible harmony.
@@ -32,7 +66,7 @@ String buildTankStockingRecommendationPrompt(
     - Tank Type: "${tank.type}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage% (THIS MUST BE MAINTAINED OR IMPROVED)
-    - Current Inhabitants: ${json.encode(existingFishNames)}
+    - Current Inhabitants: ${json.encode(existingFishNames)}$customNamesInfo$additionalNotesSection
 
     Current Fish Compatibility Data:
     ${json.encode(existingFish.map((f) => {
@@ -45,7 +79,7 @@ String buildTankStockingRecommendationPrompt(
 
     Based on the current tank setup, provide 3 distinct recommendations for ADDITIONAL fish to add. Each recommendation should:
     - MAINTAIN OR IMPROVE the current $currentHarmonyPercentage% harmony score
-    - Be compatible with ALL existing fish
+    - Be compatible with ALL existing fish or Current Inhabitants
     - Consider appropriate stocking levels for the tank size
     - Suggest fish that complement the existing ecosystem
     - Account for water column usage (top, middle, bottom dwellers)

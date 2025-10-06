@@ -392,7 +392,7 @@ class FishCompatibilityScreenState
                       child: Column(
                         children: [
                           Text(
-                            'AI Fish Compatibility',
+                            'AI Inhabitant Compatibility',
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineLarge

@@ -19,6 +19,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   final _tankSizeController = TextEditingController();
   final _notesController = TextEditingController();
   String _selectedCategory = 'freshwater';
+  String _selectedUnit = 'gallons';
 
   @override
   void dispose() {
@@ -29,19 +30,23 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
 
   void _getRecommendations() {
     if (_formKey.currentState!.validate()) {
+      // Build tank size string with unit
+      final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
+      
       // Log actual feature usage
       AnalyticsService.logFeatureUsed(
         featureName: 'aquarium_stocking_assistant',
         parameters: {
-          'tank_size': _tankSizeController.text,
+          'tank_size': tankSizeWithUnit,
           'tank_type': _selectedCategory,
+          'tank_unit': _selectedUnit,
           'has_notes': _notesController.text.isNotEmpty ? 'true' : 'false',
           'notes_length': _notesController.text.length,
         },
       );
       
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
-            tankSize: _tankSizeController.text,
+            tankSize: tankSizeWithUnit,
             tankType: _selectedCategory,
             userNotes: _notesController.text,
           );
@@ -59,11 +64,14 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       }
 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+        // Build tank size string with unit
+        final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
+        
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => StockingReportScreen(
               reports: next.recommendations!,
-              tankSize: _tankSizeController.text,
+              tankSize: tankSizeWithUnit,
               tankType: _selectedCategory,
               userNotes: _notesController.text,
             ),
@@ -128,18 +136,47 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 ],
               ),
               const SizedBox(height: 24),
-              TextFormField(
-                controller: _tankSizeController,
-                decoration: const InputDecoration(
-                  labelText: 'Tank Size (e.g., "55" (for gallons) or "200 liters")',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a tank size';
-                  }
-                  return null;
-                },
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _tankSizeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tank Size',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a tank size';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedUnit,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'gallons', child: Text('Gallons')),
+                        DropdownMenuItem(value: 'liters', child: Text('Liters')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedUnit = value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               TextFormField(
