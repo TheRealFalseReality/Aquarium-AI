@@ -98,6 +98,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         final fish = _currentExistingFish;
         
         if (tank != null && fish != null) {
+          // Debug: Print values being passed to report screen
+          debugPrint('Passing to report - includeCustomNames: $_includeCustomNames');
+          debugPrint('Passing to report - additionalNotes: "$_additionalNotes"');
+          
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TankStockingReportScreen(
@@ -3018,6 +3022,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Store the options for the listener
     _includeCustomNames = options.includeCustomNames;
     _additionalNotes = options.additionalNotes;
+    
+    // Debug: Print values to verify they're being stored
+    debugPrint('Storing options - includeCustomNames: $_includeCustomNames');
+    debugPrint('Storing options - additionalNotes: "$_additionalNotes"');
     
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;

@@ -244,6 +244,11 @@ class _TankRecommendationTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    
+    // Debug: Print values to help troubleshoot
+    debugPrint('TankRecommendationTabView - includeCustomNames: $includeCustomNames');
+    debugPrint('TankRecommendationTabView - additionalNotes: "$additionalNotes"');
+    debugPrint('TankRecommendationTabView - tank inhabitants: ${originalTank.inhabitants.map((i) => '${i.fishUnit}:${i.customName}').join(', ')}');
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
