@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/species_tag.dart';
+import '../services/fish_data_service.dart';
 
 /// State class for species tags
 class SpeciesTagsState {
@@ -141,10 +142,62 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
     );
     await _saveTags();
   }
+
+  /// Initialize default tags from fish data common names
+  /// Only adds tags for fish types that don't already have tags
+  Future<void> initializeDefaultTags(Map<String, List<dynamic>> fishData) async {
+    final newTags = Map<String, List<String>>.from(state.tags);
+    bool hasChanges = false;
+
+    // Process both freshwater and marine categories
+    for (final category in ['freshwater', 'marine']) {
+      final fishList = fishData[category] as List<dynamic>?;
+      if (fishList == null) continue;
+
+      for (final fishJson in fishList) {
+        final fishName = fishJson['name'] as String;
+        final commonNames = fishJson['commonNames'] as List<dynamic>?;
+
+        // Only add default tags if this fish type has no tags yet
+        if (!newTags.containsKey(fishName) || newTags[fishName]!.isEmpty) {
+          if (commonNames != null && commonNames.isNotEmpty) {
+            newTags[fishName] = commonNames.map((name) => name.toString()).toList();
+            hasChanges = true;
+          }
+        }
+      }
+    }
+
+    // Only update state and save if there were changes
+    if (hasChanges) {
+      state = state.copyWith(tags: newTags, isLoading: false);
+      await _saveTags();
+    }
+  }
 }
 
 /// Provider for species tags
 final speciesTagsProvider =
     StateNotifierProvider<SpeciesTagsNotifier, SpeciesTagsState>(
-  (ref) => SpeciesTagsNotifier(),
+  (ref) {
+    final notifier = SpeciesTagsNotifier();
+    // Initialize default tags when provider is created
+    _initializeDefaultTagsAsync(ref, notifier);
+    return notifier;
+  },
 );
+
+/// Helper function to initialize default tags asynchronously
+Future<void> _initializeDefaultTagsAsync(
+    ProviderRef ref, SpeciesTagsNotifier notifier) async {
+  try {
+    // Wait a bit for the notifier to load existing tags first
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    final fishDataService = ref.read(fishDataServiceProvider);
+    final rawFishData = await fishDataService.loadRawFishData();
+    await notifier.initializeDefaultTags(rawFishData);
+  } catch (e) {
+    // Silently fail - default tags are optional
+  }
+}
