@@ -899,7 +899,7 @@ class _FishCardGrid extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                               textAlign: TextAlign.center,
-                              maxLines: 1,
+                              maxLines: 4,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
