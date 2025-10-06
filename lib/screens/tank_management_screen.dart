@@ -3010,30 +3010,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
     
     // Calculate and store existing fish for the listener
-    if (fishData != null) {
-      final categoryFish = fishData[tank.type] ?? [];
-      final existingFish = <Fish>[];
-      
-      for (final inhabitant in tank.inhabitants) {
-        final fish = categoryFish.firstWhere(
-          (f) => f.name == inhabitant.fishUnit,
-          orElse: () => Fish(
-            name: inhabitant.fishUnit,
-            commonNames: [],
-            imageURL: '',
-            compatible: [],
-            notRecommended: [],
-            notCompatible: [],
-            withCaution: [],
-          ),
-        );
-        // Add individual fish based on quantity for proper compatibility calculations
-        for (int i = 0; i < inhabitant.quantity; i++) {
-          existingFish.add(fish);
-        }
+    final categoryFish = fishData?[tank.type] ?? [];
+    final existingFish = <Fish>[];
+    
+    for (final inhabitant in tank.inhabitants) {
+      final fish = categoryFish.firstWhere(
+        (f) => f.name == inhabitant.fishUnit,
+        orElse: () => Fish(
+          name: inhabitant.fishUnit,
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        ),
+      );
+      // Add individual fish based on quantity for proper compatibility calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
+        existingFish.add(fish);
       }
-      _currentExistingFish = existingFish;
     }
+    _currentExistingFish = existingFish;
 
     // Show loading overlay
     showDialog(
