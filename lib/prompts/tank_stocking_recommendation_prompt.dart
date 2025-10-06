@@ -22,7 +22,7 @@ String buildTankStockingRecommendationPrompt(
     You are an expert aquarium stocking advisor. Your goal is to recommend additional fish to ADD to an existing tank while maintaining the highest possible harmony.
 
     CRITICAL REQUIREMENTS:
-    1. MAINTAIN CURRENT HARMONY: The tank currently has $currentHarmonyPercentage% harmony - this MUST be maintained or improved
+    1. MAINTAIN CURRENT HARMONY: The tank currently has $currentHarmonyPercentage% harmony - this MUST be maintained or improved. If you cannot find a group that meets HIGH HARMONY, then select groups that have the least number of "With Caution" relationships.
     2. All recommended fish must be compatible with EVERY existing fish in the tank
     3. All recommended fish must be compatible with each other
     4. Priority is maintaining current harmony score ($currentHarmonyPercentage%) above all else

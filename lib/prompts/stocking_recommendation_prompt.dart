@@ -11,7 +11,8 @@ String buildStockingRecommendationPrompt(
   return '''
     You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
 
-    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
+    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group.
+    If you cannot find a group that meets the HIGH HARMONY rule, then select groups that have the least number of "With Caution" relationships.
 
     User's Input:
     - Tank Size: "$tankSize"
