@@ -375,7 +375,7 @@ class _TankRecommendationTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: existingFish, isExisting: true),
+        _FishCardGrid(fishList: existingFish, originalTank: originalTank, isExisting: true),
         const Divider(height: 32),
 
         _SectionHeader(title: 'Fish to Add'),
@@ -385,13 +385,13 @@ class _TankRecommendationTabView extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, isCore: true, isAddition: true),
+        _FishCardGrid(fishList: report.coreFish, originalTank: originalTank, isCore: true, isAddition: true),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('Other Options', style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          _FishCardGrid(fishList: report.otherDataBasedFish, isAddition: true),
+          _FishCardGrid(fishList: report.otherDataBasedFish, originalTank: originalTank, isAddition: true),
         ],
 
         // Show compatibility notes
@@ -621,8 +621,10 @@ class _FishCardGrid extends StatelessWidget {
   final bool isCore;
   final bool isAddition;
   final bool isExisting;
+  final Tank originalTank;
   const _FishCardGrid({
     required this.fishList,
+    required this.originalTank,
     this.isCore = false,
     this.isAddition = false,
     this.isExisting = false,
