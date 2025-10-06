@@ -3069,7 +3069,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     // Set up a one-time listener specifically for this tank recommendation
     // This is independent of the general stocking listener
-    final removeListener = ref.listenManual<AquariumStockingState>(
+    // Declare the variable first to avoid forward reference issues
+    late final void Function() removeListener;
+    removeListener = ref.listenManual<AquariumStockingState>(
       aquariumStockingProvider,
       (previous, next) {
         if (next.recommendations != null && next.recommendations!.isNotEmpty) {
