@@ -18,6 +18,8 @@ String buildTankStockingRecommendationPrompt(
 
     CRITICAL REQUIREMENTS:
     1. MAINTAIN CURRENT HARMONY: The tank currently has $currentHarmonyPercentage% harmony - this MUST be maintained or improved
+      If you cannot find a group of fish that meet the HIGH HARMONY rule, you may include fish that are listed as "With Caution" with **ALL** other fish in the group, but this should be avoided if possible.
+      Fish listed as "Not Compatible" with any other fish in the group are NOT allowed.
     2. All recommended fish must be compatible with EVERY existing fish in the tank
     3. All recommended fish must be compatible with each other
     4. Priority is maintaining current harmony score ($currentHarmonyPercentage%) above all else

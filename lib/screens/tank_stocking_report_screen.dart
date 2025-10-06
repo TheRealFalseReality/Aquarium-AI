@@ -13,90 +13,78 @@ import '../services/analytics_service.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/helper_text.dart';
 
-class StockingReportScreen extends ConsumerStatefulWidget {
+class TankStockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
-  
-  // For regeneration support
-  final String? tankSize; // For general stocking regeneration
-  final String? tankType; // For general stocking regeneration  
-  final String? userNotes; // For general stocking regeneration
+  final Tank originalTank;
+  final List<Fish> existingFish;
 
-  const StockingReportScreen({
-    super.key, 
+  const TankStockingReportScreen({
+    super.key,
     required this.reports,
-    this.tankSize,
-    this.tankType,
-    this.userNotes,
+    required this.originalTank,
+    required this.existingFish,
   });
 
   @override
-  ConsumerState<StockingReportScreen> createState() => _StockingReportScreenState();
+  ConsumerState<TankStockingReportScreen> createState() => _TankStockingReportScreenState();
 }
 
-class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
+class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScreen> {
   bool _isRegenerating = false;
 
   void _regenerateRecommendations() {
     if (_isRegenerating) return; // Prevent multiple calls
-    
+
     // Log regeneration analytics
     AnalyticsService.logFeatureUsed(
       featureName: 'stocking_report_regenerate',
       parameters: {
-        'regeneration_type': 'general',
-        'has_notes': widget.userNotes?.isNotEmpty == true ? 'true' : 'false',
+        'regeneration_type': 'tank_based',
+        'has_existing_fish': 'true',
+        'tank_name': widget.originalTank.name,
       },
     );
-    
+
     setState(() {
       _isRegenerating = true;
     });
 
-    if (widget.tankSize != null && widget.tankType != null) {
-      // General stocking regeneration  
-      ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
-        tankSize: widget.tankSize!,
-        tankType: widget.tankType!,
-        userNotes: widget.userNotes ?? '',
-      );
-    } else {
-      // Show error if we don't have enough data to regenerate
-      setState(() {
-        _isRegenerating = false;
-      });
-      context.showAccessibleMessage('Cannot regenerate - missing original parameters.');
-    }
+    // Tank-based regeneration
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: widget.originalTank);
   }
 
   String get _getDisplayTitle {
-    return 'Stocking Ideas';
+    final tankName = widget.originalTank.name;
+    if (tankName.isNotEmpty) {
+      return 'Stocking Ideas for "$tankName"';
+    }
+    return 'Tank Stocking Ideas';
   }
 
   @override
   Widget build(BuildContext context) {
     // Listen for new recommendations and replace current screen
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
-      if (next.recommendations != null && 
-          next.recommendations!.isNotEmpty && 
+      if (next.recommendations != null &&
+          next.recommendations!.isNotEmpty &&
           next.recommendations != widget.reports) {
         // Stop regenerating state
         setState(() {
           _isRegenerating = false;
         });
-        
+
         // Replace current screen with new recommendations
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => StockingReportScreen(
+            builder: (context) => TankStockingReportScreen(
               reports: next.recommendations!,
-              tankSize: widget.tankSize,
-              tankType: widget.tankType,
-              userNotes: widget.userNotes,
+              originalTank: widget.originalTank,
+              existingFish: widget.existingFish,
             ),
           ),
         );
       }
-      
+
       if (next.error != null) {
         setState(() {
           _isRegenerating = false;
@@ -165,9 +153,10 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                 Expanded(
                   child: TabBarView(
                     children: widget.reports.map((report) {
-                      return _RecommendationTabView(
+                      return _TankRecommendationTabView(
                         report: report,
-                        tankType: widget.tankType,
+                        originalTank: widget.originalTank,
+                        existingFish: widget.existingFish,
                       );
                     }).toList(),
                   ),
@@ -228,13 +217,15 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
   }
 }
 
-class _RecommendationTabView extends StatelessWidget {
+class _TankRecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
-  final String? tankType;
+  final Tank originalTank;
+  final List<Fish> existingFish;
 
-  const _RecommendationTabView({
+  const _TankRecommendationTabView({
     required this.report,
-    this.tankType,
+    required this.originalTank,
+    required this.existingFish,
   });
 
   @override
@@ -246,6 +237,7 @@ class _RecommendationTabView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         const BannerAdWidget(),
+        const SizedBox(height: 16),
         Text(
           report.title,
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -262,23 +254,165 @@ class _RecommendationTabView extends StatelessWidget {
             color: cs.onSurfaceVariant,
           ),
         ),
-        
+
+        // Show existing tank info
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cs.surfaceVariant.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.outline.withOpacity(0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Adding to Existing Tank',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Tank name confirmation
+              Row(
+                children: [
+                  Icon(Icons.water, size: 14, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Tank: ',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    originalTank.name,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Existing fish confirmation list - showing custom names
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Current Fish: ',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      _formatExistingFishList(),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // Show tank notes if available
+              if (originalTank.notes != null && originalTank.notes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.note_outlined, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Notes: ',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        originalTank.notes!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+              Text(
+                'These recommendations are designed to work with your current fish community. All suggested additions have been verified for compatibility.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+
         const Divider(height: 32),
-        
-        _SectionHeader(title: 'Stocking Options'),
+
+        // Show existing fish
+        _SectionHeader(title: 'Current Tank Inhabitants'),
         const SizedBox(height: 8),
         Text(
-          'The "Core Fish" are a highly compatible group. The "Other Options" are additional fish from our database that you can add while maintaining high harmony.',
+          'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _FishCardGrid(fishList: existingFish, originalTank: originalTank, isExisting: true),
+        const Divider(height: 32),
+
+        _SectionHeader(title: 'Fish to Add'),
+        const SizedBox(height: 8),
+        Text(
+          'The "Recommended Additions" are compatible with your existing tank inhabitants. The "Other Options" provide more choices while maintaining harmony.',
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, isCore: true, tankType: tankType),
+        _FishCardGrid(fishList: report.coreFish, originalTank: originalTank, isCore: true, isAddition: true),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('Other Options', style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          _FishCardGrid(fishList: report.otherDataBasedFish, tankType: tankType),
+          _FishCardGrid(fishList: report.otherDataBasedFish, originalTank: originalTank, isAddition: true),
+        ],
+
+        // Show compatibility notes
+        if (report.compatibilityNotes != null) ...[
+          const Divider(height: 32),
+          _SectionHeader(title: 'Compatibility Notes'),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.primary.withOpacity(0.2)),
+            ),
+            child: Text(
+              report.compatibilityNotes!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface,
+              ),
+            ),
+          ),
         ],
 
         const Divider(height: 16),
@@ -355,7 +489,7 @@ class _RecommendationTabView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                _calculateCompatibilityBreakdown(report.coreFish),
+                _generateCalculationBreakdown(existingFish, report),
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontFamily: 'monospace',
                 ),
@@ -365,6 +499,55 @@ class _RecommendationTabView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _formatExistingFishList() {
+    // Use custom names if available, otherwise use fish unit names
+    return originalTank.inhabitants
+        .map((inhabitant) {
+          final displayName = inhabitant.customName.isNotEmpty 
+              ? inhabitant.customName 
+              : inhabitant.fishUnit;
+          return inhabitant.quantity > 1 
+              ? '$displayName (${inhabitant.quantity})' 
+              : displayName;
+        })
+        .join(', ');
+  }
+
+  Future<void> _launchSearch(String query) async {
+    // Log external search usage
+    AnalyticsService.logFeatureUsed(
+      featureName: 'external_search',
+      parameters: {
+        'query': query,
+        'source': 'tank_stocking_report',
+      },
+    );
+    AnalyticsService.logUserEngagement(
+      engagementType: 'external_link_click',
+      content: query,
+    );
+
+    // Add tank type to search query
+    final searchQuery = '$query ${originalTank.type}';
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+    if (!await launchUrl(url)) {
+      debugPrint('Could not launch $url');
+    }
+  }
+
+  String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
+    // Combine existing fish with the recommended core fish to show full tank compatibility
+    final allTankFish = [...existingFish, ...report.coreFish];
+
+    final buffer = StringBuffer();
+    buffer.writeln("Current Tank Analysis:");
+    buffer.writeln("Existing Fish: ${existingFish.map((f) => f.name).join(', ')}");
+    buffer.writeln("Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}");
+    buffer.writeln();
+
+    return buffer.toString() + _calculateCompatibilityBreakdown(allTankFish);
   }
 
   String _calculateCompatibilityBreakdown(List<Fish> fishList) {
@@ -415,28 +598,6 @@ class _RecommendationTabView extends StatelessWidget {
     }
     return 0.5;
   }
-
-  Future<void> _launchSearch(String query) async {
-    // Log external search usage
-    AnalyticsService.logFeatureUsed(
-      featureName: 'external_search',
-      parameters: {
-        'query': query,
-        'source': 'stocking_report',
-      },
-    );
-    AnalyticsService.logUserEngagement(
-      engagementType: 'external_link_click',
-      content: query,
-    );
-    
-    // Add tank type to search query if available
-    final searchQuery = tankType != null ? '$query $tankType' : query;
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
-    if (!await launchUrl(url)) {
-      debugPrint('Could not launch $url');
-    }
-  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -456,74 +617,77 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _FishCardGrid extends StatelessWidget {
-    final List<Fish> fishList;
-    final bool isCore;
-    final String? tankType;
-    const _FishCardGrid({
-      required this.fishList, 
-      this.isCore = false,
-      this.tankType,
-    });
+  final List<Fish> fishList;
+  final bool isCore;
+  final bool isAddition;
+  final bool isExisting;
+  final Tank originalTank;
+  const _FishCardGrid({
+    required this.fishList,
+    required this.originalTank,
+    this.isCore = false,
+    this.isAddition = false,
+    this.isExisting = false,
+  });
 
-    @override
-    Widget build(BuildContext context) {
-        final theme = Theme.of(context);
-        final cs = theme.colorScheme;
-        return Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            alignment: WrapAlignment.center,
-            // --- BUG FIX STARTS HERE ---
-            // The .map function now handles the possibility of a null fish in the list.
-            children: fishList.map((fish) {
-                return Card(
-                    elevation: 2,
-                    color: cs.surfaceContainerHighest,
-                    clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: isCore 
-                          ? BorderSide(color: cs.primary, width: 2)
-                          : BorderSide.none,
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.center,
+      children: fishList.map((fish) {
+        return Card(
+          elevation: 2,
+          color: cs.surfaceContainerHighest,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: isExisting
+                ? BorderSide(color: cs.secondary, width: 2)
+                : isCore
+                    ? BorderSide(color: cs.primary, width: 2)
+                    : BorderSide.none,
+          ),
+          child: InkWell(
+            onTap: () => _launchSearch(fish.name),
+            child: SizedBox(
+              width: 100,
+              child: Column(
+                children: [
+                  Image.network(
+                    fish.imageURL,
+                    height: 80,
+                    width: 100,
+                    fit: BoxFit.cover,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      fish.name,
+                      style: theme.textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: InkWell(
-                        onTap: () => _launchSearch(fish.name),
-                        child: SizedBox(
-                            width: 100,
-                            child: Column(
-                                children: [
-                                    Image.network(
-                                        fish.imageURL,
-                                        height: 80,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                    ),
-                                    Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                            fish.name,
-                                            style: theme.textTheme.bodySmall,
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                        ),
-                                    ),
-                                ],
-                            ),
-                        ),
-                    ),
-                );
-            }).toList(),
-            // --- BUG FIX ENDS HERE ---
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
+      }).toList(),
+    );
+  }
+
+  Future<void> _launchSearch(String query) async {
+    // Add tank type to search query  
+    final searchQuery = '$query ${originalTank.type}';
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+    if (!await launchUrl(url)) {
+      debugPrint('Could not launch $url');
     }
-    
-    Future<void> _launchSearch(String query) async {
-        // Add tank type to search query if available
-        final searchQuery = tankType != null ? '$query $tankType' : query;
-        final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
-        if (!await launchUrl(url)) {
-            debugPrint('Could not launch $url');
-        }
-    }
+  }
 }
