@@ -375,30 +375,6 @@ class _TankRecommendationTabView extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 8),
-              // Existing fish confirmation list - showing custom names
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Current Fish: ',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      _formatExistingFishList(),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               // Show tank notes if available
               if (originalTank.notes != null && originalTank.notes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
