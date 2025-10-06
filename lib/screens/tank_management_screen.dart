@@ -91,13 +91,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         }
         
         // Check if we have the required data
-        if (_currentTankForRecommendations != null && _currentExistingFish != null) {
+        final tank = _currentTankForRecommendations;
+        final fish = _currentExistingFish;
+        
+        if (tank != null && fish != null) {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TankStockingReportScreen(
                 reports: next.recommendations!,
-                originalTank: _currentTankForRecommendations!,
-                existingFish: _currentExistingFish!,
+                originalTank: tank,
+                existingFish: fish,
               ),
             ),
           );
