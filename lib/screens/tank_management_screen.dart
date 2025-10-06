@@ -98,9 +98,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         final fish = _currentExistingFish;
         
         if (tank != null && fish != null) {
+          // Capture values before clearing to ensure they're available in the builder
+          final capturedIncludeCustomNames = _includeCustomNames;
+          final capturedAdditionalNotes = _additionalNotes;
+          
           // Debug: Print values being passed to report screen
-          debugPrint('Passing to report - includeCustomNames: $_includeCustomNames');
-          debugPrint('Passing to report - additionalNotes: "$_additionalNotes"');
+          debugPrint('Passing to report - includeCustomNames: $capturedIncludeCustomNames');
+          debugPrint('Passing to report - additionalNotes: "$capturedAdditionalNotes"');
           
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -108,8 +112,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 reports: next.recommendations!,
                 originalTank: tank,
                 existingFish: fish,
-                includeCustomNames: _includeCustomNames,
-                additionalNotes: _additionalNotes,
+                includeCustomNames: capturedIncludeCustomNames,
+                additionalNotes: capturedAdditionalNotes,
               ),
             ),
           );
