@@ -296,7 +296,7 @@ class FishCompatibilityScreenState
   }
 
   void _openReport(CompatibilityReport report, {bool fromHistory = false}) {
-    showReportDialog(context, report, fromHistory: fromHistory);
+    showReportDialog(context, report, fromHistory: fromHistory, fishType: _selectedCategory);
   }
 
   @override

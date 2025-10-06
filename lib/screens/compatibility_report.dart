@@ -34,10 +34,10 @@ Widget _formatAIResponse(BuildContext context, String text) {
 }
 
 void showReportDialog(BuildContext context, CompatibilityReport report,
-    {bool fromHistory = false}) {
+    {bool fromHistory = false, String? fishType}) {
   final sections = {
-    'Selected Fish': _buildSelectedFishSection(context, report.selectedFish),
-    'Compatible Tank Mates': _buildTankMatesSection(context, report),
+    'Selected Fish': _buildSelectedFishSection(context, report.selectedFish, fishType),
+    'Compatible Tank Mates': _buildTankMatesSection(context, report, fishType),
     // MODIFIED: Use the new formatter for these sections.
     'Detailed Summary': _formatAIResponse(context, report.detailedSummary),
     'Recommended Tank Size':
@@ -249,30 +249,40 @@ Widget _buildCalculationBreakdown(
 }
 
 Widget _buildSelectedFishSection(
-    BuildContext context, List<Fish> selectedFish) {
+    BuildContext context, List<Fish> selectedFish, String? fishType) {
   return Column(
     children: selectedFish.map((fish) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHigh
-                  .withOpacity(0.4),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(fish.imageURL),
-                ),
+        child: InkWell(
+          onTap: () async {
+            // Add fish type to search query
+            final searchQuery = fishType != null ? '${fish.name} $fishType' : fish.name;
+            final url = Uri.parse(
+                'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            }
+          },
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHigh
+                    .withOpacity(0.4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(fish.imageURL),
+                  ),
                 const SizedBox(width: 16),
                 Flexible(
                   child: Column(
@@ -301,13 +311,14 @@ Widget _buildSelectedFishSection(
             ),
           ),
         ),
+        ),
       );
     }).toList(),
   );
 }
 
 Widget _buildTankMatesSection(
-    BuildContext context, CompatibilityReport report) {
+    BuildContext context, CompatibilityReport report, String? fishType) {
   return Column(
     children: [
       SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),
@@ -330,8 +341,10 @@ Widget _buildTankMatesSection(
             selected: false,
             dense: true,
             onTap: () async {
+              // Add fish type to search query
+              final searchQuery = fishType != null ? '$fishName $fishType' : fishName;
               final url = Uri.parse(
-                  'https://www.google.com/search?q=${Uri.encodeComponent(fishName)}');
+                  'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }
