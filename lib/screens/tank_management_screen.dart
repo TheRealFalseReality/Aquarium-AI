@@ -20,6 +20,7 @@ import 'tank_creation_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
+import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
   name,
@@ -41,6 +42,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
+  bool _includeCustomNames = false; // Track if custom names were included
+  String _additionalNotes = ''; // Track additional notes
 
   @override
   void initState() {
@@ -95,18 +98,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         final fish = _currentExistingFish;
         
         if (tank != null && fish != null) {
+          // Capture values before clearing to ensure they're available in the builder
+          final capturedIncludeCustomNames = _includeCustomNames;
+          final capturedAdditionalNotes = _additionalNotes;
+          
+          // Debug: Print values being passed to report screen
+          debugPrint('Passing to report - includeCustomNames: $capturedIncludeCustomNames');
+          debugPrint('Passing to report - additionalNotes: "$capturedAdditionalNotes"');
+          
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TankStockingReportScreen(
                 reports: next.recommendations!,
                 originalTank: tank,
                 existingFish: fish,
+                includeCustomNames: capturedIncludeCustomNames,
+                additionalNotes: capturedAdditionalNotes,
               ),
             ),
           );
-          // Clear the current tank reference
+          // Clear the current tank reference and options
           _currentTankForRecommendations = null;
           _currentExistingFish = null;
+          _includeCustomNames = false;
+          _additionalNotes = '';
         } else {
           context.showAccessibleMessage(
             'Error: Missing tank data. Please try again.'
@@ -1842,23 +1857,59 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: Row(
                                       children: [
-                                        CircleAvatar(
-                                          radius: 22,
-                                          backgroundImage: fishImageUrl != null 
-                                            ? (fishImageUrl.startsWith('http')
-                                                ? NetworkImage(fishImageUrl)
-                                                : FileImage(File(fishImageUrl)) as ImageProvider)
-                                            : null,
-                                          backgroundColor: fishImageUrl == null 
-                                            ? cs.primaryContainer 
-                                            : null,
-                                          child: fishImageUrl == null 
-                                            ? Icon(
-                                                Icons.shape_line,
-                                                color: cs.onPrimaryContainer,
-                                                size: 22,
-                                              ) 
-                                            : null,
+                                        Stack(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 22,
+                                              backgroundImage: fishImageUrl != null 
+                                                ? (fishImageUrl.startsWith('http')
+                                                    ? NetworkImage(fishImageUrl)
+                                                    : FileImage(File(fishImageUrl)) as ImageProvider)
+                                                : null,
+                                              backgroundColor: fishImageUrl == null 
+                                                ? cs.primaryContainer 
+                                                : null,
+                                              child: fishImageUrl == null 
+                                                ? Icon(
+                                                    Icons.shape_line,
+                                                    color: cs.onPrimaryContainer,
+                                                    size: 22,
+                                                  ) 
+                                                : null,
+                                            ),
+                                            // Quantity badge
+                                            if (inhabitant.quantity > 1)
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: cs.primary,
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    border: Border.all(
+                                                      color: cs.surface,
+                                                      width: 1.5,
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withOpacity(0.3),
+                                                        blurRadius: 3,
+                                                        offset: const Offset(0, 1),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Text(
+                                                    '${inhabitant.quantity}',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: cs.onPrimary,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
@@ -1867,7 +1918,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                             children: [
                                               Text(
                                                 inhabitant.quantity > 1
-                                                    ? '${inhabitant.quantity}x ${inhabitant.customName}'
+                                                    ? inhabitant.customName
                                                     : inhabitant.customName,
                                                 style: const TextStyle(fontWeight: FontWeight.w600),
                                               ),
@@ -2926,7 +2977,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   children: [
                     Text(
                       totalQuantity > 1
-                          ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
+                          ? '${inhabitants.map((i) => i.customName).join(', ')}'
                           : inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
@@ -2935,7 +2986,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      fishType,
+                      '${totalQuantity}x $fishType',
                   
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -2974,7 +3025,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return widgets;
   }
 
-  void _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) {
+  Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
         'Tank must have existing inhabitants to get stocking recommendations.'
@@ -2996,6 +3047,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
       return;
     }
+
+    // Show options dialog first
+    final options = await showDialog<StockingRecommendationOptions>(
+      context: context,
+      builder: (context) => const StockingRecommendationOptionsDialog(),
+    );
+
+    // User cancelled the dialog
+    if (options == null || !context.mounted) {
+      return;
+    }
+    
+    // Store the options for the listener
+    _includeCustomNames = options.includeCustomNames;
+    _additionalNotes = options.additionalNotes;
+    
+    // Debug: Print values to verify they're being stored
+    debugPrint('Storing options - includeCustomNames: $_includeCustomNames');
+    debugPrint('Storing options - additionalNotes: "$_additionalNotes"');
     
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
@@ -3018,6 +3088,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       );
       // Add individual fish based on quantity for proper compatibility calculations
+      // This is used for calculating harmony scores
       for (int i = 0; i < inhabitant.quantity; i++) {
         existingFish.add(fish);
       }
@@ -3073,6 +3144,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
+        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
       },
     );
     AnalyticsService.logTankAction(
@@ -3082,7 +3155,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // Get recommendations for this tank
-    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: tank);
+    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
+      tank: tank,
+      includeCustomNames: options.includeCustomNames,
+      additionalNotes: options.additionalNotes,
+    );
   }
 
   Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {

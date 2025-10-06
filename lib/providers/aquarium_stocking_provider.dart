@@ -228,6 +228,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   Future<void> getTankStockingRecommendations({
     required Tank tank,
+    bool includeCustomNames = false,
+    String additionalNotes = '',
   }) async {
     state = state.copyWith(
         isLoading: true, clearError: true, clearRecommendation: true);
@@ -298,7 +300,14 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     // Calculate current tank harmony score
     final currentHarmonyScore = TankHarmonyCalculator.calculateHarmonyScore(existingFish);
     
-    final prompt = buildTankStockingRecommendationPrompt(tank, allFish, existingFish, currentHarmonyScore);
+    final prompt = buildTankStockingRecommendationPrompt(
+      tank,
+      allFish,
+      existingFish,
+      currentHarmonyScore,
+      includeCustomNames: includeCustomNames,
+      additionalNotes: additionalNotes,
+    );
 
     try {
       String? responseText;
