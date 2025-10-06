@@ -86,19 +86,21 @@ class ChatState {
 }
 
 final chatProvider =
-    StateNotifierProvider<ChatNotifier, ChatState>((ref) {
-  final modelState = ref.watch(modelProvider);
-  return ChatNotifier(modelState: modelState);
-});
+    NotifierProvider<ChatNotifier, ChatState>(ChatNotifier.new);
 
 // ====================== Utility (now imported from json_utils.dart) ======================
 
 // ====================== Chat Notifier ======================
-class ChatNotifier extends StateNotifier<ChatState> {
-  ChatNotifier({required ModelState modelState})
-      : _modelState = modelState,
-        super(ChatState(messages: [])) {
-    state = ChatState(messages: [
+class ChatNotifier extends Notifier<ChatState> {
+  late ModelState _modelState;
+  
+  @override
+  ChatState build() {
+    // Watch the modelProvider to get current model state
+    _modelState = ref.watch(modelProvider);
+    
+    // Return initial state with welcome messages
+    final initialState = ChatState(messages: [
       ChatMessage(
         text:
             "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
@@ -106,10 +108,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
       ),
       ChatMessage(text: 'ad', isUser: false, isAd: true),
     ]);
+    
+    // Initialize provider asynchronously
     _initializeProvider();
+    
+    return initialState;
   }
-
-  final ModelState _modelState;
   ChatSession? _geminiChatSession;
   Groq? _groqChatSession;
   CancellableCompleter<dynamic>? _cancellable;

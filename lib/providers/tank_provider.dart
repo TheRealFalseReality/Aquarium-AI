@@ -8,9 +8,9 @@ import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
-final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
-  return TankNotifier();
-});
+final tankProvider = NotifierProvider<TankNotifier, TankState>(
+  TankNotifier.new,
+);
 
 class TankState {
   final List<Tank> tanks;
@@ -37,11 +37,18 @@ class TankState {
   }
 }
 
-class TankNotifier extends StateNotifier<TankState> {
+class TankNotifier extends Notifier<TankState> {
   static const String _tanksKey = 'user_tanks';
 
-  TankNotifier() : super(TankState(isLoading: true)) {
+  @override
+  TankState build() {
+    // Return initial state with loading true
+    final initialState = TankState(isLoading: true);
+    
+    // Load tanks asynchronously
     _loadTanks();
+    
+    return initialState;
   }
 
   Future<void> _loadTanks() async {

@@ -45,10 +45,12 @@ class AquariumStockingState {
   }
 }
 
-class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
-  final Ref ref;
-
-  AquariumStockingNotifier(this.ref) : super(AquariumStockingState());
+class AquariumStockingNotifier extends Notifier<AquariumStockingState> {
+  @override
+  AquariumStockingState build() {
+    // Return initial state
+    return AquariumStockingState();
+  }
 
   void cancel() {
     state = state.copyWith(isLoading: false, clearError: true);
@@ -398,6 +400,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 }
 
 final aquariumStockingProvider =
-    StateNotifierProvider<AquariumStockingNotifier, AquariumStockingState>(
-  (ref) => AquariumStockingNotifier(ref),
+    NotifierProvider<AquariumStockingNotifier, AquariumStockingState>(
+  AquariumStockingNotifier.new,
 );
