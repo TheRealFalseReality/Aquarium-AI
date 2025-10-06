@@ -40,10 +40,6 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
-  Tank? _currentTankForRecommendations; // Track current tank for recommendations
-  List<Fish>? _currentExistingFish; // Track existing fish for recommendations
-  bool _useCustomNamesForRecommendations = false; // Track if custom names should be used
-  String _additionalNotesForRecommendations = ''; // Track additional notes
   bool _isSortMenuExpanded = false; // Track sort menu expansion
 
   @override
@@ -87,33 +83,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // Listen for stocking recommendations globally
+    // Note: Tank-based recommendations are now handled independently in _getTankStockingRecommendations
+    // This listener is for any other future uses (currently none, but kept for compatibility)
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
-      if (next.recommendations != null && next.recommendations!.isNotEmpty) {
-        // Hide loading dialog if it's showing
-        if (Navigator.canPop(context)) {
-          Navigator.of(context).pop(); // Close loading dialog
-        }
-        
-        // Check if this is a tank-based recommendation (we have tank and fish data)
-        if (_currentTankForRecommendations != null && _currentExistingFish != null) {
-          // Use dedicated tank stocking report screen for tank-based recommendations
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => TankStockingReportScreen(
-                reports: next.recommendations!,
-                tank: _currentTankForRecommendations!,
-                existingFish: _currentExistingFish!,
-                useCustomNames: _useCustomNamesForRecommendations,
-                additionalNotes: _additionalNotesForRecommendations,
-              ),
-            ),
-          );
-          // Clear the current tank reference
-          _currentTankForRecommendations = null;
-          _currentExistingFish = null;
-          _additionalNotesForRecommendations = '';
-        }
-      }
+      // Tank-based recommendations are handled by a one-time listener in _getTankStockingRecommendations
+      // This global listener is kept for potential future use or other screens
       if (next.error != null) {
         // Hide loading dialog if it's showing
         if (Navigator.canPop(context)) {
@@ -2996,11 +2970,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     final useCustomNames = result['useCustomNames'] as bool? ?? false;
     final additionalNotes = result['additionalNotes'] as String? ?? '';
-
-    // Store the current tank and options for the listener
-    _currentTankForRecommendations = tank;
-    _useCustomNamesForRecommendations = useCustomNames;
-    _additionalNotesForRecommendations = additionalNotes;
     
     // Get fish data from provider
     final fishDataAsync = ref.read(fishDataProvider);
@@ -3009,7 +2978,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       orElse: () => null,
     );
     
-    // Calculate and store existing fish for the listener
+    // Calculate existing fish for the recommendation request
     final categoryFish = fishData?[tank.type] ?? [];
     final existingFish = <Fish>[];
     
@@ -3031,7 +3000,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         existingFish.add(fish);
       }
     }
-    _currentExistingFish = existingFish;
 
     // Show loading overlay
     showDialog(
@@ -3097,6 +3065,58 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       tank: tank,
       useCustomNames: useCustomNames,
       additionalNotes: additionalNotes,
+    );
+    
+    // Set up a one-time listener specifically for this tank recommendation
+    // This is independent of the general stocking listener
+    final removeListener = ref.listenManual<AquariumStockingState>(
+      aquariumStockingProvider,
+      (previous, next) {
+        if (next.recommendations != null && next.recommendations!.isNotEmpty) {
+          // Hide loading dialog if it's showing
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop(); // Close loading dialog
+          }
+          
+          // Navigate directly to TankStockingReportScreen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => TankStockingReportScreen(
+                reports: next.recommendations!,
+                tank: tank,
+                existingFish: existingFish,
+                useCustomNames: useCustomNames,
+                additionalNotes: additionalNotes,
+              ),
+            ),
+          );
+          
+          // Remove this one-time listener
+          removeListener();
+        }
+        
+        if (next.error != null) {
+          // Hide loading dialog if it's showing
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop(); // Close loading dialog
+          }
+          
+          if (context.mounted) {
+            context.showAccessibleMessage(
+              'Error: ${next.error}',
+              onAction: next.error!.toLowerCase().contains('api key not set')
+                  ? () => Navigator.pushNamed(context, '/settings')
+                  : null,
+              actionLabel: next.error!.toLowerCase().contains('api key not set')
+                  ? 'Settings'
+                  : null,
+            );
+          }
+          
+          // Remove this one-time listener
+          removeListener();
+        }
+      },
     );
   }
 
