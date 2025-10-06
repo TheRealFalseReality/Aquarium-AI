@@ -303,29 +303,29 @@ class _TankRecommendationTabView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              // Existing fish confirmation list - showing custom names
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.pets, size: 14, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Current Fish: ',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
+              // Show tank size if available
+              if (originalTank.sizeGallons != null || originalTank.sizeLiters != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.straighten, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Size: ',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      _formatExistingFishList(),
+                    Text(
+                      _formatTankSize(originalTank),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
               // Show tank notes if available
               if (originalTank.notes != null && originalTank.notes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -550,6 +550,17 @@ class _TankRecommendationTabView extends StatelessWidget {
     return buffer.toString() + _calculateCompatibilityBreakdown(allTankFish);
   }
 
+  String _formatTankSize(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons (${tank.sizeLiters!.toStringAsFixed(0)} liters)';
+    } else if (tank.sizeGallons != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons';
+    } else if (tank.sizeLiters != null) {
+      return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
+    }
+    return 'Size not specified';
+  }
+  
   String _calculateCompatibilityBreakdown(List<Fish> fishList) {
     if (fishList.length < 2) {
       return "Select at least two fish to see a compatibility breakdown.";
