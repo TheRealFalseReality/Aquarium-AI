@@ -12,8 +12,6 @@ String buildTankStockingRecommendationPrompt(
     'compatible': f.compatible,
   }).toList();
 
-  final existingFishNames = existingFish.map((f) => f.name).toList();
-  
   // Build fish types with custom names information
   final fishInfo = _buildFishInfo(tank, existingFish, useCustomNames);
   

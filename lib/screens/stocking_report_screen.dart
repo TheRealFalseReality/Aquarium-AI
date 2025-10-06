@@ -18,6 +18,7 @@ class StockingReportScreen extends ConsumerStatefulWidget {
   final String? existingTankName; // Optional tank name for tank-based recommendations
   final List<Fish>? existingFish; // Optional existing fish for tank-based recommendations
   final bool useCustomNames; // Whether custom names are included
+  final String? additionalNotes; // Additional notes for tank-based recommendations
   
   // For regeneration support
   final Tank? originalTank; // For tank-based regeneration
@@ -31,6 +32,7 @@ class StockingReportScreen extends ConsumerStatefulWidget {
     this.existingTankName,
     this.existingFish,
     this.useCustomNames = false,
+    this.additionalNotes,
     this.originalTank,
     this.tankSize,
     this.tankType,
@@ -62,7 +64,11 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
     if (widget.originalTank != null) {
       // Tank-based regeneration
-      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: widget.originalTank!);
+      ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
+        tank: widget.originalTank!,
+        useCustomNames: widget.useCustomNames,
+        additionalNotes: widget.additionalNotes ?? '',
+      );
     } else if (widget.tankSize != null && widget.tankType != null) {
       // General stocking regeneration  
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
@@ -117,6 +123,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
               existingTankName: widget.existingTankName,
               existingFish: widget.existingFish,
               useCustomNames: widget.useCustomNames,
+              additionalNotes: widget.additionalNotes,
               originalTank: widget.originalTank,
               tankSize: widget.tankSize,
               tankType: widget.tankType,
@@ -375,7 +382,7 @@ class _RecommendationTabView extends StatelessWidget {
                           ),
                           Expanded(
                             child: Text(
-                              existingFish!.map((fish) => fish.name).join(', '),
+                              _getUniqueFish(existingFish!).map((fish) => fish.name).join(', '),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
@@ -426,13 +433,11 @@ class _RecommendationTabView extends StatelessWidget {
         const Divider(height: 32),
         
         // Show existing fish for tank-based recommendations  
-        if (existingFish != null && existingFish!.isNotEmpty) ...[
+        if (isForExistingTank && existingFish != null && existingFish!.isNotEmpty) ...[
           _SectionHeader(title: 'Current Tank Inhabitants'),
           const SizedBox(height: 8),
           Text(
-            isForExistingTank 
-              ? 'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.'
-              : 'Your current tank inhabitants:',
+            'These are the fish currently in your tank. All recommendations will be compatible with these inhabitants.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
             ),
@@ -475,7 +480,7 @@ class _RecommendationTabView extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          _FishCardGrid(fishList: existingFish!, isExisting: true),
+          _FishCardGrid(fishList: _getUniqueFish(existingFish!), isExisting: true),
           const Divider(height: 32),
         ],
         
@@ -627,11 +632,12 @@ class _RecommendationTabView extends StatelessWidget {
   
   String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
     // Combine existing fish with the recommended core fish to show full tank compatibility
+    final uniqueExisting = _getUniqueFish(existingFish);
     final allTankFish = [...existingFish, ...report.coreFish];
     
     final buffer = StringBuffer();
     buffer.writeln("Current Tank Analysis:");
-    buffer.writeln("Existing Fish: ${existingFish.map((f) => f.name).join(', ')}");
+    buffer.writeln("Existing Fish: ${uniqueExisting.map((f) => f.name).join(', ')}");
     buffer.writeln("Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}");
     buffer.writeln();
     
@@ -695,6 +701,17 @@ class _RecommendationTabView extends StatelessWidget {
       customNames.add(inhabitant.customName);
     }
     return customNames.join(', ');
+  }
+
+  List<Fish> _getUniqueFish(List<Fish> fishList) {
+    // Get unique fish by name to avoid showing duplicates
+    final uniqueFishMap = <String, Fish>{};
+    for (final fish in fishList) {
+      if (!uniqueFishMap.containsKey(fish.name)) {
+        uniqueFishMap[fish.name] = fish;
+      }
+    }
+    return uniqueFishMap.values.toList();
   }
 }
 

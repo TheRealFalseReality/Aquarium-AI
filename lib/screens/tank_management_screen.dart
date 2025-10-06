@@ -42,6 +42,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _useCustomNamesForRecommendations = false; // Track if custom names should be used
+  String _additionalNotesForRecommendations = ''; // Track additional notes
   bool _isSortMenuExpanded = false; // Track sort menu expansion
 
   @override
@@ -100,12 +101,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               existingFish: _currentExistingFish,
               originalTank: _currentTankForRecommendations, // For regeneration
               useCustomNames: _useCustomNamesForRecommendations, // Pass the custom names flag
+              additionalNotes: _additionalNotesForRecommendations, // Pass additional notes
             ),
           ),
         );
         // Clear the current tank reference
         _currentTankForRecommendations = null;
         _currentExistingFish = null;
+        _additionalNotesForRecommendations = '';
       }
       if (next.error != null) {
         // Hide loading dialog if it's showing
@@ -2993,6 +2996,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Store the current tank and options for the listener
     _currentTankForRecommendations = tank;
     _useCustomNamesForRecommendations = useCustomNames;
+    _additionalNotesForRecommendations = additionalNotes;
     
     // Get fish data from provider
     final fishDataAsync = ref.read(fishDataProvider);
