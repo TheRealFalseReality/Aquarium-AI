@@ -529,7 +529,9 @@ class _TankRecommendationTabView extends StatelessWidget {
       content: query,
     );
 
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
+    // Add tank type to search query
+    final searchQuery = '$query ${originalTank.type}';
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
@@ -679,7 +681,9 @@ class _FishCardGrid extends StatelessWidget {
   }
 
   Future<void> _launchSearch(String query) async {
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
+    // Add tank type to search query  
+    final searchQuery = '$query ${originalTank.type}';
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }

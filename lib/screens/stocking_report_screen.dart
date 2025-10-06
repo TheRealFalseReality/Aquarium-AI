@@ -167,6 +167,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                     children: widget.reports.map((report) {
                       return _RecommendationTabView(
                         report: report,
+                        tankType: widget.tankType,
                       );
                     }).toList(),
                   ),
@@ -229,9 +230,11 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
 class _RecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
+  final String? tankType;
 
   const _RecommendationTabView({
     required this.report,
+    this.tankType,
   });
 
   @override
@@ -270,13 +273,13 @@ class _RecommendationTabView extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, isCore: true),
+        _FishCardGrid(fishList: report.coreFish, isCore: true, tankType: tankType),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('Other Options', style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          _FishCardGrid(fishList: report.otherDataBasedFish),
+          _FishCardGrid(fishList: report.otherDataBasedFish, tankType: tankType),
         ],
 
         const Divider(height: 16),
@@ -333,8 +336,85 @@ class _RecommendationTabView extends StatelessWidget {
             ],
           ),
         ),
+
+        // Calculation Breakdown
+        const Divider(height: 32),
+        ExpansionTile(
+          title: Row(
+            children: [
+              Icon(Icons.calculate, size: 18, color: cs.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Calculation Breakdown',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                _calculateCompatibilityBreakdown(report.coreFish),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  String _calculateCompatibilityBreakdown(List<Fish> fishList) {
+    if (fishList.length < 2) {
+      return "Select at least two fish to see a compatibility breakdown.";
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln("Pairwise Compatibility:");
+
+    final probabilities = <double>[];
+    for (int i = 0; i < fishList.length; i++) {
+      for (int j = i + 1; j < fishList.length; j++) {
+        final fishA = fishList[i];
+        final fishB = fishList[j];
+        final prob = _getPairwiseProbability(fishA, fishB);
+        probabilities.add(prob);
+
+        buffer.writeln(
+            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+      }
+    }
+
+    buffer.writeln("\nGroup Harmony Score:");
+    final minScore = probabilities.reduce((a, b) => a < b ? a : b);
+    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
+    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+
+    return buffer.toString();
+  }
+
+  double _getPairwiseProbability(Fish fishA, Fish fishB) {
+    if (fishA.compatible.contains(fishB.name) &&
+        fishB.compatible.contains(fishA.name)) {
+      return 1.0;
+    }
+    if (fishA.notCompatible.contains(fishB.name) ||
+        fishB.notCompatible.contains(fishA.name)) {
+      return 0.0;
+    }
+    if (fishA.notRecommended.contains(fishB.name) ||
+        fishB.notRecommended.contains(fishA.name)) {
+      return 0.25;
+    }
+    if (fishA.withCaution.contains(fishB.name) ||
+        fishB.withCaution.contains(fishA.name)) {
+      return 0.75;
+    }
+    return 0.5;
   }
 
   Future<void> _launchSearch(String query) async {
@@ -351,7 +431,9 @@ class _RecommendationTabView extends StatelessWidget {
       content: query,
     );
     
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
+    // Add tank type to search query if available
+    final searchQuery = tankType != null ? '$query $tankType' : query;
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
@@ -377,9 +459,11 @@ class _SectionHeader extends StatelessWidget {
 class _FishCardGrid extends StatelessWidget {
     final List<Fish> fishList;
     final bool isCore;
+    final String? tankType;
     const _FishCardGrid({
       required this.fishList, 
       this.isCore = false,
+      this.tankType,
     });
 
     @override
@@ -436,7 +520,9 @@ class _FishCardGrid extends StatelessWidget {
     }
     
     Future<void> _launchSearch(String query) async {
-        final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
+        // Add tank type to search query if available
+        final searchQuery = tankType != null ? '$query $tankType' : query;
+        final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
         if (!await launchUrl(url)) {
             debugPrint('Could not launch $url');
         }
