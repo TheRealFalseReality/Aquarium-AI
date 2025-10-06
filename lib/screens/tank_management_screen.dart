@@ -90,18 +90,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           Navigator.of(context).pop(); // Close loading dialog
         }
         
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => TankStockingReportScreen(
-              reports: next.recommendations!,
-              originalTank: _currentTankForRecommendations!,
-              existingFish: _currentExistingFish!,
+        // Check if we have the required data
+        if (_currentTankForRecommendations != null && _currentExistingFish != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => TankStockingReportScreen(
+                reports: next.recommendations!,
+                originalTank: _currentTankForRecommendations!,
+                existingFish: _currentExistingFish!,
+              ),
             ),
-          ),
-        );
-        // Clear the current tank reference
-        _currentTankForRecommendations = null;
-        _currentExistingFish = null;
+          );
+          // Clear the current tank reference
+          _currentTankForRecommendations = null;
+          _currentExistingFish = null;
+        } else {
+          context.showAccessibleMessage(
+            'Error: Missing tank data. Please try again.'
+          );
+        }
       }
       if (next.error != null) {
         // Hide loading dialog if it's showing
@@ -2972,9 +2979,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return;
     }
 
-    // Store the current tank for the listener
-    _currentTankForRecommendations = tank;
-    
     // Get fish data from provider
     final fishDataAsync = ref.read(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -2982,31 +2986,40 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       orElse: () => null,
     );
     
-    // Calculate and store existing fish for the listener
-    if (fishData != null) {
-      final categoryFish = fishData[tank.type] ?? [];
-      final existingFish = <Fish>[];
-      
-      for (final inhabitant in tank.inhabitants) {
-        final fish = categoryFish.firstWhere(
-          (f) => f.name == inhabitant.fishUnit,
-          orElse: () => Fish(
-            name: inhabitant.fishUnit,
-            commonNames: [],
-            imageURL: '',
-            compatible: [],
-            notRecommended: [],
-            notCompatible: [],
-            withCaution: [],
-          ),
-        );
-        // Add individual fish based on quantity for proper compatibility calculations
-        for (int i = 0; i < inhabitant.quantity; i++) {
-          existingFish.add(fish);
-        }
-      }
-      _currentExistingFish = existingFish;
+    // Check if fish data is available
+    if (fishData == null) {
+      context.showAccessibleMessage(
+        'Fish data is not available. Please try again later.'
+      );
+      return;
     }
+    
+    // Store the current tank for the listener
+    _currentTankForRecommendations = tank;
+    
+    // Calculate and store existing fish for the listener
+    final categoryFish = fishData[tank.type] ?? [];
+    final existingFish = <Fish>[];
+    
+    for (final inhabitant in tank.inhabitants) {
+      final fish = categoryFish.firstWhere(
+        (f) => f.name == inhabitant.fishUnit,
+        orElse: () => Fish(
+          name: inhabitant.fishUnit,
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        ),
+      );
+      // Add individual fish based on quantity for proper compatibility calculations
+      for (int i = 0; i < inhabitant.quantity; i++) {
+        existingFish.add(fish);
+      }
+    }
+    _currentExistingFish = existingFish;
 
     // Show loading overlay
     showDialog(
