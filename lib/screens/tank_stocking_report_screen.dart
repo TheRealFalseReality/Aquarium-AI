@@ -164,9 +164,11 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                       debugPrint('TankStockingReportScreen build - additionalNotes: "${widget.additionalNotes}"');
                       
                       return TabBarView(
-                        children: widget.reports.map((report) {
+                        children: widget.reports.asMap().entries.map((entry) {
+                          debugPrint('Creating TabView child ${entry.key} - includeCustomNames: ${widget.includeCustomNames}, additionalNotes: "${widget.additionalNotes}"');
                           return _TankRecommendationTabView(
-                            report: report,
+                            key: ValueKey('tab_${entry.key}_${widget.includeCustomNames}_${widget.additionalNotes}'),
+                            report: entry.value,
                             originalTank: widget.originalTank,
                             existingFish: widget.existingFish,
                             includeCustomNames: widget.includeCustomNames,
@@ -241,6 +243,7 @@ class _TankRecommendationTabView extends StatelessWidget {
   final String additionalNotes;
 
   const _TankRecommendationTabView({
+    super.key,
     required this.report,
     required this.originalTank,
     required this.existingFish,
