@@ -2,11 +2,11 @@ import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/automation_script.dart';
 import '../main_layout.dart';
 import '../widgets/common_cards.dart';
+import '../widgets/custom_markdown.dart';
 
 class AutomationScriptResultScreen extends StatelessWidget {
   final AutomationScript script;
@@ -28,13 +28,10 @@ class AutomationScriptResultScreen extends StatelessWidget {
           _buildCodeBlock(context, script.code),
           const SizedBox(height: 16),
           const NativeAdWidget(),
-          MarkdownBody(
+          CustomMarkdown(
             data: script.explanation,
-            onTapLink: (text, href, title) {
-              if (href != null) {
-                launchUrl(Uri.parse(href));
-              }
-            },
+            selectable: true,
+            onTapLink: (url) => launchUrl(Uri.parse(url)),
           ),
           const SizedBox(height: 16),
           ElevatedButton(

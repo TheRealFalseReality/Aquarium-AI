@@ -1,11 +1,11 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
+import '../widgets/custom_markdown.dart';
 
 class AnalysisResultScreen extends StatelessWidget {
   final WaterAnalysisResult result;
@@ -90,12 +90,10 @@ class AnalysisResultScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             // Markdown for bold rendering inside summary message
-            MarkdownBody(
+            CustomMarkdown(
               data: summary.message,
               selectable: true,
-              onTapLink: (text, href, title) {
-                if (href != null) launchUrl(Uri.parse(href));
-              },
+              onTapLink: (url) => launchUrl(Uri.parse(url)),
             ),
           ],
         ),
@@ -165,12 +163,10 @@ class AnalysisResultScreen extends StatelessWidget {
             ),
             const Divider(height: 18),
             // Markdown to render **bold** inside advice
-            MarkdownBody(
+            CustomMarkdown(
               data: param.advice,
               selectable: true,
-              onTapLink: (text, href, title) {
-                if (href != null) launchUrl(Uri.parse(href));
-              },
+              onTapLink: (url) => launchUrl(Uri.parse(url)),
             )
           ],
         ),
@@ -205,12 +201,10 @@ class AnalysisResultScreen extends StatelessWidget {
                     .titleLarge
                     ?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
-            MarkdownBody(
+            CustomMarkdown(
               data: markdownText,
               selectable: true,
-              onTapLink: (text, href, title) {
-                if (href != null) launchUrl(Uri.parse(href));
-              },
+              onTapLink: (url) => launchUrl(Uri.parse(url)),
             ),
           ],
         ),

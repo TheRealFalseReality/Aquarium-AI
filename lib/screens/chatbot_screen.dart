@@ -5,7 +5,6 @@ import 'package:fish_ai/models/automation_script.dart';
 import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
@@ -16,6 +15,7 @@ import './automation_script_result_screen.dart';
 import './photo_analysis_screen.dart';
 import './photo_analysis_result_screen.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/custom_markdown.dart';
 import '../widgets/mini_ai_chip.dart';
 import '../services/analytics_service.dart';
 
@@ -827,12 +827,10 @@ class MessageBubble extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          MarkdownBody(
+                          CustomMarkdown(
                             selectable: true,
                             data: text,
-                            onTapLink: (text, href, title) {
-                              if (href != null) launchUrl(Uri.parse(href));
-                            },
+                            onTapLink: (url) => launchUrl(Uri.parse(url)),
                           ),
                           if (photoBytes != null) ...[
                             const SizedBox(height: 10),

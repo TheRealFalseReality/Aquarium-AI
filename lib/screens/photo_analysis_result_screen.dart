@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,6 +9,7 @@ import '../providers/chat_provider.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
+import '../widgets/custom_markdown.dart';
 import '../widgets/helper_text.dart';
 
 class PhotoAnalysisResultScreen extends ConsumerStatefulWidget {
@@ -210,12 +210,10 @@ class _PhotoAnalysisResultScreenState
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: MarkdownBody(
+        child: CustomMarkdown(
           data: widget.result.summary,
           selectable: true,
-          onTapLink: (text, href, title) {
-            if (href != null) launchUrl(Uri.parse(href));
-          },
+          onTapLink: (url) => launchUrl(Uri.parse(url)),
         ),
       ),
     );
@@ -395,12 +393,10 @@ class _PhotoAnalysisResultScreenState
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: MarkdownBody(
+            child: CustomMarkdown(
               data: widget.result.howAquaPiHelps,
               selectable: true,
-              onTapLink: (text, href, title) {
-                if (href != null) launchUrl(Uri.parse(href));
-              },
+              onTapLink: (url) => launchUrl(Uri.parse(url)),
             ),
           ),
         ],
