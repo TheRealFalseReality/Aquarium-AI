@@ -3052,6 +3052,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       );
       // Add individual fish based on quantity for proper compatibility calculations
+      // This is used for calculating harmony scores
       for (int i = 0; i < inhabitant.quantity; i++) {
         existingFish.add(fish);
       }
