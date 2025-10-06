@@ -352,6 +352,29 @@ class _TankRecommendationTabView extends StatelessWidget {
                   ),
                 ],
               ),
+              // Show tank size if available
+              if (originalTank.sizeGallons != null || originalTank.sizeLiters != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.straighten, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Size: ',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      _formatTankSize(originalTank),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 8),
               // Existing fish confirmation list - showing custom names
               Row(
@@ -592,6 +615,17 @@ class _TankRecommendationTabView extends StatelessWidget {
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
+  }
+
+  String _formatTankSize(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons (${tank.sizeLiters!.toStringAsFixed(0)} liters)';
+    } else if (tank.sizeGallons != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons';
+    } else if (tank.sizeLiters != null) {
+      return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
+    }
+    return 'Size not specified';
   }
 
   String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
