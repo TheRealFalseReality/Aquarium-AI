@@ -2941,7 +2941,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   children: [
                     Text(
                       totalQuantity > 1
-                          ? '${totalQuantity}x ${inhabitants.map((i) => i.customName).join(', ')}'
+                          ? '${inhabitants.map((i) => i.customName).join(', ')}'
                           : inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
@@ -2950,7 +2950,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      fishType,
+                      '${totalQuantity}x $fishType',
                   
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
