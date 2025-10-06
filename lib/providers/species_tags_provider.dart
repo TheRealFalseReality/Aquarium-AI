@@ -182,7 +182,7 @@ final speciesTagsProvider =
   (ref) {
     final notifier = SpeciesTagsNotifier();
     // Initialize default tags when provider is created
-    _initializeDefaultTagsAsync(ref, notifier);
+    _initializeDefaultTagsAsync(ref as ProviderRef, notifier);
     return notifier;
   },
 );
