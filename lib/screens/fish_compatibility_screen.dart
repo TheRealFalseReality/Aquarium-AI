@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
@@ -158,6 +159,11 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildNativeAdCard() {
+    // Don't render ad container on web since ads don't display
+    if (kIsWeb) {
+      return const SizedBox.shrink();
+    }
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate the width for 2 fish cards plus spacing
