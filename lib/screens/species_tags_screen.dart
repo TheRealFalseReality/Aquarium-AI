@@ -313,20 +313,43 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
   Widget _buildTagChip(String fishType, String tag, ColorScheme colorScheme) {
     final isDefault = ref.read(speciesTagsProvider.notifier).isDefaultTag(fishType, tag);
     
-    // Generate color based on tag
-    final colorIndex = tag.hashCode.abs() % 8;
-    final chipColor = isDefault
-        ? colorScheme.secondaryContainer
-        : [
-            colorScheme.primaryContainer,
-            colorScheme.tertiaryContainer,
-            colorScheme.errorContainer.withOpacity(0.3),
-            Colors.purple.withOpacity(0.2),
-            Colors.teal.withOpacity(0.2),
-            Colors.orange.withOpacity(0.2),
-            Colors.indigo.withOpacity(0.2),
-            Colors.pink.withOpacity(0.2),
-          ][colorIndex];
+    // Color scheme for tags
+    final Color chipColor;
+    final Color textColor;
+    final Color iconColor;
+    
+    if (isDefault) {
+      // Default tags: greyish color
+      chipColor = colorScheme.surfaceVariant;
+      textColor = colorScheme.onSurfaceVariant;
+      iconColor = colorScheme.onSurfaceVariant;
+    } else {
+      // User tags: cycle through primary, secondary, tertiary, error
+      final colorIndex = tag.hashCode.abs() % 4;
+      switch (colorIndex) {
+        case 0:
+          chipColor = colorScheme.primaryContainer;
+          textColor = colorScheme.onPrimaryContainer;
+          iconColor = colorScheme.onPrimaryContainer;
+          break;
+        case 1:
+          chipColor = colorScheme.secondaryContainer;
+          textColor = colorScheme.onSecondaryContainer;
+          iconColor = colorScheme.onSecondaryContainer;
+          break;
+        case 2:
+          chipColor = colorScheme.tertiaryContainer;
+          textColor = colorScheme.onTertiaryContainer;
+          iconColor = colorScheme.onTertiaryContainer;
+          break;
+        case 3:
+        default:
+          chipColor = colorScheme.errorContainer;
+          textColor = colorScheme.onErrorContainer;
+          iconColor = colorScheme.onErrorContainer;
+          break;
+      }
+    }
     
     return Chip(
       label: Text(
@@ -334,12 +357,15 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: isDefault ? FontWeight.w500 : FontWeight.normal,
+          color: textColor,
         ),
       ),
       backgroundColor: chipColor,
-      deleteIcon: isDefault 
-          ? const Icon(Icons.lock, size: 14)
-          : const Icon(Icons.close, size: 14),
+      deleteIcon: Icon(
+        isDefault ? Icons.lock : Icons.close,
+        size: 14,
+        color: iconColor,
+      ),
       onDeleted: isDefault
           ? null
           : () {
