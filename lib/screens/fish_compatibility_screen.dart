@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
@@ -73,41 +74,14 @@ class FishCompatibilityScreenState
   }
 
   List<Widget> _buildFishGridWithAds(FishCompatibilityState providerState) {
-    // Configuration for ad placement
-    const int itemsBeforeFirstAd = 6; // Show ad after first 6 fish
-    const int itemsBetweenAds = 8; // Show ad every 8 fish thereafter
-    
     List<Widget> slivers = [];
-    int fishIndex = 0;
     final int totalFish = _filteredFishList.length;
     
-    while (fishIndex < totalFish) {
-      // Determine how many fish to show before the next ad
-      int fishToShow;
-      bool shouldShowAd = false;
-      
-      if (fishIndex == 0) {
-        // First batch of fish
-        fishToShow = itemsBeforeFirstAd.clamp(0, totalFish - fishIndex);
-        shouldShowAd = totalFish > itemsBeforeFirstAd;
-      } else {
-        // Subsequent batches
-        fishToShow = itemsBetweenAds.clamp(0, totalFish - fishIndex);
-        shouldShowAd = fishIndex + fishToShow < totalFish;
-      }
-      
-      // Capture the starting index for this section to avoid issues with list changes
-      final int startIndex = fishIndex;
-      
-      // Add a grid of fish cards
+    // On web, don't split the grid - use a single continuous grid
+    if (kIsWeb) {
       slivers.add(
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            startIndex == 0 ? 16 : 0,
-            16,
-            0,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 210,
@@ -117,12 +91,10 @@ class FishCompatibilityScreenState
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final actualIndex = startIndex + index;
-                // Safety check to prevent index out of bounds
-                if (actualIndex >= _filteredFishList.length) {
+                if (index >= _filteredFishList.length) {
                   return const SizedBox.shrink();
                 }
-                final fish = _filteredFishList[actualIndex];
+                final fish = _filteredFishList[index];
                 final isSelected = providerState.selectedFish.contains(fish);
                 return FishCard(
                   fish: fish,
@@ -131,24 +103,87 @@ class FishCompatibilityScreenState
                   showSpeciesTags: _searchController.text.isNotEmpty,
                 );
               },
-              childCount: fishToShow,
+              childCount: totalFish,
             ),
           ),
         ),
       );
+    } else {
+      // On mobile, split the grid to insert ads
+      // Configuration for ad placement
+      const int itemsBeforeFirstAd = 6; // Show ad after first 6 fish
+      const int itemsBetweenAds = 8; // Show ad every 8 fish thereafter
       
-      fishIndex += fishToShow;
+      int fishIndex = 0;
       
-      // Add native ad if needed
-      if (shouldShowAd) {
+      while (fishIndex < totalFish) {
+        // Determine how many fish to show before the next ad
+        int fishToShow;
+        bool shouldShowAd = false;
+        
+        if (fishIndex == 0) {
+          // First batch of fish
+          fishToShow = itemsBeforeFirstAd.clamp(0, totalFish - fishIndex);
+          shouldShowAd = totalFish > itemsBeforeFirstAd;
+        } else {
+          // Subsequent batches
+          fishToShow = itemsBetweenAds.clamp(0, totalFish - fishIndex);
+          shouldShowAd = fishIndex + fishToShow < totalFish;
+        }
+        
+        // Capture the starting index for this section to avoid issues with list changes
+        final int startIndex = fishIndex;
+        
+        // Add a grid of fish cards
         slivers.add(
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-            sliver: SliverToBoxAdapter(
-              child: _buildNativeAdCard(),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              startIndex == 0 ? 16 : 0,
+              16,
+              0,
+            ),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 210,
+                childAspectRatio: 3 / 4,
+                crossAxisSpacing: 18,
+                mainAxisSpacing: 18,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final actualIndex = startIndex + index;
+                  // Safety check to prevent index out of bounds
+                  if (actualIndex >= _filteredFishList.length) {
+                    return const SizedBox.shrink();
+                  }
+                  final fish = _filteredFishList[actualIndex];
+                  final isSelected = providerState.selectedFish.contains(fish);
+                  return FishCard(
+                    fish: fish,
+                    isSelected: isSelected,
+                    category: _selectedCategory,
+                  );
+                },
+                childCount: fishToShow,
+              ),
             ),
           ),
         );
+        
+        fishIndex += fishToShow;
+        
+        // Add native ad if needed
+        if (shouldShowAd) {
+          slivers.add(
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+              sliver: SliverToBoxAdapter(
+                child: _buildNativeAdCard(),
+              ),
+            ),
+          );
+        }
       }
     }
     
@@ -165,6 +200,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildNativeAdCard() {
+    // This method is only called on mobile platforms
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate the width for 2 fish cards plus spacing

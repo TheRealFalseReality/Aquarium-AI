@@ -574,7 +574,6 @@ class _TankRecommendationTabView extends StatelessWidget {
     );
   }
 
-
   Future<void> _launchSearch(String query) async {
     // Log external search usage
     AnalyticsService.logFeatureUsed(
