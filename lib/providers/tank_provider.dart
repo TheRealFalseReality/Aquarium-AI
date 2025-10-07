@@ -6,10 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
+import 'species_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
-  return TankNotifier();
+  return TankNotifier(ref);
 });
 
 class TankState {
@@ -39,8 +40,9 @@ class TankState {
 
 class TankNotifier extends StateNotifier<TankState> {
   static const String _tanksKey = 'user_tanks';
+  final Ref _ref;
 
-  TankNotifier() : super(TankState(isLoading: true)) {
+  TankNotifier(this._ref) : super(TankState(isLoading: true)) {
     _loadTanks();
   }
 
@@ -176,6 +178,10 @@ class TankNotifier extends StateNotifier<TankState> {
         tankSize: state.tanks.length,
       );
 
+      // Get species tags for backup
+      final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
+      final speciesTags = speciesTagsNotifier.exportTags();
+
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
       final backupData = {
@@ -184,6 +190,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'exportDate': DateTime.now().toIso8601String(),
         'tankCount': state.tanks.length,
         'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
+        'speciesTags': speciesTags,
       };
 
       // Convert to formatted JSON
@@ -328,6 +335,16 @@ class TankNotifier extends StateNotifier<TankState> {
       // Parse tanks
       final tanksList = backupData['tanks'] as List;
       final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+
+      // Restore species tags if present in backup
+      if (backupData.containsKey('speciesTags')) {
+        final speciesTagsData = backupData['speciesTags'] as Map<String, dynamic>;
+        final speciesTagsMap = speciesTagsData.map(
+          (key, value) => MapEntry(key, List<String>.from(value)),
+        );
+        final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
+        await speciesTagsNotifier.importTags(speciesTagsMap);
+      }
 
       final previousTankCount = state.tanks.length;
       
