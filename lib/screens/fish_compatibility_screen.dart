@@ -128,6 +128,7 @@ class FishCompatibilityScreenState
                   fish: fish,
                   isSelected: isSelected,
                   category: _selectedCategory,
+                  showSpeciesTags: _searchController.text.isNotEmpty,
                 );
               },
               childCount: fishToShow,
