@@ -15,6 +15,13 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
+enum SettingsSection {
+  menu,
+  aiProvider,
+  appSettings,
+  dataManagement,
+}
+
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _geminiModelController;
   late final TextEditingController _geminiImageModelController;
@@ -30,6 +37,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
+  
+  SettingsSection _currentSection = SettingsSection.menu;
 
   @override
   void initState() {
@@ -147,24 +156,192 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     });
 
-    final appSettings = ref.watch(appSettingsProvider);
-
     return MainLayout(
-      title: 'Settings',
-      child: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          Text(
-            'Settings',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+      title: _currentSection == SettingsSection.menu 
+          ? 'Settings' 
+          : _currentSection == SettingsSection.aiProvider
+              ? 'AI Provider'
+              : _currentSection == SettingsSection.appSettings
+                  ? 'App Settings'
+                  : 'Data Management',
+      child: WillPopScope(
+        onWillPop: () async {
+          if (_currentSection != SettingsSection.menu) {
+            setState(() {
+              _currentSection = SettingsSection.menu;
+            });
+            return false;
+          }
+          return true;
+        },
+        child: _currentSection == SettingsSection.menu
+            ? _buildMainMenu()
+            : _currentSection == SettingsSection.aiProvider
+                ? _buildAIProviderSection()
+                : _currentSection == SettingsSection.appSettings
+                    ? _buildAppSettingsSection()
+                    : _buildDataManagementSection(),
+      ),
+    );
+  }
+
+  Widget _buildMainMenu() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        Text(
+          'Settings',
+          style: Theme.of(context)
+              .textTheme
+              .headlineLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Choose a section to configure',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 24),
-          // AI Provider Settings Section
-          Card(
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        _buildMenuCard(
+          context: context,
+          title: 'AI Provider',
+          subtitle: 'Configure Gemini, OpenAI, or Groq',
+          icon: Icons.smart_toy,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () {
+            setState(() {
+              _currentSection = SettingsSection.aiProvider;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'App Settings',
+          subtitle: 'Customize app behavior and features',
+          icon: Icons.settings_applications,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.secondary,
+          onTap: () {
+            setState(() {
+              _currentSection = SettingsSection.appSettings;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'Data Management',
+          subtitle: 'Backup and restore your data',
+          icon: Icons.cloud_sync,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.tertiary,
+          onTap: () {
+            setState(() {
+              _currentSection = SettingsSection.dataManagement;
+            });
+          },
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildMenuCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Gradient gradient,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: gradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIProviderSection() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // AI Provider Settings Section
+        Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -383,9 +560,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          // App Settings Section
-          Card(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppSettingsSection() {
+    final appSettings = ref.watch(appSettingsProvider);
+    
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // App Settings Section
+        Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -457,9 +644,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          // Data Management Section
-          Card(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataManagementSection() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Data Management Section
+        Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -538,7 +733,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
