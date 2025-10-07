@@ -641,7 +641,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       children: [
                         Icon(Icons.backup, color: Colors.blue),
                         SizedBox(width: 8),
-                        Text('Backup Tanks'),
+                        Text('Backup'),
                       ],
                     ),
                   ),
@@ -651,7 +651,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       children: [
                         Icon(Icons.restore, color: Colors.green),
                         SizedBox(width: 8),
-                        Text('Restore Tanks'),
+                        Text('Restore'),
                       ],
                     ),
                   ),
@@ -3180,7 +3180,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           children: [
             Icon(Icons.backup, color: Colors.blue),
             SizedBox(width: 8),
-            Text('Backup Tanks'),
+            Text('Backup'),
           ],
         ),
         content: Column(
@@ -3252,7 +3252,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           children: [
             Icon(Icons.restore, color: Colors.green),
             SizedBox(width: 8),
-            Text('Restore Tanks'),
+            Text('Restore'),
           ],
         ),
         content: const Column(
