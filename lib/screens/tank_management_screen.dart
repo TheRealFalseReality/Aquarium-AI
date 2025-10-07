@@ -3191,6 +3191,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             const SizedBox(height: 8),
             Text('• ${backupInfo['tankCount']} tank(s)'),
             Text('• All fish and tank configurations'),
+            Text('• Species tags'),
             Text('• Export date: ${DateTime.now().toString().split('.')[0]}'),
             const SizedBox(height: 16),
             Text(
@@ -3267,6 +3268,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Text('Restoring from backup will:'),
             SizedBox(height: 8),
             Text('• Replace ALL current tanks'),
+            Text('• Replace ALL species tags'),
             Text('• Cannot be undone'),
             SizedBox(height: 16),
             Text('Make sure you have a current backup before proceeding.'),
