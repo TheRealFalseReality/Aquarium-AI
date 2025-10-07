@@ -7,19 +7,23 @@ import '../services/fish_data_service.dart';
 /// State class for species tags
 class SpeciesTagsState {
   final Map<String, List<String>> tags; // fishType -> list of tags
+  final Map<String, List<String>> defaultTags; // fishType -> list of default (system) tags
   final bool isLoading;
 
   SpeciesTagsState({
     required this.tags,
+    this.defaultTags = const {},
     this.isLoading = true,
   });
 
   SpeciesTagsState copyWith({
     Map<String, List<String>>? tags,
+    Map<String, List<String>>? defaultTags,
     bool? isLoading,
   }) {
     return SpeciesTagsState(
       tags: tags ?? this.tags,
+      defaultTags: defaultTags ?? this.defaultTags,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -101,8 +105,12 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
     }
   }
 
-  /// Remove a tag from a fish type
+  /// Remove a tag from a fish type (won't remove default/system tags)
   Future<void> removeTag(String fishType, String tag) async {
+    // Don't allow removing default tags
+    if (isDefaultTag(fishType, tag)) {
+      return;
+    }
     final currentTags = state.tags[fishType] ?? [];
     final newTags = List<String>.from(currentTags)..remove(tag);
     await setTagsForFishType(fishType, newTags);
@@ -147,6 +155,7 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
   /// Only adds tags for fish types that don't already have tags
   Future<void> initializeDefaultTags(Map<String, List<dynamic>> fishData) async {
     final newTags = Map<String, List<String>>.from(state.tags);
+    final newDefaultTags = Map<String, List<String>>{};
     bool hasChanges = false;
 
     // Process both freshwater and marine categories
@@ -158,21 +167,33 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
         final fishName = fishJson['name'] as String;
         final commonNames = fishJson['commonNames'] as List<dynamic>?;
 
-        // Only add default tags if this fish type has no tags yet
-        if (!newTags.containsKey(fishName) || newTags[fishName]!.isEmpty) {
-          if (commonNames != null && commonNames.isNotEmpty) {
-            newTags[fishName] = commonNames.map((name) => name.toString()).toList();
+        if (commonNames != null && commonNames.isNotEmpty) {
+          final defaultTagsList = commonNames.map((name) => name.toString()).toList();
+          newDefaultTags[fishName] = defaultTagsList;
+          
+          // Only add default tags if this fish type has no tags yet
+          if (!newTags.containsKey(fishName) || newTags[fishName]!.isEmpty) {
+            newTags[fishName] = List.from(defaultTagsList);
             hasChanges = true;
           }
         }
       }
     }
 
-    // Only update state and save if there were changes
+    // Always update default tags, and update tags only if there were changes
+    state = state.copyWith(
+      tags: newTags,
+      defaultTags: newDefaultTags,
+      isLoading: false,
+    );
     if (hasChanges) {
-      state = state.copyWith(tags: newTags, isLoading: false);
       await _saveTags();
     }
+  }
+  
+  /// Check if a tag is a default (system) tag
+  bool isDefaultTag(String fishType, String tag) {
+    return state.defaultTags[fishType]?.contains(tag) ?? false;
   }
 }
 
