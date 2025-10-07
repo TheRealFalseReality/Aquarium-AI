@@ -13,6 +13,7 @@ import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
@@ -272,7 +273,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
-                      onPressed: () => _importTanks(context, ref),
+                      onPressed: () => BackupRestoreUtils.importData(context, ref, source: 'tank_management'),
                       icon: const Icon(Icons.restore, size: 18),
                       label: const Text('Restore'),
                       style: OutlinedButton.styleFrom(
@@ -627,10 +628,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 onSelected: (value) {
                   switch (value) {
                     case 'backup':
-                      _exportTanks(context, ref);
+                      BackupRestoreUtils.exportData(context, ref, source: 'tank_management');
                       break;
                     case 'restore':
-                      _importTanks(context, ref);
+                      BackupRestoreUtils.importData(context, ref, source: 'tank_management');
                       break;
                   }
                 },
@@ -3162,152 +3163,5 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Future<void> _exportTanks(BuildContext context, WidgetRef ref) async {
-    final tankNotifier = ref.read(tankProvider.notifier);
-    final tankState = ref.read(tankProvider);
 
-    if (tankState.tanks.isEmpty) {
-      context.showAccessibleMessage('No tanks to backup');
-      return;
-    }
-
-    // Show confirmation dialog with backup info
-    final backupInfo = tankNotifier.createBackupInfo();
-    final shouldExport = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.backup, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Backup'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('This will create a backup file containing:'),
-            const SizedBox(height: 8),
-            Text('• ${backupInfo['tankCount']} tank(s)'),
-            Text('• All fish and tank configurations'),
-            Text('• Species tags'),
-            Text('• Export date: ${DateTime.now().toString().split('.')[0]}'),
-            const SizedBox(height: 16),
-            Text(
-              'The backup file will be saved to your device.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Create Backup'),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldExport == true) {
-      final filePath = await tankNotifier.exportTanksToFile();
-      
-      if (context.mounted) {
-        if (filePath != null) {
-          context.showAccessibleMessage(
-            'Backup created successfully!\nSaved to: ${filePath.split('/').last}',
-            duration: const Duration(seconds: 4),
-          );
-        } else {
-          // Check if there's an actual error or if user just cancelled
-          final error = ref.read(tankProvider).error;
-          if (error != null) {
-            context.showAccessibleMessage(
-              'Failed to create backup: $error',
-              duration: const Duration(seconds: 4),
-            );
-          }
-          // If no error, user probably cancelled the save dialog - no message needed
-        }
-      }
-    }
-  }
-
-  Future<void> _importTanks(BuildContext context, WidgetRef ref) async {
-    // Show warning dialog first
-    final shouldImport = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.restore, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Restore'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '⚠️ Important',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
-            ),
-            SizedBox(height: 8),
-            Text('Restoring from backup will:'),
-            SizedBox(height: 8),
-            Text('• Replace ALL current tanks'),
-            Text('• Replace ALL species tags'),
-            Text('• Cannot be undone'),
-            SizedBox(height: 16),
-            Text('Make sure you have a current backup before proceeding.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Choose File'),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldImport == true) {
-      final success = await ref.read(tankProvider.notifier).importTanksFromFile();
-      
-      if (context.mounted) {
-        if (success) {
-          context.showAccessibleMessage('Tanks restored successfully!');
-        } else {
-          // Error message will be shown from the provider's error state
-          final error = ref.read(tankProvider).error;
-          if (error != null) {
-            context.showAccessibleMessage(
-              error,
-              duration: const Duration(seconds: 4),
-            );
-          }
-        }
-      }
-    }
-  }
 }
