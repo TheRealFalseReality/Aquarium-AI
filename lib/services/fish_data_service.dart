@@ -30,6 +30,22 @@ class FishDataService {
     _cachedFishData = fishData;
     return fishData;
   }
+
+  /// Load raw fish data JSON for tag initialization
+  /// Returns the raw JSON data with common names intact
+  Future<Map<String, List<dynamic>>> loadRawFishData() async {
+    final jsonString = await rootBundle.loadString('assets/fishcompat.json');
+    final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
+    
+    final fishData = <String, List<dynamic>>{};
+    for (final category in ['freshwater', 'marine']) {
+      if (jsonResponse.containsKey(category)) {
+        fishData[category] = jsonResponse[category] as List<dynamic>;
+      }
+    }
+    
+    return fishData;
+  }
   
   /// Clear cached data (useful for testing or when data needs to be refreshed)
   void clearCache() {

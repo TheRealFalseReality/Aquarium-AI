@@ -418,6 +418,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
                     },
                   ),
+                  const Divider(height: 24),
+                  ListTile(
+                    leading: Icon(
+                      Icons.label,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: const Text('Species Tags'),
+                    subtitle: const Text('Manage searchable species names for fish types'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/species-tags');
+                    },
+                  ),
                 ],
               ),
             ),

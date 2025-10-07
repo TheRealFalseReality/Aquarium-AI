@@ -4,18 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/fish.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../providers/species_tags_provider.dart';
 import '../theme_provider.dart';
 
 class FishCard extends ConsumerWidget {
   final Fish fish;
   final bool isSelected;
   final String category;
+  final bool showSpeciesTags;
 
   const FishCard({
     super.key,
     required this.fish,
     required this.isSelected,
     required this.category,
+    this.showSpeciesTags = false,
   });
 
   Future<void> _launchURL(String url) async {
@@ -166,14 +169,40 @@ class FishCard extends ConsumerWidget {
                       textAlign: TextAlign.center,
                       maxLines: 2,
                     ),
-                    if (fish.commonNames.isNotEmpty)
-                      Text(
-                        fish.commonNames.join(', '),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isMaterialYou ? cs.onSurfaceVariant.withOpacity(0.8) : null,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
+                    if (fish.commonNames.isNotEmpty || showSpeciesTags)
+                      Builder(
+                        builder: (context) {
+                          // Get species tags if showing them
+                          List<String> displayNames = List.from(fish.commonNames);
+                          
+                          if (showSpeciesTags) {
+                            final speciesTags = ref.read(speciesTagsProvider.notifier)
+                                .getTagsForFishType(fish.name);
+                            
+                            // Add tags that aren't already in commonNames (case-insensitive)
+                            final commonNamesLower = fish.commonNames
+                                .map((name) => name.toLowerCase())
+                                .toSet();
+                            
+                            for (final tag in speciesTags) {
+                              if (!commonNamesLower.contains(tag.toLowerCase())) {
+                                displayNames.add(tag);
+                              }
+                            }
+                          }
+                          
+                          if (displayNames.isEmpty) return const SizedBox.shrink();
+                          
+                          return Text(
+                            displayNames.join(', '),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isMaterialYou ? cs.onSurfaceVariant.withOpacity(0.8) : null,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
                       ),
                   ],
                 ),

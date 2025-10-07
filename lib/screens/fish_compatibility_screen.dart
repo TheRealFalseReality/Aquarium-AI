@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
 import '../widgets/accessible_feedback.dart';
@@ -61,7 +62,12 @@ class FishCompatibilityScreenState
               fish.name.toLowerCase().contains(query.toLowerCase());
           final commonNamesMatch = fish.commonNames
               .any((name) => name.toLowerCase().contains(query.toLowerCase()));
-          return nameMatches || commonNamesMatch;
+          
+          // Check species tags
+          final tags = ref.read(speciesTagsProvider).tags[fish.name] ?? [];
+          final tagsMatch = tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
+          
+          return nameMatches || commonNamesMatch || tagsMatch;
         }).toList();
       }
     });
@@ -94,6 +100,7 @@ class FishCompatibilityScreenState
                   fish: fish,
                   isSelected: isSelected,
                   category: _selectedCategory,
+                  showSpeciesTags: _searchController.text.isNotEmpty,
                 );
               },
               childCount: totalFish,
@@ -435,6 +442,47 @@ class FishCompatibilityScreenState
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
+                          const SizedBox(height: 12),
+                          // Species tags link
+                          InkWell(
+                            onTap: () => Navigator.pushNamed(context, '/species-tags'),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.label,
+                                    size: 18,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Tag fish with species names for better search',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 12,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -544,30 +592,36 @@ class FishCompatibilityScreenState
         width: canShowLastReportFab
             ? MediaQuery.of(context).size.width - 180
             : double.infinity,
-        child: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Search by name...',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _isSearchVisible = false;
-                });
-                FocusScope.of(context).unfocus();
-              },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search by name, species...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _isSearchVisible = false;
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+              ),
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surface,
-          ),
+            
+          ],
         ),
       ),
     );

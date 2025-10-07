@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
+import '../providers/species_tags_provider.dart';
 import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
@@ -1057,7 +1058,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   }
 }
 
-class _InhabitantDialog extends StatefulWidget {
+class _InhabitantDialog extends ConsumerStatefulWidget {
   final List<Fish> availableFish;
   final TankInhabitant? existingInhabitant;
   final Function(TankInhabitant) onAdd;
@@ -1069,10 +1070,10 @@ class _InhabitantDialog extends StatefulWidget {
   });
 
   @override
-  _InhabitantDialogState createState() => _InhabitantDialogState();
+  ConsumerState<_InhabitantDialog> createState() => _InhabitantDialogState();
 }
 
-class _InhabitantDialogState extends State<_InhabitantDialog> {
+class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   final _formKey = GlobalKey<FormState>();
   final _customNameController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -1118,8 +1119,15 @@ class _InhabitantDialogState extends State<_InhabitantDialog> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredFish = widget.availableFish.where((fish) {
-        return fish.name.toLowerCase().contains(query) ||
+        // Check fish name and common names
+        final nameMatches = fish.name.toLowerCase().contains(query) ||
                fish.commonNames.any((name) => name.toLowerCase().contains(query));
+        
+        // Check species tags
+        final tags = ref.read(speciesTagsProvider).tags[fish.name] ?? [];
+        final tagsMatch = tags.any((tag) => tag.toLowerCase().contains(query));
+        
+        return nameMatches || tagsMatch;
       }).toList();
     });
   }
