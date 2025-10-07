@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/species_tag.dart';
 import '../services/fish_data_service.dart';
 
 /// State class for species tags
@@ -155,12 +154,12 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
   /// Only adds tags for fish types that don't already have tags
   Future<void> initializeDefaultTags(Map<String, List<dynamic>> fishData) async {
     final newTags = Map<String, List<String>>.from(state.tags);
-    final newDefaultTags = Map<String, List<String>>{};
+    final newDefaultTags = <String, List<String>>{};
     bool hasChanges = false;
 
     // Process both freshwater and marine categories
     for (final category in ['freshwater', 'marine']) {
-      final fishList = fishData[category] as List<dynamic>?;
+      final fishList = fishData[category];
       if (fishList == null) continue;
 
       for (final fishJson in fishList) {

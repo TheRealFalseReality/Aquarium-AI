@@ -2977,7 +2977,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   children: [
                     Text(
                       totalQuantity > 1
-                          ? '${inhabitants.map((i) => i.customName).join(', ')}'
+                          ? inhabitants.map((i) => i.customName).join(', ')
                           : inhabitants.map((i) => i.customName).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,

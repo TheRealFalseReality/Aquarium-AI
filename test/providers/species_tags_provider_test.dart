@@ -20,7 +20,7 @@ void main() {
     });
 
     test('initial state has empty tags', () async {
-      final notifier = container.read(speciesTagsProvider.notifier);
+      container.read(speciesTagsProvider.notifier);
       
       // Wait for initialization
       await Future.delayed(const Duration(milliseconds: 100));

@@ -88,7 +88,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
   @override
   Widget build(BuildContext context) {
     final fishDataAsync = ref.watch(fishDataProvider);
-    final tagsState = ref.watch(speciesTagsProvider);
+    ref.watch(speciesTagsProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return MainLayout(

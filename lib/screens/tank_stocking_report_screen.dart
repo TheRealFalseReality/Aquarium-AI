@@ -574,19 +574,6 @@ class _TankRecommendationTabView extends StatelessWidget {
     );
   }
 
-  String _formatExistingFishList() {
-    // Use custom names if available, otherwise use fish unit names
-    return originalTank.inhabitants
-        .map((inhabitant) {
-          final displayName = inhabitant.customName.isNotEmpty 
-              ? inhabitant.customName 
-              : inhabitant.fishUnit;
-          return inhabitant.quantity > 1 
-              ? '$displayName (${inhabitant.quantity})' 
-              : displayName;
-        })
-        .join(', ');
-  }
 
   Future<void> _launchSearch(String query) async {
     // Log external search usage

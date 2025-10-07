@@ -562,7 +562,7 @@ class FishCompatibilityScreenState
               controller: _searchController,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search by name...',
+                hintText: 'Search by name, species...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.close),
@@ -583,36 +583,7 @@ class FishCompatibilityScreenState
                 fillColor: Theme.of(context).colorScheme.surface,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/species-tags');
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.label_outline,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Manage species tags',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            
           ],
         ),
       ),
