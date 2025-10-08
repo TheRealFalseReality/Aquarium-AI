@@ -620,7 +620,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ElevatedButton.icon(
                         onPressed: _saveSettings, // Call the save function.
                         icon: const Icon(Icons.save),
-                        label: const Text('Save Settings'),
+                        label: const Text('Save'),
                       ),
                     ],
                   ),
