@@ -158,13 +158,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     return MainLayout(
-      title: _currentSection == SettingsSection.menu 
-          ? 'Settings' 
-          : _currentSection == SettingsSection.aiProvider
-              ? 'AI Provider'
-              : _currentSection == SettingsSection.appSettings
-                  ? 'App Settings'
-                  : 'Data Management',
+      title: 'Settings',
+      leading: _currentSection != SettingsSection.menu
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  _currentSection = SettingsSection.menu;
+                });
+              },
+            )
+          : null,
       child: WillPopScope(
         onWillPop: () async {
           if (_currentSection != SettingsSection.menu) {
@@ -175,19 +179,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           }
           return true;
         },
-        child: _currentSection == SettingsSection.menu
-            ? _buildMainMenu()
-            : _currentSection == SettingsSection.aiProvider
-                ? _buildAIProviderSection()
-                : _currentSection == SettingsSection.appSettings
-                    ? _buildAppSettingsSection()
-                    : _buildDataManagementSection(),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: _currentSection == SettingsSection.menu
+              ? _buildMainMenu()
+              : _currentSection == SettingsSection.aiProvider
+                  ? _buildAIProviderSection()
+                  : _currentSection == SettingsSection.appSettings
+                      ? _buildAppSettingsSection()
+                      : _buildDataManagementSection(),
+        ),
       ),
     );
   }
 
   Widget _buildMainMenu() {
     return ListView(
+      key: const ValueKey('main_menu'),
       padding: const EdgeInsets.all(16.0),
       children: [
         Text(
@@ -339,6 +359,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAIProviderSection() {
     return ListView(
+      key: const ValueKey('ai_provider'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // AI Provider Settings Section
@@ -478,32 +499,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   // Display settings based on the selected provider.
-                  ExpansionTile(
-                    title: Text(
-                      'Configure API Settings',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: const Text('API keys, models, and configuration'),
-                    leading: const Icon(Icons.tune),
-                    initiallyExpanded: false,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          children: [
-                            if (_selectedProvider == AIProvider.gemini)
-                              _buildGeminiSettings()
-                            else if (_selectedProvider == AIProvider.openAI)
-                              _buildOpenAISettings()
-                            else
-                              _buildGroqSettings(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (_selectedProvider == AIProvider.gemini)
+                    _buildGeminiSettings()
+                  else if (_selectedProvider == AIProvider.openAI)
+                    _buildOpenAISettings()
+                  else
+                    _buildGroqSettings(),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -570,6 +571,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final appSettings = ref.watch(appSettingsProvider);
     
     return ListView(
+      key: const ValueKey('app_settings'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // App Settings Section
@@ -652,6 +654,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildDataManagementSection() {
     return ListView(
+      key: const ValueKey('data_management'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // Data Management Section
