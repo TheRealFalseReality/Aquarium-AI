@@ -159,16 +159,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return MainLayout(
       title: 'Settings',
-      leading: _currentSection != SettingsSection.menu
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  _currentSection = SettingsSection.menu;
-                });
-              },
-            )
-          : null,
       child: WillPopScope(
         onWillPop: () async {
           if (_currentSection != SettingsSection.menu) {
@@ -179,27 +169,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           }
           return true;
         },
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
+        child: Column(
+          children: [
+            if (_currentSection != SettingsSection.menu)
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        setState(() {
+                          _currentSection = SettingsSection.menu;
+                        });
+                      },
+                      tooltip: 'Back to Settings Menu',
+                    ),
+                    Text(
+                      _currentSection == SettingsSection.aiProvider
+                          ? 'AI Provider'
+                          : _currentSection == SettingsSection.appSettings
+                              ? 'App Settings'
+                              : 'Data Management',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-          child: _currentSection == SettingsSection.menu
-              ? _buildMainMenu()
-              : _currentSection == SettingsSection.aiProvider
-                  ? _buildAIProviderSection()
-                  : _currentSection == SettingsSection.appSettings
-                      ? _buildAppSettingsSection()
-                      : _buildDataManagementSection(),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.1, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _currentSection == SettingsSection.menu
+                    ? _buildMainMenu()
+                    : _currentSection == SettingsSection.aiProvider
+                        ? _buildAIProviderSection()
+                        : _currentSection == SettingsSection.appSettings
+                            ? _buildAppSettingsSection()
+                            : _buildDataManagementSection(),
+              ),
+            ),
+          ],
         ),
       ),
     );
