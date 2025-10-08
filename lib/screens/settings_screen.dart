@@ -16,13 +16,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-enum SettingsSection {
-  menu,
-  aiProvider,
-  appSettings,
-  dataManagement,
-}
-
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _geminiModelController;
   late final TextEditingController _geminiImageModelController;
@@ -38,8 +31,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
-  
-  SettingsSection _currentSection = SettingsSection.menu;
 
   @override
   void initState() {
@@ -72,6 +63,168 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _groqImageModelController.dispose();
     _groqApiKeyController.dispose();
     super.dispose();
+  }
+
+  void _showAIProviderDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.9,
+          child: Column(
+            children: [
+              // Header with close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.smart_toy,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'AI Provider',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: _buildAIProviderContent(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAppSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.9,
+          child: Column(
+            children: [
+              // Header with close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.settings_applications,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'App Settings',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: _buildAppSettingsContent(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDataManagementDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.9,
+          child: Column(
+            children: [
+              // Header with close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.cloud_sync,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Data Management',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: _buildDataManagementContent(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   /// **Saves the settings after validation.**
@@ -159,87 +312,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return MainLayout(
       title: 'Settings',
-      child: WillPopScope(
-        onWillPop: () async {
-          if (_currentSection != SettingsSection.menu) {
-            setState(() {
-              _currentSection = SettingsSection.menu;
-            });
-            return false;
-          }
-          return true;
-        },
-        child: Column(
-          children: [
-            if (_currentSection != SettingsSection.menu)
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        setState(() {
-                          _currentSection = SettingsSection.menu;
-                        });
-                      },
-                      tooltip: 'Back to Settings Menu',
-                    ),
-                    Text(
-                      _currentSection == SettingsSection.aiProvider
-                          ? 'AI Provider'
-                          : _currentSection == SettingsSection.appSettings
-                              ? 'App Settings'
-                              : 'Data Management',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.1, 0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
-                child: _currentSection == SettingsSection.menu
-                    ? _buildMainMenu()
-                    : _currentSection == SettingsSection.aiProvider
-                        ? _buildAIProviderSection()
-                        : _currentSection == SettingsSection.appSettings
-                            ? _buildAppSettingsSection()
-                            : _buildDataManagementSection(),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: _buildMainMenu(),
     );
   }
 
   Widget _buildMainMenu() {
     return ListView(
-      key: const ValueKey('main_menu'),
       padding: const EdgeInsets.all(16.0),
       children: [
         Text(
@@ -273,11 +351,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Theme.of(context).colorScheme.primary,
-          onTap: () {
-            setState(() {
-              _currentSection = SettingsSection.aiProvider;
-            });
-          },
+          onTap: () => _showAIProviderDialog(),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(
@@ -294,11 +368,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Theme.of(context).colorScheme.secondary,
-          onTap: () {
-            setState(() {
-              _currentSection = SettingsSection.appSettings;
-            });
-          },
+          onTap: () => _showAppSettingsDialog(),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(
@@ -315,11 +385,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Theme.of(context).colorScheme.tertiary,
-          onTap: () {
-            setState(() {
-              _currentSection = SettingsSection.dataManagement;
-            });
-          },
+          onTap: () => _showDataManagementDialog(),
         ),
         const SizedBox(height: 24),
       ],
@@ -389,9 +455,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildAIProviderSection() {
+  Widget _buildAIProviderContent() {
     return ListView(
-      key: const ValueKey('ai_provider'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // AI Provider Settings Section
@@ -598,11 +663,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildAppSettingsSection() {
+  Widget _buildAppSettingsContent() {
     final appSettings = ref.watch(appSettingsProvider);
     
     return ListView(
-      key: const ValueKey('app_settings'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // App Settings Section
@@ -682,9 +746,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildDataManagementSection() {
+  Widget _buildDataManagementContent() {
     return ListView(
-      key: const ValueKey('data_management'),
       padding: const EdgeInsets.all(16.0),
       children: [
         // Data Management Section
