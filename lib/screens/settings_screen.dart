@@ -168,7 +168,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 // Content
                 Expanded(
-                  child: _buildAppSettingsContent(),
+                  child: _buildAppSettingsContent(setDialogState),
                 ),
               ],
             ),
@@ -676,7 +676,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildAppSettingsContent() {
+  Widget _buildAppSettingsContent([StateSetter? setDialogState]) {
     final appSettings = ref.watch(appSettingsProvider);
     
     return ListView(
@@ -736,6 +736,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       );
                       
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+                      
+                      // Update dialog state if dialog is open
+                      if (setDialogState != null) {
+                        setDialogState(() {});
+                      }
                     },
                   ),
                   const Divider(height: 24),
