@@ -68,51 +68,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showAIProviderDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.9,
-          child: Column(
-            children: [
-              // Header with close button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.smart_toy,
-                      color: Theme.of(context).colorScheme.primary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'AI Provider',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.smart_toy,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'AI Provider',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: 'Close',
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Content
-              Expanded(
-                child: _buildAIProviderContent(),
-              ),
-            ],
+                // Content
+                Expanded(
+                  child: _buildAIProviderContent(setDialogState),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -122,51 +124,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showAppSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.9,
-          child: Column(
-            children: [
-              // Header with close button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.settings_applications,
-                      color: Theme.of(context).colorScheme.secondary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'App Settings',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.settings_applications,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'App Settings',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: 'Close',
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Content
-              Expanded(
-                child: _buildAppSettingsContent(),
-              ),
-            ],
+                // Content
+                Expanded(
+                  child: _buildAppSettingsContent(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -176,51 +180,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showDataManagementDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.9,
-          child: Column(
-            children: [
-              // Header with close button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.cloud_sync,
-                      color: Theme.of(context).colorScheme.tertiary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Data Management',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cloud_sync,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Data Management',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: 'Close',
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Content
-              Expanded(
-                child: _buildDataManagementContent(),
-              ),
-            ],
+                // Content
+                Expanded(
+                  child: _buildDataManagementContent(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -455,7 +461,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildAIProviderContent() {
+  Widget _buildAIProviderContent([StateSetter? setDialogState]) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -559,9 +565,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         oldValue: oldProvider.toString(),
                       );
                       
+                      // Update both parent and dialog state
                       setState(() {
                         _selectedProvider = newProvider;
                       });
+                      if (setDialogState != null) {
+                        setDialogState(() {
+                          _selectedProvider = newProvider;
+                        });
+                      }
                     },
                   ),
                   const SizedBox(height: 8),
@@ -597,11 +609,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 16),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
-                    _buildGeminiSettings()
+                    _buildGeminiSettings(setDialogState)
                   else if (_selectedProvider == AIProvider.openAI)
-                    _buildOpenAISettings()
+                    _buildOpenAISettings(setDialogState)
                   else
-                    _buildGroqSettings(),
+                    _buildGroqSettings(setDialogState),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -834,7 +846,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGeminiSettings() {
+  Widget _buildGeminiSettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -912,6 +924,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 setState(() {
                   _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
+                  });
+                }
               },
             ),
           ),
@@ -971,7 +988,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildOpenAISettings() {
+  Widget _buildOpenAISettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1050,6 +1067,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 setState(() {
                   _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
+                  });
+                }
               },
             ),
           ),
@@ -1108,7 +1130,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGroqSettings() {
+  Widget _buildGroqSettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1184,6 +1206,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 setState(() {
                   _isGroqApiKeyVisible = !_isGroqApiKeyVisible;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isGroqApiKeyVisible = !_isGroqApiKeyVisible;
+                  });
+                }
               },
             ),
           ),
