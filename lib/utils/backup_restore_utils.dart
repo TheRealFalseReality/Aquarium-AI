@@ -4,13 +4,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/accessible_feedback.dart';
 
-/// Utility class for backup and restore operations
-/// Provides shared methods that can be used across the app
 class BackupRestoreUtils {
-  /// Export data (tanks and species tags) to a backup file
-  /// 
-  /// Shows a confirmation dialog and handles the export process.
-  /// Can be called from any screen in the app.
   /// 
   /// [context] - BuildContext for showing dialogs and messages
   /// [ref] - WidgetRef for accessing providers
@@ -21,7 +15,6 @@ class BackupRestoreUtils {
     String? source,
   }) async {
     final tankNotifier = ref.read(tankProvider.notifier);
-    final tankState = ref.read(tankProvider);
 
     // Show confirmation dialog with backup info
     final backupInfo = tankNotifier.createBackupInfo();
