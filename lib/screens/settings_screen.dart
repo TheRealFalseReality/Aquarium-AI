@@ -921,12 +921,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isGeminiApiKeyVisible;
                 setState(() {
-                  _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
+                  _isGeminiApiKeyVisible = newVisibility;
                 });
                 if (setDialogState != null) {
                   setDialogState(() {
-                    _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
+                    _isGeminiApiKeyVisible = newVisibility;
                   });
                 }
               },
@@ -1064,12 +1065,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isOpenAIApiKeyVisible;
                 setState(() {
-                  _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
+                  _isOpenAIApiKeyVisible = newVisibility;
                 });
                 if (setDialogState != null) {
                   setDialogState(() {
-                    _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
+                    _isOpenAIApiKeyVisible = newVisibility;
                   });
                 }
               },
@@ -1203,12 +1205,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isGroqApiKeyVisible;
                 setState(() {
-                  _isGroqApiKeyVisible = !_isGroqApiKeyVisible;
+                  _isGroqApiKeyVisible = newVisibility;
                 });
                 if (setDialogState != null) {
                   setDialogState(() {
-                    _isGroqApiKeyVisible = !_isGroqApiKeyVisible;
+                    _isGroqApiKeyVisible = newVisibility;
                   });
                 }
               },
