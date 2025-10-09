@@ -735,9 +735,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         oldValue: appSettings.showStockingButton.toString(),
                       );
                       
-                      // Update the provider - this will automatically trigger a rebuild
-                      // because we're watching appSettingsProvider above
+                      // Update the provider
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+                      
+                      // Update dialog state if we're in a dialog
+                      if (setDialogState != null) {
+                        setDialogState(() {});
+                      }
+                      // Also update parent widget state
+                      setState(() {});
                     },
                   ),
                   const Divider(height: 24),
