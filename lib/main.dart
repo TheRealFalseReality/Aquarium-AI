@@ -332,6 +332,7 @@ class MyApp extends ConsumerWidget {
             Locale('en'), // English
             Locale('es'), // Spanish
             Locale('fr'), // French
+            Locale('de'), // German
           ],
           initialRoute: '/',
           navigatorObservers: _getNavigatorObservers(),

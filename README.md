@@ -58,6 +58,7 @@ Aquarium AI is now available in multiple languages! We welcome community contrib
 - 🇬🇧 English
 - 🇪🇸 Spanish (Español)
 - 🇫🇷 French (Français)
+- 🇩🇪 German (Deutsch)
 
 **Want to add your language?** 
 
@@ -67,10 +68,20 @@ Whether you want to translate to German, Japanese, Portuguese, Chinese, or any o
 
 ## 🤝 How to Contribute
 
-1. **Translations**: See [TRANSLATION_GUIDE.md](TRANSLATION_GUIDE.md)
+We welcome contributions from the community! Here are some ways you can help:
+
+1. **Translations**: See [TRANSLATION_GUIDE.md](TRANSLATION_GUIDE.md) - No programming required!
 2. **Bug Reports**: Open an issue describing the problem
 3. **Feature Requests**: Share your ideas through GitHub issues
 4. **Code Contributions**: Fork, create a branch, and submit a pull request
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
+
+### Quick Links for Contributors
+- [Translation Guide](TRANSLATION_GUIDE.md) - Add your language
+- [Translation Quick Reference](TRANSLATION_QUICK_REF.md) - Quick tips
+- [Localization Developer Guide](LOCALIZATION_DEV_GUIDE.md) - For developers
+- [Contributing Guidelines](CONTRIBUTING.md) - General contribution info
 
 ## 📄 License
 

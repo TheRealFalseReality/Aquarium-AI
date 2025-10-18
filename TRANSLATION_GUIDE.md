@@ -217,7 +217,7 @@ All translators will be credited in the app's About section and README. Thank yo
 | English  | en   | ✅ Complete | Native |
 | Spanish  | es   | ✅ Complete | Community |
 | French   | fr   | ✅ Complete | Community |
-| German   | de   | 🔄 Needed | - |
+| German   | de   | ✅ Complete | Community |
 | Japanese | ja   | 🔄 Needed | - |
 | Chinese  | zh   | 🔄 Needed | - |
 | Portuguese | pt | 🔄 Needed | - |
