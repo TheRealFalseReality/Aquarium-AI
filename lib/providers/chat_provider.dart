@@ -143,7 +143,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
   
   void _initGroqSession() {
     if (_modelState.groqApiKey.isEmpty) return;
-    final groq = Groq(apiKey: _modelState.groqApiKey, model: _modelState.groqModel);
+    final groqConfiguration = Configuration(model: _modelState.groqModel);
+    final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
     groq.startChat();
     groq.setCustomInstructionsWith(systemPrompt);
     _groqChatSession = groq;
@@ -340,7 +341,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
           responseText = response.choices.first.message.content?.first.text;
           break;
         case AIProvider.groq:
-           final groq = Groq(apiKey: _modelState.groqApiKey, model: _modelState.groqModel);
+           final groqConfiguration = Configuration(model: _modelState.groqModel);
+           final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
            groq.startChat(); 
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
            _cancellable?.complete(response);
@@ -386,7 +388,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
             $prompt
             Image data: data:$mimeType;base64,$base64Image
           ''';
-          final groq = Groq(apiKey: _modelState.groqApiKey, model: _modelState.groqImageModel);
+          final groqConfiguration = Configuration(model: _modelState.groqImageModel);
+          final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
           groq.startChat();
           final response = await groq.sendMessage(groqMessage).timeout(const Duration(seconds: 55));
           _cancellable?.complete(response);
