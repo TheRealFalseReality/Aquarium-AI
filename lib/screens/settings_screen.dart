@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -64,21 +65,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   /// **Saves the settings after validation.**
-  void _saveSettings() {
+  void _saveSettings(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Validation Check: Ensure the API key for the selected provider is not empty.
     if (_selectedProvider == AIProvider.gemini &&
         _geminiApiKeyController.text.trim().isEmpty) {
-      context.showAccessibleMessage('Please enter a Gemini API key before saving.');
+      context.showAccessibleMessage(l10n.enterGeminiApiKey);
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.openAI &&
         _openAIApiKeyController.text.trim().isEmpty) {
-      context.showAccessibleMessage('Please enter an OpenAI API key before saving.');
+      context.showAccessibleMessage(l10n.enterOpenAIApiKey);
       return; // Stop the function
     }
     if (_selectedProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
-      context.showAccessibleMessage('Please enter a Groq API key before saving.');
+      context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
 
@@ -105,7 +108,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveProvider: _selectedProvider,
         );
 
-    context.showAccessibleMessage('Settings updated successfully!');
+    context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
   @override
@@ -320,7 +323,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton.icon(
-                        onPressed: _saveSettings, // Call the save function.
+                        onPressed: () => _saveSettings(context), // Call the save function.
                         icon: const Icon(Icons.save),
                         label: const Text('Save Settings'),
                       ),

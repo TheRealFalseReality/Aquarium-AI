@@ -1,0 +1,263 @@
+{
+  "@@locale": "en",
+  "appTitle": "Aquarium AI",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "welcomeTitle": "Welcome",
+  "@welcomeTitle": {
+    "description": "Title for the welcome screen"
+  },
+  
+  "welcomeSubtitle": "Your intelligent assistant for all things aquatic.",
+  "@welcomeSubtitle": {
+    "description": "Subtitle for the welcome screen"
+  },
+  
+  "aiCompatibilityTool": "AI Compatibility Tool",
+  "@aiCompatibilityTool": {
+    "description": "Name of the AI compatibility tool feature"
+  },
+  
+  "aiCompatibilityDescription": "Get detailed compatibility reports with care guides and recommendations.",
+  "@aiCompatibilityDescription": {
+    "description": "Description of the AI compatibility tool"
+  },
+  
+  "aiChatbot": "AI Chatbot",
+  "@aiChatbot": {
+    "description": "Name of the AI chatbot feature"
+  },
+  
+  "aiChatbotDescription": "Ask questions, analyze water parameters, and get expert advice.",
+  "@aiChatbotDescription": {
+    "description": "Description of the AI chatbot"
+  },
+  
+  "photoAnalyzer": "Photo Analyzer",
+  "@photoAnalyzer": {
+    "description": "Name of the photo analyzer feature"
+  },
+  
+  "photoAnalyzerDescription": "Identify fish species and assess tank health from photos.",
+  "@photoAnalyzerDescription": {
+    "description": "Description of the photo analyzer"
+  },
+  
+  "aiStockingAssistant": "AI Stocking Assistant",
+  "@aiStockingAssistant": {
+    "description": "Name of the AI stocking assistant feature"
+  },
+  
+  "aiStockingDescription": "Get custom stocking plans to build a harmonious aquatic community.",
+  "@aiStockingDescription": {
+    "description": "Description of the AI stocking assistant"
+  },
+  
+  "aquariumCalculators": "Aquarium Calculators",
+  "@aquariumCalculators": {
+    "description": "Name of the aquarium calculators feature"
+  },
+  
+  "aquariumCalculatorsDescription": "Essential tools for salinity, CO₂, alkalinity and more.",
+  "@aquariumCalculatorsDescription": {
+    "description": "Description of the aquarium calculators"
+  },
+  
+  "tankVolumeCalculator": "Tank Volume Calculator",
+  "@tankVolumeCalculator": {
+    "description": "Name of the tank volume calculator feature"
+  },
+  
+  "tankVolumeDescription": "Calculate volume and water weight for various tank shapes.",
+  "@tankVolumeDescription": {
+    "description": "Description of the tank volume calculator"
+  },
+  
+  "aquaPiStore": "AquaPi Store",
+  "@aquaPiStore": {
+    "description": "Name of the AquaPi store"
+  },
+  
+  "aquaPiStoreDescription": "Visit the official store for AquaPi products.",
+  "@aquaPiStoreDescription": {
+    "description": "Description of the AquaPi store"
+  },
+  
+  "myTanks": "My Tanks",
+  "@myTanks": {
+    "description": "Title for the my tanks section"
+  },
+  
+  "noTanksYet": "No tanks yet. Tap to add one!",
+  "@noTanksYet": {
+    "description": "Message when user has no tanks"
+  },
+  
+  "totalTanks": "Total: {count}",
+  "@totalTanks": {
+    "description": "Total number of tanks",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  
+  "createFirstTank": "Create Your First Tank",
+  "@createFirstTank": {
+    "description": "Button text to create first tank"
+  },
+  
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings menu item"
+  },
+  
+  "about": "About",
+  "@about": {
+    "description": "About menu item"
+  },
+  
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance section in settings"
+  },
+  
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting"
+  },
+  
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light theme option"
+  },
+  
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark theme option"
+  },
+  
+  "systemDefault": "System Default",
+  "@systemDefault": {
+    "description": "System default theme option"
+  },
+  
+  "saveSettings": "Save Settings",
+  "@saveSettings": {
+    "description": "Save settings button"
+  },
+  
+  "settingsUpdatedSuccess": "Settings updated successfully!",
+  "@settingsUpdatedSuccess": {
+    "description": "Success message when settings are saved"
+  },
+  
+  "enterGeminiApiKey": "Please enter a Gemini API key before saving.",
+  "@enterGeminiApiKey": {
+    "description": "Error message for missing Gemini API key"
+  },
+  
+  "enterOpenAIApiKey": "Please enter an OpenAI API key before saving.",
+  "@enterOpenAIApiKey": {
+    "description": "Error message for missing OpenAI API key"
+  },
+  
+  "enterGroqApiKey": "Please enter a Groq API key before saving.",
+  "@enterGroqApiKey": {
+    "description": "Error message for missing Groq API key"
+  },
+  
+  "apiKey": "API Key",
+  "@apiKey": {
+    "description": "API Key label"
+  },
+  
+  "model": "Model",
+  "@model": {
+    "description": "Model label"
+  },
+  
+  "imageModel": "Image Model",
+  "@imageModel": {
+    "description": "Image Model label"
+  },
+  
+  "provider": "Provider",
+  "@provider": {
+    "description": "AI Provider label"
+  },
+  
+  "gemini": "Gemini",
+  "@gemini": {
+    "description": "Google Gemini provider name"
+  },
+  
+  "openAI": "OpenAI",
+  "@openAI": {
+    "description": "OpenAI provider name"
+  },
+  
+  "groq": "Groq",
+  "@groq": {
+    "description": "Groq provider name"
+  },
+  
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+  
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button"
+  },
+  
+  "add": "Add",
+  "@add": {
+    "description": "Add button"
+  },
+  
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+  
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  
+  "error": "Error",
+  "@error": {
+    "description": "Error label"
+  },
+  
+  "success": "Success",
+  "@success": {
+    "description": "Success label"
+  },
+  
+  "warning": "Warning",
+  "@warning": {
+    "description": "Warning label"
+  },
+  
+  "info": "Info",
+  "@info": {
+    "description": "Info label"
+  }
+}

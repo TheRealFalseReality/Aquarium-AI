@@ -44,6 +44,7 @@ dev_dependencies:
 flutter:
   default-flavor: production
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/

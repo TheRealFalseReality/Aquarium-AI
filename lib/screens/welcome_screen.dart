@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
@@ -195,6 +196,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) async {
       // If the provider is no longer loading and the API key is empty, show the dialog.
@@ -224,55 +227,51 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final List<FeatureInfo> features = [
       FeatureInfo(
         icon: '🐡',
-        title: 'AI Compatibility Tool',
-        description:
-            'Get detailed compatibility reports with care guides and recommendations.',
+        title: l10n.aiCompatibilityTool,
+        description: l10n.aiCompatibilityDescription,
         routeName: '/compat-ai',
         delay: const Duration(milliseconds: 650),
       ),
       FeatureInfo(
         icon: '🤖',
-        title: 'AI Chatbot',
-        description: 'Ask questions, analyze water parameters, and get expert advice.',
+        title: l10n.aiChatbot,
+        description: l10n.aiChatbotDescription,
         routeName: '/chatbot',
         delay: const Duration(milliseconds: 700),
       ),
       FeatureInfo(
         icon: '📷',
-        title: 'Photo Analyzer',
-        description:
-            'Identify fish species and assess tank health from photos.',
+        title: l10n.photoAnalyzer,
+        description: l10n.photoAnalyzerDescription,
         routeName: '/chatbot',
         openPhotoAnalyzer: true,
         delay: const Duration(milliseconds: 750),
       ),
       FeatureInfo(
         icon: '🦐',
-        title: 'AI Stocking Assistant',
-        description: 'Get custom stocking plans to build a harmonious aquatic community.',
+        title: l10n.aiStockingAssistant,
+        description: l10n.aiStockingDescription,
         routeName: '/stocking',
         delay: const Duration(milliseconds: 800),
       ),
       FeatureInfo(
         icon: '🧪',
-        title: 'Aquarium Calculators',
-        description:
-            'Essential tools for salinity, CO₂, alkalinity and more.',
+        title: l10n.aquariumCalculators,
+        description: l10n.aquariumCalculatorsDescription,
         routeName: '/calculators',
         delay: const Duration(milliseconds: 850),
       ),
       FeatureInfo(
         icon: '📏',
-        title: 'Tank Volume Calculator',
-        description:
-            'Calculate volume and water weight for various tank shapes.',
+        title: l10n.tankVolumeCalculator,
+        description: l10n.tankVolumeDescription,
         routeName: '/tank-volume',
         delay: const Duration(milliseconds: 900),
       ),
       FeatureInfo(
         icon: '🛒',
-        title: 'AquaPi Store',
-        description: 'Visit the official store for AquaPi products.',
+        title: l10n.aquaPiStore,
+        description: l10n.aquaPiStoreDescription,
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
@@ -280,7 +279,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     ];
 
     return MainLayout(
-      title: 'Welcome',
+      title: l10n.welcomeTitle,
       bottomNavigationBar: const AdBanner(),
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -293,7 +292,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       const AnimatedHeader(),
                       const SizedBox(height: 16),
                       AnimatedText(
-                        'Your intelligent assistant for all things aquatic.',
+                        l10n.welcomeSubtitle,
                         style: Theme.of(context).textTheme.titleMedium,
                         delay: const Duration(milliseconds: 520),
                       ),
