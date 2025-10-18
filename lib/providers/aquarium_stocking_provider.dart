@@ -146,7 +146,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groq = Groq(apiKey: models.groqApiKey, model: models.groqModel);
+        final groqConfiguration = Configuration(model: models.groqModel);
+        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
         groq.startChat();
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
@@ -327,7 +328,8 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groq = Groq(apiKey: models.groqApiKey, model: models.groqModel);
+        final groqConfiguration = Configuration(model: models.groqModel);
+        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
         groq.startChat();
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
