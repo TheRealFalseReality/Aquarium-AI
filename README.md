@@ -66,6 +66,19 @@ Check out our [Translation Guide](TRANSLATION_GUIDE.md) to learn how to contribu
 
 Whether you want to translate to German, Japanese, Portuguese, Chinese, or any other language, we'd love your help. All contributors are credited in the app!
 
+### For Developers: Setup After Pulling i18n Changes
+
+If you just pulled the i18n changes and see package errors:
+
+```bash
+flutter pub get        # Install flutter_localizations package
+flutter gen-l10n       # Generate localization files
+```
+
+The generated files will be in `.dart_tool/flutter_gen/gen_l10n/` (not in Git, created automatically).
+
+See [LOCALIZATION_DEV_GUIDE.md](LOCALIZATION_DEV_GUIDE.md) for detailed developer documentation.
+
 ## 🤝 How to Contribute
 
 We welcome contributions from the community! Here are some ways you can help:

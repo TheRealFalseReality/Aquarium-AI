@@ -301,6 +301,37 @@ flutter gen-l10n
 
 This is automatically run by `flutter run` and `flutter build`.
 
+## Troubleshooting
+
+### Missing Package Errors
+
+If you see errors like:
+- `'package:flutter_localizations/flutter_localizations.dart' not found`
+- `'package:flutter_gen/gen_l10n/app_localizations.dart' not found`
+
+**Solution:**
+
+1. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+2. **Generate localization files**:
+   ```bash
+   flutter gen-l10n
+   ```
+   
+   The generated files will be in `.dart_tool/flutter_gen/gen_l10n/`
+
+3. **Verify setup**:
+   - Check `pubspec.yaml` includes `flutter_localizations: sdk: flutter`
+   - Check `l10n.yaml` exists with proper configuration
+   - Check `flutter: generate: true` is set in `pubspec.yaml`
+
+4. **Restart your IDE/editor** after running the commands above
+
+**Note**: The generated localization files are not committed to Git. They are generated automatically when you run `flutter pub get` or `flutter run`.
+
 ## Resources
 
 - [Flutter i18n Official Docs](https://docs.flutter.dev/development/accessibility-and-localization/internationalization)

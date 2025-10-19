@@ -74,11 +74,35 @@ Want to add your language? **It's easier than you think!**
    Text(l10n.welcomeTitle) // Shows localized text
    ```
 
-2. **Add new strings**
+2. **Initial Setup** (after pulling the changes):
+   ```bash
+   flutter pub get        # Install dependencies
+   flutter gen-l10n       # Generate localization files
+   ```
+   
+   **Note**: `flutter gen-l10n` is also automatically run when you do `flutter run` or `flutter build`.
+
+3. **Add new strings**
    - Add to `lib/l10n/app_en.arb` with description
    - Run `flutter gen-l10n`
    - Update other language files
    - Use in code!
+
+## 🔧 Troubleshooting
+
+### "Package not found" Errors
+
+If you see errors like:
+- `'package:flutter_localizations/flutter_localizations.dart' not found`
+- `'package:flutter_gen/gen_l10n/app_localizations.dart' not found`
+
+**Fix:**
+```bash
+flutter pub get        # Install dependencies
+flutter gen-l10n       # Generate localization files
+```
+
+Then restart your IDE/editor. The generated files are in `.dart_tool/flutter_gen/gen_l10n/` and are created automatically - they're not in Git.
 
 ## 📊 What's Included
 

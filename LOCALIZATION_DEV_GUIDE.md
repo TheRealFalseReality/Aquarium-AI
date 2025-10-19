@@ -2,6 +2,32 @@
 
 This guide explains how to use the localization system in Aquarium AI for developers working on the codebase.
 
+## Setup
+
+After pulling the i18n changes, you need to:
+
+1. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+2. **Generate localization files**:
+   ```bash
+   flutter gen-l10n
+   ```
+   
+   This generates the Dart code in `.dart_tool/flutter_gen/gen_l10n/`
+   
+   **Note**: This step is also automatically run when you do `flutter run` or `flutter build`.
+
+3. **Verify the generated files**:
+   The following files should be generated:
+   - `.dart_tool/flutter_gen/gen_l10n/app_localizations.dart`
+   - `.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart`
+   - `.dart_tool/flutter_gen/gen_l10n/app_localizations_es.dart`
+   - `.dart_tool/flutter_gen/gen_l10n/app_localizations_fr.dart`
+   - `.dart_tool/flutter_gen/gen_l10n/app_localizations_de.dart`
+
 ## Quick Start
 
 ### Accessing Translations in Widgets

@@ -8,6 +8,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   google_fonts: ^6.3.2
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
