@@ -8,14 +8,14 @@ This directory contains all translation files for Aquarium AI in ARB (Applicatio
 - **app_es.arb** - Spanish (Español)
 - **app_fr.arb** - French (Français)
 - **app_de.arb** - German (Deutsch)
-- **app_template.arb** - Template for starting a new translation
+- **template.arb** - Template for starting a new translation
 
 ## For Translators
 
 ### Quick Start
 
 1. Want to add a new language? Start here:
-   - Copy `app_template.arb` to `app_XX.arb` (XX = your language code)
+   - Copy `template.arb` to `app_XX.arb` (XX = your language code)
    - Read the [Translation Guide](../TRANSLATION_GUIDE.md)
    - Translate all "TRANSLATE: " texts
    - Submit a Pull Request!

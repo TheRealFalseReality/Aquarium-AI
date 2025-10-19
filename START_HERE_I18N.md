@@ -41,7 +41,7 @@ Want to add your language? **It's easier than you think!**
 1. **Copy the template**
    ```bash
    # In the project folder
-   cp lib/l10n/app_template.arb lib/l10n/app_XX.arb
+   cp lib/l10n/template.arb lib/l10n/app_XX.arb
    # (Replace XX with your language code, e.g., app_pt.arb for Portuguese)
    ```
 
@@ -131,7 +131,7 @@ Let's walk through adding Portuguese:
 
 ```bash
 # 1. Copy template
-cp lib/l10n/app_template.arb lib/l10n/app_pt.arb
+cp lib/l10n/template.arb lib/l10n/app_pt.arb
 
 # 2. Edit app_pt.arb - change first line:
 "@@locale": "pt",
@@ -217,7 +217,7 @@ Aquarium-AI/
 │   ├── app_es.arb              # Spanish
 │   ├── app_fr.arb              # French
 │   ├── app_de.arb              # German
-│   ├── app_template.arb        # Copy me to start!
+│   ├── template.arb             # Copy me to start!
 │   └── README.md               # L10n guide
 ├── TRANSLATION_GUIDE.md         # START HERE for translators
 ├── TRANSLATION_QUICK_REF.md     # Quick tips

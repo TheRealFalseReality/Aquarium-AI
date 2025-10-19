@@ -28,7 +28,7 @@ Aquarium AI now supports internationalization, making it easy for the community 
 | Spanish | `lib/l10n/app_es.arb` | ✅ Complete |
 | French | `lib/l10n/app_fr.arb` | ✅ Complete |
 | German | `lib/l10n/app_de.arb` | ✅ Complete |
-| Template | `lib/l10n/app_template.arb` | Template for new languages |
+| Template | `lib/l10n/template.arb` | Template for new languages |
 
 **Total strings translated**: 50+ user-facing strings
 
@@ -70,7 +70,7 @@ Text(l10n.welcomeTitle)  // Shows "Welcome" in English, "Bienvenido" in Spanish,
 
 ### For Translators
 
-1. Copy `lib/l10n/app_template.arb` to `lib/l10n/app_XX.arb` (XX = language code)
+1. Copy `lib/l10n/template.arb` to `lib/l10n/app_XX.arb` (XX = language code)
 2. Translate all values (not keys)
 3. Update `lib/main.dart` to add the new locale
 4. Submit a Pull Request
@@ -128,7 +128,7 @@ Aquarium-AI/
 │   │   ├── app_es.arb           # Spanish
 │   │   ├── app_fr.arb           # French
 │   │   ├── app_de.arb           # German
-│   │   └── app_template.arb     # Template for new languages
+│   │   └── template.arb         # Template for new languages
 │   └── main.dart                # Localization configuration
 ├── l10n.yaml                    # l10n generation config
 ├── scripts/
