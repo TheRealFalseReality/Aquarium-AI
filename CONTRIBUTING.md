@@ -10,7 +10,7 @@ One of the easiest and most impactful ways to contribute is by translating the a
 
 **Quick start for translations:**
 1. Check the [Translation Quick Reference](TRANSLATION_QUICK_REF.md)
-2. Copy the [template file](lib/l10n/template.arb)
+2. Copy the [template file](lib/l10n_template.arb)
 3. Translate the strings to your language
 4. Submit a pull request or open an issue with your translation
 

@@ -125,12 +125,12 @@ Make sure all `{count}`, `{name}`, etc. are present and unchanged.
 
 1. Check the full [Translation Guide](TRANSLATION_GUIDE.md)
 2. Look at existing translations: [Spanish](lib/l10n/app_es.arb) or [French](lib/l10n/app_fr.arb)
-3. Use the [template file](lib/l10n/template.arb)
+3. Use the [template file](lib/l10n_template.arb)
 4. Open an issue on GitHub if you're stuck
 
 ## Quick Start Steps
 
-1. Copy `lib/l10n/template.arb` to `lib/l10n/app_XX.arb`
+1. Copy `lib/l10n_template.arb` to `lib/l10n/app_XX.arb`
 2. Change `@@locale` to your language code
 3. Replace all "TRANSLATE: " texts with your translations
 4. Validate JSON at https://jsonlint.com/
