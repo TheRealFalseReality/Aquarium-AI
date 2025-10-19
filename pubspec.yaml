@@ -15,7 +15,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.6
   flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.0
+  riverpod_annotation: ^3.0.3
   state_notifier: ^1.0.0
   flutter_markdown: ^0.7.1
   image_picker: ^1.2.0
