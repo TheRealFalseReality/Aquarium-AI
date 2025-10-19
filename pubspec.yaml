@@ -14,6 +14,7 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.6
+  riverpod: ^3.0.0
   flutter_riverpod: ^3.0.3
   riverpod_annotation: ^3.0.3
   state_notifier: ^1.0.0

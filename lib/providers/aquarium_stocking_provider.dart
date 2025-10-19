@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:state_notifier/state_notifier.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
