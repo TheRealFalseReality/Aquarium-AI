@@ -84,6 +84,6 @@ dependencies {
     // Add the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     // Add the Crashlytics dependency
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.5.1")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
     implementation("com.google.firebase:firebase-analytics")
 }
