@@ -681,6 +681,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAppSettingsContent([StateSetter? setDialogState]) {
     final appSettings = ref.watch(appSettingsProvider);
+    final l10n = AppLocalizations.of(context)!;
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -726,6 +727,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  
+                  // Language Selection
+                  ListTile(
+                    leading: Icon(
+                      Icons.language,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(l10n.language),
+                    subtitle: Text(_getLanguageDisplayName(appSettings.localeCode)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => _showLanguageDialog(setDialogState),
+                  ),
+                  const Divider(height: 24),
+                  
                   SwitchListTile(
                     title: const Text('Show AI Stocking Button'),
                     subtitle: const Text('Display the full "AI Stocking Recommendations" button on tank cards. The option remains available in the menu.'),
@@ -762,6 +777,68 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: () {
                       Navigator.pushNamed(context, '/species-tags');
                     },
+                  ),
+                  
+                  // Translation Community Section
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.2),
+                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.translate,
+                              color: Theme.of(context).colorScheme.tertiary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                l10n.translationCommunityTitle,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.translationCommunityMessage,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            launchUrl(Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/TRANSLATION_GUIDE.md'));
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 18),
+                          label: Text(l10n.visitGitHub),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            foregroundColor: Theme.of(context).colorScheme.onTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1469,6 +1546,150 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  String _getLanguageDisplayName(String? localeCode) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (localeCode == null) {
+      return l10n.languageSystemDefault;
+    }
+    
+    switch (localeCode) {
+      case 'en':
+        return l10n.languageEnglish;
+      case 'es':
+        return l10n.languageSpanish;
+      case 'fr':
+        return l10n.languageFrench;
+      case 'de':
+        return l10n.languageGerman;
+      default:
+        return l10n.languageSystemDefault;
+    }
+  }
+
+  void _showLanguageDialog([StateSetter? parentSetDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.selectLanguage),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String?>(
+              title: Text(l10n.languageSystemDefault),
+              value: null,
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageEnglish),
+              value: 'en',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageSpanish),
+              value: 'es',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageFrench),
+              value: 'fr',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageGerman),
+              value: 'de',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.close),
+          ),
+        ],
+      ),
     );
   }
 

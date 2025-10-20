@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './theme_provider.dart';
+import './providers/app_settings_provider.dart';
 import './screens/welcome_screen.dart';
 import './screens/about_screen.dart';
 import './screens/tank_volume_calculator.dart';
@@ -177,6 +178,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
+    final appSettings = ref.watch(appSettingsProvider);
     final textTheme =
         GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
 
@@ -322,6 +324,9 @@ class MyApp extends ConsumerWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
+          locale: appSettings.localeCode != null 
+              ? Locale(appSettings.localeCode!) 
+              : null, // null means use system locale
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,

@@ -259,5 +259,55 @@
   "info": "Info",
   "@info": {
     "description": "Info label"
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Select language dialog title"
+  },
+
+  "languageSystemDefault": "System Default",
+  "@languageSystemDefault": {
+    "description": "System default language option"
+  },
+
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+
+  "languageSpanish": "Español (Spanish)",
+  "@languageSpanish": {
+    "description": "Spanish language option"
+  },
+
+  "languageFrench": "Français (French)",
+  "@languageFrench": {
+    "description": "French language option"
+  },
+
+  "languageGerman": "Deutsch (German)",
+  "@languageGerman": {
+    "description": "German language option"
+  },
+
+  "translationCommunityTitle": "Help Translate",
+  "@translationCommunityTitle": {
+    "description": "Title for translation community section"
+  },
+
+  "translationCommunityMessage": "Want to see Aquarium AI in your language? We welcome community translations! Visit our GitHub repository to contribute translations and help make this app accessible to aquarium enthusiasts worldwide.",
+  "@translationCommunityMessage": {
+    "description": "Message asking for community translations"
+  },
+
+  "visitGitHub": "Visit GitHub",
+  "@visitGitHub": {
+    "description": "Visit GitHub button text"
   }
 }

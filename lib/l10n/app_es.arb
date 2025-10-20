@@ -50,5 +50,15 @@
   "error": "Error",
   "success": "Éxito",
   "warning": "Advertencia",
-  "info": "Información"
+  "info": "Información",
+  "language": "Idioma",
+  "selectLanguage": "Seleccionar Idioma",
+  "languageSystemDefault": "Predeterminado del Sistema",
+  "languageEnglish": "English (Inglés)",
+  "languageSpanish": "Español",
+  "languageFrench": "Français (Francés)",
+  "languageGerman": "Deutsch (Alemán)",
+  "translationCommunityTitle": "Ayuda a Traducir",
+  "translationCommunityMessage": "¿Quieres ver Aquarium AI en tu idioma? ¡Damos la bienvenida a traducciones comunitarias! Visita nuestro repositorio de GitHub para contribuir traducciones y ayudar a hacer esta aplicación accesible para entusiastas de acuarios en todo el mundo.",
+  "visitGitHub": "Visitar GitHub"
 }
