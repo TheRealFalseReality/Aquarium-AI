@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../models/tank.dart';
@@ -26,6 +27,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Tank quick summary from provider
@@ -159,7 +161,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          'My Tanks',
+                                          l10n.myTanks,
                                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             color: Theme.of(context).colorScheme.onSurface,
@@ -168,7 +170,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                         const SizedBox(height: 2),
                                         Text(
                                           tankCount == 0
-                                              ? 'No tanks yet. Tap to add one!'
+                                              ? l10n.noTanksYet
                                               : 'Total: $tankCount\n${randomTank != null ? randomTank.name : ""}',
                                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -204,9 +206,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 250),
                   child: ListTile(
                     leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
-                    title: const Text('AI Compatibility Tool'),
+                    title: Text(l10n.aiCompatibilityTool),
                     subtitle:
-                        const Text('Get detailed compatibility reports with care guides and recommendations.'),
+                        Text(l10n.aiCompatibilityDescription),
                     onTap: () => navigate('/compat-ai'),
                   ),
                 ),
@@ -214,9 +216,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 300),
                   child: ListTile(
                     leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
-                    title: const Text('AI Chatbot'),
-                    subtitle: const Text(
-                        'Ask questions, analyze water parameters, and get expert advice.'),
+                    title: Text(l10n.aiChatbot),
+                    subtitle: Text(l10n.aiChatbotDescription),
                     onTap: () => navigate('/chatbot'),
                   ),
                 ),
@@ -224,9 +225,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 350),
                   child: ListTile(
                     leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
-                    title: const Text('AI Stocking Assistant'),
-                    subtitle: const Text(
-                        'Get custom stocking plans to build a harmonious aquatic community.'),
+                    title: Text(l10n.aiStockingAssistant),
+                    subtitle: Text(l10n.aiStockingDescription),
                     onTap: () => navigate('/stocking'),
                   ),
                 ),
@@ -234,9 +234,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 400),
                   child: ListTile(
                     leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
-                    title: const Text('Aquarium Calculators'),
+                    title: Text(l10n.aquariumCalculators),
                     subtitle:
-                        const Text('Essential tools for salinity, CO₂, alkalinity and more.'),
+                        Text(l10n.aquariumCalculatorsDescription),
                     onTap: () => navigate('/calculators'),
                   ),
                 ),
@@ -244,9 +244,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 450),
                   child: ListTile(
                     leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
-                    title: const Text('Tank Volume Calculator'),
+                    title: Text(l10n.tankVolumeCalculator),
                     subtitle:
-                        const Text('Calculate volume and water weight for various tank shapes.'),
+                        Text(l10n.tankVolumeDescription),
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),

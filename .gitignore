@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 firebase-tools-instant-win.exe
+lib/l10n/app_localizations*.dart
 
 # IntelliJ related
 *.iml

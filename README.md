@@ -49,3 +49,53 @@ Access essential tools for managing your aquarium's technical details. The app i
 ## 🌊 Dive In
 
 Stop guessing and start thriving! Try **Aquarium AI** now and let it be your guide to a healthier, more beautiful aquarium.
+
+## 🌍 Contributing Translations
+
+Aquarium AI is now available in multiple languages! We welcome community contributions to make the app accessible to aquarium enthusiasts worldwide.
+
+**Currently supported languages:**
+- 🇬🇧 English
+- 🇪🇸 Spanish (Español)
+- 🇫🇷 French (Français)
+- 🇩🇪 German (Deutsch)
+
+**Want to add your language?** 
+
+Check out our [Translation Guide](TRANSLATION_GUIDE.md) to learn how to contribute translations. It's easy and doesn't require any programming knowledge!
+
+Whether you want to translate to German, Japanese, Portuguese, Chinese, or any other language, we'd love your help. All contributors are credited in the app!
+
+### For Developers: Setup After Pulling i18n Changes
+
+If you just pulled the i18n changes and see package errors:
+
+```bash
+flutter pub get        # Install flutter_localizations package
+flutter gen-l10n       # Generate localization files
+```
+
+The generated files will be in `.dart_tool/flutter_gen/gen_l10n/` (not in Git, created automatically).
+
+See [LOCALIZATION_DEV_GUIDE.md](LOCALIZATION_DEV_GUIDE.md) for detailed developer documentation.
+
+## 🤝 How to Contribute
+
+We welcome contributions from the community! Here are some ways you can help:
+
+1. **Translations**: See [TRANSLATION_GUIDE.md](TRANSLATION_GUIDE.md) - No programming required!
+2. **Bug Reports**: Open an issue describing the problem
+3. **Feature Requests**: Share your ideas through GitHub issues
+4. **Code Contributions**: Fork, create a branch, and submit a pull request
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
+
+### Quick Links for Contributors
+- [Translation Guide](TRANSLATION_GUIDE.md) - Add your language
+- [Translation Quick Reference](TRANSLATION_QUICK_REF.md) - Quick tips
+- [Localization Developer Guide](LOCALIZATION_DEV_GUIDE.md) - For developers
+- [Contributing Guidelines](CONTRIBUTING.md) - General contribution info
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

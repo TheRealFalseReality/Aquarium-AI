@@ -1,0 +1,66 @@
+name: Validate Translations
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    paths:
+      - 'lib/l10n/**.arb'
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/l10n/**.arb'
+
+jobs:
+  validate:
+    name: Validate Translation Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Validate JSON syntax in ARB files
+        run: |
+          echo "🔍 Validating JSON syntax in ARB files..."
+          for file in lib/l10n/app_*.arb; do
+            echo "Checking $file..."
+            if ! python3 -m json.tool "$file" > /dev/null 2>&1; then
+              echo "❌ Invalid JSON in $file"
+              exit 1
+            fi
+          done
+          echo "✅ All ARB files have valid JSON syntax"
+      
+      - name: Run translation validation script
+        run: |
+          chmod +x scripts/validate_translations.sh
+          ./scripts/validate_translations.sh
+      
+      - name: Check for completeness
+        run: |
+          echo "📊 Checking translation completeness..."
+          
+          TEMPLATE="lib/l10n/app_en.arb"
+          TEMPLATE_COUNT=$(grep -c '"[a-zA-Z][a-zA-Z0-9_]*":' "$TEMPLATE" || true)
+          
+          echo "Template has $TEMPLATE_COUNT keys"
+          echo ""
+          
+          for file in lib/l10n/app_*.arb; do
+            if [ "$file" = "$TEMPLATE" ] || [ "$file" = "lib/l10n/app_template.arb" ]; then
+              continue
+            fi
+            
+            LANG=$(basename "$file" .arb | sed 's/app_//')
+            COUNT=$(grep -c '"[a-zA-Z][a-zA-Z0-9_]*":' "$file" || true)
+            PERCENTAGE=$((COUNT * 100 / TEMPLATE_COUNT))
+            
+            echo "$LANG: $COUNT/$TEMPLATE_COUNT keys ($PERCENTAGE%)"
+            
+            if [ $PERCENTAGE -lt 80 ]; then
+              echo "⚠️  Warning: $LANG translation is less than 80% complete"
+            fi
+          done

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import './theme_provider.dart';
 import './screens/welcome_screen.dart';
 import './screens/about_screen.dart';
@@ -24,6 +25,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
+import '../l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -320,6 +322,18 @@ class MyApp extends ConsumerWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'), // English
+            Locale('es'), // Spanish
+            Locale('fr'), // French
+            Locale('de'), // German
+          ],
           initialRoute: '/',
           navigatorObservers: _getNavigatorObservers(),
           // debugShowCheckedModeBanner: false,
