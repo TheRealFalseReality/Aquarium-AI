@@ -1,19 +1,27 @@
 import 'dart:convert';
 import 'package:fish_ai/models/tank.dart';
 import 'package:fish_ai/providers/tank_provider.dart';
+import 'package:fish_ai/providers/species_tags_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('Tank Backup and Restore Tests', () {
+    late ProviderContainer container;
     late TankNotifier tankNotifier;
     
     setUp(() async {
       // Mock shared preferences
       SharedPreferences.setMockInitialValues({});
-      tankNotifier = TankNotifier();
+      container = ProviderContainer();
+      tankNotifier = container.read(tankProvider.notifier);
       // Wait for initial load to complete
       await Future.delayed(const Duration(milliseconds: 100));
+    });
+
+    tearDown(() {
+      container.dispose();
     });
 
     test('createBackupInfo returns correct metadata', () {
@@ -207,6 +215,130 @@ void main() {
       final parsed = json.decode(prettyJson);
       expect(parsed['version'], equals('1.0.0'));
       expect(parsed['tanks'], isA<List>());
+    });
+  });
+
+  group('Species Tags Backup and Restore Tests', () {
+    late ProviderContainer container;
+    
+    setUp(() async {
+      // Mock shared preferences
+      SharedPreferences.setMockInitialValues({});
+      container = ProviderContainer();
+      // Wait for initial load to complete
+      await Future.delayed(const Duration(milliseconds: 100));
+    });
+
+    tearDown(() {
+      container.dispose();
+    });
+
+    test('backup includes species tags', () {
+      // Add some species tags
+      final speciesTagsNotifier = container.read(speciesTagsProvider.notifier);
+      speciesTagsNotifier.setTagsForFishType('Tetras', ['Neon Tetra', 'Cardinal Tetra']);
+      speciesTagsNotifier.setTagsForFishType('Barbs', ['Tiger Barb', 'Cherry Barb']);
+
+      // Create backup data with species tags
+      final speciesTags = speciesTagsNotifier.exportTags();
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'speciesTags': speciesTags,
+      };
+
+      // Verify species tags are included
+      expect(backupData.containsKey('speciesTags'), isTrue);
+      expect(backupData['speciesTags'], isA<Map<String, List<String>>>());
+      
+      final tags = backupData['speciesTags'] as Map<String, List<String>>;
+      expect(tags['Tetras'], equals(['Neon Tetra', 'Cardinal Tetra']));
+      expect(tags['Barbs'], equals(['Tiger Barb', 'Cherry Barb']));
+    });
+
+    test('restore imports species tags', () async {
+      final speciesTagsNotifier = container.read(speciesTagsProvider.notifier);
+      
+      // Create backup data with species tags
+      final importTags = {
+        'Guppies': ['Fancy Guppy', 'Endler Guppy'],
+        'Cichlids': ['Oscar', 'Angelfish'],
+      };
+      
+      // Import the tags
+      await speciesTagsNotifier.importTags(importTags);
+      
+      // Verify tags were imported
+      final restoredTags = speciesTagsNotifier.exportTags();
+      expect(restoredTags['Guppies'], equals(['Fancy Guppy', 'Endler Guppy']));
+      expect(restoredTags['Cichlids'], equals(['Oscar', 'Angelfish']));
+    });
+
+    test('backup JSON with species tags can be parsed', () {
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'speciesTags': {
+          'Tetras': ['Neon Tetra', 'Cardinal Tetra'],
+          'Barbs': ['Tiger Barb'],
+        },
+      };
+
+      // Convert to JSON and back
+      final jsonString = json.encode(backupData);
+      final parsedBackup = json.decode(jsonString) as Map<String, dynamic>;
+      
+      // Verify species tags parsing
+      expect(parsedBackup.containsKey('speciesTags'), isTrue);
+      final speciesTags = parsedBackup['speciesTags'] as Map<String, dynamic>;
+      
+      final speciesTagsMap = speciesTags.map(
+        (key, value) => MapEntry(key, List<String>.from(value)),
+      );
+      
+      expect(speciesTagsMap['Tetras'], equals(['Neon Tetra', 'Cardinal Tetra']));
+      expect(speciesTagsMap['Barbs'], equals(['Tiger Barb']));
+    });
+
+    test('backup without species tags is still valid', () {
+      // Old backup format without species tags
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+      };
+
+      // Should still pass validation
+      expect(backupData.containsKey('tanks'), isTrue);
+      expect(backupData.containsKey('version'), isTrue);
+      
+      // Species tags are optional
+      expect(backupData.containsKey('speciesTags'), isFalse);
+    });
+
+    test('empty species tags are handled correctly', () {
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'speciesTags': {},
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsedBackup = json.decode(jsonString) as Map<String, dynamic>;
+      
+      expect(parsedBackup['speciesTags'], isA<Map>());
+      expect((parsedBackup['speciesTags'] as Map).isEmpty, isTrue);
     });
   });
 }

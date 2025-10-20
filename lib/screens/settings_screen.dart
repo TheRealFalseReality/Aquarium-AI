@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -61,6 +64,174 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _groqImageModelController.dispose();
     _groqApiKeyController.dispose();
     super.dispose();
+  }
+
+  void _showAIProviderDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.smart_toy,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'AI Provider',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: _buildAIProviderContent(setDialogState),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAppSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.settings_applications,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'App Settings',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: _buildAppSettingsContent(setDialogState),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDataManagementDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Column(
+              children: [
+                // Header with close button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cloud_sync,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Data Management',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: _buildDataManagementContent(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// **Saves the settings after validation.**
@@ -146,24 +317,157 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     });
 
-    final appSettings = ref.watch(appSettingsProvider);
-
     return MainLayout(
       title: 'Settings',
-      child: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          Text(
-            'Settings',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+      child: _buildMainMenu(),
+    );
+  }
+
+  Widget _buildMainMenu() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        Text(
+          'Settings',
+          style: Theme.of(context)
+              .textTheme
+              .headlineLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Choose a section to configure',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 24),
-          // AI Provider Settings Section
-          Card(
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        _buildMenuCard(
+          context: context,
+          title: 'AI Provider',
+          subtitle: 'Configure Gemini, OpenAI, or Groq',
+          icon: Icons.smart_toy,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () => _showAIProviderDialog(),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'App Settings',
+          subtitle: 'Customize app behavior and features',
+          icon: Icons.settings_applications,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.secondary,
+          onTap: () => _showAppSettingsDialog(),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'Data Management',
+          subtitle: 'Backup and restore your data',
+          icon: Icons.cloud_sync,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.tertiary,
+          onTap: () => _showDataManagementDialog(),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildMenuCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Gradient gradient,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: gradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIProviderContent([StateSetter? setDialogState]) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // AI Provider Settings Section
+        Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -262,9 +566,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         oldValue: oldProvider.toString(),
                       );
                       
+                      // Update both parent and dialog state
                       setState(() {
                         _selectedProvider = newProvider;
                       });
+                      if (setDialogState != null) {
+                        setDialogState(() {
+                          _selectedProvider = newProvider;
+                        });
+                      }
                     },
                   ),
                   const SizedBox(height: 8),
@@ -297,13 +607,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
                   // Display settings based on the selected provider.
                   if (_selectedProvider == AIProvider.gemini)
-                    _buildGeminiSettings()
+                    _buildGeminiSettings(setDialogState)
                   else if (_selectedProvider == AIProvider.openAI)
-                    _buildOpenAISettings()
+                    _buildOpenAISettings(setDialogState)
                   else
-                    _buildGroqSettings(),
+                    _buildGroqSettings(setDialogState),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -322,7 +633,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ElevatedButton.icon(
                         onPressed: _saveSettings, // Call the save function.
                         icon: const Icon(Icons.save),
-                        label: const Text('Save Settings'),
+                        label: const Text('Save'),
                       ),
                     ],
                   ),
@@ -361,9 +672,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          // App Settings Section
-          Card(
+        ],
+    );
+  }
+
+  Widget _buildAppSettingsContent([StateSetter? setDialogState]) {
+    final appSettings = ref.watch(appSettingsProvider);
+    
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // App Settings Section
+        Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -415,7 +735,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         oldValue: appSettings.showStockingButton.toString(),
                       );
                       
+                      // Update the provider - this triggers ref.watch to rebuild
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+                      
+                      // Only call setDialogState if we're in a dialog, otherwise call setState
+                      // This prevents double updates that cause the double-tap behavior on mobile
+                      if (setDialogState != null) {
+                        setDialogState(() {});
+                      } else {
+                        setState(() {});
+                      }
                     },
                   ),
                   const Divider(height: 24),
@@ -435,13 +764,270 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
         ],
-      ),
     );
   }
 
-  Widget _buildGeminiSettings() {
+  Widget _buildDataManagementContent() {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _loadBackupStatistics(),
+      builder: (context, snapshot) {
+        final stats = snapshot.data ?? {};
+        
+        return ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            // Data Management Section
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                            Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_sync,
+                            color: Theme.of(context).colorScheme.tertiary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Data Management',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Backup Statistics
+                    if (stats.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 16,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Backup Statistics',
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (stats['lastBackupTime'] != null) ...[
+                              _buildStatRow(
+                                context,
+                                Icons.backup,
+                                'Last Backup',
+                                stats['lastBackupTime'] as String,
+                                Colors.blue,
+                              ),
+                              if (stats['lastBackupTankCount'] != null) ...[
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                  context,
+                                  Icons.water_drop,
+                                  'Tanks Backed Up',
+                                  '${stats['lastBackupTankCount']} tank(s)',
+                                  Colors.cyan,
+                                ),
+                              ],
+                            ],
+                            if (stats['lastRestoreTime'] != null) ...[
+                              if (stats['lastBackupTime'] != null) const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.restore,
+                                'Last Restore',
+                                stats['lastRestoreTime'] as String,
+                                Colors.green,
+                              ),
+                            ],
+                            if (stats['lastBackupTime'] == null && stats['lastRestoreTime'] == null)
+                              Text(
+                                'No backup history yet',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontStyle: FontStyle.italic,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    
+                    const SizedBox(height: 16),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.backup,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      title: const Text('Backup Data'),
+                      subtitle: const Text('Save tanks and species tags to file'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () async {
+                        await BackupRestoreUtils.exportData(context, ref, source: 'settings');
+                        // Rebuild to refresh statistics
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                    const Divider(height: 16),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.restore,
+                          color: Colors.green,
+                        ),
+                      ),
+                      title: const Text('Restore Data'),
+                      subtitle: const Text('Load tanks and species tags from backup'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () async {
+                        await BackupRestoreUtils.importData(context, ref, source: 'settings');
+                        // Rebuild to refresh statistics
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildStatRow(BuildContext context, IconData icon, String label, String value, Color color) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<Map<String, dynamic>> _loadBackupStatistics() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stats = <String, dynamic>{};
+      
+      final lastBackupTimeStr = prefs.getString('last_backup_time');
+      if (lastBackupTimeStr != null) {
+        final lastBackupTime = DateTime.parse(lastBackupTimeStr);
+        stats['lastBackupTime'] = _formatDateTime(lastBackupTime);
+        
+        final lastBackupTankCount = prefs.getInt('last_backup_tank_count');
+        if (lastBackupTankCount != null) {
+          stats['lastBackupTankCount'] = lastBackupTankCount;
+        }
+      }
+      
+      final lastRestoreTimeStr = prefs.getString('last_restore_time');
+      if (lastRestoreTimeStr != null) {
+        final lastRestoreTime = DateTime.parse(lastRestoreTimeStr);
+        stats['lastRestoreTime'] = _formatDateTime(lastRestoreTime);
+      }
+      
+      return stats;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inHours < 1) {
+      final minutes = difference.inMinutes;
+      return '$minutes minute${minutes == 1 ? '' : 's'} ago';
+    } else if (difference.inDays < 1) {
+      final hours = difference.inHours;
+      return '$hours hour${hours == 1 ? '' : 's'} ago';
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return '$days day${days == 1 ? '' : 's'} ago';
+    } else {
+      // Format as date
+      final month = dateTime.month.toString().padLeft(2, '0');
+      final day = dateTime.day.toString().padLeft(2, '0');
+      final year = dateTime.year;
+      return '$month/$day/$year';
+    }
+  }
+
+  Widget _buildGeminiSettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -516,9 +1102,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isGeminiApiKeyVisible;
                 setState(() {
-                  _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
+                  _isGeminiApiKeyVisible = newVisibility;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isGeminiApiKeyVisible = newVisibility;
+                  });
+                }
               },
             ),
           ),
@@ -578,7 +1170,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildOpenAISettings() {
+  Widget _buildOpenAISettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -654,9 +1246,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isOpenAIApiKeyVisible;
                 setState(() {
-                  _isOpenAIApiKeyVisible = !_isOpenAIApiKeyVisible;
+                  _isOpenAIApiKeyVisible = newVisibility;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isOpenAIApiKeyVisible = newVisibility;
+                  });
+                }
               },
             ),
           ),
@@ -715,7 +1313,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGroqSettings() {
+  Widget _buildGroqSettings([StateSetter? setDialogState]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -788,9 +1386,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
               ),
               onPressed: () {
+                final newVisibility = !_isGroqApiKeyVisible;
                 setState(() {
-                  _isGroqApiKeyVisible = !_isGroqApiKeyVisible;
+                  _isGroqApiKeyVisible = newVisibility;
                 });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _isGroqApiKeyVisible = newVisibility;
+                  });
+                }
               },
             ),
           ),
@@ -864,4 +1468,5 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }).toList(),
     );
   }
+
 }

@@ -194,6 +194,20 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
   bool isDefaultTag(String fishType, String tag) {
     return state.defaultTags[fishType]?.contains(tag) ?? false;
   }
+
+  /// Export species tags for backup
+  Map<String, List<String>> exportTags() {
+    return Map<String, List<String>>.from(state.tags);
+  }
+
+  /// Import species tags from backup (replaces existing tags)
+  Future<void> importTags(Map<String, List<String>> importedTags) async {
+    state = state.copyWith(
+      tags: Map<String, List<String>>.from(importedTags),
+      isLoading: false,
+    );
+    await _saveTags();
+  }
 }
 
 /// Provider for species tags
