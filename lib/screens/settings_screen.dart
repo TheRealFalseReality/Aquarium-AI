@@ -735,15 +735,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         oldValue: appSettings.showStockingButton.toString(),
                       );
                       
-                      // Update the provider
+                      // Update the provider - this triggers ref.watch to rebuild
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
                       
-                      // Update dialog state if we're in a dialog
+                      // Only call setDialogState if we're in a dialog, otherwise call setState
+                      // This prevents double updates that cause the double-tap behavior on mobile
                       if (setDialogState != null) {
                         setDialogState(() {});
+                      } else {
+                        setState(() {});
                       }
-                      // Also update parent widget state
-                      setState(() {});
                     },
                   ),
                   const Divider(height: 24),
