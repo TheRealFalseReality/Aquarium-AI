@@ -424,6 +424,117 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const Divider(height: 24),
                   ListTile(
                     leading: Icon(
+                      Icons.language,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(AppLocalizations.of(context)!.languageSelection),
+                    subtitle: Text(AppLocalizations.of(context)!.selectLanguage),
+                    trailing: DropdownButton<String>(
+                      value: appSettings.locale?.languageCode ?? 'system',
+                      underline: Container(),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'system',
+                          child: Text(AppLocalizations.of(context)!.systemLanguage),
+                        ),
+                        DropdownMenuItem(
+                          value: 'en',
+                          child: Text(AppLocalizations.of(context)!.english),
+                        ),
+                        DropdownMenuItem(
+                          value: 'es',
+                          child: Text(AppLocalizations.of(context)!.spanish),
+                        ),
+                        DropdownMenuItem(
+                          value: 'fr',
+                          child: Text(AppLocalizations.of(context)!.french),
+                        ),
+                        DropdownMenuItem(
+                          value: 'de',
+                          child: Text(AppLocalizations.of(context)!.german),
+                        ),
+                      ],
+                      onChanged: (String? value) {
+                        final oldValue = appSettings.locale?.languageCode ?? 'system';
+                        
+                        // Log settings change
+                        AnalyticsService.logSettingsChange(
+                          settingName: 'language',
+                          newValue: value ?? 'system',
+                          oldValue: oldValue,
+                        );
+                        
+                        if (value == 'system') {
+                          ref.read(appSettingsProvider.notifier).setLocale(null);
+                        } else {
+                          ref.read(appSettingsProvider.notifier).setLocale(Locale(value!));
+                        }
+                        
+                        context.showAccessibleMessage(AppLocalizations.of(context)!.languageChanged);
+                      },
+                    ),
+                  ),
+                  const Divider(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                          Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.translate,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context)!.helpTranslate,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          AppLocalizations.of(context)!.helpTranslateMessage,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            launchUrl(Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/TRANSLATION_GUIDE.md'));
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 18),
+                          label: Text(AppLocalizations.of(context)!.contributeTranslations),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 24),
+                  ListTile(
+                    leading: Icon(
                       Icons.label,
                       color: Theme.of(context).colorScheme.primary,
                     ),

@@ -50,5 +50,17 @@
   "error": "Fehler",
   "success": "Erfolg",
   "warning": "Warnung",
-  "info": "Info"
+  "info": "Info",
+  "language": "Sprache",
+  "languageSelection": "Sprachauswahl",
+  "selectLanguage": "Sprache auswählen",
+  "systemLanguage": "Systemstandard",
+  "english": "English (Englisch)",
+  "spanish": "Español (Spanisch)",
+  "french": "Français (Französisch)",
+  "german": "Deutsch",
+  "helpTranslate": "Beim Übersetzen helfen",
+  "helpTranslateMessage": "Möchten Sie Aquarium AI in Ihrer Sprache sehen? Wir würden uns über Ihre Hilfe freuen! Die App ist offen für Community-Übersetzungen und Sie benötigen keine Programmiererfahrung, um beizutragen.",
+  "contributeTranslations": "Übersetzungen beitragen",
+  "languageChanged": "Sprache geändert. Bitte starten Sie die App für die vollständige Wirkung neu."
 }

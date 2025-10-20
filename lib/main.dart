@@ -177,6 +177,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
+    final appSettings = ref.watch(appSettingsProvider);
     final textTheme =
         GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
 
@@ -322,6 +323,7 @@ class MyApp extends ConsumerWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
+          locale: appSettings.locale, // Use selected locale or null for system default
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
