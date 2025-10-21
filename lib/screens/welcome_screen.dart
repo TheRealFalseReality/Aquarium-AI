@@ -356,6 +356,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
   
   Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     
     // Select a random tank if available, but persist selection across rebuilds
