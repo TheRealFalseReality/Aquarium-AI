@@ -108,6 +108,22 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return 'Calcium';
       case 'magnesium':
         return 'Magnesium';
+      case 'kh':
+        return 'KH (Carbonate Hardness)';
+      case 'gh':
+        return 'GH (General Hardness)';
+      case 'alkalinity':
+        return 'Alkalinity';
+      case 'orp':
+        return 'ORP';
+      case 'ph':
+        return 'pH';
+      case 'potassium':
+        return 'Potassium';
+      case 'tds':
+        return 'TDS';
+      case 'iodine':
+        return 'Iodine';
       default:
         return parameterType;
     }
@@ -129,6 +145,22 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Icons.diamond;
       case 'magnesium':
         return Icons.bolt;
+      case 'kh':
+        return Icons.shield;
+      case 'gh':
+        return Icons.hardware;
+      case 'alkalinity':
+        return Icons.balance;
+      case 'orp':
+        return Icons.battery_charging_full;
+      case 'ph':
+        return Icons.science_outlined;
+      case 'potassium':
+        return Icons.spa;
+      case 'tds':
+        return Icons.grain;
+      case 'iodine':
+        return Icons.ac_unit;
       default:
         return Icons.water_drop;
     }
@@ -150,6 +182,22 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Colors.teal;
       case 'magnesium':
         return Colors.cyan;
+      case 'kh':
+        return Colors.indigo;
+      case 'gh':
+        return Colors.brown;
+      case 'alkalinity':
+        return Colors.lightBlue;
+      case 'orp':
+        return Colors.green;
+      case 'ph':
+        return Colors.lime;
+      case 'potassium':
+        return Colors.deepPurple;
+      case 'tds':
+        return Colors.blueGrey;
+      case 'iodine':
+        return Colors.deepOrange;
       default:
         return Colors.grey;
     }
@@ -211,6 +259,62 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         if (value >= 1250 && value <= 1350) return Colors.green;
         if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400)) return Colors.yellow.shade700;
         if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500)) return Colors.orange;
+        return Colors.red;
+      
+      case 'kh':
+        // KH thresholds (dKH)
+        if (value >= 4 && value <= 8) return Colors.green;
+        if ((value >= 3 && value < 4) || (value > 8 && value <= 10)) return Colors.yellow.shade700;
+        if ((value >= 2 && value < 3) || (value > 10 && value <= 12)) return Colors.orange;
+        return Colors.red;
+      
+      case 'gh':
+        // GH thresholds (dGH) - general range for freshwater
+        if (value >= 4 && value <= 12) return Colors.green;
+        if ((value >= 3 && value < 4) || (value > 12 && value <= 15)) return Colors.yellow.shade700;
+        if ((value >= 2 && value < 3) || (value > 15 && value <= 18)) return Colors.orange;
+        return Colors.red;
+      
+      case 'alkalinity':
+        // Alkalinity thresholds (meq/L or dKH)
+        if (value >= 2.5 && value <= 4.0) return Colors.green;
+        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0)) return Colors.yellow.shade700;
+        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0)) return Colors.orange;
+        return Colors.red;
+      
+      case 'orp':
+        // ORP thresholds (mV) - higher is better for most aquariums
+        if (value >= 300 && value <= 450) return Colors.green;
+        if ((value >= 250 && value < 300) || (value > 450 && value <= 500)) return Colors.yellow.shade700;
+        if ((value >= 200 && value < 250) || (value > 500 && value <= 550)) return Colors.orange;
+        return Colors.red;
+      
+      case 'ph':
+        // pH thresholds - general range (6.5-8.0 is typical)
+        if (value >= 6.8 && value <= 7.8) return Colors.green;
+        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2)) return Colors.yellow.shade700;
+        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5)) return Colors.orange;
+        return Colors.red;
+      
+      case 'potassium':
+        // Potassium thresholds (ppm) - for planted tanks
+        if (value >= 10 && value <= 30) return Colors.green;
+        if ((value >= 5 && value < 10) || (value > 30 && value <= 40)) return Colors.yellow.shade700;
+        if ((value >= 2 && value < 5) || (value > 40 && value <= 50)) return Colors.orange;
+        return Colors.red;
+      
+      case 'tds':
+        // TDS thresholds (ppm) - general freshwater range
+        if (value >= 150 && value <= 250) return Colors.green;
+        if ((value >= 100 && value < 150) || (value > 250 && value <= 350)) return Colors.yellow.shade700;
+        if ((value >= 50 && value < 100) || (value > 350 && value <= 450)) return Colors.orange;
+        return Colors.red;
+      
+      case 'iodine':
+        // Iodine thresholds for marine tanks (ppm)
+        if (value >= 0.06 && value <= 0.10) return Colors.green;
+        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12)) return Colors.yellow.shade700;
+        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15)) return Colors.orange;
         return Colors.red;
       
       default:
@@ -443,10 +547,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
     
-    // Only show salinity, calcium, and magnesium for marine tanks
+    // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
-        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium']
-        : ['ammonia', 'nitrite', 'nitrate', 'phosphate'];
+        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
+        : ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -707,6 +811,14 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'salinity': ['ppt', 'SG'],
     'calcium': ['ppm', 'mg/L'],
     'magnesium': ['ppm', 'mg/L'],
+    'kh': ['dKH', 'meq/L', 'ppm'],
+    'gh': ['dGH', 'meq/L', 'ppm'],
+    'alkalinity': ['meq/L', 'dKH'],
+    'orp': ['mV'],
+    'ph': ['pH'],
+    'potassium': ['ppm', 'mg/L'],
+    'tds': ['ppm', 'mg/L'],
+    'iodine': ['ppm', 'mg/L'],
   };
 
   @override
@@ -891,11 +1003,19 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
                   const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
                   const DropdownMenuItem(value: 'phosphate', child: Text('Phosphate')),
-                  // Only show salinity, calcium, and magnesium for marine tanks
+                  const DropdownMenuItem(value: 'kh', child: Text('KH (Carbonate Hardness)')),
+                  const DropdownMenuItem(value: 'gh', child: Text('GH (General Hardness)')),
+                  const DropdownMenuItem(value: 'alkalinity', child: Text('Alkalinity')),
+                  const DropdownMenuItem(value: 'orp', child: Text('ORP')),
+                  const DropdownMenuItem(value: 'ph', child: Text('pH')),
+                  const DropdownMenuItem(value: 'potassium', child: Text('Potassium')),
+                  const DropdownMenuItem(value: 'tds', child: Text('TDS')),
+                  // Only show salinity, calcium, magnesium, and iodine for marine tanks
                   if (widget.tank.type == 'marine') ...[
                     const DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
                     const DropdownMenuItem(value: 'calcium', child: Text('Calcium')),
                     const DropdownMenuItem(value: 'magnesium', child: Text('Magnesium')),
+                    const DropdownMenuItem(value: 'iodine', child: Text('Iodine')),
                   ],
                 ],
                 onChanged: (value) {
