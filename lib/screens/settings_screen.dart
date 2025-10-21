@@ -68,6 +68,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAIProviderDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -97,7 +99,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'AI Provider',
+                          l10n.aiProvider,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -106,7 +108,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -124,6 +126,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAppSettingsDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -153,7 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'App Settings',
+                          l10n.appSettings,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -162,7 +166,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -180,6 +184,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showDataManagementDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -209,7 +215,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Data Management',
+                          l10n.dataManagement,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -218,7 +224,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -284,6 +290,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     ref.listen<ModelState>(modelProvider, (previous, next) {
       // Update text controllers if the state changes from outside.
       if (_geminiModelController.text != next.geminiModel) {
@@ -321,17 +329,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     return MainLayout(
-      title: 'Settings',
+      title: l10n.settings,
       child: _buildMainMenu(),
     );
   }
 
   Widget _buildMainMenu() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         Text(
-          'Settings',
+          l10n.settings,
           style: Theme.of(context)
               .textTheme
               .headlineLarge
@@ -340,7 +350,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Choose a section to configure',
+          l10n.chooseSection,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -349,8 +359,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 32),
         _buildMenuCard(
           context: context,
-          title: 'AI Provider',
-          subtitle: 'Configure Gemini, OpenAI, or Groq',
+          title: l10n.aiProvider,
+          subtitle: l10n.configureAIProviders,
           icon: Icons.smart_toy,
           gradient: LinearGradient(
             colors: [
@@ -366,8 +376,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'App Settings',
-          subtitle: 'Customize app behavior and features',
+          title: l10n.appSettings,
+          subtitle: l10n.customizeAppBehavior,
           icon: Icons.settings_applications,
           gradient: LinearGradient(
             colors: [
@@ -383,8 +393,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'Data Management',
-          subtitle: 'Backup and restore your data',
+          title: l10n.dataManagement,
+          subtitle: l10n.backupRestoreData,
           icon: Icons.cloud_sync,
           gradient: LinearGradient(
             colors: [
@@ -466,6 +476,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildAIProviderContent([StateSetter? setDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -500,7 +512,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Active AI Provider',
+                          l10n.activeAIProvider,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -525,34 +537,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     segments: [
                       ButtonSegment(
                         value: AIProvider.gemini, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.auto_awesome, size: 16),
-                            SizedBox(width: 4),
-                            Text('Gemini'),
+                            const Icon(Icons.auto_awesome, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.gemini),
                           ],
                         ),
                       ),
                       ButtonSegment(
                         value: AIProvider.openAI, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.psychology, size: 16),
-                            SizedBox(width: 4),
-                            Text('OpenAI'),
+                            const Icon(Icons.psychology, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.openAI),
                           ],
                         ),
                       ),
                       ButtonSegment(
                         value: AIProvider.groq, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.flash_on, size: 16),
-                            SizedBox(width: 4),
-                            Text('Groq'),
+                            const Icon(Icons.flash_on, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.groq),
                           ],
                         ),
                       ),
@@ -594,14 +606,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.star,
                           color: Colors.green,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Gemini is recommended and free',
+                          l10n.geminiRecommended,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.green.shade700,
                             fontWeight: FontWeight.w500,
@@ -627,16 +639,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref
                               .read(modelProvider.notifier)
                               .resetModelsToDefaults();
-                          context.showAccessibleMessage('Models reset to default.');
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
                         },
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Reset Models'),
+                        label: Text(l10n.resetModels),
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton.icon(
                         onPressed: () => _saveSettings(context), // Call the save function.
                         icon: const Icon(Icons.save),
-                        label: const Text('Save'),
+                        label: Text(l10n.save),
                       ),
                     ],
                   ),
@@ -717,7 +729,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'App Settings',
+                          l10n.appSettings,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.secondary,
@@ -742,8 +754,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const Divider(height: 24),
                   
                   SwitchListTile(
-                    title: const Text('Show AI Stocking Button'),
-                    subtitle: const Text('Display the full "AI Stocking Recommendations" button on tank cards. The option remains available in the menu.'),
+                    title: Text(l10n.showAIStockingButton),
+                    subtitle: Text(l10n.showAIStockingButtonDesc),
                     value: appSettings.showStockingButton,
                     onChanged: (value) {
                       // Log settings change
@@ -771,8 +783,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Icons.label,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    title: const Text('Species Tags'),
-                    subtitle: const Text('Manage searchable species names for fish types'),
+                    title: Text(l10n.speciesTags),
+                    subtitle: Text(l10n.speciesTagsDesc),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       Navigator.pushNamed(context, '/species-tags');
@@ -849,6 +861,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildDataManagementContent() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return FutureBuilder<Map<String, dynamic>>(
       future: _loadBackupStatistics(),
       builder: (context, snapshot) {
@@ -888,7 +902,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Data Management',
+                            l10n.dataManagement,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.tertiary,
@@ -986,8 +1000,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.blue,
                         ),
                       ),
-                      title: const Text('Backup Data'),
-                      subtitle: const Text('Save tanks and species tags to file'),
+                      title: Text(l10n.backupData),
+                      subtitle: Text(l10n.backupDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
                         await BackupRestoreUtils.exportData(context, ref, source: 'settings');
@@ -1008,8 +1022,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.green,
                         ),
                       ),
-                      title: const Text('Restore Data'),
-                      subtitle: const Text('Load tanks and species tags from backup'),
+                      title: Text(l10n.restoreData),
+                      subtitle: Text(l10n.restoreDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
                         await BackupRestoreUtils.importData(context, ref, source: 'settings');

@@ -309,5 +309,125 @@
   "visitGitHub": "Visit GitHub",
   "@visitGitHub": {
     "description": "Visit GitHub button text"
+  },
+
+  "aiProvider": "AI Provider",
+  "@aiProvider": {
+    "description": "AI Provider section title"
+  },
+
+  "appSettings": "App Settings",
+  "@appSettings": {
+    "description": "App Settings section title"
+  },
+
+  "dataManagement": "Data Management",
+  "@dataManagement": {
+    "description": "Data Management section title"
+  },
+
+  "chooseSection": "Choose a section to configure",
+  "@chooseSection": {
+    "description": "Settings screen subtitle"
+  },
+
+  "configureAIProviders": "Configure Gemini, OpenAI, or Groq",
+  "@configureAIProviders": {
+    "description": "AI Provider card subtitle"
+  },
+
+  "customizeAppBehavior": "Customize app behavior and features",
+  "@customizeAppBehavior": {
+    "description": "App Settings card subtitle"
+  },
+
+  "backupRestoreData": "Backup and restore your data",
+  "@backupRestoreData": {
+    "description": "Data Management card subtitle"
+  },
+
+  "activeAIProvider": "Active AI Provider",
+  "@activeAIProvider": {
+    "description": "Active AI Provider section title"
+  },
+
+  "geminiRecommended": "Gemini is recommended and free",
+  "@geminiRecommended": {
+    "description": "Gemini recommendation message"
+  },
+
+  "resetModels": "Reset Models",
+  "@resetModels": {
+    "description": "Reset models button text"
+  },
+
+  "modelsResetDefault": "Models reset to default.",
+  "@modelsResetDefault": {
+    "description": "Models reset success message"
+  },
+
+  "showAIStockingButton": "Show AI Stocking Button",
+  "@showAIStockingButton": {
+    "description": "Show AI Stocking Button setting title"
+  },
+
+  "showAIStockingButtonDesc": "Display the full \"AI Stocking Recommendations\" button on tank cards. The option remains available in the menu.",
+  "@showAIStockingButtonDesc": {
+    "description": "Show AI Stocking Button setting description"
+  },
+
+  "speciesTags": "Species Tags",
+  "@speciesTags": {
+    "description": "Species Tags menu item"
+  },
+
+  "speciesTagsDesc": "Manage searchable species names for fish types",
+  "@speciesTagsDesc": {
+    "description": "Species Tags description"
+  },
+
+  "backupData": "Backup Data",
+  "@backupData": {
+    "description": "Backup data menu item"
+  },
+
+  "backupDataDesc": "Save tanks and species tags to file",
+  "@backupDataDesc": {
+    "description": "Backup data description"
+  },
+
+  "restoreData": "Restore Data",
+  "@restoreData": {
+    "description": "Restore data menu item"
+  },
+
+  "restoreDataDesc": "Load tanks and species tags from backup",
+  "@restoreDataDesc": {
+    "description": "Restore data description"
+  },
+
+  "tankCount": "{count} {count, plural, =1{tank} other{tanks}}",
+  "@tankCount": {
+    "description": "Number of tanks with plural",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "tank": "tank",
+  "@tank": {
+    "description": "Singular form of tank"
+  },
+
+  "tanks": "tanks",
+  "@tanks": {
+    "description": "Plural form of tanks"
+  },
+
+  "myTanksDescription": "Create and manage your custom aquariums with inhabitants. Track compatibility, get personalized stocking recommendations, and maintain optimal conditions for your aquatic community.",
+  "@myTanksDescription": {
+    "description": "My Tanks section description"
   }
 }
