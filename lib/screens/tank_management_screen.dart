@@ -989,12 +989,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return Text(
+                                tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -1044,91 +1049,94 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             break;
                         }
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'parameters',
-                          child: Row(
-                            children: [
-                              Icon(Icons.science, color: Colors.teal, size: 18),
-                              SizedBox(width: 8),
-                              Text('Parameter Logger', style: TextStyle(color: Colors.teal)),
-                            ],
-                          ),
-                        ),
-                        if (tank.photos.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'set_background',
+                      itemBuilder: (context) {
+                        final l10n = AppLocalizations.of(context)!;
+                        return [
+                          PopupMenuItem(
+                            value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.wallpaper, size: 18),
-                                SizedBox(width: 8),
-                                Text('Set Card Background'),
+                                const Icon(Icons.edit, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.editTank),
                               ],
                             ),
                           ),
-                        const PopupMenuItem(
-                          value: 'set_icon',
-                          child: Row(
-                            children: [
-                              Icon(Icons.emoji_emotions_outlined, size: 18),
-                              SizedBox(width: 8),
-                              Text('Change Icon'),
-                            ],
-                          ),
-                        ),
-                        if (tank.customBackgroundPhotoId != null)
-                          const PopupMenuItem(
-                            value: 'reset_background',
+                          PopupMenuItem(
+                            value: 'parameters',
                             child: Row(
                               children: [
-                                Icon(Icons.restore, size: 18),
-                                SizedBox(width: 8),
-                                Text('Reset Background'),
+                                const Icon(Icons.science, color: Colors.teal, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
                               ],
                             ),
                           ),
-                        if (tank.inhabitants.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'recommendations',
+                          if (tank.photos.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'set_background',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.wallpaper, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.setCardBackground),
+                                ],
+                              ),
+                            ),
+                          PopupMenuItem(
+                            value: 'set_icon',
                             child: Row(
                               children: [
-                                Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
-                                SizedBox(width: 8),
-                                Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                                const Icon(Icons.emoji_emotions_outlined, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.changeIcon),
                               ],
                             ),
                           ),
-                        const PopupMenuItem(
-                          value: 'duplicate',
-                          child: Row(
-                            children: [
-                              Icon(Icons.copy, size: 18),
-                              SizedBox(width: 8),
-                              Text('Duplicate'),
-                            ],
+                          if (tank.customBackgroundPhotoId != null)
+                            PopupMenuItem(
+                              value: 'reset_background',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.restore, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.resetBackground),
+                                ],
+                              ),
+                            ),
+                          if (tank.inhabitants.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'recommendations',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                                ],
+                              ),
+                            ),
+                          PopupMenuItem(
+                            value: 'duplicate',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.copy, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.duplicate),
+                              ],
+                            ),
                           ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.red, size: 18),
-                              SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.delete, color: Colors.red, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.deleteTank, style: const TextStyle(color: Colors.red)),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ];
+                      },
                     ),
                   ],
                 ),
