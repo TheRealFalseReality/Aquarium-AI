@@ -2780,8 +2780,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Define parameter order and get labels/icons
     final paramOrder = tank.type == 'marine'
-        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium']
-        : ['ammonia', 'nitrite', 'nitrate', 'phosphate'];
+        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
+        : ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
     
     final paramLabels = {
       'ammonia': 'NH3',
@@ -2791,6 +2791,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       'salinity': 'Sal',
       'calcium': 'Ca',
       'magnesium': 'Mg',
+      'kh': 'KH',
+      'gh': 'GH',
+      'alkalinity': 'Alk',
+      'orp': 'ORP',
+      'ph': 'pH',
+      'potassium': 'K',
+      'tds': 'TDS',
+      'iodine': 'I',
     };
 
     final paramIcons = {
@@ -2801,6 +2809,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       'salinity': Icons.water,
       'calcium': Icons.diamond,
       'magnesium': Icons.bolt,
+      'kh': Icons.shield,
+      'gh': Icons.hardware,
+      'alkalinity': Icons.balance,
+      'orp': Icons.battery_charging_full,
+      'ph': Icons.science_outlined,
+      'potassium': Icons.spa,
+      'tds': Icons.grain,
+      'iodine': Icons.ac_unit,
     };
 
     return Wrap(
