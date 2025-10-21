@@ -6,7 +6,6 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
-import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
@@ -68,6 +67,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAIProviderDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -97,7 +98,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'AI Provider',
+                          l10n.aiProvider,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -106,7 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -124,6 +125,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAppSettingsDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -153,7 +156,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'App Settings',
+                          l10n.appSettings,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -162,7 +165,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -180,6 +183,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showDataManagementDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -209,7 +214,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Data Management',
+                          l10n.dataManagement,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -218,7 +223,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: l10n.close,
                       ),
                     ],
                   ),
@@ -284,6 +289,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     ref.listen<ModelState>(modelProvider, (previous, next) {
       // Update text controllers if the state changes from outside.
       if (_geminiModelController.text != next.geminiModel) {
@@ -321,17 +328,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     return MainLayout(
-      title: 'Settings',
+      title: l10n.settings,
       child: _buildMainMenu(),
     );
   }
 
   Widget _buildMainMenu() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         Text(
-          'Settings',
+          l10n.settings,
           style: Theme.of(context)
               .textTheme
               .headlineLarge
@@ -340,7 +349,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Choose a section to configure',
+          l10n.chooseSection,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -349,8 +358,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 32),
         _buildMenuCard(
           context: context,
-          title: 'AI Provider',
-          subtitle: 'Configure Gemini, OpenAI, or Groq',
+          title: l10n.aiProvider,
+          subtitle: l10n.configureAIProviders,
           icon: Icons.smart_toy,
           gradient: LinearGradient(
             colors: [
@@ -366,8 +375,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'App Settings',
-          subtitle: 'Customize app behavior and features',
+          title: l10n.appSettings,
+          subtitle: l10n.customizeAppBehavior,
           icon: Icons.settings_applications,
           gradient: LinearGradient(
             colors: [
@@ -383,8 +392,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'Data Management',
-          subtitle: 'Backup and restore your data',
+          title: l10n.dataManagement,
+          subtitle: l10n.backupRestoreData,
           icon: Icons.cloud_sync,
           gradient: LinearGradient(
             colors: [
@@ -466,6 +475,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildAIProviderContent([StateSetter? setDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -500,7 +511,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Active AI Provider',
+                          l10n.activeAIProvider,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -525,34 +536,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     segments: [
                       ButtonSegment(
                         value: AIProvider.gemini, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.auto_awesome, size: 16),
-                            SizedBox(width: 4),
-                            Text('Gemini'),
+                            const Icon(Icons.auto_awesome, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.gemini),
                           ],
                         ),
                       ),
                       ButtonSegment(
                         value: AIProvider.openAI, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.psychology, size: 16),
-                            SizedBox(width: 4),
-                            Text('OpenAI'),
+                            const Icon(Icons.psychology, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.openAI),
                           ],
                         ),
                       ),
                       ButtonSegment(
                         value: AIProvider.groq, 
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.flash_on, size: 16),
-                            SizedBox(width: 4),
-                            Text('Groq'),
+                            const Icon(Icons.flash_on, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.groq),
                           ],
                         ),
                       ),
@@ -594,14 +605,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.star,
                           color: Colors.green,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Gemini is recommended and free',
+                          l10n.geminiRecommended,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.green.shade700,
                             fontWeight: FontWeight.w500,
@@ -627,16 +638,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref
                               .read(modelProvider.notifier)
                               .resetModelsToDefaults();
-                          context.showAccessibleMessage('Models reset to default.');
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
                         },
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Reset Models'),
+                        label: Text(l10n.resetModels),
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton.icon(
                         onPressed: () => _saveSettings(context), // Call the save function.
                         icon: const Icon(Icons.save),
-                        label: const Text('Save'),
+                        label: Text(l10n.save),
                       ),
                     ],
                   ),
@@ -681,6 +692,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAppSettingsContent([StateSetter? setDialogState]) {
     final appSettings = ref.watch(appSettingsProvider);
+    final l10n = AppLocalizations.of(context)!;
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -716,7 +728,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'App Settings',
+                          l10n.appSettings,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.secondary,
@@ -726,9 +738,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  
+                  // Language Selection
+                  ListTile(
+                    leading: Icon(
+                      Icons.language,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(l10n.language),
+                    subtitle: Text(_getLanguageDisplayName(appSettings.localeCode)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => _showLanguageDialog(setDialogState),
+                  ),
+                  const Divider(height: 24),
+                  
                   SwitchListTile(
-                    title: const Text('Show AI Stocking Button'),
-                    subtitle: const Text('Display the full "AI Stocking Recommendations" button on tank cards. The option remains available in the menu.'),
+                    title: Text(l10n.showAIStockingButton),
+                    subtitle: Text(l10n.showAIStockingButtonDesc),
                     value: appSettings.showStockingButton,
                     onChanged: (value) {
                       // Log settings change
@@ -756,12 +782,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Icons.label,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    title: const Text('Species Tags'),
-                    subtitle: const Text('Manage searchable species names for fish types'),
+                    title: Text(l10n.speciesTags),
+                    subtitle: Text(l10n.speciesTagsDesc),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       Navigator.pushNamed(context, '/species-tags');
                     },
+                  ),
+                  
+                  // Translation Community Section
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.2),
+                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.translate,
+                              color: Theme.of(context).colorScheme.tertiary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                l10n.translationCommunityTitle,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.translationCommunityMessage,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            launchUrl(Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/TRANSLATION_GUIDE.md'));
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 18),
+                          label: Text(l10n.visitGitHub),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            foregroundColor: Theme.of(context).colorScheme.onTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -772,6 +860,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildDataManagementContent() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return FutureBuilder<Map<String, dynamic>>(
       future: _loadBackupStatistics(),
       builder: (context, snapshot) {
@@ -811,7 +901,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Data Management',
+                            l10n.dataManagement,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.tertiary,
@@ -845,7 +935,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Backup Statistics',
+                                  l10n.backupStatistics,
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).colorScheme.primary,
@@ -858,7 +948,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _buildStatRow(
                                 context,
                                 Icons.backup,
-                                'Last Backup',
+                                l10n.lastBackup,
                                 stats['lastBackupTime'] as String,
                                 Colors.blue,
                               ),
@@ -867,7 +957,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 _buildStatRow(
                                   context,
                                   Icons.water_drop,
-                                  'Tanks Backed Up',
+                                  l10n.tanksBackedUp,
                                   '${stats['lastBackupTankCount']} tank(s)',
                                   Colors.cyan,
                                 ),
@@ -878,14 +968,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _buildStatRow(
                                 context,
                                 Icons.restore,
-                                'Last Restore',
+                                l10n.lastRestore,
                                 stats['lastRestoreTime'] as String,
                                 Colors.green,
                               ),
                             ],
                             if (stats['lastBackupTime'] == null && stats['lastRestoreTime'] == null)
                               Text(
-                                'No backup history yet',
+                                l10n.noBackupHistory,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   fontStyle: FontStyle.italic,
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -909,8 +999,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.blue,
                         ),
                       ),
-                      title: const Text('Backup Data'),
-                      subtitle: const Text('Save tanks and species tags to file'),
+                      title: Text(l10n.backupData),
+                      subtitle: Text(l10n.backupDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
                         await BackupRestoreUtils.exportData(context, ref, source: 'settings');
@@ -931,8 +1021,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.green,
                         ),
                       ),
-                      title: const Text('Restore Data'),
-                      subtitle: const Text('Load tanks and species tags from backup'),
+                      title: Text(l10n.restoreData),
+                      subtitle: Text(l10n.restoreDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
                         await BackupRestoreUtils.importData(context, ref, source: 'settings');
@@ -1469,6 +1559,150 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  String _getLanguageDisplayName(String? localeCode) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (localeCode == null) {
+      return l10n.languageSystemDefault;
+    }
+    
+    switch (localeCode) {
+      case 'en':
+        return l10n.languageEnglish;
+      case 'es':
+        return l10n.languageSpanish;
+      case 'fr':
+        return l10n.languageFrench;
+      case 'de':
+        return l10n.languageGerman;
+      default:
+        return l10n.languageSystemDefault;
+    }
+  }
+
+  void _showLanguageDialog([StateSetter? parentSetDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.selectLanguage),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String?>(
+              title: Text(l10n.languageSystemDefault),
+              value: null,
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageEnglish),
+              value: 'en',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageSpanish),
+              value: 'es',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageFrench),
+              value: 'fr',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: Text(l10n.languageGerman),
+              value: 'de',
+              groupValue: appSettings.localeCode,
+              onChanged: (value) {
+                ref.read(appSettingsProvider.notifier).setLocale(value);
+                
+                // Log settings change
+                AnalyticsService.logSettingsChange(
+                  settingName: 'language',
+                  newValue: value ?? 'system',
+                  oldValue: appSettings.localeCode ?? 'system',
+                );
+                
+                Navigator.of(context).pop();
+                if (parentSetDialogState != null) {
+                  parentSetDialogState(() {});
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.close),
+          ),
+        ],
+      ),
     );
   }
 

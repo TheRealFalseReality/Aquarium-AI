@@ -17,6 +17,7 @@ import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../services/analytics_service.dart';
+import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
@@ -77,6 +78,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tankState = ref.watch(tankProvider);
     final appSettings = ref.watch(appSettingsProvider);
     // Watch the centralized fish data provider
@@ -149,7 +151,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     });
 
     return MainLayout(
-      title: 'My Tanks',
+      title: l10n.myTanks,
       bottomNavigationBar: const AdBanner(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -160,7 +162,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           );
         },
         icon: const Icon(Icons.add),
-        label: const Text('Create Tank'),
+        label: Text(l10n.createTank),
       ),
       child: tankState.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -173,6 +175,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, String error) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -187,7 +191,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Error Loading Tanks',
+              l10n.errorLoadingTanks,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
@@ -204,7 +208,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 // Trigger reload by creating a new notifier
                 ref.invalidate(tankProvider);
               },
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -213,6 +217,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -227,7 +233,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No Tanks Yet',
+              l10n.noTanksYetTitle,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -235,7 +241,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Create your first custom tank to get started!\n\nDesign your perfect aquarium with custom names, types, and inhabitants.',
+              l10n.noTanksYetDescription,
               style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
@@ -253,7 +259,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     );
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('Create Your First Tank'),
+                  label: Text(l10n.createFirstTank),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -266,7 +272,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Or restore from backup:',
+                      l10n.orRestoreFromBackup,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -275,7 +281,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     OutlinedButton.icon(
                       onPressed: () => BackupRestoreUtils.importData(context, ref, source: 'tank_management'),
                       icon: const Icon(Icons.restore, size: 18),
-                      label: const Text('Restore'),
+                      label: Text(l10n.restore),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.green,
                         side: const BorderSide(color: Colors.green),
@@ -574,6 +580,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildHeader(BuildContext context, int tankCount) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -585,7 +593,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'My Tanks ($tankCount)',
+                  '${l10n.myTanks} ($tankCount)',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -636,23 +644,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'backup',
                     child: Row(
                       children: [
-                        Icon(Icons.backup, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text('Backup'),
+                        const Icon(Icons.backup, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(l10n.backup),
                       ],
                     ),
                   ),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'restore',
                     child: Row(
                       children: [
-                        Icon(Icons.restore, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text('Restore'),
+                        const Icon(Icons.restore, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text(l10n.restore),
                       ],
                     ),
                   ),
@@ -668,15 +676,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   String _getSortOptionLabel(TankSortOption option) {
+    final l10n = AppLocalizations.of(context)!;
+    
     switch (option) {
       case TankSortOption.name:
-        return 'Name';
+        return l10n.sortByName;
       case TankSortOption.type:
-        return 'Type';
+        return l10n.sortByType;
       case TankSortOption.size:
-        return 'Size';
+        return l10n.sortBySize;
       case TankSortOption.date:
-        return 'Date';
+        return l10n.sortByDate;
     }
   }
 
@@ -979,12 +989,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return Text(
+                                tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -1034,91 +1049,94 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             break;
                         }
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'parameters',
-                          child: Row(
-                            children: [
-                              Icon(Icons.science, color: Colors.teal, size: 18),
-                              SizedBox(width: 8),
-                              Text('Parameter Logger', style: TextStyle(color: Colors.teal)),
-                            ],
-                          ),
-                        ),
-                        if (tank.photos.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'set_background',
+                      itemBuilder: (context) {
+                        final l10n = AppLocalizations.of(context)!;
+                        return [
+                          PopupMenuItem(
+                            value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.wallpaper, size: 18),
-                                SizedBox(width: 8),
-                                Text('Set Card Background'),
+                                const Icon(Icons.edit, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.editTank),
                               ],
                             ),
                           ),
-                        const PopupMenuItem(
-                          value: 'set_icon',
-                          child: Row(
-                            children: [
-                              Icon(Icons.emoji_emotions_outlined, size: 18),
-                              SizedBox(width: 8),
-                              Text('Change Icon'),
-                            ],
-                          ),
-                        ),
-                        if (tank.customBackgroundPhotoId != null)
-                          const PopupMenuItem(
-                            value: 'reset_background',
+                          PopupMenuItem(
+                            value: 'parameters',
                             child: Row(
                               children: [
-                                Icon(Icons.restore, size: 18),
-                                SizedBox(width: 8),
-                                Text('Reset Background'),
+                                const Icon(Icons.science, color: Colors.teal, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
                               ],
                             ),
                           ),
-                        if (tank.inhabitants.isNotEmpty)
-                          const PopupMenuItem(
-                            value: 'recommendations',
+                          if (tank.photos.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'set_background',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.wallpaper, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.setCardBackground),
+                                ],
+                              ),
+                            ),
+                          PopupMenuItem(
+                            value: 'set_icon',
                             child: Row(
                               children: [
-                                Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
-                                SizedBox(width: 8),
-                                Text('Get Stocking Ideas', style: TextStyle(color: Colors.blue)),
+                                const Icon(Icons.emoji_emotions_outlined, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.changeIcon),
                               ],
                             ),
                           ),
-                        const PopupMenuItem(
-                          value: 'duplicate',
-                          child: Row(
-                            children: [
-                              Icon(Icons.copy, size: 18),
-                              SizedBox(width: 8),
-                              Text('Duplicate'),
-                            ],
+                          if (tank.customBackgroundPhotoId != null)
+                            PopupMenuItem(
+                              value: 'reset_background',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.restore, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.resetBackground),
+                                ],
+                              ),
+                            ),
+                          if (tank.inhabitants.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'recommendations',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                                ],
+                              ),
+                            ),
+                          PopupMenuItem(
+                            value: 'duplicate',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.copy, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.duplicate),
+                              ],
+                            ),
                           ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.red, size: 18),
-                              SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.delete, color: Colors.red, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.deleteTank, style: const TextStyle(color: Colors.red)),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ];
+                      },
                     ),
                   ],
                 ),

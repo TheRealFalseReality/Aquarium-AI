@@ -356,6 +356,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
   
   Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     
     // Select a random tank if available, but persist selection across rebuilds
@@ -481,7 +482,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'My Tanks',
+                              l10n.myTanks,
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: cs.onSurface,
@@ -490,8 +491,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             const SizedBox(height: 4),
                             Text(
                               tankCount == 0 
-                                  ? 'No tanks yet' 
-                                  : '$tankCount ${tankCount == 1 ? 'tank' : 'tanks'}',
+                                  ? l10n.noTanksYet 
+                                  : '$tankCount ${tankCount == 1 ? l10n.tank : l10n.tanks}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
@@ -511,7 +512,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   const SizedBox(height: 16),
                   if (tankCount == 0) ...[
                     Text(
-                      'Create and manage your custom aquariums with inhabitants. Track compatibility, get personalized stocking recommendations, and maintain optimal conditions for your aquatic community.',
+                      l10n.myTanksDescription,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,
                         height: 1.5,
@@ -525,7 +526,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           Navigator.pushNamed(context, '/tank-management');
                         },
                         icon: const Icon(Icons.add),
-                        label: const Text('Create Your First Tank'),
+                        label: Text(l10n.createFirstTank),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         ),
