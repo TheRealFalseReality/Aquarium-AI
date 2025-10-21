@@ -134,6 +134,30 @@ void main() {
       expect(parameter.unit, 'dGH');
     });
 
+    test('should create KH parameter with meq/L unit', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'kh',
+        value: 3.5,
+        unit: 'meq/L',
+      );
+
+      expect(parameter.parameterType, 'kh');
+      expect(parameter.value, 3.5);
+      expect(parameter.unit, 'meq/L');
+    });
+
+    test('should create GH parameter with meq/L unit', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'gh',
+        value: 4.0,
+        unit: 'meq/L',
+      );
+
+      expect(parameter.parameterType, 'gh');
+      expect(parameter.value, 4.0);
+      expect(parameter.unit, 'meq/L');
+    });
+
     test('should create Alkalinity parameter with meq/L unit', () {
       final parameter = WaterParameter.create(
         parameterType: 'alkalinity',
