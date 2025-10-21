@@ -936,7 +936,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Backup Statistics',
+                                  l10n.backupStatistics,
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).colorScheme.primary,
@@ -949,7 +949,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _buildStatRow(
                                 context,
                                 Icons.backup,
-                                'Last Backup',
+                                l10n.lastBackup,
                                 stats['lastBackupTime'] as String,
                                 Colors.blue,
                               ),
@@ -958,7 +958,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 _buildStatRow(
                                   context,
                                   Icons.water_drop,
-                                  'Tanks Backed Up',
+                                  l10n.tanksBackedUp,
                                   '${stats['lastBackupTankCount']} tank(s)',
                                   Colors.cyan,
                                 ),
@@ -969,14 +969,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _buildStatRow(
                                 context,
                                 Icons.restore,
-                                'Last Restore',
+                                l10n.lastRestore,
                                 stats['lastRestoreTime'] as String,
                                 Colors.green,
                               ),
                             ],
                             if (stats['lastBackupTime'] == null && stats['lastRestoreTime'] == null)
                               Text(
-                                'No backup history yet',
+                                l10n.noBackupHistory,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   fontStyle: FontStyle.italic,
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,

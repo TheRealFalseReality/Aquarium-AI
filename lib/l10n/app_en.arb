@@ -429,5 +429,245 @@
   "myTanksDescription": "Create and manage your custom aquariums with inhabitants. Track compatibility, get personalized stocking recommendations, and maintain optimal conditions for your aquatic community.",
   "@myTanksDescription": {
     "description": "My Tanks section description"
+  },
+
+  "createTank": "Create Tank",
+  "@createTank": {
+    "description": "Create tank button"
+  },
+
+  "errorLoadingTanks": "Error Loading Tanks",
+  "@errorLoadingTanks": {
+    "description": "Error loading tanks message"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button"
+  },
+
+  "noTanksYetTitle": "No Tanks Yet",
+  "@noTanksYetTitle": {
+    "description": "No tanks yet title"
+  },
+
+  "noTanksYetDescription": "Create your first custom tank to get started!\n\nDesign your perfect aquarium with custom names, types, and inhabitants.",
+  "@noTanksYetDescription": {
+    "description": "No tanks yet description"
+  },
+
+  "orRestoreFromBackup": "Or restore from backup:",
+  "@orRestoreFromBackup": {
+    "description": "Or restore from backup text"
+  },
+
+  "restore": "Restore",
+  "@restore": {
+    "description": "Restore button"
+  },
+
+  "backup": "Backup",
+  "@backup": {
+    "description": "Backup button"
+  },
+
+  "sortByName": "Name",
+  "@sortByName": {
+    "description": "Sort by name option"
+  },
+
+  "sortByType": "Type",
+  "@sortByType": {
+    "description": "Sort by type option"
+  },
+
+  "sortBySize": "Size",
+  "@sortBySize": {
+    "description": "Sort by size option"
+  },
+
+  "sortByDate": "Date",
+  "@sortByDate": {
+    "description": "Sort by date option"
+  },
+
+  "sortOptions": "Sort Options",
+  "@sortOptions": {
+    "description": "Sort options title"
+  },
+
+  "freshwater": "Freshwater",
+  "@freshwater": {
+    "description": "Freshwater tank type"
+  },
+
+  "saltwater": "Saltwater",
+  "@saltwater": {
+    "description": "Saltwater tank type"
+  },
+
+  "freshwaterTank": "Freshwater Tank",
+  "@freshwaterTank": {
+    "description": "Freshwater tank label"
+  },
+
+  "saltwaterTank": "Saltwater Tank",
+  "@saltwaterTank": {
+    "description": "Saltwater tank label"
+  },
+
+  "editTank": "Edit",
+  "@editTank": {
+    "description": "Edit tank menu option"
+  },
+
+  "parameterLogger": "Parameter Logger",
+  "@parameterLogger": {
+    "description": "Parameter logger menu option"
+  },
+
+  "setCardBackground": "Set Card Background",
+  "@setCardBackground": {
+    "description": "Set card background menu option"
+  },
+
+  "changeIcon": "Change Icon",
+  "@changeIcon": {
+    "description": "Change icon menu option"
+  },
+
+  "resetBackground": "Reset Background",
+  "@resetBackground": {
+    "description": "Reset background menu option"
+  },
+
+  "getStockingIdeas": "Get Stocking Ideas",
+  "@getStockingIdeas": {
+    "description": "Get stocking ideas menu option"
+  },
+
+  "duplicate": "Duplicate",
+  "@duplicate": {
+    "description": "Duplicate tank menu option"
+  },
+
+  "deleteTank": "Delete",
+  "@deleteTank": {
+    "description": "Delete tank menu option"
+  },
+
+  "noInhabitantsYet": "No inhabitants yet",
+  "@noInhabitantsYet": {
+    "description": "No inhabitants yet message"
+  },
+
+  "tankPhotos": "Tank Photos ({count})",
+  "@tankPhotos": {
+    "description": "Tank photos label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "aiStockingRecommendations": "AI Stocking Recommendations",
+  "@aiStockingRecommendations": {
+    "description": "AI stocking recommendations button"
+  },
+
+  "created": "Created {date}",
+  "@created": {
+    "description": "Created date label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "parameters": "Parameters",
+  "@parameters": {
+    "description": "Parameters label"
+  },
+
+  "manage": "Manage",
+  "@manage": {
+    "description": "Manage button"
+  },
+
+  "noParametersLogged": "No parameters logged yet",
+  "@noParametersLogged": {
+    "description": "No parameters logged message"
+  },
+
+  "noParametersDescription": "Start tracking your water parameters to monitor your aquarium's health",
+  "@noParametersDescription": {
+    "description": "No parameters description"
+  },
+
+  "addParameter": "Add Parameter",
+  "@addParameter": {
+    "description": "Add parameter button"
+  },
+
+  "inhabitants": "Inhabitants ({count})",
+  "@inhabitants": {
+    "description": "Inhabitants label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "noInhabitantsAdded": "No inhabitants added yet.",
+  "@noInhabitantsAdded": {
+    "description": "No inhabitants added message"
+  },
+
+  "added": "Added: {date}",
+  "@added": {
+    "description": "Added date label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notes": "Notes",
+  "@notes": {
+    "description": "Notes label"
+  },
+
+  "compatibilityCalculation": "Compatibility Calculation",
+  "@compatibilityCalculation": {
+    "description": "Compatibility calculation label"
+  },
+
+  "backupStatistics": "Backup Statistics",
+  "@backupStatistics": {
+    "description": "Backup statistics title"
+  },
+
+  "lastBackup": "Last Backup",
+  "@lastBackup": {
+    "description": "Last backup label"
+  },
+
+  "tanksBackedUp": "Tanks Backed Up",
+  "@tanksBackedUp": {
+    "description": "Tanks backed up label"
+  },
+
+  "lastRestore": "Last Restore",
+  "@lastRestore": {
+    "description": "Last restore label"
+  },
+
+  "noBackupHistory": "No backup history yet",
+  "@noBackupHistory": {
+    "description": "No backup history message"
   }
 }
