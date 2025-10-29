@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
@@ -450,6 +451,14 @@ class _RecommendationTabView extends StatelessWidget {
     );
   }
 
+  double _geometricMean(List<double> values) {
+    if (values.isEmpty) return 1.0;
+    // If any value is 0, the geometric mean is 0.
+    if (values.any((v) => v <= 0.0)) return 0.0;
+    final logSum = values.fold<double>(0.0, (sum, v) => sum + log(v));
+    return exp(logSum / values.length);
+  }
+
   String _calculateCompatibilityBreakdown(List<Fish> fishList) {
     if (fishList.length < 2) {
       return "Select at least two fish to see a compatibility breakdown.";
@@ -472,9 +481,9 @@ class _RecommendationTabView extends StatelessWidget {
     }
 
     buffer.writeln("\nGroup Harmony Score:");
-    final minScore = probabilities.reduce((a, b) => a < b ? a : b);
+    final geometricMean = _geometricMean(probabilities);
     final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
-    buffer.writeln("min($probStrings) = ${(minScore * 100).toStringAsFixed(1)}%");
+    buffer.writeln("geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%");
 
     return buffer.toString();
   }
