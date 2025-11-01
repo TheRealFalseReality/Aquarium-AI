@@ -36,15 +36,18 @@ class AquaPiPromotionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
     
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      contentPadding: EdgeInsets.all(isSmallScreen ? 16 : 24),
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -56,10 +59,10 @@ class AquaPiPromotionDialog extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.settings_input_component,
               color: Colors.white,
-              size: 28,
+              size: isSmallScreen ? 24 : 28,
             ),
           ),
           const SizedBox(width: 12),
@@ -69,159 +72,320 @@ class AquaPiPromotionDialog extends StatelessWidget {
               style: TextStyle(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: isSmallScreen ? 18 : 20,
               ),
             ),
           ),
         ],
       ),
       content: SingleChildScrollView(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Marketing image on the left
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/AquaPiMainSmaller.png',
-                width: 180,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  // If image fails to load, show nothing
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Content on the right
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildFeatureItem(
-                    context,
-                    Icons.hub,
-                    'Smart Monitoring',
-                    'Real-time monitoring of temperature, pH, water level, and more',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFeatureItem(
-                    context,
-                    Icons.home_outlined,
-                    'Home Assistant Integration',
-                    'Seamlessly integrates with your smart home ecosystem',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFeatureItem(
-                    context,
-                    Icons.tune,
-                    'Fully Customizable',
-                    'Open-source design lets you add unlimited sensors and automations',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFeatureItem(
-                    context,
-                    Icons.notifications_active,
-                    'Automated Alerts',
-                    'Get notified instantly about critical changes in your aquarium',
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primaryContainer.withOpacity(0.3),
-                          colorScheme.secondaryContainer.withOpacity(0.3),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.outline.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: colorScheme.primary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Perfect for DIY enthusiasts and tech-savvy aquarists!',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        child: isSmallScreen
+            ? _buildVerticalLayout(context, colorScheme)
+            : _buildHorizontalLayout(context, colorScheme),
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            // Log dismissal
-            AnalyticsService.logAppPromotion(
-              action: 'dialog_dismissed',
-              source: 'aquapi_promotion_dialog',
-            );
-            Navigator.of(context).pop();
-          },
-          child: Text(
-            'Maybe Later',
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
+      actions: isSmallScreen
+          ? _buildMobileActions(context, colorScheme)
+          : _buildDesktopActions(context, colorScheme),
+    );
+  }
+
+  Widget _buildVerticalLayout(BuildContext context, ColorScheme colorScheme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Marketing image at top for mobile
+        Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/AquaPiMainSmaller.png',
+              width: double.infinity,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
-        TextButton(
-          onPressed: () async {
-            // Log never show again
-            AnalyticsService.logAppPromotion(
-              action: 'never_show_again',
-              source: 'aquapi_promotion_dialog',
-            );
-            await setNeverShowAgain();
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text(
-            'Never Show Again',
-            style: TextStyle(color: colorScheme.error),
+        const SizedBox(height: 16),
+        Text(
+          'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w500,
           ),
         ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            _launchAquaPiStore();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+        const SizedBox(height: 12),
+        _buildFeatureItem(
+          context,
+          Icons.hub,
+          'Smart Monitoring',
+          'Real-time monitoring of temperature, pH, water level, and more',
+        ),
+        const SizedBox(height: 10),
+        _buildFeatureItem(
+          context,
+          Icons.home_outlined,
+          'Home Assistant Integration',
+          'Seamlessly integrates with your smart home ecosystem',
+        ),
+        const SizedBox(height: 10),
+        _buildFeatureItem(
+          context,
+          Icons.tune,
+          'Fully Customizable',
+          'Open-source design lets you add unlimited sensors and automations',
+        ),
+        const SizedBox(height: 10),
+        _buildFeatureItem(
+          context,
+          Icons.notifications_active,
+          'Automated Alerts',
+          'Get notified instantly about critical changes in your aquarium',
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primaryContainer.withOpacity(0.3),
+                colorScheme.secondaryContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outline.withOpacity(0.3),
+            ),
           ),
-          child: const Text('Learn More'),
+          child: Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: colorScheme.primary,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Perfect for DIY enthusiasts and tech-savvy aquarists!',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildHorizontalLayout(BuildContext context, ColorScheme colorScheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Marketing image on the left
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            'assets/AquaPiMainSmaller.png',
+            width: 180,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        // Content on the right
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildFeatureItem(
+                context,
+                Icons.hub,
+                'Smart Monitoring',
+                'Real-time monitoring of temperature, pH, water level, and more',
+              ),
+              const SizedBox(height: 12),
+              _buildFeatureItem(
+                context,
+                Icons.home_outlined,
+                'Home Assistant Integration',
+                'Seamlessly integrates with your smart home ecosystem',
+              ),
+              const SizedBox(height: 12),
+              _buildFeatureItem(
+                context,
+                Icons.tune,
+                'Fully Customizable',
+                'Open-source design lets you add unlimited sensors and automations',
+              ),
+              const SizedBox(height: 12),
+              _buildFeatureItem(
+                context,
+                Icons.notifications_active,
+                'Automated Alerts',
+                'Get notified instantly about critical changes in your aquarium',
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.primaryContainer.withOpacity(0.3),
+                      colorScheme.secondaryContainer.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outline.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.star,
+                      color: colorScheme.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Perfect for DIY enthusiasts and tech-savvy aquarists!',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildMobileActions(BuildContext context, ColorScheme colorScheme) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _launchAquaPiStore();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+            ),
+            child: const Text('Learn More'),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () {
+                  AnalyticsService.logAppPromotion(
+                    action: 'dialog_dismissed',
+                    source: 'aquapi_promotion_dialog',
+                  );
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Maybe Later',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  AnalyticsService.logAppPromotion(
+                    action: 'never_show_again',
+                    source: 'aquapi_promotion_dialog',
+                  );
+                  await setNeverShowAgain();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Text(
+                  'Never Show',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> _buildDesktopActions(BuildContext context, ColorScheme colorScheme) {
+    return [
+      TextButton(
+        onPressed: () {
+          AnalyticsService.logAppPromotion(
+            action: 'dialog_dismissed',
+            source: 'aquapi_promotion_dialog',
+          );
+          Navigator.of(context).pop();
+        },
+        child: Text(
+          'Maybe Later',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+      ),
+      TextButton(
+        onPressed: () async {
+          AnalyticsService.logAppPromotion(
+            action: 'never_show_again',
+            source: 'aquapi_promotion_dialog',
+          );
+          await setNeverShowAgain();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Text(
+          'Never Show Again',
+          style: TextStyle(color: colorScheme.error),
+        ),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          _launchAquaPiStore();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+        ),
+        child: const Text('Learn More'),
+      ),
+    ];
   }
 
   Widget _buildFeatureItem(
@@ -231,12 +395,14 @@ class AquaPiPromotionDialog extends StatelessWidget {
     String description,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
     
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          padding: EdgeInsets.all(isSmallScreen ? 5 : 6),
           decoration: BoxDecoration(
             color: colorScheme.primary.withOpacity(0.15),
             borderRadius: BorderRadius.circular(8),
@@ -244,19 +410,20 @@ class AquaPiPromotionDialog extends StatelessWidget {
           child: Icon(
             icon,
             color: colorScheme.primary,
-            size: 18,
+            size: isSmallScreen ? 16 : 18,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isSmallScreen ? 10 : 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  fontSize: isSmallScreen ? 13 : null,
                 ),
               ),
               const SizedBox(height: 2),
@@ -264,6 +431,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
                 description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
+                  fontSize: isSmallScreen ? 11 : null,
                 ),
               ),
             ],
