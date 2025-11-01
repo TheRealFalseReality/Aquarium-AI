@@ -76,89 +76,99 @@ class AquaPiPromotionDialog extends StatelessWidget {
         ],
       ),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Marketing image
+            // Marketing image on the left
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 'assets/AquaPiMainSmaller.png',
-                fit: BoxFit.cover,
+                width: 120,
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   // If image fails to load, show nothing
                   return const SizedBox.shrink();
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            _buildFeatureItem(
-              context,
-              Icons.hub,
-              'Smart Monitoring',
-              'Real-time monitoring of temperature, pH, water level, and more',
-            ),
-            const SizedBox(height: 12),
-            _buildFeatureItem(
-              context,
-              Icons.home_outlined,
-              'Home Assistant Integration',
-              'Seamlessly integrates with your smart home ecosystem',
-            ),
-            const SizedBox(height: 12),
-            _buildFeatureItem(
-              context,
-              Icons.tune,
-              'Fully Customizable',
-              'Open-source design lets you add unlimited sensors and automations',
-            ),
-            const SizedBox(height: 12),
-            _buildFeatureItem(
-              context,
-              Icons.notifications_active,
-              'Automated Alerts',
-              'Get notified instantly about critical changes in your aquarium',
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.primaryContainer.withOpacity(0.3),
-                    colorScheme.secondaryContainer.withOpacity(0.3),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
+            const SizedBox(width: 16),
+            // Content on the right
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.star,
-                    color: colorScheme.primary,
-                    size: 20,
+                  Text(
+                    'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Perfect for DIY enthusiasts and tech-savvy aquarists!',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                  const SizedBox(height: 16),
+                  _buildFeatureItem(
+                    context,
+                    Icons.hub,
+                    'Smart Monitoring',
+                    'Real-time monitoring of temperature, pH, water level, and more',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeatureItem(
+                    context,
+                    Icons.home_outlined,
+                    'Home Assistant Integration',
+                    'Seamlessly integrates with your smart home ecosystem',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeatureItem(
+                    context,
+                    Icons.tune,
+                    'Fully Customizable',
+                    'Open-source design lets you add unlimited sensors and automations',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeatureItem(
+                    context,
+                    Icons.notifications_active,
+                    'Automated Alerts',
+                    'Get notified instantly about critical changes in your aquarium',
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.primaryContainer.withOpacity(0.3),
+                          colorScheme.secondaryContainer.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.outline.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: colorScheme.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Perfect for DIY enthusiasts and tech-savvy aquarists!',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
