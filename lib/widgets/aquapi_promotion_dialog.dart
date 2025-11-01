@@ -87,6 +87,19 @@ class AquaPiPromotionDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
+            // Marketing image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/AquaPiMainSmaller.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // If image fails to load, show nothing
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
             _buildFeatureItem(
               context,
               Icons.hub,
