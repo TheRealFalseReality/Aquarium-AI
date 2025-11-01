@@ -134,13 +134,14 @@ void main() {
     });
 
     test('should serialize and deserialize with different units', () {
+      final testDate = DateTime(2024, 1, 1);
       final entries = [
-        DosingEntry(id: '1', treatmentName: 'Test1', amount: 5.0, unit: 'mL', dateDosed: DateTime(2024, 1, 1)),
-        DosingEntry(id: '2', treatmentName: 'Test2', amount: 2.0, unit: 'L', dateDosed: DateTime(2024, 1, 1)),
-        DosingEntry(id: '3', treatmentName: 'Test3', amount: 1.0, unit: 'oz', dateDosed: DateTime(2024, 1, 1)),
-        DosingEntry(id: '4', treatmentName: 'Test4', amount: 0.5, unit: 'tsp', dateDosed: DateTime(2024, 1, 1)),
-        DosingEntry(id: '5', treatmentName: 'Test5', amount: 0.25, unit: 'tbsp', dateDosed: DateTime(2024, 1, 1)),
-        DosingEntry(id: '6', treatmentName: 'Test6', amount: 10.0, unit: 'drops', dateDosed: DateTime(2024, 1, 1)),
+        DosingEntry.create(treatmentName: 'Test1', amount: 5.0, unit: 'mL', dateDosed: testDate),
+        DosingEntry.create(treatmentName: 'Test2', amount: 2.0, unit: 'L', dateDosed: testDate),
+        DosingEntry.create(treatmentName: 'Test3', amount: 1.0, unit: 'oz', dateDosed: testDate),
+        DosingEntry.create(treatmentName: 'Test4', amount: 0.5, unit: 'tsp', dateDosed: testDate),
+        DosingEntry.create(treatmentName: 'Test5', amount: 0.25, unit: 'tbsp', dateDosed: testDate),
+        DosingEntry.create(treatmentName: 'Test6', amount: 10.0, unit: 'drops', dateDosed: testDate),
       ];
 
       for (var entry in entries) {

@@ -96,7 +96,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   }
 
   Color _getTreatmentColor() {
-    return Colors.teal;
+    return Colors.purple;
   }
 
   @override
@@ -425,6 +425,18 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
   _AddDosingEntrySheetState createState() => _AddDosingEntrySheetState();
 }
 
+// Volume units for dosing entries
+const List<String> kVolumeUnits = [
+  'mL',
+  'L',
+  'oz',
+  'tsp',
+  'tbsp',
+  'drops',
+  'gal',
+  'cups',
+];
+
 class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _formKey = GlobalKey<FormState>();
   final _treatmentNameController = TextEditingController();
@@ -432,17 +444,6 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _notesController = TextEditingController();
   late DateTime _selectedDate;
   late String _selectedUnit;
-
-  final List<String> _volumeUnits = [
-    'mL',
-    'L',
-    'oz',
-    'tsp',
-    'tbsp',
-    'drops',
-    'gal',
-    'cups',
-  ];
 
   @override
   void initState() {
@@ -671,7 +672,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                         filled: true,
                         fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                       ),
-                      items: _volumeUnits
+                      items: kVolumeUnits
                           .map((unit) => DropdownMenuItem(
                                 value: unit,
                                 child: Text(unit),
