@@ -22,6 +22,7 @@ import 'tank_creation_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
+import 'dosing_logger_screen.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
@@ -1029,6 +1030,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'dosing':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => DosingLoggerScreen(tank: tank),
+                              ),
+                            );
+                            break;
                           case 'set_background':
                             _showSetBackgroundDialog(context, ref, tank);
                             break;
@@ -1069,6 +1077,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 const Icon(Icons.science, color: Colors.teal, size: 18),
                                 const SizedBox(width: 8),
                                 Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'dosing',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.medication_liquid, color: Colors.purple, size: 18),
+                                const SizedBox(width: 8),
+                                const Text('Dosing Diary', style: TextStyle(color: Colors.purple)),
                               ],
                             ),
                           ),
