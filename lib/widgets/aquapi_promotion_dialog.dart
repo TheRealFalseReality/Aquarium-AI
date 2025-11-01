@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +30,9 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
     
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
+      if (kDebugMode) {
+        print('Could not launch $url');
+      }
     }
   }
 
