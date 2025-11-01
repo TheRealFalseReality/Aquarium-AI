@@ -1086,7 +1086,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               children: [
                                 const Icon(Icons.medication_liquid, color: Colors.purple, size: 18),
                                 const SizedBox(width: 8),
-                                const Text('Dosing Diary', style: TextStyle(color: Colors.purple)),
+                                Text(l10n.dosingDiary, style: const TextStyle(color: Colors.purple)),
                               ],
                             ),
                           ),

@@ -669,5 +669,10 @@
   "noBackupHistory": "No backup history yet",
   "@noBackupHistory": {
     "description": "No backup history message"
+  },
+
+  "dosingDiary": "Dosing Diary",
+  "@dosingDiary": {
+    "description": "Dosing diary menu option"
   }
 }
