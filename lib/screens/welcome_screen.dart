@@ -97,7 +97,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
   static const int _promotionDialogCooldownHours = 48;
   static const String _aquapiPromotionDialogTimestampKey = 'aquapi_promotion_dialog_timestamp';
-  static const int _aquapiPromotionDialogCooldownHours = 72; // Show every 3 days
+  static const int _aquapiPromotionDialogCooldownHours = 72; // Show again after 72 hours have elapsed
   
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
