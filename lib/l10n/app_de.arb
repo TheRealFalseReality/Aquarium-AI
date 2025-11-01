@@ -127,5 +127,6 @@
   "lastBackup": "Letzte Sicherung",
   "tanksBackedUp": "Gesicherte Aquarien",
   "lastRestore": "Letzte Wiederherstellung",
-  "noBackupHistory": "Noch kein Sicherungsverlauf"
+  "noBackupHistory": "Noch kein Sicherungsverlauf",
+  "dosingDiary": "Dosiertagebuch"
 }

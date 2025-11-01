@@ -68,7 +68,7 @@ void main() {
       final json = {
         'id': 'test-id',
         'treatmentName': 'Seachem Excel',
-        amount: 10.0,
+        'amount': 10.0,
         'unit': 'mL',
         'dateDosed': '2024-01-01T00:00:00.000',
         'notes': 'Daily dose',
