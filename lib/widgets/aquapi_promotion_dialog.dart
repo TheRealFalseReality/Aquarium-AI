@@ -84,7 +84,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 'assets/AquaPiMainSmaller.png',
-                width: 120,
+                width: 180,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   // If image fails to load, show nothing
