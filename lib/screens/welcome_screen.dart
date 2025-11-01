@@ -19,6 +19,7 @@ import '../providers/tank_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
+import '../widgets/aquapi_promotion_dialog.dart';
 import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
@@ -95,6 +96,8 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
   static const int _promotionDialogCooldownHours = 48;
+  static const String _aquapiPromotionDialogTimestampKey = 'aquapi_promotion_dialog_timestamp';
+  static const int _aquapiPromotionDialogCooldownHours = 72; // Show again after 72 hours have elapsed
   
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
@@ -106,6 +109,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (kIsWeb) {
       _checkShowPromotionDialog();
     }
+    // Check if we should show the AquaPi promotion dialog
+    _checkShowAquaPiPromotionDialog();
   }
   
   @override
@@ -172,6 +177,67 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
     } catch (e) {
       debugPrint('Error showing promotion dialog: $e');
+    }
+  }
+
+  Future<void> _checkShowAquaPiPromotionDialog() async {
+    try {
+      // Check if user has chosen to never show the dialog again
+      final shouldShow = await AquaPiPromotionDialog.shouldShowDialog();
+      if (!shouldShow) {
+        debugPrint('AquaPi promotion dialog will not be shown (user selected never show again)');
+        return;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final lastShownTimestamp = prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
+      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
+      
+      debugPrint('AquaPi promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_aquapiPromotionDialogCooldownHours hours');
+      
+      // Show the dialog if it has never been shown or if cooldown period has passed
+      if (hoursSinceLastShown >= _aquapiPromotionDialogCooldownHours && mounted) {
+        debugPrint('AquaPi promotion dialog will be shown (cooldown period elapsed)');
+        // Show the popup after a delay to allow the screen to load
+        // Use a longer delay to avoid showing both popups at once
+        Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            _showAquaPiPromotionDialog();
+          }
+        });
+      } else {
+        debugPrint('AquaPi promotion dialog will not be shown (cooldown period not elapsed)');
+      }
+    } catch (e) {
+      // If there's an error with SharedPreferences, silently continue
+      debugPrint('Error checking AquaPi promotion dialog preference: $e');
+    }
+  }
+
+  Future<void> _showAquaPiPromotionDialog() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Store the current timestamp when showing the dialog
+      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      await prefs.setInt(_aquapiPromotionDialogTimestampKey, currentTimestamp);
+      debugPrint('AquaPi promotion dialog shown, timestamp saved: $currentTimestamp');
+      
+      // Log AquaPi promotion dialog shown
+      AnalyticsService.logAppPromotion(
+        action: 'aquapi_dialog_shown',
+        source: 'welcome_screen_auto',
+      );
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => const AquaPiPromotionDialog(),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error showing AquaPi promotion dialog: $e');
     }
   }
 
