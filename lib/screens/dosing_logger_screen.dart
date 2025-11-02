@@ -106,74 +106,100 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
     final cs = Theme.of(context).colorScheme;
 
     return MainLayout(
-      title: 'Dosing Diary - ${tank.name}',
-      child: tank.dosingEntries.isEmpty
-          ? _buildEmptyState(context)
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Summary card
-                _buildSummaryCard(context, tank),
-                const SizedBox(height: 16),
-                
-                // Grouped entries
-                ...groupedEntries.entries.map((entry) {
-                  final treatmentName = entry.key;
-                  final entries = entry.value;
-                  final isExpanded = _expandedTreatment == treatmentName;
+      title: '${tank.name} - Dosing Diary',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(tank.name),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _addDosingEntry(context),
+              tooltip: 'Add Dose',
+            ),
+          ],
+        ),
+        body: tank.dosingEntries.isEmpty
+            ? _buildEmptyState(context)
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text(
+                    'Dosing Diary',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Track treatments and supplements added to your aquarium',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurface.withOpacity(0.7),
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Summary card
+                  _buildSummaryCard(context, tank),
+                  const SizedBox(height: 16),
+                  
+                  // Grouped entries
+                  ...groupedEntries.entries.map((entry) {
+                    final treatmentName = entry.key;
+                    final entries = entry.value;
+                    final isExpanded = _expandedTreatment == treatmentName;
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: _getTreatmentColor().withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: _getTreatmentColor().withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _getTreatmentIcon(),
+                                color: _getTreatmentColor(),
+                              ),
                             ),
-                            child: Icon(
-                              _getTreatmentIcon(),
-                              color: _getTreatmentColor(),
+                            title: Text(
+                              treatmentName,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          title: Text(
-                            treatmentName,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text('${entries.length} dose${entries.length == 1 ? '' : 's'}'),
-                          trailing: IconButton(
-                            icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () {
+                            subtitle: Text('${entries.length} dose${entries.length == 1 ? '' : 's'}'),
+                            trailing: IconButton(
+                              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                              onPressed: () {
+                                setState(() {
+                                  _expandedTreatment = isExpanded ? null : treatmentName;
+                                });
+                              },
+                            ),
+                            onTap: () {
                               setState(() {
                                 _expandedTreatment = isExpanded ? null : treatmentName;
                               });
                             },
                           ),
-                          onTap: () {
-                            setState(() {
-                              _expandedTreatment = isExpanded ? null : treatmentName;
-                            });
-                          },
-                        ),
-                        if (isExpanded)
-                          Column(
-                            children: [
-                              const Divider(height: 1),
-                              ...entries.map((entry) => _buildDosingItem(context, entry)),
-                            ],
-                          ),
-                      ],
-                    ),
-                  );
-                }),
-              ],
-            ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _addDosingEntry(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Dose'),
+                          if (isExpanded)
+                            Column(
+                              children: [
+                                const Divider(height: 1),
+                                ...entries.map((entry) => _buildDosingItem(context, entry)),
+                              ],
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _addDosingEntry(context),
+          icon: const Icon(Icons.add),
+          label: const Text('Add Dose'),
+        ),
       ),
     );
   }
