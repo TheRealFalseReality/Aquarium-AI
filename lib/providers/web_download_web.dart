@@ -16,7 +16,9 @@ void downloadFile(Uint8List bytes, String fileName) {
   anchor.click();
   anchor.remove();
   
-  // Revoke the URL after a short delay to ensure download starts
+  // Revoke the URL after a short delay to ensure the browser has
+  // enough time to process the download before the URL becomes invalid.
+  // 100ms is sufficient for all modern browsers to initiate the download.
   Future.delayed(const Duration(milliseconds: 100), () {
     html.Url.revokeObjectUrl(url);
   });
