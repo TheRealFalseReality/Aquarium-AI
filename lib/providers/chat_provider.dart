@@ -16,6 +16,7 @@ import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
+import '../utils/groq_helper.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {
@@ -111,11 +112,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
   
   void _initGroqSession() {
     if (_modelState.groqApiKey.isEmpty) return;
-    final groqConfiguration = Configuration(model: _modelState.groqModel);
-    final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
-    groq.startChat();
-    groq.setCustomInstructionsWith(systemPrompt);
-    _groqChatSession = groq;
+    _groqChatSession = GroqHelper.createClient(
+      apiKey: _modelState.groqApiKey,
+      model: _modelState.groqModel,
+      systemPrompt: systemPrompt,
+    );
   }
 
 
@@ -309,9 +310,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
           responseText = response.choices.first.message.content?.first.text;
           break;
         case AIProvider.groq:
-           final groqConfiguration = Configuration(model: _modelState.groqModel);
-           final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
-           groq.startChat(); 
+           final groq = GroqHelper.createClient(
+             apiKey: _modelState.groqApiKey,
+             model: _modelState.groqModel,
+           );
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
            _cancellable?.complete(response);
            responseText = response.choices.first.message.content;
@@ -356,9 +358,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
             $prompt
             Image data: data:$mimeType;base64,$base64Image
           ''';
-          final groqConfiguration = Configuration(model: _modelState.groqImageModel);
-          final groq = Groq(apiKey: _modelState.groqApiKey, configuration: groqConfiguration);
-          groq.startChat();
+          final groq = GroqHelper.createClient(
+            apiKey: _modelState.groqApiKey,
+            model: _modelState.groqImageModel,
+          );
           final response = await groq.sendMessage(groqMessage).timeout(const Duration(seconds: 55));
           _cancellable?.complete(response);
           responseText = response.choices.first.message.content;

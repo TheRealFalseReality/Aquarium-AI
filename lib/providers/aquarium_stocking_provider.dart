@@ -16,6 +16,7 @@ import '../utils/json_utils.dart';
 import '../models/tank.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
+import '../utils/groq_helper.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -119,9 +120,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groqConfiguration = Configuration(model: models.groqModel);
-        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
-        groq.startChat();
+        final groq = GroqHelper.createClient(
+          apiKey: models.groqApiKey,
+          model: models.groqModel,
+        );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
       }
@@ -301,9 +303,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groqConfiguration = Configuration(model: models.groqModel);
-        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
-        groq.startChat();
+        final groq = GroqHelper.createClient(
+          apiKey: models.groqApiKey,
+          model: models.groqModel,
+        );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
       }
