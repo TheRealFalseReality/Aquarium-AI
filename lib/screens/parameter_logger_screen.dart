@@ -935,8 +935,8 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
-            'is_custom': _selectedParameter == 'custom',
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
+            'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
       } else {
@@ -967,9 +967,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
             'total_parameters': updatedParameters.length,
-            'is_custom': _selectedParameter == 'custom',
+            'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
       }
