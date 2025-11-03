@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';

@@ -72,6 +72,8 @@ class OpenAIRetryHelper {
         }
       }
     }
-    return null;
+    // This should never be reached because the loop will either return a response
+    // or rethrow an exception, but we need to satisfy the return type
+    throw Exception('Failed to generate response after $maxRetries retries');
   }
 }
