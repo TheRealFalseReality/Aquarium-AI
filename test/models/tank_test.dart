@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank.dart';
+import 'package:fish_ai/models/water_parameter.dart';
 
 void main() {
   group('TankPhoto', () {
@@ -174,6 +175,61 @@ void main() {
       final tank = Tank.fromJson(json);
 
       expect(tank.waterParameters, isEmpty);
+    });
+
+    test('should serialize and deserialize Tank with custom water parameters', () {
+      final tank = Tank.create(
+        name: 'My Tank',
+        type: 'freshwater',
+        waterParameters: [
+          WaterParameter(
+            id: 'param-1',
+            parameterType: 'iron',
+            value: 0.5,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 1),
+            notes: 'Custom iron measurement',
+          ),
+          WaterParameter(
+            id: 'param-2',
+            parameterType: 'copper',
+            value: 0.02,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 2),
+          ),
+          WaterParameter(
+            id: 'param-3',
+            parameterType: 'ammonia',
+            value: 0.0,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 3),
+          ),
+        ],
+      );
+
+      // Serialize to JSON
+      final json = tank.toJson();
+      
+      // Verify JSON contains custom parameters
+      expect(json['waterParameters'], isA<List>());
+      expect(json['waterParameters'].length, 3);
+      expect(json['waterParameters'][0]['parameterType'], 'iron');
+      expect(json['waterParameters'][1]['parameterType'], 'copper');
+      expect(json['waterParameters'][2]['parameterType'], 'ammonia');
+
+      // Deserialize from JSON
+      final deserializedTank = Tank.fromJson(json);
+
+      // Verify custom parameters are preserved
+      expect(deserializedTank.waterParameters.length, 3);
+      expect(deserializedTank.waterParameters[0].parameterType, 'iron');
+      expect(deserializedTank.waterParameters[0].value, 0.5);
+      expect(deserializedTank.waterParameters[0].unit, 'ppm');
+      expect(deserializedTank.waterParameters[0].notes, 'Custom iron measurement');
+      expect(deserializedTank.waterParameters[1].parameterType, 'copper');
+      expect(deserializedTank.waterParameters[1].value, 0.02);
+      expect(deserializedTank.waterParameters[2].parameterType, 'ammonia');
+      expect(deserializedTank.waterParameters[2].value, 0.0);
     });
   });
 }
