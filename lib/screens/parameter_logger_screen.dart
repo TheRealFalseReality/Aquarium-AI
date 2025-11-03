@@ -126,9 +126,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return 'Iodine';
       default:
         // For custom parameters, capitalize first letter
-        return parameterType.isEmpty 
-            ? 'Custom' 
-            : parameterType[0].toUpperCase() + parameterType.substring(1);
+        if (parameterType.isEmpty) {
+          return 'Custom';
+        }
+        return parameterType[0].toUpperCase() + (parameterType.length > 1 ? parameterType.substring(1) : '');
     }
   }
 
@@ -902,6 +903,17 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
       final parameterType = _getParameterType();
+      
+      // Additional safety check: prevent saving with empty parameter type
+      if (parameterType.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a parameter name'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       
       if (isEditing) {
         // Update existing parameter
