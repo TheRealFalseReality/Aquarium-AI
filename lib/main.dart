@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +25,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
-import '../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +57,15 @@ void main() async {
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
+    // Present the error to the console in debug mode
+    FlutterError.presentError(errorDetails);
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('Flutter Error: ${errorDetails.exception}');
+      // ignore: avoid_print
+      print('Stack trace: ${errorDetails.stack}');
+    }
+    // Record to Crashlytics
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
     // Also log to Analytics (non-blocking)
     AnalyticsService.logError(
@@ -72,6 +80,13 @@ void main() async {
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('Platform Error: $error');
+      // ignore: avoid_print
+      print('Stack trace: $stack');
+    }
+    // Record to Crashlytics
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     // Also log to Analytics (non-blocking)
     AnalyticsService.logError(
@@ -82,26 +97,6 @@ void main() async {
         print('Analytics error logging failed: $analyticsError');
       }
     });
-    return true;
-  };
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    if (kDebugMode) {
-      // ignore: avoid_print
-      print('Flutter Error: ${details.exception}');
-      // ignore: avoid_print
-      print('Stack trace: ${details.stack}');
-    }
-  };
-
-  PlatformDispatcher.instance.onError = (error, stack) {
-    if (kDebugMode) {
-      // ignore: avoid_print
-      print('Platform Error: $error');
-      // ignore: avoid_print
-      print('Stack trace: $stack');
-    }
     return true;
   };
 

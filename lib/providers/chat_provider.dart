@@ -15,39 +15,7 @@ import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../utils/json_utils.dart';
-
-// ====================== Cancellable Helper ======================
-class CancellableCompleter<T> {
-  final Completer<T> _completer = Completer<T>();
-  bool _isCancelled = false;
-
-  Future<T> get future => _completer.future;
-  bool get isCancelled => _isCancelled;
-
-  void complete(FutureOr<T> value) {
-    if (!_isCancelled && !_completer.isCompleted) {
-      _completer.complete(value);
-    }
-  }
-
-  void completeError(Object error, [StackTrace? stack]) {
-    if (!_isCancelled && !_completer.isCompleted) {
-      _completer.completeError(error, stack);
-    }
-  }
-
-  void cancel() {
-    if (!_completer.isCompleted) {
-      _isCancelled = true;
-      _completer.completeError(CancelledException());
-    }
-  }
-}
-
-class CancelledException implements Exception {
-  @override
-  String toString() => 'Future was cancelled';
-}
+import '../utils/cancellable_completer.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {

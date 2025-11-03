@@ -10,42 +10,9 @@ import '../prompts/fish_compatibility_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/json_utils.dart';
 import '../services/fish_data_service.dart';
-
-// Helper class for cancellable operations
-class CancellableCompleter<T> {
-  final Completer<T> _completer = Completer<T>();
-  bool _isCancelled = false;
-
-  Future<T> get future => _completer.future;
-  bool get isCompleted => _completer.isCompleted;
-  bool get isCancelled => _isCancelled;
-
-  void complete([FutureOr<T>? value]) {
-    if (!_isCancelled && !_completer.isCompleted) {
-      _completer.complete(value);
-    }
-  }
-
-  void completeError(Object error, [StackTrace? stackTrace]) {
-    if (!_isCancelled && !_completer.isCompleted) {
-      _completer.completeError(error, stackTrace);
-    }
-  }
-
-  void cancel() {
-    if (!_completer.isCompleted) {
-      _isCancelled = true;
-      _completer.completeError(CancelledException());
-    }
-  }
-}
-
-class CancelledException implements Exception {
-  @override
-  String toString() => 'Future was cancelled';
-}
-
-// Note: extractJson is now imported from json_utils.dart
+import '../utils/cancellable_completer.dart';
+import '../utils/openai_retry_helper.dart';
+import '../utils/api_error_handler.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -171,43 +138,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     }
   }
       
-  // Helper function for OpenAI calls with retry logic
-  Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
-    int retries = 0;
-    const maxRetries = 3;
-    int delay = 1000; // start with 1 second
 
-    while (retries < maxRetries) {
-      try {
-        final response = await OpenAI.instance.chat.create(
-          model: modelName,
-          responseFormat: {"type": "json_object"},
-          messages: [
-            OpenAIChatCompletionChoiceMessageModel(
-              content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt)],
-              role: OpenAIChatMessageRole.user,
-            ),
-          ],
-        ).timeout(const Duration(seconds: 30));
-        _cancellableCompleter?.complete(response);
-        return response.choices.first.message.content?.first.text;
-      } catch (e) {
-        // Check the error message for rate limit indicators
-        if (e.toString().contains('429') || e.toString().toLowerCase().contains('rate limit')) {
-          retries++;
-          if (retries >= maxRetries) {
-            rethrow; // rethrow the exception if we've exhausted all retries
-          }
-          // Exponential backoff
-          await Future.delayed(Duration(milliseconds: delay));
-          delay *= 2; 
-        } else {
-          rethrow; // rethrow other exceptions immediately
-        }
-      }
-    }
-    return null;
-  }
 
   Future<void> getCompatibilityReport(String category) async {
     if (state.selectedFish.isEmpty) return;
@@ -241,7 +172,13 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
         }
-        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+        final response = await OpenAIRetryHelper.generateWithRetry(
+          modelName: models.chatGPTModel,
+          prompt: prompt,
+          expectJson: true,
+        );
+        _cancellableCompleter?.complete(response);
+        responseText = response;
       }
 
       if (responseText == null) {
@@ -282,12 +219,6 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   String _getFriendlyErrorMessage(String error) {
-    if (error.contains('429') || error.toLowerCase().contains('rate limit')) {
-        return '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
-    }
-    if (error.toLowerCase().contains('quota')) {
-        return '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
-    }
-    return '⚠️ **An Unexpected Error Occurred**\n\n$error';
+    return ApiErrorHandler.getFriendlyErrorMessage(error);
   }
 }
