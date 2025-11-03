@@ -463,6 +463,28 @@ const List<String> kVolumeUnits = [
   'cups',
 ];
 
+// Common aquarium treatments
+const List<String> kCommonTreatments = [
+  'Prime (Seachem)',
+  'Stability (Seachem)',
+  'Flourish (Seachem)',
+  'Excel (Seachem)',
+  'Stress Coat (API)',
+  'Quick Start (API)',
+  'Stress Zyme (API)',
+  'Ich-X',
+  'Paraguard (Seachem)',
+  'Kanaplex (Seachem)',
+  'MetroPlex (Seachem)',
+  'Focus (Seachem)',
+  'AmGuard (Seachem)',
+  'Safe (Seachem)',
+  'Purigen (Seachem)',
+  'Alkalinity Buffer',
+  'pH Buffer',
+  'Other (Custom)',
+];
+
 class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _formKey = GlobalKey<FormState>();
   final _treatmentNameController = TextEditingController();
@@ -470,13 +492,20 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _notesController = TextEditingController();
   late DateTime _selectedDate;
   late String _selectedUnit;
+  String? _selectedTreatment;
 
   @override
   void initState() {
     super.initState();
     if (widget.existingEntry != null) {
       // Initialize with existing entry data
-      _treatmentNameController.text = widget.existingEntry!.treatmentName;
+      final existingName = widget.existingEntry!.treatmentName;
+      if (kCommonTreatments.contains(existingName)) {
+        _selectedTreatment = existingName;
+      } else {
+        _selectedTreatment = 'Other (Custom)';
+        _treatmentNameController.text = existingName;
+      }
       _amountController.text = widget.existingEntry!.amount.toString();
       _notesController.text = widget.existingEntry!.notes ?? '';
       _selectedDate = widget.existingEntry!.dateDosed;
@@ -485,6 +514,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       // Initialize with default values for new entry
       _selectedDate = DateTime.now();
       _selectedUnit = 'mL';
+      _selectedTreatment = kCommonTreatments.first;
     }
   }
 
@@ -522,15 +552,25 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
     }
   }
 
+  String _getTreatmentName() {
+    // If "Other (Custom)" is selected, use the text field value
+    if (_selectedTreatment == 'Other (Custom)') {
+      return _treatmentNameController.text.trim();
+    }
+    // Otherwise use the selected treatment from dropdown
+    return _selectedTreatment ?? _treatmentNameController.text.trim();
+  }
+
   void _saveEntry() {
     if (_formKey.currentState!.validate()) {
       final DosingEntry entry;
       final isEditing = widget.existingEntry != null;
+      final treatmentName = _getTreatmentName();
       
       if (isEditing) {
         // Update existing entry
         entry = widget.existingEntry!.copyWith(
-          treatmentName: _treatmentNameController.text.trim(),
+          treatmentName: treatmentName,
           amount: double.parse(_amountController.text),
           unit: _selectedUnit,
           dateDosed: _selectedDate,
@@ -563,7 +603,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       } else {
         // Create new entry
         entry = DosingEntry.create(
-          treatmentName: _treatmentNameController.text.trim(),
+          treatmentName: treatmentName,
           amount: double.parse(_amountController.text),
           unit: _selectedUnit,
           dateDosed: _selectedDate,
@@ -637,26 +677,63 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
               ),
               const SizedBox(height: 16),
               
-              // Treatment name
-              TextFormField(
-                controller: _treatmentNameController,
+              // Treatment dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedTreatment,
                 decoration: InputDecoration(
-                  labelText: 'Treatment Name *',
-                  hintText: 'e.g., Prime, Flourish, etc.',
+                  labelText: 'Treatment Type *',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.medication_liquid),
                   filled: true,
                   fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                 ),
-                textCapitalization: TextCapitalization.words,
+                items: kCommonTreatments.map((treatment) {
+                  return DropdownMenuItem(
+                    value: treatment,
+                    child: Text(treatment),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTreatment = value;
+                    // Clear custom name when switching away from "Other"
+                    if (value != 'Other (Custom)') {
+                      _treatmentNameController.clear();
+                    }
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a treatment name';
+                  if (value == null) {
+                    return 'Please select a treatment type';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
+              
+              // Custom treatment name (shown only when "Other" is selected)
+              if (_selectedTreatment == 'Other (Custom)') ...[
+                TextFormField(
+                  controller: _treatmentNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Custom Treatment Name *',
+                    hintText: 'Enter treatment name',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.edit),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) {
+                    if (_selectedTreatment == 'Other (Custom)' && 
+                        (value == null || value.trim().isEmpty)) {
+                      return 'Please enter a treatment name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
               
               // Amount and unit
               Row(
