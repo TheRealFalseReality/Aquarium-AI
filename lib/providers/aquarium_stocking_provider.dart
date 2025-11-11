@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fish_ai/models/fish.dart';
@@ -8,12 +9,14 @@ import 'package:dart_openai/dart_openai.dart';
 import 'package:groq/groq.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
-import 'dart:async';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/json_utils.dart';
 import '../models/tank.dart';
+import '../utils/openai_retry_helper.dart';
+import '../utils/api_error_handler.dart';
+import '../utils/groq_helper.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -55,41 +58,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(isLoading: false, clearError: true);
   }
 
-  // Helper function for OpenAI calls with retry logic
-  Future<String?> _generateOpenAIContentWithRetry(String modelName, String prompt) async {
-    int retries = 0;
-    const maxRetries = 3;
-    int delay = 1000; // start with 1 second
 
-    while (retries < maxRetries) {
-      try {
-        final response = await OpenAI.instance.chat.create(
-          model: modelName,
-          responseFormat: {"type": "json_object"},
-          messages: [
-            OpenAIChatCompletionChoiceMessageModel(
-              content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt)],
-              role: OpenAIChatMessageRole.user,
-            ),
-          ],
-        ).timeout(const Duration(seconds: 45)); // Increased timeout
-        return response.choices.first.message.content?.first.text;
-      } catch (e) {
-        // Check the error message for rate limit indicators
-        if (e.toString().contains('429') || e.toString().toLowerCase().contains('rate limit')) {
-          retries++;
-          if (retries >= maxRetries) {
-            rethrow; 
-          }
-          await Future.delayed(Duration(milliseconds: delay));
-          delay *= 2; 
-        } else {
-          rethrow; 
-        }
-      }
-    }
-    return null;
-  }
 
   Future<void> getStockingRecommendations({
     required String tankSize,
@@ -141,14 +110,20 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
         }
-        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+        responseText = await OpenAIRetryHelper.generateWithRetry(
+          modelName: models.chatGPTModel,
+          prompt: prompt,
+          expectJson: true,
+          timeout: const Duration(seconds: 45),
+        );
       } else if (models.activeProvider == AIProvider.groq) {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groqConfiguration = Configuration(model: models.groqModel);
-        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
-        groq.startChat();
+        final groq = GroqHelper.createClient(
+          apiKey: models.groqApiKey,
+          model: models.groqModel,
+        );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
       }
@@ -214,12 +189,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
-      String errorMessage = 'Failed to generate recommendations: ${e.toString()}';
-      if (e.toString().contains('429') || e.toString().toLowerCase().contains('quota')) {
-          errorMessage = '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
-      } else if (e.toString().toLowerCase().contains('rate limit')) {
-          errorMessage = '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
-      }
+      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());
       state = state.copyWith(
         error: errorMessage,
         isLoading: false,
@@ -323,14 +293,20 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
         }
-        responseText = await _generateOpenAIContentWithRetry(models.chatGPTModel, prompt);
+        responseText = await OpenAIRetryHelper.generateWithRetry(
+          modelName: models.chatGPTModel,
+          prompt: prompt,
+          expectJson: true,
+          timeout: const Duration(seconds: 45),
+        );
       } else if (models.activeProvider == AIProvider.groq) {
         if (models.groqApiKey.isEmpty) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groqConfiguration = Configuration(model: models.groqModel);
-        final groq = Groq(apiKey: models.groqApiKey, configuration: groqConfiguration);
-        groq.startChat();
+        final groq = GroqHelper.createClient(
+          apiKey: models.groqApiKey,
+          model: models.groqModel,
+        );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
         responseText = response.choices.first.message.content;
       }
@@ -402,12 +378,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
-      String errorMessage = 'Failed to generate recommendations: ${e.toString()}';
-      if (e.toString().contains('429') || e.toString().toLowerCase().contains('quota')) {
-          errorMessage = '️ **Quota Exceeded**\n\nYou have exceeded your OpenAI API quota. Please check your plan and billing details on the OpenAI website.';
-      } else if (e.toString().toLowerCase().contains('rate limit')) {
-          errorMessage = '️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
-      }
+      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());
       state = state.copyWith(
         error: errorMessage,
         isLoading: false,
