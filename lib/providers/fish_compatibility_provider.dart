@@ -4,7 +4,6 @@ import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:dart_openai/dart_openai.dart';
 import 'model_provider.dart';
 import '../prompts/fish_compatibility_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
