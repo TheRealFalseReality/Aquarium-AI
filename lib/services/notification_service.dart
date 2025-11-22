@@ -72,8 +72,27 @@ class NotificationService {
     final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.requestNotificationsPermission();
+    
+    // Request exact alarm permission for Android 12+ (API 31+)
+    // This is required for scheduled notifications to work properly
+    final exactAlarmGranted = await androidPlugin?.requestExactAlarmsPermission();
 
-    return granted ?? true;
+    return granted ?? exactAlarmGranted ?? true;
+  }
+  
+  /// Check if exact alarms permission is granted (Android 12+)
+  Future<bool> canScheduleExactNotifications() async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    
+    // Check if exact alarms are allowed
+    final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? true;
+    
+    return canScheduleExact;
   }
 
   /// Schedule a notification from a TankNotification

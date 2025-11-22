@@ -36,7 +36,46 @@ class _NotificationManagementScreenState
     final enabled = await _notificationService.areNotificationsEnabled();
     if (!enabled && mounted) {
       _showPermissionDialog();
+      return;
     }
+    
+    // Check if exact alarms are allowed (required for scheduled notifications)
+    final canScheduleExact = await _notificationService.canScheduleExactNotifications();
+    if (!canScheduleExact && mounted) {
+      _showExactAlarmPermissionDialog();
+    }
+  }
+  
+  void _showExactAlarmPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.alarm, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Exact Alarm Permission'),
+          ],
+        ),
+        content: const Text(
+          'For scheduled notifications to work properly on Android 12+, this app needs permission to schedule exact alarms.\n\n'
+          'This ensures your tank maintenance reminders trigger at the correct time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Maybe Later'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _notificationService.requestPermissions();
+            },
+            child: const Text('Grant Permission'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPermissionDialog() {
@@ -265,6 +304,17 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
+                if (notification.getNextNotificationDate() != null && notification.enabled)
+                  Chip(
+                    label: Text(
+                      _getTimeFromNow(notification.getNextNotificationDate()!),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    avatar: const Icon(Icons.schedule, size: 16),
+                    backgroundColor: colorScheme.secondaryContainer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
               ],
             ),
           ],
@@ -278,6 +328,38 @@ class _NotificationManagementScreenState
       return notification.repeatFrequency.displayName;
     }
     return 'Every ${notification.repeatInterval} ${notification.repeatFrequency.name}';
+  }
+
+  String _getTimeFromNow(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = dateTime.difference(now);
+    
+    if (difference.isNegative) {
+      return 'Overdue';
+    }
+    
+    final days = difference.inDays;
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes;
+    
+    if (days > 0) {
+      if (days == 1) {
+        return 'In 1 day';
+      }
+      return 'In $days days';
+    } else if (hours > 0) {
+      if (hours == 1) {
+        return 'In 1 hour';
+      }
+      return 'In $hours hours';
+    } else if (minutes > 0) {
+      if (minutes == 1) {
+        return 'In 1 minute';
+      }
+      return 'In $minutes minutes';
+    } else {
+      return 'In less than a minute';
+    }
   }
 
   IconData _getNotificationIcon(NotificationType type) {
