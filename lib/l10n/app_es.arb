@@ -128,5 +128,6 @@
   "tanksBackedUp": "Acuarios Respaldados",
   "lastRestore": "Última Restauración",
   "noBackupHistory": "Aún no hay historial de copias de seguridad",
-  "dosingDiary": "Diario de Dosificación"
+  "dosingDiary": "Diario de Dosificación",
+  "notifications": "Notificaciones"
 }

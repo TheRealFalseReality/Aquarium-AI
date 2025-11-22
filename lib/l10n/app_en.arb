@@ -674,5 +674,10 @@
   "dosingDiary": "Dosing Diary",
   "@dosingDiary": {
     "description": "Dosing diary menu option"
+  },
+
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications menu option"
   }
 }
