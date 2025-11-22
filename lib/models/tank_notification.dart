@@ -224,8 +224,7 @@ class TankNotification {
   }
 
   /// Check if the notification should trigger now
-  /// For repeating notifications, checks if we're past the notification time
-  /// and within the current interval period
+  /// For repeating notifications, checks if we're at or past a scheduled occurrence
   bool shouldTrigger({DateTime? referenceTime}) {
     if (!enabled) return false;
     
@@ -237,12 +236,69 @@ class TankNotification {
              notificationDateTime.isAtSameMomentAs(now);
     }
     
-    // For repeating notifications, check if we're in a trigger period
-    final nextDate = getNextNotificationDate();
-    if (nextDate == null) return false;
+    // For repeating notifications, check if the original time has passed
+    // (meaning at least one occurrence should have happened)
+    if (notificationDateTime.isAfter(now)) {
+      return false; // First occurrence hasn't happened yet
+    }
     
-    // Check if the next scheduled time has arrived
-    return nextDate.isBefore(now) || nextDate.isAtSameMomentAs(now);
+    // Calculate how long since the last scheduled occurrence
+    switch (repeatFrequency) {
+      case RepeatFrequency.daily:
+        final daysSinceStart = now.difference(notificationDateTime).inDays;
+        final intervalsPassed = (daysSinceStart / repeatInterval).floor();
+        final lastOccurrence = notificationDateTime.add(
+          Duration(days: repeatInterval * intervalsPassed)
+        );
+        // Trigger if we're at or past the last occurrence time
+        return !now.isBefore(lastOccurrence);
+        
+      case RepeatFrequency.weekly:
+        final daysSinceStart = now.difference(notificationDateTime).inDays;
+        final weeksSinceStart = (daysSinceStart / 7).floor();
+        final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
+        final lastOccurrence = notificationDateTime.add(
+          Duration(days: 7 * repeatInterval * intervalsPassed)
+        );
+        return !now.isBefore(lastOccurrence);
+        
+      case RepeatFrequency.monthly:
+        // For monthly, we need to check if we've reached the day-of-month
+        int monthsSinceStart = (now.year - notificationDateTime.year) * 12 + 
+                               (now.month - notificationDateTime.month);
+        if (monthsSinceStart >= 0 && (monthsSinceStart % repeatInterval == 0)) {
+          // We're in a trigger month, check if we've passed the trigger day
+          if (now.day > notificationDateTime.day) {
+            return true;
+          } else if (now.day == notificationDateTime.day) {
+            // Same day, check time
+            return now.hour >= notificationDateTime.hour && 
+                   now.minute >= notificationDateTime.minute;
+          }
+        }
+        return false;
+        
+      case RepeatFrequency.yearly:
+        // For yearly, check if we've reached the month and day
+        int yearsSinceStart = now.year - notificationDateTime.year;
+        if (yearsSinceStart >= 0 && (yearsSinceStart % repeatInterval == 0)) {
+          // We're in a trigger year, check month and day
+          if (now.month > notificationDateTime.month) {
+            return true;
+          } else if (now.month == notificationDateTime.month) {
+            if (now.day > notificationDateTime.day) {
+              return true;
+            } else if (now.day == notificationDateTime.day) {
+              return now.hour >= notificationDateTime.hour && 
+                     now.minute >= notificationDateTime.minute;
+            }
+          }
+        }
+        return false;
+        
+      case RepeatFrequency.none:
+        return false;
+    }
   }
 
   /// Safely add months to a date, handling edge cases like end-of-month

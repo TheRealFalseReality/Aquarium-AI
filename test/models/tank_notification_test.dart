@@ -388,6 +388,55 @@ void main() {
       expect(notification.shouldTrigger(referenceTime: beforeTime), false);
       expect(notification.shouldTrigger(referenceTime: afterTime), true);
     });
+
+    test('should trigger on scheduled daily occurrences', () {
+      // Set notification for 9:00 AM yesterday
+      final yesterday9am = DateTime.now().subtract(const Duration(days: 1))
+          .copyWith(hour: 9, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+      
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: yesterday9am,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+      );
+
+      // Should trigger now (we're past today's 9:00 AM)
+      final now = DateTime.now();
+      final today9am = DateTime(now.year, now.month, now.day, 9, 0);
+      
+      if (now.isAfter(today9am)) {
+        expect(notification.shouldTrigger(), true);
+      }
+    });
+
+    test('should trigger on scheduled weekly occurrences', () {
+      // Set notification for 1 week + 1 day ago
+      final pastDate = DateTime.now().subtract(const Duration(days: 8))
+          .copyWith(hour: 10, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+      
+      final notification = TankNotification.create(
+        type: NotificationType.waterChange,
+        notificationDateTime: pastDate,
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 1,
+      );
+
+      expect(notification.shouldTrigger(), true);
+    });
+
+    test('should not trigger before first occurrence', () {
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: futureDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+      );
+
+      expect(notification.shouldTrigger(), false);
+    });
   });
 
   group('TankNotification - All Notification Types', () {
