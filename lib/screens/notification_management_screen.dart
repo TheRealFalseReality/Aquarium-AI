@@ -70,6 +70,34 @@ class _NotificationManagementScreenState
     );
   }
 
+  Future<void> _sendTestNotification() async {
+    try {
+      await _notificationService.sendTestNotification(
+        tankName: widget.tank.name,
+        type: NotificationType.feeding,
+      );
+
+      if (mounted) {
+        context.showAccessibleMessage(
+          'Test notification sent! Check your notification tray.',
+          duration: const Duration(seconds: 3),
+        );
+      }
+
+      AnalyticsService.logFeatureUsed(
+        featureName: 'test_notification',
+        parameters: {'tank_id': widget.tank.id},
+      );
+    } catch (e) {
+      if (mounted) {
+        context.showAccessibleMessage(
+          'Failed to send test notification: $e',
+          duration: const Duration(seconds: 3),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -90,6 +118,13 @@ class _NotificationManagementScreenState
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Send Test Notification',
+            onPressed: () => _sendTestNotification(),
+          ),
+        ],
       ),
       body: notifications.isEmpty
           ? _buildEmptyState(context)

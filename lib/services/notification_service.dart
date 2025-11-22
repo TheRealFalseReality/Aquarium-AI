@@ -220,4 +220,51 @@ class NotificationService {
 
     return androidEnabled;
   }
+
+  /// Send a test notification immediately (for debugging)
+  Future<void> sendTestNotification({
+    required String tankName,
+    NotificationType type = NotificationType.feeding,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    // Create notification details
+    const androidDetails = AndroidNotificationDetails(
+      'tank_notifications',
+      'Tank Maintenance',
+      channelDescription: 'Notifications for tank maintenance tasks',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    // Get notification title and body
+    final title = _getNotificationTitle(type, tankName);
+    final body = '${_getDefaultBody(type)} (Test notification)';
+
+    // Use a unique ID for test notifications
+    const int testNotificationId = 999999;
+
+    // Show notification immediately
+    await _notifications.show(
+      testNotificationId,
+      title,
+      body,
+      details,
+      payload: 'test_notification',
+    );
+  }
 }
