@@ -45,14 +45,19 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize notification service
-  try {
-    await NotificationService().initialize();
-  } catch (e) {
+  // Initialize notification service (non-blocking)
+  NotificationService().initialize().catchError((error) {
     if (kDebugMode) {
-      print('Notification service initialization error: $e');
+      debugPrint('Notification service initialization error: $error');
     }
-  }
+    // Log to crash reporting if initialization fails
+    FirebaseCrashlytics.instance.recordError(
+      error,
+      StackTrace.current,
+      reason: 'Notification service initialization failed',
+      fatal: false,
+    );
+  });
 
   // Initialize Analytics session tracking (non-blocking)
   // Don't await this to prevent blocking app startup

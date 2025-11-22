@@ -679,5 +679,238 @@
   "notifications": "Notifications",
   "@notifications": {
     "description": "Notifications menu option"
+  },
+
+  "notificationTitleFeeding": "🐠 Time to Feed - {tankName}",
+  "@notificationTitleFeeding": {
+    "description": "Notification title for feeding",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationTitleDosing": "💧 Dosing Reminder - {tankName}",
+  "@notificationTitleDosing": {
+    "description": "Notification title for dosing",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationTitleWaterChange": "🔄 Water Change - {tankName}",
+  "@notificationTitleWaterChange": {
+    "description": "Notification title for water change",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationTitleTesting": "🧪 Test Water Parameters - {tankName}",
+  "@notificationTitleTesting": {
+    "description": "Notification title for testing",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationTitleMaintenance": "🔧 Maintenance Due - {tankName}",
+  "@notificationTitleMaintenance": {
+    "description": "Notification title for maintenance",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationTitleOther": "⏰ Tank Reminder - {tankName}",
+  "@notificationTitleOther": {
+    "description": "Notification title for other",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationBodyFeeding": "Time to feed your fish!",
+  "@notificationBodyFeeding": {
+    "description": "Notification body for feeding"
+  },
+
+  "notificationBodyDosing": "Don't forget to dose your tank.",
+  "@notificationBodyDosing": {
+    "description": "Notification body for dosing"
+  },
+
+  "notificationBodyWaterChange": "It's time for a water change.",
+  "@notificationBodyWaterChange": {
+    "description": "Notification body for water change"
+  },
+
+  "notificationBodyTesting": "Test your water parameters.",
+  "@notificationBodyTesting": {
+    "description": "Notification body for testing"
+  },
+
+  "notificationBodyMaintenance": "Tank maintenance is due.",
+  "@notificationBodyMaintenance": {
+    "description": "Notification body for maintenance"
+  },
+
+  "notificationBodyOther": "You have a tank reminder.",
+  "@notificationBodyOther": {
+    "description": "Notification body for other"
+  },
+
+  "enableNotifications": "Enable Notifications",
+  "@enableNotifications": {
+    "description": "Enable notifications dialog title"
+  },
+
+  "notificationPermissionMessage": "To receive tank maintenance reminders, please enable notifications for this app in your device settings.",
+  "@notificationPermissionMessage": {
+    "description": "Notification permission request message"
+  },
+
+  "maybeLater": "Maybe Later",
+  "@maybeLater": {
+    "description": "Maybe later button"
+  },
+
+  "enable": "Enable",
+  "@enable": {
+    "description": "Enable button"
+  },
+
+  "noNotificationsYet": "No Notifications Yet",
+  "@noNotificationsYet": {
+    "description": "Empty state title"
+  },
+
+  "noNotificationsDescription": "Add notifications to remind you about feeding, dosing, water changes, and other tank maintenance tasks.",
+  "@noNotificationsDescription": {
+    "description": "Empty state description"
+  },
+
+  "addNotification": "Add Notification",
+  "@addNotification": {
+    "description": "Add notification button"
+  },
+
+  "editNotification": "Edit Notification",
+  "@editNotification": {
+    "description": "Edit notification screen title"
+  },
+
+  "notificationEnabled": "Notification enabled",
+  "@notificationEnabled": {
+    "description": "Notification enabled message"
+  },
+
+  "notificationDisabled": "Notification disabled",
+  "@notificationDisabled": {
+    "description": "Notification disabled message"
+  },
+
+  "deleteNotification": "Delete Notification",
+  "@deleteNotification": {
+    "description": "Delete notification dialog title"
+  },
+
+  "deleteNotificationConfirm": "Are you sure you want to delete this notification?",
+  "@deleteNotificationConfirm": {
+    "description": "Delete notification confirmation message"
+  },
+
+  "notificationDeleted": "Notification deleted",
+  "@notificationDeleted": {
+    "description": "Notification deleted message"
+  },
+
+  "notificationType": "Notification Type",
+  "@notificationType": {
+    "description": "Notification type label"
+  },
+
+  "dateAndTime": "Date & Time",
+  "@dateAndTime": {
+    "description": "Date and time label"
+  },
+
+  "repeat": "Repeat",
+  "@repeat": {
+    "description": "Repeat label"
+  },
+
+  "frequency": "Frequency",
+  "@frequency": {
+    "description": "Frequency label"
+  },
+
+  "repeatEvery": "Repeat Every",
+  "@repeatEvery": {
+    "description": "Repeat every label"
+  },
+
+  "notesOptional": "Notes (Optional)",
+  "@notesOptional": {
+    "description": "Notes optional label"
+  },
+
+  "addNotesPlaceholder": "Add any additional notes...",
+  "@addNotesPlaceholder": {
+    "description": "Add notes placeholder"
+  },
+
+  "enableNotification": "Enable Notification",
+  "@enableNotification": {
+    "description": "Enable notification switch label"
+  },
+
+  "receiveReminders": "Receive reminders for this task",
+  "@receiveReminders": {
+    "description": "Receive reminders subtitle"
+  },
+
+  "notificationAdded": "Notification added",
+  "@notificationAdded": {
+    "description": "Notification added message"
+  },
+
+  "notificationUpdated": "Notification updated",
+  "@notificationUpdated": {
+    "description": "Notification updated message"
+  },
+
+  "nextOccurrence": "Next: {date}",
+  "@nextOccurrence": {
+    "description": "Next occurrence label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "everyXDays": "Every {count} {unit}",
+  "@everyXDays": {
+    "description": "Every X days/weeks/months/years",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
   }
 }

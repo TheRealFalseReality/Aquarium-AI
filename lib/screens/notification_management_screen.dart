@@ -7,6 +7,7 @@ import '../providers/tank_provider.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
 import '../services/analytics_service.dart';
+import '../l10n/app_localizations.dart';
 
 class NotificationManagementScreen extends ConsumerStatefulWidget {
   final Tank tank;

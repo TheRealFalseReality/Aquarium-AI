@@ -46,8 +46,11 @@ class NotificationService {
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     // Handle notification tap - can be extended to navigate to specific screens
-    // For now, just log it
-    print('Notification tapped: ${response.payload}');
+    // Payload format: ${tankId}_${notificationId}
+    if (response.payload != null) {
+      // Could navigate to tank details or notification screen here
+      // For now, just silently handle it
+    }
   }
 
   /// Request notification permissions (especially important for iOS)
