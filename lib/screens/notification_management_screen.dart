@@ -109,39 +109,15 @@ class _NotificationManagementScreenState
     );
   }
 
-  Future<void> _sendTestNotification() async {
-    try {
-      await _notificationService.sendTestNotification(
-        tankName: widget.tank.name,
-        type: NotificationType.feeding,
-      );
-
-      if (mounted) {
-        context.showAccessibleMessage(
-          'Test notification sent! Check your notification tray.',
-          duration: const Duration(seconds: 3),
-        );
-      }
-
-      AnalyticsService.logFeatureUsed(
-        featureName: 'test_notification',
-        parameters: {'tank_id': widget.tank.id},
-      );
-    } catch (e) {
-      if (mounted) {
-        context.showAccessibleMessage(
-          'Failed to send test notification: $e',
-          duration: const Duration(seconds: 3),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final notifications = widget.tank.notifications;
+    
+    // Watch the tank provider to get real-time updates
+    final currentTank = ref.watch(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    final notifications = currentTank.notifications;
 
     return Scaffold(
       appBar: AppBar(
@@ -150,20 +126,13 @@ class _NotificationManagementScreenState
           children: [
             const Text('Notifications'),
             Text(
-              widget.tank.name,
+              currentTank.name,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            tooltip: 'Send Test Notification',
-            onPressed: () => _sendTestNotification(),
-          ),
-        ],
       ),
       body: notifications.isEmpty
           ? _buildEmptyState(context)
@@ -550,6 +519,7 @@ class _NotificationFormScreenState
     extends ConsumerState<_NotificationFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
+  final _titleController = TextEditingController();
   final NotificationService _notificationService = NotificationService();
 
   late NotificationType _selectedType;
@@ -572,6 +542,7 @@ class _NotificationFormScreenState
       _repeatInterval = notif.repeatInterval;
       _enabled = notif.enabled;
       _notesController.text = notif.notes ?? '';
+      _titleController.text = notif.customTitle ?? '';
     } else {
       _selectedType = NotificationType.feeding;
       final now = DateTime.now();
@@ -586,6 +557,7 @@ class _NotificationFormScreenState
   @override
   void dispose() {
     _notesController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -749,6 +721,35 @@ class _NotificationFormScreenState
             ),
             const SizedBox(height: 16),
 
+            // Custom Title
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Custom Title (Optional)',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g., "Feed the goldfish" or "Dose calcium"',
+                        helperText: 'Leave empty to use default title based on type',
+                        border: const OutlineInputBorder(),
+                      ),
+                      maxLength: 50,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Notes
             Card(
               child: Padding(
@@ -843,6 +844,7 @@ class _NotificationFormScreenState
         repeatFrequency: _repeatFrequency,
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
+        customTitle: _titleController.text.isEmpty ? null : _titleController.text,
         enabled: _enabled,
         updatedAt: DateTime.now(),
       );
@@ -854,6 +856,7 @@ class _NotificationFormScreenState
         repeatFrequency: _repeatFrequency,
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
+        customTitle: _titleController.text.isEmpty ? null : _titleController.text,
         enabled: _enabled,
       );
     }

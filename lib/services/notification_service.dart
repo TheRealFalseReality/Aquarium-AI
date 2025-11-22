@@ -130,7 +130,7 @@ class NotificationService {
     );
 
     // Get notification title and body
-    final title = _getNotificationTitle(notification.type, tankName);
+    final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
     // Schedule the notification

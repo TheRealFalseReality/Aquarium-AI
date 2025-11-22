@@ -48,6 +48,7 @@ class TankNotification {
   final RepeatFrequency repeatFrequency; // How often to repeat
   final int repeatInterval; // Interval value (e.g., every X days/weeks/months/years)
   final String? notes; // Optional user notes
+  final String? customTitle; // Optional custom notification title
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool enabled; // Whether the notification is active
@@ -59,6 +60,7 @@ class TankNotification {
     this.repeatFrequency = RepeatFrequency.none,
     this.repeatInterval = 1,
     this.notes,
+    this.customTitle,
     required this.createdAt,
     required this.updatedAt,
     this.enabled = true,
@@ -71,6 +73,7 @@ class TankNotification {
     RepeatFrequency repeatFrequency = RepeatFrequency.none,
     int repeatInterval = 1,
     String? notes,
+    String? customTitle,
     bool enabled = true,
   }) {
     final now = DateTime.now();
@@ -81,6 +84,7 @@ class TankNotification {
       repeatFrequency: repeatFrequency,
       repeatInterval: repeatInterval,
       notes: notes,
+      customTitle: customTitle,
       createdAt: now,
       updatedAt: now,
       enabled: enabled,
@@ -96,6 +100,7 @@ class TankNotification {
       'repeatFrequency': repeatFrequency.name,
       'repeatInterval': repeatInterval,
       'notes': notes,
+      'customTitle': customTitle,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'enabled': enabled,
@@ -111,6 +116,7 @@ class TankNotification {
       repeatFrequency: RepeatFrequency.fromString(json['repeatFrequency'] as String),
       repeatInterval: json['repeatInterval'] as int? ?? 1,
       notes: json['notes'] as String?,
+      customTitle: json['customTitle'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
@@ -125,6 +131,7 @@ class TankNotification {
     RepeatFrequency? repeatFrequency,
     int? repeatInterval,
     String? notes,
+    String? customTitle,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? enabled,
@@ -136,6 +143,7 @@ class TankNotification {
       repeatFrequency: repeatFrequency ?? this.repeatFrequency,
       repeatInterval: repeatInterval ?? this.repeatInterval,
       notes: notes ?? this.notes,
+      customTitle: customTitle ?? this.customTitle,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enabled: enabled ?? this.enabled,
