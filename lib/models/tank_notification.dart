@@ -143,50 +143,105 @@ class TankNotification {
   }
 
   /// Calculate the next notification date based on repeat settings
+  /// Uses optimized math to avoid loops for dates far in the past
   DateTime? getNextNotificationDate() {
     if (!enabled || repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 
     final now = DateTime.now();
-    DateTime nextDate = notificationDateTime;
-
-    // If the notification date is in the past, calculate the next occurrence
-    while (nextDate.isBefore(now)) {
-      switch (repeatFrequency) {
-        case RepeatFrequency.daily:
-          nextDate = nextDate.add(Duration(days: repeatInterval));
-          break;
-        case RepeatFrequency.weekly:
-          nextDate = nextDate.add(Duration(days: 7 * repeatInterval));
-          break;
-        case RepeatFrequency.monthly:
-          nextDate = _addMonths(nextDate, repeatInterval);
-          break;
-        case RepeatFrequency.yearly:
-          nextDate = _addYears(nextDate, repeatInterval);
-          break;
-        case RepeatFrequency.none:
-          return null;
-      }
+    
+    // If notification is in the future, return it
+    if (!notificationDateTime.isBefore(now)) {
+      return notificationDateTime;
     }
 
-    return nextDate;
+    // Calculate next occurrence based on frequency
+    switch (repeatFrequency) {
+      case RepeatFrequency.daily:
+        return _getNextDailyDate(now);
+      case RepeatFrequency.weekly:
+        return _getNextWeeklyDate(now);
+      case RepeatFrequency.monthly:
+        return _getNextMonthlyDate(now);
+      case RepeatFrequency.yearly:
+        return _getNextYearlyDate(now);
+      case RepeatFrequency.none:
+        return null;
+    }
+  }
+
+  /// Calculate next daily occurrence using optimized math
+  DateTime _getNextDailyDate(DateTime now) {
+    final daysSinceStart = now.difference(notificationDateTime).inDays;
+    final intervalsPassed = (daysSinceStart / repeatInterval).floor();
+    final nextInterval = intervalsPassed + 1;
+    return notificationDateTime.add(Duration(days: repeatInterval * nextInterval));
+  }
+
+  /// Calculate next weekly occurrence using optimized math
+  DateTime _getNextWeeklyDate(DateTime now) {
+    final daysSinceStart = now.difference(notificationDateTime).inDays;
+    final weeksSinceStart = (daysSinceStart / 7).floor();
+    final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
+    final nextInterval = intervalsPassed + 1;
+    return notificationDateTime.add(Duration(days: 7 * repeatInterval * nextInterval));
+  }
+
+  /// Calculate next monthly occurrence
+  DateTime _getNextMonthlyDate(DateTime now) {
+    // Calculate how many months have passed
+    int monthsSinceStart = (now.year - notificationDateTime.year) * 12 + 
+                           (now.month - notificationDateTime.month);
+    
+    // Calculate the next interval
+    int intervalsPassed = (monthsSinceStart / repeatInterval).floor();
+    DateTime candidate = _addMonths(notificationDateTime, repeatInterval * intervalsPassed);
+    
+    // If candidate is still before now, add one more interval
+    if (candidate.isBefore(now)) {
+      candidate = _addMonths(notificationDateTime, repeatInterval * (intervalsPassed + 1));
+    }
+    
+    return candidate;
+  }
+
+  /// Calculate next yearly occurrence
+  DateTime _getNextYearlyDate(DateTime now) {
+    // Calculate how many years have passed
+    int yearsSinceStart = now.year - notificationDateTime.year;
+    
+    // Calculate the next interval
+    int intervalsPassed = (yearsSinceStart / repeatInterval).floor();
+    DateTime candidate = _addYears(notificationDateTime, repeatInterval * intervalsPassed);
+    
+    // If candidate is still before now, add one more interval
+    if (candidate.isBefore(now)) {
+      candidate = _addYears(notificationDateTime, repeatInterval * (intervalsPassed + 1));
+    }
+    
+    return candidate;
   }
 
   /// Check if the notification should trigger now
+  /// For repeating notifications, checks if we're past the notification time
+  /// and within the current interval period
   bool shouldTrigger({DateTime? referenceTime}) {
     if (!enabled) return false;
     
     final now = referenceTime ?? DateTime.now();
-    final nextDate = getNextNotificationDate();
     
-    if (nextDate == null) {
-      // One-time notification
+    // For non-repeating notifications, just check if time has passed
+    if (repeatFrequency == RepeatFrequency.none) {
       return notificationDateTime.isBefore(now) || 
              notificationDateTime.isAtSameMomentAs(now);
     }
     
+    // For repeating notifications, check if we're in a trigger period
+    final nextDate = getNextNotificationDate();
+    if (nextDate == null) return false;
+    
+    // Check if the next scheduled time has arrived
     return nextDate.isBefore(now) || nextDate.isAtSameMomentAs(now);
   }
 

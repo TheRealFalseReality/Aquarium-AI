@@ -583,4 +583,121 @@ void main() {
       expect(nextYearly.minute, specificTime.minute);
     });
   });
+
+  group('TankNotification - Performance Tests', () {
+    test('should efficiently handle dates far in the past (daily)', () {
+      // Test notification from 5 years ago
+      final veryOldDate = DateTime.now().subtract(const Duration(days: 365 * 5));
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: veryOldDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+      );
+
+      // Should calculate next date quickly without looping 1800+ times
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+      // Should complete in less than 10ms (was looping ~1800 times before)
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should efficiently handle dates far in the past (weekly)', () {
+      // Test notification from 3 years ago
+      final veryOldDate = DateTime.now().subtract(const Duration(days: 365 * 3));
+      final notification = TankNotification.create(
+        type: NotificationType.waterChange,
+        notificationDateTime: veryOldDate,
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 1,
+      );
+
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should efficiently handle dates far in the past (monthly)', () {
+      // Test notification from 10 years ago
+      final veryOldDate = DateTime.now().subtract(const Duration(days: 365 * 10));
+      final notification = TankNotification.create(
+        type: NotificationType.maintenance,
+        notificationDateTime: veryOldDate,
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+      );
+
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should efficiently handle dates far in the past (yearly)', () {
+      // Test notification from 20 years ago
+      final veryOldDate = DateTime.now().subtract(const Duration(days: 365 * 20));
+      final notification = TankNotification.create(
+        type: NotificationType.other,
+        notificationDateTime: veryOldDate,
+        repeatFrequency: RepeatFrequency.yearly,
+        repeatInterval: 1,
+      );
+
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should handle custom intervals efficiently', () {
+      // Test with every 3 days, notification from 2 years ago
+      final oldDate = DateTime.now().subtract(const Duration(days: 730));
+      final notification = TankNotification.create(
+        type: NotificationType.dosing,
+        notificationDateTime: oldDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 3,
+      );
+
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should return notification date immediately if in future', () {
+      final futureDate = DateTime.now().add(const Duration(days: 30));
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: futureDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+      );
+
+      final stopwatch = Stopwatch()..start();
+      final nextDate = notification.getNextNotificationDate();
+      stopwatch.stop();
+
+      expect(nextDate, futureDate);
+      // Should be nearly instant
+      expect(stopwatch.elapsedMilliseconds, lessThan(5));
+    });
+  });
 }
