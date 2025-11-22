@@ -161,22 +161,10 @@ class TankNotification {
           nextDate = nextDate.add(Duration(days: 7 * repeatInterval));
           break;
         case RepeatFrequency.monthly:
-          nextDate = DateTime(
-            nextDate.year,
-            nextDate.month + repeatInterval,
-            nextDate.day,
-            nextDate.hour,
-            nextDate.minute,
-          );
+          nextDate = _addMonths(nextDate, repeatInterval);
           break;
         case RepeatFrequency.yearly:
-          nextDate = DateTime(
-            nextDate.year + repeatInterval,
-            nextDate.month,
-            nextDate.day,
-            nextDate.hour,
-            nextDate.minute,
-          );
+          nextDate = _addYears(nextDate, repeatInterval);
           break;
         case RepeatFrequency.none:
           return null;
@@ -200,5 +188,67 @@ class TankNotification {
     }
     
     return nextDate.isBefore(now) || nextDate.isAtSameMomentAs(now);
+  }
+
+  /// Safely add months to a date, handling edge cases like end-of-month
+  static DateTime _addMonths(DateTime date, int months) {
+    int newYear = date.year;
+    int newMonth = date.month + months;
+    
+    // Handle month overflow
+    while (newMonth > 12) {
+      newMonth -= 12;
+      newYear += 1;
+    }
+    while (newMonth < 1) {
+      newMonth += 12;
+      newYear -= 1;
+    }
+    
+    // Handle day overflow (e.g., Jan 31 + 1 month = Feb 28/29)
+    int newDay = date.day;
+    int maxDaysInMonth = DateTime(newYear, newMonth + 1, 0).day;
+    if (newDay > maxDaysInMonth) {
+      newDay = maxDaysInMonth;
+    }
+    
+    return DateTime(
+      newYear,
+      newMonth,
+      newDay,
+      date.hour,
+      date.minute,
+      date.second,
+      date.millisecond,
+      date.microsecond,
+    );
+  }
+
+  /// Safely add years to a date, handling leap year edge cases
+  static DateTime _addYears(DateTime date, int years) {
+    int newYear = date.year + years;
+    int newMonth = date.month;
+    int newDay = date.day;
+    
+    // Handle Feb 29 on leap year -> non-leap year
+    if (newMonth == 2 && newDay == 29) {
+      // Check if the target year is a leap year
+      bool isLeapYear = (newYear % 4 == 0) && 
+                        ((newYear % 100 != 0) || (newYear % 400 == 0));
+      if (!isLeapYear) {
+        newDay = 28; // Adjust to Feb 28
+      }
+    }
+    
+    return DateTime(
+      newYear,
+      newMonth,
+      newDay,
+      date.hour,
+      date.minute,
+      date.second,
+      date.millisecond,
+      date.microsecond,
+    );
   }
 }

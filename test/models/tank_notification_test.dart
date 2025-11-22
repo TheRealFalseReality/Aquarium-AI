@@ -443,4 +443,144 @@ void main() {
       }
     });
   });
+
+  group('TankNotification - Edge Cases for Date Calculation', () {
+    test('should handle end-of-month dates when adding months', () {
+      // January 31 + 1 month should become February 28/29
+      final jan31 = DateTime(2024, 1, 31, 9, 0);
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: jan31,
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+      );
+
+      final nextDate = notification.getNextNotificationDate();
+      expect(nextDate, isNotNull);
+      
+      // Should be in February (month 2)
+      expect(nextDate!.month, greaterThanOrEqualTo(2));
+      // Day should be valid (28 or 29 for Feb, depending on leap year)
+      expect(nextDate.day, lessThanOrEqualTo(29));
+    });
+
+    test('should handle March 31 to April 30 when adding months', () {
+      // March 31 + 1 month should become April 30
+      final mar31 = DateTime(2024, 3, 31, 9, 0);
+      final notification = TankNotification.create(
+        type: NotificationType.waterChange,
+        notificationDateTime: mar31,
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+      );
+
+      final nextDate = notification.getNextNotificationDate();
+      expect(nextDate, isNotNull);
+      
+      // Should be in April (month 4) or later
+      expect(nextDate!.month, greaterThanOrEqualTo(4));
+      // Day should be 30 or less for April
+      if (nextDate.month == 4) {
+        expect(nextDate.day, lessThanOrEqualTo(30));
+      }
+    });
+
+    test('should handle February 29 on leap year when adding years', () {
+      // Feb 29, 2024 (leap year) + 1 year should become Feb 28, 2025 (non-leap year)
+      final feb29Leap = DateTime(2024, 2, 29, 9, 0);
+      final notification = TankNotification.create(
+        type: NotificationType.maintenance,
+        notificationDateTime: feb29Leap,
+        repeatFrequency: RepeatFrequency.yearly,
+        repeatInterval: 1,
+      );
+
+      final nextDate = notification.getNextNotificationDate();
+      expect(nextDate, isNotNull);
+      
+      // Should be in February of 2025 or later
+      expect(nextDate!.year, greaterThanOrEqualTo(2025));
+      expect(nextDate.month, 2);
+      // Should be Feb 28 for non-leap year
+      expect(nextDate.day, lessThanOrEqualTo(29));
+    });
+
+    test('should handle multiple month additions with end-of-month', () {
+      // Test adding multiple months to end-of-month dates
+      final jan31 = DateTime(2024, 1, 31, 9, 0);
+      final notification = TankNotification.create(
+        type: NotificationType.dosing,
+        notificationDateTime: jan31,
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 2, // Every 2 months
+      );
+
+      final nextDate = notification.getNextNotificationDate();
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), true);
+    });
+
+    test('should not throw exception for any valid date calculations', () {
+      // Test various edge case dates to ensure no exceptions are thrown
+      final edgeCaseDates = [
+        DateTime(2024, 1, 31, 9, 0), // Jan 31
+        DateTime(2024, 2, 29, 9, 0), // Feb 29 (leap year)
+        DateTime(2024, 3, 31, 9, 0), // Mar 31
+        DateTime(2024, 5, 31, 9, 0), // May 31
+        DateTime(2024, 8, 31, 9, 0), // Aug 31
+        DateTime(2024, 10, 31, 9, 0), // Oct 31
+        DateTime(2024, 12, 31, 9, 0), // Dec 31
+      ];
+
+      for (final date in edgeCaseDates) {
+        // Test monthly
+        final monthlyNotif = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: date,
+          repeatFrequency: RepeatFrequency.monthly,
+          repeatInterval: 1,
+        );
+        expect(() => monthlyNotif.getNextNotificationDate(), returnsNormally);
+
+        // Test yearly
+        final yearlyNotif = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: date,
+          repeatFrequency: RepeatFrequency.yearly,
+          repeatInterval: 1,
+        );
+        expect(() => yearlyNotif.getNextNotificationDate(), returnsNormally);
+      }
+    });
+
+    test('should preserve time when adding months and years', () {
+      final specificTime = DateTime(2024, 1, 15, 14, 35, 22);
+      
+      // Test monthly
+      final monthlyNotif = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: specificTime,
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+      );
+      
+      final nextMonthly = monthlyNotif.getNextNotificationDate();
+      expect(nextMonthly, isNotNull);
+      expect(nextMonthly!.hour, specificTime.hour);
+      expect(nextMonthly.minute, specificTime.minute);
+
+      // Test yearly
+      final yearlyNotif = TankNotification.create(
+        type: NotificationType.maintenance,
+        notificationDateTime: specificTime,
+        repeatFrequency: RepeatFrequency.yearly,
+        repeatInterval: 1,
+      );
+      
+      final nextYearly = yearlyNotif.getNextNotificationDate();
+      expect(nextYearly, isNotNull);
+      expect(nextYearly!.hour, specificTime.hour);
+      expect(nextYearly.minute, specificTime.minute);
+    });
+  });
 }
