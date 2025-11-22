@@ -192,49 +192,54 @@ class _NotificationManagementScreenState
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  _getNotificationIcon(notification.type),
-                  color: _getNotificationColor(notification.type),
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notification.type.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        dateFormat.format(notification.notificationDateTime),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
+      child: InkWell(
+        onTap: () => _showEditNotificationDialog(notification),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _getNotificationIcon(notification.type),
+                    color: _getNotificationColor(notification.type),
+                    size: 24,
                   ),
-                ),
-                Switch(
-                  value: notification.enabled,
-                  onChanged: (value) => _toggleNotification(notification, value),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () => _showNotificationOptions(notification),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          notification.customTitle ?? notification.type.displayName,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          dateFormat.format(notification.notificationDateTime),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: notification.enabled,
+                    onChanged: (value) => _toggleNotification(notification, value),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => _showNotificationOptions(notification),
+                  ),
+                ],
+              ),
             if (notification.notes != null && notification.notes!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
@@ -288,6 +293,7 @@ class _NotificationManagementScreenState
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -528,6 +534,7 @@ class _NotificationFormScreenState
   late RepeatFrequency _repeatFrequency;
   late int _repeatInterval;
   late bool _enabled;
+  late bool _useTankIcon;
 
   @override
   void initState() {
@@ -541,6 +548,7 @@ class _NotificationFormScreenState
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
       _enabled = notif.enabled;
+      _useTankIcon = notif.useTankIcon;
       _notesController.text = notif.notes ?? '';
       _titleController.text = notif.customTitle ?? '';
     } else {
@@ -551,6 +559,7 @@ class _NotificationFormScreenState
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
       _enabled = true;
+      _useTankIcon = false;
     }
   }
 
@@ -778,6 +787,19 @@ class _NotificationFormScreenState
             ),
             const SizedBox(height: 16),
 
+            // Use Tank Icon Switch
+            Card(
+              child: SwitchListTile(
+                title: const Text('Use Tank Icon'),
+                subtitle: const Text('Use your tank\'s custom icon/image in notification instead of default app icon'),
+                value: _useTankIcon,
+                onChanged: (value) {
+                  setState(() => _useTankIcon = value);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Enabled Switch
             Card(
               child: SwitchListTile(
@@ -845,6 +867,7 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        useTankIcon: _useTankIcon,
         enabled: _enabled,
         updatedAt: DateTime.now(),
       );
@@ -857,6 +880,7 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        useTankIcon: _useTankIcon,
         enabled: _enabled,
       );
     }
