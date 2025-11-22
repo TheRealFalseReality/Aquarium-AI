@@ -912,5 +912,115 @@
         "type": "String"
       }
     }
+  },
+
+  "exactAlarmPermission": "Exact Alarm Permission",
+  "@exactAlarmPermission": {
+    "description": "Exact alarm permission dialog title"
+  },
+
+  "exactAlarmPermissionMessage": "For scheduled notifications to work properly on Android 12+, this app needs permission to schedule exact alarms.\n\nThis ensures your tank maintenance reminders trigger at the correct time.",
+  "@exactAlarmPermissionMessage": {
+    "description": "Exact alarm permission explanation message"
+  },
+
+  "grantPermission": "Grant Permission",
+  "@grantPermission": {
+    "description": "Grant permission button"
+  },
+
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit menu item"
+  },
+
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete menu item"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+
+  "customTitleOptional": "Custom Title (Optional)",
+  "@customTitleOptional": {
+    "description": "Custom title field label"
+  },
+
+  "customTitleHelper": "Leave empty to use default title based on type",
+  "@customTitleHelper": {
+    "description": "Custom title helper text"
+  },
+
+  "enterInterval": "Please enter an interval",
+  "@enterInterval": {
+    "description": "Validation message for empty interval"
+  },
+
+  "enterValidNumber": "Please enter a valid number",
+  "@enterValidNumber": {
+    "description": "Validation message for invalid number"
+  },
+
+  "overdue": "Overdue",
+  "@overdue": {
+    "description": "Overdue notification status"
+  },
+
+  "inOneDay": "In 1 day",
+  "@inOneDay": {
+    "description": "Time remaining: in 1 day"
+  },
+
+  "inXDays": "In {count} days",
+  "@inXDays": {
+    "description": "Time remaining: in X days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "inOneHour": "In 1 hour",
+  "@inOneHour": {
+    "description": "Time remaining: in 1 hour"
+  },
+
+  "inXHours": "In {count} hours",
+  "@inXHours": {
+    "description": "Time remaining: in X hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "inOneMinute": "In 1 minute",
+  "@inOneMinute": {
+    "description": "Time remaining: in 1 minute"
+  },
+
+  "inXMinutes": "In {count} minutes",
+  "@inXMinutes": {
+    "description": "Time remaining: in X minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "inLessThanAMinute": "In less than a minute",
+  "@inLessThanAMinute": {
+    "description": "Time remaining: less than a minute"
   }
 }

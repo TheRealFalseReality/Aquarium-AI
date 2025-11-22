@@ -54,24 +54,23 @@ class _NotificationManagementScreenState
           children: [
             Icon(Icons.alarm, color: Colors.orange),
             SizedBox(width: 8),
-            Text('Exact Alarm Permission'),
+            Text(AppLocalizations.of(context)!.exactAlarmPermission),
           ],
         ),
-        content: const Text(
-          'For scheduled notifications to work properly on Android 12+, this app needs permission to schedule exact alarms.\n\n'
-          'This ensures your tank maintenance reminders trigger at the correct time.',
+        content: Text(
+          AppLocalizations.of(context)!.exactAlarmPermissionMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Maybe Later'),
+            child: Text(AppLocalizations.of(context)!.maybeLater),
           ),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
               await _notificationService.requestPermissions();
             },
-            child: const Text('Grant Permission'),
+            child: Text(AppLocalizations.of(context)!.grantPermission),
           ),
         ],
       ),
@@ -86,23 +85,23 @@ class _NotificationManagementScreenState
           children: [
             Icon(Icons.notifications_off, color: Colors.orange),
             SizedBox(width: 8),
-            Text('Enable Notifications'),
+            Text(AppLocalizations.of(context)!.enableNotifications),
           ],
         ),
-        content: const Text(
-          'To receive tank maintenance reminders, please enable notifications for this app in your device settings.',
+        content: Text(
+          AppLocalizations.of(context)!.notificationPermissionMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Maybe Later'),
+            child: Text(AppLocalizations.of(context)!.maybeLater),
           ),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
               await _notificationService.requestPermissions();
             },
-            child: const Text('Enable'),
+            child: Text(AppLocalizations.of(context)!.enable),
           ),
         ],
       ),
@@ -124,7 +123,7 @@ class _NotificationManagementScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Notifications'),
+            Text(AppLocalizations.of(context)!.notifications),
             Text(
               currentTank.name,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -147,7 +146,7 @@ class _NotificationManagementScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddNotificationDialog(),
         icon: const Icon(Icons.add_alert),
-        label: const Text('Add Notification'),
+        label: Text(AppLocalizations.of(context)!.addNotification),
       ),
     );
   }
@@ -167,13 +166,13 @@ class _NotificationManagementScreenState
             ),
             const SizedBox(height: 24),
             Text(
-              'No Notifications Yet',
+              AppLocalizations.of(context)!.noNotificationsYet,
               style: theme.textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              'Add notifications to remind you about feeding, dosing, water changes, and other tank maintenance tasks.',
+              AppLocalizations.of(context)!.noNotificationsDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -308,9 +307,10 @@ class _NotificationManagementScreenState
   String _getTimeFromNow(DateTime dateTime) {
     final now = DateTime.now();
     final difference = dateTime.difference(now);
+    final l10n = AppLocalizations.of(context)!;
     
     if (difference.isNegative) {
-      return 'Overdue';
+      return l10n.overdue;
     }
     
     final days = difference.inDays;
@@ -319,21 +319,21 @@ class _NotificationManagementScreenState
     
     if (days > 0) {
       if (days == 1) {
-        return 'In 1 day';
+        return l10n.inOneDay;
       }
-      return 'In $days days';
+      return l10n.inXDays(days);
     } else if (hours > 0) {
       if (hours == 1) {
-        return 'In 1 hour';
+        return l10n.inOneHour;
       }
-      return 'In $hours hours';
+      return l10n.inXHours(hours);
     } else if (minutes > 0) {
       if (minutes == 1) {
-        return 'In 1 minute';
+        return l10n.inOneMinute;
       }
-      return 'In $minutes minutes';
+      return l10n.inXMinutes(minutes);
     } else {
-      return 'In less than a minute';
+      return l10n.inLessThanAMinute;
     }
   }
 
@@ -400,8 +400,9 @@ class _NotificationManagementScreenState
     }
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(
-        enabled ? 'Notification enabled' : 'Notification disabled',
+        enabled ? l10n.notificationEnabled : l10n.notificationDisabled,
       );
     }
 
@@ -420,7 +421,7 @@ class _NotificationManagementScreenState
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('Edit'),
+              title: Text(AppLocalizations.of(context)!.edit),
               onTap: () {
                 Navigator.pop(context);
                 _showEditNotificationDialog(notification);
@@ -428,7 +429,7 @@ class _NotificationManagementScreenState
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete', style: TextStyle(color: Colors.red)),
+              title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteNotification(notification);
@@ -444,12 +445,12 @@ class _NotificationManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Notification'),
-        content: const Text('Are you sure you want to delete this notification?'),
+        title: Text(AppLocalizations.of(context)!.deleteNotification),
+        content: Text(AppLocalizations.of(context)!.deleteNotificationConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -457,7 +458,7 @@ class _NotificationManagementScreenState
               await _deleteNotification(notification);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -478,7 +479,7 @@ class _NotificationManagementScreenState
     await _notificationService.cancelNotification(notification);
 
     if (mounted) {
-      context.showAccessibleMessage('Notification deleted');
+      context.showAccessibleMessage(AppLocalizations.of(context)!.notificationDeleted);
     }
 
     AnalyticsService.logFeatureUsed(
@@ -534,7 +535,6 @@ class _NotificationFormScreenState
   late RepeatFrequency _repeatFrequency;
   late int _repeatInterval;
   late bool _enabled;
-  late bool _useTankIcon;
 
   @override
   void initState() {
@@ -548,7 +548,6 @@ class _NotificationFormScreenState
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
       _enabled = notif.enabled;
-      _useTankIcon = notif.useTankIcon;
       _notesController.text = notif.notes ?? '';
       _titleController.text = notif.customTitle ?? '';
     } else {
@@ -559,7 +558,6 @@ class _NotificationFormScreenState
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
       _enabled = true;
-      _useTankIcon = false;
     }
   }
 
@@ -577,11 +575,11 @@ class _NotificationFormScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Notification' : 'Add Notification'),
+        title: Text(isEditing ? AppLocalizations.of(context)!.editNotification : AppLocalizations.of(context)!.addNotification),
         actions: [
           TextButton(
             onPressed: _saveNotification,
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -598,7 +596,7 @@ class _NotificationFormScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Notification Type',
+                      AppLocalizations.of(context)!.notificationType,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -634,7 +632,7 @@ class _NotificationFormScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Date & Time',
+                      AppLocalizations.of(context)!.dateAndTime,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -675,7 +673,7 @@ class _NotificationFormScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Repeat',
+                      AppLocalizations.of(context)!.repeat,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -683,9 +681,9 @@ class _NotificationFormScreenState
                     const SizedBox(height: 12),
                     DropdownButtonFormField<RepeatFrequency>(
                       value: _repeatFrequency,
-                      decoration: const InputDecoration(
-                        labelText: 'Frequency',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.frequency,
+                        border: const OutlineInputBorder(),
                       ),
                       items: RepeatFrequency.values.map((freq) {
                         return DropdownMenuItem(
@@ -704,18 +702,18 @@ class _NotificationFormScreenState
                       TextFormField(
                         initialValue: _repeatInterval.toString(),
                         decoration: InputDecoration(
-                          labelText: 'Repeat Every',
+                          labelText: AppLocalizations.of(context)!.repeatEvery,
                           border: const OutlineInputBorder(),
                           suffixText: _repeatFrequency.name,
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter an interval';
+                            return AppLocalizations.of(context)!.enterInterval;
                           }
                           final number = int.tryParse(value);
                           if (number == null || number < 1) {
-                            return 'Please enter a valid number';
+                            return AppLocalizations.of(context)!.enterValidNumber;
                           }
                           return null;
                         },
@@ -738,7 +736,7 @@ class _NotificationFormScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Custom Title (Optional)',
+                      AppLocalizations.of(context)!.customTitleOptional,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -748,7 +746,7 @@ class _NotificationFormScreenState
                       controller: _titleController,
                       decoration: InputDecoration(
                         hintText: 'e.g., "Feed the goldfish" or "Dose calcium"',
-                        helperText: 'Leave empty to use default title based on type',
+                        helperText: AppLocalizations.of(context)!.customTitleHelper,
                         border: const OutlineInputBorder(),
                       ),
                       maxLength: 50,
@@ -767,7 +765,7 @@ class _NotificationFormScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Notes (Optional)',
+                      AppLocalizations.of(context)!.notesOptional,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -775,9 +773,9 @@ class _NotificationFormScreenState
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _notesController,
-                      decoration: const InputDecoration(
-                        hintText: 'Add any additional notes...',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.addNotesPlaceholder,
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
                     ),
@@ -787,24 +785,11 @@ class _NotificationFormScreenState
             ),
             const SizedBox(height: 16),
 
-            // Use Tank Icon Switch
-            Card(
-              child: SwitchListTile(
-                title: const Text('Use Tank Icon'),
-                subtitle: const Text('Use your tank\'s custom icon/image in notification instead of default app icon'),
-                value: _useTankIcon,
-                onChanged: (value) {
-                  setState(() => _useTankIcon = value);
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Enabled Switch
             Card(
               child: SwitchListTile(
-                title: const Text('Enable Notification'),
-                subtitle: const Text('Receive reminders for this task'),
+                title: Text(AppLocalizations.of(context)!.enableNotification),
+                subtitle: Text(AppLocalizations.of(context)!.receiveReminders),
                 value: _enabled,
                 onChanged: (value) {
                   setState(() => _enabled = value);
@@ -867,7 +852,6 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
-        useTankIcon: _useTankIcon,
         enabled: _enabled,
         updatedAt: DateTime.now(),
       );
@@ -880,7 +864,6 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
-        useTankIcon: _useTankIcon,
         enabled: _enabled,
       );
     }
@@ -909,10 +892,11 @@ class _NotificationFormScreenState
     }
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(
         widget.existingNotification != null
-            ? 'Notification updated'
-            : 'Notification added',
+            ? l10n.notificationUpdated
+            : l10n.notificationAdded,
       );
       Navigator.of(context).pop();
 
