@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'water_parameter.dart';
 import 'dosing_entry.dart';
+import 'tank_notification.dart';
 
 class TankPhoto {
   final String id;
@@ -134,6 +135,7 @@ class Tank {
   final int? customIconCodePoint; // Custom icon code point for tank card
   final List<WaterParameter> waterParameters; // Water parameter logs
   final List<DosingEntry> dosingEntries; // Dosing diary entries
+  final List<TankNotification> notifications; // Task notifications
 
   Tank({
     required this.id,
@@ -153,9 +155,11 @@ class Tank {
     this.customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
-       dosingEntries = dosingEntries ?? [];
+       dosingEntries = dosingEntries ?? [],
+       notifications = notifications ?? [];
 
   factory Tank.create({
     required String name,
@@ -173,6 +177,7 @@ class Tank {
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -193,6 +198,7 @@ class Tank {
       customIconCodePoint: customIconCodePoint,
       waterParameters: waterParameters,
       dosingEntries: dosingEntries,
+      notifications: notifications,
     );
   }
 
@@ -215,6 +221,7 @@ class Tank {
       'customIconCodePoint': customIconCodePoint,
       'waterParameters': waterParameters.map((wp) => wp.toJson()).toList(),
       'dosingEntries': dosingEntries.map((de) => de.toJson()).toList(),
+      'notifications': notifications.map((n) => n.toJson()).toList(),
     };
   }
 
@@ -245,6 +252,9 @@ class Tank {
       dosingEntries: (json['dosingEntries'] as List?)
           ?.map((de) => DosingEntry.fromJson(de))
           .toList() ?? [],
+      notifications: (json['notifications'] as List?)
+          ?.map((n) => TankNotification.fromJson(n))
+          .toList() ?? [],
     );
   }
 
@@ -266,6 +276,7 @@ class Tank {
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
@@ -288,6 +299,7 @@ class Tank {
       customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
       waterParameters: waterParameters ?? this.waterParameters,
       dosingEntries: dosingEntries ?? this.dosingEntries,
+      notifications: notifications ?? this.notifications,
     );
   }
 }
