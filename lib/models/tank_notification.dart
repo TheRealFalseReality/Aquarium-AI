@@ -49,6 +49,7 @@ class TankNotification {
   final int repeatInterval; // Interval value (e.g., every X days/weeks/months/years)
   final String? notes; // Optional user notes
   final String? customTitle; // Optional custom notification title
+  final String? customCategory; // For 'other' type - custom category name
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool enabled; // Whether the notification is active
@@ -61,6 +62,7 @@ class TankNotification {
     this.repeatInterval = 1,
     this.notes,
     this.customTitle,
+    this.customCategory,
     required this.createdAt,
     required this.updatedAt,
     this.enabled = true,
@@ -74,6 +76,7 @@ class TankNotification {
     int repeatInterval = 1,
     String? notes,
     String? customTitle,
+    String? customCategory,
     bool enabled = true,
   }) {
     final now = DateTime.now();
@@ -85,6 +88,7 @@ class TankNotification {
       repeatInterval: repeatInterval,
       notes: notes,
       customTitle: customTitle,
+      customCategory: customCategory,
       createdAt: now,
       updatedAt: now,
       enabled: enabled,
@@ -101,6 +105,7 @@ class TankNotification {
       'repeatInterval': repeatInterval,
       'notes': notes,
       'customTitle': customTitle,
+      'customCategory': customCategory,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'enabled': enabled,
@@ -117,6 +122,7 @@ class TankNotification {
       repeatInterval: json['repeatInterval'] as int? ?? 1,
       notes: json['notes'] as String?,
       customTitle: json['customTitle'] as String?,
+      customCategory: json['customCategory'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
@@ -132,6 +138,7 @@ class TankNotification {
     int? repeatInterval,
     String? notes,
     String? customTitle,
+    String? customCategory,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? enabled,
@@ -144,6 +151,7 @@ class TankNotification {
       repeatInterval: repeatInterval ?? this.repeatInterval,
       notes: notes ?? this.notes,
       customTitle: customTitle ?? this.customTitle,
+      customCategory: customCategory ?? this.customCategory,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enabled: enabled ?? this.enabled,
@@ -369,5 +377,14 @@ class TankNotification {
       date.millisecond,
       date.microsecond,
     );
+  }
+
+  /// Get display name for the notification
+  /// Shows custom category for 'other' type if available
+  String getDisplayName() {
+    if (type == NotificationType.other && customCategory != null && customCategory!.isNotEmpty) {
+      return customCategory!;
+    }
+    return type.displayName;
   }
 }
