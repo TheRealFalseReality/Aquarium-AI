@@ -291,10 +291,27 @@ class _NotificationManagementScreenState
     if (notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
-    final l10n = AppLocalizations.of(context)!;
-    return l10n.everyXDays
-        .replaceAll('{count}', notification.repeatInterval.toString())
-        .replaceAll('{unit}', notification.repeatFrequency.name);
+    
+    // Get the appropriate unit name based on frequency
+    final String unitName;
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        unitName = 'days';
+        break;
+      case RepeatFrequency.weekly:
+        unitName = 'weeks';
+        break;
+      case RepeatFrequency.monthly:
+        unitName = 'months';
+        break;
+      case RepeatFrequency.yearly:
+        unitName = 'years';
+        break;
+      default:
+        return notification.repeatFrequency.displayName;
+    }
+    
+    return 'Every ${notification.repeatInterval} $unitName';
   }
 
   String _getTimeFromNow(DateTime dateTime) {
