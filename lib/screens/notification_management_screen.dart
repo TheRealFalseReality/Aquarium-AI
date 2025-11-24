@@ -288,6 +288,8 @@ class _NotificationManagementScreenState
   }
 
   String _getRepeatText(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
@@ -296,22 +298,22 @@ class _NotificationManagementScreenState
     final String unitName;
     switch (notification.repeatFrequency) {
       case RepeatFrequency.daily:
-        unitName = 'days';
+        unitName = l10n.days;
         break;
       case RepeatFrequency.weekly:
-        unitName = 'weeks';
+        unitName = l10n.weeks;
         break;
       case RepeatFrequency.monthly:
-        unitName = 'months';
+        unitName = l10n.months;
         break;
       case RepeatFrequency.yearly:
-        unitName = 'years';
+        unitName = l10n.years;
         break;
       default:
         return notification.repeatFrequency.displayName;
     }
     
-    return 'Every ${notification.repeatInterval} $unitName';
+    return l10n.everyXDays(notification.repeatInterval, unitName);
   }
 
   String _getTimeFromNow(DateTime dateTime) {
@@ -438,6 +440,14 @@ class _NotificationManagementScreenState
               },
             ),
             ListTile(
+              leading: const Icon(Icons.send),
+              title: Text(AppLocalizations.of(context)!.sendTestNotification),
+              onTap: () {
+                Navigator.pop(context);
+                _sendTestNotification(notification);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
@@ -494,6 +504,25 @@ class _NotificationManagementScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: 'delete_notification',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
+  Future<void> _sendTestNotification(TankNotification notification) async {
+    // Send test notification immediately using the notification's type and custom settings
+    await _notificationService.sendTestNotification(
+      tankName: widget.tank.name,
+      type: notification.type,
+      customTitle: notification.customTitle,
+      customBody: notification.notes,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_notification',
       parameters: {'type': notification.type.name},
     );
   }
@@ -806,6 +835,38 @@ class _NotificationFormScreenState
                 },
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Test Notification Button
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.sendTestNotification,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)!.testNotificationDescription,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: _sendTestNotificationForPreview,
+                      icon: const Icon(Icons.send),
+                      label: Text(AppLocalizations.of(context)!.sendTestNotification),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -834,6 +895,25 @@ class _NotificationFormScreenState
     if (time != null) {
       setState(() => _selectedTime = time);
     }
+  }
+
+  Future<void> _sendTestNotificationForPreview() async {
+    // Send test notification with current form settings
+    await _notificationService.sendTestNotification(
+      tankName: widget.tank.name,
+      type: _selectedType,
+      customTitle: _titleController.text.isNotEmpty ? _titleController.text : null,
+      customBody: _notesController.text.isNotEmpty ? _notesController.text : null,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_notification_preview',
+      parameters: {'type': _selectedType.name},
+    );
   }
 
   Future<void> _saveNotification() async {

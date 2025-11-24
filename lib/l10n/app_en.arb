@@ -836,6 +836,21 @@
     "description": "Notification deleted message"
   },
 
+  "sendTestNotification": "Send Test Notification",
+  "@sendTestNotification": {
+    "description": "Send test notification option"
+  },
+
+  "testNotificationSent": "Test notification sent",
+  "@testNotificationSent": {
+    "description": "Test notification sent confirmation message"
+  },
+
+  "testNotificationDescription": "Send a test notification immediately to see how it will appear.",
+  "@testNotificationDescription": {
+    "description": "Description for test notification feature"
+  },
+
   "notificationType": "Notification Type",
   "@notificationType": {
     "description": "Notification type label"
@@ -912,6 +927,26 @@
         "type": "String"
       }
     }
+  },
+
+  "days": "days",
+  "@days": {
+    "description": "Days unit name"
+  },
+
+  "weeks": "weeks",
+  "@weeks": {
+    "description": "Weeks unit name"
+  },
+
+  "months": "months",
+  "@months": {
+    "description": "Months unit name"
+  },
+
+  "years": "years",
+  "@years": {
+    "description": "Years unit name"
   },
 
   "exactAlarmPermission": "Exact Alarm Permission",

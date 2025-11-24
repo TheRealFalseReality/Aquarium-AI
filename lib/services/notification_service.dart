@@ -244,6 +244,8 @@ class NotificationService {
   Future<void> sendTestNotification({
     required String tankName,
     NotificationType type = NotificationType.feeding,
+    String? customTitle,
+    String? customBody,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -270,9 +272,10 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Get notification title and body
-    final title = _getNotificationTitle(type, tankName);
-    final body = '${_getDefaultBody(type)} (Test notification)';
+    // Get notification title and body - use custom values if provided
+    final title = customTitle ?? _getNotificationTitle(type, tankName);
+    final defaultBody = customBody ?? _getDefaultBody(type);
+    final body = '$defaultBody (Test notification)';
 
     // Use a unique ID for test notifications
     const int testNotificationId = 999999;
