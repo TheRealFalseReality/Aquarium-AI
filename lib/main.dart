@@ -25,6 +25,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
+import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 
 void main() async {
@@ -43,6 +44,20 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize notification service (non-blocking)
+  NotificationService().initialize().catchError((error) {
+    if (kDebugMode) {
+      debugPrint('Notification service initialization error: $error');
+    }
+    // Log to crash reporting if initialization fails
+    FirebaseCrashlytics.instance.recordError(
+      error,
+      StackTrace.current,
+      reason: 'Notification service initialization failed',
+      fatal: false,
+    );
+  });
 
   // Initialize Analytics session tracking (non-blocking)
   // Don't await this to prevent blocking app startup
