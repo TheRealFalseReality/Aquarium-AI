@@ -384,16 +384,20 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _toggleNotification(TankNotification notification, bool enabled) async {
+    // Get the current tank state from the provider to avoid race conditions
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    
     final updatedNotification = notification.copyWith(
       enabled: enabled,
       updatedAt: DateTime.now(),
     );
 
-    final updatedNotifications = widget.tank.notifications
+    final updatedNotifications = currentTank.notifications
         .map((n) => n.id == notification.id ? updatedNotification : n)
         .toList();
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -403,8 +407,8 @@ class _NotificationManagementScreenState
     // Schedule or cancel notification
     if (enabled) {
       await _notificationService.scheduleNotification(
-        tankId: widget.tank.id,
-        tankName: widget.tank.name,
+        tankId: currentTank.id,
+        tankName: currentTank.name,
         notification: updatedNotification,
       );
     } else {
@@ -486,11 +490,15 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _deleteNotification(TankNotification notification) async {
-    final updatedNotifications = widget.tank.notifications
+    // Get the current tank state from the provider to avoid race conditions
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    
+    final updatedNotifications = currentTank.notifications
         .where((n) => n.id != notification.id)
         .toList();
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -923,6 +931,10 @@ class _NotificationFormScreenState
 
     _formKey.currentState!.save();
 
+    // Get the current tank state from the provider to avoid race conditions
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+
     // Combine date and time
     final notificationDateTime = DateTime(
       _selectedDate.year,
@@ -958,14 +970,14 @@ class _NotificationFormScreenState
       );
     }
 
-    // Update tank with new/updated notification
+    // Update tank with new/updated notification using current tank state
     final updatedNotifications = widget.existingNotification != null
-        ? widget.tank.notifications
+        ? currentTank.notifications
             .map((n) => n.id == notification.id ? notification : n)
             .toList()
-        : [...widget.tank.notifications, notification];
+        : [...currentTank.notifications, notification];
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -975,8 +987,8 @@ class _NotificationFormScreenState
     // Schedule notification if enabled
     if (_enabled) {
       await _notificationService.scheduleNotification(
-        tankId: widget.tank.id,
-        tankName: widget.tank.name,
+        tankId: currentTank.id,
+        tankName: currentTank.name,
         notification: notification,
       );
     }
