@@ -32,6 +32,13 @@ class _NotificationManagementScreenState
     _checkNotificationPermissions();
   }
 
+  /// Get the current tank state from the provider to avoid race conditions
+  /// Falls back to widget.tank if not found (shouldn't happen in normal operation)
+  Tank _getCurrentTank() {
+    return ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+  }
+
   Future<void> _checkNotificationPermissions() async {
     final enabled = await _notificationService.areNotificationsEnabled();
     if (!enabled && mounted) {
@@ -384,9 +391,7 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _toggleNotification(TankNotification notification, bool enabled) async {
-    // Get the current tank state from the provider to avoid race conditions
-    final currentTank = ref.read(tankProvider).tanks
-        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    final currentTank = _getCurrentTank();
     
     final updatedNotification = notification.copyWith(
       enabled: enabled,
@@ -490,9 +495,7 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _deleteNotification(TankNotification notification) async {
-    // Get the current tank state from the provider to avoid race conditions
-    final currentTank = ref.read(tankProvider).tanks
-        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    final currentTank = _getCurrentTank();
     
     final updatedNotifications = currentTank.notifications
         .where((n) => n.id != notification.id)
@@ -582,6 +585,13 @@ class _NotificationFormScreenState
   late RepeatFrequency _repeatFrequency;
   late int _repeatInterval;
   late bool _enabled;
+
+  /// Get the current tank state from the provider to avoid race conditions
+  /// Falls back to widget.tank if not found (shouldn't happen in normal operation)
+  Tank _getCurrentTank() {
+    return ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+  }
 
   @override
   void initState() {
@@ -931,9 +941,7 @@ class _NotificationFormScreenState
 
     _formKey.currentState!.save();
 
-    // Get the current tank state from the provider to avoid race conditions
-    final currentTank = ref.read(tankProvider).tanks
-        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    final currentTank = _getCurrentTank();
 
     // Combine date and time
     final notificationDateTime = DateTime(

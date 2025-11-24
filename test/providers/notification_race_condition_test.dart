@@ -212,13 +212,19 @@ void main() {
       await tankNotifier.addTank(tank);
       
       // Rapidly add three notifications
+      final notificationTypes = [
+        NotificationType.feeding,
+        NotificationType.dosing,
+        NotificationType.waterChange,
+      ];
+      
       for (int i = 0; i < 3; i++) {
         // Always get fresh state
         final currentTank = container.read(tankProvider).tanks
             .firstWhere((t) => t.id == tank.id);
         
         final newNotification = TankNotification.create(
-          type: NotificationType.values[i],
+          type: notificationTypes[i],
           notificationDateTime: DateTime.now().add(Duration(hours: i + 1)),
           notes: 'Notification $i',
         );
