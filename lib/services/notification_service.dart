@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -12,10 +13,16 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  
+  /// Navigator key for app-wide navigation from notification taps
+  GlobalKey<NavigatorState>? _navigatorKey;
 
   /// Initialize the notification service
-  Future<void> initialize() async {
+  /// [navigatorKey] is optional and used for navigating when notifications are tapped
+  Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) return;
+    
+    _navigatorKey = navigatorKey;
 
     // Initialize timezone data
     tz.initializeTimeZones();
@@ -43,13 +50,11 @@ class NotificationService {
     _initialized = true;
   }
 
-  /// Handle notification tap
+  /// Handle notification tap - navigates to tank management screen
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap - can be extended to navigate to specific screens
-    // Payload format: ${tankId}_${notificationId}
-    if (response.payload != null) {
-      // Could navigate to tank details or notification screen here
-      // For now, just silently handle it
+    // Navigate to tank management screen when notification is tapped
+    if (_navigatorKey?.currentState != null) {
+      _navigatorKey!.currentState!.pushNamed('/tank-management');
     }
   }
 
