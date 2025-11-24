@@ -139,9 +139,11 @@ class _NotificationManagementScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.notifications),
             Text(
-              currentTank.name,
+              currentTank.name, 
+            ),
+            Text(
+                AppLocalizations.of(context)!.notifications,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),
