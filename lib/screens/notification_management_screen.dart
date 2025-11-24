@@ -438,6 +438,14 @@ class _NotificationManagementScreenState
               },
             ),
             ListTile(
+              leading: const Icon(Icons.send),
+              title: Text(AppLocalizations.of(context)!.sendTestNotification),
+              onTap: () {
+                Navigator.pop(context);
+                _sendTestNotification(notification);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
@@ -494,6 +502,23 @@ class _NotificationManagementScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: 'delete_notification',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
+  Future<void> _sendTestNotification(TankNotification notification) async {
+    // Send test notification immediately using the notification's type and custom settings
+    await _notificationService.sendTestNotification(
+      tankName: widget.tank.name,
+      type: notification.type,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_notification',
       parameters: {'type': notification.type.name},
     );
   }

@@ -130,6 +130,8 @@
   "noBackupHistory": "Pas encore d'historique de sauvegarde",
   "dosingDiary": "Journal de Dosage",
   "notifications": "Notifications",
+  "sendTestNotification": "Envoyer une Notification de Test",
+  "testNotificationSent": "Notification de test envoyée",
   "exactAlarmPermission": "Permission d'Alarme Exacte",
   "exactAlarmPermissionMessage": "Pour que les notifications programmées fonctionnent correctement sur Android 12+, cette application a besoin de la permission de programmer des alarmes exactes.\n\nCela garantit que vos rappels d'entretien d'aquarium se déclenchent au bon moment.",
   "grantPermission": "Accorder la Permission",

@@ -836,6 +836,16 @@
     "description": "Notification deleted message"
   },
 
+  "sendTestNotification": "Send Test Notification",
+  "@sendTestNotification": {
+    "description": "Send test notification option"
+  },
+
+  "testNotificationSent": "Test notification sent",
+  "@testNotificationSent": {
+    "description": "Test notification sent confirmation message"
+  },
+
   "notificationType": "Notification Type",
   "@notificationType": {
     "description": "Notification type label"
