@@ -28,6 +28,9 @@ import './services/analytics_service.dart';
 import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 
+/// Global navigator key for app-wide navigation from services like notifications
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -45,8 +48,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize notification service (non-blocking)
-  NotificationService().initialize().catchError((error) {
+  // Initialize notification service with navigator key (non-blocking)
+  NotificationService().initialize(navigatorKey: navigatorKey).catchError((error) {
     if (kDebugMode) {
       debugPrint('Notification service initialization error: $error');
     }
@@ -330,6 +333,7 @@ class MyApp extends ConsumerWidget {
         _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
 
         return MaterialApp(
+          navigatorKey: navigatorKey,
           title: 'Aquarium AI',
           theme: lightTheme,
           darkTheme: darkTheme,

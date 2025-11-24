@@ -1,9 +1,31 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank_notification.dart';
 import 'package:fish_ai/services/notification_service.dart';
 
 void main() {
   group('NotificationService', () {
+    test('should accept optional navigatorKey in initialize', () {
+      final service = NotificationService();
+      final navigatorKey = GlobalKey<NavigatorState>();
+      
+      // Verify the method can be called with navigatorKey parameter
+      expect(
+        () => service.initialize(navigatorKey: navigatorKey),
+        returnsNormally,
+      );
+    });
+
+    test('should accept initialize without navigatorKey (backward compatibility)', () {
+      final service = NotificationService();
+      
+      // Verify the method can still be called without navigatorKey
+      expect(
+        () => service.initialize(),
+        returnsNormally,
+      );
+    });
+
     test('should have sendTestNotification method with correct signature', () {
       final service = NotificationService();
       
