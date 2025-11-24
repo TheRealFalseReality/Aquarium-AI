@@ -959,6 +959,11 @@
     "description": "Custom title helper text"
   },
 
+  "customTitleHint": "e.g., \"Feed the goldfish\" or \"Dose calcium\"",
+  "@customTitleHint": {
+    "description": "Custom title hint text"
+  },
+
   "enterInterval": "Please enter an interval",
   "@enterInterval": {
     "description": "Validation message for empty interval"

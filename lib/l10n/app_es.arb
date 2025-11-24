@@ -139,6 +139,7 @@
   "save": "Guardar",
   "customTitleOptional": "Título Personalizado (Opcional)",
   "customTitleHelper": "Dejar vacío para usar el título predeterminado según el tipo",
+  "customTitleHint": "ej., \"Alimentar los peces\" o \"Dosificar calcio\"",
   "enterInterval": "Por favor ingrese un intervalo",
   "enterValidNumber": "Por favor ingrese un número válido",
   "overdue": "Vencido",

@@ -139,6 +139,7 @@
   "save": "Speichern",
   "customTitleOptional": "Benutzerdefinierter Titel (Optional)",
   "customTitleHelper": "Leer lassen, um den Standardtitel basierend auf dem Typ zu verwenden",
+  "customTitleHint": "z.B. \"Fische füttern\" oder \"Kalzium dosieren\"",
   "enterInterval": "Bitte geben Sie ein Intervall ein",
   "enterValidNumber": "Bitte geben Sie eine gültige Zahl ein",
   "overdue": "Überfällig",

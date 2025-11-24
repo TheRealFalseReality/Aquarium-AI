@@ -291,7 +291,10 @@ class _NotificationManagementScreenState
     if (notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
-    return 'Every ${notification.repeatInterval} ${notification.repeatFrequency.name}';
+    final l10n = AppLocalizations.of(context)!;
+    return l10n.everyXDays
+        .replaceAll('{count}', notification.repeatInterval.toString())
+        .replaceAll('{unit}', notification.repeatFrequency.name);
   }
 
   String _getTimeFromNow(DateTime dateTime) {
@@ -735,7 +738,7 @@ class _NotificationFormScreenState
                     TextFormField(
                       controller: _titleController,
                       decoration: InputDecoration(
-                        hintText: 'e.g., "Feed the goldfish" or "Dose calcium"',
+                        hintText: AppLocalizations.of(context)!.customTitleHint,
                         helperText: AppLocalizations.of(context)!.customTitleHelper,
                         border: const OutlineInputBorder(),
                       ),
