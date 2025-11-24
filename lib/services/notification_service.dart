@@ -52,8 +52,11 @@ class NotificationService {
       // Navigate to tank management screen when notification is tapped
       try {
         _navigateToTankManagement();
-      } catch (e) {
-        // Silent fail - the user can manually navigate to the screen
+      } catch (e, stackTrace) {
+        // Log error for debugging but don't crash the app
+        // User can manually navigate to the screen if navigation fails
+        print('Error navigating to tank management from notification: $e');
+        print('Stack trace: $stackTrace');
       }
     }
   }
@@ -63,7 +66,8 @@ class NotificationService {
   void _navigateToTankManagement() {
     final navigator = navigatorKey.currentState;
     if (navigator != null) {
-      // Navigate to tank management screen
+      // Use pushNamed to add tank management to the navigation stack
+      // This allows the user to navigate back to where they were before
       navigator.pushNamed('/tank-management');
     }
   }
