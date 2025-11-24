@@ -50,10 +50,10 @@ class _NotificationManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.alarm, color: Colors.orange),
-            const SizedBox(width: 8),
+            Icon(Icons.alarm, color: Colors.orange),
+            SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.exactAlarmPermission),
           ],
         ),
@@ -81,10 +81,10 @@ class _NotificationManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.notifications_off, color: Colors.orange),
-            const SizedBox(width: 8),
+            Icon(Icons.notifications_off, color: Colors.orange),
+            SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.enableNotifications),
           ],
         ),
@@ -267,6 +267,27 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
+                if (notification.getNextNotificationDate() != null)
+                  Chip(
+                    label: Text(
+                      'Next: ${dateFormat.format(notification.getNextNotificationDate()!)}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    backgroundColor: colorScheme.primaryContainer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                if (notification.getNextNotificationDate() != null && notification.enabled)
+                  Chip(
+                    label: Text(
+                      _getTimeFromNow(notification.getNextNotificationDate()!),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    avatar: const Icon(Icons.schedule, size: 16),
+                    backgroundColor: colorScheme.secondaryContainer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
               ],
             ),
           ],
@@ -283,7 +304,38 @@ class _NotificationManagementScreenState
     return 'Every ${notification.repeatInterval} ${notification.repeatFrequency.name}';
   }
 
-
+  String _getTimeFromNow(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = dateTime.difference(now);
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (difference.isNegative) {
+      return l10n.overdue;
+    }
+    
+    final days = difference.inDays;
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes;
+    
+    if (days > 0) {
+      if (days == 1) {
+        return l10n.inOneDay;
+      }
+      return l10n.inXDays(days);
+    } else if (hours > 0) {
+      if (hours == 1) {
+        return l10n.inOneHour;
+      }
+      return l10n.inXHours(hours);
+    } else if (minutes > 0) {
+      if (minutes == 1) {
+        return l10n.inOneMinute;
+      }
+      return l10n.inXMinutes(minutes);
+    } else {
+      return l10n.inLessThanAMinute;
+    }
+  }
 
   IconData _getNotificationIcon(NotificationType type) {
     switch (type) {
