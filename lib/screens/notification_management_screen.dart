@@ -288,6 +288,8 @@ class _NotificationManagementScreenState
   }
 
   String _getRepeatText(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
@@ -296,22 +298,22 @@ class _NotificationManagementScreenState
     final String unitName;
     switch (notification.repeatFrequency) {
       case RepeatFrequency.daily:
-        unitName = 'days';
+        unitName = l10n.days;
         break;
       case RepeatFrequency.weekly:
-        unitName = 'weeks';
+        unitName = l10n.weeks;
         break;
       case RepeatFrequency.monthly:
-        unitName = 'months';
+        unitName = l10n.months;
         break;
       case RepeatFrequency.yearly:
-        unitName = 'years';
+        unitName = l10n.years;
         break;
       default:
         return notification.repeatFrequency.displayName;
     }
     
-    return 'Every ${notification.repeatInterval} $unitName';
+    return l10n.everyXDays(notification.repeatInterval, unitName);
   }
 
   String _getTimeFromNow(DateTime dateTime) {
@@ -511,6 +513,8 @@ class _NotificationManagementScreenState
     await _notificationService.sendTestNotification(
       tankName: widget.tank.name,
       type: notification.type,
+      customTitle: notification.customTitle,
+      customBody: notification.notes,
     );
 
     if (mounted) {
@@ -898,6 +902,8 @@ class _NotificationFormScreenState
     await _notificationService.sendTestNotification(
       tankName: widget.tank.name,
       type: _selectedType,
+      customTitle: _titleController.text.isNotEmpty ? _titleController.text : null,
+      customBody: _notesController.text.isNotEmpty ? _notesController.text : null,
     );
 
     if (mounted) {

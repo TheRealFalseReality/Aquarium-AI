@@ -929,6 +929,26 @@
     }
   },
 
+  "days": "days",
+  "@days": {
+    "description": "Days unit name"
+  },
+
+  "weeks": "weeks",
+  "@weeks": {
+    "description": "Weeks unit name"
+  },
+
+  "months": "months",
+  "@months": {
+    "description": "Months unit name"
+  },
+
+  "years": "years",
+  "@years": {
+    "description": "Years unit name"
+  },
+
   "exactAlarmPermission": "Exact Alarm Permission",
   "@exactAlarmPermission": {
     "description": "Exact alarm permission dialog title"
