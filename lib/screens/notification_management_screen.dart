@@ -283,16 +283,34 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                if (notification.getNextNotificationDate() != null && notification.enabled)
-                  Chip(
-                    label: Text(
-                      _getTimeFromNow(notification.getNextNotificationDate()!),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    avatar: const Icon(Icons.schedule, size: 16),
-                    backgroundColor: colorScheme.secondaryContainer,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                if (notification.enabled)
+                  Builder(
+                    builder: (context) {
+                      // For repeating notifications, use getNextNotificationDate()
+                      // For non-repeating notifications, use notificationDateTime if it's in the future
+                      final DateTime? nextDate;
+                      if (notification.repeatFrequency != RepeatFrequency.none) {
+                        nextDate = notification.getNextNotificationDate();
+                      } else {
+                        // Non-repeating: show if scheduled time is in the future
+                        nextDate = notification.notificationDateTime.isAfter(DateTime.now())
+                            ? notification.notificationDateTime
+                            : null;
+                      }
+                      
+                      if (nextDate == null) return const SizedBox.shrink();
+                      
+                      return Chip(
+                        label: Text(
+                          _getTimeFromNow(nextDate),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        avatar: const Icon(Icons.schedule, size: 16),
+                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      );
+                    },
                   ),
               ],
             ),
