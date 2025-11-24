@@ -140,7 +140,7 @@ class _NotificationManagementScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              currentTank.name, 
+              currentTank.name,
             ),
             Text(
                 AppLocalizations.of(context)!.notifications,
