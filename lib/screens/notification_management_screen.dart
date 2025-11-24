@@ -831,6 +831,38 @@ class _NotificationFormScreenState
                 },
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Test Notification Button
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.sendTestNotification,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Send a test notification immediately to see how it will appear.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: _sendTestNotificationForPreview,
+                      icon: const Icon(Icons.send),
+                      label: Text(AppLocalizations.of(context)!.sendTestNotification),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -859,6 +891,23 @@ class _NotificationFormScreenState
     if (time != null) {
       setState(() => _selectedTime = time);
     }
+  }
+
+  Future<void> _sendTestNotificationForPreview() async {
+    // Send test notification with current form settings
+    await _notificationService.sendTestNotification(
+      tankName: widget.tank.name,
+      type: _selectedType,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_notification_preview',
+      parameters: {'type': _selectedType.name},
+    );
   }
 
   Future<void> _saveNotification() async {
