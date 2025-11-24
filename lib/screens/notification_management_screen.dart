@@ -32,6 +32,22 @@ class _NotificationManagementScreenState
     _checkNotificationPermissions();
   }
 
+  /// Get the current tank state from the provider to avoid race conditions.
+  /// 
+  /// This method always fetches the latest tank state from the provider rather than
+  /// using widget.tank, which is a snapshot from when the widget was created.
+  /// This prevents race conditions where concurrent notification operations could
+  /// overwrite each other's changes.
+  /// 
+  /// Falls back to widget.tank if the tank is not found in the provider, which could
+  /// happen if the tank was deleted while this screen is still open. In practice,
+  /// this fallback ensures the app doesn't crash, though the subsequent update
+  /// operation would fail gracefully since the tank doesn't exist.
+  Tank _getCurrentTank() {
+    return ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+  }
+
   Future<void> _checkNotificationPermissions() async {
     final enabled = await _notificationService.areNotificationsEnabled();
     if (!enabled && mounted) {
@@ -123,9 +139,11 @@ class _NotificationManagementScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.notifications),
             Text(
               currentTank.name,
+            ),
+            Text(
+                AppLocalizations.of(context)!.notifications,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -267,16 +285,34 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                if (notification.getNextNotificationDate() != null && notification.enabled)
-                  Chip(
-                    label: Text(
-                      _getTimeFromNow(notification.getNextNotificationDate()!),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    avatar: const Icon(Icons.schedule, size: 16),
-                    backgroundColor: colorScheme.secondaryContainer,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                if (notification.enabled)
+                  Builder(
+                    builder: (context) {
+                      // For repeating notifications, use getNextNotificationDate()
+                      // For non-repeating notifications, use notificationDateTime if it's in the future
+                      final DateTime? nextDate;
+                      if (notification.repeatFrequency != RepeatFrequency.none) {
+                        nextDate = notification.getNextNotificationDate();
+                      } else {
+                        // Non-repeating: show if scheduled time is in the future
+                        nextDate = notification.notificationDateTime.isAfter(DateTime.now())
+                            ? notification.notificationDateTime
+                            : null;
+                      }
+                      
+                      if (nextDate == null) return const SizedBox.shrink();
+                      
+                      return Chip(
+                        label: Text(
+                          _getTimeFromNow(nextDate),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        avatar: const Icon(Icons.schedule, size: 16),
+                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      );
+                    },
                   ),
               ],
             ),
@@ -384,16 +420,18 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _toggleNotification(TankNotification notification, bool enabled) async {
+    final currentTank = _getCurrentTank();
+    
     final updatedNotification = notification.copyWith(
       enabled: enabled,
       updatedAt: DateTime.now(),
     );
 
-    final updatedNotifications = widget.tank.notifications
+    final updatedNotifications = currentTank.notifications
         .map((n) => n.id == notification.id ? updatedNotification : n)
         .toList();
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -403,8 +441,8 @@ class _NotificationManagementScreenState
     // Schedule or cancel notification
     if (enabled) {
       await _notificationService.scheduleNotification(
-        tankId: widget.tank.id,
-        tankName: widget.tank.name,
+        tankId: currentTank.id,
+        tankName: currentTank.name,
         notification: updatedNotification,
       );
     } else {
@@ -486,11 +524,13 @@ class _NotificationManagementScreenState
   }
 
   Future<void> _deleteNotification(TankNotification notification) async {
-    final updatedNotifications = widget.tank.notifications
+    final currentTank = _getCurrentTank();
+    
+    final updatedNotifications = currentTank.notifications
         .where((n) => n.id != notification.id)
         .toList();
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -574,6 +614,22 @@ class _NotificationFormScreenState
   late RepeatFrequency _repeatFrequency;
   late int _repeatInterval;
   late bool _enabled;
+
+  /// Get the current tank state from the provider to avoid race conditions.
+  /// 
+  /// This method always fetches the latest tank state from the provider rather than
+  /// using widget.tank, which is a snapshot from when the widget was created.
+  /// This prevents race conditions where concurrent notification operations could
+  /// overwrite each other's changes.
+  /// 
+  /// Falls back to widget.tank if the tank is not found in the provider, which could
+  /// happen if the tank was deleted while this screen is still open. In practice,
+  /// this fallback ensures the app doesn't crash, though the subsequent update
+  /// operation would fail gracefully since the tank doesn't exist.
+  Tank _getCurrentTank() {
+    return ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+  }
 
   @override
   void initState() {
@@ -923,6 +979,8 @@ class _NotificationFormScreenState
 
     _formKey.currentState!.save();
 
+    final currentTank = _getCurrentTank();
+
     // Combine date and time
     final notificationDateTime = DateTime(
       _selectedDate.year,
@@ -958,14 +1016,14 @@ class _NotificationFormScreenState
       );
     }
 
-    // Update tank with new/updated notification
+    // Update tank with new/updated notification using current tank state
     final updatedNotifications = widget.existingNotification != null
-        ? widget.tank.notifications
+        ? currentTank.notifications
             .map((n) => n.id == notification.id ? notification : n)
             .toList()
-        : [...widget.tank.notifications, notification];
+        : [...currentTank.notifications, notification];
 
-    final updatedTank = widget.tank.copyWith(
+    final updatedTank = currentTank.copyWith(
       notifications: updatedNotifications,
       updatedAt: DateTime.now(),
     );
@@ -975,8 +1033,8 @@ class _NotificationFormScreenState
     // Schedule notification if enabled
     if (_enabled) {
       await _notificationService.scheduleNotification(
-        tankId: widget.tank.id,
-        tankName: widget.tank.name,
+        tankId: currentTank.id,
+        tankName: currentTank.name,
         notification: notification,
       );
     }
