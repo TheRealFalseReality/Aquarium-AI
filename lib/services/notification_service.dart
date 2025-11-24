@@ -18,7 +18,10 @@ class NotificationService {
   GlobalKey<NavigatorState>? _navigatorKey;
 
   /// Initialize the notification service
-  /// [navigatorKey] is optional and used for navigating when notifications are tapped
+  /// [navigatorKey] is optional and used for navigating when notifications are tapped.
+  /// Note: The navigatorKey should be passed on the first call (typically from main.dart).
+  /// Subsequent calls (e.g., from requestPermissions()) will return early due to _initialized check,
+  /// preserving the originally set navigatorKey.
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) return;
     
