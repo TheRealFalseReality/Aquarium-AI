@@ -28,6 +28,9 @@ import './services/analytics_service.dart';
 import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 
+// Global navigator key for navigation from services (e.g., notification taps)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -330,6 +333,7 @@ class MyApp extends ConsumerWidget {
         _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
 
         return MaterialApp(
+          navigatorKey: navigatorKey,
           title: 'Aquarium AI',
           theme: lightTheme,
           darkTheme: darkTheme,

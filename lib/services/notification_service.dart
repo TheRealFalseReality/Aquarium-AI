@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../models/tank_notification.dart';
+import '../main.dart' show navigatorKey;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -45,11 +46,25 @@ class NotificationService {
 
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap - can be extended to navigate to specific screens
+    // Handle notification tap - navigate to tank management screen
     // Payload format: ${tankId}_${notificationId}
     if (response.payload != null) {
-      // Could navigate to tank details or notification screen here
-      // For now, just silently handle it
+      // Navigate to tank management screen when notification is tapped
+      try {
+        _navigateToTankManagement();
+      } catch (e) {
+        // Silent fail - the user can manually navigate to the screen
+      }
+    }
+  }
+
+  /// Navigate to tank management screen
+  /// This will be called when a notification is tapped
+  void _navigateToTankManagement() {
+    final navigator = navigatorKey.currentState;
+    if (navigator != null) {
+      // Navigate to tank management screen
+      navigator.pushNamed('/tank-management');
     }
   }
 
