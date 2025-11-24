@@ -848,7 +848,7 @@ class _NotificationFormScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Send a test notification immediately to see how it will appear.',
+                      AppLocalizations.of(context)!.testNotificationDescription,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),

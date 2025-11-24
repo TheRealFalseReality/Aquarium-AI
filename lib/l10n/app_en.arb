@@ -846,6 +846,11 @@
     "description": "Test notification sent confirmation message"
   },
 
+  "testNotificationDescription": "Send a test notification immediately to see how it will appear.",
+  "@testNotificationDescription": {
+    "description": "Description for test notification feature"
+  },
+
   "notificationType": "Notification Type",
   "@notificationType": {
     "description": "Notification type label"

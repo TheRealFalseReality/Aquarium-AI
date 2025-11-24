@@ -132,6 +132,7 @@
   "notifications": "Notificaciones",
   "sendTestNotification": "Enviar Notificación de Prueba",
   "testNotificationSent": "Notificación de prueba enviada",
+  "testNotificationDescription": "Envía una notificación de prueba inmediatamente para ver cómo aparecerá.",
   "exactAlarmPermission": "Permiso de Alarma Exacta",
   "exactAlarmPermissionMessage": "Para que las notificaciones programadas funcionen correctamente en Android 12+, esta aplicación necesita permiso para programar alarmas exactas.\n\nEsto asegura que sus recordatorios de mantenimiento del tanque se activen en el momento correcto.",
   "grantPermission": "Conceder Permiso",
