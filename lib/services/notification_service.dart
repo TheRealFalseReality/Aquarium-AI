@@ -53,8 +53,13 @@ class NotificationService {
   /// Handle notification tap - navigates to tank management screen
   void _onNotificationTapped(NotificationResponse response) {
     // Navigate to tank management screen when notification is tapped
-    if (_navigatorKey?.currentState != null) {
-      _navigatorKey!.currentState!.pushNamed('/tank-management');
+    try {
+      if (_navigatorKey?.currentState != null) {
+        _navigatorKey!.currentState!.pushNamed('/tank-management');
+      }
+    } catch (e) {
+      // Navigation failed - log but don't crash the app
+      debugPrint('Failed to navigate from notification tap: $e');
     }
   }
 
