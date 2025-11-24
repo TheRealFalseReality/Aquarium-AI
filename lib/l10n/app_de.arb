@@ -133,6 +133,7 @@
   "sendTestNotification": "Testbenachrichtigung Senden",
   "testNotificationSent": "Testbenachrichtigung gesendet",
   "testNotificationDescription": "Senden Sie sofort eine Testbenachrichtigung, um zu sehen, wie sie erscheinen wird.",
+  "everyXDays": "Alle {count} {unit}",
   "days": "Tage",
   "weeks": "Wochen",
   "months": "Monate",
