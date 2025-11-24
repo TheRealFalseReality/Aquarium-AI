@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -55,8 +56,12 @@ class NotificationService {
       } catch (e, stackTrace) {
         // Log error for debugging but don't crash the app
         // User can manually navigate to the screen if navigation fails
-        print('Error navigating to tank management from notification: $e');
-        print('Stack trace: $stackTrace');
+        developer.log(
+          'Error navigating to tank management from notification',
+          name: 'NotificationService',
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
     }
   }
