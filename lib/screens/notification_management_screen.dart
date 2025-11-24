@@ -50,10 +50,10 @@ class _NotificationManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.alarm, color: Colors.orange),
-            SizedBox(width: 8),
+            const Icon(Icons.alarm, color: Colors.orange),
+            const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.exactAlarmPermission),
           ],
         ),
@@ -81,10 +81,10 @@ class _NotificationManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.notifications_off, color: Colors.orange),
-            SizedBox(width: 8),
+            const Icon(Icons.notifications_off, color: Colors.orange),
+            const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.enableNotifications),
           ],
         ),
