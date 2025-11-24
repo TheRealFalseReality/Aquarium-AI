@@ -32,8 +32,17 @@ class _NotificationManagementScreenState
     _checkNotificationPermissions();
   }
 
-  /// Get the current tank state from the provider to avoid race conditions
-  /// Falls back to widget.tank if not found (shouldn't happen in normal operation)
+  /// Get the current tank state from the provider to avoid race conditions.
+  /// 
+  /// This method always fetches the latest tank state from the provider rather than
+  /// using widget.tank, which is a snapshot from when the widget was created.
+  /// This prevents race conditions where concurrent notification operations could
+  /// overwrite each other's changes.
+  /// 
+  /// Falls back to widget.tank if the tank is not found in the provider, which could
+  /// happen if the tank was deleted while this screen is still open. In practice,
+  /// this fallback ensures the app doesn't crash, though the subsequent update
+  /// operation would fail gracefully since the tank doesn't exist.
   Tank _getCurrentTank() {
     return ref.read(tankProvider).tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
@@ -586,8 +595,17 @@ class _NotificationFormScreenState
   late int _repeatInterval;
   late bool _enabled;
 
-  /// Get the current tank state from the provider to avoid race conditions
-  /// Falls back to widget.tank if not found (shouldn't happen in normal operation)
+  /// Get the current tank state from the provider to avoid race conditions.
+  /// 
+  /// This method always fetches the latest tank state from the provider rather than
+  /// using widget.tank, which is a snapshot from when the widget was created.
+  /// This prevents race conditions where concurrent notification operations could
+  /// overwrite each other's changes.
+  /// 
+  /// Falls back to widget.tank if the tank is not found in the provider, which could
+  /// happen if the tank was deleted while this screen is still open. In practice,
+  /// this fallback ensures the app doesn't crash, though the subsequent update
+  /// operation would fail gracefully since the tank doesn't exist.
   Tank _getCurrentTank() {
     return ref.read(tankProvider).tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
