@@ -267,16 +267,6 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                if (notification.getNextNotificationDate() != null)
-                  Chip(
-                    label: Text(
-                      'Next: ${dateFormat.format(notification.getNextNotificationDate()!)}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    backgroundColor: colorScheme.primaryContainer,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                  ),
               ],
             ),
           ],
