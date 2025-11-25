@@ -25,6 +25,7 @@ import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_management_screen.dart';
+import 'notification_logger_screen.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
@@ -1046,6 +1047,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'activity_log':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => NotificationLoggerScreen(tank: tank),
+                              ),
+                            );
+                            break;
                           case 'set_background':
                             _showSetBackgroundDialog(context, ref, tank);
                             break;
@@ -1106,6 +1114,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 const Icon(Icons.notifications, color: Colors.orange, size: 18),
                                 const SizedBox(width: 8),
                                 Text(l10n.notifications, style: const TextStyle(color: Colors.orange)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'activity_log',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.history, color: Colors.green, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.activityLog, style: const TextStyle(color: Colors.green)),
                               ],
                             ),
                           ),

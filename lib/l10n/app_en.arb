@@ -1062,5 +1062,115 @@
   "inLessThanAMinute": "In less than a minute",
   "@inLessThanAMinute": {
     "description": "Time remaining: less than a minute"
+  },
+
+  "activityLog": "Activity Log",
+  "@activityLog": {
+    "description": "Activity log screen title"
+  },
+
+  "activityLogDescription": "Track completed maintenance tasks and activities for your aquarium",
+  "@activityLogDescription": {
+    "description": "Description for activity log screen"
+  },
+
+  "addLogEntry": "Add Log Entry",
+  "@addLogEntry": {
+    "description": "Add log entry button"
+  },
+
+  "editLogEntry": "Edit Log Entry",
+  "@editLogEntry": {
+    "description": "Edit log entry dialog title"
+  },
+
+  "deleteLogEntry": "Delete Log Entry",
+  "@deleteLogEntry": {
+    "description": "Delete log entry dialog title"
+  },
+
+  "deleteLogEntryConfirm": "Are you sure you want to delete this log entry?",
+  "@deleteLogEntryConfirm": {
+    "description": "Delete log entry confirmation message"
+  },
+
+  "noActivityLogsYet": "No Activity Logs Yet",
+  "@noActivityLogsYet": {
+    "description": "Empty state title for activity logs"
+  },
+
+  "noActivityLogsDescription": "Start tracking your tank maintenance activities like feeding, water changes, and more.",
+  "@noActivityLogsDescription": {
+    "description": "Empty state description for activity logs"
+  },
+
+  "addFirstLogEntry": "Add First Log Entry",
+  "@addFirstLogEntry": {
+    "description": "Button text for adding first log entry"
+  },
+
+  "activitySummary": "Activity Summary",
+  "@activitySummary": {
+    "description": "Activity summary card title"
+  },
+
+  "totalLogs": "Total Logs",
+  "@totalLogs": {
+    "description": "Total logs label"
+  },
+
+  "categories": "Categories",
+  "@categories": {
+    "description": "Categories label"
+  },
+
+  "lastActivity": "Last activity",
+  "@lastActivity": {
+    "description": "Last activity label"
+  },
+
+  "entry": "entry",
+  "@entry": {
+    "description": "Singular form of entry"
+  },
+
+  "entries": "entries",
+  "@entries": {
+    "description": "Plural form of entries"
+  },
+
+  "category": "Category",
+  "@category": {
+    "description": "Category label"
+  },
+
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Validation message for category selection"
+  },
+
+  "customCategoryOptional": "Custom Category (Optional)",
+  "@customCategoryOptional": {
+    "description": "Custom category field label"
+  },
+
+  "customCategoryHint": "e.g., Filter Cleaning, Coral Dipping",
+  "@customCategoryHint": {
+    "description": "Custom category hint text"
+  },
+
+  "customCategoryHelper": "Leave empty to use 'Other' as category",
+  "@customCategoryHelper": {
+    "description": "Custom category helper text"
+  },
+
+  "updateLogEntry": "Update Log Entry",
+  "@updateLogEntry": {
+    "description": "Update log entry button"
+  },
+
+  "saveLogEntry": "Save Log Entry",
+  "@saveLogEntry": {
+    "description": "Save log entry button"
   }
 }
