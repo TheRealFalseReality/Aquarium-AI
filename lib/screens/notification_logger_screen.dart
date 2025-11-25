@@ -546,25 +546,25 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
       final NotificationLog entry;
       final isEditing = widget.existingEntry != null;
       
+      // Extract trimmed values to avoid calling trim() multiple times
+      final trimmedCustomCategory = _customCategoryController.text.trim();
+      final trimmedNotes = _notesController.text.trim();
+      
       // For 'other' type, use custom category or default to 'Other'
       final customCategory = _selectedType == NotificationType.other
-          ? (_customCategoryController.text.trim().isNotEmpty 
-              ? _customCategoryController.text.trim() 
-              : 'Other')
+          ? (trimmedCustomCategory.isNotEmpty ? trimmedCustomCategory : 'Other')
           : null;
       
       // Determine if we need to clear custom category (when switching from 'other' to another type)
       final shouldClearCustomCategory = _selectedType != NotificationType.other;
       
       if (isEditing) {
-        // Update existing entry
+        // Update existing entry - loggedAt is included to allow users to correct/adjust the date
         entry = widget.existingEntry!.copyWith(
           type: _selectedType,
           customCategory: customCategory,
           loggedAt: _selectedDate,
-          notes: _notesController.text.trim().isNotEmpty
-              ? _notesController.text.trim()
-              : null,
+          notes: trimmedNotes.isNotEmpty ? trimmedNotes : null,
           clearCustomCategory: shouldClearCustomCategory,
         );
         
@@ -593,9 +593,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         entry = NotificationLog.create(
           type: _selectedType,
           customCategory: customCategory,
-          notes: _notesController.text.trim().isNotEmpty
-              ? _notesController.text.trim()
-              : null,
+          notes: trimmedNotes.isNotEmpty ? trimmedNotes : null,
         );
         
         final updatedLogs = [...widget.tank.notificationLogs, entry];
