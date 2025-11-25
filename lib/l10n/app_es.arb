@@ -179,5 +179,7 @@
   "customCategoryHint": "ej., Limpieza de Filtro, Baño de Coral",
   "customCategoryHelper": "Dejar vacío para usar Otro como categoría",
   "updateLogEntry": "Actualizar Entrada",
-  "saveLogEntry": "Guardar Entrada"
+  "saveLogEntry": "Guardar Entrada",
+  "quickLog": "Registro Rápido",
+  "activityLogged": "Actividad registrada correctamente"
 }

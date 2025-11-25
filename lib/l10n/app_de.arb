@@ -179,5 +179,7 @@
   "customCategoryHint": "z.B., Filterreinigung, Korallenbehandlung",
   "customCategoryHelper": "Leer lassen um Andere als Kategorie zu verwenden",
   "updateLogEntry": "Eintrag Aktualisieren",
-  "saveLogEntry": "Eintrag Speichern"
+  "saveLogEntry": "Eintrag Speichern",
+  "quickLog": "Schnellprotokoll",
+  "activityLogged": "Aktivität erfolgreich protokolliert"
 }

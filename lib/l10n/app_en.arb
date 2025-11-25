@@ -1172,5 +1172,15 @@
   "saveLogEntry": "Save Log Entry",
   "@saveLogEntry": {
     "description": "Save log entry button"
+  },
+
+  "quickLog": "Quick Log",
+  "@quickLog": {
+    "description": "Quick log button to log an activity from notification"
+  },
+
+  "activityLogged": "Activity logged successfully",
+  "@activityLogged": {
+    "description": "Message shown when activity is logged"
   }
 }

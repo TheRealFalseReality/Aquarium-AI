@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
+import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
@@ -230,7 +231,7 @@ class _NotificationManagementScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          notification.customTitle ?? notification.type.displayName,
+                          notification.customTitle ?? notification.getDisplayName(),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -315,6 +316,20 @@ class _NotificationManagementScreenState
                     },
                   ),
               ],
+            ),
+            const SizedBox(height: 12),
+            // Quick Log button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _quickLogActivity(notification),
+                icon: const Icon(Icons.add_task, size: 18),
+                label: Text(AppLocalizations.of(context)!.quickLog),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _getNotificationColor(notification.type),
+                  side: BorderSide(color: _getNotificationColor(notification.type).withOpacity(0.5)),
+                ),
+              ),
             ),
           ],
         ),
@@ -462,6 +477,47 @@ class _NotificationManagementScreenState
     );
   }
 
+  /// Quick log an activity based on a notification
+  Future<void> _quickLogActivity(TankNotification notification) async {
+    final currentTank = _getCurrentTank();
+    
+    // Create a new log entry based on the notification type and custom category
+    final log = NotificationLog.create(
+      type: notification.type,
+      customCategory: notification.type == NotificationType.other
+          ? (notification.customCategory ?? 'Other')
+          : null,
+      notes: notification.notes,
+      notificationId: notification.id,
+    );
+    
+    final updatedLogs = [...currentTank.notificationLogs, log];
+    final updatedTank = currentTank.copyWith(
+      notificationLogs: updatedLogs,
+      updatedAt: DateTime.now(),
+    );
+    
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      context.showAccessibleMessage(l10n.activityLogged);
+    }
+    
+    AnalyticsService.logFeatureUsed(
+      featureName: 'quick_log_activity',
+      parameters: {
+        'type': notification.type.name,
+        'has_custom_category': notification.customCategory != null ? 'true' : 'false',
+      },
+    );
+    
+    AnalyticsService.logTankAction(
+      action: 'quick_log_activity',
+      tankType: currentTank.type,
+    );
+  }
+
   void _showNotificationOptions(TankNotification notification) {
     showModalBottomSheet(
       context: context,
@@ -606,6 +662,7 @@ class _NotificationFormScreenState
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
   final _titleController = TextEditingController();
+  final _customCategoryController = TextEditingController();
   final NotificationService _notificationService = NotificationService();
 
   late NotificationType _selectedType;
@@ -645,6 +702,7 @@ class _NotificationFormScreenState
       _enabled = notif.enabled;
       _notesController.text = notif.notes ?? '';
       _titleController.text = notif.customTitle ?? '';
+      _customCategoryController.text = notif.customCategory ?? '';
     } else {
       _selectedType = NotificationType.feeding;
       final now = DateTime.now();
@@ -660,6 +718,7 @@ class _NotificationFormScreenState
   void dispose() {
     _notesController.dispose();
     _titleController.dispose();
+    _customCategoryController.dispose();
     super.dispose();
   }
 
@@ -707,12 +766,33 @@ class _NotificationFormScreenState
                           selected: isSelected,
                           onSelected: (selected) {
                             if (selected) {
-                              setState(() => _selectedType = type);
+                              setState(() {
+                                _selectedType = type;
+                                // Clear custom category when switching away from "Other"
+                                if (type != NotificationType.other) {
+                                  _customCategoryController.clear();
+                                }
+                              });
                             }
                           },
                         );
                       }).toList(),
                     ),
+                    // Custom category field for "Other" type
+                    if (_selectedType == NotificationType.other) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _customCategoryController,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.customCategoryOptional,
+                          hintText: AppLocalizations.of(context)!.customCategoryHint,
+                          helperText: AppLocalizations.of(context)!.customCategoryHelper,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.category),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -991,6 +1071,13 @@ class _NotificationFormScreenState
     );
 
     final TankNotification notification;
+    
+    // Get custom category for 'other' type, defaulting to 'Other' if empty
+    final trimmedCustomCategory = _customCategoryController.text.trim();
+    final customCategory = _selectedType == NotificationType.other
+        ? (trimmedCustomCategory.isNotEmpty ? trimmedCustomCategory : 'Other')
+        : null;
+    
     if (widget.existingNotification != null) {
       // Update existing notification
       notification = widget.existingNotification!.copyWith(
@@ -1000,6 +1087,7 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        customCategory: customCategory,
         enabled: _enabled,
         updatedAt: DateTime.now(),
       );
@@ -1012,6 +1100,7 @@ class _NotificationFormScreenState
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        customCategory: customCategory,
         enabled: _enabled,
       );
     }

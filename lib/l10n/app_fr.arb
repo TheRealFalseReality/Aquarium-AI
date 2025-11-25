@@ -179,5 +179,7 @@
   "customCategoryHint": "ex., Nettoyage du Filtre, Trempage de Corail",
   "customCategoryHelper": "Laisser vide pour utiliser 'Autre' comme catégorie",
   "updateLogEntry": "Mettre à Jour l'Entrée",
-  "saveLogEntry": "Enregistrer l'Entrée"
+  "saveLogEntry": "Enregistrer l'Entrée",
+  "quickLog": "Journal Rapide",
+  "activityLogged": "Activité enregistrée avec succès"
 }
