@@ -1182,5 +1182,135 @@
   "activityLogged": "Activity logged successfully",
   "@activityLogged": {
     "description": "Message shown when activity is logged"
+  },
+
+  "backupDialogTitle": "Backup Data",
+  "@backupDialogTitle": {
+    "description": "Backup dialog title"
+  },
+
+  "backupDialogContent": "This will create a backup file containing:",
+  "@backupDialogContent": {
+    "description": "Backup dialog content description"
+  },
+
+  "tanksCount": "{count} tank(s)",
+  "@tanksCount": {
+    "description": "Number of tanks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "allFishAndConfigurations": "All fish and configurations",
+  "@allFishAndConfigurations": {
+    "description": "All fish and configurations backup item"
+  },
+
+  "speciesTags": "Species tags",
+  "@speciesTags": {
+    "description": "Species tags backup item"
+  },
+
+  "activityLogs": "Activity logs",
+  "@activityLogs": {
+    "description": "Activity logs backup item"
+  },
+
+  "exportDateLabel": "Export date: {date}",
+  "@exportDateLabel": {
+    "description": "Export date label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "backupFileNote": "The backup file will be saved to your device.",
+  "@backupFileNote": {
+    "description": "Backup file save location note"
+  },
+
+  "createBackupButton": "Create Backup",
+  "@createBackupButton": {
+    "description": "Create backup button label"
+  },
+
+  "restoreDialogTitle": "Restore Data",
+  "@restoreDialogTitle": {
+    "description": "Restore dialog title"
+  },
+
+  "importantWarning": "Important",
+  "@importantWarning": {
+    "description": "Important warning label"
+  },
+
+  "restoreWarningIntro": "Restoring from backup will:",
+  "@restoreWarningIntro": {
+    "description": "Restore warning introduction"
+  },
+
+  "replaceAllTanks": "Replace ALL current tanks",
+  "@replaceAllTanks": {
+    "description": "Replace all tanks warning item"
+  },
+
+  "replaceAllSpeciesTags": "Replace ALL species tags",
+  "@replaceAllSpeciesTags": {
+    "description": "Replace all species tags warning item"
+  },
+
+  "replaceAllActivityLogs": "Replace ALL activity logs",
+  "@replaceAllActivityLogs": {
+    "description": "Replace all activity logs warning item"
+  },
+
+  "cannotBeUndone": "Cannot be undone",
+  "@cannotBeUndone": {
+    "description": "Cannot be undone warning item"
+  },
+
+  "backupBeforeRestoreNote": "Make sure you have a current backup before proceeding.",
+  "@backupBeforeRestoreNote": {
+    "description": "Note to backup before restoring"
+  },
+
+  "chooseFileButton": "Choose File",
+  "@chooseFileButton": {
+    "description": "Choose file button label"
+  },
+
+  "backupCreatedSuccess": "Backup created successfully!",
+  "@backupCreatedSuccess": {
+    "description": "Backup created success message"
+  },
+
+  "savedToFile": "Saved to: {fileName}",
+  "@savedToFile": {
+    "description": "Saved to file message",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "failedToCreateBackup": "Failed to create backup: {error}",
+  "@failedToCreateBackup": {
+    "description": "Failed to create backup error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "dataRestoredSuccess": "Data restored successfully!",
+  "@dataRestoredSuccess": {
+    "description": "Data restored success message"
   }
 }

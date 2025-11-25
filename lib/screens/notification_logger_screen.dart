@@ -151,7 +151,12 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
         body: tank.notificationLogs.isEmpty
             ? _buildEmptyState(context)
             : ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 100, // Extra padding for FAB
+                ),
                 children: [
                   Text(
                     l10n.activityLog,
