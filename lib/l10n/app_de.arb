@@ -196,6 +196,7 @@
   "restoreWarningIntro": "Die Wiederherstellung aus einer Sicherung wird:",
   "replaceAllTanks": "ALLE aktuellen Aquarien ersetzen",
   "replaceAllSpeciesTags": "ALLE Artenetiketten ersetzen",
+  "replaceAllNotifications": "ALLE Benachrichtigungen ersetzen",
   "replaceAllActivityLogs": "ALLE Aktivitätsprotokolle ersetzen",
   "cannotBeUndone": "Kann nicht rückgängig gemacht werden",
   "backupBeforeRestoreNote": "Stellen Sie sicher, dass Sie eine aktuelle Sicherung haben, bevor Sie fortfahren.",
@@ -212,5 +213,6 @@
   "xHoursAgo": "Vor {count} Stunden",
   "oneMinuteAgo": "Vor 1 Minute",
   "xMinutesAgo": "Vor {count} Minuten",
-  "justNow": "Gerade eben"
+  "justNow": "Gerade eben",
+  "notify": "Benachrichtigen"
 }

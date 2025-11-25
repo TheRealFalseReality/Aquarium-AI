@@ -196,6 +196,7 @@
   "restoreWarningIntro": "Restaurar desde una copia de seguridad:",
   "replaceAllTanks": "Reemplazará TODOS los acuarios actuales",
   "replaceAllSpeciesTags": "Reemplazará TODAS las etiquetas de especies",
+  "replaceAllNotifications": "Reemplazará TODAS las notificaciones",
   "replaceAllActivityLogs": "Reemplazará TODOS los registros de actividad",
   "cannotBeUndone": "No se puede deshacer",
   "backupBeforeRestoreNote": "Asegúrate de tener un respaldo actual antes de continuar.",
@@ -212,5 +213,6 @@
   "xHoursAgo": "Hace {count} horas",
   "oneMinuteAgo": "Hace 1 minuto",
   "xMinutesAgo": "Hace {count} minutos",
-  "justNow": "Ahora mismo"
+  "justNow": "Ahora mismo",
+  "notify": "Notificar"
 }

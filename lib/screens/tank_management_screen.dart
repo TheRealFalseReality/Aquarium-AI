@@ -2734,10 +2734,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Notifications button
-                      IconButton(
+                      // Notifications button - aligned to the left
+                      TextButton.icon(
                         onPressed: () {
                           Navigator.of(context).pop();
                           Navigator.of(context).push(
@@ -2749,10 +2748,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         icon: Icon(
                           Icons.notifications_outlined,
                           color: cs.primary,
+                          size: 20,
                         ),
-                        tooltip: 'Notifications',
+                        label: Text(
+                          AppLocalizations.of(context)!.notify,
+                          style: TextStyle(color: cs.primary),
+                        ),
                       ),
-                      const SizedBox(width: 8),
+                      const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Close'),

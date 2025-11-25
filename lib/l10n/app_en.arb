@@ -1269,6 +1269,11 @@
     "description": "Replace all activity logs warning item"
   },
 
+  "replaceAllNotifications": "Replace ALL notifications",
+  "@replaceAllNotifications": {
+    "description": "Replace all notifications warning item"
+  },
+
   "cannotBeUndone": "Cannot be undone",
   "@cannotBeUndone": {
     "description": "Cannot be undone warning item"
@@ -1377,5 +1382,10 @@
   "justNow": "Just now",
   "@justNow": {
     "description": "Just now label"
+  },
+
+  "notify": "Notify",
+  "@notify": {
+    "description": "Notify button label"
   }
 }

@@ -65,6 +65,14 @@ class BackupRestoreUtils {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
+                Text(l10n.notifications),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
                 Text(l10n.activityLogs),
               ],
             ),
@@ -213,6 +221,14 @@ class BackupRestoreUtils {
               children: [
                 const Text('• ', style: TextStyle(fontSize: 16)),
                 Expanded(child: Text(l10n.replaceAllSpeciesTags)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllNotifications)),
               ],
             ),
             const SizedBox(height: 6),
