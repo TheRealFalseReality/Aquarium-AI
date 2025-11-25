@@ -3597,13 +3597,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...recentLogs.map((log) {
-          final daysSince = DateTime.now().difference(log.loggedAt).inDays;
-          final timeAgo = daysSince == 0
+          // Use calendar day comparison instead of 24-hour periods
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final logDate = DateTime(log.loggedAt.year, log.loggedAt.month, log.loggedAt.day);
+          final daysDifference = today.difference(logDate).inDays;
+          
+          final timeAgo = daysDifference == 0
               ? l10n.today
-              : daysSince == 1
+              : daysDifference == 1
                   ? l10n.yesterday
-                  : daysSince < 7
-                      ? l10n.daysAgo(daysSince)
+                  : daysDifference < 7
+                      ? l10n.daysAgo(daysDifference)
                       : '${log.loggedAt.month}/${log.loggedAt.day}/${log.loggedAt.year}';
 
           return Padding(
