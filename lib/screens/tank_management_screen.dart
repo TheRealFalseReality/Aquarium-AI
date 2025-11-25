@@ -1520,14 +1520,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
       final recentLog = sortedLogs.first;
       
-      final daysSince = DateTime.now().difference(recentLog.loggedAt).inDays;
-      final timeAgo = daysSince == 0
-          ? l10n.today
-          : daysSince == 1
-              ? l10n.yesterday
-              : daysSince < 7
-                  ? l10n.daysAgo(daysSince)
-                  : '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
+      // Calculate time ago in hours/minutes for today, otherwise days
+      final now = DateTime.now();
+      final difference = now.difference(recentLog.loggedAt);
+      final hoursAgo = difference.inHours;
+      final minutesAgo = difference.inMinutes % 60;
+      final daysSince = difference.inDays;
+      
+      String timeAgo;
+      if (daysSince == 0) {
+        // Today - show hours/minutes ago
+        if (hoursAgo > 0) {
+          timeAgo = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
+        } else if (minutesAgo > 0) {
+          timeAgo = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+        } else {
+          timeAgo = l10n.justNow;
+        }
+      } else if (daysSince == 1) {
+        timeAgo = l10n.yesterday;
+      } else if (daysSince < 7) {
+        timeAgo = l10n.daysAgo(daysSince);
+      } else {
+        timeAgo = '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
+      }
       
       items.add(
         Container(
@@ -1609,77 +1625,66 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         items.add(
           Container(
             margin: EdgeInsets.only(top: items.isNotEmpty ? 8 : 0),
-            child: Material(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
               color: _getActivityColor(notification.type).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () => _quickLogFromCard(context, ref, tank, notification),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: _getActivityColor(notification.type).withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
+              border: Border.all(
+                color: _getActivityColor(notification.type).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _getActivityIcon(notification.type),
+                  size: 18,
+                  color: _getActivityColor(notification.type),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        _getActivityIcon(notification.type),
-                        size: 18,
-                        color: _getActivityColor(notification.type),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              notification.getDisplayName(),
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            Text(
-                              timeUntil,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: _getActivityColor(notification.type),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        notification.getDisplayName(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
+                      Text(
+                        timeUntil,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: _getActivityColor(notification.type),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.add_task, size: 14, color: Colors.white),
-                            const SizedBox(width: 4),
-                            Text(
-                              l10n.quickLog,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+                // Quick log + button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _quickLogFromCard(context, ref, tank, notification),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _getActivityColor(notification.type),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );

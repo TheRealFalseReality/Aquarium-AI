@@ -207,5 +207,10 @@
   "today": "Heute",
   "yesterday": "Gestern",
   "daysAgo": "Vor {count} Tagen",
-  "moreActivities": "+{count} weitere Aktivitäten"
+  "moreActivities": "+{count} weitere Aktivitäten",
+  "oneHourAgo": "Vor 1 Stunde",
+  "xHoursAgo": "Vor {count} Stunden",
+  "oneMinuteAgo": "Vor 1 Minute",
+  "xMinutesAgo": "Vor {count} Minuten",
+  "justNow": "Gerade eben"
 }

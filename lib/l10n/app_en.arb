@@ -1342,5 +1342,40 @@
         "type": "int"
       }
     }
+  },
+
+  "oneHourAgo": "1 hour ago",
+  "@oneHourAgo": {
+    "description": "One hour ago label"
+  },
+
+  "xHoursAgo": "{count} hours ago",
+  "@xHoursAgo": {
+    "description": "X hours ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "oneMinuteAgo": "1 minute ago",
+  "@oneMinuteAgo": {
+    "description": "One minute ago label"
+  },
+
+  "xMinutesAgo": "{count} minutes ago",
+  "@xMinutesAgo": {
+    "description": "X minutes ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Just now label"
   }
 }
