@@ -207,6 +207,14 @@ class _NotificationManagementScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
+    
+    // Get next notification date for display
+    DateTime displayDate;
+    if (notification.repeatFrequency != RepeatFrequency.none) {
+      displayDate = notification.getNextNotificationDate() ?? notification.notificationDateTime;
+    } else {
+      displayDate = notification.notificationDateTime;
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -240,7 +248,7 @@ class _NotificationManagementScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          dateFormat.format(notification.notificationDateTime),
+                          dateFormat.format(displayDate),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withOpacity(0.6),
                           ),

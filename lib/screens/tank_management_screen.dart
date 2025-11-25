@@ -1591,9 +1591,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
     }
     
-    // Check for upcoming notifications within 12 hours
+    // Check for notifications within 12 hours (past and future) that are not logged
     final now = DateTime.now();
     final twelveHoursFromNow = now.add(const Duration(hours: 12));
+    final twelveHoursAgo = now.subtract(const Duration(hours: 12));
     
     for (final notification in tank.notifications) {
       if (!notification.enabled) continue;
@@ -1602,24 +1603,64 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       if (notification.repeatFrequency != RepeatFrequency.none) {
         nextDate = notification.getNextNotificationDate();
       } else {
-        // Non-repeating: check if scheduled time is in the future
-        if (notification.notificationDateTime.isAfter(now)) {
+        // Non-repeating: check if scheduled time is within 12 hour window
+        if (notification.notificationDateTime.isAfter(twelveHoursAgo) && 
+            notification.notificationDateTime.isBefore(twelveHoursFromNow)) {
           nextDate = notification.notificationDateTime;
         }
       }
       
-      if (nextDate != null && nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(now)) {
-        // This notification is due within 12 hours - show quick log button
-        final hoursUntil = nextDate.difference(now).inHours;
-        final minutesUntil = nextDate.difference(now).inMinutes % 60;
+      if (nextDate != null && nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(twelveHoursAgo)) {
+        // Time windows for checking if activity is already logged
+        const loggedByIdWindowHours = 12; // If logged by notification ID, consider logged within 12 hours
+        const loggedByTypeWindowHours = 2; // If logged by same type, consider logged within 2 hours
         
-        String timeUntil;
-        if (hoursUntil > 0) {
-          timeUntil = hoursUntil == 1 ? l10n.inOneHour : l10n.inXHours(hoursUntil);
-        } else if (minutesUntil > 0) {
-          timeUntil = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
+        // Check if this notification has already been logged within the relevant time window
+        final isLogged = tank.notificationLogs.any((log) {
+          // Check if there's a log entry for this notification within the ID window
+          if (log.notificationId == notification.id) {
+            final logDifference = log.loggedAt.difference(nextDate!).abs();
+            return logDifference.inHours <= loggedByIdWindowHours;
+          }
+          // Also check if any log of the same type was made within the type window
+          if (log.type == notification.type) {
+            final logDifference = log.loggedAt.difference(nextDate!).abs();
+            return logDifference.inHours <= loggedByTypeWindowHours;
+          }
+          return false;
+        });
+        
+        if (isLogged) continue; // Skip if already logged
+        
+        // Calculate time display
+        String timeDisplay;
+        final bool isPast = nextDate.isBefore(now);
+        
+        if (isPast) {
+          // Past - show how long ago
+          final difference = now.difference(nextDate);
+          final hoursAgo = difference.inHours;
+          final minutesAgo = difference.inMinutes % 60;
+          
+          if (hoursAgo > 0) {
+            timeDisplay = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
+          } else if (minutesAgo > 0) {
+            timeDisplay = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+          } else {
+            timeDisplay = l10n.justNow;
+          }
         } else {
-          timeUntil = l10n.inLessThanAMinute;
+          // Future - show time until
+          final hoursUntil = nextDate.difference(now).inHours;
+          final minutesUntil = nextDate.difference(now).inMinutes % 60;
+          
+          if (hoursUntil > 0) {
+            timeDisplay = hoursUntil == 1 ? l10n.inOneHour : l10n.inXHours(hoursUntil);
+          } else if (minutesUntil > 0) {
+            timeDisplay = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
+          } else {
+            timeDisplay = l10n.inLessThanAMinute;
+          }
         }
         
         items.add(
@@ -1654,9 +1695,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                       Text(
-                        timeUntil,
+                        timeDisplay,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _getActivityColor(notification.type),
+                          color: isPast ? Colors.red : _getActivityColor(notification.type),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
