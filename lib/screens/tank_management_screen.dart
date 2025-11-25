@@ -2736,6 +2736,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Notifications button
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => NotificationManagementScreen(tank: tank),
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.notifications_outlined,
+                          color: cs.primary,
+                        ),
+                        tooltip: 'Notifications',
+                      ),
+                      const SizedBox(width: 8),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Close'),
