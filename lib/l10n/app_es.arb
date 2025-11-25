@@ -203,5 +203,9 @@
   "backupCreatedSuccess": "¡Respaldo creado exitosamente!",
   "savedToFile": "Guardado en: {fileName}",
   "failedToCreateBackup": "Error al crear respaldo: {error}",
-  "dataRestoredSuccess": "¡Datos restaurados exitosamente!"
+  "dataRestoredSuccess": "¡Datos restaurados exitosamente!",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "daysAgo": "Hace {count} días",
+  "moreActivities": "+{count} más actividades"
 }

@@ -203,5 +203,9 @@
   "backupCreatedSuccess": "Sicherung erfolgreich erstellt!",
   "savedToFile": "Gespeichert in: {fileName}",
   "failedToCreateBackup": "Sicherung fehlgeschlagen: {error}",
-  "dataRestoredSuccess": "Daten erfolgreich wiederhergestellt!"
+  "dataRestoredSuccess": "Daten erfolgreich wiederhergestellt!",
+  "today": "Heute",
+  "yesterday": "Gestern",
+  "daysAgo": "Vor {count} Tagen",
+  "moreActivities": "+{count} weitere Aktivitäten"
 }

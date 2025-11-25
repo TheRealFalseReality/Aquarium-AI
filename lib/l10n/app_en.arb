@@ -1312,5 +1312,35 @@
   "dataRestoredSuccess": "Data restored successfully!",
   "@dataRestoredSuccess": {
     "description": "Data restored success message"
+  },
+
+  "today": "Today",
+  "@today": {
+    "description": "Today label"
+  },
+
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
+
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "description": "Days ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "moreActivities": "+{count} more activities",
+  "@moreActivities": {
+    "description": "More activities label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

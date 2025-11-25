@@ -9,6 +9,7 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../models/water_parameter.dart';
 import '../models/dosing_entry.dart';
+import '../models/tank_notification.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -1895,6 +1896,135 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           const SizedBox(height: 16),
                         ],
                         
+                        // Activity Log section
+                        if (tank.notificationLogs.isNotEmpty) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.history, size: 18, color: Colors.green),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          AppLocalizations.of(context)!.activityLog,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      FilledButton.icon(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => NotificationLoggerScreen(tank: tank),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.edit, size: 16),
+                                        label: Text(AppLocalizations.of(context)!.manage),
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: _buildLatestActivityLogs(context, tank, cs),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ] else ...[
+                          // Empty state - no activity logs yet
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.history, size: 18, color: Colors.green),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          AppLocalizations.of(context)!.activityLog,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Icon(
+                                    Icons.history_outlined,
+                                    size: 48,
+                                    color: cs.onSurfaceVariant.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    AppLocalizations.of(context)!.noActivityLogsYet,
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(context)!.noActivityLogsDescription,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant.withOpacity(0.7),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  FilledButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => NotificationLoggerScreen(tank: tank),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add, size: 18),
+                                    label: Text(AppLocalizations.of(context)!.addLogEntry),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        
                         // Dosing Diary section
                         if (tank.dosingEntries.isNotEmpty) ...[
                           Container(
@@ -3124,6 +3254,126 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               '+${tank.dosingEntries.length - 5} more doses',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildLatestActivityLogs(BuildContext context, Tank tank, ColorScheme cs) {
+    if (tank.notificationLogs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Get the 5 most recent activity logs
+    final sortedLogs = List.from(tank.notificationLogs)
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    final recentLogs = sortedLogs.take(5).toList();
+
+    IconData _getLogIcon(NotificationType type) {
+      switch (type) {
+        case NotificationType.feeding:
+          return Icons.restaurant;
+        case NotificationType.dosing:
+          return Icons.medication_liquid;
+        case NotificationType.waterChange:
+          return Icons.water_drop;
+        case NotificationType.testing:
+          return Icons.science;
+        case NotificationType.maintenance:
+          return Icons.build;
+        case NotificationType.other:
+          return Icons.notifications;
+      }
+    }
+
+    Color _getLogColor(NotificationType type) {
+      switch (type) {
+        case NotificationType.feeding:
+          return Colors.orange;
+        case NotificationType.dosing:
+          return Colors.purple;
+        case NotificationType.waterChange:
+          return Colors.blue;
+        case NotificationType.testing:
+          return Colors.teal;
+        case NotificationType.maintenance:
+          return Colors.brown;
+        case NotificationType.other:
+          return Colors.grey;
+      }
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...recentLogs.map((log) {
+          final daysSince = DateTime.now().difference(log.loggedAt).inDays;
+          final timeAgo = daysSince == 0
+              ? l10n.today
+              : daysSince == 1
+                  ? l10n.yesterday
+                  : daysSince < 7
+                      ? l10n.daysAgo(daysSince)
+                      : '${log.loggedAt.month}/${log.loggedAt.day}/${log.loggedAt.year}';
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: cs.outline.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _getLogIcon(log.type),
+                    size: 16,
+                    color: _getLogColor(log.type),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          log.getDisplayName(),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        Text(
+                          timeAgo,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        if (tank.notificationLogs.length > 5)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              l10n.moreActivities(tank.notificationLogs.length - 5),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
