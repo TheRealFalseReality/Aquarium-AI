@@ -62,6 +62,7 @@ class NotificationLog {
   }
 
   /// Create a copy with modifications
+  /// Set clearCustomCategory to true to explicitly clear customCategory
   NotificationLog copyWith({
     String? id,
     NotificationType? type,
@@ -69,11 +70,12 @@ class NotificationLog {
     DateTime? loggedAt,
     String? notes,
     String? notificationId,
+    bool clearCustomCategory = false,
   }) {
     return NotificationLog(
       id: id ?? this.id,
       type: type ?? this.type,
-      customCategory: customCategory ?? this.customCategory,
+      customCategory: clearCustomCategory ? null : (customCategory ?? this.customCategory),
       loggedAt: loggedAt ?? this.loggedAt,
       notes: notes ?? this.notes,
       notificationId: notificationId ?? this.notificationId,

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/accessible_feedback.dart';
+import '../l10n/app_localizations.dart';
 
 class BackupRestoreUtils {
   /// 
@@ -16,51 +17,68 @@ class BackupRestoreUtils {
     String? source,
   }) async {
     final tankNotifier = ref.read(tankProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
 
     // Show confirmation dialog with backup info
     final backupInfo = tankNotifier.createBackupInfo();
     final shouldExport = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.backup, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Backup Data'),
+            const Icon(Icons.backup, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(l10n.backupDialogTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('This will create a backup file containing:'),
+            Text(l10n.backupDialogContent),
             const SizedBox(height: 12),
             Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
-                Text('${backupInfo['tankCount']} tank(s)'),
+                Text(l10n.tanksCount(backupInfo['tankCount'] as int)),
               ],
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 20),
-                SizedBox(width: 8),
-                Text('All fish and configurations'),
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.allFishAndConfigurations),
               ],
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 20),
-                SizedBox(width: 8),
-                Text('Species tags'),
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.speciesTags),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.notifications),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.activityLogs),
               ],
             ),
             const SizedBox(height: 16),
             Text(
-              'Export date: ${DateTime.now().toString().split('.')[0]}',
+              l10n.exportDateLabel(DateTime.now().toString().split('.')[0]),
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -68,7 +86,7 @@ class BackupRestoreUtils {
             ),
             const SizedBox(height: 8),
             Text(
-              'The backup file will be saved to your device.',
+              l10n.backupFileNote,
               style: TextStyle(
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
@@ -80,7 +98,7 @@ class BackupRestoreUtils {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.of(context).pop(true),
@@ -89,7 +107,7 @@ class BackupRestoreUtils {
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.backup),
-            label: const Text('Create Backup'),
+            label: Text(l10n.createBackupButton),
           ),
         ],
       ),
@@ -106,7 +124,7 @@ class BackupRestoreUtils {
           await prefs.setInt('last_backup_tank_count', backupInfo['tankCount'] as int);
           
           context.showAccessibleMessage(
-            'Backup created successfully!\nSaved to: ${filePath.split('/').last}',
+            '${l10n.backupCreatedSuccess}\n${l10n.savedToFile(filePath.split('/').last)}',
             duration: const Duration(seconds: 4),
           );
           
@@ -122,7 +140,7 @@ class BackupRestoreUtils {
           final error = ref.read(tankProvider).error;
           if (error != null) {
             context.showAccessibleMessage(
-              'Failed to create backup: $error',
+              l10n.failedToCreateBackup(error),
               duration: const Duration(seconds: 4),
             );
           }
@@ -144,15 +162,17 @@ class BackupRestoreUtils {
     WidgetRef ref, {
     String? source,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Show warning dialog first
     final shouldImport = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.restore, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Restore Data'),
+            const Icon(Icons.restore, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(l10n.restoreDialogTitle),
           ],
         ),
         content: Column(
@@ -169,14 +189,14 @@ class BackupRestoreUtils {
                   width: 1,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.orange),
-                  SizedBox(width: 8),
+                  const Icon(Icons.warning, color: Colors.orange),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Important',
-                      style: TextStyle(
+                      l10n.importantWarning,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange,
                       ),
@@ -186,34 +206,50 @@ class BackupRestoreUtils {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Restoring from backup will:'),
+            Text(l10n.restoreWarningIntro),
             const SizedBox(height: 12),
-            const Row(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('• ', style: TextStyle(fontSize: 16)),
-                Expanded(child: Text('Replace ALL current tanks')),
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllTanks)),
               ],
             ),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('• ', style: TextStyle(fontSize: 16)),
-                Expanded(child: Text('Replace ALL species tags')),
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllSpeciesTags)),
               ],
             ),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('• ', style: TextStyle(fontSize: 16)),
-                Expanded(child: Text('Cannot be undone')),
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllNotifications)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllActivityLogs)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.cannotBeUndone)),
               ],
             ),
             const SizedBox(height: 16),
             Text(
-              'Make sure you have a current backup before proceeding.',
+              l10n.backupBeforeRestoreNote,
               style: TextStyle(
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
@@ -225,7 +261,7 @@ class BackupRestoreUtils {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.of(context).pop(true),
@@ -234,7 +270,7 @@ class BackupRestoreUtils {
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.restore),
-            label: const Text('Choose File'),
+            label: Text(l10n.chooseFileButton),
           ),
         ],
       ),
@@ -250,7 +286,7 @@ class BackupRestoreUtils {
           await prefs.setString('last_restore_time', DateTime.now().toIso8601String());
           
           context.showAccessibleMessage(
-            'Data restored successfully!',
+            l10n.dataRestoredSuccess,
             duration: const Duration(seconds: 3),
           );
           

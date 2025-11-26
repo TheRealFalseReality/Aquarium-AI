@@ -1062,5 +1062,330 @@
   "inLessThanAMinute": "In less than a minute",
   "@inLessThanAMinute": {
     "description": "Time remaining: less than a minute"
+  },
+
+  "activityLog": "Activity Log",
+  "@activityLog": {
+    "description": "Activity log screen title"
+  },
+
+  "activityLogDescription": "Track completed maintenance tasks and activities for your aquarium",
+  "@activityLogDescription": {
+    "description": "Description for activity log screen"
+  },
+
+  "addLogEntry": "Add Log Entry",
+  "@addLogEntry": {
+    "description": "Add log entry button"
+  },
+
+  "editLogEntry": "Edit Log Entry",
+  "@editLogEntry": {
+    "description": "Edit log entry dialog title"
+  },
+
+  "deleteLogEntry": "Delete Log Entry",
+  "@deleteLogEntry": {
+    "description": "Delete log entry dialog title"
+  },
+
+  "deleteLogEntryConfirm": "Are you sure you want to delete this log entry?",
+  "@deleteLogEntryConfirm": {
+    "description": "Delete log entry confirmation message"
+  },
+
+  "noActivityLogsYet": "No Activity Logs Yet",
+  "@noActivityLogsYet": {
+    "description": "Empty state title for activity logs"
+  },
+
+  "noActivityLogsDescription": "Start tracking your tank maintenance activities like feeding, water changes, and more.",
+  "@noActivityLogsDescription": {
+    "description": "Empty state description for activity logs"
+  },
+
+  "addFirstLogEntry": "Add First Log Entry",
+  "@addFirstLogEntry": {
+    "description": "Button text for adding first log entry"
+  },
+
+  "activitySummary": "Activity Summary",
+  "@activitySummary": {
+    "description": "Activity summary card title"
+  },
+
+  "totalLogs": "Total Logs",
+  "@totalLogs": {
+    "description": "Total logs label"
+  },
+
+  "categories": "Categories",
+  "@categories": {
+    "description": "Categories label"
+  },
+
+  "lastActivity": "Last activity",
+  "@lastActivity": {
+    "description": "Last activity label"
+  },
+
+  "entry": "entry",
+  "@entry": {
+    "description": "Singular form of entry"
+  },
+
+  "entries": "entries",
+  "@entries": {
+    "description": "Plural form of entries"
+  },
+
+  "category": "Category",
+  "@category": {
+    "description": "Category label"
+  },
+
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Validation message for category selection"
+  },
+
+  "customCategoryOptional": "Custom Category (Optional)",
+  "@customCategoryOptional": {
+    "description": "Custom category field label"
+  },
+
+  "customCategoryHint": "e.g., Filter Cleaning, Coral Dipping",
+  "@customCategoryHint": {
+    "description": "Custom category hint text"
+  },
+
+  "customCategoryHelper": "Leave empty to use 'Other' as category",
+  "@customCategoryHelper": {
+    "description": "Custom category helper text"
+  },
+
+  "updateLogEntry": "Update Log Entry",
+  "@updateLogEntry": {
+    "description": "Update log entry button"
+  },
+
+  "saveLogEntry": "Save Log Entry",
+  "@saveLogEntry": {
+    "description": "Save log entry button"
+  },
+
+  "quickLog": "Quick Log",
+  "@quickLog": {
+    "description": "Quick log button to log an activity from notification"
+  },
+
+  "activityLogged": "Activity logged successfully",
+  "@activityLogged": {
+    "description": "Message shown when activity is logged"
+  },
+
+  "backupDialogTitle": "Backup Data",
+  "@backupDialogTitle": {
+    "description": "Backup dialog title"
+  },
+
+  "backupDialogContent": "This will create a backup file containing:",
+  "@backupDialogContent": {
+    "description": "Backup dialog content description"
+  },
+
+  "tanksCount": "{count} tank(s)",
+  "@tanksCount": {
+    "description": "Number of tanks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "allFishAndConfigurations": "All fish and configurations",
+  "@allFishAndConfigurations": {
+    "description": "All fish and configurations backup item"
+  },
+
+  "speciesTags": "Species tags",
+  "@speciesTags": {
+    "description": "Species tags backup item"
+  },
+
+  "activityLogs": "Activity logs",
+  "@activityLogs": {
+    "description": "Activity logs backup item"
+  },
+
+  "exportDateLabel": "Export date: {date}",
+  "@exportDateLabel": {
+    "description": "Export date label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "backupFileNote": "The backup file will be saved to your device.",
+  "@backupFileNote": {
+    "description": "Backup file save location note"
+  },
+
+  "createBackupButton": "Create Backup",
+  "@createBackupButton": {
+    "description": "Create backup button label"
+  },
+
+  "restoreDialogTitle": "Restore Data",
+  "@restoreDialogTitle": {
+    "description": "Restore dialog title"
+  },
+
+  "importantWarning": "Important",
+  "@importantWarning": {
+    "description": "Important warning label"
+  },
+
+  "restoreWarningIntro": "Restoring from backup will:",
+  "@restoreWarningIntro": {
+    "description": "Restore warning introduction"
+  },
+
+  "replaceAllTanks": "Replace ALL current tanks",
+  "@replaceAllTanks": {
+    "description": "Replace all tanks warning item"
+  },
+
+  "replaceAllSpeciesTags": "Replace ALL species tags",
+  "@replaceAllSpeciesTags": {
+    "description": "Replace all species tags warning item"
+  },
+
+  "replaceAllActivityLogs": "Replace ALL activity logs",
+  "@replaceAllActivityLogs": {
+    "description": "Replace all activity logs warning item"
+  },
+
+  "replaceAllNotifications": "Replace ALL notifications",
+  "@replaceAllNotifications": {
+    "description": "Replace all notifications warning item"
+  },
+
+  "cannotBeUndone": "Cannot be undone",
+  "@cannotBeUndone": {
+    "description": "Cannot be undone warning item"
+  },
+
+  "backupBeforeRestoreNote": "Make sure you have a current backup before proceeding.",
+  "@backupBeforeRestoreNote": {
+    "description": "Note to backup before restoring"
+  },
+
+  "chooseFileButton": "Choose File",
+  "@chooseFileButton": {
+    "description": "Choose file button label"
+  },
+
+  "backupCreatedSuccess": "Backup created successfully!",
+  "@backupCreatedSuccess": {
+    "description": "Backup created success message"
+  },
+
+  "savedToFile": "Saved to: {fileName}",
+  "@savedToFile": {
+    "description": "Saved to file message",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "failedToCreateBackup": "Failed to create backup: {error}",
+  "@failedToCreateBackup": {
+    "description": "Failed to create backup error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "dataRestoredSuccess": "Data restored successfully!",
+  "@dataRestoredSuccess": {
+    "description": "Data restored success message"
+  },
+
+  "today": "Today",
+  "@today": {
+    "description": "Today label"
+  },
+
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
+
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "description": "Days ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "moreActivities": "+{count} more activities",
+  "@moreActivities": {
+    "description": "More activities label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "oneHourAgo": "1 hour ago",
+  "@oneHourAgo": {
+    "description": "One hour ago label"
+  },
+
+  "xHoursAgo": "{count} hours ago",
+  "@xHoursAgo": {
+    "description": "X hours ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "oneMinuteAgo": "1 minute ago",
+  "@oneMinuteAgo": {
+    "description": "One minute ago label"
+  },
+
+  "xMinutesAgo": "{count} minutes ago",
+  "@xMinutesAgo": {
+    "description": "X minutes ago label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Just now label"
+  },
+
+  "notify": "Notify",
+  "@notify": {
+    "description": "Notify button label"
   }
 }

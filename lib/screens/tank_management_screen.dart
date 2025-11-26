@@ -9,6 +9,8 @@ import '../models/tank.dart';
 import '../models/fish.dart';
 import '../models/water_parameter.dart';
 import '../models/dosing_entry.dart';
+import '../models/tank_notification.dart';
+import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -25,6 +27,7 @@ import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_management_screen.dart';
+import 'notification_logger_screen.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
@@ -1046,6 +1049,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
+                          case 'activity_log':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => NotificationLoggerScreen(tank: tank),
+                              ),
+                            );
+                            break;
                           case 'set_background':
                             _showSetBackgroundDialog(context, ref, tank);
                             break;
@@ -1106,6 +1116,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 const Icon(Icons.notifications, color: Colors.orange, size: 18),
                                 const SizedBox(width: 8),
                                 Text(l10n.notifications, style: const TextStyle(color: Colors.orange)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'activity_log',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.history, color: Colors.green, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.activityLog, style: const TextStyle(color: Colors.green)),
                               ],
                             ),
                           ),
@@ -1380,6 +1400,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   const SizedBox(height: 14),
                 ],
                 
+                // Activity Log and Upcoming Notifications section
+                _buildActivitySection(context, ref, tank, cs),
+                
                 // Action buttons area (space for future parameters/dosing)
                 Row(
                   children: [
@@ -1481,6 +1504,319 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Build the activity section for the tank card showing:
+  /// 1. Most recent activity log entry
+  /// 2. Upcoming notifications within 12 hours with quick log button
+  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs) {
+    final l10n = AppLocalizations.of(context)!;
+    final List<Widget> items = [];
+    
+    // Get most recent activity log
+    if (tank.notificationLogs.isNotEmpty) {
+      final sortedLogs = List.from(tank.notificationLogs)
+        ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+      final recentLog = sortedLogs.first;
+      
+      // Calculate time ago in hours/minutes for today, otherwise days
+      final now = DateTime.now();
+      final difference = now.difference(recentLog.loggedAt);
+      final hoursAgo = difference.inHours;
+      final minutesAgo = difference.inMinutes % 60;
+      final daysSince = difference.inDays;
+      
+      String timeAgo;
+      if (daysSince == 0) {
+        // Today - show hours/minutes ago
+        if (hoursAgo > 0) {
+          timeAgo = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
+        } else if (minutesAgo > 0) {
+          timeAgo = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+        } else {
+          timeAgo = l10n.justNow;
+        }
+      } else if (daysSince == 1) {
+        timeAgo = l10n.yesterday;
+      } else if (daysSince < 7) {
+        timeAgo = l10n.daysAgo(daysSince);
+      } else {
+        timeAgo = '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
+      }
+      
+      items.add(
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHigh.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(0.4),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _getActivityIcon(recentLog.type),
+                size: 16,
+                color: _getActivityColor(recentLog.type),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recentLog.getDisplayName(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    Text(
+                      timeAgo,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Check for notifications within 12 hours (past and future) that are not logged
+    final now = DateTime.now();
+    final twelveHoursFromNow = now.add(const Duration(hours: 12));
+    final twelveHoursAgo = now.subtract(const Duration(hours: 12));
+    
+    for (final notification in tank.notifications) {
+      if (!notification.enabled) continue;
+      
+      DateTime? nextDate;
+      if (notification.repeatFrequency != RepeatFrequency.none) {
+        nextDate = notification.getNextNotificationDate();
+      } else {
+        // Non-repeating: check if scheduled time is within 12 hour window
+        if (notification.notificationDateTime.isAfter(twelveHoursAgo) && 
+            notification.notificationDateTime.isBefore(twelveHoursFromNow)) {
+          nextDate = notification.notificationDateTime;
+        }
+      }
+      
+      if (nextDate != null && nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(twelveHoursAgo)) {
+        // Time windows for checking if activity is already logged
+        const loggedByIdWindowHours = 12; // If logged by notification ID, consider logged within 12 hours
+        const loggedByTypeWindowHours = 2; // If logged by same type, consider logged within 2 hours
+        
+        // Check if this notification has already been logged within the relevant time window
+        final isLogged = tank.notificationLogs.any((log) {
+          // Check if there's a log entry for this notification within the ID window
+          if (log.notificationId == notification.id) {
+            final logDifference = log.loggedAt.difference(nextDate!).abs();
+            return logDifference.inHours <= loggedByIdWindowHours;
+          }
+          // Also check if any log of the same type was made within the type window
+          if (log.type == notification.type) {
+            final logDifference = log.loggedAt.difference(nextDate!).abs();
+            return logDifference.inHours <= loggedByTypeWindowHours;
+          }
+          return false;
+        });
+        
+        if (isLogged) continue; // Skip if already logged
+        
+        // Calculate time display
+        String timeDisplay;
+        final bool isPast = nextDate.isBefore(now);
+        
+        if (isPast) {
+          // Past - show how long ago
+          final difference = now.difference(nextDate);
+          final hoursAgo = difference.inHours;
+          final minutesAgo = difference.inMinutes % 60;
+          
+          if (hoursAgo > 0) {
+            timeDisplay = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
+          } else if (minutesAgo > 0) {
+            timeDisplay = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+          } else {
+            timeDisplay = l10n.justNow;
+          }
+        } else {
+          // Future - show time until
+          final hoursUntil = nextDate.difference(now).inHours;
+          final minutesUntil = nextDate.difference(now).inMinutes % 60;
+          
+          if (hoursUntil > 0) {
+            timeDisplay = hoursUntil == 1 ? l10n.inOneHour : l10n.inXHours(hoursUntil);
+          } else if (minutesUntil > 0) {
+            timeDisplay = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
+          } else {
+            timeDisplay = l10n.inLessThanAMinute;
+          }
+        }
+        
+        items.add(
+          Container(
+            margin: EdgeInsets.only(top: items.isNotEmpty ? 8 : 0),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _getActivityColor(notification.type).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _getActivityColor(notification.type).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _getActivityIcon(notification.type),
+                  size: 18,
+                  color: _getActivityColor(notification.type),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        notification.getDisplayName(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      Text(
+                        timeDisplay,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isPast ? Colors.red : _getActivityColor(notification.type),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Quick log + button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _quickLogFromCard(context, ref, tank, notification),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _getActivityColor(notification.type),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      children: [
+        ...items,
+        const SizedBox(height: 14),
+      ],
+    );
+  }
+
+  IconData _getActivityIcon(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Icons.restaurant;
+      case NotificationType.dosing:
+        return Icons.medication_liquid;
+      case NotificationType.waterChange:
+        return Icons.water_drop;
+      case NotificationType.testing:
+        return Icons.science;
+      case NotificationType.maintenance:
+        return Icons.build;
+      case NotificationType.other:
+        return Icons.notifications;
+    }
+  }
+
+  Color _getActivityColor(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Colors.orange;
+      case NotificationType.dosing:
+        return Colors.purple;
+      case NotificationType.waterChange:
+        return Colors.blue;
+      case NotificationType.testing:
+        return Colors.teal;
+      case NotificationType.maintenance:
+        return Colors.brown;
+      case NotificationType.other:
+        return Colors.grey;
+    }
+  }
+
+  Future<void> _quickLogFromCard(BuildContext context, WidgetRef ref, Tank tank, TankNotification notification) async {
+    // Get the latest tank state from the provider
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == tank.id, orElse: () => tank);
+    
+    // Create a new log entry based on the notification type and custom category
+    final log = NotificationLog.create(
+      type: notification.type,
+      customCategory: notification.type == NotificationType.other
+          ? (notification.customCategory ?? 'Other')
+          : null,
+      notes: notification.notes,
+      notificationId: notification.id,
+    );
+    
+    final updatedLogs = [...currentTank.notificationLogs, log];
+    final updatedTank = currentTank.copyWith(
+      notificationLogs: updatedLogs,
+      updatedAt: DateTime.now(),
+    );
+    
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    if (context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      context.showAccessibleMessage(l10n.activityLogged);
+    }
+    
+    AnalyticsService.logFeatureUsed(
+      featureName: 'quick_log_from_card',
+      parameters: {
+        'type': notification.type.name,
+        'has_custom_category': notification.customCategory != null ? 'true' : 'false',
+      },
+    );
+    
+    AnalyticsService.logTankAction(
+      action: 'quick_log_from_card',
+      tankType: currentTank.type,
     );
   }
 
@@ -1866,6 +2202,135 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     },
                                     icon: const Icon(Icons.add, size: 18),
                                     label: const Text('Add Parameter'),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        
+                        // Activity Log section
+                        if (tank.notificationLogs.isNotEmpty) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.history, size: 18, color: Colors.green),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          AppLocalizations.of(context)!.activityLog,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      FilledButton.icon(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => NotificationLoggerScreen(tank: tank),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.edit, size: 16),
+                                        label: Text(AppLocalizations.of(context)!.manage),
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: _buildLatestActivityLogs(context, tank, cs),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ] else ...[
+                          // Empty state - no activity logs yet
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.history, size: 18, color: Colors.green),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          AppLocalizations.of(context)!.activityLog,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Icon(
+                                    Icons.history_outlined,
+                                    size: 48,
+                                    color: cs.onSurfaceVariant.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    AppLocalizations.of(context)!.noActivityLogsYet,
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(context)!.noActivityLogsDescription,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant.withOpacity(0.7),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  FilledButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => NotificationLoggerScreen(tank: tank),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add, size: 18),
+                                    label: Text(AppLocalizations.of(context)!.addLogEntry),
                                     style: FilledButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     ),
@@ -2269,8 +2734,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Notifications button - aligned to the left
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => NotificationManagementScreen(tank: tank),
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.notifications_outlined,
+                          color: cs.primary,
+                          size: 20,
+                        ),
+                        label: Text(
+                          AppLocalizations.of(context)!.notify,
+                          style: TextStyle(color: cs.primary),
+                        ),
+                      ),
+                      const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Close'),
@@ -3106,6 +3591,97 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               '+${tank.dosingEntries.length - 5} more doses',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildLatestActivityLogs(BuildContext context, Tank tank, ColorScheme cs) {
+    if (tank.notificationLogs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Get the 5 most recent activity logs
+    final sortedLogs = List.from(tank.notificationLogs)
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    final recentLogs = sortedLogs.take(5).toList();
+
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...recentLogs.map((log) {
+          // Use calendar day comparison instead of 24-hour periods
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final logDate = DateTime(log.loggedAt.year, log.loggedAt.month, log.loggedAt.day);
+          final daysDifference = today.difference(logDate).inDays;
+          
+          final timeAgo = daysDifference == 0
+              ? l10n.today
+              : daysDifference == 1
+                  ? l10n.yesterday
+                  : daysDifference < 7
+                      ? l10n.daysAgo(daysDifference)
+                      : '${log.loggedAt.month}/${log.loggedAt.day}/${log.loggedAt.year}';
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: cs.outline.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _getActivityIcon(log.type),
+                    size: 16,
+                    color: _getActivityColor(log.type),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          log.getDisplayName(),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        Text(
+                          timeAgo,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        if (tank.notificationLogs.length > 5)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              l10n.moreActivities(tank.notificationLogs.length - 5),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
