@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'notification_log.dart';
 
 /// Enum for notification types
 enum NotificationType {
@@ -230,6 +231,42 @@ class TankNotification {
       case RepeatFrequency.none:
         return null;
     }
+  }
+
+  /// Calculate the next notification date considering activity logs.
+  /// 
+  /// This is the primary method for determining when the next notification
+  /// should occur, as it considers the user's actual logged activities.
+  /// 
+  /// If matching activity logs exist, the next notification date is calculated
+  /// from the most recent activity. Otherwise, falls back to the standard
+  /// calculation based on the original notification date.
+  /// 
+  /// [activityLogs] - The list of activity logs to consider
+  /// 
+  /// Returns the next notification date, or null if the notification is disabled
+  /// or non-repeating.
+  DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs) {
+    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+      return null;
+    }
+
+    // Find matching activity logs
+    final matchingLogs = activityLogs.where((log) {
+      return matchesActivityLog(log.type, log.customCategory);
+    }).toList();
+
+    if (matchingLogs.isNotEmpty) {
+      // Sort by date (newest first) and get the most recent
+      matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+      final lastActivity = matchingLogs.first;
+      
+      // Calculate next date from the last activity
+      return getNextNotificationDateFromBase(lastActivity.loggedAt);
+    }
+
+    // Fall back to the standard calculation
+    return getNextNotificationDate();
   }
 
   /// Check if an activity log matches this notification's category.

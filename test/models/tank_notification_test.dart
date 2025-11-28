@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fish_ai/models/notification_log.dart';
 import 'package:fish_ai/models/tank_notification.dart';
 
 void main() {
@@ -990,6 +991,147 @@ void main() {
 
       expect(notification.matchesActivityLog(NotificationType.other, null), true);
       expect(notification.matchesActivityLog(NotificationType.other, ''), true); // Empty = null
+    });
+  });
+
+  group('TankNotification - getNextNotificationDateWithActivity', () {
+    test('should calculate next date from most recent matching activity', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 2, // Every 2 days
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final activityLogs = [
+        NotificationLog(
+          id: 'log-1',
+          type: NotificationType.feeding,
+          loggedAt: DateTime(2024, 6, 10, 10, 0),
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+        NotificationLog(
+          id: 'log-2',
+          type: NotificationType.feeding,
+          loggedAt: DateTime(2024, 6, 15, 14, 0), // Most recent
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+      ];
+
+      final nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+
+      expect(nextDate, isNotNull);
+      // Should be 2 days after most recent activity (June 15), at original time (9am)
+      expect(nextDate, DateTime(2024, 6, 17, 9, 0));
+    });
+
+    test('should fall back to standard calculation when no matching activities', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      // Activity logs with different type
+      final activityLogs = [
+        NotificationLog(
+          id: 'log-1',
+          type: NotificationType.waterChange, // Different type
+          loggedAt: DateTime(2024, 6, 15, 14, 0),
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+      ];
+
+      final nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+
+      // Should fall back to standard calculation (getNextNotificationDate)
+      expect(nextDate, isNotNull);
+      expect(nextDate, notification.getNextNotificationDate());
+    });
+
+    test('should return null for disabled notifications', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: false,
+      );
+
+      final activityLogs = [
+        NotificationLog(
+          id: 'log-1',
+          type: NotificationType.feeding,
+          loggedAt: DateTime(2024, 6, 15, 14, 0),
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+      ];
+
+      expect(notification.getNextNotificationDateWithActivity(activityLogs), isNull);
+    });
+
+    test('should return null for non-repeating notifications', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.none,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final activityLogs = [
+        NotificationLog(
+          id: 'log-1',
+          type: NotificationType.feeding,
+          loggedAt: DateTime(2024, 6, 15, 14, 0),
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+      ];
+
+      expect(notification.getNextNotificationDateWithActivity(activityLogs), isNull);
+    });
+
+    test('should work with empty activity logs', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateWithActivity([]);
+
+      // Should fall back to standard calculation
+      expect(nextDate, notification.getNextNotificationDate());
     });
   });
 }

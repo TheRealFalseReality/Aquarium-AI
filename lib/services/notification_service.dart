@@ -151,14 +151,11 @@ class NotificationService {
     final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Calculate the next notification date
-    // If activity logs are provided, calculate based on the last matching activity
-    DateTime? nextDate;
-    if (activityLogs != null && activityLogs.isNotEmpty) {
-      nextDate = _calculateNextDateFromActivity(notification, activityLogs);
-    }
-    // Fall back to the standard calculation
-    nextDate ??= notification.getNextNotificationDate();
+    // Calculate the next notification date using activity-based scheduling
+    // This uses the same logic as the UI displays, ensuring consistency
+    final nextDate = activityLogs != null 
+        ? notification.getNextNotificationDateWithActivity(activityLogs)
+        : notification.getNextNotificationDate();
     
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
@@ -175,32 +172,6 @@ class NotificationService {
         payload: '${tankId}_${notification.id}',
       );
     }
-  }
-
-  /// Calculate the next notification date based on activity logs
-  DateTime? _calculateNextDateFromActivity(
-    TankNotification notification,
-    List<NotificationLog> logs,
-  ) {
-    if (notification.repeatFrequency == RepeatFrequency.none) {
-      return null;
-    }
-
-    // Find matching activity logs
-    final matchingLogs = logs.where((log) {
-      return notification.matchesActivityLog(log.type, log.customCategory);
-    }).toList();
-
-    if (matchingLogs.isEmpty) {
-      return null;
-    }
-
-    // Sort by date (newest first) and get the most recent
-    matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
-    final lastActivity = matchingLogs.first;
-
-    // Calculate next date from the last activity
-    return notification.getNextNotificationDateFromBase(lastActivity.loggedAt);
   }
 
   /// Cancel a scheduled notification

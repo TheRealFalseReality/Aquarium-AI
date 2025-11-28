@@ -208,10 +208,14 @@ class _NotificationManagementScreenState
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Get next notification date for display
+    // Get the current tank to access activity logs
+    final currentTank = _getCurrentTank();
+    
+    // Get next notification date for display, considering activity logs
     DateTime displayDate;
     if (notification.repeatFrequency != RepeatFrequency.none) {
-      displayDate = notification.getNextNotificationDate() ?? notification.notificationDateTime;
+      displayDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs) 
+          ?? notification.notificationDateTime;
     } else {
       displayDate = notification.notificationDateTime;
     }
@@ -297,11 +301,14 @@ class _NotificationManagementScreenState
                 if (notification.enabled)
                   Builder(
                     builder: (context) {
-                      // For repeating notifications, use getNextNotificationDate()
+                      // Get the current tank to access activity logs
+                      final currentTank = _getCurrentTank();
+                      
+                      // For repeating notifications, use activity-based calculation
                       // For non-repeating notifications, use notificationDateTime if it's in the future
                       final DateTime? nextDate;
                       if (notification.repeatFrequency != RepeatFrequency.none) {
-                        nextDate = notification.getNextNotificationDate();
+                        nextDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs);
                       } else {
                         // Non-repeating: show if scheduled time is in the future
                         nextDate = notification.notificationDateTime.isAfter(DateTime.now())
