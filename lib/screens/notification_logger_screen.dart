@@ -7,6 +7,7 @@ import '../models/tank_notification.dart';
 import '../providers/tank_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
+import '../services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 
 class NotificationLoggerScreen extends ConsumerStatefulWidget {
@@ -20,6 +21,7 @@ class NotificationLoggerScreen extends ConsumerStatefulWidget {
 
 class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScreen> {
   String? _expandedCategory;
+  final NotificationService _notificationService = NotificationService();
 
   Tank _getCurrentTank() {
     // Get the latest tank state from the provider
@@ -51,7 +53,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     );
   }
 
-  void _deleteLogEntry(NotificationLog entry) {
+  Future<void> _deleteLogEntry(NotificationLog entry) async {
     final currentTank = _getCurrentTank();
     final updatedLogs = currentTank.notificationLogs
         .where((e) => e.id != entry.id)
@@ -60,7 +62,18 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
       notificationLogs: updatedLogs,
       updatedAt: DateTime.now(),
     );
-    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    // Reschedule matching notifications based on remaining activity logs
+    // (next most recent activity becomes the base)
+    await _notificationService.rescheduleMatchingNotifications(
+      tankId: currentTank.id,
+      tankName: currentTank.name,
+      notifications: currentTank.notifications,
+      activityLogs: updatedLogs,
+      activityType: entry.type,
+      activityCustomCategory: entry.customCategory,
+    );
     
     // Log notification log entry deletion
     AnalyticsService.logFeatureUsed(
@@ -494,6 +507,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
   final _formKey = GlobalKey<FormState>();
   final _customCategoryController = TextEditingController();
   final _notesController = TextEditingController();
+  final NotificationService _notificationService = NotificationService();
   late DateTime _selectedDate;
   late NotificationType _selectedType;
 
@@ -546,7 +560,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     }
   }
 
-  void _saveEntry() {
+  Future<void> _saveEntry() async {
     if (_formKey.currentState!.validate()) {
       final NotificationLog entry;
       final isEditing = widget.existingEntry != null;
@@ -563,6 +577,8 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
       // Determine if we need to clear custom category (when switching from 'other' to another type)
       final shouldClearCustomCategory = _selectedType != NotificationType.other;
       
+      List<NotificationLog> updatedLogs;
+      
       if (isEditing) {
         // Update existing entry - loggedAt is included to allow users to correct/adjust the date
         entry = widget.existingEntry!.copyWith(
@@ -574,7 +590,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         );
         
         // Replace the existing entry in the list
-        final updatedLogs = widget.tank.notificationLogs.map((e) {
+        updatedLogs = widget.tank.notificationLogs.map((e) {
           return e.id == entry.id ? entry : e;
         }).toList();
         
@@ -583,7 +599,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           updatedAt: DateTime.now(),
         );
         
-        ref.read(tankProvider.notifier).updateTank(updatedTank);
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
         
         // Log notification log entry update
         AnalyticsService.logFeatureUsed(
@@ -601,13 +617,13 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           notes: trimmedNotes.isNotEmpty ? trimmedNotes : null,
         );
         
-        final updatedLogs = [...widget.tank.notificationLogs, entry];
+        updatedLogs = [...widget.tank.notificationLogs, entry];
         final updatedTank = widget.tank.copyWith(
           notificationLogs: updatedLogs,
           updatedAt: DateTime.now(),
         );
         
-        ref.read(tankProvider.notifier).updateTank(updatedTank);
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
         
         // Log notification log entry addition
         AnalyticsService.logFeatureUsed(
@@ -625,7 +641,19 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         );
       }
       
-      Navigator.pop(context);
+      // Reschedule matching notifications based on the new/updated activity
+      await _notificationService.rescheduleMatchingNotifications(
+        tankId: widget.tank.id,
+        tankName: widget.tank.name,
+        notifications: widget.tank.notifications,
+        activityLogs: updatedLogs,
+        activityType: entry.type,
+        activityCustomCategory: entry.customCategory,
+      );
+      
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 

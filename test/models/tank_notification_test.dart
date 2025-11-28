@@ -749,4 +749,247 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(5));
     });
   });
+
+  group('TankNotification - Activity-Based Scheduling', () {
+    test('should calculate next date from base date for daily frequency', () {
+      final baseDate = DateTime(2024, 6, 15, 10, 0); // Activity at 10am
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0), // Original at 9am
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 2, // Every 2 days
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      // Should be 2 days after base date, at the original time (9am)
+      expect(nextDate, DateTime(2024, 6, 17, 9, 0));
+    });
+
+    test('should calculate next date from base date for weekly frequency', () {
+      final baseDate = DateTime(2024, 6, 15);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.waterChange,
+        notificationDateTime: DateTime(2024, 6, 1, 10, 30),
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 1, // Every week
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      // Should be 7 days after base date, at the original time (10:30am)
+      expect(nextDate, DateTime(2024, 6, 22, 10, 30));
+    });
+
+    test('should calculate next date from base date for monthly frequency', () {
+      final baseDate = DateTime(2024, 6, 15, 14, 0);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.maintenance,
+        notificationDateTime: DateTime(2024, 5, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      // Should be 1 month after base date
+      expect(nextDate!.year, 2024);
+      expect(nextDate.month, 7);
+      expect(nextDate.day, 15);
+      expect(nextDate.hour, 9); // Preserves original time
+    });
+
+    test('should calculate next date from base date for yearly frequency', () {
+      final baseDate = DateTime(2024, 6, 15);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.other,
+        notificationDateTime: DateTime(2023, 1, 1, 12, 0),
+        repeatFrequency: RepeatFrequency.yearly,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      // Should be 1 year after base date
+      expect(nextDate!.year, 2025);
+      expect(nextDate.month, 6);
+      expect(nextDate.day, 15);
+    });
+
+    test('should return null for non-repeating notifications from base', () {
+      final baseDate = DateTime(2024, 6, 15);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.none,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNull);
+    });
+
+    test('should return null for disabled notifications from base', () {
+      final baseDate = DateTime(2024, 6, 15);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: false,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNull);
+    });
+
+    test('should preserve original notification time when calculating from base', () {
+      final baseDate = DateTime(2024, 6, 15, 14, 30, 45); // Different time
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 8, 15, 30), // Specific time
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      expect(nextDate!.hour, 8);
+      expect(nextDate.minute, 15);
+      expect(nextDate.second, 30);
+    });
+
+    test('should handle custom repeat intervals from base', () {
+      final baseDate = DateTime(2024, 6, 15);
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.dosing,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 3, // Every 3 days
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromBase(baseDate);
+
+      expect(nextDate, isNotNull);
+      expect(nextDate, DateTime(2024, 6, 18, 9, 0)); // 3 days after base
+    });
+  });
+
+  group('TankNotification - Activity Log Matching', () {
+    test('should match feeding activity log', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      expect(notification.matchesActivityLog(NotificationType.feeding, null), true);
+      expect(notification.matchesActivityLog(NotificationType.dosing, null), false);
+    });
+
+    test('should match other type with same custom category', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.other,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        customCategory: 'Filter Cleaning',
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      expect(notification.matchesActivityLog(NotificationType.other, 'Filter Cleaning'), true);
+      expect(notification.matchesActivityLog(NotificationType.other, 'filter cleaning'), true); // Case insensitive
+      expect(notification.matchesActivityLog(NotificationType.other, ' Filter Cleaning '), true); // Trims whitespace
+      expect(notification.matchesActivityLog(NotificationType.other, 'Something Else'), false);
+    });
+
+    test('should not match other type with different custom category', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.other,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        customCategory: 'Filter Cleaning',
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      expect(notification.matchesActivityLog(NotificationType.other, 'Coral Dipping'), false);
+    });
+
+    test('should not match different notification type', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.waterChange,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.weekly,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      expect(notification.matchesActivityLog(NotificationType.feeding, null), false);
+      expect(notification.matchesActivityLog(NotificationType.waterChange, null), true);
+    });
+
+    test('should match other type with null custom categories on both sides', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.other,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        customCategory: null,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      expect(notification.matchesActivityLog(NotificationType.other, null), true);
+      expect(notification.matchesActivityLog(NotificationType.other, ''), true); // Empty = null
+    });
+  });
 }

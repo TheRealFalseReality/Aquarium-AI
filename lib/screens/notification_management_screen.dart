@@ -463,10 +463,12 @@ class _NotificationManagementScreenState
 
     // Schedule or cancel notification
     if (enabled) {
+      // Schedule with activity logs for activity-based scheduling
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: updatedNotification,
+        activityLogs: currentTank.notificationLogs,
       );
     } else {
       await _notificationService.cancelNotification(updatedNotification);
@@ -506,6 +508,16 @@ class _NotificationManagementScreenState
     );
     
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    // Reschedule matching notifications based on the new activity
+    await _notificationService.rescheduleMatchingNotifications(
+      tankId: currentTank.id,
+      tankName: currentTank.name,
+      notifications: currentTank.notifications,
+      activityLogs: updatedLogs,
+      activityType: log.type,
+      activityCustomCategory: log.customCategory,
+    );
     
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
@@ -1127,12 +1139,13 @@ class _NotificationFormScreenState
 
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
 
-    // Schedule notification if enabled
+    // Schedule notification if enabled, using activity logs for activity-based scheduling
     if (_enabled) {
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
+        activityLogs: currentTank.notificationLogs,
       );
     }
 
