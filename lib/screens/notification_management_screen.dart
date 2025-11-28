@@ -719,11 +719,14 @@ class _NotificationFormScreenState
   void initState() {
     super.initState();
     
+    // Always use today's date and time as the starting point
+    final now = DateTime.now();
+    _selectedDate = now;
+    _selectedTime = TimeOfDay.fromDateTime(now);
+    
     if (widget.existingNotification != null) {
       final notif = widget.existingNotification!;
       _selectedType = notif.type;
-      _selectedDate = notif.notificationDateTime;
-      _selectedTime = TimeOfDay.fromDateTime(notif.notificationDateTime);
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
       _enabled = notif.enabled;
@@ -732,9 +735,6 @@ class _NotificationFormScreenState
       _customCategoryController.text = notif.customCategory ?? '';
     } else {
       _selectedType = NotificationType.feeding;
-      final now = DateTime.now();
-      _selectedDate = now;
-      _selectedTime = TimeOfDay.fromDateTime(now);
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
       _enabled = true;
