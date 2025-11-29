@@ -1387,5 +1387,10 @@
   "notify": "Notify",
   "@notify": {
     "description": "Notify button label"
+  },
+
+  "dateTimeInPast": "Cannot schedule notification in the past",
+  "@dateTimeInPast": {
+    "description": "Error message when user tries to set a notification date/time in the past"
   }
 }

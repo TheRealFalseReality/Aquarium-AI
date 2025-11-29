@@ -1601,7 +1601,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
-        nextDate = notification.getNextNotificationDate();
+        // Use activity-based calculation for consistent behavior
+        nextDate = notification.getNextNotificationDateWithActivity(tank.notificationLogs);
       } else {
         // Non-repeating: check if scheduled time is within 12 hour window
         if (notification.notificationDateTime.isAfter(twelveHoursAgo) && 

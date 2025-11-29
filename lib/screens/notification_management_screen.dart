@@ -208,10 +208,14 @@ class _NotificationManagementScreenState
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Get next notification date for display
+    // Get the current tank to access activity logs
+    final currentTank = _getCurrentTank();
+    
+    // Get next notification date for display, considering activity logs
     DateTime displayDate;
     if (notification.repeatFrequency != RepeatFrequency.none) {
-      displayDate = notification.getNextNotificationDate() ?? notification.notificationDateTime;
+      displayDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs) 
+          ?? notification.notificationDateTime;
     } else {
       displayDate = notification.notificationDateTime;
     }
@@ -297,11 +301,14 @@ class _NotificationManagementScreenState
                 if (notification.enabled)
                   Builder(
                     builder: (context) {
-                      // For repeating notifications, use getNextNotificationDate()
+                      // Get the current tank to access activity logs
+                      final currentTank = _getCurrentTank();
+                      
+                      // For repeating notifications, use activity-based calculation
                       // For non-repeating notifications, use notificationDateTime if it's in the future
                       final DateTime? nextDate;
                       if (notification.repeatFrequency != RepeatFrequency.none) {
-                        nextDate = notification.getNextNotificationDate();
+                        nextDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs);
                       } else {
                         // Non-repeating: show if scheduled time is in the future
                         nextDate = notification.notificationDateTime.isAfter(DateTime.now())
@@ -463,10 +470,12 @@ class _NotificationManagementScreenState
 
     // Schedule or cancel notification
     if (enabled) {
+      // Schedule with activity logs for activity-based scheduling
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: updatedNotification,
+        activityLogs: currentTank.notificationLogs,
       );
     } else {
       await _notificationService.cancelNotification(updatedNotification);
@@ -506,6 +515,16 @@ class _NotificationManagementScreenState
     );
     
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    // Reschedule matching notifications based on the new activity
+    await _notificationService.rescheduleMatchingNotifications(
+      tankId: currentTank.id,
+      tankName: currentTank.name,
+      notifications: currentTank.notifications,
+      activityLogs: updatedLogs,
+      activityType: log.type,
+      activityCustomCategory: log.customCategory,
+    );
     
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
@@ -700,11 +719,15 @@ class _NotificationFormScreenState
   void initState() {
     super.initState();
     
+    // Always use today's date and time as the starting point
+    final now = DateTime.now();
+    // Store date as midnight to ensure consistent date-only comparison
+    _selectedDate = DateTime(now.year, now.month, now.day);
+    _selectedTime = TimeOfDay.fromDateTime(now);
+    
     if (widget.existingNotification != null) {
       final notif = widget.existingNotification!;
       _selectedType = notif.type;
-      _selectedDate = notif.notificationDateTime;
-      _selectedTime = TimeOfDay.fromDateTime(notif.notificationDateTime);
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
       _enabled = notif.enabled;
@@ -713,9 +736,6 @@ class _NotificationFormScreenState
       _customCategoryController.text = notif.customCategory ?? '';
     } else {
       _selectedType = NotificationType.feeding;
-      final now = DateTime.now();
-      _selectedDate = now;
-      _selectedTime = TimeOfDay.fromDateTime(now);
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
       _enabled = true;
@@ -1018,15 +1038,24 @@ class _NotificationFormScreenState
   }
 
   Future<void> _selectDate() async {
+    // Use the start of today (midnight) as firstDate to allow selecting any time today
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Ensure initialDate is not before firstDate
+    // Use today if _selectedDate is in the past, otherwise use _selectedDate
+    final initialDate = _selectedDate.isBefore(today) ? today : _selectedDate;
+    
     final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: initialDate,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 365 * 10)),
     );
 
     if (date != null) {
-      setState(() => _selectedDate = date);
+      // Normalize to midnight to ensure consistent date-only storage
+      setState(() => _selectedDate = DateTime(date.year, date.month, date.day));
     }
   }
 
@@ -1068,6 +1097,9 @@ class _NotificationFormScreenState
     _formKey.currentState!.save();
 
     final currentTank = _getCurrentTank();
+    
+    // Capture current time once to avoid race conditions
+    final now = DateTime.now();
 
     // Combine date and time
     final notificationDateTime = DateTime(
@@ -1077,6 +1109,20 @@ class _NotificationFormScreenState
       _selectedTime.hour,
       _selectedTime.minute,
     );
+
+    // Check if the selected date/time is in the past
+    if (notificationDateTime.isBefore(now)) {
+      if (mounted) {
+        final colorScheme = Theme.of(context).colorScheme;
+        AccessibleFeedback.showMessage(
+          context,
+          message: AppLocalizations.of(context)!.dateTimeInPast,
+          backgroundColor: colorScheme.error,
+          textColor: colorScheme.onError,
+        );
+      }
+      return;
+    }
 
     final TankNotification notification;
     
@@ -1127,12 +1173,13 @@ class _NotificationFormScreenState
 
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
 
-    // Schedule notification if enabled
+    // Schedule notification if enabled, using activity logs for activity-based scheduling
     if (_enabled) {
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
+        activityLogs: currentTank.notificationLogs,
       );
     }
 

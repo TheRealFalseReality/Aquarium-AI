@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 
 class NotificationService {
@@ -107,10 +108,16 @@ class NotificationService {
   }
 
   /// Schedule a notification from a TankNotification
+  /// 
+  /// If [activityLogs] is provided, the next notification date will be
+  /// calculated based on the last matching activity log, making the
+  /// notification schedule relative to when the user actually completed
+  /// the task.
   Future<void> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
+    List<NotificationLog>? activityLogs,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -144,8 +151,12 @@ class NotificationService {
     final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Schedule the notification
-    final nextDate = notification.getNextNotificationDate();
+    // Calculate the next notification date using activity-based scheduling
+    // This uses the same logic as the UI displays, ensuring consistency
+    final nextDate = activityLogs != null 
+        ? notification.getNextNotificationDateWithActivity(activityLogs)
+        : notification.getNextNotificationDate();
+    
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
       
@@ -182,10 +193,14 @@ class NotificationService {
   }
 
   /// Reschedule all tank notifications (useful after a notification fires)
+  /// 
+  /// If [activityLogs] is provided, notifications will be scheduled based on
+  /// the last matching activity log for each notification type.
   Future<void> rescheduleTankNotifications({
     required String tankId,
     required String tankName,
     required List<TankNotification> notifications,
+    List<NotificationLog>? activityLogs,
   }) async {
     // Cancel existing notifications first
     await cancelTankNotifications(tankId, notifications);
@@ -197,6 +212,38 @@ class NotificationService {
           tankId: tankId,
           tankName: tankName,
           notification: notification,
+          activityLogs: activityLogs,
+        );
+      }
+    }
+  }
+
+  /// Reschedule notifications that match a specific activity type.
+  /// 
+  /// This is called when an activity is logged to update the schedule
+  /// of matching notifications based on the new activity.
+  Future<void> rescheduleMatchingNotifications({
+    required String tankId,
+    required String tankName,
+    required List<TankNotification> notifications,
+    required List<NotificationLog> activityLogs,
+    required NotificationType activityType,
+    String? activityCustomCategory,
+  }) async {
+    for (final notification in notifications) {
+      if (!notification.enabled || notification.repeatFrequency == RepeatFrequency.none) {
+        continue;
+      }
+
+      // Check if this notification matches the activity type
+      if (notification.matchesActivityLog(activityType, activityCustomCategory)) {
+        // Cancel and reschedule with the new activity-based date
+        await cancelNotification(notification);
+        await scheduleNotification(
+          tankId: tankId,
+          tankName: tankName,
+          notification: notification,
+          activityLogs: activityLogs,
         );
       }
     }

@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'notification_log.dart';
 
 /// Enum for notification types
 enum NotificationType {
@@ -185,6 +186,123 @@ class TankNotification {
       case RepeatFrequency.none:
         return null;
     }
+  }
+
+  /// Calculate the next notification date based on a specific base date
+  /// (typically the last logged activity date).
+  /// 
+  /// This allows the notification schedule to be relative to when the user
+  /// actually completed the task, rather than the original notification time.
+  /// 
+  /// For example, if a notification is set for "every 2 days" and the user
+  /// logs an activity today, the next notification will be 2 days from today.
+  /// 
+  /// [baseDate] - The date to calculate the next occurrence from (e.g., last activity date)
+  /// 
+  /// Returns the next notification date, or null if the notification is disabled
+  /// or non-repeating.
+  DateTime? getNextNotificationDateFromBase(DateTime baseDate) {
+    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+      return null;
+    }
+
+    // Preserve the original time from the notification, but use the base date
+    final baseWithTime = DateTime(
+      baseDate.year,
+      baseDate.month,
+      baseDate.day,
+      notificationDateTime.hour,
+      notificationDateTime.minute,
+      notificationDateTime.second,
+      notificationDateTime.millisecond,
+      notificationDateTime.microsecond,
+    );
+
+    // Calculate the next occurrence from the base date
+    switch (repeatFrequency) {
+      case RepeatFrequency.daily:
+        return baseWithTime.add(Duration(days: repeatInterval));
+      case RepeatFrequency.weekly:
+        return baseWithTime.add(Duration(days: 7 * repeatInterval));
+      case RepeatFrequency.monthly:
+        return _addMonths(baseWithTime, repeatInterval);
+      case RepeatFrequency.yearly:
+        return _addYears(baseWithTime, repeatInterval);
+      case RepeatFrequency.none:
+        return null;
+    }
+  }
+
+  /// Calculate the next notification date considering activity logs.
+  /// 
+  /// This is the primary method for determining when the next notification
+  /// should occur, as it considers the user's actual logged activities.
+  /// 
+  /// If matching activity logs exist, the next notification date is calculated
+  /// from the most recent activity. Otherwise, falls back to the standard
+  /// calculation based on the original notification date.
+  /// 
+  /// [activityLogs] - The list of activity logs to consider
+  /// 
+  /// Returns the next notification date, or null if the notification is disabled
+  /// or non-repeating.
+  DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs) {
+    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+      return null;
+    }
+
+    final now = DateTime.now();
+    
+    // If notification is in the future, return it directly
+    // This respects the user's explicit date/time setting
+    if (!notificationDateTime.isBefore(now)) {
+      return notificationDateTime;
+    }
+
+    // Notification date is in the past, so calculate next occurrence
+    // Find matching activity logs
+    final matchingLogs = activityLogs.where((log) {
+      return matchesActivityLog(log.type, log.customCategory);
+    }).toList();
+
+    if (matchingLogs.isNotEmpty) {
+      // Sort by date (newest first) and get the most recent
+      matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+      final lastActivity = matchingLogs.first;
+      
+      // Calculate next date from the last activity
+      return getNextNotificationDateFromBase(lastActivity.loggedAt);
+    }
+
+    // Fall back to the standard calculation
+    return getNextNotificationDate();
+  }
+
+  /// Check if an activity log matches this notification's category.
+  /// 
+  /// For 'other' type notifications, matches are based on the custom category name.
+  /// For standard types, matches are based on the notification type.
+  /// 
+  /// [logType] - The type of the activity log
+  /// [logCustomCategory] - The custom category of the activity log (for 'other' type)
+  /// 
+  /// Returns true if the activity log matches this notification's category.
+  bool matchesActivityLog(NotificationType logType, String? logCustomCategory) {
+    // Types must match
+    if (type != logType) {
+      return false;
+    }
+    
+    // For 'other' type, also match custom category
+    if (type == NotificationType.other) {
+      // Both must have a custom category, or both must not have one
+      final thisCategory = customCategory?.toLowerCase().trim() ?? '';
+      final logCategory = logCustomCategory?.toLowerCase().trim() ?? '';
+      return thisCategory == logCategory;
+    }
+    
+    // For standard types, type match is sufficient
+    return true;
   }
 
   /// Calculate next daily occurrence using optimized math
