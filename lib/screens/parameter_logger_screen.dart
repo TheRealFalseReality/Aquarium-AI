@@ -579,8 +579,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
-        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds', 'temperature']
-        : ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds', 'temperature'];
+        ? ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
+        : ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -874,9 +874,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       _selectedUnit = widget.existingParameter!.unit ?? 'ppm';
     } else {
       // Initialize with default values for new parameter
-      _selectedParameter = 'ammonia';
+      _selectedParameter = 'temperature';
       _selectedDate = DateTime.now();
-      _selectedUnit = 'ppm';
+      _selectedUnit = '°F';
     }
   }
 
@@ -1064,6 +1064,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
+                  const DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
                   const DropdownMenuItem(value: 'ammonia', child: Text('Ammonia')),
                   const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
                   const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
@@ -1075,7 +1076,6 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   const DropdownMenuItem(value: 'ph', child: Text('pH')),
                   const DropdownMenuItem(value: 'potassium', child: Text('Potassium')),
                   const DropdownMenuItem(value: 'tds', child: Text('TDS')),
-                  const DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
                   // Only show salinity, calcium, magnesium, and iodine for marine tanks
                   if (widget.tank.type == 'marine') ...[
                     const DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
