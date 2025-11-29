@@ -1041,11 +1041,16 @@ class _NotificationFormScreenState
     // Use the start of today (midnight) as firstDate to allow selecting any time today
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    
+    // Ensure initialDate is not before firstDate
+    // Use today if _selectedDate is in the past, otherwise use _selectedDate
+    final initialDate = _selectedDate.isBefore(today) ? today : _selectedDate;
+    
     final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDate.isBefore(today) ? today : _selectedDate,
+      initialDate: initialDate,
       firstDate: today,
-      lastDate: now.add(const Duration(days: 365 * 10)),
+      lastDate: today.add(const Duration(days: 365 * 10)),
     );
 
     if (date != null) {
