@@ -155,7 +155,7 @@ class _NotificationManagementScreenState
       body: notifications.isEmpty
           ? _buildEmptyState(context)
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
