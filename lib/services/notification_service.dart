@@ -230,22 +230,27 @@ class NotificationService {
     required NotificationType activityType,
     String? activityCustomCategory,
   }) async {
-    for (final notification in notifications) {
-      if (!notification.enabled || notification.repeatFrequency == RepeatFrequency.none) {
-        continue;
-      }
+    // Filter to only enabled, repeating notifications that match the activity type
+    final matchingNotifications = notifications.where((notification) => 
+      notification.enabled && 
+      notification.repeatFrequency != RepeatFrequency.none &&
+      notification.matchesActivityLog(activityType, activityCustomCategory)
+    ).toList();
 
-      // Check if this notification matches the activity type
-      if (notification.matchesActivityLog(activityType, activityCustomCategory)) {
-        // Cancel and reschedule with the new activity-based date
-        await cancelNotification(notification);
-        await scheduleNotification(
-          tankId: tankId,
-          tankName: tankName,
-          notification: notification,
-          activityLogs: activityLogs,
-        );
-      }
+    // Early return if no notifications match
+    if (matchingNotifications.isEmpty) {
+      return;
+    }
+
+    // Cancel and reschedule each matching notification
+    for (final notification in matchingNotifications) {
+      await cancelNotification(notification);
+      await scheduleNotification(
+        tankId: tankId,
+        tankName: tankName,
+        notification: notification,
+        activityLogs: activityLogs,
+      );
     }
   }
 

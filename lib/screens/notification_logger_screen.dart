@@ -8,6 +8,7 @@ import '../providers/tank_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
 import '../services/notification_service.dart';
+import '../widgets/notification_reschedule_dialog.dart';
 import '../l10n/app_localizations.dart';
 
 class NotificationLoggerScreen extends ConsumerStatefulWidget {
@@ -641,20 +642,97 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         );
       }
       
-      // Reschedule matching notifications based on the new/updated activity
-      await _notificationService.rescheduleMatchingNotifications(
-        tankId: widget.tank.id,
-        tankName: widget.tank.name,
-        notifications: widget.tank.notifications,
-        activityLogs: updatedLogs,
-        activityType: entry.type,
-        activityCustomCategory: entry.customCategory,
-      );
+      // Find matching notifications for this activity type
+      final matchingNotifications = widget.tank.notifications.where((notification) {
+        return notification.enabled &&
+               notification.repeatFrequency != RepeatFrequency.none &&
+               notification.matchesActivityLog(entry.type, entry.customCategory);
+      }).toList();
       
+      // Close the bottom sheet first
       if (mounted) {
         Navigator.pop(context);
       }
+      
+      // If there are matching notifications, ask user how to handle rescheduling
+      if (matchingNotifications.isNotEmpty && mounted) {
+        // Show dialog for the first matching notification
+        // (typically there's only one notification per activity type)
+        final matchingNotification = matchingNotifications.first;
+        final rescheduleOption = await NotificationRescheduleDialog.show(
+          context,
+          matchingNotification,
+        );
+        
+        if (rescheduleOption != null && mounted) {
+          await _handleRescheduleOption(
+            matchingNotification,
+            entry,
+            updatedLogs,
+            rescheduleOption,
+          );
+        }
+      }
     }
+  }
+
+  /// Handle the reschedule option selected by the user
+  Future<void> _handleRescheduleOption(
+    TankNotification notification,
+    NotificationLog log,
+    List<NotificationLog> updatedLogs,
+    RescheduleOption option,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    switch (option) {
+      case RescheduleOption.rescheduleFromNow:
+        // Reschedule based on the activity log date
+        await _notificationService.rescheduleMatchingNotifications(
+          tankId: widget.tank.id,
+          tankName: widget.tank.name,
+          notifications: widget.tank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.notificationUpdated)),
+          );
+        }
+        break;
+        
+      case RescheduleOption.keepOriginal:
+        // Cancel and reschedule from the original notification date
+        await _notificationService.cancelNotification(notification);
+        await _notificationService.scheduleNotification(
+          tankId: widget.tank.id,
+          tankName: widget.tank.name,
+          notification: notification,
+          // Don't pass activity logs - use original schedule
+          activityLogs: null,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.notificationUpdated)),
+          );
+        }
+        break;
+        
+      case RescheduleOption.doNothing:
+        // Do nothing - keep the existing schedule as is
+        break;
+    }
+    
+    AnalyticsService.logFeatureUsed(
+      featureName: 'notification_reschedule_option',
+      parameters: {
+        'option': option.name,
+        'notification_type': notification.type.name,
+        'source': 'activity_logger',
+      },
+    );
   }
 
   @override

@@ -206,5 +206,15 @@
   "failedToCreateBackup": "Échec de la création de sauvegarde: {error}",
   "dataRestoredSuccess": "Données restaurées avec succès!",
   "notify": "Notifier",
-  "dateTimeInPast": "Impossible de programmer une notification dans le passé"
+  "dateTimeInPast": "Impossible de programmer une notification dans le passé",
+
+  "updateNotificationTitle": "Mettre à jour la notification?",
+  "updateNotificationMessage": "Vous avez une notification \"{notificationName}\" configurée. Souhaitez-vous mettre à jour quand la prochaine notification est programmée?",
+  "rescheduleFromOriginal": "Garder le calendrier original",
+  "rescheduleFromOriginalDescription": "Prochaine notification basée sur la date/heure originale",
+  "rescheduleFromNow": "Reprogrammer à partir de maintenant",
+  "rescheduleFromNowDescription": "Prochaine notification basée sur quand vous avez enregistré cette activité",
+  "doNothing": "Ne rien faire",
+  "doNothingDescription": "Laisser le calendrier de notification inchangé",
+  "notificationUpdated": "Calendrier de notification mis à jour"
 }

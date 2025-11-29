@@ -215,5 +215,15 @@
   "xMinutesAgo": "Vor {count} Minuten",
   "justNow": "Gerade eben",
   "notify": "Benachrichtigen",
-  "dateTimeInPast": "Benachrichtigung kann nicht in der Vergangenheit geplant werden"
+  "dateTimeInPast": "Benachrichtigung kann nicht in der Vergangenheit geplant werden",
+
+  "updateNotificationTitle": "Benachrichtigung aktualisieren?",
+  "updateNotificationMessage": "Sie haben eine \"{notificationName}\" Benachrichtigung konfiguriert. Möchten Sie den Zeitpunkt der nächsten Benachrichtigung aktualisieren?",
+  "rescheduleFromOriginal": "Ursprünglichen Zeitplan beibehalten",
+  "rescheduleFromOriginalDescription": "Nächste Benachrichtigung basierend auf ursprünglichem Datum/Uhrzeit",
+  "rescheduleFromNow": "Ab jetzt neu planen",
+  "rescheduleFromNowDescription": "Nächste Benachrichtigung basierend auf wann Sie diese Aktivität protokolliert haben",
+  "doNothing": "Nichts tun",
+  "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
+  "notificationUpdated": "Benachrichtigungsplan aktualisiert"
 }

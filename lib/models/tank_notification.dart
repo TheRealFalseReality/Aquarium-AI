@@ -238,9 +238,10 @@ class TankNotification {
   /// This is the primary method for determining when the next notification
   /// should occur, as it considers the user's actual logged activities.
   /// 
-  /// If matching activity logs exist, the next notification date is calculated
-  /// from the most recent activity. Otherwise, falls back to the standard
-  /// calculation based on the original notification date.
+  /// Priority order:
+  /// 1. If matching activities exist, calculate from most recent activity
+  /// 2. If notificationDateTime is in the future, return it directly
+  /// 3. Otherwise, fall back to standard calculation from notificationDateTime
   /// 
   /// [activityLogs] - The list of activity logs to consider
   /// 
@@ -253,14 +254,7 @@ class TankNotification {
 
     final now = DateTime.now();
     
-    // If notification is in the future, return it directly
-    // This respects the user's explicit date/time setting
-    if (!notificationDateTime.isBefore(now)) {
-      return notificationDateTime;
-    }
-
-    // Notification date is in the past, so calculate next occurrence
-    // Find matching activity logs
+    // Find matching activity logs first - these take priority
     final matchingLogs = activityLogs.where((log) {
       return matchesActivityLog(log.type, log.customCategory);
     }).toList();
@@ -274,7 +268,13 @@ class TankNotification {
       return getNextNotificationDateFromBase(lastActivity.loggedAt);
     }
 
-    // Fall back to the standard calculation
+    // No matching activity logs - use the original notification date
+    // If notification is in the future, return it directly
+    if (!notificationDateTime.isBefore(now)) {
+      return notificationDateTime;
+    }
+
+    // Fall back to the standard calculation based on original date
     return getNextNotificationDate();
   }
 
