@@ -231,5 +231,64 @@ void main() {
       expect(deserializedTank.waterParameters[2].parameterType, 'ammonia');
       expect(deserializedTank.waterParameters[2].value, 0.0);
     });
+
+    test('should serialize and deserialize Tank with temperature parameter for backup/restore', () {
+      final tank = Tank.create(
+        name: 'My Tank',
+        type: 'freshwater',
+        waterParameters: [
+          WaterParameter(
+            id: 'temp-1',
+            parameterType: 'temperature',
+            value: 78.0,
+            unit: '°F',
+            dateRecorded: DateTime(2024, 1, 1),
+            notes: 'Morning temperature',
+          ),
+          WaterParameter(
+            id: 'temp-2',
+            parameterType: 'temperature',
+            value: 25.5,
+            unit: '°C',
+            dateRecorded: DateTime(2024, 1, 2),
+            notes: 'Evening temperature',
+          ),
+          WaterParameter(
+            id: 'param-1',
+            parameterType: 'ammonia',
+            value: 0.0,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 1),
+          ),
+        ],
+      );
+
+      // Serialize to JSON (simulating backup)
+      final json = tank.toJson();
+      
+      // Verify JSON contains temperature parameters
+      expect(json['waterParameters'], isA<List>());
+      expect(json['waterParameters'].length, 3);
+      expect(json['waterParameters'][0]['parameterType'], 'temperature');
+      expect(json['waterParameters'][0]['value'], 78.0);
+      expect(json['waterParameters'][0]['unit'], '°F');
+      expect(json['waterParameters'][1]['parameterType'], 'temperature');
+      expect(json['waterParameters'][1]['value'], 25.5);
+      expect(json['waterParameters'][1]['unit'], '°C');
+
+      // Deserialize from JSON (simulating restore)
+      final deserializedTank = Tank.fromJson(json);
+
+      // Verify temperature parameters are preserved
+      expect(deserializedTank.waterParameters.length, 3);
+      expect(deserializedTank.waterParameters[0].parameterType, 'temperature');
+      expect(deserializedTank.waterParameters[0].value, 78.0);
+      expect(deserializedTank.waterParameters[0].unit, '°F');
+      expect(deserializedTank.waterParameters[0].notes, 'Morning temperature');
+      expect(deserializedTank.waterParameters[1].parameterType, 'temperature');
+      expect(deserializedTank.waterParameters[1].value, 25.5);
+      expect(deserializedTank.waterParameters[1].unit, '°C');
+      expect(deserializedTank.waterParameters[1].notes, 'Evening temperature');
+    });
   });
 }

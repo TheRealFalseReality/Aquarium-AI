@@ -124,6 +124,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return 'TDS';
       case 'iodine':
         return 'Iodine';
+      case 'temperature':
+        return 'Temperature';
       default:
         // For custom parameters, capitalize first letter
         if (parameterType.isEmpty) {
@@ -165,6 +167,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Icons.grain;
       case 'iodine':
         return Icons.ac_unit;
+      case 'temperature':
+        return Icons.thermostat;
       default:
         // For custom parameters, use a generic icon
         return Icons.science;
@@ -203,6 +207,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         return Colors.blueGrey;
       case 'iodine':
         return Colors.deepOrange;
+      case 'temperature':
+        return Colors.redAccent;
       default:
         // For custom parameters, use a teal color
         return Colors.teal;
@@ -322,6 +328,24 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12)) return Colors.yellow.shade700;
         if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15)) return Colors.orange;
         return Colors.red;
+      
+      case 'temperature':
+        // Temperature thresholds - check unit for °F or °C
+        final isFahrenheit = unit == '°F';
+        
+        if (isFahrenheit) {
+          // Fahrenheit thresholds (75-82°F is ideal for most tropical fish)
+          if (value >= 76 && value <= 80) return Colors.green;
+          if ((value >= 72 && value < 76) || (value > 80 && value <= 84)) return Colors.yellow.shade700;
+          if ((value >= 68 && value < 72) || (value > 84 && value <= 88)) return Colors.orange;
+          return Colors.red;
+        } else {
+          // Celsius thresholds (24-28°C is ideal for most tropical fish)
+          if (value >= 24 && value <= 27) return Colors.green;
+          if ((value >= 22 && value < 24) || (value > 27 && value <= 29)) return Colors.yellow.shade700;
+          if ((value >= 20 && value < 22) || (value > 29 && value <= 31)) return Colors.orange;
+          return Colors.red;
+        }
       
       default:
         return Colors.grey;
@@ -555,8 +579,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
-        ? ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
-        : ['ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
+        ? ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
+        : ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -826,7 +850,8 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'potassium': ['ppm', 'mg/L'],
     'tds': ['ppm', 'mg/L'],
     'iodine': ['ppm', 'mg/L'],
-    'custom': ['ppm', 'mg/L', '%', 'dKH', 'meq/L', 'mV', 'pH', 'ppt', 'SG', 'dGH'],
+    'temperature': ['°F', '°C'],
+    'custom': ['ppm', 'mg/L', '%', 'dKH', 'meq/L', 'mV', 'pH', 'ppt', 'SG', 'dGH', '°F', '°C'],
   };
 
   @override
@@ -849,9 +874,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       _selectedUnit = widget.existingParameter!.unit ?? 'ppm';
     } else {
       // Initialize with default values for new parameter
-      _selectedParameter = 'ammonia';
+      _selectedParameter = 'temperature';
       _selectedDate = DateTime.now();
-      _selectedUnit = 'ppm';
+      _selectedUnit = '°F';
     }
   }
 
@@ -1039,6 +1064,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
+                  const DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
                   const DropdownMenuItem(value: 'ammonia', child: Text('Ammonia')),
                   const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
                   const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
