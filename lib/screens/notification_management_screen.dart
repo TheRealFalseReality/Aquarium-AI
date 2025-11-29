@@ -1137,16 +1137,22 @@ class _NotificationFormScreenState
     
     if (widget.existingNotification != null) {
       // Update existing notification
+      // Use clear flags to explicitly set notes/title to null when empty
+      final notesIsEmpty = _notesController.text.isEmpty;
+      final titleIsEmpty = _titleController.text.isEmpty;
+      
       notification = widget.existingNotification!.copyWith(
         type: _selectedType,
         notificationDateTime: notificationDateTime,
         repeatFrequency: _repeatFrequency,
         repeatInterval: _repeatInterval,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-        customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        notes: notesIsEmpty ? null : _notesController.text,
+        customTitle: titleIsEmpty ? null : _titleController.text,
         customCategory: customCategory,
         enabled: _enabled,
         updatedAt: DateTime.now(),
+        clearNotes: notesIsEmpty && widget.existingNotification!.notes != null,
+        clearCustomTitle: titleIsEmpty && widget.existingNotification!.customTitle != null,
       );
     } else {
       // Create new notification
