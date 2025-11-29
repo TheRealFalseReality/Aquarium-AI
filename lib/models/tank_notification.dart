@@ -238,9 +238,10 @@ class TankNotification {
   /// This is the primary method for determining when the next notification
   /// should occur, as it considers the user's actual logged activities.
   /// 
-  /// If matching activity logs exist, the next notification date is calculated
-  /// from the most recent activity. Otherwise, falls back to the standard
-  /// calculation based on the original notification date.
+  /// Priority order:
+  /// 1. If matching activities exist, calculate from most recent activity
+  /// 2. If notificationDateTime is in the future, return it directly
+  /// 3. Otherwise, fall back to standard calculation from notificationDateTime
   /// 
   /// [activityLogs] - The list of activity logs to consider
   /// 
