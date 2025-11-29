@@ -214,5 +214,6 @@
   "oneMinuteAgo": "Vor 1 Minute",
   "xMinutesAgo": "Vor {count} Minuten",
   "justNow": "Gerade eben",
-  "notify": "Benachrichtigen"
+  "notify": "Benachrichtigen",
+  "dateTimeInPast": "Benachrichtigung kann nicht in der Vergangenheit geplant werden"
 }

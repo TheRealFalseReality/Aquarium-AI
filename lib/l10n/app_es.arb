@@ -214,5 +214,6 @@
   "oneMinuteAgo": "Hace 1 minuto",
   "xMinutesAgo": "Hace {count} minutos",
   "justNow": "Ahora mismo",
-  "notify": "Notificar"
+  "notify": "Notificar",
+  "dateTimeInPast": "No se puede programar una notificación en el pasado"
 }

@@ -1037,11 +1037,14 @@ class _NotificationFormScreenState
   }
 
   Future<void> _selectDate() async {
+    // Use the start of today (midnight) as firstDate to allow selecting any time today
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      initialDate: _selectedDate.isBefore(today) ? today : _selectedDate,
+      firstDate: today,
+      lastDate: now.add(const Duration(days: 365 * 10)),
     );
 
     if (date != null) {
@@ -1087,6 +1090,9 @@ class _NotificationFormScreenState
     _formKey.currentState!.save();
 
     final currentTank = _getCurrentTank();
+    
+    // Capture current time once to avoid race conditions
+    final now = DateTime.now();
 
     // Combine date and time
     final notificationDateTime = DateTime(
@@ -1096,6 +1102,20 @@ class _NotificationFormScreenState
       _selectedTime.hour,
       _selectedTime.minute,
     );
+
+    // Check if the selected date/time is in the past
+    if (notificationDateTime.isBefore(now)) {
+      if (mounted) {
+        final colorScheme = Theme.of(context).colorScheme;
+        AccessibleFeedback.showMessage(
+          context,
+          message: AppLocalizations.of(context)!.dateTimeInPast,
+          backgroundColor: colorScheme.error,
+          textColor: colorScheme.onError,
+        );
+      }
+      return;
+    }
 
     final TankNotification notification;
     

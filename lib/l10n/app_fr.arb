@@ -205,5 +205,6 @@
   "savedToFile": "Enregistré dans: {fileName}",
   "failedToCreateBackup": "Échec de la création de sauvegarde: {error}",
   "dataRestoredSuccess": "Données restaurées avec succès!",
-  "notify": "Notifier"
+  "notify": "Notifier",
+  "dateTimeInPast": "Impossible de programmer une notification dans le passé"
 }
