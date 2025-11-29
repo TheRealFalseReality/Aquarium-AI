@@ -131,6 +131,9 @@ class TankNotification {
   }
 
   /// Create a copy with modified fields
+  /// 
+  /// For nullable fields (notes, customTitle, customCategory), set [clearNotes],
+  /// [clearCustomTitle], or [clearCustomCategory] to true to explicitly set them to null.
   TankNotification copyWith({
     String? id,
     NotificationType? type,
@@ -143,6 +146,9 @@ class TankNotification {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? enabled,
+    bool clearNotes = false,
+    bool clearCustomTitle = false,
+    bool clearCustomCategory = false,
   }) {
     return TankNotification(
       id: id ?? this.id,
@@ -150,9 +156,9 @@ class TankNotification {
       notificationDateTime: notificationDateTime ?? this.notificationDateTime,
       repeatFrequency: repeatFrequency ?? this.repeatFrequency,
       repeatInterval: repeatInterval ?? this.repeatInterval,
-      notes: notes ?? this.notes,
-      customTitle: customTitle ?? this.customTitle,
-      customCategory: customCategory ?? this.customCategory,
+      notes: clearNotes ? null : (notes ?? this.notes),
+      customTitle: clearCustomTitle ? null : (customTitle ?? this.customTitle),
+      customCategory: clearCustomCategory ? null : (customCategory ?? this.customCategory),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enabled: enabled ?? this.enabled,

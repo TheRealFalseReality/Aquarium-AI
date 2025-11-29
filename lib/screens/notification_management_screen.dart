@@ -155,7 +155,7 @@ class _NotificationManagementScreenState
       body: notifications.isEmpty
           ? _buildEmptyState(context)
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
@@ -719,14 +719,12 @@ class _NotificationFormScreenState
   void initState() {
     super.initState();
     
-    // Always use today's date and time as the starting point
-    final now = DateTime.now();
-    // Store date as midnight to ensure consistent date-only comparison
-    _selectedDate = DateTime(now.year, now.month, now.day);
-    _selectedTime = TimeOfDay.fromDateTime(now);
-    
     if (widget.existingNotification != null) {
+      // When editing, use the existing notification's date and time
       final notif = widget.existingNotification!;
+      final notifDateTime = notif.notificationDateTime;
+      _selectedDate = DateTime(notifDateTime.year, notifDateTime.month, notifDateTime.day);
+      _selectedTime = TimeOfDay.fromDateTime(notifDateTime);
       _selectedType = notif.type;
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
@@ -735,6 +733,11 @@ class _NotificationFormScreenState
       _titleController.text = notif.customTitle ?? '';
       _customCategoryController.text = notif.customCategory ?? '';
     } else {
+      // For new notifications, use today's date and time as the starting point
+      final now = DateTime.now();
+      // Store date as midnight to ensure consistent date-only comparison
+      _selectedDate = DateTime(now.year, now.month, now.day);
+      _selectedTime = TimeOfDay.fromDateTime(now);
       _selectedType = NotificationType.feeding;
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
@@ -1134,16 +1137,22 @@ class _NotificationFormScreenState
     
     if (widget.existingNotification != null) {
       // Update existing notification
+      // Use clear flags to explicitly set notes/title to null when empty
+      final notesIsEmpty = _notesController.text.isEmpty;
+      final titleIsEmpty = _titleController.text.isEmpty;
+      
       notification = widget.existingNotification!.copyWith(
         type: _selectedType,
         notificationDateTime: notificationDateTime,
         repeatFrequency: _repeatFrequency,
         repeatInterval: _repeatInterval,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-        customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        notes: notesIsEmpty ? null : _notesController.text,
+        customTitle: titleIsEmpty ? null : _titleController.text,
         customCategory: customCategory,
         enabled: _enabled,
         updatedAt: DateTime.now(),
+        clearNotes: notesIsEmpty && widget.existingNotification!.notes != null,
+        clearCustomTitle: titleIsEmpty && widget.existingNotification!.customTitle != null,
       );
     } else {
       // Create new notification
