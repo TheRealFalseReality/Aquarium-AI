@@ -15,10 +15,12 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
+import '../services/notification_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
+import '../widgets/notification_reschedule_dialog.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
@@ -1848,6 +1850,24 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     if (context.mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(l10n.activityLogged);
+      
+      // Check if this notification has a repeat frequency (only repeating notifications need rescheduling)
+      if (notification.repeatFrequency != RepeatFrequency.none) {
+        // Ask user how they want to update the notification schedule
+        final rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
+        
+        if (rescheduleOption != null && context.mounted) {
+          await _handleRescheduleOption(
+            context,
+            ref,
+            currentTank,
+            notification,
+            log,
+            updatedLogs,
+            rescheduleOption,
+          );
+        }
+      }
     }
     
     AnalyticsService.logFeatureUsed(
@@ -1861,6 +1881,64 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     AnalyticsService.logTankAction(
       action: 'quick_log_from_card',
       tankType: currentTank.type,
+    );
+  }
+
+  /// Handle the reschedule option selected by the user
+  Future<void> _handleRescheduleOption(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    TankNotification notification,
+    NotificationLog log,
+    List<NotificationLog> updatedLogs,
+    RescheduleOption option,
+  ) async {
+    final notificationService = NotificationService();
+    final l10n = AppLocalizations.of(context)!;
+    
+    switch (option) {
+      case RescheduleOption.rescheduleFromNow:
+        // Reschedule based on the activity log date (which is now)
+        await notificationService.rescheduleMatchingNotifications(
+          tankId: tank.id,
+          tankName: tank.name,
+          notifications: tank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+        if (context.mounted) {
+          context.showAccessibleMessage(l10n.notificationUpdated);
+        }
+        break;
+        
+      case RescheduleOption.keepOriginal:
+        // Cancel and reschedule from the original notification date
+        await notificationService.cancelNotification(notification);
+        await notificationService.scheduleNotification(
+          tankId: tank.id,
+          tankName: tank.name,
+          notification: notification,
+          // Don't pass activity logs - use original schedule
+          activityLogs: null,
+        );
+        if (context.mounted) {
+          context.showAccessibleMessage(l10n.notificationUpdated);
+        }
+        break;
+        
+      case RescheduleOption.doNothing:
+        // Do nothing - keep the existing schedule as is
+        break;
+    }
+    
+    AnalyticsService.logFeatureUsed(
+      featureName: 'notification_reschedule_option',
+      parameters: {
+        'option': option.name,
+        'notification_type': notification.type.name,
+      },
     );
   }
 

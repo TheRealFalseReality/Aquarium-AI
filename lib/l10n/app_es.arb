@@ -215,5 +215,15 @@
   "xMinutesAgo": "Hace {count} minutos",
   "justNow": "Ahora mismo",
   "notify": "Notificar",
-  "dateTimeInPast": "No se puede programar una notificación en el pasado"
+  "dateTimeInPast": "No se puede programar una notificación en el pasado",
+
+  "updateNotificationTitle": "¿Actualizar Notificación?",
+  "updateNotificationMessage": "Tienes una notificación de \"{notificationName}\" configurada. ¿Te gustaría actualizar cuándo se programa la próxima notificación?",
+  "rescheduleFromOriginal": "Mantener Horario Original",
+  "rescheduleFromOriginalDescription": "Próxima notificación basada en fecha/hora original",
+  "rescheduleFromNow": "Reprogramar desde Ahora",
+  "rescheduleFromNowDescription": "Próxima notificación basada en cuándo registraste esta actividad",
+  "doNothing": "No Hacer Nada",
+  "doNothingDescription": "Dejar el horario de notificación sin cambios",
+  "notificationUpdated": "Horario de notificación actualizado"
 }

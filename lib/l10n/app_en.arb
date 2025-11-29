@@ -1392,5 +1392,55 @@
   "dateTimeInPast": "Cannot schedule notification in the past",
   "@dateTimeInPast": {
     "description": "Error message when user tries to set a notification date/time in the past"
+  },
+
+  "updateNotificationTitle": "Update Notification?",
+  "@updateNotificationTitle": {
+    "description": "Title for the notification reschedule dialog"
+  },
+
+  "updateNotificationMessage": "You have a \"{notificationName}\" notification configured. Would you like to update when the next notification is scheduled?",
+  "@updateNotificationMessage": {
+    "description": "Message for the notification reschedule dialog",
+    "placeholders": {
+      "notificationName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "rescheduleFromOriginal": "Keep Original Schedule",
+  "@rescheduleFromOriginal": {
+    "description": "Option to keep the notification's original schedule"
+  },
+
+  "rescheduleFromOriginalDescription": "Next notification based on original date/time",
+  "@rescheduleFromOriginalDescription": {
+    "description": "Description for keeping original schedule"
+  },
+
+  "rescheduleFromNow": "Reschedule from Now",
+  "@rescheduleFromNow": {
+    "description": "Option to reschedule notification from current time"
+  },
+
+  "rescheduleFromNowDescription": "Next notification based on when you logged this activity",
+  "@rescheduleFromNowDescription": {
+    "description": "Description for rescheduling from now"
+  },
+
+  "doNothing": "Do Nothing",
+  "@doNothing": {
+    "description": "Option to not change the notification"
+  },
+
+  "doNothingDescription": "Leave the notification schedule unchanged",
+  "@doNothingDescription": {
+    "description": "Description for doing nothing"
+  },
+
+  "notificationUpdated": "Notification schedule updated",
+  "@notificationUpdated": {
+    "description": "Message when notification is updated"
   }
 }
