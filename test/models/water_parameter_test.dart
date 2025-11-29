@@ -324,5 +324,55 @@ void main() {
       
       expect(deserialized.parameterType, 'Iron');
     });
+
+    test('should create temperature parameter with Fahrenheit unit', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'temperature',
+        value: 78.0,
+        unit: '°F',
+      );
+
+      expect(parameter.parameterType, 'temperature');
+      expect(parameter.value, 78.0);
+      expect(parameter.unit, '°F');
+    });
+
+    test('should create temperature parameter with Celsius unit', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'temperature',
+        value: 25.5,
+        unit: '°C',
+      );
+
+      expect(parameter.parameterType, 'temperature');
+      expect(parameter.value, 25.5);
+      expect(parameter.unit, '°C');
+    });
+
+    test('should serialize and deserialize temperature parameter', () {
+      final parameter = WaterParameter(
+        id: 'temp-id',
+        parameterType: 'temperature',
+        value: 77.5,
+        unit: '°F',
+        dateRecorded: DateTime(2024, 1, 1),
+        notes: 'Morning reading',
+      );
+
+      final json = parameter.toJson();
+      
+      expect(json['parameterType'], 'temperature');
+      expect(json['value'], 77.5);
+      expect(json['unit'], '°F');
+      expect(json['notes'], 'Morning reading');
+
+      final deserialized = WaterParameter.fromJson(json);
+      
+      expect(deserialized.id, 'temp-id');
+      expect(deserialized.parameterType, 'temperature');
+      expect(deserialized.value, 77.5);
+      expect(deserialized.unit, '°F');
+      expect(deserialized.notes, 'Morning reading');
+    });
   });
 }
