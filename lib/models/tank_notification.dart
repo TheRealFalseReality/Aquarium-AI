@@ -251,6 +251,15 @@ class TankNotification {
       return null;
     }
 
+    final now = DateTime.now();
+    
+    // If notification is in the future, return it directly
+    // This respects the user's explicit date/time setting
+    if (!notificationDateTime.isBefore(now)) {
+      return notificationDateTime;
+    }
+
+    // Notification date is in the past, so calculate next occurrence
     // Find matching activity logs
     final matchingLogs = activityLogs.where((log) {
       return matchesActivityLog(log.type, log.customCategory);

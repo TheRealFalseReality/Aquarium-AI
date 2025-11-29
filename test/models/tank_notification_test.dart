@@ -1133,5 +1133,37 @@ void main() {
       // Should fall back to standard calculation
       expect(nextDate, notification.getNextNotificationDate());
     });
+
+    test('should return notificationDateTime directly when it is in the future', () {
+      // Create a notification with a date/time in the future
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: futureDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      // Activity logs exist but should be ignored since notificationDateTime is in the future
+      final activityLogs = [
+        NotificationLog(
+          id: 'log-1',
+          type: NotificationType.feeding,
+          loggedAt: DateTime.now().subtract(const Duration(hours: 1)),
+          customCategory: null,
+          notes: null,
+          notificationId: null,
+        ),
+      ];
+
+      final nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+
+      // Should return the notificationDateTime directly, ignoring activity logs
+      expect(nextDate, futureDate);
+    });
   });
 }
