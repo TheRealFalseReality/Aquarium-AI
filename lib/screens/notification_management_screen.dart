@@ -719,14 +719,12 @@ class _NotificationFormScreenState
   void initState() {
     super.initState();
     
-    // Always use today's date and time as the starting point
-    final now = DateTime.now();
-    // Store date as midnight to ensure consistent date-only comparison
-    _selectedDate = DateTime(now.year, now.month, now.day);
-    _selectedTime = TimeOfDay.fromDateTime(now);
-    
     if (widget.existingNotification != null) {
+      // When editing, use the existing notification's date and time
       final notif = widget.existingNotification!;
+      final notifDateTime = notif.notificationDateTime;
+      _selectedDate = DateTime(notifDateTime.year, notifDateTime.month, notifDateTime.day);
+      _selectedTime = TimeOfDay.fromDateTime(notifDateTime);
       _selectedType = notif.type;
       _repeatFrequency = notif.repeatFrequency;
       _repeatInterval = notif.repeatInterval;
@@ -735,6 +733,11 @@ class _NotificationFormScreenState
       _titleController.text = notif.customTitle ?? '';
       _customCategoryController.text = notif.customCategory ?? '';
     } else {
+      // For new notifications, use today's date and time as the starting point
+      final now = DateTime.now();
+      // Store date as midnight to ensure consistent date-only comparison
+      _selectedDate = DateTime(now.year, now.month, now.day);
+      _selectedTime = TimeOfDay.fromDateTime(now);
       _selectedType = NotificationType.feeding;
       _repeatFrequency = RepeatFrequency.none;
       _repeatInterval = 1;
