@@ -1509,10 +1509,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   /// Build the activity section for the tank card showing:
   /// 1. Most recent activity log entry
-  /// 2. Upcoming notifications within 12 hours with quick log button
+  /// 2. ALL configured notifications as quick log buttons (2 per row)
+  ///    - Shows time until next occurrence
+  ///    - Highlights notifications within 12 hours
+  ///    - Tapping logs the activity instantly
   Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs) {
     final l10n = AppLocalizations.of(context)!;
-    final List<Widget> items = [];
+    final List<Widget> recentActivityItems = [];
+    final List<Widget> notificationItems = [];
     
     // Get most recent activity log
     if (tank.notificationLogs.isNotEmpty) {
@@ -1545,7 +1549,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         timeAgo = '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
       }
       
-      items.add(
+      recentActivityItems.add(
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -1591,59 +1595,41 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       );
     }
     
-    // Check for notifications within 12 hours (past and future) that are not logged
+    // Show ALL configured notifications as quick log buttons (2 per row)
     final now = DateTime.now();
-    final twelveHoursFromNow = now.add(const Duration(hours: 12));
-    final twelveHoursAgo = now.subtract(const Duration(hours: 12));
     
     for (final notification in tank.notifications) {
       if (!notification.enabled) continue;
       
+      // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
-        // Use activity-based calculation for consistent behavior
         nextDate = notification.getNextNotificationDateWithActivity(tank.notificationLogs);
       } else {
-        // Non-repeating: check if scheduled time is within 12 hour window
-        if (notification.notificationDateTime.isAfter(twelveHoursAgo) && 
-            notification.notificationDateTime.isBefore(twelveHoursFromNow)) {
-          nextDate = notification.notificationDateTime;
-        }
+        nextDate = notification.notificationDateTime;
       }
       
-      if (nextDate != null && nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(twelveHoursAgo)) {
-        // Time windows for checking if activity is already logged
-        const loggedByIdWindowHours = 12; // If logged by notification ID, consider logged within 12 hours
-        const loggedByTypeWindowHours = 2; // If logged by same type, consider logged within 2 hours
-        
-        // Check if this notification has already been logged within the relevant time window
-        final isLogged = tank.notificationLogs.any((log) {
-          // Check if there's a log entry for this notification within the ID window
-          if (log.notificationId == notification.id) {
-            final logDifference = log.loggedAt.difference(nextDate!).abs();
-            return logDifference.inHours <= loggedByIdWindowHours;
-          }
-          // Also check if any log of the same type was made within the type window
-          if (log.type == notification.type) {
-            final logDifference = log.loggedAt.difference(nextDate!).abs();
-            return logDifference.inHours <= loggedByTypeWindowHours;
-          }
-          return false;
-        });
-        
-        if (isLogged) continue; // Skip if already logged
-        
-        // Calculate time display
-        String timeDisplay;
-        final bool isPast = nextDate.isBefore(now);
+      // Calculate time display for the next occurrence
+      String timeDisplay;
+      bool isPast = false;
+      bool isWithin12Hours = false;
+      
+      if (nextDate != null) {
+        isPast = nextDate.isBefore(now);
+        final twelveHoursFromNow = now.add(const Duration(hours: 12));
+        final twelveHoursAgo = now.subtract(const Duration(hours: 12));
+        isWithin12Hours = nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(twelveHoursAgo);
         
         if (isPast) {
           // Past - show how long ago
           final difference = now.difference(nextDate);
           final hoursAgo = difference.inHours;
           final minutesAgo = difference.inMinutes % 60;
+          final daysSince = difference.inDays;
           
-          if (hoursAgo > 0) {
+          if (daysSince > 0) {
+            timeDisplay = daysSince == 1 ? l10n.yesterday : l10n.daysAgo(daysSince);
+          } else if (hoursAgo > 0) {
             timeDisplay = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
           } else if (minutesAgo > 0) {
             timeDisplay = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
@@ -1654,8 +1640,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           // Future - show time until
           final hoursUntil = nextDate.difference(now).inHours;
           final minutesUntil = nextDate.difference(now).inMinutes % 60;
+          final daysUntil = nextDate.difference(now).inDays;
           
-          if (hoursUntil > 0) {
+          if (daysUntil > 0) {
+            timeDisplay = l10n.inXDays(daysUntil);
+          } else if (hoursUntil > 0) {
             timeDisplay = hoursUntil == 1 ? l10n.inOneHour : l10n.inXHours(hoursUntil);
           } else if (minutesUntil > 0) {
             timeDisplay = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
@@ -1663,85 +1652,139 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             timeDisplay = l10n.inLessThanAMinute;
           }
         }
-        
-        items.add(
-          Container(
-            margin: EdgeInsets.only(top: items.isNotEmpty ? 8 : 0),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: _getActivityColor(notification.type).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: _getActivityColor(notification.type).withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _getActivityIcon(notification.type),
-                  size: 18,
-                  color: _getActivityColor(notification.type),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notification.getDisplayName(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      Text(
-                        timeDisplay,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isPast ? Colors.red : _getActivityColor(notification.type),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Quick log + button
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _quickLogFromCard(context, ref, tank, notification),
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: _getActivityColor(notification.type),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+      } else {
+        timeDisplay = notification.repeatFrequency.displayName;
       }
+      
+      notificationItems.add(
+        _buildNotificationQuickLogItem(
+          context, 
+          ref, 
+          tank, 
+          notification, 
+          cs, 
+          timeDisplay, 
+          isPast,
+          isWithin12Hours,
+        ),
+      );
     }
     
-    if (items.isEmpty) {
+    if (recentActivityItems.isEmpty && notificationItems.isEmpty) {
       return const SizedBox.shrink();
     }
     
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...items,
+        // Recent activity section
+        ...recentActivityItems,
+        
+        // Notifications section (2 per row using LayoutBuilder for responsive width)
+        if (notificationItems.isNotEmpty) ...[
+          if (recentActivityItems.isNotEmpty) const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Calculate item width for 2 per row with 8px spacing
+              final itemWidth = (constraints.maxWidth - 8) / 2;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: notificationItems.map((item) => 
+                  SizedBox(
+                    width: itemWidth,
+                    child: item,
+                  ),
+                ).toList(),
+              );
+            },
+          ),
+        ],
         const SizedBox(height: 14),
       ],
+    );
+  }
+  
+  /// Build a compact notification quick log item for 2-per-row layout
+  Widget _buildNotificationQuickLogItem(
+    BuildContext context, 
+    WidgetRef ref, 
+    Tank tank, 
+    TankNotification notification, 
+    ColorScheme cs,
+    String timeDisplay,
+    bool isPast,
+    bool isWithin12Hours,
+  ) {
+    final activityColor = _getActivityColor(notification.type);
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _quickLogFromCard(context, ref, tank, notification),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: activityColor.withOpacity(isWithin12Hours ? 0.15 : 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: activityColor.withOpacity(isWithin12Hours ? 0.4 : 0.2),
+              width: isWithin12Hours ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _getActivityIcon(notification.type),
+                size: 16,
+                color: activityColor,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      notification.getDisplayName(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      timeDisplay,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isPast && isWithin12Hours ? Colors.red : activityColor,
+                        fontSize: 10,
+                        fontWeight: isWithin12Hours ? FontWeight.w500 : FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: activityColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.add,
+                  size: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
