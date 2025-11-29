@@ -1,6 +1,8 @@
 import 'package:uuid/uuid.dart';
 import 'water_parameter.dart';
 import 'dosing_entry.dart';
+import 'tank_notification.dart';
+import 'notification_log.dart';
 
 class TankPhoto {
   final String id;
@@ -134,6 +136,8 @@ class Tank {
   final int? customIconCodePoint; // Custom icon code point for tank card
   final List<WaterParameter> waterParameters; // Water parameter logs
   final List<DosingEntry> dosingEntries; // Dosing diary entries
+  final List<TankNotification> notifications; // Task notifications
+  final List<NotificationLog> notificationLogs; // Notification action logs
 
   Tank({
     required this.id,
@@ -153,9 +157,13 @@ class Tank {
     this.customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
+    List<NotificationLog>? notificationLogs,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
-       dosingEntries = dosingEntries ?? [];
+       dosingEntries = dosingEntries ?? [],
+       notifications = notifications ?? [],
+       notificationLogs = notificationLogs ?? [];
 
   factory Tank.create({
     required String name,
@@ -173,6 +181,8 @@ class Tank {
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
+    List<NotificationLog>? notificationLogs,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -193,6 +203,8 @@ class Tank {
       customIconCodePoint: customIconCodePoint,
       waterParameters: waterParameters,
       dosingEntries: dosingEntries,
+      notifications: notifications,
+      notificationLogs: notificationLogs,
     );
   }
 
@@ -215,6 +227,8 @@ class Tank {
       'customIconCodePoint': customIconCodePoint,
       'waterParameters': waterParameters.map((wp) => wp.toJson()).toList(),
       'dosingEntries': dosingEntries.map((de) => de.toJson()).toList(),
+      'notifications': notifications.map((n) => n.toJson()).toList(),
+      'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
     };
   }
 
@@ -245,6 +259,12 @@ class Tank {
       dosingEntries: (json['dosingEntries'] as List?)
           ?.map((de) => DosingEntry.fromJson(de))
           .toList() ?? [],
+      notifications: (json['notifications'] as List?)
+          ?.map((n) => TankNotification.fromJson(n))
+          .toList() ?? [],
+      notificationLogs: (json['notificationLogs'] as List?)
+          ?.map((nl) => NotificationLog.fromJson(nl))
+          .toList() ?? [],
     );
   }
 
@@ -266,6 +286,8 @@ class Tank {
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
+    List<TankNotification>? notifications,
+    List<NotificationLog>? notificationLogs,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
@@ -288,6 +310,8 @@ class Tank {
       customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
       waterParameters: waterParameters ?? this.waterParameters,
       dosingEntries: dosingEntries ?? this.dosingEntries,
+      notifications: notifications ?? this.notifications,
+      notificationLogs: notificationLogs ?? this.notificationLogs,
     );
   }
 }

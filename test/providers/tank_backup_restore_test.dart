@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:fish_ai/models/tank.dart';
+import 'package:fish_ai/models/tank_notification.dart';
 import 'package:fish_ai/providers/tank_provider.dart';
 import 'package:fish_ai/providers/species_tags_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -339,6 +340,273 @@ void main() {
       
       expect(parsedBackup['speciesTags'], isA<Map>());
       expect((parsedBackup['speciesTags'] as Map).isEmpty, isTrue);
+    });
+  });
+
+  group('Notifications Backup and Restore Tests', () {
+    test('backup includes tank notifications', () {
+      // Create a tank with notifications
+      final feedingNotif = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 15, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        notes: 'Feed the fish',
+      );
+
+      final dosingNotif = TankNotification.create(
+        type: NotificationType.dosing,
+        notificationDateTime: DateTime(2024, 6, 15, 10, 0),
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 2,
+        notes: 'Dose the tank',
+      );
+
+      final tank = Tank.create(
+        name: 'Test Tank',
+        type: 'freshwater',
+        notifications: [feedingNotif, dosingNotif],
+      );
+
+      // Create backup data
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [tank.toJson()],
+      };
+
+      // Verify notifications are included
+      final tankData = (backupData['tanks'] as List)[0] as Map<String, dynamic>;
+      expect(tankData.containsKey('notifications'), isTrue);
+      expect(tankData['notifications'], isA<List>());
+      
+      final notifications = tankData['notifications'] as List;
+      expect(notifications.length, equals(2));
+      expect(notifications[0]['type'], equals('feeding'));
+      expect(notifications[0]['repeatFrequency'], equals('daily'));
+      expect(notifications[0]['notes'], equals('Feed the fish'));
+      expect(notifications[1]['type'], equals('dosing'));
+      expect(notifications[1]['repeatFrequency'], equals('weekly'));
+      expect(notifications[1]['notes'], equals('Dose the tank'));
+    });
+
+    test('backup JSON with notifications can be parsed and restored', () {
+      // Create original tank with notifications
+      final waterChangeNotif = TankNotification.create(
+        type: NotificationType.waterChange,
+        notificationDateTime: DateTime(2024, 6, 20, 14, 0),
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 1,
+        notes: 'Weekly water change',
+      );
+
+      final maintenanceNotif = TankNotification.create(
+        type: NotificationType.maintenance,
+        notificationDateTime: DateTime(2024, 7, 1, 10, 0),
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 1,
+        notes: 'Monthly filter cleaning',
+        enabled: true,
+      );
+
+      final originalTank = Tank.create(
+        name: 'Notification Test Tank',
+        type: 'freshwater',
+        sizeGallons: 40.0,
+        notifications: [waterChangeNotif, maintenanceNotif],
+      );
+
+      // Convert to JSON and back
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [originalTank.toJson()],
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsedBackup = json.decode(jsonString) as Map<String, dynamic>;
+      
+      // Restore the tank
+      final tanksList = parsedBackup['tanks'] as List;
+      final restoredTank = Tank.fromJson(tanksList[0]);
+      
+      // Verify notifications were restored correctly
+      expect(restoredTank.notifications.length, equals(2));
+      
+      final restoredWaterChange = restoredTank.notifications[0];
+      expect(restoredWaterChange.type, equals(NotificationType.waterChange));
+      expect(restoredWaterChange.repeatFrequency, equals(RepeatFrequency.weekly));
+      expect(restoredWaterChange.repeatInterval, equals(1));
+      expect(restoredWaterChange.notes, equals('Weekly water change'));
+      expect(restoredWaterChange.notificationDateTime, equals(DateTime(2024, 6, 20, 14, 0)));
+      
+      final restoredMaintenance = restoredTank.notifications[1];
+      expect(restoredMaintenance.type, equals(NotificationType.maintenance));
+      expect(restoredMaintenance.repeatFrequency, equals(RepeatFrequency.monthly));
+      expect(restoredMaintenance.repeatInterval, equals(1));
+      expect(restoredMaintenance.notes, equals('Monthly filter cleaning'));
+      expect(restoredMaintenance.enabled, isTrue);
+      expect(restoredMaintenance.notificationDateTime, equals(DateTime(2024, 7, 1, 10, 0)));
+    });
+
+    test('backup handles tank without notifications (backwards compatibility)', () {
+      // Old tank format without notifications
+      final tankJson = {
+        'id': 'tank-1',
+        'name': 'Old Tank',
+        'type': 'freshwater',
+        'inhabitants': [],
+        'sizeGallons': null,
+        'sizeLiters': null,
+        'notes': null,
+        'harmonyScore': null,
+        'calculationBreakdown': null,
+        'createdAt': '2024-01-01T00:00:00.000',
+        'updatedAt': '2024-01-01T00:00:00.000',
+        'photos': [],
+        'waterParameters': [],
+        'dosingEntries': [],
+        // Note: 'notifications' field is missing
+      };
+
+      // Should still parse successfully
+      final restoredTank = Tank.fromJson(tankJson);
+      
+      expect(restoredTank.notifications, isEmpty);
+      expect(restoredTank.name, equals('Old Tank'));
+    });
+
+    test('backup with empty notifications list', () {
+      final tank = Tank.create(
+        name: 'Empty Notifications Tank',
+        type: 'marine',
+        notifications: [],
+      );
+
+      final backupData = {
+        'version': '1.0.0',
+        'tanks': [tank.toJson()],
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsedBackup = json.decode(jsonString) as Map<String, dynamic>;
+      
+      final tanksList = parsedBackup['tanks'] as List;
+      final restoredTank = Tank.fromJson(tanksList[0]);
+      
+      expect(restoredTank.notifications, isEmpty);
+    });
+
+    test('backup preserves all notification properties', () {
+      final notification = TankNotification.create(
+        type: NotificationType.testing,
+        notificationDateTime: DateTime(2024, 6, 15, 16, 30),
+        repeatFrequency: RepeatFrequency.monthly,
+        repeatInterval: 3,
+        notes: 'Test water parameters every 3 months',
+        enabled: false,
+      );
+
+      final tank = Tank.create(
+        name: 'Full Properties Tank',
+        type: 'freshwater',
+        notifications: [notification],
+      );
+
+      // Serialize and deserialize
+      final json = tank.toJson();
+      final restoredTank = Tank.fromJson(json);
+      
+      final restoredNotif = restoredTank.notifications[0];
+      expect(restoredNotif.id, equals(notification.id));
+      expect(restoredNotif.type, equals(notification.type));
+      expect(restoredNotif.notificationDateTime, equals(notification.notificationDateTime));
+      expect(restoredNotif.repeatFrequency, equals(notification.repeatFrequency));
+      expect(restoredNotif.repeatInterval, equals(notification.repeatInterval));
+      expect(restoredNotif.notes, equals(notification.notes));
+      expect(restoredNotif.enabled, equals(notification.enabled));
+      expect(restoredNotif.createdAt, equals(notification.createdAt));
+      expect(restoredNotif.updatedAt, equals(notification.updatedAt));
+    });
+
+    test('backup with multiple tanks with different notifications', () {
+      final tank1 = Tank.create(
+        name: 'Tank 1',
+        type: 'freshwater',
+        notifications: [
+          TankNotification.create(
+            type: NotificationType.feeding,
+            notificationDateTime: DateTime(2024, 6, 15, 9, 0),
+            repeatFrequency: RepeatFrequency.daily,
+          ),
+        ],
+      );
+
+      final tank2 = Tank.create(
+        name: 'Tank 2',
+        type: 'marine',
+        notifications: [
+          TankNotification.create(
+            type: NotificationType.dosing,
+            notificationDateTime: DateTime(2024, 6, 15, 10, 0),
+            repeatFrequency: RepeatFrequency.weekly,
+          ),
+          TankNotification.create(
+            type: NotificationType.waterChange,
+            notificationDateTime: DateTime(2024, 6, 20, 14, 0),
+            repeatFrequency: RepeatFrequency.weekly,
+          ),
+        ],
+      );
+
+      final backupData = {
+        'version': '1.0.0',
+        'tanks': [tank1.toJson(), tank2.toJson()],
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsedBackup = json.decode(jsonString) as Map<String, dynamic>;
+      
+      final tanksList = parsedBackup['tanks'] as List;
+      expect(tanksList.length, equals(2));
+      
+      final restoredTank1 = Tank.fromJson(tanksList[0]);
+      expect(restoredTank1.notifications.length, equals(1));
+      expect(restoredTank1.notifications[0].type, equals(NotificationType.feeding));
+      
+      final restoredTank2 = Tank.fromJson(tanksList[1]);
+      expect(restoredTank2.notifications.length, equals(2));
+      expect(restoredTank2.notifications[0].type, equals(NotificationType.dosing));
+      expect(restoredTank2.notifications[1].type, equals(NotificationType.waterChange));
+    });
+
+    test('backup preserves notification datetime precision', () {
+      final specificDateTime = DateTime(2024, 6, 15, 14, 35, 22, 123);
+      final notification = TankNotification.create(
+        type: NotificationType.other,
+        notificationDateTime: specificDateTime,
+        notes: 'Precise time notification',
+      );
+
+      final tank = Tank.create(
+        name: 'Precision Tank',
+        type: 'freshwater',
+        notifications: [notification],
+      );
+
+      final json = tank.toJson();
+      final restoredTank = Tank.fromJson(json);
+      
+      final restoredNotif = restoredTank.notifications[0];
+      expect(restoredNotif.notificationDateTime.year, equals(specificDateTime.year));
+      expect(restoredNotif.notificationDateTime.month, equals(specificDateTime.month));
+      expect(restoredNotif.notificationDateTime.day, equals(specificDateTime.day));
+      expect(restoredNotif.notificationDateTime.hour, equals(specificDateTime.hour));
+      expect(restoredNotif.notificationDateTime.minute, equals(specificDateTime.minute));
     });
   });
 }
