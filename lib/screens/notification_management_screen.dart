@@ -721,7 +721,8 @@ class _NotificationFormScreenState
     
     // Always use today's date and time as the starting point
     final now = DateTime.now();
-    _selectedDate = now;
+    // Store date as midnight to ensure consistent date-only comparison
+    _selectedDate = DateTime(now.year, now.month, now.day);
     _selectedTime = TimeOfDay.fromDateTime(now);
     
     if (widget.existingNotification != null) {
@@ -1048,7 +1049,8 @@ class _NotificationFormScreenState
     );
 
     if (date != null) {
-      setState(() => _selectedDate = date);
+      // Normalize to midnight to ensure consistent date-only storage
+      setState(() => _selectedDate = DateTime(date.year, date.month, date.day));
     }
   }
 
