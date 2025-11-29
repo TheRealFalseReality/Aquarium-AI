@@ -1839,6 +1839,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       notificationId: notification.id,
     );
     
+    // Check if this notification has a repeat frequency (only repeating notifications need rescheduling dialog)
+    RescheduleOption? rescheduleOption;
+    if (notification.repeatFrequency != RepeatFrequency.none && context.mounted) {
+      // Ask user how they want to update the notification schedule BEFORE saving
+      rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
+      
+      // If user cancelled, still log the activity but don't reschedule
+      rescheduleOption ??= RescheduleOption.doNothing;
+    }
+    
+    // Now save the activity log
     final updatedLogs = [...currentTank.notificationLogs, log];
     final updatedTank = currentTank.copyWith(
       notificationLogs: updatedLogs,
@@ -1851,22 +1862,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(l10n.activityLogged);
       
-      // Check if this notification has a repeat frequency (only repeating notifications need rescheduling)
-      if (notification.repeatFrequency != RepeatFrequency.none) {
-        // Ask user how they want to update the notification schedule
-        final rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
-        
-        if (rescheduleOption != null && context.mounted) {
-          await _handleRescheduleOption(
-            context,
-            ref,
-            currentTank,
-            notification,
-            log,
-            updatedLogs,
-            rescheduleOption,
-          );
-        }
+      // Handle the reschedule option if one was selected
+      if (rescheduleOption != null && rescheduleOption != RescheduleOption.doNothing) {
+        await _handleRescheduleOption(
+          context,
+          ref,
+          currentTank,
+          notification,
+          log,
+          updatedLogs,
+          rescheduleOption,
+        );
       }
     }
     
