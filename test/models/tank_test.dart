@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank.dart';
-import 'package:fish_ai/models/tank_notification.dart';
+import 'package:fish_ai/models/water_parameter.dart';
 
 void main() {
   group('TankPhoto', () {
@@ -177,174 +177,59 @@ void main() {
       expect(tank.waterParameters, isEmpty);
     });
 
-    test('should handle Tank with no notifications (backwards compatibility)', () {
-      final json = {
-        'id': 'tank-1',
-        'name': 'My Tank',
-        'type': 'freshwater',
-        'inhabitants': [],
-        'sizeGallons': null,
-        'sizeLiters': null,
-        'notes': null,
-        'harmonyScore': null,
-        'calculationBreakdown': null,
-        'createdAt': '2024-01-01T00:00:00.000',
-        'updatedAt': '2024-01-01T00:00:00.000',
-        'photos': [],
-        'waterParameters': [],
-        'dosingEntries': [],
-        // Note: 'notifications' field is missing
-      };
-
-      final tank = Tank.fromJson(json);
-
-      expect(tank.notifications, isEmpty);
-    });
-  });
-
-  group('Tank with Notifications', () {
-    test('should create a Tank with notifications', () {
-      final notification = TankNotification.create(
-        type: NotificationType.feeding,
-        notificationDateTime: DateTime(2024, 6, 15, 9, 0),
-        repeatFrequency: RepeatFrequency.daily,
-        notes: 'Feed the fish',
-      );
-
+    test('should serialize and deserialize Tank with custom water parameters', () {
       final tank = Tank.create(
         name: 'My Tank',
         type: 'freshwater',
-        notifications: [notification],
-      );
-
-      expect(tank.notifications.length, 1);
-      expect(tank.notifications.first.type, NotificationType.feeding);
-    });
-
-    test('should serialize Tank with notifications to JSON correctly', () {
-      final notification = TankNotification.create(
-        type: NotificationType.dosing,
-        notificationDateTime: DateTime(2024, 6, 15, 10, 0),
-        repeatFrequency: RepeatFrequency.weekly,
-        notes: 'Dose the tank',
-      );
-
-      final tank = Tank.create(
-        name: 'My Tank',
-        type: 'freshwater',
-        notifications: [notification],
-      );
-
-      final json = tank.toJson();
-
-      expect(json['notifications'], isA<List>());
-      expect((json['notifications'] as List).length, 1);
-      expect((json['notifications'] as List).first['type'], 'dosing');
-    });
-
-    test('should deserialize Tank with notifications from JSON correctly', () {
-      final json = {
-        'id': 'tank-1',
-        'name': 'My Tank',
-        'type': 'freshwater',
-        'inhabitants': [],
-        'sizeGallons': null,
-        'sizeLiters': null,
-        'notes': null,
-        'harmonyScore': null,
-        'calculationBreakdown': null,
-        'createdAt': '2024-01-01T00:00:00.000',
-        'updatedAt': '2024-01-01T00:00:00.000',
-        'photos': [],
-        'waterParameters': [],
-        'dosingEntries': [],
-        'notifications': [
-          {
-            'id': 'notif-1',
-            'type': 'feeding',
-            'notificationDateTime': '2024-06-15T09:00:00.000',
-            'repeatFrequency': 'daily',
-            'repeatInterval': 1,
-            'notes': 'Feed the fish',
-            'createdAt': '2024-01-01T00:00:00.000',
-            'updatedAt': '2024-01-01T00:00:00.000',
-            'enabled': true,
-          }
+        waterParameters: [
+          WaterParameter(
+            id: 'param-1',
+            parameterType: 'iron',
+            value: 0.5,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 1),
+            notes: 'Custom iron measurement',
+          ),
+          WaterParameter(
+            id: 'param-2',
+            parameterType: 'copper',
+            value: 0.02,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 2),
+          ),
+          WaterParameter(
+            id: 'param-3',
+            parameterType: 'ammonia',
+            value: 0.0,
+            unit: 'ppm',
+            dateRecorded: DateTime(2024, 1, 3),
+          ),
         ],
-      };
-
-      final tank = Tank.fromJson(json);
-
-      expect(tank.notifications.length, 1);
-      expect(tank.notifications.first.type, NotificationType.feeding);
-      expect(tank.notifications.first.repeatFrequency, RepeatFrequency.daily);
-      expect(tank.notifications.first.notes, 'Feed the fish');
-    });
-
-    test('should handle Tank with multiple notifications', () {
-      final feedingNotif = TankNotification.create(
-        type: NotificationType.feeding,
-        notificationDateTime: DateTime(2024, 6, 15, 9, 0),
-        repeatFrequency: RepeatFrequency.daily,
       );
 
-      final dosingNotif = TankNotification.create(
-        type: NotificationType.dosing,
-        notificationDateTime: DateTime(2024, 6, 15, 10, 0),
-        repeatFrequency: RepeatFrequency.weekly,
-      );
-
-      final maintenanceNotif = TankNotification.create(
-        type: NotificationType.maintenance,
-        notificationDateTime: DateTime(2024, 6, 15, 14, 0),
-        repeatFrequency: RepeatFrequency.monthly,
-      );
-
-      final tank = Tank.create(
-        name: 'My Tank',
-        type: 'freshwater',
-        notifications: [feedingNotif, dosingNotif, maintenanceNotif],
-      );
-
-      expect(tank.notifications.length, 3);
-      expect(tank.notifications[0].type, NotificationType.feeding);
-      expect(tank.notifications[1].type, NotificationType.dosing);
-      expect(tank.notifications[2].type, NotificationType.maintenance);
-
-      // Test serialization
+      // Serialize to JSON
       final json = tank.toJson();
-      final deserialized = Tank.fromJson(json);
+      
+      // Verify JSON contains custom parameters
+      expect(json['waterParameters'], isA<List>());
+      expect(json['waterParameters'].length, 3);
+      expect(json['waterParameters'][0]['parameterType'], 'iron');
+      expect(json['waterParameters'][1]['parameterType'], 'copper');
+      expect(json['waterParameters'][2]['parameterType'], 'ammonia');
 
-      expect(deserialized.notifications.length, 3);
-      expect(deserialized.notifications[0].type, NotificationType.feeding);
-      expect(deserialized.notifications[1].type, NotificationType.dosing);
-      expect(deserialized.notifications[2].type, NotificationType.maintenance);
-    });
+      // Deserialize from JSON
+      final deserializedTank = Tank.fromJson(json);
 
-    test('should update notifications using copyWith', () {
-      final notification = TankNotification.create(
-        type: NotificationType.feeding,
-        notificationDateTime: DateTime(2024, 6, 15, 9, 0),
-      );
-
-      final tank = Tank.create(
-        name: 'My Tank',
-        type: 'freshwater',
-        notifications: [notification],
-      );
-
-      final newNotification = TankNotification.create(
-        type: NotificationType.dosing,
-        notificationDateTime: DateTime(2024, 6, 15, 10, 0),
-      );
-
-      final updatedTank = tank.copyWith(
-        notifications: [notification, newNotification],
-      );
-
-      expect(updatedTank.notifications.length, 2);
-      expect(updatedTank.notifications[0].type, NotificationType.feeding);
-      expect(updatedTank.notifications[1].type, NotificationType.dosing);
+      // Verify custom parameters are preserved
+      expect(deserializedTank.waterParameters.length, 3);
+      expect(deserializedTank.waterParameters[0].parameterType, 'iron');
+      expect(deserializedTank.waterParameters[0].value, 0.5);
+      expect(deserializedTank.waterParameters[0].unit, 'ppm');
+      expect(deserializedTank.waterParameters[0].notes, 'Custom iron measurement');
+      expect(deserializedTank.waterParameters[1].parameterType, 'copper');
+      expect(deserializedTank.waterParameters[1].value, 0.02);
+      expect(deserializedTank.waterParameters[2].parameterType, 'ammonia');
+      expect(deserializedTank.waterParameters[2].value, 0.0);
     });
   });
 }

@@ -125,7 +125,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       case 'iodine':
         return 'Iodine';
       default:
-        return parameterType;
+        // For custom parameters, capitalize first letter
+        if (parameterType.isEmpty) {
+          return 'Custom';
+        }
+        return parameterType[0].toUpperCase() + (parameterType.length > 1 ? parameterType.substring(1) : '');
     }
   }
 
@@ -162,7 +166,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       case 'iodine':
         return Icons.ac_unit;
       default:
-        return Icons.water_drop;
+        // For custom parameters, use a generic icon
+        return Icons.science;
     }
   }
 
@@ -199,7 +204,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       case 'iodine':
         return Colors.deepOrange;
       default:
-        return Colors.grey;
+        // For custom parameters, use a teal color
+        return Colors.teal;
     }
   }
 
@@ -798,6 +804,7 @@ class _AddParameterSheet extends ConsumerStatefulWidget {
 class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   final _formKey = GlobalKey<FormState>();
   late String _selectedParameter;
+  final _customParameterNameController = TextEditingController();
   final _valueController = TextEditingController();
   final _notesController = TextEditingController();
   late DateTime _selectedDate;
@@ -819,6 +826,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'potassium': ['ppm', 'mg/L'],
     'tds': ['ppm', 'mg/L'],
     'iodine': ['ppm', 'mg/L'],
+    'custom': ['ppm', 'mg/L', '%', 'dKH', 'meq/L', 'mV', 'pH', 'ppt', 'SG', 'dGH'],
   };
 
   @override
@@ -826,7 +834,15 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     super.initState();
     if (widget.existingParameter != null) {
       // Initialize with existing parameter data
-      _selectedParameter = widget.existingParameter!.parameterType;
+      final existingType = widget.existingParameter!.parameterType;
+      // Check if it's a predefined parameter type
+      if (_unitOptions.containsKey(existingType) && existingType != 'custom') {
+        _selectedParameter = existingType;
+      } else {
+        // It's a custom parameter
+        _selectedParameter = 'custom';
+        _customParameterNameController.text = existingType;
+      }
       _valueController.text = widget.existingParameter!.value.toString();
       _notesController.text = widget.existingParameter!.notes ?? '';
       _selectedDate = widget.existingParameter!.dateRecorded;
@@ -841,6 +857,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
   @override
   void dispose() {
+    _customParameterNameController.dispose();
     _valueController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -872,15 +889,36 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     }
   }
 
+  String _getParameterType() {
+    // If "custom" is selected, use the text field value
+    if (_selectedParameter == 'custom') {
+      return _customParameterNameController.text.trim().toLowerCase();
+    }
+    // Otherwise use the selected parameter from dropdown
+    return _selectedParameter;
+  }
+
   void _saveParameter() {
     if (_formKey.currentState!.validate()) {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
+      final parameterType = _getParameterType();
+      
+      // Additional safety check: prevent saving with empty parameter type
+      if (parameterType.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a parameter name'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       
       if (isEditing) {
         // Update existing parameter
         parameter = widget.existingParameter!.copyWith(
-          parameterType: _selectedParameter,
+          parameterType: parameterType,
           value: double.parse(_valueController.text),
           unit: _selectedUnit,
           dateRecorded: _selectedDate,
@@ -905,17 +943,18 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         AnalyticsService.logFeatureUsed(
           featureName: 'parameter_edited',
           parameters: {
-            'parameter_type': _selectedParameter,
+            'parameter_type': parameterType,
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
+            'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
       } else {
         // Create new parameter
         parameter = WaterParameter.create(
-          parameterType: _selectedParameter,
+          parameterType: parameterType,
           value: double.parse(_valueController.text),
           unit: _selectedUnit,
           dateRecorded: _selectedDate,
@@ -936,12 +975,13 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         AnalyticsService.logFeatureUsed(
           featureName: 'parameter_added',
           parameters: {
-            'parameter_type': _selectedParameter,
+            'parameter_type': parameterType,
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty,
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
             'total_parameters': updatedParameters.length,
+            'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
       }
@@ -1017,15 +1057,41 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                     const DropdownMenuItem(value: 'magnesium', child: Text('Magnesium')),
                     const DropdownMenuItem(value: 'iodine', child: Text('Iodine')),
                   ],
+                  const DropdownMenuItem(value: 'custom', child: Text('Custom')),
                 ],
                 onChanged: (value) {
                   setState(() {
                     _selectedParameter = value!;
                     _selectedUnit = _unitOptions[value]!.first;
+                    // Clear custom name when switching away from "Custom"
+                    if (value != 'custom') {
+                      _customParameterNameController.clear();
+                    }
                   });
                 },
               ),
               const SizedBox(height: 16),
+              
+              // Custom parameter name (shown only when "Custom" is selected)
+              if (_selectedParameter == 'custom') ...[
+                TextFormField(
+                  controller: _customParameterNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Custom Parameter Name *',
+                    hintText: 'e.g., Iron, Copper, Strontium',
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) {
+                    if (_selectedParameter == 'custom' && 
+                        (value == null || value.trim().isEmpty)) {
+                      return 'Please enter a parameter name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
               Row(
                 children: [
                   Expanded(

@@ -252,5 +252,77 @@ void main() {
         expect(deserialized.unit, param.unit);
       }
     });
+
+    test('should create a custom parameter with any name', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'iron',
+        value: 0.5,
+        unit: 'ppm',
+      );
+
+      expect(parameter.parameterType, 'iron');
+      expect(parameter.value, 0.5);
+      expect(parameter.unit, 'ppm');
+    });
+
+    test('should serialize and deserialize custom parameters', () {
+      final customParameters = [
+        WaterParameter.create(parameterType: 'iron', value: 0.5, unit: 'ppm', dateDosed: DateTime(2024, 1, 1)),
+        WaterParameter.create(parameterType: 'copper', value: 0.02, unit: 'ppm', dateDosed: DateTime(2024, 1, 1)),
+        WaterParameter.create(parameterType: 'strontium', value: 8.0, unit: 'ppm', dateDosed: DateTime(2024, 1, 1)),
+        WaterParameter.create(parameterType: 'silicate', value: 1.0, unit: 'ppm', dateDosed: DateTime(2024, 1, 1)),
+      ];
+
+      for (var param in customParameters) {
+        final json = param.toJson();
+        final deserialized = WaterParameter.fromJson(json);
+        
+        expect(deserialized.id, param.id);
+        expect(deserialized.parameterType, param.parameterType);
+        expect(deserialized.value, param.value);
+        expect(deserialized.unit, param.unit);
+      }
+    });
+
+    test('should handle custom parameters with various units', () {
+      final parameter1 = WaterParameter.create(
+        parameterType: 'copper',
+        value: 0.15,
+        unit: 'mg/L',
+      );
+      expect(parameter1.parameterType, 'copper');
+      expect(parameter1.unit, 'mg/L');
+
+      final parameter2 = WaterParameter.create(
+        parameterType: 'temperature',
+        value: 78.5,
+        unit: '°F',
+      );
+      expect(parameter2.parameterType, 'temperature');
+      expect(parameter2.unit, '°F');
+
+      final parameter3 = WaterParameter.create(
+        parameterType: 'oxygen',
+        value: 85.0,
+        unit: '%',
+      );
+      expect(parameter3.parameterType, 'oxygen');
+      expect(parameter3.unit, '%');
+    });
+
+    test('should preserve custom parameter names case-sensitively', () {
+      final parameter = WaterParameter.create(
+        parameterType: 'Iron',
+        value: 0.5,
+        unit: 'ppm',
+      );
+
+      expect(parameter.parameterType, 'Iron');
+      
+      final json = parameter.toJson();
+      final deserialized = WaterParameter.fromJson(json);
+      
+      expect(deserialized.parameterType, 'Iron');
+    });
   });
 }
