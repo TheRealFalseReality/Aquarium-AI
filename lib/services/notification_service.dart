@@ -373,6 +373,10 @@ class NotificationService {
   /// [overdueDays] - Number of days the task is overdue
   /// 
   /// Returns a formatted overdue message
+  /// 
+  /// Note: This method uses English text as a fallback for system notifications
+  /// displayed outside the app context where Flutter's localization framework
+  /// is not available. For in-app display, use AppLocalizations.taskOverdueByDays().
   static String formatOverdueMessage(String taskName, int overdueDays) {
     final dayWord = overdueDays == 1 ? 'day' : 'days';
     return '$taskName is $overdueDays $dayWord overdue';
