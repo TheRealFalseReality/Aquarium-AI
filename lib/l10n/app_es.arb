@@ -223,6 +223,8 @@
   "rescheduleFromOriginalDescription": "Próxima notificación basada en fecha/hora original",
   "rescheduleFromNow": "Reprogramar desde Ahora",
   "rescheduleFromNowDescription": "Próxima notificación basada en cuándo registraste esta actividad",
+  "rescheduleTimeAndDate": "Reprogramar Hora y Fecha",
+  "rescheduleDateOnly": "Reprogramar Solo Fecha",
   "doNothing": "No Hacer Nada",
   "doNothingDescription": "Dejar el horario de notificación sin cambios",
   "notificationUpdated": "Horario de notificación actualizado",

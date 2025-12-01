@@ -214,6 +214,8 @@
   "rescheduleFromOriginalDescription": "Prochaine notification basée sur la date/heure originale",
   "rescheduleFromNow": "Reprogrammer à partir de maintenant",
   "rescheduleFromNowDescription": "Prochaine notification basée sur quand vous avez enregistré cette activité",
+  "rescheduleTimeAndDate": "Reprogrammer l'Heure et la Date",
+  "rescheduleDateOnly": "Reprogrammer la Date Uniquement",
   "doNothing": "Ne rien faire",
   "doNothingDescription": "Laisser le calendrier de notification inchangé",
   "notificationUpdated": "Calendrier de notification mis à jour",

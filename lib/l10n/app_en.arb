@@ -1429,6 +1429,16 @@
     "description": "Description for rescheduling from now"
   },
 
+  "rescheduleTimeAndDate": "Reschedule Time & Date",
+  "@rescheduleTimeAndDate": {
+    "description": "Option to reschedule both the time and date of the notification"
+  },
+
+  "rescheduleDateOnly": "Reschedule Date Only",
+  "@rescheduleDateOnly": {
+    "description": "Option to reschedule only the date, keeping the original time"
+  },
+
   "doNothing": "Do Nothing",
   "@doNothing": {
     "description": "Option to not change the notification"

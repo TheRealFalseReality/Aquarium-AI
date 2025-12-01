@@ -223,6 +223,8 @@
   "rescheduleFromOriginalDescription": "Nächste Benachrichtigung basierend auf ursprünglichem Datum/Uhrzeit",
   "rescheduleFromNow": "Ab jetzt neu planen",
   "rescheduleFromNowDescription": "Nächste Benachrichtigung basierend auf wann Sie diese Aktivität protokolliert haben",
+  "rescheduleTimeAndDate": "Zeit & Datum neu planen",
+  "rescheduleDateOnly": "Nur Datum neu planen",
   "doNothing": "Nichts tun",
   "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
   "notificationUpdated": "Benachrichtigungsplan aktualisiert",

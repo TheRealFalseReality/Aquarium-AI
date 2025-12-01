@@ -50,29 +50,34 @@ class NotificationRescheduleDialog extends StatelessWidget {
     final notificationName = notification.getDisplayName();
     
     // Calculate the actual next dates for each option using the model's methods
-    // "Keep Original Schedule" uses the notification's standard getNextNotificationDate()
-    // "Reschedule from Now" uses getNextNotificationDateFromBase with current time
-    final nextDateWithOriginalSchedule = notification.getNextNotificationDate();
+    // "Reschedule Date Only" uses getNextNotificationDateFromBase with useCurrentTime: false
+    //   → same date as "Reschedule Time & Date" but keeps original notification time
+    // "Reschedule Time & Date" uses getNextNotificationDateFromBase with useCurrentTime: true
+    //   → both date and time are based on now
+    final nextDateWithOriginalTime = notification.getNextNotificationDateFromBase(
+      DateTime.now(), 
+      useCurrentTime: false,  // Preserve original time
+    );
     final nextDateWithCurrentTime = notification.getNextNotificationDateFromBase(
       DateTime.now(), 
-      useCurrentTime: true,
+      useCurrentTime: true,   // Use current time
     );
     
     // Format dates with full date and time
-    final originalDateTime = nextDateWithOriginalSchedule != null 
-        ? _getFormattedDateTime(nextDateWithOriginalSchedule)
+    final originalTimeDateTime = nextDateWithOriginalTime != null 
+        ? _getFormattedDateTime(nextDateWithOriginalTime)
         : l10n.rescheduleFromOriginalDescription;
     final currentDateTime = nextDateWithCurrentTime != null 
         ? _getFormattedDateTime(nextDateWithCurrentTime)
         : l10n.rescheduleFromNowDescription;
     
     // Build the description strings with the actual calculated dates
-    final rescheduleFromNowDesc = notification.repeatFrequency != RepeatFrequency.none
+    final rescheduleTimeAndDateDesc = notification.repeatFrequency != RepeatFrequency.none
         ? currentDateTime
         : l10n.rescheduleFromNowDescription;
     
-    final keepOriginalDesc = notification.repeatFrequency != RepeatFrequency.none
-        ? originalDateTime
+    final rescheduleDateOnlyDesc = notification.repeatFrequency != RepeatFrequency.none
+        ? originalTimeDateTime
         : l10n.rescheduleFromOriginalDescription;
 
     return AlertDialog(
@@ -98,24 +103,24 @@ class NotificationRescheduleDialog extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           
-          // Option 1: Reschedule from now
+          // Option 1: Reschedule Time & Date (uses current time)
           _buildOption(
             context,
             icon: Icons.update,
             iconColor: Colors.blue,
-            title: l10n.rescheduleFromNow,
-            description: rescheduleFromNowDesc,
+            title: l10n.rescheduleTimeAndDate,
+            description: rescheduleTimeAndDateDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.rescheduleFromNow),
           ),
           const SizedBox(height: 12),
           
-          // Option 2: Keep original schedule
+          // Option 2: Reschedule Date Only (keeps original time)
           _buildOption(
             context,
             icon: Icons.schedule,
             iconColor: Colors.orange,
-            title: l10n.rescheduleFromOriginal,
-            description: keepOriginalDesc,
+            title: l10n.rescheduleDateOnly,
+            description: rescheduleDateOnlyDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.keepOriginal),
           ),
           const SizedBox(height: 12),
