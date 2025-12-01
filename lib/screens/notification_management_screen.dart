@@ -1211,8 +1211,10 @@ class _NotificationFormScreenState
         } else if (scheduleOption == ScheduleOption.useSpecifiedTime) {
           // User explicitly chose to use the specified time - use exact date/time
           useExactDateTime = true;
+        } else if (scheduleOption == null) {
+          // If scheduleOption is null (canceled), default to using the exact specified time
+          useExactDateTime = true;
         }
-        // If scheduleOption is null (canceled), fall back to default behavior
       }
     }
 

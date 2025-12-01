@@ -1449,6 +1449,26 @@
     "description": "Description for doing nothing"
   },
 
+  "dontReschedule": "Don't Reschedule",
+  "@dontReschedule": {
+    "description": "Option to log activity but not reschedule notification"
+  },
+
+  "dontRescheduleDescription": "Log the activity but keep the existing notification schedule",
+  "@dontRescheduleDescription": {
+    "description": "Description for don't reschedule option"
+  },
+
+  "cancelActivityLog": "Cancel",
+  "@cancelActivityLog": {
+    "description": "Option to cancel logging the activity entirely"
+  },
+
+  "cancelActivityLogDescription": "Don't log activity and don't reschedule",
+  "@cancelActivityLogDescription": {
+    "description": "Description for cancel option"
+  },
+
   "notificationUpdated": "Notification schedule updated",
   "@notificationUpdated": {
     "description": "Message when notification is updated"

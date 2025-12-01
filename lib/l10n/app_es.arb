@@ -227,6 +227,10 @@
   "rescheduleDateOnly": "Reprogramar Solo Fecha",
   "doNothing": "No Hacer Nada",
   "doNothingDescription": "Dejar el horario de notificación sin cambios",
+  "dontReschedule": "No Reprogramar",
+  "dontRescheduleDescription": "Registrar actividad pero mantener el horario de notificación existente",
+  "cancelActivityLog": "Cancelar",
+  "cancelActivityLogDescription": "No registrar actividad y no reprogramar",
   "notificationUpdated": "Horario de notificación actualizado",
 
   "scheduleNotificationTitle": "Programar Notificación",

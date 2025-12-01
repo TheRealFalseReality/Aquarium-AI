@@ -218,6 +218,10 @@
   "rescheduleDateOnly": "Reprogrammer la Date Uniquement",
   "doNothing": "Ne rien faire",
   "doNothingDescription": "Laisser le calendrier de notification inchangé",
+  "dontReschedule": "Ne pas reprogrammer",
+  "dontRescheduleDescription": "Enregistrer l'activité mais garder le calendrier de notification existant",
+  "cancelActivityLog": "Annuler",
+  "cancelActivityLogDescription": "Ne pas enregistrer l'activité et ne pas reprogrammer",
   "notificationUpdated": "Calendrier de notification mis à jour",
 
   "scheduleNotificationTitle": "Programmer la Notification",

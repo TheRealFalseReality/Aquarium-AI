@@ -227,6 +227,10 @@
   "rescheduleDateOnly": "Nur Datum neu planen",
   "doNothing": "Nichts tun",
   "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
+  "dontReschedule": "Nicht neu planen",
+  "dontRescheduleDescription": "Aktivität protokollieren, aber bestehenden Benachrichtigungsplan beibehalten",
+  "cancelActivityLog": "Abbrechen",
+  "cancelActivityLogDescription": "Aktivität nicht protokollieren und nicht neu planen",
   "notificationUpdated": "Benachrichtigungsplan aktualisiert",
 
   "scheduleNotificationTitle": "Benachrichtigung Planen",

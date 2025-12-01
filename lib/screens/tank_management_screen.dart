@@ -1942,24 +1942,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         break;
         
       case RescheduleOption.keepOriginal:
-        // Cancel and reschedule from the original notification date
-        await notificationService.cancelNotification(notification);
-        final nextDate = await notificationService.scheduleNotification(
+        // Reschedule to same date as rescheduleFromNow but keep original notification time
+        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
           tankId: currentTank.id,
           tankName: currentTank.name,
-          notification: notification,
-          // Don't pass activity logs - use original schedule
-          activityLogs: null,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+          useCurrentTime: false,  // Keep original time
         );
         
-        // Persist the updated notification with new scheduledNextDate
-        if (nextDate != null) {
-          final updatedNotification = notification.copyWith(
-            scheduledNextDate: nextDate,
-            updatedAt: DateTime.now(),
-          );
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
           final notificationsList = currentTank.notifications.map((n) {
-            return n.id == notification.id ? updatedNotification : n;
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
           }).toList();
           final updatedTank = currentTank.copyWith(
             notifications: notificationsList,
@@ -1974,7 +1975,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         break;
         
       case RescheduleOption.doNothing:
-        // Do nothing - keep the existing schedule as is
+        // Don't reschedule - activity is already logged, just keep existing schedule
+        break;
+        
+      case RescheduleOption.cancelAll:
+        // Cancel - don't log activity and don't reschedule
+        // Remove the log that was just added
+        final logsWithoutNew = updatedLogs.where((l) => l.id != log.id).toList();
+        final updatedTank = currentTank.copyWith(
+          notificationLogs: logsWithoutNew,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
         break;
     }
     
