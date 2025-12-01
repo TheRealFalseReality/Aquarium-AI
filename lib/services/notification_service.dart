@@ -303,56 +303,6 @@ class NotificationService {
     return androidEnabled;
   }
 
-  /// Send a test notification immediately (for debugging)
-  Future<void> sendTestNotification({
-    required String tankName,
-    NotificationType type = NotificationType.feeding,
-    String? customTitle,
-    String? customBody,
-  }) async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    // Create notification details
-    const androidDetails = AndroidNotificationDetails(
-      'tank_notifications',
-      'Tank Maintenance',
-      channelDescription: 'Notifications for tank maintenance tasks',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    // Get notification title and body - use custom values if provided
-    final title = customTitle ?? _getNotificationTitle(type, tankName);
-    final defaultBody = customBody ?? _getDefaultBody(type);
-    final body = '$defaultBody (Test notification)';
-
-    // Use a unique ID for test notifications
-    const int testNotificationId = 999999;
-
-    // Show notification immediately
-    await _notifications.show(
-      testNotificationId,
-      title,
-      body,
-      details,
-      payload: 'test_notification',
-    );
-  }
-
   /// Calculate the number of days a task is overdue
   /// 
   /// [dueDate] - The date when the task was originally due
@@ -380,64 +330,5 @@ class NotificationService {
   static String formatOverdueMessage(String taskName, int overdueDays) {
     final dayWord = overdueDays == 1 ? 'day' : 'days';
     return '$taskName is $overdueDays $dayWord overdue';
-  }
-
-  /// Send a test overdue notification simulating a task due on Nov 25, 2025
-  /// 
-  /// This method is for testing purposes to demonstrate how overdue
-  /// notifications will appear to users.
-  /// 
-  /// [tankName] - The name of the tank
-  /// [taskName] - The name of the task (e.g., "Water Change")
-  /// [type] - The notification type
-  Future<void> sendTestOverdueNotification({
-    required String tankName,
-    required String taskName,
-    NotificationType type = NotificationType.maintenance,
-  }) async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    // Simulate a task due on Nov 25, 2025
-    final dueDate = DateTime(2025, 11, 25);
-    final overdueDays = calculateOverdueDays(dueDate);
-
-    // Create notification details
-    const androidDetails = AndroidNotificationDetails(
-      'tank_notifications',
-      'Tank Maintenance',
-      channelDescription: 'Notifications for tank maintenance tasks',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    // Create overdue notification title and body
-    final title = '⚠️ Overdue Reminder - $tankName';
-    final body = formatOverdueMessage(taskName, overdueDays);
-
-    // Use a unique ID for test overdue notifications
-    const int testOverdueNotificationId = 999998;
-
-    // Show notification immediately
-    await _notifications.show(
-      testOverdueNotificationId,
-      title,
-      body,
-      details,
-      payload: 'test_overdue_notification',
-    );
   }
 }

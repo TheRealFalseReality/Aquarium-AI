@@ -628,26 +628,6 @@ class _NotificationManagementScreenState
               },
             ),
             ListTile(
-              leading: const Icon(Icons.send),
-              title: Text(AppLocalizations.of(context)!.sendTestNotification),
-              onTap: () {
-                Navigator.pop(context);
-                _sendTestNotification(notification);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.warning_amber, color: Colors.orange),
-              title: Text(AppLocalizations.of(context)!.sendTestOverdueNotification),
-              subtitle: Text(
-                AppLocalizations.of(context)!.testOverdueDescription,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _sendTestOverdueNotification(notification);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
@@ -706,45 +686,6 @@ class _NotificationManagementScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: 'delete_notification',
-      parameters: {'type': notification.type.name},
-    );
-  }
-
-  Future<void> _sendTestNotification(TankNotification notification) async {
-    // Send test notification immediately using the notification's type and custom settings
-    await _notificationService.sendTestNotification(
-      tankName: widget.tank.name,
-      type: notification.type,
-      customTitle: notification.customTitle,
-      customBody: notification.notes,
-    );
-
-    if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
-    }
-
-    AnalyticsService.logFeatureUsed(
-      featureName: 'send_test_notification',
-      parameters: {'type': notification.type.name},
-    );
-  }
-
-  /// Send a test overdue notification simulating a task due on Nov 25, 2025
-  Future<void> _sendTestOverdueNotification(TankNotification notification) async {
-    final taskName = notification.customTitle ?? notification.getDisplayName();
-    
-    await _notificationService.sendTestOverdueNotification(
-      tankName: widget.tank.name,
-      taskName: taskName,
-      type: notification.type,
-    );
-
-    if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.testOverdueNotificationSent);
-    }
-
-    AnalyticsService.logFeatureUsed(
-      featureName: 'send_test_overdue_notification',
       parameters: {'type': notification.type.name},
     );
   }
@@ -1101,38 +1042,6 @@ class _NotificationFormScreenState
                 },
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Test Notification Button
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.sendTestNotification,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppLocalizations.of(context)!.testNotificationDescription,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: _sendTestNotificationForPreview,
-                      icon: const Icon(Icons.send),
-                      label: Text(AppLocalizations.of(context)!.sendTestNotification),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -1170,25 +1079,6 @@ class _NotificationFormScreenState
     if (time != null) {
       setState(() => _selectedTime = time);
     }
-  }
-
-  Future<void> _sendTestNotificationForPreview() async {
-    // Send test notification with current form settings
-    await _notificationService.sendTestNotification(
-      tankName: widget.tank.name,
-      type: _selectedType,
-      customTitle: _titleController.text.isNotEmpty ? _titleController.text : null,
-      customBody: _notesController.text.isNotEmpty ? _notesController.text : null,
-    );
-
-    if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
-    }
-
-    AnalyticsService.logFeatureUsed(
-      featureName: 'send_test_notification_preview',
-      parameters: {'type': _selectedType.name},
-    );
   }
 
   Future<void> _saveNotification() async {
