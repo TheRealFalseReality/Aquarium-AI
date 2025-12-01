@@ -1217,9 +1217,15 @@ class _NotificationFormScreenState
         } else if (scheduleOption == ScheduleOption.useSpecifiedTime) {
           // User explicitly chose to use the specified time - use exact date/time
           useExactDateTime = true;
-        } else if (scheduleOption == null) {
-          // If scheduleOption is null (canceled), default to using the exact specified time
-          useExactDateTime = true;
+        } else if (scheduleOption == ScheduleOption.goBackToEdit) {
+          // User chose to go back to edit - do nothing and stay on the form
+          return;
+        } else if (scheduleOption == ScheduleOption.discardChanges || scheduleOption == null) {
+          // User chose to discard changes - go back to notification list without saving
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+          return;
         }
       }
     }

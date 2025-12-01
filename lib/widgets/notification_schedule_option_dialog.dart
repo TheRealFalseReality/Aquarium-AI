@@ -10,6 +10,10 @@ enum ScheduleOption {
   useSpecifiedTime,
   /// Schedule based on the last logged activity
   useLastActivity,
+  /// Go back to edit the notification form without saving
+  goBackToEdit,
+  /// Discard changes and go back to the notification list
+  discardChanges,
 }
 
 /// Dialog to ask the user how they want to schedule a notification
@@ -129,8 +133,15 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: Text(l10n.cancel),
+          onPressed: () => Navigator.of(context).pop(ScheduleOption.discardChanges),
+          style: TextButton.styleFrom(
+            foregroundColor: cs.error,
+          ),
+          child: Text(l10n.discard),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(ScheduleOption.goBackToEdit),
+          child: Text(l10n.goBack),
         ),
       ],
     );

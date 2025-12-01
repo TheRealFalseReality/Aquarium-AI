@@ -251,5 +251,7 @@
   "oneYear": "1 Jahr",
   "xYears": "{count} Jahre",
   "scheduledFor": "Geplant für",
-  "nextScheduled": "Nächste geplante"
+  "nextScheduled": "Nächste geplante",
+  "discard": "Verwerfen",
+  "goBack": "Zurück"
 }

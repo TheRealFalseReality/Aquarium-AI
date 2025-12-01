@@ -1611,5 +1611,15 @@
   "nextScheduled": "Next scheduled",
   "@nextScheduled": {
     "description": "Label prefix for showing the next scheduled date/time based on activity"
+  },
+
+  "discard": "Discard",
+  "@discard": {
+    "description": "Button to discard changes and go back"
+  },
+
+  "goBack": "Go Back",
+  "@goBack": {
+    "description": "Button to go back to previous screen without saving"
   }
 }
