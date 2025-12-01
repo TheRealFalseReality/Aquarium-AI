@@ -352,9 +352,28 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
   }
 
-  List<WaterParameter> _filterLast30Days(List<WaterParameter> parameters) {
+  /// Minimum number of entries to show on the graph when falling back from the 30-day filter
+  static const int _minGraphEntries = 10;
+
+  /// Get parameters for the graph display.
+  /// Returns a record with the filtered parameters and whether we're using the fallback mode.
+  /// - First tries to get data from the last 30 days
+  /// - If no data in last 30 days, falls back to showing the most recent entries
+  ({List<WaterParameter> params, bool isRecentFallback}) _getParametersForGraph(List<WaterParameter> parameters) {
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-    return parameters.where((p) => p.dateRecorded.isAfter(thirtyDaysAgo)).toList();
+    final last30Days = parameters.where((p) => p.dateRecorded.isAfter(thirtyDaysAgo)).toList();
+    
+    if (last30Days.isNotEmpty) {
+      return (params: last30Days, isRecentFallback: false);
+    }
+    
+    // No data in last 30 days, fall back to showing the most recent entries
+    // Sort by date (newest first) and take the last N entries
+    final sortedByDateDesc = List<WaterParameter>.from(parameters)
+      ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
+    final recentParams = sortedByDateDesc.take(_minGraphEntries).toList();
+    
+    return (params: recentParams, isRecentFallback: true);
   }
 
   Widget _buildParameterGraph(List<WaterParameter> parameters, String parameterType) {
@@ -362,14 +381,16 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       return const SizedBox.shrink();
     }
 
-    // Filter to last 30 days
-    final filteredParams = _filterLast30Days(parameters);
+    // Get parameters for graph display with smart fallback
+    final graphData = _getParametersForGraph(parameters);
+    final filteredParams = graphData.params;
+    final isRecentFallback = graphData.isRecentFallback;
     
     if (filteredParams.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
-          'No data in the last 30 days',
+          'No data available',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             fontStyle: FontStyle.italic,
@@ -406,6 +427,19 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
     final yRange = maxY - minY;
     final yPadding = yRange * 0.1;
+    
+    // Calculate the actual date range for the X axis
+    final newestDate = sortedParams.last.dateRecorded;
+    final daySpan = newestDate.difference(oldestDate).inDays.toDouble();
+    final maxXValue = daySpan > 0 ? daySpan : 1.0; // Ensure at least 1 day span for single data point
+
+    // Build the graph title based on the data range
+    final String graphTitle;
+    if (isRecentFallback) {
+      graphTitle = 'Last ${sortedParams.length} Reading${sortedParams.length == 1 ? '' : 's'}';
+    } else {
+      graphTitle = 'Last 30 Days Trend';
+    }
 
     return Container(
       height: 280,
@@ -417,7 +451,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Last 30 Days Trend',
+                graphTitle,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -473,7 +507,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: 5,
+                      interval: maxXValue > 20 ? 5 : (maxXValue > 7 ? 2 : 1),
                       getTitlesWidget: (value, meta) {
                         final date = oldestDate.add(Duration(days: value.toInt()));
                         return Padding(
@@ -513,7 +547,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                   ),
                 ),
                 minX: 0,
-                maxX: 30,
+                maxX: maxXValue,
                 minY: minY - yPadding,
                 maxY: maxY + yPadding,
                 lineBarsData: [
