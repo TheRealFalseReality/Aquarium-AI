@@ -225,5 +225,12 @@
   "rescheduleFromNowDescription": "Próxima notificación basada en cuándo registraste esta actividad",
   "doNothing": "No Hacer Nada",
   "doNothingDescription": "Dejar el horario de notificación sin cambios",
-  "notificationUpdated": "Horario de notificación actualizado"
+  "notificationUpdated": "Horario de notificación actualizado",
+
+  "scheduleNotificationTitle": "Programar Notificación",
+  "scheduleNotificationMessage": "Tienes registros de actividad de \"{activityType}\" existentes. ¿Cómo te gustaría programar la próxima notificación?",
+  "useSpecifiedTime": "Usar Hora Especificada",
+  "useSpecifiedTimeDescription": "Programar basado en la fecha/hora que configuraste arriba",
+  "useLastActivity": "Desde Última Actividad",
+  "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente"
 }

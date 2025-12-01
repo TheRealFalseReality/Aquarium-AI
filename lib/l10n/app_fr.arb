@@ -216,5 +216,12 @@
   "rescheduleFromNowDescription": "Prochaine notification basée sur quand vous avez enregistré cette activité",
   "doNothing": "Ne rien faire",
   "doNothingDescription": "Laisser le calendrier de notification inchangé",
-  "notificationUpdated": "Calendrier de notification mis à jour"
+  "notificationUpdated": "Calendrier de notification mis à jour",
+
+  "scheduleNotificationTitle": "Programmer la Notification",
+  "scheduleNotificationMessage": "Vous avez des journaux d'activité \"{activityType}\" existants. Comment souhaitez-vous programmer la prochaine notification?",
+  "useSpecifiedTime": "Utiliser l'Heure Spécifiée",
+  "useSpecifiedTimeDescription": "Programmer selon la date/heure que vous avez définie ci-dessus",
+  "useLastActivity": "Depuis la Dernière Activité",
+  "useLastActivityDescription": "Programmer selon votre journal d'activité le plus récent"
 }

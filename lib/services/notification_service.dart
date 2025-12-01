@@ -113,11 +113,17 @@ class NotificationService {
   /// calculated based on the last matching activity log, making the
   /// notification schedule relative to when the user actually completed
   /// the task.
+  /// 
+  /// If [useExactDateTime] is true, the notification will be scheduled for
+  /// exactly [notification.notificationDateTime], ignoring any activity logs
+  /// or repeat frequency calculations. This is useful when the user explicitly
+  /// wants to schedule for a specific date/time.
   Future<void> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
+    bool useExactDateTime = false,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -151,11 +157,18 @@ class NotificationService {
     final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Calculate the next notification date using activity-based scheduling
-    // This uses the same logic as the UI displays, ensuring consistency
-    final nextDate = activityLogs != null 
-        ? notification.getNextNotificationDateWithActivity(activityLogs)
-        : notification.getNextNotificationDate();
+    // Determine the next notification date
+    DateTime? nextDate;
+    if (useExactDateTime) {
+      // Use the exact date/time specified in the notification, ignoring any calculations
+      nextDate = notification.notificationDateTime;
+    } else if (activityLogs != null) {
+      // Calculate based on activity logs
+      nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+    } else {
+      // Fall back to standard calculation
+      nextDate = notification.getNextNotificationDate();
+    }
     
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);

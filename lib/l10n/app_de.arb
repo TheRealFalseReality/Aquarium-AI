@@ -225,5 +225,12 @@
   "rescheduleFromNowDescription": "Nächste Benachrichtigung basierend auf wann Sie diese Aktivität protokolliert haben",
   "doNothing": "Nichts tun",
   "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
-  "notificationUpdated": "Benachrichtigungsplan aktualisiert"
+  "notificationUpdated": "Benachrichtigungsplan aktualisiert",
+
+  "scheduleNotificationTitle": "Benachrichtigung Planen",
+  "scheduleNotificationMessage": "Sie haben bestehende \"{activityType}\" Aktivitätsprotokolle. Wie möchten Sie die nächste Benachrichtigung planen?",
+  "useSpecifiedTime": "Angegebene Zeit Verwenden",
+  "useSpecifiedTimeDescription": "Planen basierend auf dem oben eingestellten Datum/Uhrzeit",
+  "useLastActivity": "Von Letzter Aktivität",
+  "useLastActivityDescription": "Planen basierend auf Ihrem letzten Aktivitätsprotokoll"
 }
