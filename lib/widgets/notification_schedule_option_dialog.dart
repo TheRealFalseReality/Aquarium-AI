@@ -60,19 +60,21 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
 
     // Build description for "Use Specified Time" option
     String specifiedTimeDescription = l10n.useSpecifiedTimeDescription;
-    if (specifiedDateTime != null) {
-      specifiedTimeDescription = '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: ${dateTimeFormat.format(specifiedDateTime!)}';
+    final specifiedDateTimeVal = specifiedDateTime;
+    if (specifiedDateTimeVal != null) {
+      specifiedTimeDescription = '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: ${dateTimeFormat.format(specifiedDateTimeVal)}';
     }
 
     // Build description for "From Last Activity" option
     String? lastActivityDate;
     String? nextScheduledDate;
     
-    if (lastActivityLog != null) {
-      lastActivityDate = dateFormat.format(lastActivityLog!.loggedAt);
+    final lastActivityLogVal = lastActivityLog;
+    if (lastActivityLogVal != null) {
+      lastActivityDate = dateFormat.format(lastActivityLogVal.loggedAt);
       
       // Calculate next scheduled date based on last activity
-      final nextDate = notification.getNextNotificationDateFromBase(lastActivityLog!.loggedAt);
+      final nextDate = notification.getNextNotificationDateFromBase(lastActivityLogVal.loggedAt);
       if (nextDate != null) {
         nextScheduledDate = dateTimeFormat.format(nextDate);
       }
