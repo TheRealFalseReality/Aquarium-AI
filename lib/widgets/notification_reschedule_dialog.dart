@@ -149,12 +149,6 @@ class NotificationRescheduleDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: Text(l10n.cancel),
-        ),
-      ],
     );
   }
 

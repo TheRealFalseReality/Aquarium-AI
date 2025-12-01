@@ -1845,8 +1845,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       // Ask user how they want to update the notification schedule BEFORE saving
       rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
       
-      // If user cancelled, still log the activity but don't reschedule
-      rescheduleOption ??= RescheduleOption.doNothing;
+      // If user cancelled (null) or chose cancelAll, don't log the activity
+      if (rescheduleOption == null || rescheduleOption == RescheduleOption.cancelAll) {
+        return; // Exit early - don't log or reschedule
+      }
     }
     
     // Now save the activity log
