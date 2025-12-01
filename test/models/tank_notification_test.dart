@@ -913,6 +913,83 @@ void main() {
     });
   });
 
+  group('TankNotification - getNextNotificationDateFromNow', () {
+    test('should return null for disabled notification', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: false,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromNow();
+
+      expect(nextDate, isNull);
+    });
+
+    test('should return null for non-repeating notification', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.none,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final nextDate = notification.getNextNotificationDateFromNow();
+
+      expect(nextDate, isNull);
+    });
+
+    test('should calculate next daily occurrence from now', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 2,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final now = DateTime.now();
+      final nextDate = notification.getNextNotificationDateFromNow();
+
+      expect(nextDate, isNotNull);
+      // Should be 2 days from now (current time, not original time)
+      final expectedDate = now.add(const Duration(days: 2));
+      // Allow 1 second tolerance for test execution time
+      expect(nextDate!.difference(expectedDate).inSeconds.abs() < 2, true);
+    });
+
+    test('should calculate next weekly occurrence from now', () {
+      final notification = TankNotification(
+        id: 'test-id',
+        type: NotificationType.waterChange,
+        notificationDateTime: DateTime(2024, 6, 1, 9, 0),
+        repeatFrequency: RepeatFrequency.weekly,
+        repeatInterval: 1,
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+        enabled: true,
+      );
+
+      final now = DateTime.now();
+      final nextDate = notification.getNextNotificationDateFromNow();
+
+      expect(nextDate, isNotNull);
+      // Should be 7 days from now
+      final expectedDate = now.add(const Duration(days: 7));
+      expect(nextDate!.difference(expectedDate).inSeconds.abs() < 2, true);
+    });
+  });
+
   group('TankNotification - Activity Log Matching', () {
     test('should match feeding activity log', () {
       final notification = TankNotification(

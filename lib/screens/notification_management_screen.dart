@@ -135,6 +135,7 @@ class _NotificationManagementScreenState
     final currentTank = ref.watch(tankProvider).tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
     final notifications = currentTank.notifications;
+    final activityLogs = currentTank.notificationLogs;
 
     return Scaffold(
       appBar: AppBar(
@@ -160,7 +161,7 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(notification, activityLogs);
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -204,14 +205,24 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification) {
+  Widget _buildNotificationCard(TankNotification notification, List<NotificationLog> activityLogs) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Display the notification's set date/time directly
-    // This matches what the user specified when creating/editing the notification
-    final DateTime displayDate = notification.notificationDateTime;
+    // Calculate the next notification date using activity logs for repeating notifications
+    // For non-repeating, use the stored date/time
+    final DateTime? nextDate;
+    if (notification.repeatFrequency != RepeatFrequency.none) {
+      nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+    } else if (notification.notificationDateTime.isAfter(DateTime.now())) {
+      nextDate = notification.notificationDateTime;
+    } else {
+      nextDate = null;
+    }
+    
+    // Display date: use calculated next date if available, otherwise use stored date
+    final DateTime displayDate = nextDate ?? notification.notificationDateTime;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -291,32 +302,16 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                if (notification.enabled)
-                  Builder(
-                    builder: (context) {
-                      // Use the notification's set date/time for the "time from now" chip
-                      // This shows when the notification will fire based on user's specification
-                      final DateTime? nextDate;
-                      if (notification.notificationDateTime.isAfter(DateTime.now())) {
-                        nextDate = notification.notificationDateTime;
-                      } else {
-                        // If the set time is in the past, don't show the chip
-                        nextDate = null;
-                      }
-                      
-                      if (nextDate == null) return const SizedBox.shrink();
-                      
-                      return Chip(
-                        label: Text(
-                          _getTimeFromNow(nextDate),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        avatar: const Icon(Icons.schedule, size: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      );
-                    },
+                if (notification.enabled && nextDate != null)
+                  Chip(
+                    label: Text(
+                      _getTimeFromNow(nextDate),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    avatar: const Icon(Icons.schedule, size: 16),
+                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
                   ),
               ],
             ),

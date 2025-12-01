@@ -239,6 +239,38 @@ class TankNotification {
     }
   }
 
+  /// Calculate the next notification date from now, using the current time.
+  /// 
+  /// Unlike [getNextNotificationDateFromBase], this uses the current time
+  /// for the new notification, not the original notification time.
+  /// 
+  /// For example, if it's 3:00 PM and the notification is set for "every 2 days",
+  /// the next notification will be at 3:00 PM in 2 days.
+  /// 
+  /// Returns the next notification date, or null if the notification is disabled
+  /// or non-repeating.
+  DateTime? getNextNotificationDateFromNow() {
+    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+      return null;
+    }
+
+    final now = DateTime.now();
+
+    // Calculate the next occurrence from now, using current time
+    switch (repeatFrequency) {
+      case RepeatFrequency.daily:
+        return now.add(Duration(days: repeatInterval));
+      case RepeatFrequency.weekly:
+        return now.add(Duration(days: 7 * repeatInterval));
+      case RepeatFrequency.monthly:
+        return _addMonths(now, repeatInterval);
+      case RepeatFrequency.yearly:
+        return _addYears(now, repeatInterval);
+      case RepeatFrequency.none:
+        return null;
+    }
+  }
+
   /// Calculate the next notification date considering activity logs.
   /// 
   /// This is the primary method for determining when the next notification

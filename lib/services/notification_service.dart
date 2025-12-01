@@ -118,12 +118,17 @@ class NotificationService {
   /// exactly [notification.notificationDateTime], ignoring any activity logs
   /// or repeat frequency calculations. This is useful when the user explicitly
   /// wants to schedule for a specific date/time.
+  /// 
+  /// If [useCurrentTime] is true, the notification will be scheduled using the
+  /// current time instead of the original notification time. This is used when
+  /// rescheduling from "now" after logging an activity.
   Future<void> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
     bool useExactDateTime = false,
+    bool useCurrentTime = false,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -162,8 +167,11 @@ class NotificationService {
     if (useExactDateTime) {
       // Use the exact date/time specified in the notification, ignoring any calculations
       nextDate = notification.notificationDateTime;
+    } else if (useCurrentTime) {
+      // Calculate from now using current time
+      nextDate = notification.getNextNotificationDateFromNow();
     } else if (activityLogs != null) {
-      // Calculate based on activity logs
+      // Calculate based on activity logs (preserves original time)
       nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
     } else {
       // Fall back to standard calculation

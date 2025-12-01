@@ -1414,9 +1414,19 @@
     "description": "Option to keep the notification's original schedule"
   },
 
-  "rescheduleFromOriginalDescription": "Next notification based on original date/time",
+  "rescheduleFromOriginalDescription": "{intervalDescription}, at original time ({time})",
   "@rescheduleFromOriginalDescription": {
-    "description": "Description for keeping original schedule"
+    "description": "Description for keeping original schedule with dynamic time",
+    "placeholders": {
+      "intervalDescription": {
+        "type": "String",
+        "description": "The interval description like 'In 2 days'"
+      },
+      "time": {
+        "type": "String",
+        "description": "The original notification time"
+      }
+    }
   },
 
   "rescheduleFromNow": "Reschedule from Now",
@@ -1424,9 +1434,19 @@
     "description": "Option to reschedule notification from current time"
   },
 
-  "rescheduleFromNowDescription": "Next notification based on when you logged this activity",
+  "rescheduleFromNowDescription": "{intervalDescription}, at current time ({time})",
   "@rescheduleFromNowDescription": {
-    "description": "Description for rescheduling from now"
+    "description": "Description for rescheduling from now with dynamic time",
+    "placeholders": {
+      "intervalDescription": {
+        "type": "String",
+        "description": "The interval description like 'In 2 days'"
+      },
+      "time": {
+        "type": "String",
+        "description": "The current time"
+      }
+    }
   },
 
   "doNothing": "Do Nothing",

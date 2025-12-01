@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
 
@@ -35,11 +36,52 @@ class NotificationRescheduleDialog extends StatelessWidget {
     );
   }
 
+  /// Get a human-readable interval description for the notification frequency
+  String _getIntervalDescription(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final interval = notification.repeatInterval;
+    
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        if (interval == 1) {
+          return l10n.inOneDay;
+        }
+        return l10n.inXDays(interval);
+      case RepeatFrequency.weekly:
+        if (interval == 1) {
+          return l10n.inXDays(7);
+        }
+        return l10n.inXDays(7 * interval);
+      case RepeatFrequency.monthly:
+        if (interval == 1) {
+          return l10n.inXDays(30);
+        }
+        return l10n.inXDays(30 * interval);
+      case RepeatFrequency.yearly:
+        if (interval == 1) {
+          return l10n.inXDays(365);
+        }
+        return l10n.inXDays(365 * interval);
+      case RepeatFrequency.none:
+        return '';
+    }
+  }
+
+  /// Format time for display
+  String _formatTime(DateTime dateTime) {
+    return DateFormat('h:mm a').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final notificationName = notification.getDisplayName();
+    
+    // Calculate interval description and times for display
+    final intervalDescription = _getIntervalDescription(context);
+    final originalTime = _formatTime(notification.notificationDateTime);
+    final currentTime = _formatTime(DateTime.now());
 
     return AlertDialog(
       title: Row(
@@ -64,24 +106,24 @@ class NotificationRescheduleDialog extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           
-          // Option 1: Reschedule from now
+          // Option 1: Reschedule from now (uses current time)
           _buildOption(
             context,
             icon: Icons.update,
             iconColor: Colors.blue,
             title: l10n.rescheduleFromNow,
-            description: l10n.rescheduleFromNowDescription,
+            description: l10n.rescheduleFromNowDescription(intervalDescription, currentTime),
             onTap: () => Navigator.of(context).pop(RescheduleOption.rescheduleFromNow),
           ),
           const SizedBox(height: 12),
           
-          // Option 2: Keep original schedule
+          // Option 2: Keep original schedule (uses original time)
           _buildOption(
             context,
             icon: Icons.schedule,
             iconColor: Colors.orange,
             title: l10n.rescheduleFromOriginal,
-            description: l10n.rescheduleFromOriginalDescription,
+            description: l10n.rescheduleFromOriginalDescription(intervalDescription, originalTime),
             onTap: () => Navigator.of(context).pop(RescheduleOption.keepOriginal),
           ),
           const SizedBox(height: 12),

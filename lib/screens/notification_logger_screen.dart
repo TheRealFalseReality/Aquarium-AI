@@ -687,14 +687,13 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
-        // Reschedule based on the activity log date
-        await _notificationService.rescheduleMatchingNotifications(
+        // Reschedule from now using current time
+        await _notificationService.cancelNotification(notification);
+        await _notificationService.scheduleNotification(
           tankId: widget.tank.id,
           tankName: widget.tank.name,
-          notifications: widget.tank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
+          notification: notification,
+          useCurrentTime: true,
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -705,6 +704,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         
       case RescheduleOption.keepOriginal:
         // Cancel and reschedule from the original notification date
+        // This uses the repeat interval from the original date, preserving original time
         await _notificationService.cancelNotification(notification);
         await _notificationService.scheduleNotification(
           tankId: widget.tank.id,
