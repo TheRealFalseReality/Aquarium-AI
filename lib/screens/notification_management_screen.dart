@@ -1199,10 +1199,16 @@ class _NotificationFormScreenState
       }).toList();
       
       if (matchingLogs.isNotEmpty && mounted) {
+        // Sort by date (newest first) and get the most recent activity log
+        matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+        final lastActivityLog = matchingLogs.first;
+        
         // Show dialog to let user choose scheduling method
         final scheduleOption = await NotificationScheduleOptionDialog.show(
           context,
           notification,
+          lastActivityLog: lastActivityLog,
+          specifiedDateTime: notificationDateTime,
         );
         
         if (scheduleOption == ScheduleOption.useLastActivity) {
@@ -1211,9 +1217,15 @@ class _NotificationFormScreenState
         } else if (scheduleOption == ScheduleOption.useSpecifiedTime) {
           // User explicitly chose to use the specified time - use exact date/time
           useExactDateTime = true;
-        } else if (scheduleOption == null) {
-          // If scheduleOption is null (canceled), default to using the exact specified time
-          useExactDateTime = true;
+        } else if (scheduleOption == ScheduleOption.goBackToEdit) {
+          // User chose to go back to edit - do nothing and stay on the form
+          return;
+        } else if (scheduleOption == ScheduleOption.discardChanges || scheduleOption == null) {
+          // User chose to discard changes - go back to notification list without saving
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+          return;
         }
       }
     }
