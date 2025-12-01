@@ -1655,7 +1655,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           }
         }
       } else {
-        timeDisplay = notification.repeatFrequency.displayName;
+        timeDisplay = _getRepeatIntervalText(context, notification);
       }
       
       notificationItems.add(
@@ -1822,6 +1822,37 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       case NotificationType.other:
         return Colors.grey;
     }
+  }
+
+  /// Get the repeat interval text for a notification, considering the repeat interval.
+  /// Returns "Daily", "Weekly", etc. for interval=1, or "Every 2 days", "Every 3 weeks", etc. for interval>1.
+  String _getRepeatIntervalText(BuildContext context, TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (notification.repeatInterval == 1) {
+      return notification.repeatFrequency.displayName;
+    }
+    
+    // Get the appropriate unit name based on frequency
+    final String unitName;
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        unitName = l10n.days;
+        break;
+      case RepeatFrequency.weekly:
+        unitName = l10n.weeks;
+        break;
+      case RepeatFrequency.monthly:
+        unitName = l10n.months;
+        break;
+      case RepeatFrequency.yearly:
+        unitName = l10n.years;
+        break;
+      case RepeatFrequency.none:
+        return notification.repeatFrequency.displayName;
+    }
+    
+    return l10n.everyXDays(notification.repeatInterval, unitName);
   }
 
   Future<void> _quickLogFromCard(BuildContext context, WidgetRef ref, Tank tank, TankNotification notification) async {
