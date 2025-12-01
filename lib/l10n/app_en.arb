@@ -886,12 +886,12 @@
     "description": "Add notes placeholder"
   },
 
-  "enableNotification": "Enable Notification",
+  "enableNotification": "Enable Device Notifications",
   "@enableNotification": {
     "description": "Enable notification switch label"
   },
 
-  "receiveReminders": "Receive reminders for this task",
+  "receiveReminders": "Receive push notifications on your device for this task",
   "@receiveReminders": {
     "description": "Receive reminders subtitle"
   },

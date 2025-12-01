@@ -1598,11 +1598,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     // Show ALL configured notifications as quick log buttons (2 per row)
+    // Quick log cards are shown regardless of whether the notification is enabled
+    // because activity logging is separate from receiving device notifications
     final now = DateTime.now();
     
     for (final notification in tank.notifications) {
-      if (!notification.enabled) continue;
-      
       // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
