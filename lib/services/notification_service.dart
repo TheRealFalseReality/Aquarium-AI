@@ -118,12 +118,21 @@ class NotificationService {
   /// exactly [notification.notificationDateTime], ignoring any activity logs
   /// or repeat frequency calculations. This is useful when the user explicitly
   /// wants to schedule for a specific date/time.
-  Future<void> scheduleNotification({
+  /// 
+  /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
+  /// will use the time from the activity log instead of the original notification
+  /// time. This is used for "Reschedule from Now" to schedule at the current time.
+  /// 
+  /// Returns the calculated next notification date, or null if the notification
+  /// is disabled or non-repeating. This can be used to update the notification
+  /// model's scheduledNextDate field.
+  Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
     bool useExactDateTime = false,
+    bool useCurrentTime = false,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -163,8 +172,8 @@ class NotificationService {
       // Use the exact date/time specified in the notification, ignoring any calculations
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
-      // Calculate based on activity logs
-      nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+      // Calculate based on activity logs, optionally using current time
+      nextDate = notification.getNextNotificationDateWithActivity(activityLogs, useCurrentTime: useCurrentTime);
     } else {
       // Fall back to standard calculation
       nextDate = notification.getNextNotificationDate();
@@ -185,6 +194,9 @@ class NotificationService {
         payload: '${tankId}_${notification.id}',
       );
     }
+    
+    // Return the calculated next date so callers can update the model
+    return nextDate;
   }
 
   /// Cancel a scheduled notification
@@ -235,13 +247,20 @@ class NotificationService {
   /// 
   /// This is called when an activity is logged to update the schedule
   /// of matching notifications based on the new activity.
-  Future<void> rescheduleMatchingNotifications({
+  /// 
+  /// If [useCurrentTime] is true, the notification will use the time from the
+  /// activity log instead of the original notification time.
+  /// 
+  /// Returns a list of updated notifications with their scheduledNextDate set.
+  /// Callers should persist these updated notifications to the tank.
+  Future<List<TankNotification>> rescheduleMatchingNotifications({
     required String tankId,
     required String tankName,
     required List<TankNotification> notifications,
     required List<NotificationLog> activityLogs,
     required NotificationType activityType,
     String? activityCustomCategory,
+    bool useCurrentTime = false,
   }) async {
     // Filter to only enabled, repeating notifications that match the activity type
     final matchingNotifications = notifications.where((notification) => 
@@ -252,19 +271,32 @@ class NotificationService {
 
     // Early return if no notifications match
     if (matchingNotifications.isEmpty) {
-      return;
+      return [];
     }
+
+    final updatedNotifications = <TankNotification>[];
 
     // Cancel and reschedule each matching notification
     for (final notification in matchingNotifications) {
       await cancelNotification(notification);
-      await scheduleNotification(
+      final nextDate = await scheduleNotification(
         tankId: tankId,
         tankName: tankName,
         notification: notification,
         activityLogs: activityLogs,
+        useCurrentTime: useCurrentTime,
       );
+      
+      // Create updated notification with the new scheduledNextDate
+      if (nextDate != null) {
+        updatedNotifications.add(notification.copyWith(
+          scheduledNextDate: nextDate,
+          updatedAt: DateTime.now(),
+        ));
+      }
     }
+    
+    return updatedNotifications;
   }
 
   /// Get notification title based on type

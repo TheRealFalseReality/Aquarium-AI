@@ -214,8 +214,14 @@
   "rescheduleFromOriginalDescription": "Prochaine notification basée sur la date/heure originale",
   "rescheduleFromNow": "Reprogrammer à partir de maintenant",
   "rescheduleFromNowDescription": "Prochaine notification basée sur quand vous avez enregistré cette activité",
+  "rescheduleTimeAndDate": "Reprogrammer l'Heure et la Date",
+  "rescheduleDateOnly": "Reprogrammer la Date Uniquement",
   "doNothing": "Ne rien faire",
   "doNothingDescription": "Laisser le calendrier de notification inchangé",
+  "dontReschedule": "Ne pas reprogrammer",
+  "dontRescheduleDescription": "Enregistrer l'activité mais garder le calendrier de notification existant",
+  "cancelActivityLog": "Annuler",
+  "cancelActivityLogDescription": "Ne pas enregistrer l'activité et ne pas reprogrammer",
   "notificationUpdated": "Calendrier de notification mis à jour",
 
   "scheduleNotificationTitle": "Programmer la Notification",
@@ -223,5 +229,16 @@
   "useSpecifiedTime": "Utiliser l'Heure Spécifiée",
   "useSpecifiedTimeDescription": "Programmer selon la date/heure que vous avez définie ci-dessus",
   "useLastActivity": "Depuis la Dernière Activité",
-  "useLastActivityDescription": "Programmer selon votre journal d'activité le plus récent"
+  "useLastActivityDescription": "Programmer selon votre journal d'activité le plus récent",
+
+  "rescheduleFromOriginalDescriptionDetailed": "{interval} à partir de maintenant, à {time} (heure originale)",
+  "rescheduleFromNowDescriptionDetailed": "{interval} à partir de maintenant, à {time} (heure actuelle)",
+  "oneDay": "1 jour",
+  "xDays": "{count} jours",
+  "oneWeek": "1 semaine",
+  "xWeeks": "{count} semaines",
+  "oneMonth": "1 mois",
+  "xMonths": "{count} mois",
+  "oneYear": "1 an",
+  "xYears": "{count} ans"
 }

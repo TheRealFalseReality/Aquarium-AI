@@ -1598,11 +1598,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     // Show ALL configured notifications as quick log buttons (2 per row)
+    // Quick log cards are shown regardless of whether the notification is enabled
+    // because activity logging is separate from receiving device notifications
     final now = DateTime.now();
     
     for (final notification in tank.notifications) {
-      if (!notification.enabled) continue;
-      
       // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
@@ -1845,8 +1845,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       // Ask user how they want to update the notification schedule BEFORE saving
       rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
       
-      // If user cancelled, still log the activity but don't reschedule
-      rescheduleOption ??= RescheduleOption.doNothing;
+      // If user cancelled (null) or chose cancelAll, don't log the activity
+      if (rescheduleOption == null || rescheduleOption == RescheduleOption.cancelAll) {
+        return; // Exit early - don't log or reschedule
+      }
     }
     
     // Now save the activity log
@@ -1903,39 +1905,90 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final notificationService = NotificationService();
     final l10n = AppLocalizations.of(context)!;
     
+    // Get the latest tank state
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == tank.id, orElse: () => tank);
+    
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
-        // Reschedule based on the activity log date (which is now)
-        await notificationService.rescheduleMatchingNotifications(
-          tankId: tank.id,
-          tankName: tank.name,
-          notifications: tank.notifications,
+        // Reschedule based on the activity log date (which is now), using current time
+        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
           activityLogs: updatedLogs,
           activityType: log.type,
           activityCustomCategory: log.customCategory,
+          useCurrentTime: true,
         );
+        
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
+          final notificationsList = currentTank.notifications.map((n) {
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (context.mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
         
       case RescheduleOption.keepOriginal:
-        // Cancel and reschedule from the original notification date
-        await notificationService.cancelNotification(notification);
-        await notificationService.scheduleNotification(
-          tankId: tank.id,
-          tankName: tank.name,
-          notification: notification,
-          // Don't pass activity logs - use original schedule
-          activityLogs: null,
+        // Reschedule to same date as rescheduleFromNow but keep original notification time
+        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+          useCurrentTime: false,  // Keep original time
         );
+        
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
+          final notificationsList = currentTank.notifications.map((n) {
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (context.mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
         
       case RescheduleOption.doNothing:
-        // Do nothing - keep the existing schedule as is
+        // Don't reschedule - activity is already logged, just keep existing schedule
+        break;
+        
+      case RescheduleOption.cancelAll:
+        // Cancel - don't log activity and don't reschedule
+        // Remove the log that was just added
+        final logsWithoutNew = updatedLogs.where((l) => l.id != log.id).toList();
+        final updatedTank = currentTank.copyWith(
+          notificationLogs: logsWithoutNew,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
         break;
     }
     

@@ -223,8 +223,14 @@
   "rescheduleFromOriginalDescription": "Nächste Benachrichtigung basierend auf ursprünglichem Datum/Uhrzeit",
   "rescheduleFromNow": "Ab jetzt neu planen",
   "rescheduleFromNowDescription": "Nächste Benachrichtigung basierend auf wann Sie diese Aktivität protokolliert haben",
+  "rescheduleTimeAndDate": "Zeit & Datum neu planen",
+  "rescheduleDateOnly": "Nur Datum neu planen",
   "doNothing": "Nichts tun",
   "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
+  "dontReschedule": "Nicht neu planen",
+  "dontRescheduleDescription": "Aktivität protokollieren, aber bestehenden Benachrichtigungsplan beibehalten",
+  "cancelActivityLog": "Abbrechen",
+  "cancelActivityLogDescription": "Aktivität nicht protokollieren und nicht neu planen",
   "notificationUpdated": "Benachrichtigungsplan aktualisiert",
 
   "scheduleNotificationTitle": "Benachrichtigung Planen",
@@ -232,5 +238,16 @@
   "useSpecifiedTime": "Angegebene Zeit Verwenden",
   "useSpecifiedTimeDescription": "Planen basierend auf dem oben eingestellten Datum/Uhrzeit",
   "useLastActivity": "Von Letzter Aktivität",
-  "useLastActivityDescription": "Planen basierend auf Ihrem letzten Aktivitätsprotokoll"
+  "useLastActivityDescription": "Planen basierend auf Ihrem letzten Aktivitätsprotokoll",
+
+  "rescheduleFromOriginalDescriptionDetailed": "{interval} ab jetzt, um {time} (ursprüngliche Zeit)",
+  "rescheduleFromNowDescriptionDetailed": "{interval} ab jetzt, um {time} (aktuelle Zeit)",
+  "oneDay": "1 Tag",
+  "xDays": "{count} Tage",
+  "oneWeek": "1 Woche",
+  "xWeeks": "{count} Wochen",
+  "oneMonth": "1 Monat",
+  "xMonths": "{count} Monate",
+  "oneYear": "1 Jahr",
+  "xYears": "{count} Jahre"
 }

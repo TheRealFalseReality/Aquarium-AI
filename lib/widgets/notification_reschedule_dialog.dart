@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
 
 /// Options for rescheduling a notification after logging an activity
 enum RescheduleOption {
-  /// Keep the original notification schedule (based on notification's original date)
+  /// Reschedule Date Only - same date as rescheduleFromNow but keeps original time
   keepOriginal,
-  /// Reschedule from the current time/date
+  /// Reschedule from the current time/date - both date and time are based on now
   rescheduleFromNow,
-  /// Do not change the notification schedule
+  /// Don't reschedule - log the activity but keep existing notification schedule
   doNothing,
+  /// Cancel - don't log the activity and don't reschedule
+  cancelAll,
 }
 
 /// Dialog to ask the user how they want to update a notification
@@ -34,12 +37,50 @@ class NotificationRescheduleDialog extends StatelessWidget {
       ),
     );
   }
+  
+  /// Get a formatted date and time string
+  String _getFormattedDateTime(DateTime dateTime) {
+    final dateFormat = DateFormat('MMM d, y'); // e.g., "Dec 15, 2024"
+    final timeFormat = DateFormat.jm(); // e.g., "2:30 PM"
+    return '${dateFormat.format(dateTime)} at ${timeFormat.format(dateTime)}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final notificationName = notification.getDisplayName();
+    
+    // Calculate the actual next dates for each option using the model's methods
+    // "Reschedule Date Only" uses getNextNotificationDateFromBase with useCurrentTime: false
+    //   → same date as "Reschedule Time & Date" but keeps original notification time
+    // "Reschedule Time & Date" uses getNextNotificationDateFromBase with useCurrentTime: true
+    //   → both date and time are based on now
+    final nextDateWithOriginalTime = notification.getNextNotificationDateFromBase(
+      DateTime.now(), 
+      useCurrentTime: false,  // Preserve original time
+    );
+    final nextDateWithCurrentTime = notification.getNextNotificationDateFromBase(
+      DateTime.now(), 
+      useCurrentTime: true,   // Use current time
+    );
+    
+    // Format dates with full date and time
+    final originalTimeDateTime = nextDateWithOriginalTime != null 
+        ? _getFormattedDateTime(nextDateWithOriginalTime)
+        : l10n.rescheduleFromOriginalDescription;
+    final currentDateTime = nextDateWithCurrentTime != null 
+        ? _getFormattedDateTime(nextDateWithCurrentTime)
+        : l10n.rescheduleFromNowDescription;
+    
+    // Build the description strings with the actual calculated dates
+    final rescheduleTimeAndDateDesc = notification.repeatFrequency != RepeatFrequency.none
+        ? currentDateTime
+        : l10n.rescheduleFromNowDescription;
+    
+    final rescheduleDateOnlyDesc = notification.repeatFrequency != RepeatFrequency.none
+        ? originalTimeDateTime
+        : l10n.rescheduleFromOriginalDescription;
 
     return AlertDialog(
       title: Row(
@@ -64,45 +105,50 @@ class NotificationRescheduleDialog extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           
-          // Option 1: Reschedule from now
+          // Option 1: Reschedule Time & Date (uses current time)
           _buildOption(
             context,
             icon: Icons.update,
             iconColor: Colors.blue,
-            title: l10n.rescheduleFromNow,
-            description: l10n.rescheduleFromNowDescription,
+            title: l10n.rescheduleTimeAndDate,
+            description: rescheduleTimeAndDateDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.rescheduleFromNow),
           ),
           const SizedBox(height: 12),
           
-          // Option 2: Keep original schedule
+          // Option 2: Reschedule Date Only (keeps original time)
           _buildOption(
             context,
             icon: Icons.schedule,
             iconColor: Colors.orange,
-            title: l10n.rescheduleFromOriginal,
-            description: l10n.rescheduleFromOriginalDescription,
+            title: l10n.rescheduleDateOnly,
+            description: rescheduleDateOnlyDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.keepOriginal),
           ),
           const SizedBox(height: 12),
           
-          // Option 3: Do nothing
+          // Option 3: Don't Reschedule (log activity but keep existing schedule)
           _buildOption(
             context,
-            icon: Icons.block,
+            icon: Icons.notifications_off,
             iconColor: Colors.grey,
-            title: l10n.doNothing,
-            description: l10n.doNothingDescription,
+            title: l10n.dontReschedule,
+            description: l10n.dontRescheduleDescription,
             onTap: () => Navigator.of(context).pop(RescheduleOption.doNothing),
+          ),
+          const SizedBox(height: 12),
+          
+          // Option 4: Cancel (don't log activity and don't reschedule)
+          _buildOption(
+            context,
+            icon: Icons.cancel_outlined,
+            iconColor: Colors.red,
+            title: l10n.cancelActivityLog,
+            description: l10n.cancelActivityLogDescription,
+            onTap: () => Navigator.of(context).pop(RescheduleOption.cancelAll),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: Text(l10n.cancel),
-        ),
-      ],
     );
   }
 

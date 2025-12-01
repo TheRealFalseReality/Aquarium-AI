@@ -223,8 +223,14 @@
   "rescheduleFromOriginalDescription": "Próxima notificación basada en fecha/hora original",
   "rescheduleFromNow": "Reprogramar desde Ahora",
   "rescheduleFromNowDescription": "Próxima notificación basada en cuándo registraste esta actividad",
+  "rescheduleTimeAndDate": "Reprogramar Hora y Fecha",
+  "rescheduleDateOnly": "Reprogramar Solo Fecha",
   "doNothing": "No Hacer Nada",
   "doNothingDescription": "Dejar el horario de notificación sin cambios",
+  "dontReschedule": "No Reprogramar",
+  "dontRescheduleDescription": "Registrar actividad pero mantener el horario de notificación existente",
+  "cancelActivityLog": "Cancelar",
+  "cancelActivityLogDescription": "No registrar actividad y no reprogramar",
   "notificationUpdated": "Horario de notificación actualizado",
 
   "scheduleNotificationTitle": "Programar Notificación",
@@ -232,5 +238,16 @@
   "useSpecifiedTime": "Usar Hora Especificada",
   "useSpecifiedTimeDescription": "Programar basado en la fecha/hora que configuraste arriba",
   "useLastActivity": "Desde Última Actividad",
-  "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente"
+  "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente",
+
+  "rescheduleFromOriginalDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora original)",
+  "rescheduleFromNowDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora actual)",
+  "oneDay": "1 día",
+  "xDays": "{count} días",
+  "oneWeek": "1 semana",
+  "xWeeks": "{count} semanas",
+  "oneMonth": "1 mes",
+  "xMonths": "{count} meses",
+  "oneYear": "1 año",
+  "xYears": "{count} años"
 }

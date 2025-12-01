@@ -59,15 +59,10 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final updatedLogs = currentTank.notificationLogs
         .where((e) => e.id != entry.id)
         .toList();
-    final updatedTank = currentTank.copyWith(
-      notificationLogs: updatedLogs,
-      updatedAt: DateTime.now(),
-    );
-    await ref.read(tankProvider.notifier).updateTank(updatedTank);
     
     // Reschedule matching notifications based on remaining activity logs
     // (next most recent activity becomes the base)
-    await _notificationService.rescheduleMatchingNotifications(
+    final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
       tankId: currentTank.id,
       tankName: currentTank.name,
       notifications: currentTank.notifications,
@@ -75,6 +70,26 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
       activityType: entry.type,
       activityCustomCategory: entry.customCategory,
     );
+    
+    // Update the tank with updated logs and notifications
+    var updatedTank = currentTank.copyWith(
+      notificationLogs: updatedLogs,
+      updatedAt: DateTime.now(),
+    );
+    
+    // Apply the updated notifications with new scheduledNextDate
+    if (updatedNotifications.isNotEmpty) {
+      final notificationsList = updatedTank.notifications.map((n) {
+        final updated = updatedNotifications.firstWhere(
+          (u) => u.id == n.id,
+          orElse: () => n,
+        );
+        return updated;
+      }).toList();
+      updatedTank = updatedTank.copyWith(notifications: notificationsList);
+    }
+    
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
     
     // Log notification log entry deletion
     AnalyticsService.logFeatureUsed(
@@ -685,17 +700,39 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
   ) async {
     final l10n = AppLocalizations.of(context)!;
     
+    // Get the latest tank state
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
+    
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
-        // Reschedule based on the activity log date
-        await _notificationService.rescheduleMatchingNotifications(
-          tankId: widget.tank.id,
-          tankName: widget.tank.name,
-          notifications: widget.tank.notifications,
+        // Reschedule based on the activity log date, using current time
+        final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
           activityLogs: updatedLogs,
           activityType: log.type,
           activityCustomCategory: log.customCategory,
+          useCurrentTime: true,
         );
+        
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
+          final notificationsList = currentTank.notifications.map((n) {
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.notificationUpdated)),
@@ -704,15 +741,33 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         break;
         
       case RescheduleOption.keepOriginal:
-        // Cancel and reschedule from the original notification date
-        await _notificationService.cancelNotification(notification);
-        await _notificationService.scheduleNotification(
-          tankId: widget.tank.id,
-          tankName: widget.tank.name,
-          notification: notification,
-          // Don't pass activity logs - use original schedule
-          activityLogs: null,
+        // Reschedule to same date as rescheduleFromNow but keep original notification time
+        final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+          useCurrentTime: false,  // Keep original time
         );
+        
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
+          final notificationsList = currentTank.notifications.map((n) {
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.notificationUpdated)),
@@ -721,7 +776,18 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         break;
         
       case RescheduleOption.doNothing:
-        // Do nothing - keep the existing schedule as is
+        // Don't reschedule - activity is already logged, just keep existing schedule
+        break;
+        
+      case RescheduleOption.cancelAll:
+        // Cancel - don't log activity and don't reschedule
+        // Remove the log that was just added
+        final logsWithoutNew = updatedLogs.where((l) => l.id != log.id).toList();
+        final updatedTank = currentTank.copyWith(
+          notificationLogs: logsWithoutNew,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
         break;
     }
     
