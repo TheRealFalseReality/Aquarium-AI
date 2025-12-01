@@ -1442,5 +1442,40 @@
   "notificationUpdated": "Notification schedule updated",
   "@notificationUpdated": {
     "description": "Message when notification is updated"
+  },
+
+  "scheduleNotificationTitle": "Schedule Notification",
+  "@scheduleNotificationTitle": {
+    "description": "Title for the notification scheduling dialog"
+  },
+
+  "scheduleNotificationMessage": "You have existing \"{activityType}\" activity logs. How would you like to schedule the next notification?",
+  "@scheduleNotificationMessage": {
+    "description": "Message asking how to schedule notification when activity logs exist",
+    "placeholders": {
+      "activityType": {
+        "type": "String"
+      }
+    }
+  },
+
+  "useSpecifiedTime": "Use Specified Time",
+  "@useSpecifiedTime": {
+    "description": "Option to use the time set in the notification form"
+  },
+
+  "useSpecifiedTimeDescription": "Schedule based on the date/time you set above",
+  "@useSpecifiedTimeDescription": {
+    "description": "Description for using specified time"
+  },
+
+  "useLastActivity": "From Last Activity",
+  "@useLastActivity": {
+    "description": "Option to schedule from last logged activity"
+  },
+
+  "useLastActivityDescription": "Schedule based on your most recent activity log",
+  "@useLastActivityDescription": {
+    "description": "Description for scheduling from last activity"
   }
 }

@@ -7,6 +7,7 @@ import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
+import '../widgets/notification_schedule_option_dialog.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
 
@@ -1182,13 +1183,42 @@ class _NotificationFormScreenState
 
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
 
-    // Schedule notification if enabled, using activity logs for activity-based scheduling
+    // Determine if we should show the schedule option dialog
+    // Show dialog when:
+    // 1. Notification is enabled
+    // 2. Notification has a repeat frequency (not one-time)
+    // 3. There are matching activity logs for this notification type
+    bool useActivityLogs = false; // Default: use specified time
+    
+    if (_enabled && _repeatFrequency != RepeatFrequency.none) {
+      // Check for matching activity logs
+      final matchingLogs = currentTank.notificationLogs.where((log) {
+        return notification.matchesActivityLog(log.type, log.customCategory);
+      }).toList();
+      
+      if (matchingLogs.isNotEmpty && mounted) {
+        // Show dialog to let user choose scheduling method
+        final scheduleOption = await NotificationScheduleOptionDialog.show(
+          context,
+          notification,
+        );
+        
+        // If user cancels, still save the notification but use specified time
+        if (scheduleOption == ScheduleOption.useLastActivity) {
+          useActivityLogs = true;
+        }
+        // If scheduleOption is null (canceled) or useSpecifiedTime, use specified time (useActivityLogs = false)
+      }
+    }
+
+    // Schedule notification if enabled
     if (_enabled) {
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
-        activityLogs: currentTank.notificationLogs,
+        // Pass activity logs only if user chose to schedule from last activity
+        activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
       );
     }
 
