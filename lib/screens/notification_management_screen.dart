@@ -1177,13 +1177,6 @@ class _NotificationFormScreenState
             .toList()
         : [...currentTank.notifications, notification];
 
-    final updatedTank = currentTank.copyWith(
-      notifications: updatedNotifications,
-      updatedAt: DateTime.now(),
-    );
-
-    await ref.read(tankProvider.notifier).updateTank(updatedTank);
-
     // Determine if we should show the schedule option dialog
     // Show dialog when:
     // 1. Notification is enabled
@@ -1203,7 +1196,7 @@ class _NotificationFormScreenState
         matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
         final lastActivityLog = matchingLogs.first;
         
-        // Show dialog to let user choose scheduling method
+        // Show dialog to let user choose scheduling method BEFORE saving
         final scheduleOption = await NotificationScheduleOptionDialog.show(
           context,
           notification,
@@ -1229,6 +1222,14 @@ class _NotificationFormScreenState
         }
       }
     }
+
+    // Now save the notification after user has confirmed via dialog (or no dialog needed)
+    final updatedTank = currentTank.copyWith(
+      notifications: updatedNotifications,
+      updatedAt: DateTime.now(),
+    );
+
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
 
     // Schedule notification if enabled and update with scheduled date
     if (_enabled) {

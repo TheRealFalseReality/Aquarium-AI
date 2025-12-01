@@ -59,14 +59,15 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final activityType = notification.getDisplayName();
-    final dateFormat = DateFormat('MMM d, y');
-    final dateTimeFormat = DateFormat('MMM d, y h:mm a');
+    final dateFormat = DateFormat.yMMMd();
+    final timeFormat = DateFormat.jm();
 
     // Build description for "Use Specified Time" option
     String specifiedTimeDescription = l10n.useSpecifiedTimeDescription;
     final specifiedDateTimeVal = specifiedDateTime;
     if (specifiedDateTimeVal != null) {
-      specifiedTimeDescription = '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: ${dateTimeFormat.format(specifiedDateTimeVal)}';
+      final formattedDateTime = '${dateFormat.format(specifiedDateTimeVal)} ${timeFormat.format(specifiedDateTimeVal)}';
+      specifiedTimeDescription = '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: $formattedDateTime';
     }
 
     // Build description for "From Last Activity" option
@@ -80,7 +81,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
       // Calculate next scheduled date based on last activity
       final nextDate = notification.getNextNotificationDateFromBase(lastActivityLogVal.loggedAt);
       if (nextDate != null) {
-        nextScheduledDate = dateTimeFormat.format(nextDate);
+        nextScheduledDate = '${dateFormat.format(nextDate)} ${timeFormat.format(nextDate)}';
       }
     }
 
