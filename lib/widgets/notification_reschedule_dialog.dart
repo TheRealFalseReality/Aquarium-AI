@@ -36,91 +36,6 @@ class NotificationRescheduleDialog extends StatelessWidget {
     );
   }
   
-  /// Calculate the next notification date using the original time
-  DateTime _getNextDateWithOriginalTime() {
-    final now = DateTime.now();
-    final originalTime = notification.notificationDateTime;
-    
-    // Base date is today with the original notification time
-    var nextDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      originalTime.hour,
-      originalTime.minute,
-    );
-    
-    // Add the interval based on frequency
-    switch (notification.repeatFrequency) {
-      case RepeatFrequency.daily:
-        nextDate = nextDate.add(Duration(days: notification.repeatInterval));
-        break;
-      case RepeatFrequency.weekly:
-        nextDate = nextDate.add(Duration(days: 7 * notification.repeatInterval));
-        break;
-      case RepeatFrequency.monthly:
-        nextDate = DateTime(
-          nextDate.year,
-          nextDate.month + notification.repeatInterval,
-          nextDate.day,
-          nextDate.hour,
-          nextDate.minute,
-        );
-        break;
-      case RepeatFrequency.yearly:
-        nextDate = DateTime(
-          nextDate.year + notification.repeatInterval,
-          nextDate.month,
-          nextDate.day,
-          nextDate.hour,
-          nextDate.minute,
-        );
-        break;
-      case RepeatFrequency.none:
-        break;
-    }
-    
-    return nextDate;
-  }
-  
-  /// Calculate the next notification date using the current time
-  DateTime _getNextDateWithCurrentTime() {
-    final now = DateTime.now();
-    var nextDate = now;
-    
-    // Add the interval based on frequency
-    switch (notification.repeatFrequency) {
-      case RepeatFrequency.daily:
-        nextDate = nextDate.add(Duration(days: notification.repeatInterval));
-        break;
-      case RepeatFrequency.weekly:
-        nextDate = nextDate.add(Duration(days: 7 * notification.repeatInterval));
-        break;
-      case RepeatFrequency.monthly:
-        nextDate = DateTime(
-          nextDate.year,
-          nextDate.month + notification.repeatInterval,
-          nextDate.day,
-          nextDate.hour,
-          nextDate.minute,
-        );
-        break;
-      case RepeatFrequency.yearly:
-        nextDate = DateTime(
-          nextDate.year + notification.repeatInterval,
-          nextDate.month,
-          nextDate.day,
-          nextDate.hour,
-          nextDate.minute,
-        );
-        break;
-      case RepeatFrequency.none:
-        break;
-    }
-    
-    return nextDate;
-  }
-  
   /// Get a formatted date and time string
   String _getFormattedDateTime(DateTime dateTime) {
     final dateFormat = DateFormat('MMM d, y'); // e.g., "Dec 15, 2024"
@@ -134,13 +49,22 @@ class NotificationRescheduleDialog extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final notificationName = notification.getDisplayName();
     
-    // Calculate the actual next dates for each option
-    final nextDateWithOriginalTime = _getNextDateWithOriginalTime();
-    final nextDateWithCurrentTime = _getNextDateWithCurrentTime();
+    // Calculate the actual next dates for each option using the model's methods
+    // "Keep Original Schedule" uses the notification's standard getNextNotificationDate()
+    // "Reschedule from Now" uses getNextNotificationDateFromBase with current time
+    final nextDateWithOriginalSchedule = notification.getNextNotificationDate();
+    final nextDateWithCurrentTime = notification.getNextNotificationDateFromBase(
+      DateTime.now(), 
+      useCurrentTime: true,
+    );
     
     // Format dates with full date and time
-    final originalDateTime = _getFormattedDateTime(nextDateWithOriginalTime);
-    final currentDateTime = _getFormattedDateTime(nextDateWithCurrentTime);
+    final originalDateTime = nextDateWithOriginalSchedule != null 
+        ? _getFormattedDateTime(nextDateWithOriginalSchedule)
+        : l10n.rescheduleFromOriginalDescription;
+    final currentDateTime = nextDateWithCurrentTime != null 
+        ? _getFormattedDateTime(nextDateWithCurrentTime)
+        : l10n.rescheduleFromNowDescription;
     
     // Build the description strings with the actual calculated dates
     final rescheduleFromNowDesc = notification.repeatFrequency != RepeatFrequency.none
