@@ -160,7 +160,7 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(notification, currentTank.notificationLogs);
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -204,14 +204,33 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification) {
+  Widget _buildNotificationCard(TankNotification notification, List<NotificationLog> activityLogs) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Display the notification's set date/time directly
-    // This matches what the user specified when creating/editing the notification
-    final DateTime displayDate = notification.notificationDateTime;
+    // Dynamically determine the display date based on notification settings and activity logs
+    // If the notification has repeat frequency and there are matching activity logs,
+    // use the calculated next date based on activity. Otherwise, use the stored notificationDateTime.
+    final DateTime displayDate;
+    if (notification.repeatFrequency != RepeatFrequency.none) {
+      // Check if there are matching activity logs
+      final matchingLogs = activityLogs.where((log) {
+        return notification.matchesActivityLog(log.type, log.customCategory);
+      }).toList();
+      
+      if (matchingLogs.isNotEmpty) {
+        // Use the calculated next date based on activity logs
+        final calculatedDate = notification.getNextNotificationDateWithActivity(activityLogs);
+        displayDate = calculatedDate ?? notification.notificationDateTime;
+      } else {
+        // No matching activity logs, use the stored notification date
+        displayDate = notification.notificationDateTime;
+      }
+    } else {
+      // Non-repeating notification, use the stored notification date
+      displayDate = notification.notificationDateTime;
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -294,13 +313,13 @@ class _NotificationManagementScreenState
                 if (notification.enabled)
                   Builder(
                     builder: (context) {
-                      // Use the notification's set date/time for the "time from now" chip
-                      // This shows when the notification will fire based on user's specification
+                      // Use the dynamically calculated displayDate for the "time from now" chip
+                      // This shows when the notification will actually fire
                       final DateTime? nextDate;
-                      if (notification.notificationDateTime.isAfter(DateTime.now())) {
-                        nextDate = notification.notificationDateTime;
+                      if (displayDate.isAfter(DateTime.now())) {
+                        nextDate = displayDate;
                       } else {
-                        // If the set time is in the past, don't show the chip
+                        // If the display time is in the past, don't show the chip
                         nextDate = null;
                       }
                       
