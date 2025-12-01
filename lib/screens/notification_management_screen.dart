@@ -1189,6 +1189,7 @@ class _NotificationFormScreenState
     // 2. Notification has a repeat frequency (not one-time)
     // 3. There are matching activity logs for this notification type
     bool useActivityLogs = false; // Default: use specified time
+    bool useExactDateTime = false; // Whether to use exact date/time (ignoring all calculations)
     
     if (_enabled && _repeatFrequency != RepeatFrequency.none) {
       // Check for matching activity logs
@@ -1203,27 +1204,27 @@ class _NotificationFormScreenState
           notification,
         );
         
-        // If user cancels, still save the notification but use specified time
         if (scheduleOption == ScheduleOption.useLastActivity) {
+          // User chose to schedule from last activity
           useActivityLogs = true;
+        } else if (scheduleOption == ScheduleOption.useSpecifiedTime) {
+          // User explicitly chose to use the specified time - use exact date/time
+          useExactDateTime = true;
         }
-        // If scheduleOption is null (canceled) or useSpecifiedTime, use specified time (useActivityLogs = false)
+        // If scheduleOption is null (canceled), fall back to default behavior
       }
     }
 
     // Schedule notification if enabled
     if (_enabled) {
-      // Determine which activity logs to use for scheduling:
-      // - If user chose "From Last Activity", use the tank's activity logs
-      // - Otherwise (user chose "Use Specified Time" or dialog wasn't shown), use null
-      final List<NotificationLog>? logsForScheduling = 
-          useActivityLogs ? currentTank.notificationLogs : null;
-      
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
-        activityLogs: logsForScheduling,
+        // Pass activity logs only if user chose "From Last Activity"
+        activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
+        // Use exact date/time if user explicitly chose "Use Specified Time"
+        useExactDateTime: useExactDateTime,
       );
     }
 
