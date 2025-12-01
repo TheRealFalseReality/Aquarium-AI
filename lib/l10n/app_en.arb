@@ -1442,5 +1442,38 @@
   "notificationUpdated": "Notification schedule updated",
   "@notificationUpdated": {
     "description": "Message when notification is updated"
+  },
+
+  "taskOverdueByDays": "{taskName} is {days} {days, plural, =1{day} other{days}} overdue",
+  "@taskOverdueByDays": {
+    "description": "Message showing how many days a task is overdue",
+    "placeholders": {
+      "taskName": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "overdueNotification": "Overdue Reminder",
+  "@overdueNotification": {
+    "description": "Title prefix for overdue notifications"
+  },
+
+  "sendTestOverdueNotification": "Send Test Overdue Notification",
+  "@sendTestOverdueNotification": {
+    "description": "Button to send a test overdue notification"
+  },
+
+  "testOverdueNotificationSent": "Test overdue notification sent",
+  "@testOverdueNotificationSent": {
+    "description": "Confirmation message for test overdue notification"
+  },
+
+  "testOverdueDescription": "Send a test notification that simulates an overdue task from Nov 25, 2025",
+  "@testOverdueDescription": {
+    "description": "Description for test overdue notification feature"
   }
 }

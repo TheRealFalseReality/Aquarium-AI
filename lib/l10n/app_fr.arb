@@ -216,5 +216,11 @@
   "rescheduleFromNowDescription": "Prochaine notification basée sur quand vous avez enregistré cette activité",
   "doNothing": "Ne rien faire",
   "doNothingDescription": "Laisser le calendrier de notification inchangé",
-  "notificationUpdated": "Calendrier de notification mis à jour"
+  "notificationUpdated": "Calendrier de notification mis à jour",
+
+  "taskOverdueByDays": "{taskName} est en retard de {days} {days, plural, =1{jour} other{jours}}",
+  "overdueNotification": "Rappel en Retard",
+  "sendTestOverdueNotification": "Envoyer une Notification de Test en Retard",
+  "testOverdueNotificationSent": "Notification de test en retard envoyée",
+  "testOverdueDescription": "Envoyez une notification de test simulant une tâche en retard depuis le 25 novembre 2025"
 }

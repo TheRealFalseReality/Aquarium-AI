@@ -225,5 +225,11 @@
   "rescheduleFromNowDescription": "Nächste Benachrichtigung basierend auf wann Sie diese Aktivität protokolliert haben",
   "doNothing": "Nichts tun",
   "doNothingDescription": "Benachrichtigungsplan unverändert lassen",
-  "notificationUpdated": "Benachrichtigungsplan aktualisiert"
+  "notificationUpdated": "Benachrichtigungsplan aktualisiert",
+
+  "taskOverdueByDays": "{taskName} ist {days} {days, plural, =1{Tag} other{Tage}} überfällig",
+  "overdueNotification": "Überfällige Erinnerung",
+  "sendTestOverdueNotification": "Test-Überfälligkeitsbenachrichtigung senden",
+  "testOverdueNotificationSent": "Test-Überfälligkeitsbenachrichtigung gesendet",
+  "testOverdueDescription": "Senden Sie eine Testbenachrichtigung, die eine überfällige Aufgabe vom 25. November 2025 simuliert"
 }

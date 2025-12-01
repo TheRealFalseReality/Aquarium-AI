@@ -352,4 +352,88 @@ class NotificationService {
       payload: 'test_notification',
     );
   }
+
+  /// Calculate the number of days a task is overdue
+  /// 
+  /// [dueDate] - The date when the task was originally due
+  /// [referenceDate] - The reference date to calculate from (defaults to now)
+  /// 
+  /// Returns the number of days overdue, or 0 if not overdue
+  static int calculateOverdueDays(DateTime dueDate, {DateTime? referenceDate}) {
+    final now = referenceDate ?? DateTime.now();
+    if (dueDate.isAfter(now)) {
+      return 0;
+    }
+    return now.difference(dueDate).inDays;
+  }
+
+  /// Format an overdue message with the task name and number of days
+  /// 
+  /// [taskName] - The name of the overdue task
+  /// [overdueDays] - Number of days the task is overdue
+  /// 
+  /// Returns a formatted overdue message
+  static String formatOverdueMessage(String taskName, int overdueDays) {
+    final dayWord = overdueDays == 1 ? 'day' : 'days';
+    return '$taskName is $overdueDays $dayWord overdue';
+  }
+
+  /// Send a test overdue notification simulating a task due on Nov 25, 2025
+  /// 
+  /// This method is for testing purposes to demonstrate how overdue
+  /// notifications will appear to users.
+  /// 
+  /// [tankName] - The name of the tank
+  /// [taskName] - The name of the task (e.g., "Water Change")
+  /// [type] - The notification type
+  Future<void> sendTestOverdueNotification({
+    required String tankName,
+    required String taskName,
+    NotificationType type = NotificationType.maintenance,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    // Simulate a task due on Nov 25, 2025
+    final dueDate = DateTime(2025, 11, 25);
+    final overdueDays = calculateOverdueDays(dueDate);
+
+    // Create notification details
+    const androidDetails = AndroidNotificationDetails(
+      'tank_notifications',
+      'Tank Maintenance',
+      channelDescription: 'Notifications for tank maintenance tasks',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    // Create overdue notification title and body
+    final title = '⚠️ Overdue Reminder - $tankName';
+    final body = formatOverdueMessage(taskName, overdueDays);
+
+    // Use a unique ID for test overdue notifications
+    const int testOverdueNotificationId = 999998;
+
+    // Show notification immediately
+    await _notifications.show(
+      testOverdueNotificationId,
+      title,
+      body,
+      details,
+      payload: 'test_overdue_notification',
+    );
+  }
 }

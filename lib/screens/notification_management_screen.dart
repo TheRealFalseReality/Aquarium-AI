@@ -220,8 +220,25 @@ class _NotificationManagementScreenState
       displayDate = notification.notificationDateTime;
     }
 
+    // Check if the notification is overdue
+    final now = DateTime.now();
+    final isOverdue = notification.enabled && displayDate.isBefore(now);
+    final overdueDays = isOverdue ? NotificationService.calculateOverdueDays(displayDate) : 0;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      // Add a colored border for overdue notifications
+      shape: isOverdue
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: colorScheme.error,
+                width: 2,
+              ),
+            )
+          : RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
       child: InkWell(
         onTap: () => _showEditNotificationDialog(notification),
         borderRadius: BorderRadius.circular(12),
@@ -230,11 +247,45 @@ class _NotificationManagementScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Overdue warning banner
+              if (isOverdue) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: colorScheme.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.taskOverdueByDays(
+                            notification.customTitle ?? notification.getDisplayName(),
+                            overdueDays,
+                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onErrorContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               Row(
                 children: [
                   Icon(
                     _getNotificationIcon(notification.type),
-                    color: _getNotificationColor(notification.type),
+                    color: isOverdue ? colorScheme.error : _getNotificationColor(notification.type),
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -246,6 +297,7 @@ class _NotificationManagementScreenState
                           notification.customTitle ?? notification.getDisplayName(),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: isOverdue ? colorScheme.error : null,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -254,7 +306,9 @@ class _NotificationManagementScreenState
                         Text(
                           dateFormat.format(displayDate),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.6),
+                            color: isOverdue 
+                                ? colorScheme.error.withOpacity(0.8)
+                                : colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                       ],
@@ -318,13 +372,26 @@ class _NotificationManagementScreenState
                       
                       if (nextDate == null) return const SizedBox.shrink();
                       
+                      // Check if overdue
+                      final isChipOverdue = nextDate.isBefore(DateTime.now());
+                      
                       return Chip(
                         label: Text(
                           _getTimeFromNow(nextDate),
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isChipOverdue ? Theme.of(context).colorScheme.onError : null,
+                            fontWeight: isChipOverdue ? FontWeight.bold : null,
+                          ),
                         ),
-                        avatar: const Icon(Icons.schedule, size: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                        avatar: Icon(
+                          isChipOverdue ? Icons.warning_amber_rounded : Icons.schedule,
+                          size: 16,
+                          color: isChipOverdue ? Theme.of(context).colorScheme.onError : null,
+                        ),
+                        backgroundColor: isChipOverdue 
+                            ? Theme.of(context).colorScheme.error 
+                            : Theme.of(context).colorScheme.secondaryContainer,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: VisualDensity.compact,
                       );
@@ -569,6 +636,18 @@ class _NotificationManagementScreenState
               },
             ),
             ListTile(
+              leading: const Icon(Icons.warning_amber, color: Colors.orange),
+              title: Text(AppLocalizations.of(context)!.sendTestOverdueNotification),
+              subtitle: Text(
+                AppLocalizations.of(context)!.testOverdueDescription,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _sendTestOverdueNotification(notification);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
@@ -646,6 +725,26 @@ class _NotificationManagementScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: 'send_test_notification',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
+  /// Send a test overdue notification simulating a task due on Nov 25, 2025
+  Future<void> _sendTestOverdueNotification(TankNotification notification) async {
+    final taskName = notification.customTitle ?? notification.getDisplayName();
+    
+    await _notificationService.sendTestOverdueNotification(
+      tankName: widget.tank.name,
+      taskName: taskName,
+      type: notification.type,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(AppLocalizations.of(context)!.testOverdueNotificationSent);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_overdue_notification',
       parameters: {'type': notification.type.name},
     );
   }

@@ -225,5 +225,11 @@
   "rescheduleFromNowDescription": "Próxima notificación basada en cuándo registraste esta actividad",
   "doNothing": "No Hacer Nada",
   "doNothingDescription": "Dejar el horario de notificación sin cambios",
-  "notificationUpdated": "Horario de notificación actualizado"
+  "notificationUpdated": "Horario de notificación actualizado",
+
+  "taskOverdueByDays": "{taskName} está {days} {days, plural, =1{día} other{días}} atrasado",
+  "overdueNotification": "Recordatorio Atrasado",
+  "sendTestOverdueNotification": "Enviar Notificación de Prueba Atrasada",
+  "testOverdueNotificationSent": "Notificación de prueba atrasada enviada",
+  "testOverdueDescription": "Envía una notificación de prueba que simula una tarea atrasada desde el 25 de noviembre de 2025"
 }
