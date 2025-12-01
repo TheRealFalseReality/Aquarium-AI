@@ -209,9 +209,11 @@ class _NotificationManagementScreenState
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Use the single source of truth: getImmediateNextDate()
-    // This returns scheduledNextDate if set, otherwise notificationDateTime
-    final DateTime displayDate = notification.getImmediateNextDate();
+    // Calculate the display date dynamically:
+    // For repeating notifications, if the stored scheduledNextDate has passed,
+    // calculate the next occurrence so the UI always shows the correct next date
+    // even if the device didn't receive the push notification.
+    final DateTime displayDate = _calculateDisplayDate(notification);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -401,6 +403,34 @@ class _NotificationManagementScreenState
     } else {
       return l10n.inLessThanAMinute;
     }
+  }
+
+  /// Calculate the display date for a notification.
+  /// 
+  /// For repeating notifications where the stored scheduledNextDate has passed,
+  /// this dynamically calculates the next occurrence so the UI always shows
+  /// the correct next date even if the device didn't receive the push notification.
+  /// 
+  /// For non-repeating notifications, returns the stored date as-is.
+  DateTime _calculateDisplayDate(TankNotification notification) {
+    final storedDate = notification.getImmediateNextDate();
+    final now = DateTime.now();
+    
+    // If the stored date is in the future, use it
+    if (storedDate.isAfter(now)) {
+      return storedDate;
+    }
+    
+    // For repeating notifications with a past date, calculate the next occurrence
+    if (notification.repeatFrequency != RepeatFrequency.none && notification.enabled) {
+      final nextDate = notification.getNextNotificationDate();
+      if (nextDate != null) {
+        return nextDate;
+      }
+    }
+    
+    // Fall back to the stored date for non-repeating or disabled notifications
+    return storedDate;
   }
 
   IconData _getNotificationIcon(NotificationType type) {
