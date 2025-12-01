@@ -209,17 +209,9 @@ class _NotificationManagementScreenState
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Get the current tank to access activity logs
-    final currentTank = _getCurrentTank();
-    
-    // Get next notification date for display, considering activity logs
-    DateTime displayDate;
-    if (notification.repeatFrequency != RepeatFrequency.none) {
-      displayDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs) 
-          ?? notification.notificationDateTime;
-    } else {
-      displayDate = notification.notificationDateTime;
-    }
+    // Display the notification's set date/time directly
+    // This matches what the user specified when creating/editing the notification
+    final DateTime displayDate = notification.notificationDateTime;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -302,19 +294,14 @@ class _NotificationManagementScreenState
                 if (notification.enabled)
                   Builder(
                     builder: (context) {
-                      // Get the current tank to access activity logs
-                      final currentTank = _getCurrentTank();
-                      
-                      // For repeating notifications, use activity-based calculation
-                      // For non-repeating notifications, use notificationDateTime if it's in the future
+                      // Use the notification's set date/time for the "time from now" chip
+                      // This shows when the notification will fire based on user's specification
                       final DateTime? nextDate;
-                      if (notification.repeatFrequency != RepeatFrequency.none) {
-                        nextDate = notification.getNextNotificationDateWithActivity(currentTank.notificationLogs);
+                      if (notification.notificationDateTime.isAfter(DateTime.now())) {
+                        nextDate = notification.notificationDateTime;
                       } else {
-                        // Non-repeating: show if scheduled time is in the future
-                        nextDate = notification.notificationDateTime.isAfter(DateTime.now())
-                            ? notification.notificationDateTime
-                            : null;
+                        // If the set time is in the past, don't show the chip
+                        nextDate = null;
                       }
                       
                       if (nextDate == null) return const SizedBox.shrink();
