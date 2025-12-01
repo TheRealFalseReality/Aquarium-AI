@@ -45,7 +45,7 @@ enum RepeatFrequency {
 class TankNotification {
   final String id;
   final NotificationType type;
-  final DateTime notificationDateTime; // When to notify
+  final DateTime notificationDateTime; // The base/original notification time set by user
   final RepeatFrequency repeatFrequency; // How often to repeat
   final int repeatInterval; // Interval value (e.g., every X days/weeks/months/years)
   final String? notes; // Optional user notes
@@ -54,6 +54,7 @@ class TankNotification {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool enabled; // Whether the notification is active
+  final DateTime? scheduledNextDate; // The actual next scheduled notification date (single source of truth)
 
   TankNotification({
     required this.id,
@@ -67,7 +68,15 @@ class TankNotification {
     required this.createdAt,
     required this.updatedAt,
     this.enabled = true,
+    this.scheduledNextDate,
   });
+
+  /// Get the immediate next notification date.
+  /// This is the single source of truth for when the notification will fire.
+  /// Returns scheduledNextDate if set, otherwise falls back to notificationDateTime.
+  DateTime getImmediateNextDate() {
+    return scheduledNextDate ?? notificationDateTime;
+  }
 
   /// Factory method to create a new notification
   factory TankNotification.create({
@@ -79,6 +88,7 @@ class TankNotification {
     String? customTitle,
     String? customCategory,
     bool enabled = true,
+    DateTime? scheduledNextDate,
   }) {
     final now = DateTime.now();
     return TankNotification(
@@ -93,6 +103,8 @@ class TankNotification {
       createdAt: now,
       updatedAt: now,
       enabled: enabled,
+      // If no scheduledNextDate provided, use notificationDateTime as the initial schedule
+      scheduledNextDate: scheduledNextDate ?? notificationDateTime,
     );
   }
 
@@ -110,15 +122,19 @@ class TankNotification {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'enabled': enabled,
+      'scheduledNextDate': scheduledNextDate?.toIso8601String(),
     };
   }
 
   /// Deserialize from JSON
   factory TankNotification.fromJson(Map<String, dynamic> json) {
+    final notificationDateTime = DateTime.parse(json['notificationDateTime'] as String);
+    final scheduledNextDateStr = json['scheduledNextDate'] as String?;
+    
     return TankNotification(
       id: json['id'] as String,
       type: NotificationType.fromString(json['type'] as String),
-      notificationDateTime: DateTime.parse(json['notificationDateTime'] as String),
+      notificationDateTime: notificationDateTime,
       repeatFrequency: RepeatFrequency.fromString(json['repeatFrequency'] as String),
       repeatInterval: json['repeatInterval'] as int? ?? 1,
       notes: json['notes'] as String?,
@@ -127,13 +143,17 @@ class TankNotification {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
+      // For backwards compatibility: if scheduledNextDate is not in JSON, use notificationDateTime
+      scheduledNextDate: scheduledNextDateStr != null 
+          ? DateTime.parse(scheduledNextDateStr) 
+          : notificationDateTime,
     );
   }
 
   /// Create a copy with modified fields
   /// 
-  /// For nullable fields (notes, customTitle, customCategory), set [clearNotes],
-  /// [clearCustomTitle], or [clearCustomCategory] to true to explicitly set them to null.
+  /// For nullable fields (notes, customTitle, customCategory, scheduledNextDate), 
+  /// set the corresponding clear flag to true to explicitly set them to null.
   TankNotification copyWith({
     String? id,
     NotificationType? type,
@@ -146,9 +166,11 @@ class TankNotification {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? enabled,
+    DateTime? scheduledNextDate,
     bool clearNotes = false,
     bool clearCustomTitle = false,
     bool clearCustomCategory = false,
+    bool clearScheduledNextDate = false,
   }) {
     return TankNotification(
       id: id ?? this.id,
@@ -162,6 +184,7 @@ class TankNotification {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enabled: enabled ?? this.enabled,
+      scheduledNextDate: clearScheduledNextDate ? null : (scheduledNextDate ?? this.scheduledNextDate),
     );
   }
 

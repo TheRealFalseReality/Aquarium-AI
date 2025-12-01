@@ -1903,18 +1903,39 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final notificationService = NotificationService();
     final l10n = AppLocalizations.of(context)!;
     
+    // Get the latest tank state
+    final currentTank = ref.read(tankProvider).tanks
+        .firstWhere((t) => t.id == tank.id, orElse: () => tank);
+    
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
         // Reschedule based on the activity log date (which is now), using current time
-        await notificationService.rescheduleMatchingNotifications(
-          tankId: tank.id,
-          tankName: tank.name,
-          notifications: tank.notifications,
+        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
           activityLogs: updatedLogs,
           activityType: log.type,
           activityCustomCategory: log.customCategory,
           useCurrentTime: true,
         );
+        
+        // Persist the updated notifications
+        if (updatedNotifications.isNotEmpty) {
+          final notificationsList = currentTank.notifications.map((n) {
+            final updated = updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+            return updated;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (context.mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
@@ -1923,13 +1944,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       case RescheduleOption.keepOriginal:
         // Cancel and reschedule from the original notification date
         await notificationService.cancelNotification(notification);
-        await notificationService.scheduleNotification(
-          tankId: tank.id,
-          tankName: tank.name,
+        final nextDate = await notificationService.scheduleNotification(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
           notification: notification,
           // Don't pass activity logs - use original schedule
           activityLogs: null,
         );
+        
+        // Persist the updated notification with new scheduledNextDate
+        if (nextDate != null) {
+          final updatedNotification = notification.copyWith(
+            scheduledNextDate: nextDate,
+            updatedAt: DateTime.now(),
+          );
+          final notificationsList = currentTank.notifications.map((n) {
+            return n.id == notification.id ? updatedNotification : n;
+          }).toList();
+          final updatedTank = currentTank.copyWith(
+            notifications: notificationsList,
+            updatedAt: DateTime.now(),
+          );
+          await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        }
+        
         if (context.mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }

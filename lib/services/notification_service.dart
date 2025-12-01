@@ -122,7 +122,11 @@ class NotificationService {
   /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
   /// will use the time from the activity log instead of the original notification
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
-  Future<void> scheduleNotification({
+  /// 
+  /// Returns the calculated next notification date, or null if the notification
+  /// is disabled or non-repeating. This can be used to update the notification
+  /// model's scheduledNextDate field.
+  Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
@@ -190,6 +194,9 @@ class NotificationService {
         payload: '${tankId}_${notification.id}',
       );
     }
+    
+    // Return the calculated next date so callers can update the model
+    return nextDate;
   }
 
   /// Cancel a scheduled notification
@@ -243,7 +250,10 @@ class NotificationService {
   /// 
   /// If [useCurrentTime] is true, the notification will use the time from the
   /// activity log instead of the original notification time.
-  Future<void> rescheduleMatchingNotifications({
+  /// 
+  /// Returns a list of updated notifications with their scheduledNextDate set.
+  /// Callers should persist these updated notifications to the tank.
+  Future<List<TankNotification>> rescheduleMatchingNotifications({
     required String tankId,
     required String tankName,
     required List<TankNotification> notifications,
@@ -261,20 +271,32 @@ class NotificationService {
 
     // Early return if no notifications match
     if (matchingNotifications.isEmpty) {
-      return;
+      return [];
     }
+
+    final updatedNotifications = <TankNotification>[];
 
     // Cancel and reschedule each matching notification
     for (final notification in matchingNotifications) {
       await cancelNotification(notification);
-      await scheduleNotification(
+      final nextDate = await scheduleNotification(
         tankId: tankId,
         tankName: tankName,
         notification: notification,
         activityLogs: activityLogs,
         useCurrentTime: useCurrentTime,
       );
+      
+      // Create updated notification with the new scheduledNextDate
+      if (nextDate != null) {
+        updatedNotifications.add(notification.copyWith(
+          scheduledNextDate: nextDate,
+          updatedAt: DateTime.now(),
+        ));
+      }
     }
+    
+    return updatedNotifications;
   }
 
   /// Get notification title based on type

@@ -160,7 +160,7 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification, currentTank.notificationLogs);
+                return _buildNotificationCard(notification);
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -204,33 +204,14 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification, List<NotificationLog> activityLogs) {
+  Widget _buildNotificationCard(TankNotification notification) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Dynamically determine the display date based on notification settings and activity logs
-    // If the notification has repeat frequency and there are matching activity logs,
-    // use the calculated next date based on activity. Otherwise, use the stored notificationDateTime.
-    final DateTime displayDate;
-    if (notification.repeatFrequency != RepeatFrequency.none) {
-      // Check if there are matching activity logs
-      final matchingLogs = activityLogs.where((log) {
-        return notification.matchesActivityLog(log.type, log.customCategory);
-      }).toList();
-      
-      if (matchingLogs.isNotEmpty) {
-        // Use the calculated next date based on activity logs
-        final calculatedDate = notification.getNextNotificationDateWithActivity(activityLogs);
-        displayDate = calculatedDate ?? notification.notificationDateTime;
-      } else {
-        // No matching activity logs, use the stored notification date
-        displayDate = notification.notificationDateTime;
-      }
-    } else {
-      // Non-repeating notification, use the stored notification date
-      displayDate = notification.notificationDateTime;
-    }
+    // Use the single source of truth: getImmediateNextDate()
+    // This returns scheduledNextDate if set, otherwise notificationDateTime
+    final DateTime displayDate = notification.getImmediateNextDate();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -516,15 +497,9 @@ class _NotificationManagementScreenState
     );
     
     final updatedLogs = [...currentTank.notificationLogs, log];
-    final updatedTank = currentTank.copyWith(
-      notificationLogs: updatedLogs,
-      updatedAt: DateTime.now(),
-    );
-    
-    await ref.read(tankProvider.notifier).updateTank(updatedTank);
     
     // Reschedule matching notifications based on the new activity
-    await _notificationService.rescheduleMatchingNotifications(
+    final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
       tankId: currentTank.id,
       tankName: currentTank.name,
       notifications: currentTank.notifications,
@@ -532,6 +507,26 @@ class _NotificationManagementScreenState
       activityType: log.type,
       activityCustomCategory: log.customCategory,
     );
+    
+    // Update the tank with new activity logs and updated notifications
+    var updatedTank = currentTank.copyWith(
+      notificationLogs: updatedLogs,
+      updatedAt: DateTime.now(),
+    );
+    
+    // Apply the updated notifications with new scheduledNextDate
+    if (updatedNotifications.isNotEmpty) {
+      final notificationsList = updatedTank.notifications.map((n) {
+        final updated = updatedNotifications.firstWhere(
+          (u) => u.id == n.id,
+          orElse: () => n,
+        );
+        return updated;
+      }).toList();
+      updatedTank = updatedTank.copyWith(notifications: notificationsList);
+    }
+    
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
     
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
@@ -1221,9 +1216,9 @@ class _NotificationFormScreenState
       }
     }
 
-    // Schedule notification if enabled
+    // Schedule notification if enabled and update with scheduled date
     if (_enabled) {
-      await _notificationService.scheduleNotification(
+      final nextDate = await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
@@ -1232,6 +1227,25 @@ class _NotificationFormScreenState
         // Use exact date/time if user explicitly chose "Use Specified Time"
         useExactDateTime: useExactDateTime,
       );
+      
+      // Update the notification with the calculated scheduledNextDate
+      if (nextDate != null) {
+        final notificationWithSchedule = notification.copyWith(
+          scheduledNextDate: nextDate,
+        );
+        
+        // Update the tank with the notification that has scheduledNextDate set
+        final finalNotifications = updatedNotifications.map((n) {
+          return n.id == notification.id ? notificationWithSchedule : n;
+        }).toList();
+        
+        final tankWithSchedule = currentTank.copyWith(
+          notifications: finalNotifications,
+          updatedAt: DateTime.now(),
+        );
+        
+        await ref.read(tankProvider.notifier).updateTank(tankWithSchedule);
+      }
     }
 
     if (mounted) {
