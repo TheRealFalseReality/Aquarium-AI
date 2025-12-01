@@ -1905,7 +1905,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
-        // Reschedule based on the activity log date (which is now)
+        // Reschedule based on the activity log date (which is now), using current time
         await notificationService.rescheduleMatchingNotifications(
           tankId: tank.id,
           tankName: tank.name,
@@ -1913,6 +1913,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           activityLogs: updatedLogs,
           activityType: log.type,
           activityCustomCategory: log.customCategory,
+          useCurrentTime: true,
         );
         if (context.mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);

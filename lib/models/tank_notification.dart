@@ -204,25 +204,34 @@ class TankNotification {
   /// logs an activity today, the next notification will be 2 days from today.
   /// 
   /// [baseDate] - The date to calculate the next occurrence from (e.g., last activity date)
+  /// [useCurrentTime] - If true, uses the time from baseDate instead of preserving
+  ///                    the original notification time. Defaults to false.
   /// 
   /// Returns the next notification date, or null if the notification is disabled
   /// or non-repeating.
-  DateTime? getNextNotificationDateFromBase(DateTime baseDate) {
+  DateTime? getNextNotificationDateFromBase(DateTime baseDate, {bool useCurrentTime = false}) {
     if (!enabled || repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 
-    // Preserve the original time from the notification, but use the base date
-    final baseWithTime = DateTime(
-      baseDate.year,
-      baseDate.month,
-      baseDate.day,
-      notificationDateTime.hour,
-      notificationDateTime.minute,
-      notificationDateTime.second,
-      notificationDateTime.millisecond,
-      notificationDateTime.microsecond,
-    );
+    // Determine which time to use for the notification
+    final DateTime baseWithTime;
+    if (useCurrentTime) {
+      // Use the time from the baseDate (current time when activity was logged)
+      baseWithTime = baseDate;
+    } else {
+      // Preserve the original time from the notification, but use the base date
+      baseWithTime = DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        notificationDateTime.hour,
+        notificationDateTime.minute,
+        notificationDateTime.second,
+        notificationDateTime.millisecond,
+        notificationDateTime.microsecond,
+      );
+    }
 
     // Calculate the next occurrence from the base date
     switch (repeatFrequency) {
@@ -250,10 +259,12 @@ class TankNotification {
   /// 3. Otherwise, fall back to standard calculation from notificationDateTime
   /// 
   /// [activityLogs] - The list of activity logs to consider
+  /// [useCurrentTime] - If true, uses the time from the activity log instead of
+  ///                    preserving the original notification time. Defaults to false.
   /// 
   /// Returns the next notification date, or null if the notification is disabled
   /// or non-repeating.
-  DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs) {
+  DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs, {bool useCurrentTime = false}) {
     if (!enabled || repeatFrequency == RepeatFrequency.none) {
       return null;
     }
@@ -271,7 +282,7 @@ class TankNotification {
       final lastActivity = matchingLogs.first;
       
       // Calculate next date from the last activity
-      return getNextNotificationDateFromBase(lastActivity.loggedAt);
+      return getNextNotificationDateFromBase(lastActivity.loggedAt, useCurrentTime: useCurrentTime);
     }
 
     // No matching activity logs - use the original notification date

@@ -118,12 +118,17 @@ class NotificationService {
   /// exactly [notification.notificationDateTime], ignoring any activity logs
   /// or repeat frequency calculations. This is useful when the user explicitly
   /// wants to schedule for a specific date/time.
+  /// 
+  /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
+  /// will use the time from the activity log instead of the original notification
+  /// time. This is used for "Reschedule from Now" to schedule at the current time.
   Future<void> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
     bool useExactDateTime = false,
+    bool useCurrentTime = false,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -163,8 +168,8 @@ class NotificationService {
       // Use the exact date/time specified in the notification, ignoring any calculations
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
-      // Calculate based on activity logs
-      nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+      // Calculate based on activity logs, optionally using current time
+      nextDate = notification.getNextNotificationDateWithActivity(activityLogs, useCurrentTime: useCurrentTime);
     } else {
       // Fall back to standard calculation
       nextDate = notification.getNextNotificationDate();
@@ -235,6 +240,9 @@ class NotificationService {
   /// 
   /// This is called when an activity is logged to update the schedule
   /// of matching notifications based on the new activity.
+  /// 
+  /// If [useCurrentTime] is true, the notification will use the time from the
+  /// activity log instead of the original notification time.
   Future<void> rescheduleMatchingNotifications({
     required String tankId,
     required String tankName,
@@ -242,6 +250,7 @@ class NotificationService {
     required List<NotificationLog> activityLogs,
     required NotificationType activityType,
     String? activityCustomCategory,
+    bool useCurrentTime = false,
   }) async {
     // Filter to only enabled, repeating notifications that match the activity type
     final matchingNotifications = notifications.where((notification) => 
@@ -263,6 +272,7 @@ class NotificationService {
         tankName: tankName,
         notification: notification,
         activityLogs: activityLogs,
+        useCurrentTime: useCurrentTime,
       );
     }
   }

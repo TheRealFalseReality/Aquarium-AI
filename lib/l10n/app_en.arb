@@ -1477,5 +1477,99 @@
   "useLastActivityDescription": "Schedule based on your most recent activity log",
   "@useLastActivityDescription": {
     "description": "Description for scheduling from last activity"
+  },
+
+  "rescheduleFromOriginalDescriptionDetailed": "{interval} from now, at {time} (original time)",
+  "@rescheduleFromOriginalDescriptionDetailed": {
+    "description": "Detailed description for keeping original schedule with interval and time",
+    "placeholders": {
+      "interval": {
+        "type": "String",
+        "example": "2 days"
+      },
+      "time": {
+        "type": "String",
+        "example": "2:30 PM"
+      }
+    }
+  },
+
+  "rescheduleFromNowDescriptionDetailed": "{interval} from now, at {time} (current time)",
+  "@rescheduleFromNowDescriptionDetailed": {
+    "description": "Detailed description for rescheduling from now with interval and time",
+    "placeholders": {
+      "interval": {
+        "type": "String",
+        "example": "2 days"
+      },
+      "time": {
+        "type": "String",
+        "example": "2:30 PM"
+      }
+    }
+  },
+
+  "oneDay": "1 day",
+  "@oneDay": {
+    "description": "One day interval"
+  },
+
+  "xDays": "{count} days",
+  "@xDays": {
+    "description": "X days interval",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+
+  "oneWeek": "1 week",
+  "@oneWeek": {
+    "description": "One week interval"
+  },
+
+  "xWeeks": "{count} weeks",
+  "@xWeeks": {
+    "description": "X weeks interval",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+
+  "oneMonth": "1 month",
+  "@oneMonth": {
+    "description": "One month interval"
+  },
+
+  "xMonths": "{count} months",
+  "@xMonths": {
+    "description": "X months interval",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+
+  "oneYear": "1 year",
+  "@oneYear": {
+    "description": "One year interval"
+  },
+
+  "xYears": "{count} years",
+  "@xYears": {
+    "description": "X years interval",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
   }
 }

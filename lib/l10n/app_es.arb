@@ -232,5 +232,16 @@
   "useSpecifiedTime": "Usar Hora Especificada",
   "useSpecifiedTimeDescription": "Programar basado en la fecha/hora que configuraste arriba",
   "useLastActivity": "Desde Última Actividad",
-  "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente"
+  "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente",
+
+  "rescheduleFromOriginalDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora original)",
+  "rescheduleFromNowDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora actual)",
+  "oneDay": "1 día",
+  "xDays": "{count} días",
+  "oneWeek": "1 semana",
+  "xWeeks": "{count} semanas",
+  "oneMonth": "1 mes",
+  "xMonths": "{count} meses",
+  "oneYear": "1 año",
+  "xYears": "{count} años"
 }

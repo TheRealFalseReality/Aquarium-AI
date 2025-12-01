@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
 
@@ -35,11 +36,68 @@ class NotificationRescheduleDialog extends StatelessWidget {
     );
   }
 
+  /// Get the interval text based on the notification's repeat frequency and interval
+  String _getIntervalText(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final interval = notification.repeatInterval;
+    
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        if (interval == 1) {
+          return l10n.oneDay;
+        }
+        return l10n.xDays(interval);
+      case RepeatFrequency.weekly:
+        if (interval == 1) {
+          return l10n.oneWeek;
+        }
+        return l10n.xWeeks(interval);
+      case RepeatFrequency.monthly:
+        if (interval == 1) {
+          return l10n.oneMonth;
+        }
+        return l10n.xMonths(interval);
+      case RepeatFrequency.yearly:
+        if (interval == 1) {
+          return l10n.oneYear;
+        }
+        return l10n.xYears(interval);
+      case RepeatFrequency.none:
+        return '';
+    }
+  }
+
+  /// Get the formatted time string from the notification's original time
+  String _getOriginalTimeString(BuildContext context) {
+    final timeFormat = DateFormat.jm(); // e.g., "2:30 PM"
+    return timeFormat.format(notification.notificationDateTime);
+  }
+
+  /// Get the formatted current time string
+  String _getCurrentTimeString(BuildContext context) {
+    final timeFormat = DateFormat.jm(); // e.g., "2:30 PM"
+    return timeFormat.format(DateTime.now());
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final notificationName = notification.getDisplayName();
+    
+    // Build dynamic descriptions based on the notification's frequency
+    final intervalText = _getIntervalText(context);
+    final originalTime = _getOriginalTimeString(context);
+    final currentTime = _getCurrentTimeString(context);
+    
+    // Build the description strings
+    final rescheduleFromNowDesc = intervalText.isNotEmpty
+        ? l10n.rescheduleFromNowDescriptionDetailed(intervalText, currentTime)
+        : l10n.rescheduleFromNowDescription;
+    
+    final keepOriginalDesc = intervalText.isNotEmpty
+        ? l10n.rescheduleFromOriginalDescriptionDetailed(intervalText, originalTime)
+        : l10n.rescheduleFromOriginalDescription;
 
     return AlertDialog(
       title: Row(
@@ -70,7 +128,7 @@ class NotificationRescheduleDialog extends StatelessWidget {
             icon: Icons.update,
             iconColor: Colors.blue,
             title: l10n.rescheduleFromNow,
-            description: l10n.rescheduleFromNowDescription,
+            description: rescheduleFromNowDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.rescheduleFromNow),
           ),
           const SizedBox(height: 12),
@@ -81,7 +139,7 @@ class NotificationRescheduleDialog extends StatelessWidget {
             icon: Icons.schedule,
             iconColor: Colors.orange,
             title: l10n.rescheduleFromOriginal,
-            description: l10n.rescheduleFromOriginalDescription,
+            description: keepOriginalDesc,
             onTap: () => Navigator.of(context).pop(RescheduleOption.keepOriginal),
           ),
           const SizedBox(height: 12),

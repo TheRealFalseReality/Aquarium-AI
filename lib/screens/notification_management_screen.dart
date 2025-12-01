@@ -160,7 +160,7 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(notification, currentTank.notificationLogs);
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -204,14 +204,20 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification) {
+  Widget _buildNotificationCard(TankNotification notification, List<NotificationLog> activityLogs) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
     
-    // Display the notification's set date/time directly
-    // This matches what the user specified when creating/editing the notification
-    final DateTime displayDate = notification.notificationDateTime;
+    // Calculate the actual next notification date considering activity logs
+    // This provides the accurate "next notification" time after rescheduling
+    final DateTime? calculatedNextDate = notification.enabled 
+        ? notification.getNextNotificationDateWithActivity(activityLogs)
+        : null;
+    
+    // For display under the title, use the calculated next date if available,
+    // otherwise fall back to the notification's original date/time
+    final DateTime displayDate = calculatedNextDate ?? notification.notificationDateTime;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -294,21 +300,13 @@ class _NotificationManagementScreenState
                 if (notification.enabled)
                   Builder(
                     builder: (context) {
-                      // Use the notification's set date/time for the "time from now" chip
-                      // This shows when the notification will fire based on user's specification
-                      final DateTime? nextDate;
-                      if (notification.notificationDateTime.isAfter(DateTime.now())) {
-                        nextDate = notification.notificationDateTime;
-                      } else {
-                        // If the set time is in the past, don't show the chip
-                        nextDate = null;
-                      }
-                      
-                      if (nextDate == null) return const SizedBox.shrink();
+                      // Use the calculated next notification date for the "time from now" chip
+                      // This accurately reflects when the notification will fire after rescheduling
+                      if (calculatedNextDate == null) return const SizedBox.shrink();
                       
                       return Chip(
                         label: Text(
-                          _getTimeFromNow(nextDate),
+                          _getTimeFromNow(calculatedNextDate),
                           style: const TextStyle(fontSize: 12),
                         ),
                         avatar: const Icon(Icons.schedule, size: 16),
