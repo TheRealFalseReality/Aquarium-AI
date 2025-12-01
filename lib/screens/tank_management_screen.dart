@@ -1829,7 +1829,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   String _getRepeatIntervalText(BuildContext context, TankNotification notification) {
     final l10n = AppLocalizations.of(context)!;
     
-    if (notification.repeatInterval == 1) {
+    // Handle non-repeating notifications and interval=1 case
+    if (notification.repeatFrequency == RepeatFrequency.none || notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
     
@@ -1838,17 +1839,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     switch (notification.repeatFrequency) {
       case RepeatFrequency.daily:
         unitName = l10n.days;
-        break;
       case RepeatFrequency.weekly:
         unitName = l10n.weeks;
-        break;
       case RepeatFrequency.monthly:
         unitName = l10n.months;
-        break;
       case RepeatFrequency.yearly:
         unitName = l10n.years;
-        break;
       case RepeatFrequency.none:
+        // This case is already handled above, but Dart requires exhaustive switch
         return notification.repeatFrequency.displayName;
     }
     
