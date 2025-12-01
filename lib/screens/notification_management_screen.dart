@@ -1213,12 +1213,17 @@ class _NotificationFormScreenState
 
     // Schedule notification if enabled
     if (_enabled) {
+      // Determine which activity logs to use for scheduling:
+      // - If user chose "From Last Activity", use the tank's activity logs
+      // - Otherwise (user chose "Use Specified Time" or dialog wasn't shown), use null
+      final List<NotificationLog>? logsForScheduling = 
+          useActivityLogs ? currentTank.notificationLogs : null;
+      
       await _notificationService.scheduleNotification(
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
-        // Pass activity logs only if user chose to schedule from last activity
-        activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
+        activityLogs: logsForScheduling,
       );
     }
 

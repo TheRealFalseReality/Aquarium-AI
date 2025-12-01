@@ -71,7 +71,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
           _buildOption(
             context,
             icon: Icons.access_time,
-            iconColor: Colors.blue,
+            iconColor: cs.primary,
             title: l10n.useSpecifiedTime,
             description: l10n.useSpecifiedTimeDescription,
             onTap: () => Navigator.of(context).pop(ScheduleOption.useSpecifiedTime),
@@ -82,7 +82,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
           _buildOption(
             context,
             icon: Icons.history,
-            iconColor: Colors.orange,
+            iconColor: cs.tertiary,
             title: l10n.useLastActivity,
             description: l10n.useLastActivityDescription,
             onTap: () => Navigator.of(context).pop(ScheduleOption.useLastActivity),
