@@ -113,11 +113,17 @@ class NotificationService {
   /// calculated based on the last matching activity log, making the
   /// notification schedule relative to when the user actually completed
   /// the task.
+  /// 
+  /// When [useActivityBasedScheduling] is false (default for new/edited notifications),
+  /// the notification is scheduled at the exact date/time the user specified.
+  /// When true (used when rescheduling after activity logging), frequency
+  /// calculations are applied.
   Future<void> scheduleNotification({
     required String tankId,
     required String tankName,
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
+    bool useActivityBasedScheduling = false,
   }) async {
     if (!_initialized) {
       await initialize();
@@ -151,11 +157,16 @@ class NotificationService {
     final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Calculate the next notification date using activity-based scheduling
-    // This uses the same logic as the UI displays, ensuring consistency
-    final nextDate = activityLogs != null 
-        ? notification.getNextNotificationDateWithActivity(activityLogs)
-        : notification.getNextNotificationDate();
+    // Determine the next notification date
+    // For new/edited notifications: use the exact user-specified date
+    // For rescheduling after activity: use activity-based calculations
+    DateTime? nextDate;
+    if (useActivityBasedScheduling && activityLogs != null) {
+      nextDate = notification.getNextNotificationDateWithActivity(activityLogs);
+    } else {
+      // Use the exact date/time the user specified
+      nextDate = notification.notificationDateTime;
+    }
     
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
@@ -243,6 +254,7 @@ class NotificationService {
     }
 
     // Cancel and reschedule each matching notification
+    // Use activity-based scheduling since this is triggered by activity logging
     for (final notification in matchingNotifications) {
       await cancelNotification(notification);
       await scheduleNotification(
@@ -250,6 +262,7 @@ class NotificationService {
         tankName: tankName,
         notification: notification,
         activityLogs: activityLogs,
+        useActivityBasedScheduling: true,
       );
     }
   }
