@@ -35,48 +35,97 @@ class NotificationRescheduleDialog extends StatelessWidget {
       ),
     );
   }
-
-  /// Get the interval text based on the notification's repeat frequency and interval
-  String _getIntervalText(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final interval = notification.repeatInterval;
+  
+  /// Calculate the next notification date using the original time
+  DateTime _getNextDateWithOriginalTime() {
+    final now = DateTime.now();
+    final originalTime = notification.notificationDateTime;
     
+    // Base date is today with the original notification time
+    var nextDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      originalTime.hour,
+      originalTime.minute,
+    );
+    
+    // Add the interval based on frequency
     switch (notification.repeatFrequency) {
       case RepeatFrequency.daily:
-        if (interval == 1) {
-          return l10n.oneDay;
-        }
-        return l10n.xDays(interval);
+        nextDate = nextDate.add(Duration(days: notification.repeatInterval));
+        break;
       case RepeatFrequency.weekly:
-        if (interval == 1) {
-          return l10n.oneWeek;
-        }
-        return l10n.xWeeks(interval);
+        nextDate = nextDate.add(Duration(days: 7 * notification.repeatInterval));
+        break;
       case RepeatFrequency.monthly:
-        if (interval == 1) {
-          return l10n.oneMonth;
-        }
-        return l10n.xMonths(interval);
+        nextDate = DateTime(
+          nextDate.year,
+          nextDate.month + notification.repeatInterval,
+          nextDate.day,
+          nextDate.hour,
+          nextDate.minute,
+        );
+        break;
       case RepeatFrequency.yearly:
-        if (interval == 1) {
-          return l10n.oneYear;
-        }
-        return l10n.xYears(interval);
+        nextDate = DateTime(
+          nextDate.year + notification.repeatInterval,
+          nextDate.month,
+          nextDate.day,
+          nextDate.hour,
+          nextDate.minute,
+        );
+        break;
       case RepeatFrequency.none:
-        return '';
+        break;
     }
+    
+    return nextDate;
   }
-
-  /// Get the formatted time string from the notification's original time
-  String _getOriginalTimeString(BuildContext context) {
-    final timeFormat = DateFormat.jm(); // e.g., "2:30 PM"
-    return timeFormat.format(notification.notificationDateTime);
+  
+  /// Calculate the next notification date using the current time
+  DateTime _getNextDateWithCurrentTime() {
+    final now = DateTime.now();
+    var nextDate = now;
+    
+    // Add the interval based on frequency
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        nextDate = nextDate.add(Duration(days: notification.repeatInterval));
+        break;
+      case RepeatFrequency.weekly:
+        nextDate = nextDate.add(Duration(days: 7 * notification.repeatInterval));
+        break;
+      case RepeatFrequency.monthly:
+        nextDate = DateTime(
+          nextDate.year,
+          nextDate.month + notification.repeatInterval,
+          nextDate.day,
+          nextDate.hour,
+          nextDate.minute,
+        );
+        break;
+      case RepeatFrequency.yearly:
+        nextDate = DateTime(
+          nextDate.year + notification.repeatInterval,
+          nextDate.month,
+          nextDate.day,
+          nextDate.hour,
+          nextDate.minute,
+        );
+        break;
+      case RepeatFrequency.none:
+        break;
+    }
+    
+    return nextDate;
   }
-
-  /// Get the formatted current time string
-  String _getCurrentTimeString(BuildContext context) {
+  
+  /// Get a formatted date and time string
+  String _getFormattedDateTime(DateTime dateTime) {
+    final dateFormat = DateFormat('MMM d, y'); // e.g., "Dec 15, 2024"
     final timeFormat = DateFormat.jm(); // e.g., "2:30 PM"
-    return timeFormat.format(DateTime.now());
+    return '${dateFormat.format(dateTime)} at ${timeFormat.format(dateTime)}';
   }
 
   @override
@@ -85,18 +134,21 @@ class NotificationRescheduleDialog extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final notificationName = notification.getDisplayName();
     
-    // Build dynamic descriptions based on the notification's frequency
-    final intervalText = _getIntervalText(context);
-    final originalTime = _getOriginalTimeString(context);
-    final currentTime = _getCurrentTimeString(context);
+    // Calculate the actual next dates for each option
+    final nextDateWithOriginalTime = _getNextDateWithOriginalTime();
+    final nextDateWithCurrentTime = _getNextDateWithCurrentTime();
     
-    // Build the description strings
-    final rescheduleFromNowDesc = intervalText.isNotEmpty
-        ? l10n.rescheduleFromNowDescriptionDetailed(intervalText, currentTime)
+    // Format dates with full date and time
+    final originalDateTime = _getFormattedDateTime(nextDateWithOriginalTime);
+    final currentDateTime = _getFormattedDateTime(nextDateWithCurrentTime);
+    
+    // Build the description strings with the actual calculated dates
+    final rescheduleFromNowDesc = notification.repeatFrequency != RepeatFrequency.none
+        ? currentDateTime
         : l10n.rescheduleFromNowDescription;
     
-    final keepOriginalDesc = intervalText.isNotEmpty
-        ? l10n.rescheduleFromOriginalDescriptionDetailed(intervalText, originalTime)
+    final keepOriginalDesc = notification.repeatFrequency != RepeatFrequency.none
+        ? originalDateTime
         : l10n.rescheduleFromOriginalDescription;
 
     return AlertDialog(
