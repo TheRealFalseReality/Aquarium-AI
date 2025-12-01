@@ -246,8 +246,8 @@ class TankNotification {
   /// 
   /// Priority order:
   /// 1. If matching activities exist, calculate from most recent activity
-  /// 2. If notificationDateTime is in the future, return it directly
-  /// 3. Otherwise, fall back to standard calculation from notificationDateTime
+  /// 2. If no activities logged, return the original notificationDateTime
+  ///    (frequency only applies after an activity is logged)
   /// 
   /// [activityLogs] - The list of activity logs to consider
   /// 
@@ -258,8 +258,6 @@ class TankNotification {
       return null;
     }
 
-    final now = DateTime.now();
-    
     // Find matching activity logs first - these take priority
     final matchingLogs = activityLogs.where((log) {
       return matchesActivityLog(log.type, log.customCategory);
@@ -274,14 +272,9 @@ class TankNotification {
       return getNextNotificationDateFromBase(lastActivity.loggedAt);
     }
 
-    // No matching activity logs - use the original notification date
-    // If notification is in the future, return it directly
-    if (!notificationDateTime.isBefore(now)) {
-      return notificationDateTime;
-    }
-
-    // Fall back to the standard calculation based on original date
-    return getNextNotificationDate();
+    // No matching activity logs - always use the original notification date
+    // The frequency is only applied after an activity has been logged
+    return notificationDateTime;
   }
 
   /// Check if an activity log matches this notification's category.
