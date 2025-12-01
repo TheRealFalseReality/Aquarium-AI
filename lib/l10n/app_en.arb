@@ -1029,6 +1029,51 @@
     }
   },
 
+  "inOneWeek": "In 1 week",
+  "@inOneWeek": {
+    "description": "Time remaining: in 1 week"
+  },
+
+  "inXWeeks": "In {count} weeks",
+  "@inXWeeks": {
+    "description": "Time remaining: in X weeks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "inOneMonth": "In 1 month",
+  "@inOneMonth": {
+    "description": "Time remaining: in 1 month"
+  },
+
+  "inXMonths": "In {count} months",
+  "@inXMonths": {
+    "description": "Time remaining: in X months",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "inOneYear": "In 1 year",
+  "@inOneYear": {
+    "description": "Time remaining: in 1 year"
+  },
+
+  "inXYears": "In {count} years",
+  "@inXYears": {
+    "description": "Time remaining: in X years",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
   "inOneHour": "In 1 hour",
   "@inOneHour": {
     "description": "Time remaining: in 1 hour"

@@ -49,19 +49,19 @@ class NotificationRescheduleDialog extends StatelessWidget {
         return l10n.inXDays(interval);
       case RepeatFrequency.weekly:
         if (interval == 1) {
-          return l10n.inXDays(7);
+          return l10n.inOneWeek;
         }
-        return l10n.inXDays(7 * interval);
+        return l10n.inXWeeks(interval);
       case RepeatFrequency.monthly:
         if (interval == 1) {
-          return l10n.inXDays(30);
+          return l10n.inOneMonth;
         }
-        return l10n.inXDays(30 * interval);
+        return l10n.inXMonths(interval);
       case RepeatFrequency.yearly:
         if (interval == 1) {
-          return l10n.inXDays(365);
+          return l10n.inOneYear;
         }
-        return l10n.inXDays(365 * interval);
+        return l10n.inXYears(interval);
       case RepeatFrequency.none:
         return '';
     }
