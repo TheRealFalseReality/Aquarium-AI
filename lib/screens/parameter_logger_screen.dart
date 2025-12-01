@@ -354,6 +354,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
   /// Minimum number of entries to show on the graph when falling back from the 30-day filter
   static const int _minGraphEntries = 10;
+  
+  /// Date span thresholds for determining X-axis label intervals
+  static const int _wideSpanThreshold = 20;  // Days; use interval of 5 above this
+  static const int _mediumSpanThreshold = 7; // Days; use interval of 2 above this
 
   /// Get parameters for the graph display.
   /// Returns a record with the filtered parameters and whether we're using the fallback mode.
@@ -368,7 +372,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
     
     // No data in last 30 days, fall back to showing the most recent entries
-    // Sort by date (newest first) and take the last N entries
+    // Sort by date (newest first) and take up to N most recent entries
     final sortedByDateDesc = List<WaterParameter>.from(parameters)
       ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
     final recentParams = sortedByDateDesc.take(_minGraphEntries).toList();
@@ -507,7 +511,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: maxXValue > 20 ? 5 : (maxXValue > 7 ? 2 : 1),
+                      interval: maxXValue > _wideSpanThreshold ? 5 : (maxXValue > _mediumSpanThreshold ? 2 : 1),
                       getTitlesWidget: (value, meta) {
                         final date = oldestDate.add(Duration(days: value.toInt()));
                         return Padding(
