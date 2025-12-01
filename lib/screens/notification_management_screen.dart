@@ -1199,10 +1199,16 @@ class _NotificationFormScreenState
       }).toList();
       
       if (matchingLogs.isNotEmpty && mounted) {
+        // Sort by date (newest first) and get the most recent activity log
+        matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+        final lastActivityLog = matchingLogs.first;
+        
         // Show dialog to let user choose scheduling method
         final scheduleOption = await NotificationScheduleOptionDialog.show(
           context,
           notification,
+          lastActivityLog: lastActivityLog,
+          specifiedDateTime: notificationDateTime,
         );
         
         if (scheduleOption == ScheduleOption.useLastActivity) {

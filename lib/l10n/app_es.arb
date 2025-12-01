@@ -249,5 +249,7 @@
   "oneMonth": "1 mes",
   "xMonths": "{count} meses",
   "oneYear": "1 año",
-  "xYears": "{count} años"
+  "xYears": "{count} años",
+  "scheduledFor": "Programado para",
+  "nextScheduled": "Próxima programada"
 }
