@@ -54,45 +54,7 @@ class _NotificationManagementScreenState
     final enabled = await _notificationService.areNotificationsEnabled();
     if (!enabled && mounted) {
       _showPermissionDialog();
-      return;
     }
-    
-    // Check if exact alarms are allowed (required for scheduled notifications)
-    final canScheduleExact = await _notificationService.canScheduleExactNotifications();
-    if (!canScheduleExact && mounted) {
-      _showExactAlarmPermissionDialog();
-    }
-  }
-  
-  void _showExactAlarmPermissionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.alarm, color: Colors.orange),
-            const SizedBox(width: 8),
-            Text(AppLocalizations.of(context)!.exactAlarmPermission),
-          ],
-        ),
-        content: Text(
-          AppLocalizations.of(context)!.exactAlarmPermissionMessage,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.maybeLater),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _notificationService.requestPermissions();
-            },
-            child: Text(AppLocalizations.of(context)!.grantPermission),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showPermissionDialog() {
