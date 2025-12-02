@@ -18,12 +18,13 @@ class TankNote {
   /// Factory method to create a new note entry
   factory TankNote.create({
     required String content,
+    DateTime? createdAt,
   }) {
     final now = DateTime.now();
     return TankNote(
       id: const Uuid().v4(),
       content: content,
-      createdAt: now,
+      createdAt: createdAt ?? now,
       updatedAt: now,
     );
   }

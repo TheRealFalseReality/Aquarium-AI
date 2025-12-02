@@ -375,55 +375,56 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     }
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        initiallyExpanded: false,
+        leading: Icon(Icons.summarize, color: cs.primary),
+        title: Text(
+          l10n.notesSection,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        subtitle: Text('$totalNotes ${totalNotes == 1 ? l10n.entry : l10n.entries}'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.summarize, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.notesSection,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSummaryItem(
+                        context,
+                        l10n.totalNotes,
+                        totalNotes.toString(),
+                        Icons.note,
                       ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryItem(
-                    context,
-                    l10n.totalNotes,
-                    totalNotes.toString(),
-                    Icons.note,
-                  ),
-                ),
-              ],
-            ),
-            if (lastNote != null) ...[
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${l10n.lastNote}: ${DateFormat('MMM d, yyyy').format(lastNote.createdAt)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                if (lastNote != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${l10n.lastNote}: ${DateFormat('MMM d, yyyy').format(lastNote.createdAt)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -693,63 +694,65 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
         : null;
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        initiallyExpanded: false,
+        leading: Icon(Icons.summarize, color: cs.primary),
+        title: Text(
+          l10n.activitySummary,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        subtitle: Text('$totalLogs ${totalLogs == 1 ? l10n.entry : l10n.entries}'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.summarize, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.activitySummary,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSummaryItem(
+                        context,
+                        l10n.totalLogs,
+                        totalLogs.toString(),
+                        Icons.history,
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildSummaryItem(
+                        context,
+                        l10n.categories,
+                        groupedLogs.length.toString(),
+                        Icons.category,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryItem(
-                    context,
-                    l10n.totalLogs,
-                    totalLogs.toString(),
-                    Icons.history,
-                  ),
-                ),
-                Expanded(
-                  child: _buildSummaryItem(
-                    context,
-                    l10n.categories,
-                    groupedLogs.length.toString(),
-                    Icons.category,
-                  ),
-                ),
-              ],
-            ),
-            if (lastLog != null) ...[
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${l10n.lastActivity}: ${DateFormat('MMM d, yyyy').format(lastLog.loggedAt)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                if (lastLog != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${l10n.lastActivity}: ${DateFormat('MMM d, yyyy').format(lastLog.loggedAt)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1326,12 +1329,16 @@ class _AddNoteSheet extends ConsumerStatefulWidget {
 class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
   final _formKey = GlobalKey<FormState>();
   final _contentController = TextEditingController();
+  late DateTime _selectedDate;
 
   @override
   void initState() {
     super.initState();
     if (widget.existingNote != null) {
       _contentController.text = widget.existingNote!.content;
+      _selectedDate = widget.existingNote!.createdAt;
+    } else {
+      _selectedDate = DateTime.now();
     }
   }
 
@@ -1339,6 +1346,32 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
   void dispose() {
     _contentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      );
+      if (time != null) {
+        setState(() {
+          _selectedDate = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
+        });
+      }
+    }
   }
 
   Future<void> _saveNote() async {
@@ -1349,9 +1382,10 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
       List<TankNote> updatedNotes;
       
       if (isEditing) {
-        // Update existing note
+        // Update existing note - createdAt is included to allow users to correct/adjust the date
         final updatedNote = widget.existingNote!.copyWith(
           content: trimmedContent,
+          createdAt: _selectedDate,
           updatedAt: DateTime.now(),
         );
         
@@ -1375,9 +1409,10 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
           },
         );
       } else {
-        // Create new note
+        // Create new note with selected date
         final note = TankNote.create(
           content: trimmedContent,
+          createdAt: _selectedDate,
         );
         
         updatedNotes = [...widget.tank.tankNotes, note];
@@ -1465,6 +1500,24 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              
+              // Date selection
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10n.dateAndTime,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                  ),
+                  child: Text(
+                    DateFormat('MMM d, yyyy - h:mm a').format(_selectedDate),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               
