@@ -42,6 +42,7 @@ class PlotlyChartWidget extends StatefulWidget {
 class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -70,12 +71,23 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
               _isLoading = false;
             });
           },
+          onWebResourceError: (WebResourceError error) {
+            // Handle CDN or resource loading errors
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+            });
+          },
         ),
       );
     _loadPlotlyChart();
   }
 
   void _loadPlotlyChart() {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     final htmlContent = _generatePlotlyHtml();
     _controller.loadHtmlString(htmlContent);
   }
@@ -112,7 +124,11 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
     final minY = yValues.reduce((a, b) => a < b ? a : b);
     final maxY = yValues.reduce((a, b) => a > b ? a : b);
     final yRange = maxY - minY;
-    final yPadding = yRange * 0.1;
+    // Handle edge case when all values are the same (yRange = 0)
+    // Use a minimum padding of 10% of the value, or 1.0 if the value is 0
+    final yPadding = yRange > 0 
+        ? yRange * 0.1 
+        : (minY.abs() * 0.1).clamp(1.0, double.infinity);
     final adjustedMinY = minY - yPadding;
     final adjustedMaxY = maxY + yPadding;
 
@@ -255,6 +271,37 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return SizedBox(
+        height: widget.height,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.error,
+                size: 32,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Unable to load chart',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _loadPlotlyChart,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: widget.height,
       child: Stack(
