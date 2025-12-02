@@ -43,11 +43,23 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
   late final WebViewController _controller;
   bool _isLoading = true;
   bool _hasError = false;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
+    _initializeWebViewController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Load chart here instead of initState() because we need access to Theme.of(context)
+    // which requires the widget to be fully inserted in the tree
+    if (!_isInitialized) {
+      _isInitialized = true;
+      _loadPlotlyChart();
+    }
   }
 
   @override
@@ -60,7 +72,7 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
     }
   }
 
-  void _initializeWebView() {
+  void _initializeWebViewController() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.transparent)
@@ -80,7 +92,6 @@ class _PlotlyChartWidgetState extends State<PlotlyChartWidget> {
           },
         ),
       );
-    _loadPlotlyChart();
   }
 
   void _loadPlotlyChart() {
