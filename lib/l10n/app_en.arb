@@ -681,6 +681,16 @@
     "description": "Notifications menu option"
   },
 
+  "notificationsExperimental": "Notifications (Experimental)",
+  "@notificationsExperimental": {
+    "description": "Notifications menu option with experimental tag"
+  },
+
+  "experimental": "Experimental",
+  "@experimental": {
+    "description": "Experimental feature tag"
+  },
+
   "notificationTitleFeeding": "🐠 Time to Feed - {tankName}",
   "@notificationTitleFeeding": {
     "description": "Notification title for feeding",

@@ -130,6 +130,8 @@
   "noBackupHistory": "Pas encore d'historique de sauvegarde",
   "dosingDiary": "Journal de Dosage",
   "notifications": "Notifications",
+  "notificationsExperimental": "Notifications (Expérimental)",
+  "experimental": "Expérimental",
   "sendTestNotification": "Envoyer une Notification de Test",
   "testNotificationSent": "Notification de test envoyée",
   "testNotificationDescription": "Envoyez une notification de test immédiatement pour voir comment elle apparaîtra.",
