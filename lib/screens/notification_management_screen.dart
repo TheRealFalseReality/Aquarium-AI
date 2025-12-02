@@ -291,33 +291,43 @@ class _NotificationManagementScreenState
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                if (notification.enabled)
-                  Builder(
-                    builder: (context) {
-                      // Use the dynamically calculated displayDate for the "time from now" chip
-                      // This shows when the notification will actually fire
-                      final DateTime? nextDate;
-                      if (displayDate.isAfter(DateTime.now())) {
-                        nextDate = displayDate;
-                      } else {
-                        // If the display time is in the past, don't show the chip
-                        nextDate = null;
-                      }
-                      
-                      if (nextDate == null) return const SizedBox.shrink();
-                      
-                      return Chip(
-                        label: Text(
-                          _getTimeFromNow(nextDate),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        avatar: const Icon(Icons.schedule, size: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      );
-                    },
-                  ),
+                // Show the "time from now" chip for all repeating notifications,
+                // regardless of whether device push notifications are enabled
+                Builder(
+                  builder: (context) {
+                    // Use the dynamically calculated displayDate for the "time from now" chip
+                    // This shows when the next occurrence is scheduled
+                    final DateTime? nextDate;
+                    if (displayDate.isAfter(DateTime.now())) {
+                      nextDate = displayDate;
+                    } else {
+                      // If the display time is in the past, don't show the chip
+                      nextDate = null;
+                    }
+                    
+                    if (nextDate == null) return const SizedBox.shrink();
+                    
+                    return Chip(
+                      label: Text(
+                        _getTimeFromNow(nextDate),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      avatar: Icon(
+                        Icons.schedule, 
+                        size: 16,
+                        // Use a muted color when device notifications are disabled
+                        color: notification.enabled 
+                            ? null 
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      backgroundColor: notification.enabled
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 12),
