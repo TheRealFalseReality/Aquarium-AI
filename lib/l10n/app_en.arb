@@ -1661,5 +1661,15 @@
   "resetAll": "Reset All",
   "@resetAll": {
     "description": "Reset all button label"
+  },
+
+  "reschedulePreferences": "Reschedule preferences",
+  "@reschedulePreferences": {
+    "description": "Label for reschedule preferences in backup dialog"
+  },
+
+  "replaceAllReschedulePreferences": "Replace ALL reschedule preferences",
+  "@replaceAllReschedulePreferences": {
+    "description": "Warning message for replacing reschedule preferences during restore"
   }
 }

@@ -262,5 +262,7 @@
   "resetReschedulePreferenceDescInactive": "No hay preferencias guardadas actualmente. El diálogo se mostrará al registrar actividades.",
   "reschedulePreferenceCleared": "Todas las preferencias de reprogramación eliminadas. El diálogo se mostrará de nuevo.",
   "reset": "Restablecer",
-  "resetAll": "Restablecer todo"
+  "resetAll": "Restablecer todo",
+  "reschedulePreferences": "Preferencias de reprogramación",
+  "replaceAllReschedulePreferences": "Reemplazar TODAS las preferencias de reprogramación"
 }

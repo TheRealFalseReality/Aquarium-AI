@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'species_tags_provider.dart';
+import 'app_settings_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
@@ -182,6 +183,10 @@ class TankNotifier extends StateNotifier<TankState> {
       final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
       final speciesTags = speciesTagsNotifier.exportTags();
 
+      // Get reschedule preferences for backup
+      final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
+      final reschedulePreferences = await appSettingsNotifier.exportReschedulePreferences();
+
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
       final backupData = {
@@ -191,6 +196,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'tankCount': state.tanks.length,
         'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
         'speciesTags': speciesTags,
+        'reschedulePreferences': reschedulePreferences,
       };
 
       // Convert to formatted JSON
@@ -344,6 +350,16 @@ class TankNotifier extends StateNotifier<TankState> {
         );
         final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
         await speciesTagsNotifier.importTags(speciesTagsMap);
+      }
+
+      // Restore reschedule preferences if present in backup
+      if (backupData.containsKey('reschedulePreferences')) {
+        final rescheduleData = backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final reschedulePreferences = rescheduleData.map(
+          (key, value) => MapEntry(key, value as int),
+        );
+        final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
+        await appSettingsNotifier.importReschedulePreferences(reschedulePreferences);
       }
 
       final previousTankCount = state.tanks.length;

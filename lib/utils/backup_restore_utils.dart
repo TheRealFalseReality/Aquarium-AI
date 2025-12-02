@@ -76,6 +76,14 @@ class BackupRestoreUtils {
                 Text(l10n.activityLogs),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.reschedulePreferences),
+              ],
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.exportDateLabel(DateTime.now().toString().split('.')[0]),
@@ -237,6 +245,14 @@ class BackupRestoreUtils {
               children: [
                 const Text('• ', style: TextStyle(fontSize: 16)),
                 Expanded(child: Text(l10n.replaceAllActivityLogs)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(child: Text(l10n.replaceAllReschedulePreferences)),
               ],
             ),
             const SizedBox(height: 6),

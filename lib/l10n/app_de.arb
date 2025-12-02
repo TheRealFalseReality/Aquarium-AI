@@ -262,5 +262,7 @@
   "resetReschedulePreferenceDescInactive": "Derzeit sind keine Einstellungen gespeichert. Der Dialog wird beim Protokollieren von Aktivitäten angezeigt.",
   "reschedulePreferenceCleared": "Alle Neuplanungseinstellungen gelöscht. Der Dialog wird nun wieder angezeigt.",
   "reset": "Zurücksetzen",
-  "resetAll": "Alle zurücksetzen"
+  "resetAll": "Alle zurücksetzen",
+  "reschedulePreferences": "Neuplanungseinstellungen",
+  "replaceAllReschedulePreferences": "ALLE Neuplanungseinstellungen ersetzen"
 }

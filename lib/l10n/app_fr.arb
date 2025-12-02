@@ -253,5 +253,7 @@
   "resetReschedulePreferenceDescInactive": "Aucune préférence n'est actuellement enregistrée. La boîte de dialogue s'affichera lors de l'enregistrement des activités.",
   "reschedulePreferenceCleared": "Toutes les préférences de reprogrammation effacées. La boîte de dialogue s'affichera à nouveau.",
   "reset": "Réinitialiser",
-  "resetAll": "Tout réinitialiser"
+  "resetAll": "Tout réinitialiser",
+  "reschedulePreferences": "Préférences de reprogrammation",
+  "replaceAllReschedulePreferences": "Remplacer TOUTES les préférences de reprogrammation"
 }
