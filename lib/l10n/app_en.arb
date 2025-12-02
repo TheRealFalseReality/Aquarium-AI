@@ -1731,6 +1731,8 @@
         "type": "int"
       }
     }
+  },
+
   "rememberMyChoice": "Remember my choice",
   "@rememberMyChoice": {
     "description": "Checkbox label to remember the user's reschedule option choice"

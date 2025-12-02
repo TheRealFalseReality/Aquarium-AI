@@ -274,7 +274,7 @@
   "totalNotes": "Notizen Gesamt",
   "lastNote": "Letzte Notiz",
   "noteRequired": "Bitte geben Sie eine Notiz ein",
-  "moreNotes": "+{count} weitere Notizen"
+  "moreNotes": "+{count} weitere Notizen",
 
   "rememberMyChoice": "Meine Auswahl merken",
   "rememberChoiceSettingsHint": "Sie können diese Einstellung unter Einstellungen > App-Einstellungen zurücksetzen",

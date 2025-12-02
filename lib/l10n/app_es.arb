@@ -274,7 +274,7 @@
   "totalNotes": "Total de Notas",
   "lastNote": "Última nota",
   "noteRequired": "Por favor ingresa una nota",
-  "moreNotes": "+{count} más notas"
+  "moreNotes": "+{count} más notas",
 
   "rememberMyChoice": "Recordar mi elección",
   "rememberChoiceSettingsHint": "Puedes restablecer esta preferencia en Configuración > Ajustes de la aplicación",
