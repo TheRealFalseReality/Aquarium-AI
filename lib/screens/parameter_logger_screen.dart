@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
+import '../widgets/plotly_chart_widget.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -354,10 +354,6 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
   /// Minimum number of entries to show on the graph when falling back from the 30-day filter
   static const int _minGraphEntries = 10;
-  
-  /// Date span thresholds for determining X-axis label intervals
-  static const int _wideSpanThreshold = 20;  // Days; use interval of 5 above this
-  static const int _mediumSpanThreshold = 7; // Days; use interval of 2 above this
 
   /// Get parameters for the graph display.
   /// Returns a record with the filtered parameters and whether we're using the fallback mode.
@@ -414,28 +410,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final latestUnit = latestParam.unit ?? '';
     final latestColor = _getThresholdColor(parameterType, latestValue, unit: latestUnit);
 
-    // Create data spots with color segments
-    final spots = <FlSpot>[];
-    final spotColors = <Color>[];
-    final oldestDate = sortedParams.first.dateRecorded;
-    
-    for (var param in sortedParams) {
-      final daysDiff = param.dateRecorded.difference(oldestDate).inDays.toDouble();
-      spots.add(FlSpot(daysDiff, param.value));
-      spotColors.add(_getThresholdColor(parameterType, param.value, unit: param.unit));
-    }
-
     // Use the latest value's threshold color for the line, except for salinity which is always blue
     final lineColor = parameterType == 'salinity' ? Colors.blue : latestColor;
-    final maxY = sortedParams.map((p) => p.value).reduce((a, b) => a > b ? a : b);
-    final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
-    final yRange = maxY - minY;
-    final yPadding = yRange * 0.1;
-    
-    // Calculate the actual date range for the X axis
-    final newestDate = sortedParams.last.dateRecorded;
-    final daySpan = newestDate.difference(oldestDate).inDays.toDouble();
-    final maxXValue = daySpan > 0 ? daySpan : 1.0; // Ensure at least 1 day span for single data point
 
     // Build the graph title based on the data range
     final String graphTitle;
@@ -444,6 +420,16 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     } else {
       graphTitle = 'Last 30 Days Trend';
     }
+
+    // Prepare data points for Plotly
+    final dataPoints = sortedParams.map((param) {
+      return {
+        'date': param.dateRecorded,
+        'value': param.value,
+        'color': _getThresholdColor(parameterType, param.value, unit: param.unit),
+        'unit': param.unit ?? '',
+      };
+    }).toList();
 
     return Container(
       height: 280,
@@ -480,128 +466,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: true,
-                  horizontalInterval: yRange > 0 ? yRange / 5 : 1,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-                      strokeWidth: 1,
-                    );
-                  },
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-                      strokeWidth: 1,
-                    );
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: maxXValue > _wideSpanThreshold ? 5 : (maxXValue > _mediumSpanThreshold ? 2 : 1),
-                      getTitlesWidget: (value, meta) {
-                        final date = oldestDate.add(Duration(days: value.toInt()));
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            DateFormat('M/d').format(date),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                              fontSize: 10,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      interval: yRange > 0 ? yRange / 4 : 1,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toStringAsFixed(1),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                            fontSize: 10,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-                  ),
-                ),
-                minX: 0,
-                maxX: maxXValue,
-                minY: minY - yPadding,
-                maxY: maxY + yPadding,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    color: lineColor,
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        // Color each dot based on its threshold
-                        final dotColor = spotColors[index];
-                        return FlDotCirclePainter(
-                          radius: 4,
-                          color: dotColor,
-                          strokeWidth: 2,
-                          strokeColor: Colors.white,
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: lineColor.withOpacity(0.1),
-                    ),
-                  ),
-                ],
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((spot) {
-                        final date = oldestDate.add(Duration(days: spot.x.toInt()));
-                        final param = sortedParams.firstWhere(
-                          (p) => p.dateRecorded.difference(oldestDate).inDays == spot.x.toInt(),
-                          orElse: () => sortedParams.first,
-                        );
-                        return LineTooltipItem(
-                          '${DateFormat('MMM d').format(date)}\n${spot.y.toStringAsFixed(2)}${param.unit ?? ''}',
-                          TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
-              ),
+            child: PlotlyChartWidget(
+              dataPoints: dataPoints,
+              lineColor: lineColor,
+              title: _getParameterLabel(parameterType),
+              unit: latestUnit,
             ),
           ),
         ],
