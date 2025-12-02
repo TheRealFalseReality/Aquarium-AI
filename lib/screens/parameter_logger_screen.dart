@@ -933,12 +933,12 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDate),
       );
-      if (time != null) {
+      if (time != null && mounted) {
         setState(() {
           _selectedDate = DateTime(
             picked.year,
