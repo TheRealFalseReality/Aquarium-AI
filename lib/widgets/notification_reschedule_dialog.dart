@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
+import '../providers/app_settings_provider.dart' show rememberedRescheduleOptionKey;
 
 /// Options for rescheduling a notification after logging an activity
 enum RescheduleOption {
@@ -26,9 +27,6 @@ class RescheduleDialogResult {
     required this.rememberChoice,
   });
 }
-
-/// Key used to store the remembered reschedule option in SharedPreferences
-const String rememberedRescheduleOptionKey = 'remembered_reschedule_option';
 
 /// Dialog to ask the user how they want to update a notification
 /// after logging an activity that matches the notification type.
