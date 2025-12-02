@@ -1064,14 +1064,14 @@
     "description": "Time remaining: less than a minute"
   },
 
-  "activityLog": "Activity Log",
+  "activityLog": "Notes & Activity",
   "@activityLog": {
-    "description": "Activity log screen title"
+    "description": "Notes and activity log screen title"
   },
 
-  "activityLogDescription": "Track completed maintenance tasks and activities for your aquarium",
+  "activityLogDescription": "Add notes and track completed maintenance tasks for your aquarium",
   "@activityLogDescription": {
-    "description": "Description for activity log screen"
+    "description": "Description for notes and activity log screen"
   },
 
   "addLogEntry": "Add Log Entry",
@@ -1621,5 +1621,115 @@
   "goBack": "Go Back",
   "@goBack": {
     "description": "Button to go back to previous screen without saving"
+  },
+
+  "tankNotes": "Tank notes",
+  "@tankNotes": {
+    "description": "Tank notes backup item"
+  },
+
+  "notesSection": "Notes",
+  "@notesSection": {
+    "description": "Notes section title"
+  },
+
+  "activitiesSection": "Activities",
+  "@activitiesSection": {
+    "description": "Activities section title"
+  },
+
+  "addNote": "Add Note",
+  "@addNote": {
+    "description": "Add note button"
+  },
+
+  "editNote": "Edit Note",
+  "@editNote": {
+    "description": "Edit note dialog title"
+  },
+
+  "deleteNote": "Delete Note",
+  "@deleteNote": {
+    "description": "Delete note dialog title"
+  },
+
+  "deleteNoteConfirm": "Are you sure you want to delete this note?",
+  "@deleteNoteConfirm": {
+    "description": "Delete note confirmation message"
+  },
+
+  "noNotesYet": "No Notes Yet",
+  "@noNotesYet": {
+    "description": "Empty state title for notes"
+  },
+
+  "noNotesDescription": "Add notes to remember important observations about your tank.",
+  "@noNotesDescription": {
+    "description": "Empty state description for notes"
+  },
+
+  "addFirstNote": "Add First Note",
+  "@addFirstNote": {
+    "description": "Button text for adding first note"
+  },
+
+  "noteContent": "Note",
+  "@noteContent": {
+    "description": "Note content field label"
+  },
+
+  "noteContentHint": "Enter your note here...",
+  "@noteContentHint": {
+    "description": "Note content field hint"
+  },
+
+  "saveNote": "Save Note",
+  "@saveNote": {
+    "description": "Save note button"
+  },
+
+  "updateNote": "Update Note",
+  "@updateNote": {
+    "description": "Update note button"
+  },
+
+  "noteAdded": "Note added",
+  "@noteAdded": {
+    "description": "Note added confirmation message"
+  },
+
+  "noteUpdated": "Note updated",
+  "@noteUpdated": {
+    "description": "Note updated confirmation message"
+  },
+
+  "noteDeleted": "Note deleted",
+  "@noteDeleted": {
+    "description": "Note deleted confirmation message"
+  },
+
+  "totalNotes": "Total Notes",
+  "@totalNotes": {
+    "description": "Total notes label"
+  },
+
+  "lastNote": "Last note",
+  "@lastNote": {
+    "description": "Last note label"
+  },
+
+  "noteRequired": "Please enter a note",
+  "@noteRequired": {
+    "description": "Validation message for empty note"
+  },
+
+  "moreNotes": "+{count} more notes",
+  "@moreNotes": {
+    "description": "More notes label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

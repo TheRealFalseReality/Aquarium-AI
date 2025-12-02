@@ -3,6 +3,7 @@ import 'water_parameter.dart';
 import 'dosing_entry.dart';
 import 'tank_notification.dart';
 import 'notification_log.dart';
+import 'tank_note.dart';
 
 class TankPhoto {
   final String id;
@@ -138,6 +139,7 @@ class Tank {
   final List<DosingEntry> dosingEntries; // Dosing diary entries
   final List<TankNotification> notifications; // Task notifications
   final List<NotificationLog> notificationLogs; // Notification action logs
+  final List<TankNote> tankNotes; // User notes for the tank
 
   Tank({
     required this.id,
@@ -159,11 +161,13 @@ class Tank {
     List<DosingEntry>? dosingEntries,
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
+    List<TankNote>? tankNotes,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
        dosingEntries = dosingEntries ?? [],
        notifications = notifications ?? [],
-       notificationLogs = notificationLogs ?? [];
+       notificationLogs = notificationLogs ?? [],
+       tankNotes = tankNotes ?? [];
 
   factory Tank.create({
     required String name,
@@ -183,6 +187,7 @@ class Tank {
     List<DosingEntry>? dosingEntries,
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
+    List<TankNote>? tankNotes,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -205,6 +210,7 @@ class Tank {
       dosingEntries: dosingEntries,
       notifications: notifications,
       notificationLogs: notificationLogs,
+      tankNotes: tankNotes,
     );
   }
 
@@ -229,6 +235,7 @@ class Tank {
       'dosingEntries': dosingEntries.map((de) => de.toJson()).toList(),
       'notifications': notifications.map((n) => n.toJson()).toList(),
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
+      'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
     };
   }
 
@@ -265,6 +272,9 @@ class Tank {
       notificationLogs: (json['notificationLogs'] as List?)
           ?.map((nl) => NotificationLog.fromJson(nl))
           .toList() ?? [],
+      tankNotes: (json['tankNotes'] as List?)
+          ?.map((tn) => TankNote.fromJson(tn))
+          .toList() ?? [],
     );
   }
 
@@ -288,6 +298,7 @@ class Tank {
     List<DosingEntry>? dosingEntries,
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
+    List<TankNote>? tankNotes,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
@@ -312,6 +323,7 @@ class Tank {
       dosingEntries: dosingEntries ?? this.dosingEntries,
       notifications: notifications ?? this.notifications,
       notificationLogs: notificationLogs ?? this.notificationLogs,
+      tankNotes: tankNotes ?? this.tankNotes,
     );
   }
 }

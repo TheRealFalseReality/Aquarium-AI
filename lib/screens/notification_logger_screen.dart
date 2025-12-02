@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/tank.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
+import '../models/tank_note.dart';
 import '../providers/tank_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
@@ -20,9 +21,22 @@ class NotificationLoggerScreen extends ConsumerStatefulWidget {
   NotificationLoggerScreenState createState() => NotificationLoggerScreenState();
 }
 
-class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScreen> {
+class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScreen> with SingleTickerProviderStateMixin {
   String? _expandedCategory;
   final NotificationService _notificationService = NotificationService();
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Tank _getCurrentTank() {
     // Get the latest tank state from the provider
@@ -30,6 +44,50 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     return tanks.firstWhere(
       (t) => t.id == widget.tank.id,
       orElse: () => widget.tank,
+    );
+  }
+
+  void _addNote(BuildContext context) {
+    final currentTank = _getCurrentTank();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _AddNoteSheet(tank: currentTank),
+    );
+  }
+
+  void _editNote(BuildContext context, TankNote note) {
+    final currentTank = _getCurrentTank();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _AddNoteSheet(
+        tank: currentTank,
+        existingNote: note,
+      ),
+    );
+  }
+
+  Future<void> _deleteNote(TankNote note) async {
+    final currentTank = _getCurrentTank();
+    final updatedNotes = currentTank.tankNotes
+        .where((n) => n.id != note.id)
+        .toList();
+    
+    final updatedTank = currentTank.copyWith(
+      tankNotes: updatedNotes,
+      updatedAt: DateTime.now(),
+    );
+    
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    
+    // Log note deletion
+    AnalyticsService.logFeatureUsed(
+      featureName: 'tank_note_deleted',
+      parameters: {
+        'tank_type': currentTank.type,
+        'remaining_notes': updatedNotes.length,
+      },
     );
   }
 
@@ -160,8 +218,6 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
   @override
   Widget build(BuildContext context) {
     final tank = _getCurrentTank();
-    final groupedLogs = _groupLogsByCategory(tank);
-    final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
     return MainLayout(
@@ -169,107 +225,408 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
       child: Scaffold(
         appBar: AppBar(
           title: Text(tank.name),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _addLogEntry(context),
-              tooltip: l10n.addLogEntry,
-            ),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.note_outlined),
+                text: l10n.notesSection,
+              ),
+              Tab(
+                icon: const Icon(Icons.history),
+                text: l10n.activitiesSection,
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildNotesTab(context, tank),
+            _buildActivitiesTab(context, tank),
           ],
         ),
-        body: tank.notificationLogs.isEmpty
-            ? _buildEmptyState(context)
-            : ListView(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: 100, // Extra padding for FAB
-                ),
-                children: [
-                  Text(
-                    l10n.activityLog,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.activityLogDescription,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withOpacity(0.7),
-                        ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Summary card
-                  _buildSummaryCard(context, tank),
-                  const SizedBox(height: 16),
-                  
-                  // Grouped entries
-                  ...groupedLogs.entries.map((entry) {
-                    final categoryName = entry.key;
-                    final logs = entry.value;
-                    final isExpanded = _expandedCategory == categoryName;
-                    final firstLog = logs.first;
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: _getCategoryColor(firstLog.type).withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                _getCategoryIcon(firstLog.type),
-                                color: _getCategoryColor(firstLog.type),
-                              ),
-                            ),
-                            title: Text(
-                              categoryName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text('${logs.length} ${logs.length == 1 ? l10n.entry : l10n.entries}'),
-                            trailing: IconButton(
-                              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                              onPressed: () {
-                                setState(() {
-                                  _expandedCategory = isExpanded ? null : categoryName;
-                                });
-                              },
-                            ),
-                            onTap: () {
-                              setState(() {
-                                _expandedCategory = isExpanded ? null : categoryName;
-                              });
-                            },
-                          ),
-                          if (isExpanded)
-                            Column(
-                              children: [
-                                const Divider(height: 1),
-                                ...logs.map((log) => _buildLogItem(context, log)),
-                              ],
-                            ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _addLogEntry(context),
+          onPressed: () {
+            if (_tabController.index == 0) {
+              _addNote(context);
+            } else {
+              _addLogEntry(context);
+            }
+          },
           icon: const Icon(Icons.add),
-          label: Text(l10n.addLogEntry),
+          label: AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, child) {
+              return Text(_tabController.index == 0 ? l10n.addNote : l10n.addLogEntry);
+            },
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildNotesTab(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    if (tank.tankNotes.isEmpty) {
+      return _buildNotesEmptyState(context);
+    }
+
+    // Sort notes by most recent first
+    final sortedNotes = List<TankNote>.from(tank.tankNotes)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return ListView(
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 100,
+      ),
+      children: [
+        Text(
+          l10n.notesSection,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.noNotesDescription,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface.withOpacity(0.7),
+              ),
+        ),
+        const SizedBox(height: 24),
+        // Notes summary card
+        _buildNotesSummaryCard(context, tank),
+        const SizedBox(height: 16),
+        // Notes list
+        ...sortedNotes.map((note) => _buildNoteItem(context, note)),
+      ],
+    );
+  }
+
+  Widget _buildNotesEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.note_outlined,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              l10n.noNotesYet,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.noNotesDescription,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () => _addNote(context),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addFirstNote),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotesSummaryCard(BuildContext context, Tank tank) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final totalNotes = tank.tankNotes.length;
+    final lastNote = tank.tankNotes.isNotEmpty
+        ? tank.tankNotes.reduce((a, b) => 
+            a.createdAt.isAfter(b.createdAt) ? a : b)
+        : null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.summarize, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.notesSection,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryItem(
+                    context,
+                    l10n.totalNotes,
+                    totalNotes.toString(),
+                    Icons.note,
+                  ),
+                ),
+              ],
+            ),
+            if (lastNote != null) ...[
+              const SizedBox(height: 12),
+              const Divider(),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${l10n.lastNote}: ${DateFormat('MMM d, yyyy').format(lastNote.createdAt)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoteItem(BuildContext context, TankNote note) {
+    final cs = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
+    final l10n = AppLocalizations.of(context)!;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.note,
+                    size: 20,
+                    color: cs.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dateFormat.format(note.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        note.content,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: cs.onSurfaceVariant),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editNote(context, note);
+                    } else if (value == 'delete') {
+                      _showDeleteNoteDialog(context, note);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 20, color: cs.primary),
+                          const SizedBox(width: 8),
+                          Text(l10n.edit),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, size: 20, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteNoteDialog(BuildContext context, TankNote note) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteNote),
+        content: Text(l10n.deleteNoteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteNote(note);
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivitiesTab(BuildContext context, Tank tank) {
+    final groupedLogs = _groupLogsByCategory(tank);
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (tank.notificationLogs.isEmpty) {
+      return _buildActivitiesEmptyState(context);
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 100,
+      ),
+      children: [
+        Text(
+          l10n.activitiesSection,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.activityLogDescription,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface.withOpacity(0.7),
+              ),
+        ),
+        const SizedBox(height: 24),
+        // Summary card
+        _buildSummaryCard(context, tank),
+        const SizedBox(height: 16),
+        
+        // Grouped entries
+        ...groupedLogs.entries.map((entry) {
+          final categoryName = entry.key;
+          final logs = entry.value;
+          final isExpanded = _expandedCategory == categoryName;
+          final firstLog = logs.first;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _getCategoryColor(firstLog.type).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getCategoryIcon(firstLog.type),
+                      color: _getCategoryColor(firstLog.type),
+                    ),
+                  ),
+                  title: Text(
+                    categoryName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text('${logs.length} ${logs.length == 1 ? l10n.entry : l10n.entries}'),
+                  trailing: IconButton(
+                    icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                    onPressed: () {
+                      setState(() {
+                        _expandedCategory = isExpanded ? null : categoryName;
+                      });
+                    },
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _expandedCategory = isExpanded ? null : categoryName;
+                    });
+                  },
+                ),
+                if (isExpanded)
+                  Column(
+                    children: [
+                      const Divider(height: 1),
+                      ...logs.map((log) => _buildLogItem(context, log)),
+                    ],
+                  ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildActivitiesEmptyState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
     return Center(
@@ -933,6 +1290,184 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                   onPressed: _saveEntry,
                   icon: const Icon(Icons.save),
                   label: Text(isEditing ? l10n.updateLogEntry : l10n.saveLogEntry),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddNoteSheet extends ConsumerStatefulWidget {
+  final Tank tank;
+  final TankNote? existingNote;
+
+  const _AddNoteSheet({
+    required this.tank,
+    this.existingNote,
+  });
+
+  @override
+  _AddNoteSheetState createState() => _AddNoteSheetState();
+}
+
+class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _contentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingNote != null) {
+      _contentController.text = widget.existingNote!.content;
+    }
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveNote() async {
+    if (_formKey.currentState!.validate()) {
+      final trimmedContent = _contentController.text.trim();
+      final isEditing = widget.existingNote != null;
+      
+      List<TankNote> updatedNotes;
+      
+      if (isEditing) {
+        // Update existing note
+        final updatedNote = widget.existingNote!.copyWith(
+          content: trimmedContent,
+        );
+        
+        // Replace the existing note in the list
+        updatedNotes = widget.tank.tankNotes.map((n) {
+          return n.id == updatedNote.id ? updatedNote : n;
+        }).toList();
+        
+        final updatedTank = widget.tank.copyWith(
+          tankNotes: updatedNotes,
+          updatedAt: DateTime.now(),
+        );
+        
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        
+        // Log note update
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_note_updated',
+          parameters: {
+            'tank_type': widget.tank.type,
+          },
+        );
+      } else {
+        // Create new note
+        final note = TankNote.create(
+          content: trimmedContent,
+        );
+        
+        updatedNotes = [...widget.tank.tankNotes, note];
+        final updatedTank = widget.tank.copyWith(
+          tankNotes: updatedNotes,
+          updatedAt: DateTime.now(),
+        );
+        
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
+        
+        // Log note addition
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_note_added',
+          parameters: {
+            'tank_type': widget.tank.type,
+            'total_notes': updatedNotes.length,
+          },
+        );
+        
+        AnalyticsService.logTankAction(
+          action: 'tank_note_added',
+          tankType: widget.tank.type,
+        );
+      }
+      
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isEditing = widget.existingNote != null;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 16,
+        right: 16,
+        top: 16,
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isEditing ? l10n.editNote : l10n.addNote,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Note content
+              TextFormField(
+                controller: _contentController,
+                decoration: InputDecoration(
+                  labelText: '${l10n.noteContent} *',
+                  hintText: l10n.noteContentHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.note),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                ),
+                maxLines: 5,
+                textCapitalization: TextCapitalization.sentences,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.noteRequired;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              
+              // Save button
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _saveNote,
+                  icon: const Icon(Icons.save),
+                  label: Text(isEditing ? l10n.updateNote : l10n.saveNote),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
