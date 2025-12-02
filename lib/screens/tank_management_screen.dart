@@ -1117,7 +1117,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               children: [
                                 const Icon(Icons.notifications, color: Colors.orange, size: 18),
                                 const SizedBox(width: 8),
-                                Text(l10n.notifications, style: const TextStyle(color: Colors.orange)),
+                                Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange)),
                               ],
                             ),
                           ),

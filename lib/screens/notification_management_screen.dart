@@ -145,7 +145,7 @@ class _NotificationManagementScreenState
               currentTank.name,
             ),
             Text(
-                AppLocalizations.of(context)!.notifications,
+                AppLocalizations.of(context)!.notificationsExperimental,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),
