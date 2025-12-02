@@ -275,4 +275,15 @@
   "lastNote": "Última nota",
   "noteRequired": "Por favor ingresa una nota",
   "moreNotes": "+{count} más notas"
+
+  "rememberMyChoice": "Recordar mi elección",
+  "rememberChoiceSettingsHint": "Puedes restablecer esta preferencia en Configuración > Ajustes de la aplicación",
+  "resetReschedulePreference": "Preferencia del diálogo de reprogramación",
+  "resetReschedulePreferenceDescActive": "Las preferencias de reprogramación están guardadas para algunas notificaciones. Toca Restablecer todo para mostrar el diálogo de nuevo.",
+  "resetReschedulePreferenceDescInactive": "No hay preferencias guardadas actualmente. El diálogo se mostrará al registrar actividades.",
+  "reschedulePreferenceCleared": "Todas las preferencias de reprogramación eliminadas. El diálogo se mostrará de nuevo.",
+  "reset": "Restablecer",
+  "resetAll": "Restablecer todo",
+  "reschedulePreferences": "Preferencias de reprogramación",
+  "replaceAllReschedulePreferences": "Reemplazar TODAS las preferencias de reprogramación"
 }

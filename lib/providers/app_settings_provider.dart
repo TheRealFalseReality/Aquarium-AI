@@ -1,16 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Prefix used to store the remembered reschedule option per notification in SharedPreferences
+const String rememberedRescheduleOptionKeyPrefix = 'remembered_reschedule_option_';
+
+/// Get the SharedPreferences key for a specific notification's remembered reschedule option
+String getRememberedRescheduleOptionKey(String notificationId) {
+  return '$rememberedRescheduleOptionKeyPrefix$notificationId';
+}
+
 // State class for app settings
 class AppSettingsState {
   final bool showStockingButton;
   final String? localeCode; // null means system default
   final bool isLoading;
+  final bool hasRememberedRescheduleOptions;
 
   AppSettingsState({
     required this.showStockingButton,
     this.localeCode,
     this.isLoading = true,
+    this.hasRememberedRescheduleOptions = false,
   });
 }
 
@@ -27,12 +37,20 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final prefs = await SharedPreferences.getInstance();
     final showStockingButton = prefs.getBool('showStockingButton') ?? true;
     final localeCode = prefs.getString('localeCode'); // null means system default
+    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
       localeCode: localeCode,
       isLoading: false,
+      hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
     );
+  }
+
+  /// Check if any remembered reschedule options exist
+  bool _hasAnyRememberedRescheduleOptions(SharedPreferences prefs) {
+    final keys = prefs.getKeys();
+    return keys.any((key) => key.startsWith(rememberedRescheduleOptionKeyPrefix));
   }
 
   Future<void> setShowStockingButton(bool value) async {
@@ -43,6 +61,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: value,
       localeCode: state.localeCode,
       isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
     );
   }
 
@@ -58,6 +77,87 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       localeCode: localeCode,
       isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+    );
+  }
+
+  /// Clear all remembered reschedule option preferences for all notifications
+  Future<void> clearAllRememberedRescheduleOptions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().toList();
+    
+    // Remove all keys that start with the prefix
+    for (final key in keys) {
+      if (key.startsWith(rememberedRescheduleOptionKeyPrefix)) {
+        await prefs.remove(key);
+      }
+    }
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: false,
+    );
+  }
+
+  /// Refresh the state to check if any remembered reschedule options exist
+  Future<void> refreshRememberedRescheduleOptions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+    );
+  }
+
+  /// Export all reschedule preferences for backup
+  /// Returns a map of notification ID to reschedule option index
+  Future<Map<String, int>> exportReschedulePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final preferences = <String, int>{};
+    
+    for (final key in prefs.getKeys()) {
+      if (key.startsWith(rememberedRescheduleOptionKeyPrefix)) {
+        final notificationId = key.substring(rememberedRescheduleOptionKeyPrefix.length);
+        final value = prefs.getInt(key);
+        if (value != null) {
+          preferences[notificationId] = value;
+        }
+      }
+    }
+    
+    return preferences;
+  }
+
+  /// Import reschedule preferences from backup
+  /// Takes a map of notification ID to reschedule option index
+  Future<void> importReschedulePreferences(Map<String, int> preferences) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Clear existing preferences first
+    final keys = prefs.getKeys().toList();
+    for (final key in keys) {
+      if (key.startsWith(rememberedRescheduleOptionKeyPrefix)) {
+        await prefs.remove(key);
+      }
+    }
+    
+    // Import new preferences
+    for (final entry in preferences.entries) {
+      final key = getRememberedRescheduleOptionKey(entry.key);
+      await prefs.setInt(key, entry.value);
+    }
+    
+    // Update state
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: preferences.isNotEmpty,
     );
   }
 }
