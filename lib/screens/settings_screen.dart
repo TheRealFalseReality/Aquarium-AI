@@ -789,6 +789,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Navigator.pushNamed(context, '/species-tags');
                     },
                   ),
+                  const Divider(height: 24),
+                  
+                  // Reset Remembered Reschedule Option
+                  ListTile(
+                    leading: Icon(
+                      Icons.notifications_active,
+                      color: appSettings.hasRememberedRescheduleOption
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(l10n.resetReschedulePreference),
+                    subtitle: Text(
+                      appSettings.hasRememberedRescheduleOption
+                          ? l10n.resetReschedulePreferenceDescActive
+                          : l10n.resetReschedulePreferenceDescInactive,
+                    ),
+                    trailing: appSettings.hasRememberedRescheduleOption
+                        ? OutlinedButton(
+                            onPressed: () async {
+                              // Log settings change
+                              AnalyticsService.logSettingsChange(
+                                settingName: 'reset_reschedule_preference',
+                                newValue: 'cleared',
+                                oldValue: 'set',
+                              );
+                              
+                              await ref.read(appSettingsProvider.notifier).clearRememberedRescheduleOption();
+                              
+                              if (context.mounted) {
+                                context.showAccessibleMessage(l10n.reschedulePreferenceCleared);
+                              }
+                              
+                              if (setDialogState != null) {
+                                setDialogState(() {});
+                              } else {
+                                setState(() {});
+                              }
+                            },
+                            child: Text(l10n.reset),
+                          )
+                        : null,
+                  ),
                   
                   // Translation Community Section
                   const SizedBox(height: 24),

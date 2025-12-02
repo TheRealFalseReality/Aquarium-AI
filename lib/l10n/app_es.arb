@@ -253,5 +253,13 @@
   "scheduledFor": "Programado para",
   "nextScheduled": "Próxima programada",
   "discard": "Descartar",
-  "goBack": "Volver"
+  "goBack": "Volver",
+
+  "rememberMyChoice": "Recordar mi elección",
+  "rememberChoiceSettingsHint": "Puedes restablecer esta preferencia en Configuración > Ajustes de la aplicación",
+  "resetReschedulePreference": "Preferencia del diálogo de reprogramación",
+  "resetReschedulePreferenceDescActive": "Una opción de reprogramación está actualmente guardada. Toca Restablecer para mostrar el diálogo de nuevo.",
+  "resetReschedulePreferenceDescInactive": "No hay preferencia guardada actualmente. El diálogo se mostrará al registrar actividades.",
+  "reschedulePreferenceCleared": "Preferencia de reprogramación eliminada. El diálogo se mostrará de nuevo.",
+  "reset": "Restablecer"
 }

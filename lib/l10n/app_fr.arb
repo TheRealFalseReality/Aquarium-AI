@@ -244,5 +244,13 @@
   "scheduledFor": "Programmé pour",
   "nextScheduled": "Prochaine programmée",
   "discard": "Abandonner",
-  "goBack": "Retour"
+  "goBack": "Retour",
+
+  "rememberMyChoice": "Se souvenir de mon choix",
+  "rememberChoiceSettingsHint": "Vous pouvez réinitialiser cette préférence dans Paramètres > Paramètres de l'application",
+  "resetReschedulePreference": "Préférence de la boîte de dialogue de reprogrammation",
+  "resetReschedulePreferenceDescActive": "Une option de reprogrammation est actuellement mémorisée. Appuyez sur Réinitialiser pour afficher à nouveau la boîte de dialogue.",
+  "resetReschedulePreferenceDescInactive": "Aucune préférence n'est actuellement enregistrée. La boîte de dialogue s'affichera lors de l'enregistrement des activités.",
+  "reschedulePreferenceCleared": "Préférence de reprogrammation effacée. La boîte de dialogue s'affichera à nouveau.",
+  "reset": "Réinitialiser"
 }
