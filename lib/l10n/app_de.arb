@@ -253,5 +253,16 @@
   "scheduledFor": "Geplant für",
   "nextScheduled": "Nächste geplante",
   "discard": "Verwerfen",
-  "goBack": "Zurück"
+  "goBack": "Zurück",
+
+  "rememberMyChoice": "Meine Auswahl merken",
+  "rememberChoiceSettingsHint": "Sie können diese Einstellung unter Einstellungen > App-Einstellungen zurücksetzen",
+  "resetReschedulePreference": "Neuplanungsdialog-Einstellung",
+  "resetReschedulePreferenceDescActive": "Neuplanungseinstellungen sind für einige Benachrichtigungen gespeichert. Tippen Sie auf Alle zurücksetzen, um den Dialog erneut anzuzeigen.",
+  "resetReschedulePreferenceDescInactive": "Derzeit sind keine Einstellungen gespeichert. Der Dialog wird beim Protokollieren von Aktivitäten angezeigt.",
+  "reschedulePreferenceCleared": "Alle Neuplanungseinstellungen gelöscht. Der Dialog wird nun wieder angezeigt.",
+  "reset": "Zurücksetzen",
+  "resetAll": "Alle zurücksetzen",
+  "reschedulePreferences": "Neuplanungseinstellungen",
+  "replaceAllReschedulePreferences": "ALLE Neuplanungseinstellungen ersetzen"
 }

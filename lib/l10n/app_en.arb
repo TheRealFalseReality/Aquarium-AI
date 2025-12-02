@@ -1621,5 +1621,55 @@
   "goBack": "Go Back",
   "@goBack": {
     "description": "Button to go back to previous screen without saving"
+  },
+
+  "rememberMyChoice": "Remember my choice",
+  "@rememberMyChoice": {
+    "description": "Checkbox label to remember the user's reschedule option choice"
+  },
+
+  "rememberChoiceSettingsHint": "You can reset this preference in Settings > App Settings",
+  "@rememberChoiceSettingsHint": {
+    "description": "Hint text explaining where to reset the remembered choice"
+  },
+
+  "resetReschedulePreference": "Reschedule Dialog Preference",
+  "@resetReschedulePreference": {
+    "description": "Title for the reset reschedule preference setting"
+  },
+
+  "resetReschedulePreferenceDescActive": "Reschedule preferences are saved for some notifications. Tap Reset All to show the dialog again for all notifications.",
+  "@resetReschedulePreferenceDescActive": {
+    "description": "Description when reschedule preferences are set"
+  },
+
+  "resetReschedulePreferenceDescInactive": "No preferences are currently saved. The dialog will be shown when logging activities.",
+  "@resetReschedulePreferenceDescInactive": {
+    "description": "Description when no reschedule preferences are set"
+  },
+
+  "reschedulePreferenceCleared": "All reschedule preferences cleared. The dialog will now be shown again.",
+  "@reschedulePreferenceCleared": {
+    "description": "Success message when reschedule preferences are cleared"
+  },
+
+  "reset": "Reset",
+  "@reset": {
+    "description": "Reset button label"
+  },
+
+  "resetAll": "Reset All",
+  "@resetAll": {
+    "description": "Reset all button label"
+  },
+
+  "reschedulePreferences": "Reschedule preferences",
+  "@reschedulePreferences": {
+    "description": "Label for reschedule preferences in backup dialog"
+  },
+
+  "replaceAllReschedulePreferences": "Replace ALL reschedule preferences",
+  "@replaceAllReschedulePreferences": {
+    "description": "Warning message for replacing reschedule preferences during restore"
   }
 }
