@@ -363,10 +363,16 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final totalNotes = tank.tankNotes.length;
-    final lastNote = tank.tankNotes.isNotEmpty
-        ? tank.tankNotes.reduce((a, b) => 
-            a.createdAt.isAfter(b.createdAt) ? a : b)
-        : null;
+    // Get the most recent note - notes are stored unsorted, so we need to find max
+    TankNote? lastNote;
+    if (tank.tankNotes.isNotEmpty) {
+      lastNote = tank.tankNotes.first;
+      for (final note in tank.tankNotes) {
+        if (note.createdAt.isAfter(lastNote!.createdAt)) {
+          lastNote = note;
+        }
+      }
+    }
 
     return Card(
       child: Padding(
@@ -1346,6 +1352,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
         // Update existing note
         final updatedNote = widget.existingNote!.copyWith(
           content: trimmedContent,
+          updatedAt: DateTime.now(),
         );
         
         // Replace the existing note in the list
