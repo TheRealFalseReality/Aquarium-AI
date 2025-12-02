@@ -658,9 +658,10 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
       }
       
       // Find matching notifications for this activity type
+      // Note: Include both enabled and disabled notifications so we can update
+      // the scheduledNextDate even when device notifications are off
       final matchingNotifications = widget.tank.notifications.where((notification) {
-        return notification.enabled &&
-               notification.repeatFrequency != RepeatFrequency.none &&
+        return notification.repeatFrequency != RepeatFrequency.none &&
                notification.matchesActivityLog(entry.type, entry.customCategory);
       }).toList();
       

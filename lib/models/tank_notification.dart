@@ -190,8 +190,11 @@ class TankNotification {
 
   /// Calculate the next notification date based on repeat settings
   /// Uses optimized math to avoid loops for dates far in the past
+  /// 
+  /// Note: This returns a date regardless of whether the notification is enabled,
+  /// since the schedule should be tracked even when device notifications are off.
   DateTime? getNextNotificationDate() {
-    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+    if (repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 
@@ -230,10 +233,11 @@ class TankNotification {
   /// [useCurrentTime] - If true, uses the time from baseDate instead of preserving
   ///                    the original notification time. Defaults to false.
   /// 
-  /// Returns the next notification date, or null if the notification is disabled
-  /// or non-repeating.
+  /// Returns the next notification date, or null if non-repeating.
+  /// Note: This returns a date regardless of whether the notification is enabled,
+  /// since the schedule should be tracked even when device notifications are off.
   DateTime? getNextNotificationDateFromBase(DateTime baseDate, {bool useCurrentTime = false}) {
-    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+    if (repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 
@@ -285,10 +289,11 @@ class TankNotification {
   /// [useCurrentTime] - If true, uses the time from the activity log instead of
   ///                    preserving the original notification time. Defaults to false.
   /// 
-  /// Returns the next notification date, or null if the notification is disabled
-  /// or non-repeating.
+  /// Returns the next notification date, or null if non-repeating.
+  /// Note: This returns a date regardless of whether the notification is enabled,
+  /// since the schedule should be tracked even when device notifications are off.
   DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs, {bool useCurrentTime = false}) {
-    if (!enabled || repeatFrequency == RepeatFrequency.none) {
+    if (repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 

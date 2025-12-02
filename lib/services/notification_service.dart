@@ -262,9 +262,10 @@ class NotificationService {
     String? activityCustomCategory,
     bool useCurrentTime = false,
   }) async {
-    // Filter to only enabled, repeating notifications that match the activity type
+    // Filter to repeating notifications that match the activity type
+    // Note: Include both enabled and disabled notifications so we can update
+    // the scheduledNextDate even when device notifications are off
     final matchingNotifications = notifications.where((notification) => 
-      notification.enabled && 
       notification.repeatFrequency != RepeatFrequency.none &&
       notification.matchesActivityLog(activityType, activityCustomCategory)
     ).toList();
@@ -278,7 +279,13 @@ class NotificationService {
 
     // Cancel and reschedule each matching notification
     for (final notification in matchingNotifications) {
+      // Cancel any existing platform notification. For disabled notifications,
+      // this is a no-op but safe to call to ensure cleanup.
       await cancelNotification(notification);
+      
+      // Calculate the next notification date. The scheduleNotification method will:
+      // - Always return the calculated nextDate for updating scheduledNextDate
+      // - Only create a platform push notification if notification.enabled is true
       final nextDate = await scheduleNotification(
         tankId: tankId,
         tankName: tankName,
