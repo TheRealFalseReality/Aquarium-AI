@@ -83,28 +83,20 @@ class NotificationService {
     // Request permissions for Android 13+
     final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestNotificationsPermission();
-    
-    // Request exact alarm permission for Android 12+ (API 31+)
-    // This is required for scheduled notifications to work properly
-    final exactAlarmGranted = await androidPlugin?.requestExactAlarmsPermission();
+    final androidGranted = await androidPlugin?.requestNotificationsPermission();
 
-    return granted ?? exactAlarmGranted ?? true;
+    return granted ?? androidGranted ?? true;
   }
   
-  /// Check if exact alarms permission is granted (Android 12+)
-  Future<bool> canScheduleExactNotifications() async {
+  /// Check if notifications can be scheduled
+  /// Note: With inexact alarms, this always returns true as no special permission is required
+  Future<bool> canScheduleNotifications() async {
     if (!_initialized) {
       await initialize();
     }
 
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    
-    // Check if exact alarms are allowed
-    final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? true;
-    
-    return canScheduleExact;
+    // Inexact alarms don't require special permissions beyond basic notification permission
+    return true;
   }
 
   /// Schedule a notification from a TankNotification
@@ -188,7 +180,7 @@ class NotificationService {
         body,
         scheduledDate,
         details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         payload: '${tankId}_${notification.id}',
