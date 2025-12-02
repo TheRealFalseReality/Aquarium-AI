@@ -87,17 +87,6 @@ class NotificationService {
 
     return granted ?? androidGranted ?? true;
   }
-  
-  /// Check if notifications can be scheduled
-  /// Note: With inexact alarms, this always returns true as no special permission is required
-  Future<bool> canScheduleNotifications() async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    // Inexact alarms don't require special permissions beyond basic notification permission
-    return true;
-  }
 
   /// Schedule a notification from a TankNotification
   /// 
