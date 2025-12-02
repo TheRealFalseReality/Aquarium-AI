@@ -363,16 +363,10 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final totalNotes = tank.tankNotes.length;
-    // Get the most recent note - notes are stored unsorted, so we need to find max
-    TankNote? lastNote;
-    if (tank.tankNotes.isNotEmpty) {
-      lastNote = tank.tankNotes.first;
-      for (final note in tank.tankNotes) {
-        if (note.createdAt.isAfter(lastNote!.createdAt)) {
-          lastNote = note;
-        }
-      }
-    }
+    // Get the most recent note using reduce for cleaner code
+    final lastNote = tank.tankNotes.isNotEmpty
+        ? tank.tankNotes.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b)
+        : null;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -923,12 +917,12 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDate),
       );
-      if (time != null) {
+      if (time != null && mounted) {
         setState(() {
           _selectedDate = DateTime(
             picked.year,
@@ -1355,12 +1349,12 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDate),
       );
-      if (time != null) {
+      if (time != null && mounted) {
         setState(() {
           _selectedDate = DateTime(
             picked.year,
