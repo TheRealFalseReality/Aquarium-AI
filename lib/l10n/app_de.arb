@@ -258,8 +258,9 @@
   "rememberMyChoice": "Meine Auswahl merken",
   "rememberChoiceSettingsHint": "Sie können diese Einstellung unter Einstellungen > App-Einstellungen zurücksetzen",
   "resetReschedulePreference": "Neuplanungsdialog-Einstellung",
-  "resetReschedulePreferenceDescActive": "Eine Neuplanungsoption ist derzeit gespeichert. Tippen Sie auf Zurücksetzen, um den Dialog erneut anzuzeigen.",
-  "resetReschedulePreferenceDescInactive": "Derzeit ist keine Einstellung gespeichert. Der Dialog wird beim Protokollieren von Aktivitäten angezeigt.",
-  "reschedulePreferenceCleared": "Neuplanungseinstellung gelöscht. Der Dialog wird nun wieder angezeigt.",
-  "reset": "Zurücksetzen"
+  "resetReschedulePreferenceDescActive": "Neuplanungseinstellungen sind für einige Benachrichtigungen gespeichert. Tippen Sie auf Alle zurücksetzen, um den Dialog erneut anzuzeigen.",
+  "resetReschedulePreferenceDescInactive": "Derzeit sind keine Einstellungen gespeichert. Der Dialog wird beim Protokollieren von Aktivitäten angezeigt.",
+  "reschedulePreferenceCleared": "Alle Neuplanungseinstellungen gelöscht. Der Dialog wird nun wieder angezeigt.",
+  "reset": "Zurücksetzen",
+  "resetAll": "Alle zurücksetzen"
 }

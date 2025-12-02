@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
-import '../providers/app_settings_provider.dart' show rememberedRescheduleOptionKey;
+import '../providers/app_settings_provider.dart' show getRememberedRescheduleOptionKey;
 
 /// Options for rescheduling a notification after logging an activity
 enum RescheduleOption {
@@ -39,19 +39,20 @@ class NotificationRescheduleDialog extends StatefulWidget {
   });
 
   /// Show the dialog and return the selected option
-  /// If the user has a remembered preference, returns that directly
+  /// If the user has a remembered preference for this notification, returns that directly
   static Future<RescheduleOption?> show(
     BuildContext context,
     TankNotification notification,
   ) async {
-    // Check for remembered preference
+    // Check for remembered preference for this specific notification
     final prefs = await SharedPreferences.getInstance();
-    final rememberedOptionIndex = prefs.getInt(rememberedRescheduleOptionKey);
+    final key = getRememberedRescheduleOptionKey(notification.id);
+    final rememberedOptionIndex = prefs.getInt(key);
     
     if (rememberedOptionIndex != null && 
         rememberedOptionIndex >= 0 && 
         rememberedOptionIndex < RescheduleOption.values.length) {
-      // User has a remembered preference, return it directly
+      // User has a remembered preference for this notification, return it directly
       return RescheduleOption.values[rememberedOptionIndex];
     }
     
@@ -67,24 +68,24 @@ class NotificationRescheduleDialog extends StatefulWidget {
     
     if (result == null) return null;
     
-    // Save the preference if requested
+    // Save the preference for this notification if requested
     if (result.rememberChoice) {
-      await prefs.setInt(rememberedRescheduleOptionKey, result.option.index);
+      await prefs.setInt(key, result.option.index);
     }
     
     return result.option;
   }
   
-  /// Clear the remembered reschedule option preference
-  static Future<void> clearRememberedOption() async {
+  /// Clear the remembered reschedule option preference for a specific notification
+  static Future<void> clearRememberedOption(String notificationId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(rememberedRescheduleOptionKey);
+    await prefs.remove(getRememberedRescheduleOptionKey(notificationId));
   }
   
-  /// Check if a reschedule option is currently remembered
-  static Future<bool> hasRememberedOption() async {
+  /// Check if a reschedule option is currently remembered for a specific notification
+  static Future<bool> hasRememberedOption(String notificationId) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(rememberedRescheduleOptionKey);
+    return prefs.containsKey(getRememberedRescheduleOptionKey(notificationId));
   }
 
   @override

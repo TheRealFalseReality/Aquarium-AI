@@ -249,8 +249,9 @@
   "rememberMyChoice": "Se souvenir de mon choix",
   "rememberChoiceSettingsHint": "Vous pouvez réinitialiser cette préférence dans Paramètres > Paramètres de l'application",
   "resetReschedulePreference": "Préférence de la boîte de dialogue de reprogrammation",
-  "resetReschedulePreferenceDescActive": "Une option de reprogrammation est actuellement mémorisée. Appuyez sur Réinitialiser pour afficher à nouveau la boîte de dialogue.",
+  "resetReschedulePreferenceDescActive": "Les préférences de reprogrammation sont enregistrées pour certaines notifications. Appuyez sur Tout réinitialiser pour afficher à nouveau la boîte de dialogue.",
   "resetReschedulePreferenceDescInactive": "Aucune préférence n'est actuellement enregistrée. La boîte de dialogue s'affichera lors de l'enregistrement des activités.",
-  "reschedulePreferenceCleared": "Préférence de reprogrammation effacée. La boîte de dialogue s'affichera à nouveau.",
-  "reset": "Réinitialiser"
+  "reschedulePreferenceCleared": "Toutes les préférences de reprogrammation effacées. La boîte de dialogue s'affichera à nouveau.",
+  "reset": "Réinitialiser",
+  "resetAll": "Tout réinitialiser"
 }

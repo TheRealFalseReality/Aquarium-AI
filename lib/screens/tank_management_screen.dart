@@ -1846,7 +1846,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
       
       // Refresh the app settings state to reflect any newly remembered preference
-      await ref.read(appSettingsProvider.notifier).refreshRememberedRescheduleOption();
+      await ref.read(appSettingsProvider.notifier).refreshRememberedRescheduleOptions();
       
       // If user cancelled (null) or chose cancelAll, don't log the activity
       if (rescheduleOption == null || rescheduleOption == RescheduleOption.cancelAll) {

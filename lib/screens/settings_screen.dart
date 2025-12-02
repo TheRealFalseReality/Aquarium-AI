@@ -791,45 +791,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const Divider(height: 24),
                   
-                  // Reset Remembered Reschedule Option
-                  ListTile(
-                    leading: Icon(
-                      Icons.notifications_active,
-                      color: appSettings.hasRememberedRescheduleOption
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    title: Text(l10n.resetReschedulePreference),
-                    subtitle: Text(
-                      appSettings.hasRememberedRescheduleOption
-                          ? l10n.resetReschedulePreferenceDescActive
-                          : l10n.resetReschedulePreferenceDescInactive,
-                    ),
-                    trailing: appSettings.hasRememberedRescheduleOption
-                        ? OutlinedButton(
-                            onPressed: () async {
-                              // Log settings change
-                              AnalyticsService.logSettingsChange(
-                                settingName: 'reset_reschedule_preference',
-                                newValue: 'cleared',
-                                oldValue: 'set',
-                              );
-                              
-                              await ref.read(appSettingsProvider.notifier).clearRememberedRescheduleOption();
-                              
-                              if (context.mounted) {
-                                context.showAccessibleMessage(l10n.reschedulePreferenceCleared);
-                              }
-                              
-                              if (setDialogState != null) {
-                                setDialogState(() {});
-                              } else {
-                                setState(() {});
-                              }
-                            },
-                            child: Text(l10n.reset),
-                          )
-                        : null,
+                  // Reset Remembered Reschedule Options
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: Icon(
+                          Icons.notifications_active,
+                          color: appSettings.hasRememberedRescheduleOptions
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        title: Text(l10n.resetReschedulePreference),
+                        subtitle: Text(
+                          appSettings.hasRememberedRescheduleOptions
+                              ? l10n.resetReschedulePreferenceDescActive
+                              : l10n.resetReschedulePreferenceDescInactive,
+                        ),
+                      ),
+                      if (appSettings.hasRememberedRescheduleOptions)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                // Log settings change
+                                AnalyticsService.logSettingsChange(
+                                  settingName: 'reset_reschedule_preference',
+                                  newValue: 'cleared',
+                                  oldValue: 'set',
+                                );
+                                
+                                await ref.read(appSettingsProvider.notifier).clearAllRememberedRescheduleOptions();
+                                
+                                if (context.mounted) {
+                                  context.showAccessibleMessage(l10n.reschedulePreferenceCleared);
+                                }
+                                
+                                if (setDialogState != null) {
+                                  setDialogState(() {});
+                                } else {
+                                  setState(() {});
+                                }
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: Text(l10n.resetAll),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   
                   // Translation Community Section

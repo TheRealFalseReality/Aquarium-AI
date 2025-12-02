@@ -1638,23 +1638,28 @@
     "description": "Title for the reset reschedule preference setting"
   },
 
-  "resetReschedulePreferenceDescActive": "A reschedule option is currently remembered. Tap Reset to show the dialog again.",
+  "resetReschedulePreferenceDescActive": "Reschedule preferences are saved for some notifications. Tap Reset All to show the dialog again for all notifications.",
   "@resetReschedulePreferenceDescActive": {
-    "description": "Description when a reschedule preference is set"
+    "description": "Description when reschedule preferences are set"
   },
 
-  "resetReschedulePreferenceDescInactive": "No preference is currently saved. The dialog will be shown when logging activities.",
+  "resetReschedulePreferenceDescInactive": "No preferences are currently saved. The dialog will be shown when logging activities.",
   "@resetReschedulePreferenceDescInactive": {
-    "description": "Description when no reschedule preference is set"
+    "description": "Description when no reschedule preferences are set"
   },
 
-  "reschedulePreferenceCleared": "Reschedule preference cleared. The dialog will now be shown again.",
+  "reschedulePreferenceCleared": "All reschedule preferences cleared. The dialog will now be shown again.",
   "@reschedulePreferenceCleared": {
-    "description": "Success message when reschedule preference is cleared"
+    "description": "Success message when reschedule preferences are cleared"
   },
 
   "reset": "Reset",
   "@reset": {
     "description": "Reset button label"
+  },
+
+  "resetAll": "Reset All",
+  "@resetAll": {
+    "description": "Reset all button label"
   }
 }
