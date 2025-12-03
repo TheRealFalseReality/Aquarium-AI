@@ -80,7 +80,9 @@ flutter {
 
 dependencies {
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.15.0")
+    // Required for enableEdgeToEdge() backward compatibility on Android 15+
+    implementation("androidx.activity:activity-ktx:1.9.3")
 
     // Core library desugaring for flutter_local_notifications
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
