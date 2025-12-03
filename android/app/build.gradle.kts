@@ -50,6 +50,11 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // ProGuard/R8 configuration for flutter_local_notifications
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
