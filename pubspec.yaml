@@ -10,7 +10,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  google_fonts: ^6.3.2
+  google_fonts: ^6.3.3
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.3
