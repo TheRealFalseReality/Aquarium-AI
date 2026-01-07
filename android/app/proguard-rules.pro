@@ -37,11 +37,6 @@
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Keep data classes that might be serialized/deserialized by flutter_local_notifications
--keepclassmembers class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}
-
 # Prevent R8 from removing or optimizing Gson-related code
 -dontwarn com.google.gson.**
 -dontnote com.google.gson.**
