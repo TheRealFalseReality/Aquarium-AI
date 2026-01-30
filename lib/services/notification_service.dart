@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -87,7 +88,14 @@ class NotificationService {
     
     // Request exact alarm permission for Android 12+ (API 31+)
     // This is required for reliable scheduled notifications
-    await androidPlugin?.requestExactAlarmsPermission();
+    // Note: This opens system settings; user must manually grant
+    try {
+      await androidPlugin?.requestExactAlarmsPermission();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Exact alarm permission request error: $e');
+      }
+    }
 
     return granted ?? androidGranted ?? true;
   }
@@ -179,30 +187,37 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
       
-      // Debug logging
-      debugPrint('Scheduling notification: $title');
-      debugPrint('  Notification ID: $notificationId');
-      debugPrint('  Scheduled for: $scheduledDate');
-      debugPrint('  Current time: ${tz.TZDateTime.now(tz.local)}');
-      
-      // Check if scheduled date is in the past
-      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-        debugPrint('  WARNING: Scheduled date is in the past! Notification may not trigger.');
+      // Debug logging (only in debug builds)
+      if (kDebugMode) {
+        debugPrint('Scheduling notification: $title');
+        debugPrint('  Notification ID: $notificationId');
+        debugPrint('  Scheduled for: $scheduledDate');
+        debugPrint('  Current time: ${tz.TZDateTime.now(tz.local)}');
+        
+        // Check if scheduled date is in the past
+        if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+          debugPrint('  WARNING: Scheduled date is in the past! Notification may not trigger.');
+        }
       }
       
       // Check if we can schedule exact alarms (Android 12+)
+      // Default to true for iOS and older Android versions that don't need this permission
       final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-      final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? false;
+      final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? true;
       
-      debugPrint('  Can schedule exact alarms: $canScheduleExact');
+      if (kDebugMode) {
+        debugPrint('  Can schedule exact alarms: $canScheduleExact');
+      }
       
       // Use exact alarms if permission is granted, otherwise fall back to inexact
       final scheduleMode = canScheduleExact 
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle;
       
-      debugPrint('  Using schedule mode: ${canScheduleExact ? "exactAllowWhileIdle" : "inexactAllowWhileIdle"}');
+      if (kDebugMode) {
+        debugPrint('  Using schedule mode: ${canScheduleExact ? "exactAllowWhileIdle" : "inexactAllowWhileIdle"}');
+      }
       
       try {
         await _notifications.zonedSchedule(
@@ -216,16 +231,22 @@ class NotificationService {
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: '${tankId}_${notification.id}',
         );
-        debugPrint('  ✓ Notification scheduled successfully');
+        if (kDebugMode) {
+          debugPrint('  ✓ Notification scheduled successfully');
+        }
       } catch (e) {
-        debugPrint('  ✗ Error scheduling notification: $e');
+        if (kDebugMode) {
+          debugPrint('  ✗ Error scheduling notification: $e');
+        }
         rethrow;
       }
     } else {
-      if (nextDate == null) {
-        debugPrint('Notification not scheduled: nextDate is null');
-      } else if (!notification.enabled) {
-        debugPrint('Notification not scheduled: notification is disabled');
+      if (kDebugMode) {
+        if (nextDate == null) {
+          debugPrint('Notification not scheduled: nextDate is null');
+        } else if (!notification.enabled) {
+          debugPrint('Notification not scheduled: notification is disabled');
+        }
       }
     }
     
