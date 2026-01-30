@@ -65,7 +65,7 @@ class NotificationService {
     }
   }
 
-  /// Request notification permissions (especially important for iOS)
+  /// Request notification permissions (especially important for iOS and Android 13+)
   Future<bool> requestPermissions() async {
     if (!_initialized) {
       await initialize();
@@ -84,8 +84,24 @@ class NotificationService {
     final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     final androidGranted = await androidPlugin?.requestNotificationsPermission();
+    
+    // Request exact alarm permission for Android 12+ (API 31+)
+    // This is required for reliable scheduled notifications
+    await androidPlugin?.requestExactAlarmsPermission();
 
     return granted ?? androidGranted ?? true;
+  }
+  
+  /// Check if exact alarms can be scheduled (Android 12+)
+  /// Returns true if permission is granted or not required (older Android/iOS)
+  Future<bool> canScheduleExactAlarms() async {
+    if (!_initialized) {
+      await initialize();
+    }
+    
+    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    return await androidPlugin?.canScheduleExactNotifications() ?? true;
   }
 
   /// Schedule a notification from a TankNotification
@@ -163,17 +179,54 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
       
-      await _notifications.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        scheduledDate,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: '${tankId}_${notification.id}',
-      );
+      // Debug logging
+      debugPrint('Scheduling notification: $title');
+      debugPrint('  Notification ID: $notificationId');
+      debugPrint('  Scheduled for: $scheduledDate');
+      debugPrint('  Current time: ${tz.TZDateTime.now(tz.local)}');
+      
+      // Check if scheduled date is in the past
+      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+        debugPrint('  WARNING: Scheduled date is in the past! Notification may not trigger.');
+      }
+      
+      // Check if we can schedule exact alarms (Android 12+)
+      final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? false;
+      
+      debugPrint('  Can schedule exact alarms: $canScheduleExact');
+      
+      // Use exact alarms if permission is granted, otherwise fall back to inexact
+      final scheduleMode = canScheduleExact 
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle;
+      
+      debugPrint('  Using schedule mode: ${canScheduleExact ? "exactAllowWhileIdle" : "inexactAllowWhileIdle"}');
+      
+      try {
+        await _notifications.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          scheduledDate,
+          details,
+          androidScheduleMode: scheduleMode,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: '${tankId}_${notification.id}',
+        );
+        debugPrint('  ✓ Notification scheduled successfully');
+      } catch (e) {
+        debugPrint('  ✗ Error scheduling notification: $e');
+        rethrow;
+      }
+    } else {
+      if (nextDate == null) {
+        debugPrint('Notification not scheduled: nextDate is null');
+      } else if (!notification.enabled) {
+        debugPrint('Notification not scheduled: notification is disabled');
+      }
     }
     
     // Return the calculated next date so callers can update the model
