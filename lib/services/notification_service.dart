@@ -177,9 +177,9 @@ class NotificationService {
         }
       }
       
-      // Always use inexactAllowWhileIdle for Android 12+
-      // This doesn't require SCHEDULE_EXACT_ALARM permission
-      // Note: System may delay notifications for battery optimization, but they will eventually fire
+      // Use inexactAllowWhileIdle to ensure notifications fire even during device idle/doze
+      // This is the recommended approach for all Android versions and doesn't require special permissions
+      // Note: System may batch/delay notifications for battery optimization, but they will eventually fire
       try {
         await _notifications.zonedSchedule(
           notificationId,
