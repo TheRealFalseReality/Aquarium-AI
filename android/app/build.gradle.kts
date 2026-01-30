@@ -12,12 +12,16 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.firebase.crashlytics") version "3.0.6" apply false
+    id("com.google.firebase.crashlytics") version "3.0.6"
+}
+
+flutter {
+    source = "../.."
 }
 
 android {
     namespace = "com.cca.fishai"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion ?: 34
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -32,28 +36,29 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keyProperties["keyAlias"] as String
-            keyPassword = keyProperties["keyPassword"] as String
-            storeFile = file(keyProperties["storeFile"] as String)
-            storePassword = keyProperties["storePassword"] as String
+            keyAlias = keyProperties["keyAlias"] as? String ?: ""
+            keyPassword = keyProperties["keyPassword"] as? String ?: ""
+            val storeFileProp = keyProperties["storeFile"] as? String
+            if (storeFileProp != null) {
+                storeFile = file(storeFileProp)
+            }
+            storePassword = keyProperties["storePassword"] as? String ?: ""
         }
     }
 
     defaultConfig {
         applicationId = "com.cca.fishai"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = flutter.minSdkVersion ?: 21
+        targetSdk = flutter.targetSdkVersion ?: 34
+        versionCode = flutter.versionCode ?: 1
+        versionName = flutter.versionName ?: "1.0.0"
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            // Enable code shrinking, obfuscation, and optimization for release builds
             isMinifyEnabled = true
             isShrinkResources = true
-            // ProGuard/R8 configuration for flutter_local_notifications
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -79,23 +84,15 @@ android {
                 value = "Aquarium AI")
         }
     }
-
-}
-
-flutter {
-    source = "../.."
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.core:core-ktx:1.17.0")
 
-    // Core library desugaring for flutter_local_notifications
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    // Add the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    // Add the Crashlytics dependency
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.5.1")
+    implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+    implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
 }

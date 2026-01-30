@@ -33,6 +33,7 @@ lib/l10n/app_localizations*.dart
 .pub-cache/
 .pub/
 /build/
+/android/app/build/
 /coverage/
 
 # Symbolication related
