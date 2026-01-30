@@ -85,31 +85,8 @@ class NotificationService {
     final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     final androidGranted = await androidPlugin?.requestNotificationsPermission();
-    
-    // Request exact alarm permission for Android 12+ (API 31+)
-    // This is required for reliable scheduled notifications
-    // Note: This opens system settings; user must manually grant
-    try {
-      await androidPlugin?.requestExactAlarmsPermission();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Exact alarm permission request error: $e');
-      }
-    }
 
     return granted ?? androidGranted ?? true;
-  }
-  
-  /// Check if exact alarms can be scheduled (Android 12+)
-  /// Returns true if permission is granted or not required (older Android/iOS)
-  Future<bool> canScheduleExactAlarms() async {
-    if (!_initialized) {
-      await initialize();
-    }
-    
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    return await androidPlugin?.canScheduleExactNotifications() ?? true;
   }
 
   /// Schedule a notification from a TankNotification
@@ -200,25 +177,9 @@ class NotificationService {
         }
       }
       
-      // Check if we can schedule exact alarms (Android 12+)
-      // Default to true for iOS and older Android versions that don't need this permission
-      final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
-      final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? true;
-      
-      if (kDebugMode) {
-        debugPrint('  Can schedule exact alarms: $canScheduleExact');
-      }
-      
-      // Use exact alarms if permission is granted, otherwise fall back to inexact
-      final scheduleMode = canScheduleExact 
-          ? AndroidScheduleMode.exactAllowWhileIdle
-          : AndroidScheduleMode.inexactAllowWhileIdle;
-      
-      if (kDebugMode) {
-        debugPrint('  Using schedule mode: ${canScheduleExact ? "exactAllowWhileIdle" : "inexactAllowWhileIdle"}');
-      }
-      
+      // Always use inexactAllowWhileIdle for Android 12+
+      // This doesn't require SCHEDULE_EXACT_ALARM permission
+      // Note: System may delay notifications for battery optimization, but they will eventually fire
       try {
         await _notifications.zonedSchedule(
           notificationId,
@@ -226,13 +187,13 @@ class NotificationService {
           body,
           scheduledDate,
           details,
-          androidScheduleMode: scheduleMode,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: '${tankId}_${notification.id}',
         );
         if (kDebugMode) {
-          debugPrint('  ✓ Notification scheduled successfully');
+          debugPrint('  ✓ Notification scheduled successfully with inexactAllowWhileIdle');
         }
       } catch (e) {
         if (kDebugMode) {
