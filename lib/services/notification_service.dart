@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -66,7 +65,7 @@ class NotificationService {
     }
   }
 
-  /// Request notification permissions (especially important for iOS and Android 13+)
+  /// Request notification permissions (especially important for iOS)
   Future<bool> requestPermissions() async {
     if (!_initialized) {
       await initialize();
@@ -164,51 +163,17 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
       
-      // Debug logging (only in debug builds)
-      if (kDebugMode) {
-        debugPrint('Scheduling notification: $title');
-        debugPrint('  Notification ID: $notificationId');
-        debugPrint('  Scheduled for: $scheduledDate');
-        debugPrint('  Current time: ${tz.TZDateTime.now(tz.local)}');
-        
-        // Check if scheduled date is in the past
-        if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-          debugPrint('  WARNING: Scheduled date is in the past! Notification may not trigger.');
-        }
-      }
-      
-      // Use inexactAllowWhileIdle to ensure notifications fire even during device idle/doze
-      // This is the recommended approach for all Android versions and doesn't require special permissions
-      // Note: System may batch/delay notifications for battery optimization, but they will eventually fire
-      try {
-        await _notifications.zonedSchedule(
-          notificationId,
-          title,
-          body,
-          scheduledDate,
-          details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          payload: '${tankId}_${notification.id}',
-        );
-        if (kDebugMode) {
-          debugPrint('  ✓ Notification scheduled successfully with inexactAllowWhileIdle');
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('  ✗ Error scheduling notification: $e');
-        }
-        rethrow;
-      }
-    } else {
-      if (kDebugMode) {
-        if (nextDate == null) {
-          debugPrint('Notification not scheduled: nextDate is null');
-        } else if (!notification.enabled) {
-          debugPrint('Notification not scheduled: notification is disabled');
-        }
-      }
+      await _notifications.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: '${tankId}_${notification.id}',
+      );
     }
     
     // Return the calculated next date so callers can update the model
