@@ -335,6 +335,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildMainMenu() {
     final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.watch(appSettingsProvider);
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -356,23 +357,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
-        _buildMenuCard(
-          context: context,
-          title: l10n.aiProvider,
-          subtitle: l10n.configureAIProviders,
-          icon: Icons.smart_toy,
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        if (!appSettings.noAI) ...[
+          _buildMenuCard(
+            context: context,
+            title: l10n.aiProvider,
+            subtitle: l10n.configureAIProviders,
+            icon: Icons.smart_toy,
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: Theme.of(context).colorScheme.primary,
+            onTap: () => _showAIProviderDialog(),
           ),
-          iconColor: Theme.of(context).colorScheme.primary,
-          onTap: () => _showAIProviderDialog(),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         _buildMenuCard(
           context: context,
           title: l10n.appSettings,
@@ -766,6 +769,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       
                       // Update the provider - this triggers ref.watch to rebuild
                       ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+                      
+                      // Only call setDialogState if we're in a dialog, otherwise call setState
+                      // This prevents double updates that cause the double-tap behavior on mobile
+                      if (setDialogState != null) {
+                        setDialogState(() {});
+                      } else {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                  const Divider(height: 24),
+                  
+                  SwitchListTile(
+                    title: const Text('No AI Mode'),
+                    subtitle: const Text('Disable all AI features in the app'),
+                    value: appSettings.noAI,
+                    onChanged: (value) {
+                      // Log settings change
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'no_ai',
+                        newValue: value.toString(),
+                        oldValue: appSettings.noAI.toString(),
+                      );
+                      
+                      // Update the provider - this triggers ref.watch to rebuild
+                      ref.read(appSettingsProvider.notifier).setNoAI(value);
                       
                       // Only call setDialogState if we're in a dialog, otherwise call setState
                       // This prevents double updates that cause the double-tap behavior on mobile

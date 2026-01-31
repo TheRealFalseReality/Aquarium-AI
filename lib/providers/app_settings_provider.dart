@@ -15,12 +15,14 @@ class AppSettingsState {
   final String? localeCode; // null means system default
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
+  final bool noAI; // Toggle to disable all AI features
 
   AppSettingsState({
     required this.showStockingButton,
     this.localeCode,
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
+    this.noAI = false, // Default to false (AI enabled)
   });
 }
 
@@ -38,12 +40,14 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final showStockingButton = prefs.getBool('showStockingButton') ?? true;
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
+    final noAI = prefs.getBool('noAI') ?? false; // Default to false (AI enabled)
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      noAI: noAI,
     );
   }
 
@@ -62,6 +66,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      noAI: state.noAI,
     );
   }
 
@@ -78,6 +83,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      noAI: state.noAI,
     );
   }
 
@@ -98,6 +104,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: false,
+      noAI: state.noAI,
     );
   }
 
@@ -111,6 +118,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      noAI: state.noAI,
     );
   }
 
@@ -158,6 +166,20 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
+      noAI: state.noAI,
+    );
+  }
+
+  Future<void> setNoAI(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('noAI', value);
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      noAI: value,
     );
   }
 }
