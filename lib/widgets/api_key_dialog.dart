@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
 import '../l10n/app_localizations.dart';
 
-class ApiKeyDialog extends ConsumerStatefulWidget {
+class ApiKeyDialog extends ConsumerWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
@@ -20,13 +20,7 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<ApiKeyDialog> createState() => _ApiKeyDialogState();
-}
-
-class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appSettings = ref.watch(appSettingsProvider);
     final appSettingsNotifier = ref.read(appSettingsProvider.notifier);
     final l10n = AppLocalizations.of(context)!;
