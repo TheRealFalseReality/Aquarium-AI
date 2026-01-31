@@ -74,6 +74,8 @@
   "modelsResetDefault": "Modelle auf Standard zurückgesetzt.",
   "showAIStockingButton": "KI-Besatz-Schaltfläche Anzeigen",
   "showAIStockingButtonDesc": "Die vollständige Schaltfläche \"KI-Besatzempfehlungen\" auf Aquariumkarten anzeigen. Die Option bleibt im Menü verfügbar.",
+  "noAIMode": "Kein KI-Modus",
+  "noAIModeDesc": "Alle KI-Funktionen in der App deaktivieren",
   "speciesTags": "Arten-Tags",
   "speciesTagsDesc": "Suchbare Artennamen für Fischtypen verwalten",
   "backupData": "Daten Sichern",

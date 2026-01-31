@@ -782,8 +782,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const Divider(height: 24),
                   
                   SwitchListTile(
-                    title: const Text('No AI Mode'),
-                    subtitle: const Text('Disable all AI features in the app'),
+                    title: Text(l10n.noAIMode),
+                    subtitle: Text(l10n.noAIModeDesc),
                     value: appSettings.noAI,
                     onChanged: (value) {
                       // Log settings change

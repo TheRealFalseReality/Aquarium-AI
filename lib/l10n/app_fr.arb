@@ -74,6 +74,8 @@
   "modelsResetDefault": "Modèles réinitialisés par défaut.",
   "showAIStockingButton": "Afficher le Bouton de Peuplement IA",
   "showAIStockingButtonDesc": "Afficher le bouton complet \"Recommandations de Peuplement IA\" sur les cartes d'aquarium. L'option reste disponible dans le menu.",
+  "noAIMode": "Mode Sans IA",
+  "noAIModeDesc": "Désactiver toutes les fonctionnalités IA dans l'application",
   "speciesTags": "Étiquettes d'Espèces",
   "speciesTagsDesc": "Gérer les noms d'espèces recherchables pour les types de poissons",
   "backupData": "Sauvegarder les Données",

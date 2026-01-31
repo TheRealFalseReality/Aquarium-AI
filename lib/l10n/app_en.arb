@@ -376,6 +376,16 @@
     "description": "Show AI Stocking Button setting description"
   },
 
+  "noAIMode": "No AI Mode",
+  "@noAIMode": {
+    "description": "No AI Mode setting title"
+  },
+
+  "noAIModeDesc": "Disable all AI features in the app",
+  "@noAIModeDesc": {
+    "description": "No AI Mode setting description"
+  },
+
   "speciesTags": "Species Tags",
   "@speciesTags": {
     "description": "Species Tags menu item"

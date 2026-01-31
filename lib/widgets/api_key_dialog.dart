@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
@@ -28,6 +29,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   Widget build(BuildContext context) {
     final appSettings = ref.watch(appSettingsProvider);
     final appSettingsNotifier = ref.read(appSettingsProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
     
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
@@ -48,13 +50,13 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               ),
               child: SwitchListTile(
                 title: Text(
-                  'No AI Mode',
+                  l10n.noAIMode,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 subtitle: Text(
-                  'Disable all AI features in the app',
+                  l10n.noAIModeDesc,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 value: appSettings.noAI,
