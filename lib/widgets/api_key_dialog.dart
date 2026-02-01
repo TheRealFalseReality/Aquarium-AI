@@ -23,9 +23,11 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
 }
 
 class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
+  static const double _smallScreenBreakpoint = 600;
+
   List<Widget> _buildDialogActions(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
+    final isSmallScreen = screenWidth < _smallScreenBreakpoint;
 
     if (isSmallScreen) {
       // For small screens, create a custom compact layout
