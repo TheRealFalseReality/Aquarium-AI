@@ -1694,21 +1694,26 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         // Notifications section (2 per row using LayoutBuilder for responsive width)
         if (notificationItems.isNotEmpty) ...[
           if (recentActivityItems.isNotEmpty) const SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // Calculate item width for 2 per row with 8px spacing
-              final itemWidth = (constraints.maxWidth - 8) / 2;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: notificationItems.map((item) => 
-                  SizedBox(
-                    width: itemWidth,
-                    child: item,
-                  ),
-                ).toList(),
-              );
-            },
+          // Wrap LayoutBuilder in Flexible to prevent intrinsic dimension calculation issues
+          // LayoutBuilder does not support returning intrinsic dimensions
+          Flexible(
+            fit: FlexFit.loose,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate item width for 2 per row with 8px spacing
+                final itemWidth = (constraints.maxWidth - 8) / 2;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: notificationItems.map((item) => 
+                    SizedBox(
+                      width: itemWidth,
+                      child: item,
+                    ),
+                  ).toList(),
+                );
+              },
+            ),
           ),
         ],
         const SizedBox(height: 14),
