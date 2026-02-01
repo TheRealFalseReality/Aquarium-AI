@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/app_settings_provider.dart';
+import '../l10n/app_localizations.dart';
 
-class ApiKeyDialog extends StatelessWidget {
+class ApiKeyDialog extends ConsumerWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
@@ -17,7 +20,11 @@ class ApiKeyDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appSettings = ref.watch(appSettingsProvider);
+    final appSettingsNotifier = ref.read(appSettingsProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
+    
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
       content: SingleChildScrollView(
@@ -25,6 +32,34 @@ class ApiKeyDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // No AI Toggle
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+              child: SwitchListTile(
+                title: Text(
+                  l10n.noAIMode,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  l10n.noAIModeDesc,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                value: appSettings.noAI,
+                onChanged: (value) {
+                  appSettingsNotifier.setNoAI(value);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
               'Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:',
               style: Theme.of(context).textTheme.bodyMedium,
@@ -115,7 +150,7 @@ class ApiKeyDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            await setNeverShowAgain();
+            await ApiKeyDialog.setNeverShowAgain();
             if (context.mounted) {
               Navigator.of(context).pop();
             }

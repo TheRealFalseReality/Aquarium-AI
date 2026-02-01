@@ -1163,7 +1163,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty)
+                          if (tank.inhabitants.isNotEmpty && !appSettings.noAI)
                             PopupMenuItem(
                               value: 'recommendations',
                               child: Row(
@@ -1409,7 +1409,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 Row(
                   children: [
                     // AI stocking button - conditionally shown based on app settings
-                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton)
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton && !appSettings.noAI)
                       Expanded(
                         child: Container(
                           height: 36,
@@ -1456,7 +1456,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                     // Space for future buttons (dosing, parameters, etc.)
-                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton) const SizedBox(width: 8),
+                    if (tank.inhabitants.isNotEmpty && appSettings.showStockingButton && !appSettings.noAI) const SizedBox(width: 8),
                   ],
                 ),
                 
@@ -2975,6 +2975,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
     
+    // Check if AI features are disabled
+    final noAI = ref?.watch(appSettingsProvider).noAI ?? false;
+    
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -3036,7 +3039,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ),
             ),
-            Positioned(
+            if (!noAI) Positioned(
               bottom: 40,
               right: 16,
               child: Material(

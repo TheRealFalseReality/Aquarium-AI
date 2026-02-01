@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
@@ -33,6 +34,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     // Tank quick summary from provider
     final tankState = ref.watch(tankProvider);
     final tankCount = tankState.tanks.length;
+    
+    // Watch the noAI setting
+    final appSettings = ref.watch(appSettingsProvider);
+    final noAI = appSettings.noAI;
     // Show a random tank instead of the last tank
     // Initialize random index on first build or when tank count changes
     if (_randomTankIndex == null || _randomTankIndex! >= tankCount) {
@@ -202,7 +207,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                AnimatedDrawerItem(
+                if (!noAI) AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 250),
                   child: ListTile(
                     leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
@@ -212,7 +217,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     onTap: () => navigate('/compat-ai'),
                   ),
                 ),
-                AnimatedDrawerItem(
+                if (!noAI) AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 300),
                   child: ListTile(
                     leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
@@ -221,7 +226,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     onTap: () => navigate('/chatbot'),
                   ),
                 ),
-                AnimatedDrawerItem(
+                if (!noAI) AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 350),
                   child: ListTile(
                     leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),

@@ -74,6 +74,8 @@
   "modelsResetDefault": "Modelos restablecidos a predeterminados.",
   "showAIStockingButton": "Mostrar Botón de Poblado IA",
   "showAIStockingButtonDesc": "Mostrar el botón completo \"Recomendaciones de Poblado IA\" en las tarjetas de acuarios. La opción permanece disponible en el menú.",
+  "noAIMode": "Modo Sin IA",
+  "noAIModeDesc": "Desactivar todas las funciones de IA en la aplicación",
   "speciesTags": "Etiquetas de Especies",
   "speciesTagsDesc": "Gestionar nombres de especies buscables para tipos de peces",
   "backupData": "Copia de Seguridad",
