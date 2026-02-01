@@ -45,7 +45,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     }
   }
 
-  void _handleLink(String text, String? href, String title) {
+  Future<void> _handleLink(String text, String? href, String title) async {
     if (href == null) return;
 
     // Check if it's a local markdown file link
@@ -62,8 +62,27 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
       );
     } else {
       // External link - open in browser
-      final uri = Uri.parse(href);
-      launchUrl(uri, mode: LaunchMode.externalApplication);
+      try {
+        final uri = Uri.parse(href);
+        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not open link: $href'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Invalid link: $href'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -73,7 +92,11 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     return nameWithoutExt
         .replaceAll('_', ' ')
         .split(' ')
-        .map((word) => word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .map((word) {
+          if (word.isEmpty || word.length == 0) return '';
+          if (word.length == 1) return word[0].toUpperCase();
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
         .join(' ');
   }
 
