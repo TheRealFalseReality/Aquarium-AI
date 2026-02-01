@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
@@ -257,6 +258,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: 'Tank Volume Calculator',
       bottomNavigationBar: const AdBanner(),
@@ -368,7 +370,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
-                label: const Text('Calculate'),
+                label: Text(l10n.calculate),
               ),
               if (shapeDimensionImages.containsKey(_shape)) ...[
                 const SizedBox(width: 16),

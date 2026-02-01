@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
@@ -51,6 +52,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
     context: context,
     builder: (context) => Consumer(
       builder: (context, ref, child) {
+        final l10n = AppLocalizations.of(context)!;
         final notifier = ref.read(fishCompatibilityProvider.notifier);
         return AlertDialog(
           insetPadding:
@@ -59,7 +61,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
           title: Stack(
             alignment: Alignment.center,
             children: [
-              const Text('Compatibility Report', textAlign: TextAlign.center),
+              Text(l10n.compatibilityReport, textAlign: TextAlign.center),
               Positioned(
                 right: -10,
                 top: -10,

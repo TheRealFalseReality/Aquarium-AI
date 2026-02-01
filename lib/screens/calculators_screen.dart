@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
@@ -46,6 +47,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> calculatorTypes = [
       'Salinity',
       'CO2',
@@ -267,7 +269,7 @@ class SalinityConverterState extends State<SalinityConverter> {
             textStyle:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          label: const Text('Convert Salinity'),
+          label: Text(l10n.convertSalinity),
         ),
         if (_results.isNotEmpty)
           Padding(
@@ -370,6 +372,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const fieldWidth = 200.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -416,7 +419,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
             textStyle:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          label: const Text('Calculate CO₂ (ppm)'),
+          label: Text(l10n.calculateCO2),
         ),
         if (_result.isNotEmpty)
           Padding(
@@ -516,6 +519,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> units = ['dKH', 'ppm', 'meq/L'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -562,7 +566,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             textStyle:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          label: const Text('Convert Alkalinity'),
+          label: Text(l10n.convertAlkalinity),
         ),
         if (_results['dkh']!.isNotEmpty)
           Padding(
@@ -666,6 +670,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> units = ['Fahrenheit', 'Celsius'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -713,7 +718,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             textStyle:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          label: const Text('Convert Temperature'),
+          label: Text(l10n.convertTemperature),
         ),
         if (_results['toValue']!.isNotEmpty)
           Padding(
