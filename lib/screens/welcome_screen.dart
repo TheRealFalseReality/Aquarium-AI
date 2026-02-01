@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../l10n/app_localizations.dart';
 
 import '../main_layout.dart';
@@ -490,7 +491,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           ) : null,
           image: backgroundPhoto != null ? DecorationImage(
             image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
-                ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
+                ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!) as ImageProvider
                 : FileImage(File(backgroundPhoto.imagePath!)),
             fit: BoxFit.cover,
             opacity: 0.8,
@@ -698,7 +699,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return imageUrl != null
                           ? (imageUrl.startsWith('http')
-                              ? Image.network(imageUrl, fit: BoxFit.cover)
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl, 
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) => Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : Image.file(File(imageUrl), fit: BoxFit.cover))
                           : Icon(
                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,

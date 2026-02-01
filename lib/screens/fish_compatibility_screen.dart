@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/species_tags_provider.dart';
@@ -284,7 +285,7 @@ class FishCompatibilityScreenState
                             children: [
                               CircleAvatar(
                                 radius: 40,
-                                backgroundImage: NetworkImage(fish.imageURL),
+                                backgroundImage: CachedNetworkImageProvider(fish.imageURL),
                               ),
                               const SizedBox(height: 8),
                               // MODIFIED: This section is now corrected to allow wrapping.
@@ -699,12 +700,23 @@ class FishCompatibilityScreenState
                       final fish = provider.selectedFish[index];
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(40),
-                        child: Image.network(
-                          fish.imageURL,
+                        child: CachedNetworkImage(
+                          imageUrl: fish.imageURL,
                           width: 52,
                           height: 52,
                           fit: BoxFit.cover,
-                          errorBuilder: (c, e, s) => Container(
+                          placeholder: (context, url) => Container(
+                            width: 52,
+                            height: 52,
+                            color: cs.surfaceVariant,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (c, url, error) => Container(
                             width: 52,
                             height: 52,
                             color: cs.error.withOpacity(0.1),

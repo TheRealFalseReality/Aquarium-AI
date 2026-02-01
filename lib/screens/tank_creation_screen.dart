@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
@@ -235,12 +236,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
             borderRadius: BorderRadius.circular(10),
             child: imageUrl != null
                 ? (imageUrl.startsWith('http')
-                    ? Image.network(
-                        imageUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        errorWidget: (context, url, error) => Container(
                           color: Theme.of(context).colorScheme.errorContainer,
                           child: Icon(
                             Icons.error_outline,
@@ -866,7 +867,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                                 radius: 24,
                                 backgroundImage: _getFishImageUrl(inhabitant) != null
                                   ? (_getFishImageUrl(inhabitant)!.startsWith('http')
-                                      ? NetworkImage(_getFishImageUrl(inhabitant)!)
+                                      ? CachedNetworkImageProvider(_getFishImageUrl(inhabitant)!)
                                       : FileImage(File(_getFishImageUrl(inhabitant)!)) as ImageProvider)
                                   : null,
                                 backgroundColor: _getFishImageUrl(inhabitant) == null
@@ -1386,12 +1387,12 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                fish.imageURL,
+                              child: CachedNetworkImage(
+                                imageUrl: fish.imageURL,
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
+                                errorWidget: (context, url, error) => Container(
                                   width: 60,
                                   height: 60,
                                   decoration: BoxDecoration(
@@ -1482,12 +1483,12 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(11),
                       child: _customImageUrl != null
-                          ? Image.network(
-                              _customImageUrl!,
+                          ? CachedNetworkImage(
+                              imageUrl: _customImageUrl!,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
-                              errorBuilder: (context, error, stackTrace) => Container(
+                              errorWidget: (context, url, error) => Container(
                                 color: Theme.of(context).colorScheme.errorContainer,
                                 child: Center(
                                   child: Column(
@@ -1825,12 +1826,12 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(11),
                                 child: _customImageUrl != null
-                                    ? Image.network(
-                                        _customImageUrl!,
+                                    ? CachedNetworkImage(
+                                        imageUrl: _customImageUrl!,
                                         fit: BoxFit.cover,
                                         width: double.infinity,
                                         height: double.infinity,
-                                        errorBuilder: (context, error, stackTrace) => Container(
+                                        errorWidget: (context, url, error) => Container(
                                           color: Theme.of(context).colorScheme.errorContainer,
                                           child: Center(
                                             child: Column(
