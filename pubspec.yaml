@@ -16,8 +16,8 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.7
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.2.0
+  riverpod_annotation: ^4.0.1
   flutter_markdown_plus: ^1.0.5
   image_picker: ^1.2.1
   google_generative_ai: ^0.4.0
