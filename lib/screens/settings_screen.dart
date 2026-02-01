@@ -287,6 +287,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
+  // Helper method to handle stocking button toggle
+  void _handleStockingButtonToggle(bool value, StateSetter? setDialogState, AppSettingsState appSettings) {
+    // Log settings change
+    AnalyticsService.logSettingsChange(
+      settingName: 'show_stocking_button',
+      newValue: value.toString(),
+      oldValue: appSettings.showStockingButton.toString(),
+    );
+    
+    // Update the provider - this triggers ref.watch to rebuild
+    ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
+    
+    // Only call setDialogState if we're in a dialog, otherwise call setState
+    // This prevents double updates that cause the double-tap behavior on mobile
+    if (setDialogState != null) {
+      setDialogState(() {});
+    } else {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -785,25 +806,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     subtitle: Text(l10n.showAIStockingButtonDesc),
                     value: appSettings.showStockingButton,
                     // Disable the toggle when AI is disabled
-                    onChanged: appSettings.enableAI ? (value) {
-                      // Log settings change
-                      AnalyticsService.logSettingsChange(
-                        settingName: 'show_stocking_button',
-                        newValue: value.toString(),
-                        oldValue: appSettings.showStockingButton.toString(),
-                      );
-                      
-                      // Update the provider - this triggers ref.watch to rebuild
-                      ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
-                      
-                      // Only call setDialogState if we're in a dialog, otherwise call setState
-                      // This prevents double updates that cause the double-tap behavior on mobile
-                      if (setDialogState != null) {
-                        setDialogState(() {});
-                      } else {
-                        setState(() {});
-                      }
-                    } : null,
+                    onChanged: appSettings.enableAI 
+                      ? (value) => _handleStockingButtonToggle(value, setDialogState, appSettings)
+                      : null,
                   ),
                   const Divider(height: 24),
                   ListTile(
