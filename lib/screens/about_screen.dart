@@ -74,34 +74,25 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         debugPrint('Google Fonts SocketException: $e');
         debugPrint('Using fallback TextStyle');
       }
-      return TextStyle(
-        color: color,
-        fontWeight: fontWeight,
-        fontSize: fontSize,
-      );
     } on HandshakeException catch (e) {
       // TLS/SSL handshake error
       if (kDebugMode) {
         debugPrint('Google Fonts HandshakeException: $e');
         debugPrint('Using fallback TextStyle');
       }
-      return TextStyle(
-        color: color,
-        fontWeight: fontWeight,
-        fontSize: fontSize,
-      );
     } catch (e) {
       // Catch any other exceptions (ClientException, etc.)
       if (kDebugMode) {
         debugPrint('Google Fonts loading error: $e');
         debugPrint('Using fallback TextStyle');
       }
-      return TextStyle(
-        color: color,
-        fontWeight: fontWeight,
-        fontSize: fontSize,
-      );
     }
+    // Return fallback TextStyle with the same properties
+    return TextStyle(
+      color: color,
+      fontWeight: fontWeight,
+      fontSize: fontSize,
+    );
   }
 
   Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
