@@ -111,7 +111,10 @@ To verify the fix:
 - `android/app/build.gradle.kts` - Improved documentation
 
 ## Version Information
+This fix was tested and verified with:
 - flutter_local_notifications: 18.0.1
 - Flutter SDK: 3.9.2+
-- Minimum SDK: As specified in build.gradle.kts
-- Target SDK: As specified in build.gradle.kts
+- Android Gradle Plugin: 8.9.1
+- Kotlin: 2.1.0
+
+**Note**: These rules should remain compatible with future versions of flutter_local_notifications, as they follow the official plugin recommendations. However, always check the plugin's changelog and example project when upgrading to new major versions.
