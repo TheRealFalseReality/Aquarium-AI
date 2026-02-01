@@ -6,6 +6,7 @@ import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
@@ -169,8 +170,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       });
     });
 
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'AI Chatbot',
+      title: l10n.aiChatbot,
       bottomNavigationBar: const AdBanner(),
       child: SafeArea(
         child: Stack(
@@ -276,7 +278,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                         onPressed: () {
                           ref.read(chatProvider.notifier).cancel();
                         },
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancel),
                       ),
                     ],
                   ),
@@ -371,10 +373,10 @@ Widget _suggestionMenu(BuildContext context) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MiniAIChip(
-                label: 'Aquarium',
+                label: l10n.aquarium,
                 icon: Icons.bubble_chart_outlined,
                 iconOnly: true,
-                tooltip: 'Aquarium Questions',
+                tooltip: l10n.aquarium,
                 selected: _expandedMenu == 'aquarium',
                 onTap: () {
                   setState(() {
@@ -385,7 +387,7 @@ Widget _suggestionMenu(BuildContext context) {
               ),
               const SizedBox(width: 10),
               MiniAIChip(
-                label: 'AquaPi',
+                label: l10n.aquaPi,
                 // Simply provide the image. The chip will color it automatically.
                 customIcon: Image.asset(
                   'assets/AquaPiLogo300.png',
@@ -393,7 +395,7 @@ Widget _suggestionMenu(BuildContext context) {
                   width: 24,
                 ),
                 iconOnly: true,
-                tooltip: 'AquaPi Questions',
+                tooltip: l10n.aquaPi,
                 selected: _expandedMenu == 'aquapi',
                 onTap: () {
                   setState(() {
@@ -403,10 +405,10 @@ Widget _suggestionMenu(BuildContext context) {
               ),
               const SizedBox(width: 10),
               MiniAIChip(
-                label: 'AI Tools',
+                label: l10n.aiTools,
                 icon: Icons.science_outlined,
                 iconOnly: true,
-                tooltip: 'AI Tools',
+                tooltip: l10n.aiTools,
                 selected: _expandedMenu == 'ai_tools',
                 onTap: () {
                   setState(() {
@@ -534,7 +536,7 @@ Widget _suggestionMenu(BuildContext context) {
       runSpacing: 6,
       children: [
         MiniAIChip(
-          label: 'Water Analysis',
+          label: l10n.waterAnalysis,
           icon: Icons.water_drop_outlined,
           customGradient: LinearGradient(
             colors: [Colors.blue.shade400, Colors.teal.shade300],
@@ -550,7 +552,7 @@ Widget _suggestionMenu(BuildContext context) {
           },
         ),
         MiniAIChip(
-          label: 'Script Generator',
+          label: l10n.automationScript,
           icon: Icons.code_outlined,
           customGradient: LinearGradient(
             colors: [Colors.purple.shade400, Colors.indigo.shade300],
@@ -566,7 +568,7 @@ Widget _suggestionMenu(BuildContext context) {
           },
         ),
         MiniAIChip(
-          label: 'Photo Analyzer',
+          label: l10n.photoAnalyzer,
           icon: Icons.camera_alt_outlined,
           customGradient: LinearGradient(
             colors: [Colors.deepOrange.shade400, const Color.fromARGB(255, 160, 88, 6)],
@@ -898,7 +900,7 @@ class MessageBubble extends ConsumerWidget {
             ),
           if (analysisResult != null)
             _ResultButton(
-              label: 'View Analysis',
+              label: l10n.viewAnalysis,
               onTap: () {
                 Navigator.push(
                   context,
@@ -911,7 +913,7 @@ class MessageBubble extends ConsumerWidget {
             ),
           if (automationScript != null)
             _ResultButton(
-              label: 'View Script',
+              label: l10n.viewScript,
               onTap: () {
                 Navigator.push(
                   context,
@@ -925,7 +927,7 @@ class MessageBubble extends ConsumerWidget {
             ),
           if (photoAnalysisResult != null)
             _ResultButton(
-              label: 'View Photo Analysis',
+              label: l10n.viewPhotoAnalysis,
               onTap: () {
                 Navigator.push(
                   context,

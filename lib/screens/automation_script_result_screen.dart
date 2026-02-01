@@ -3,6 +3,7 @@ import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/automation_script.dart';
 import '../main_layout.dart';
@@ -15,6 +16,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: 'Automation Script',
       child: ListView(
@@ -39,7 +41,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
           const BannerAdWidget(),
         ],

@@ -2243,5 +2243,125 @@
   "treatments": "Treatments",
   "@treatments": {
     "description": "Treatments label"
+  },
+
+  "automationScript": "Automation Script",
+  "@automationScript": {
+    "description": "Automation script feature name"
+  },
+
+  "aiAutomationScriptGenerator": "AI Automation Script Generator",
+  "@aiAutomationScriptGenerator": {
+    "description": "AI automation script generator heading"
+  },
+
+  "automationDescription": "Describe the automation you want to create for Home Assistant or ESPHome.",
+  "@automationDescription": {
+    "description": "Instructions for automation script"
+  },
+
+  "automationDescriptionLabel": "Automation Description",
+  "@automationDescriptionLabel": {
+    "description": "Label for automation description field"
+  },
+
+  "automationDescriptionHint": "e.g., \"turn on a pump for 30 seconds every 24 hours\"",
+  "@automationDescriptionHint": {
+    "description": "Hint text for automation description"
+  },
+
+  "pleaseEnterDescription": "Please enter a description",
+  "@pleaseEnterDescription": {
+    "description": "Validation message for empty description"
+  },
+
+  "generateScript": "Generate Script",
+  "@generateScript": {
+    "description": "Generate script button label"
+  },
+
+  "waterAnalysis": "Water Analysis",
+  "@waterAnalysis": {
+    "description": "Water analysis feature name"
+  },
+
+  "aiWaterParameterAnalysis": "AI Water Parameter Analysis",
+  "@aiWaterParameterAnalysis": {
+    "description": "AI water parameter analysis heading"
+  },
+
+  "enterParametersForAnalysis": "Enter your aquarium's parameters below for an expert AI analysis.",
+  "@enterParametersForAnalysis": {
+    "description": "Instructions for water parameter analysis"
+  },
+
+  "tankTypeLabel": "Tank Type (e.g., Reef, Freshwater)",
+  "@tankTypeLabel": {
+    "description": "Label for tank type field"
+  },
+
+  "pleaseEnterTankType": "Please enter a tank type",
+  "@pleaseEnterTankType": {
+    "description": "Validation message for empty tank type"
+  },
+
+  "temperatureLabel": "Temperature",
+  "@temperatureLabel": {
+    "description": "Label for temperature field"
+  },
+
+  "pleaseEnterTemperature": "Please enter a temperature",
+  "@pleaseEnterTemperature": {
+    "description": "Validation message for empty temperature"
+  },
+
+  "phOptional": "pH (Optional)",
+  "@phOptional": {
+    "description": "Label for optional pH field"
+  },
+
+  "salinityOptional": "Salinity (Optional)",
+  "@salinityOptional": {
+    "description": "Label for optional salinity field"
+  },
+
+  "additionalInfoOptional": "Additional Info (Optional)",
+  "@additionalInfoOptional": {
+    "description": "Label for optional additional info field"
+  },
+
+  "submitForAnalysis": "Submit for Analysis",
+  "@submitForAnalysis": {
+    "description": "Submit for analysis button label"
+  },
+
+  "aquarium": "Aquarium",
+  "@aquarium": {
+    "description": "Aquarium label"
+  },
+
+  "aquaPi": "AquaPi",
+  "@aquaPi": {
+    "description": "AquaPi label"
+  },
+
+  "aiTools": "AI Tools",
+  "@aiTools": {
+    "description": "AI tools section label"
+  },
+
+  "viewAnalysis": "View Analysis",
+  "@viewAnalysis": {
+    "description": "View analysis button label"
+  },
+
+  "viewScript": "View Script",
+  "@viewScript": {
+    "description": "View script button label"
+  },
+
+  "viewPhotoAnalysis": "View Photo Analysis",
+  "@viewPhotoAnalysis": {
+    "description": "View photo analysis button label"
   }
 }
