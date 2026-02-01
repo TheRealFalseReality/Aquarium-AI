@@ -152,6 +152,10 @@ class NotificationService {
     if (useExactDateTime) {
       // Use the exact date/time specified in the notification, ignoring any calculations
       nextDate = notification.notificationDateTime;
+    } else if (notification.repeatFrequency == RepeatFrequency.none) {
+      // For non-repeating notifications, use the notification date/time directly
+      // (getNextNotificationDate returns null for non-repeating, which would prevent scheduling)
+      nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
       // Calculate based on activity logs, optionally using current time
       nextDate = notification.getNextNotificationDateWithActivity(activityLogs, useCurrentTime: useCurrentTime);
