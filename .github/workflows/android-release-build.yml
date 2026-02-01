@@ -30,7 +30,7 @@ jobs:
         env:
           KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
         run: |
-          echo "$KEY_PROPERTIES" > android/key.properties
+          printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
       
       - name: Decode and create keystore
         env:
