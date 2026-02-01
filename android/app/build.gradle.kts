@@ -51,10 +51,17 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
             
+            // Explicitly enable code shrinking and minification for release builds
+            // This is critical for preventing the "Missing type parameter" crash
+            // that occurs when notification receivers fire in the background
+            isMinifyEnabled = true
+            isShrinkResources = true
+            
             // ProGuard/R8 configuration for flutter_local_notifications
             // These rules prevent "Missing type parameter" crashes in scheduled notifications
             // by preserving generic type information needed by the plugin's receivers
-            // Note: R8 is enabled by default for release builds in Flutter
+            // IMPORTANT: These rules are required for flutter_local_notifications v18.x
+            // Note: v19+ includes these rules automatically - consider upgrading
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

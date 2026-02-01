@@ -1,19 +1,18 @@
 # Flutter Local Notifications ProGuard rules
-# Required to prevent "Missing type parameter" crash when using zonedSchedule
-# These rules are based on official flutter_local_notifications recommendations
-# and prevent ProGuard/R8 from stripping generic type information
-
-# Keep Flutter core classes
--keep class io.flutter.app.** { *; }
--keep class io.flutter.plugin.** { *; }
--keep class io.flutter.util.** { *; }
--keep class io.flutter.view.** { *; }
--keep class io.flutter.** { *; }
--keep class io.flutter.plugins.** { *; }
-
-# Keep Flutter Local Notifications plugin classes
--keep class com.dexterous.** { *; }
--keep class com.dexterous.flutterlocalnotifications.** { *; }
+# CRITICAL: These rules prevent "Missing type parameter" crash in background notifications
+# 
+# Issue: flutter_local_notifications v18.x uses GSON for serialization. When R8/ProGuard
+# strips generic type information, scheduled notifications crash with "Missing type parameter"
+# when fired in the background.
+#
+# Solution: Keep GSON type information and generic signatures
+# Reference: https://github.com/MaikuB/flutter_local_notifications/blob/master/flutter_local_notifications/example/android/app/proguard-rules.pro
+#
+# IMPORTANT: These rules are REQUIRED for flutter_local_notifications v18.x
+# NOTE: Version 19.0.0+ includes these rules automatically - consider upgrading when ready
+#
+# Flutter core classes are already handled by Flutter's default ProGuard configuration
+# so we only need to keep the GSON-specific rules below
 
 ## Gson rules
 # Gson uses generic type information stored in a class file when working with fields.
