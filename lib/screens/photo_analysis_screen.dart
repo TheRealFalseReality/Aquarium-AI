@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
@@ -58,7 +59,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         );
       }
     } catch (e) {
-      setState(() => _error = 'Failed to pick image: $e');
+      final l10n = AppLocalizations.of(context)!;
+      setState(() => _error = l10n.failedToPickImage);
       
       // Log image selection error
       AnalyticsService.logPhotoAnalysis(
@@ -117,6 +119,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
@@ -142,7 +145,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     });
     
     return MainLayout(
-      title: 'Photo Analyzer',
+      title: l10n.photoAnalyzer,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -162,7 +165,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
-                  tooltip: 'Close',
+                  tooltip: l10n.close,
                 ),
               ],
             ),
@@ -220,18 +223,18 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 ElevatedButton.icon(
                   onPressed: () => _pick(ImageSource.gallery),
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Gallery'),
+                  label: Text(l10n.gallery),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _pick(ImageSource.camera),
                   icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Camera'),
+                  label: Text(l10n.camera),
                 ),
                 if (_imageBytes != null)
                   OutlinedButton.icon(
                     onPressed: () => setState(() => _imageBytes = null),
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Remove'),
+                    label: Text(l10n.remove),
                   ),
               ],
             ),
@@ -265,7 +268,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                       child: CircularProgressIndicator(strokeWidth: 3),
                     )
                   : const Icon(Icons.analytics_outlined),
-              label: Text(_isSubmitting ? 'Analyzing...' : 'Analyze Photo'),
+              label: Text(_isSubmitting ? l10n.analyzing : l10n.analyzePhoto),
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
