@@ -50,7 +50,11 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            
             // ProGuard/R8 configuration for flutter_local_notifications
+            // These rules prevent "Missing type parameter" crashes in scheduled notifications
+            // by preserving generic type information needed by the plugin's receivers
+            // Note: R8 is enabled by default for release builds in Flutter
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
