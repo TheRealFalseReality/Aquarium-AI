@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/stocking_recommendation.dart';
 import '../models/tank.dart';
 import '../main_layout.dart';
@@ -221,7 +222,7 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 16),
-                      Text('Generating new recommendations...'),
+                      Text(l10n.generatingNewRecommendations),
                       SizedBox(height: 8),
                       Text(
                         'This may take up to 60 seconds',
@@ -256,6 +257,7 @@ class _TankRecommendationTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     
@@ -464,7 +466,7 @@ class _TankRecommendationTabView extends StatelessWidget {
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text('Other Options', style: theme.textTheme.titleMedium),
+          Text(l10n.otherOptions, style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
           _FishCardGrid(fishList: report.otherDataBasedFish, originalTank: originalTank, isAddition: true),
         ],

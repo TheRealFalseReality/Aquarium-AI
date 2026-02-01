@@ -2,6 +2,7 @@ import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
 import '../widgets/common_buttons.dart';
@@ -28,6 +29,7 @@ class AnalysisResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: 'Analysis Result',
       child: ListView(
@@ -39,7 +41,7 @@ class AnalysisResultScreen extends StatelessWidget {
           const SizedBox(height: 18),
           ...result.parameters.map((p) => _parameterCard(context, p)),
           const SizedBox(height: 18),
-          _howAquaPiHelpsCard(context, result.howAquaPiHelps),
+          _howAquaPiHelpsCard(context, l10n, result.howAquaPiHelps),
           const SizedBox(height: 20),
           const CommonCloseButton(),
         ],
@@ -178,7 +180,7 @@ class AnalysisResultScreen extends StatelessWidget {
     );
   }
 
-  Widget _howAquaPiHelpsCard(BuildContext context, String markdownText) {
+  Widget _howAquaPiHelpsCard(BuildContext context, AppLocalizations l10n, String markdownText) {
     final cs = Theme.of(context).colorScheme;
     return Card(
       elevation: 3,
@@ -199,7 +201,7 @@ class AnalysisResultScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BannerAdWidget(),
-            Text("How AquaPi Can Help",
+            Text(l10n.howAquaPiCanHelp,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
