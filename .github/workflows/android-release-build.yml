@@ -1,0 +1,91 @@
+name: Build Android Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Decode and create key.properties
+        env:
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          echo "$KEY_PROPERTIES" > android/key.properties
+      
+      - name: Decode and create keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+      
+      - name: Build Production AAB
+        run: flutter build appbundle --flavor production --release
+      
+      - name: Build Production APK
+        run: flutter build apk --flavor production --release
+      
+      - name: Build Staging AAB
+        run: flutter build appbundle --flavor staging --release
+      
+      - name: Build Staging APK
+        run: flutter build apk --flavor staging --release
+      
+      - name: Upload Production AAB to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/app/outputs/bundle/productionRelease/app-production-release.aab
+          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.aab
+          asset_content_type: application/octet-stream
+      
+      - name: Upload Production APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-production-release.apk
+          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.apk
+          asset_content_type: application/vnd.android.package-archive
+      
+      - name: Upload Staging AAB to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/app/outputs/bundle/stagingRelease/app-staging-release.aab
+          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.aab
+          asset_content_type: application/octet-stream
+      
+      - name: Upload Staging APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-staging-release.apk
+          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.apk
+          asset_content_type: application/vnd.android.package-archive
