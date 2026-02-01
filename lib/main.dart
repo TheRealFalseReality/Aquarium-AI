@@ -28,7 +28,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
 import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
-import './utils/api_error_handler.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
