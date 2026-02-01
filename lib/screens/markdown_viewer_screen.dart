@@ -7,9 +7,8 @@ import '../widgets/ad_component.dart';
 
 class Breadcrumb {
   final String title;
-  final String assetPath;
 
-  Breadcrumb({required this.title, required this.assetPath});
+  Breadcrumb({required this.title});
 }
 
 class MarkdownViewerScreen extends StatefulWidget {
@@ -62,7 +61,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
       // Create new breadcrumb trail including current page
       final newBreadcrumbs = [
         ...widget.breadcrumbs,
-        Breadcrumb(title: widget.title, assetPath: widget.assetPath),
+        Breadcrumb(title: widget.title),
       ];
       
       // Navigate to another markdown viewer with the new file
@@ -189,7 +188,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                           }
                         : () {
                             // Pop until we reach this breadcrumb level
-                            int popCount = widget.breadcrumbs.length - index;
+                            // We need to pop (breadcrumbs.length - index - 1) times
+                            // because the current page is not in the breadcrumbs list
+                            int popCount = widget.breadcrumbs.length - index - 1;
                             for (int i = 0; i < popCount; i++) {
                               Navigator.of(context).pop();
                             }
