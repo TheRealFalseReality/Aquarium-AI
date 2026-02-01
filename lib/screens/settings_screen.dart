@@ -1281,7 +1281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _buildApiKeyGuide(
           title: 'How to get your Google AI API key:',
           children: [
-            const Text('1. Go to the Google AI Studio website.'),
+            Text(l10n.googleAIStudioStep1),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
@@ -1294,10 +1294,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
               ),
             ),
-            const Text('2. Sign in with your Google account.'),
-            const Text(
-                '3. Click "Create API key in new project" or "Get API key".'),
-            const Text('4. Copy the generated API key and paste it above.'),
+            Text(l10n.googleAIStudioStep2),
+            Text(l10n.googleAIStudioStep3),
+            Text(l10n.googleAIStudioStep4),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
@@ -1427,7 +1426,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _buildApiKeyGuide(
           title: 'How to get your OpenAI API key:',
           children: [
-            const Text('1. Go to the OpenAI API keys page.'),
+            Text(l10n.openAIStep1),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
@@ -1440,8 +1439,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const Text('2. Sign in and create a new secret key.'),
-            const Text('3. Copy the generated API key and paste it above.'),
+            Text(l10n.openAIStep2),
+            Text(l10n.openAIStep3),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
@@ -1565,7 +1564,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _buildApiKeyGuide(
           title: 'How to get your Groq API key:',
           children: [
-            const Text('1. Go to the GroqCloud Console website.'),
+            Text(l10n.groqCloudStep1),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://console.groq.com/keys')),
@@ -1578,9 +1577,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
               ),
             ),
-            const Text('2. Sign in and navigate to the API Keys section.'),
-            const Text('3. Click "Create API Key" to create a new secret key.'),
-            const Text('4. Copy the generated API key and paste it above.'),
+            Text(l10n.groqCloudStep2),
+            Text(l10n.groqCloudStep3),
+            Text(l10n.groqCloudStep4),
             InkWell(
               onTap: () =>
                   launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
