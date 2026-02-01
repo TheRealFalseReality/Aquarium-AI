@@ -147,7 +147,8 @@ void main() {
         notification: notification,
       );
       
-      // nextDate should still be returned but notification won't be scheduled due to disabled flag
+      // nextDate should still be returned (for updating the model),
+      // but the actual platform notification won't be scheduled due to the disabled flag
       expect(nextDate, equals(futureDate));
     });
   });
