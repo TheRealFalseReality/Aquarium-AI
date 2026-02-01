@@ -21,8 +21,8 @@ WARNINGS=0
 
 # Check if we're in the right directory
 if [ ! -f "pubspec.yaml" ]; then
-    echo -e "${RED}ERROR: Not in project root directory!${NC}"
-    echo "Please run this script from the Aquarium-AI project root."
+    echo -e "${RED}ERROR: Not in Flutter project root directory!${NC}"
+    echo "Please run this script from the Flutter project root directory."
     exit 1
 fi
 
