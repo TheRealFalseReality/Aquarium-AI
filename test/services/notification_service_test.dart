@@ -75,5 +75,81 @@ void main() {
         );
       }
     });
+
+    test('should schedule non-repeating notifications', () async {
+      final service = NotificationService();
+      await service.initialize();
+      
+      // Create a non-repeating notification in the future
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: futureDate,
+        repeatFrequency: RepeatFrequency.none,
+        enabled: true,
+      );
+      
+      // Schedule the notification
+      final nextDate = await service.scheduleNotification(
+        tankId: 'test-tank-id',
+        tankName: 'Test Tank',
+        notification: notification,
+      );
+      
+      // Verify that a next date was returned (indicating it was scheduled)
+      expect(nextDate, isNotNull);
+      expect(nextDate, equals(futureDate));
+    });
+
+    test('should schedule repeating notifications', () async {
+      final service = NotificationService();
+      await service.initialize();
+      
+      // Create a repeating notification
+      final pastDate = DateTime.now().subtract(const Duration(days: 1));
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: pastDate,
+        repeatFrequency: RepeatFrequency.daily,
+        repeatInterval: 1,
+        enabled: true,
+      );
+      
+      // Schedule the notification
+      final nextDate = await service.scheduleNotification(
+        tankId: 'test-tank-id',
+        tankName: 'Test Tank',
+        notification: notification,
+      );
+      
+      // Verify that a next date was returned and it's in the future
+      expect(nextDate, isNotNull);
+      expect(nextDate!.isAfter(DateTime.now()), isTrue);
+    });
+
+    test('should not schedule disabled non-repeating notifications', () async {
+      final service = NotificationService();
+      await service.initialize();
+      
+      // Create a disabled non-repeating notification
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: futureDate,
+        repeatFrequency: RepeatFrequency.none,
+        enabled: false,
+      );
+      
+      // Attempt to schedule the notification
+      final nextDate = await service.scheduleNotification(
+        tankId: 'test-tank-id',
+        tankName: 'Test Tank',
+        notification: notification,
+      );
+      
+      // nextDate should still be returned (for updating the model),
+      // but the actual platform notification won't be scheduled due to the disabled flag
+      expect(nextDate, equals(futureDate));
+    });
   });
 }

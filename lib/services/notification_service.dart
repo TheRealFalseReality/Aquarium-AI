@@ -105,8 +105,7 @@ class NotificationService {
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
   /// 
   /// Returns the calculated next notification date, or null if the notification
-  /// is disabled or non-repeating. This can be used to update the notification
-  /// model's scheduledNextDate field.
+  /// is disabled. This can be used to update the notification model's scheduledNextDate field.
   Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
@@ -149,8 +148,10 @@ class NotificationService {
 
     // Determine the next notification date
     DateTime? nextDate;
-    if (useExactDateTime) {
-      // Use the exact date/time specified in the notification, ignoring any calculations
+    if (useExactDateTime || notification.repeatFrequency == RepeatFrequency.none) {
+      // Use the exact date/time specified in the notification for:
+      // - useExactDateTime flag (user explicitly chose the specified time)
+      // - Non-repeating notifications (getNextNotificationDate returns null for these)
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
       // Calculate based on activity logs, optionally using current time
