@@ -139,9 +139,13 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
             InkWell(
               onTap: () {
                 // Pop all the way back to Information screen
-                Navigator.of(context).popUntil((route) {
-                  return route.settings.name == '/information' || route.isFirst;
-                });
+                // We need to pop breadcrumbs.length + 1 times (all breadcrumbs + current page)
+                int popCount = widget.breadcrumbs.length + 1;
+                for (int i = 0; i < popCount; i++) {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -181,20 +185,15 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                     ),
                   ),
                   InkWell(
-                    onTap: isLast
-                        ? () {
-                            // Go back one level
-                            Navigator.of(context).pop();
-                          }
-                        : () {
-                            // Pop until we reach this breadcrumb level
-                            // We need to pop (breadcrumbs.length - index - 1) times
-                            // because the current page is not in the breadcrumbs list
-                            int popCount = widget.breadcrumbs.length - index - 1;
-                            for (int i = 0; i < popCount; i++) {
-                              Navigator.of(context).pop();
-                            }
-                          },
+                    onTap: () {
+                      // Pop until we reach this breadcrumb level
+                      // We need to pop (breadcrumbs.length - index - 1) times
+                      // because the current page is not in the breadcrumbs list
+                      int popCount = widget.breadcrumbs.length - index - 1;
+                      for (int i = 0; i < popCount; i++) {
+                        Navigator.of(context).pop();
+                      }
+                    },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                       child: Text(
