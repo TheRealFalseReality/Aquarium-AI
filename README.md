@@ -79,6 +79,26 @@ The generated files will be in `.dart_tool/flutter_gen/gen_l10n/` (not in Git, c
 
 See [LOCALIZATION_DEV_GUIDE.md](LOCALIZATION_DEV_GUIDE.md) for detailed developer documentation.
 
+## 🔧 Release Build Configuration
+
+### ProGuard/R8 Configuration for Notifications
+
+This app uses `flutter_local_notifications` for scheduled notifications. **Critical**: The release build requires specific ProGuard/R8 rules to prevent crashes when notifications fire in the background.
+
+**For Developers:**
+- **Never remove or modify** `android/app/proguard-rules.pro` without understanding the implications
+- **Always test notifications in release builds**, not just debug builds
+- See [NOTIFICATION_FIX.md](NOTIFICATION_FIX.md) for technical details on the "Missing type parameter" crash fix
+- See [REGRESSION_TEST_GUIDE.md](REGRESSION_TEST_GUIDE.md) for testing procedures
+
+**Verification:**
+Run the automated verification script before releasing:
+```bash
+./scripts/verify_proguard_config.sh
+```
+
+The GitHub Actions workflow will automatically verify ProGuard configuration on PRs that modify build files.
+
 ## 🤝 How to Contribute
 
 We welcome contributions from the community! Here are some ways you can help:

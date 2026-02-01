@@ -1,0 +1,110 @@
+name: Verify ProGuard Configuration
+
+# This workflow verifies that ProGuard/R8 configuration is correct
+# to prevent regression of the "Missing type parameter" notification crash
+
+on:
+  pull_request:
+    paths:
+      # Run when ProGuard or build config files are modified
+      - 'android/app/proguard-rules.pro'
+      - 'android/app/build.gradle.kts'
+      - 'android/app/build.gradle'
+      - 'android/app/src/main/AndroidManifest.xml'
+      - 'pubspec.yaml'
+      # Also run when the verification script itself is modified
+      - 'scripts/verify_proguard_config.sh'
+      - '.github/workflows/verify-proguard.yml'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'android/app/proguard-rules.pro'
+      - 'android/app/build.gradle.kts'
+      - 'android/app/build.gradle'
+      - 'android/app/src/main/AndroidManifest.xml'
+      - 'pubspec.yaml'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  verify-proguard:
+    name: Verify ProGuard Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make verification script executable
+        run: chmod +x scripts/verify_proguard_config.sh
+      
+      - name: Run ProGuard verification
+        id: verify
+        run: ./scripts/verify_proguard_config.sh
+      
+      - name: Check verification result
+        if: failure()
+        run: |
+          echo "::error::ProGuard configuration verification failed!"
+          echo "::error::This may cause 'Missing type parameter' crashes in release builds."
+          echo "::error::Please review the errors above and fix the configuration."
+          exit 1
+      
+      - name: Success message
+        if: success()
+        run: |
+          echo "::notice::ProGuard configuration is correct!"
+          echo "::notice::The 'Missing type parameter' crash should not occur."
+  
+  # Optional: Build a release APK to verify ProGuard actually runs
+  # Uncomment this job if you want to verify that release builds succeed
+  # Note: This requires proper setup of signing keys in GitHub Secrets
+  
+  # build-release:
+  #   name: Build Release APK
+  #   runs-on: ubuntu-latest
+  #   needs: verify-proguard
+  #   
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     
+  #     - name: Setup Java
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'temurin'
+  #         java-version: '17'
+  #     
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #     
+  #     - name: Get Flutter dependencies
+  #       run: flutter pub get
+  #     
+  #     - name: Build release APK
+  #       run: flutter build apk --release --flavor production
+  #       # Note: This will fail without proper signing configuration
+  #       # Set up GitHub Secrets for release builds if needed
+  #     
+  #     - name: Verify ProGuard mappings generated
+  #       run: |
+  #         if [ ! -f "build/app/outputs/mapping/productionRelease/mapping.txt" ]; then
+  #           echo "::error::ProGuard mapping file not generated!"
+  #           echo "::error::This indicates ProGuard/R8 is not running."
+  #           exit 1
+  #         fi
+  #         echo "::notice::ProGuard mappings successfully generated"
+  #     
+  #     - name: Check for critical rules in merged config
+  #       run: |
+  #         CONFIG="build/app/outputs/mapping/productionRelease/configuration.txt"
+  #         if ! grep -q "com.google.gson.reflect.TypeToken" "$CONFIG"; then
+  #           echo "::error::TypeToken rule not found in merged ProGuard config!"
+  #           exit 1
+  #         fi
+  #         echo "::notice::Critical ProGuard rules present in merged configuration"
