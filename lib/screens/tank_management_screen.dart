@@ -3248,7 +3248,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ? CachedNetworkImage(
                                 imageUrl: imageUrl, 
                                 fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => Container(color: Colors.grey),
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey,
+                                  child: const Icon(Icons.error_outline, color: Colors.white),
+                                ),
                               )
                             : Image.file(File(imageUrl), fit: BoxFit.cover))
                         : Container(color: Colors.grey),
@@ -3371,7 +3374,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     ? CachedNetworkImage(
                                         imageUrl: imageUrl, 
                                         fit: BoxFit.cover,
-                                        errorWidget: (context, url, error) => Container(color: Colors.grey),
+                                        errorWidget: (context, url, error) => Container(
+                                          color: Colors.grey,
+                                          child: const Icon(Icons.error_outline, color: Colors.white),
+                                        ),
                                       )
                                     : Image.file(File(imageUrl), fit: BoxFit.cover))
                                 : Container(color: Colors.grey),
