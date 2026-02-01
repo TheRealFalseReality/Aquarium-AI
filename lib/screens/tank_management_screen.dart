@@ -821,6 +821,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
@@ -2314,7 +2315,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                           );
                                         },
                                         icon: const Icon(Icons.edit, size: 16),
-                                        label: const Text('Manage'),
+                                        label: Text(l10n.manage),
                                         style: FilledButton.styleFrom(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                           minimumSize: Size.zero,
@@ -2394,7 +2395,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       );
                                     },
                                     icon: const Icon(Icons.add, size: 18),
-                                    label: const Text('Add Parameter'),
+                                    label: Text(l10n.addParameter),
                                     style: FilledButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     ),
@@ -2572,7 +2573,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                           );
                                         },
                                         icon: const Icon(Icons.edit, size: 16),
-                                        label: const Text('Manage'),
+                                        label: Text(l10n.manage),
                                         style: FilledButton.styleFrom(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                           minimumSize: Size.zero,
@@ -2652,7 +2653,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       );
                                     },
                                     icon: const Icon(Icons.add, size: 18),
-                                    label: const Text('Add Dose'),
+                                    label: Text(l10n.addDose),
                                     style: FilledButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     ),
@@ -2964,7 +2965,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           );
                         },
                         icon: const Icon(Icons.edit, size: 18),
-                        label: const Text('Edit Tank'),
+                        label: Text(l10n.editTank),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         ),
@@ -3012,7 +3013,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ),
                                 SizedBox(height: 16),
                                 Text(
-                                  'Failed to load image',
+                                  l10n.failedToLoadImage.replaceAll('{error}', ''),
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ],
@@ -3062,8 +3063,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         // For simplicity, we'll show a message that this is not supported
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('AI analysis is not supported for cloud-stored images. Please use local images.'),
+                            SnackBar(
+                              content: Text(l10n.aiAnalysisNotSupportedForCloudImages),
                               duration: Duration(seconds: 3),
                             ),
                           );
@@ -3078,7 +3079,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Failed to load image: $e'),
+                            content: Text(l10n.failedToLoadImage.replaceAll('{error}', e.toString())),
                             duration: const Duration(seconds: 3),
                           ),
                         );
@@ -3155,23 +3156,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'set_background',
                       child: Row(
                         children: [
                           Icon(Icons.wallpaper, size: 18),
                           SizedBox(width: 8),
-                          Text('Set as Card Background'),
+                          Text(l10n.setAsCardBackground),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'set_as_icon',
                       child: Row(
                         children: [
                           Icon(Icons.image_aspect_ratio, size: 18),
                           SizedBox(width: 8),
-                          Text('Set as Tank Icon'),
+                          Text(l10n.setAsTankIcon),
                         ],
                       ),
                     ),
@@ -3204,6 +3205,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
     if (tank.photos.isEmpty) {
       context.showAccessibleMessage('No photos available. Add photos to your tank first.');
       return;
@@ -3212,7 +3214,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Set Card Background'),
+        title: Text(l10n.setCardBackground),
         content: SizedBox(
           width: double.maxFinite,
           child: GridView.builder(
@@ -3264,7 +3266,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -3316,12 +3318,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
     final icons = _tankIcons;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Tank Icon'),
+        title: Text(l10n.changeTankIcon),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
@@ -3443,11 +3446,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 _resetTankIcon(context, ref, tank);
                 Navigator.of(context).pop();
               },
-              child: const Text('Reset Icon'),
+              child: Text(l10n.resetIcon),
             ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -3543,16 +3546,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Tank', textAlign: TextAlign.center),
-        content: Text('Are you sure you want to delete "${tank.name}"? This action cannot be undone.', textAlign: TextAlign.center),
+        title: Text(l10n.deleteTankTitle, textAlign: TextAlign.center),
+        content: Text(l10n.deleteTankConfirm.replaceAll('{tankName}', tank.name), textAlign: TextAlign.center),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -3574,7 +3578,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -4092,6 +4096,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
         'Tank must have existing inhabitants to get stocking recommendations.'
@@ -4178,7 +4183,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    const Text('Getting stocking recommendations...'),
+                    Text(l10n.gettingStockingRecommendations),
                     const SizedBox(height: 8),
                     const Text(
                       'This may take up to 60 seconds',
@@ -4190,7 +4195,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ref.read(aquariumStockingProvider.notifier).cancel();
                         Navigator.pop(context);
                       },
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ],
                 ),
