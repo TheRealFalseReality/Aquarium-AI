@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
@@ -534,7 +535,17 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return imageUrl != null
                           ? (imageUrl.startsWith('http')
-                              ? Image.network(imageUrl, fit: BoxFit.cover, width: size, height: size)
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl, 
+                                  fit: BoxFit.cover, 
+                                  width: size, 
+                                  height: size,
+                                  errorWidget: (context, url, error) => Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: iconSize,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : Image.file(File(imageUrl), fit: BoxFit.cover, width: size, height: size))
                           : Icon(
                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
