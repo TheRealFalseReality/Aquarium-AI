@@ -27,7 +27,7 @@ dependencies:
   google_mobile_ads: ^6.0.0
   firebase_analytics: ^12.0.4
   firebase_core: ^4.2.1 
-  firebase_crashlytics: ^5.0.4
+  firebase_crashlytics: ^5.0.7
   dart_openai: ^6.1.0
   groq: ^1.1.1 
   uuid: ^4.5.2
