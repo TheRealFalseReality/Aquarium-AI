@@ -50,42 +50,19 @@ jobs:
       - name: Build Staging APK
         run: flutter build apk --flavor staging --release
       
-      - name: Upload Production AAB to Release
-        uses: actions/upload-release-asset@v1
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/bundle/productionRelease/app-production-release.aab
+            build/app/outputs/flutter-apk/app-production-release.apk
+            build/app/outputs/bundle/stagingRelease/app-staging-release.aab
+            build/app/outputs/flutter-apk/app-staging-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/app/outputs/bundle/productionRelease/app-production-release.aab
-          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.aab
-          asset_content_type: application/octet-stream
       
-      - name: Upload Production APK to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/app-production-release.apk
-          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
-      
-      - name: Upload Staging AAB to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/app/outputs/bundle/stagingRelease/app-staging-release.aab
-          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.aab
-          asset_content_type: application/octet-stream
-      
-      - name: Upload Staging APK to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/app-staging-release.apk
-          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f android/key.properties
+          rm -f android/app/upload-keystore.jks
