@@ -79,6 +79,13 @@ jobs:
       - name: Build Staging APK
         run: flutter build apk --flavor staging --release
 
+      # Clean up sensitive files
+      - name: Clean up keystore
+        if: always()
+        run: |
+          rm -f android/app/keystore.jks
+          rm -f android/key.properties
+
       # Rename files for clarity
       - name: Rename build artifacts
         run: |
