@@ -693,7 +693,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return imageUrl != null
                           ? (imageUrl.startsWith('http')
-                              ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl, 
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) => Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : Image.file(File(imageUrl), fit: BoxFit.cover))
                           : Icon(
                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,

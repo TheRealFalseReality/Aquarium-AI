@@ -590,6 +590,12 @@ class _FishCardGrid extends StatelessWidget {
                                         height: 80,
                                         width: 100,
                                         fit: BoxFit.cover,
+                                        errorWidget: (context, url, error) => Container(
+                                          height: 80,
+                                          width: 100,
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.error_outline),
+                                        ),
                                     ),
                                     Padding(
                                         padding: const EdgeInsets.all(8.0),

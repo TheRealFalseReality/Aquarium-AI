@@ -535,7 +535,17 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       return imageUrl != null
                           ? (imageUrl.startsWith('http')
-                              ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover, width: size, height: size)
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl, 
+                                  fit: BoxFit.cover, 
+                                  width: size, 
+                                  height: size,
+                                  errorWidget: (context, url, error) => Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: iconSize,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : Image.file(File(imageUrl), fit: BoxFit.cover, width: size, height: size))
                           : Icon(
                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
