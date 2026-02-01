@@ -55,6 +55,33 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     }
   }
 
+  // Helper method to safely load Google Fonts with fallback
+  TextStyle _getSafeGoogleFont({
+    required Color color,
+    required FontWeight fontWeight,
+    required double fontSize,
+  }) {
+    try {
+      return GoogleFonts.karla(
+        color: color,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+      );
+    } catch (e) {
+      // Catch all network-related errors (HandshakeException, SocketException, ClientException, etc.)
+      if (kDebugMode) {
+        debugPrint('Google Fonts loading error: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+      // Return fallback TextStyle with the same properties
+      return TextStyle(
+        color: color,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+      );
+    }
+  }
+
   Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
     return Row(
       children: [
@@ -235,7 +262,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                                 'https://www.capitalcityaquatics.com/'),
                             child: Text(
                               'Capital City Aquatics',
-                              style: GoogleFonts.karla(
+                              style: _getSafeGoogleFont(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 26,
