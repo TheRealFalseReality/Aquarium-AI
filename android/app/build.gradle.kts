@@ -41,7 +41,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cca.fishai"
-        minSdk = 21
+        minSdk = maxOf(flutter.minSdkVersion, 21)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
