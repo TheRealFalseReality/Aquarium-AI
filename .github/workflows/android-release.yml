@@ -1,3 +1,4 @@
+---
 name: Build and Release Android
 
 on:
@@ -8,25 +9,25 @@ jobs:
   build:
     name: Build Android Release
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
-      
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      
+
       - name: Get dependencies
         run: flutter pub get
-      
+
       - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -34,16 +35,18 @@ jobs:
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
           else
-            echo "Warning: KEYSTORE_BASE64 secret not set. Skipping keystore setup."
+            echo "Warning: KEYSTORE_BASE64 secret not set."
           fi
-      
+
       - name: Create key.properties
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: |
-          if [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && [ -n "$STORE_PASSWORD" ]; then
+          if [ -n "$KEY_ALIAS" ] && \
+             [ -n "$KEY_PASSWORD" ] && \
+             [ -n "$STORE_PASSWORD" ]; then
             cat > android/key.properties <<EOF
           storeFile=app/keystore.jks
           storePassword=$STORE_PASSWORD
@@ -51,7 +54,7 @@ jobs:
           keyPassword=$KEY_PASSWORD
           EOF
           else
-            echo "Warning: Signing secrets not set. Creating dummy key.properties for debug builds."
+            echo "Warning: Signing secrets not set."
             cat > android/key.properties <<EOF
           storeFile=debug.keystore
           storePassword=android
@@ -59,23 +62,23 @@ jobs:
           keyPassword=android
           EOF
           fi
-      
+
       # Build Production AAB
       - name: Build Production AAB
         run: flutter build appbundle --flavor production --release
-      
+
       # Build Production APK
       - name: Build Production APK
         run: flutter build apk --flavor production --release
-      
+
       # Build Staging AAB
       - name: Build Staging AAB
         run: flutter build appbundle --flavor staging --release
-      
+
       # Build Staging APK
       - name: Build Staging APK
         run: flutter build apk --flavor staging --release
-      
+
       # Rename files for clarity
       - name: Rename build artifacts
         run: |
@@ -84,13 +87,13 @@ jobs:
              build/app/outputs/aquarium-ai-production.aab
           cp build/app/outputs/flutter-apk/app-production-release.apk \
              build/app/outputs/aquarium-ai-production.apk
-          
+
           # Staging builds
           cp build/app/outputs/bundle/stagingRelease/app-staging-release.aab \
              build/app/outputs/aquarium-ai-staging.aab
           cp build/app/outputs/flutter-apk/app-staging-release.apk \
              build/app/outputs/aquarium-ai-staging.apk
-      
+
       # Upload Production AAB to Release
       - name: Upload Production AAB to Release
         uses: actions/upload-release-asset@v1
@@ -99,9 +102,10 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: build/app/outputs/aquarium-ai-production.aab
-          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.aab
+          asset_name: >-
+            aquarium-ai-production-${{ github.event.release.tag_name }}.aab
           asset_content_type: application/octet-stream
-      
+
       # Upload Production APK to Release
       - name: Upload Production APK to Release
         uses: actions/upload-release-asset@v1
@@ -110,9 +114,10 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: build/app/outputs/aquarium-ai-production.apk
-          asset_name: aquarium-ai-production-${{ github.event.release.tag_name }}.apk
+          asset_name: >-
+            aquarium-ai-production-${{ github.event.release.tag_name }}.apk
           asset_content_type: application/vnd.android.package-archive
-      
+
       # Upload Staging AAB to Release
       - name: Upload Staging AAB to Release
         uses: actions/upload-release-asset@v1
@@ -121,9 +126,10 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: build/app/outputs/aquarium-ai-staging.aab
-          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.aab
+          asset_name: >-
+            aquarium-ai-staging-${{ github.event.release.tag_name }}.aab
           asset_content_type: application/octet-stream
-      
+
       # Upload Staging APK to Release
       - name: Upload Staging APK to Release
         uses: actions/upload-release-asset@v1
@@ -132,5 +138,6 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: build/app/outputs/aquarium-ai-staging.apk
-          asset_name: aquarium-ai-staging-${{ github.event.release.tag_name }}.apk
+          asset_name: >-
+            aquarium-ai-staging-${{ github.event.release.tag_name }}.apk
           asset_content_type: application/vnd.android.package-archive
