@@ -335,6 +335,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildMainMenu() {
     final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.watch(appSettingsProvider);
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -356,23 +357,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
-        _buildMenuCard(
-          context: context,
-          title: l10n.aiProvider,
-          subtitle: l10n.configureAIProviders,
-          icon: Icons.smart_toy,
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        if (appSettings.enableAI) ...[
+          _buildMenuCard(
+            context: context,
+            title: l10n.aiProvider,
+            subtitle: l10n.configureAIProviders,
+            icon: Icons.smart_toy,
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: Theme.of(context).colorScheme.primary,
+            onTap: () => _showAIProviderDialog(),
           ),
-          iconColor: Theme.of(context).colorScheme.primary,
-          onTap: () => _showAIProviderDialog(),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         _buildMenuCard(
           context: context,
           title: l10n.appSettings,
@@ -753,10 +756,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const Divider(height: 24),
                   
                   SwitchListTile(
+                    title: Text(l10n.enableAI),
+                    subtitle: Text(l10n.enableAIDesc),
+                    value: appSettings.enableAI,
+                    onChanged: (value) {
+                      // Log settings change
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'enable_ai',
+                        newValue: value.toString(),
+                        oldValue: appSettings.enableAI.toString(),
+                      );
+                      
+                      // Update the provider
+                      ref.read(appSettingsProvider.notifier).setEnableAI(value);
+                      
+                      // Update UI
+                      if (setDialogState != null) {
+                        setDialogState(() {});
+                      } else {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                  const Divider(height: 24),
+                  
+                  SwitchListTile(
                     title: Text(l10n.showAIStockingButton),
                     subtitle: Text(l10n.showAIStockingButtonDesc),
                     value: appSettings.showStockingButton,
-                    onChanged: (value) {
+                    // Disable the toggle when AI is disabled
+                    onChanged: appSettings.enableAI ? (value) {
                       // Log settings change
                       AnalyticsService.logSettingsChange(
                         settingName: 'show_stocking_button',
@@ -774,7 +803,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       } else {
                         setState(() {});
                       }
-                    },
+                    } : null,
                   ),
                   const Divider(height: 24),
                   ListTile(

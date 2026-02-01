@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/app_settings_provider.dart';
 
-class ApiKeyDialog extends StatelessWidget {
+class ApiKeyDialog extends ConsumerWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
@@ -17,7 +19,7 @@ class ApiKeyDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
       content: SingleChildScrollView(
@@ -115,15 +117,25 @@ class ApiKeyDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            await setNeverShowAgain();
+            // Disable AI instead of just dismissing
+            await ref.read(appSettingsProvider.notifier).setEnableAI(false);
             if (context.mounted) {
               Navigator.of(context).pop();
             }
           },
           child: Text(
-            'Never Show Again',
+            'No AI',
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
+        ),
+        TextButton(
+          onPressed: () async {
+            await setNeverShowAgain();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Never Show Again'),
         ),
         ElevatedButton(
           onPressed: () {

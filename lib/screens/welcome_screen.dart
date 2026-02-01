@@ -16,6 +16,7 @@ import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
 import '../providers/tank_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
@@ -289,37 +290,42 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Get fish data for harmony calculation
     final fishCompatibilityState = ref.watch(fishCompatibilityProvider);
     final fishData = fishCompatibilityState.fishData.value;
+    
+    // Watch app settings for AI toggle
+    final appSettings = ref.watch(appSettingsProvider);
 
     final List<FeatureInfo> features = [
-      FeatureInfo(
-        icon: '🐡',
-        title: l10n.aiCompatibilityTool,
-        description: l10n.aiCompatibilityDescription,
-        routeName: '/compat-ai',
-        delay: const Duration(milliseconds: 650),
-      ),
-      FeatureInfo(
-        icon: '🤖',
-        title: l10n.aiChatbot,
-        description: l10n.aiChatbotDescription,
-        routeName: '/chatbot',
-        delay: const Duration(milliseconds: 700),
-      ),
-      FeatureInfo(
-        icon: '📷',
-        title: l10n.photoAnalyzer,
-        description: l10n.photoAnalyzerDescription,
-        routeName: '/chatbot',
-        openPhotoAnalyzer: true,
-        delay: const Duration(milliseconds: 750),
-      ),
-      FeatureInfo(
-        icon: '🦐',
-        title: l10n.aiStockingAssistant,
-        description: l10n.aiStockingDescription,
-        routeName: '/stocking',
-        delay: const Duration(milliseconds: 800),
-      ),
+      if (appSettings.enableAI) ...[
+        FeatureInfo(
+          icon: '🐡',
+          title: l10n.aiCompatibilityTool,
+          description: l10n.aiCompatibilityDescription,
+          routeName: '/compat-ai',
+          delay: const Duration(milliseconds: 650),
+        ),
+        FeatureInfo(
+          icon: '🤖',
+          title: l10n.aiChatbot,
+          description: l10n.aiChatbotDescription,
+          routeName: '/chatbot',
+          delay: const Duration(milliseconds: 700),
+        ),
+        FeatureInfo(
+          icon: '📷',
+          title: l10n.photoAnalyzer,
+          description: l10n.photoAnalyzerDescription,
+          routeName: '/chatbot',
+          openPhotoAnalyzer: true,
+          delay: const Duration(milliseconds: 750),
+        ),
+        FeatureInfo(
+          icon: '🦐',
+          title: l10n.aiStockingAssistant,
+          description: l10n.aiStockingDescription,
+          routeName: '/stocking',
+          delay: const Duration(milliseconds: 800),
+        ),
+      ],
       FeatureInfo(
         icon: '🧪',
         title: l10n.aquariumCalculators,
