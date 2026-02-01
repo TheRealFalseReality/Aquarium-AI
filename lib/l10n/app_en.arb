@@ -1813,8 +1813,8 @@
     "description": "Remove button label"
   },
 
-  "continue": "Continue",
-  "@continue": {
+  "continueLabel": "Continue",
+  "@continueLabel": {
     "description": "Continue button label"
   },
 
@@ -2365,3 +2365,5 @@
     "description": "View photo analysis button label"
   }
 }
+
+

@@ -293,7 +293,7 @@
   "camera": "Cámara",
   "addPhoto": "Agregar Foto",
   "remove": "Quitar",
-  "continue": "Continuar",
+  "continueLabel": "Continuar",
   "clear": "Limpiar",
   "set": "Establecer",
   "load": "Cargar",
@@ -440,3 +440,5 @@
   "repeatEvery": "Repetir Cada",
   "salinity": "Salinidad"
 }
+
+

@@ -281,7 +281,7 @@
   "camera": "Caméra",
   "addPhoto": "Ajouter une Photo",
   "remove": "Supprimer",
-  "continue": "Continuer",
+  "continueLabel": "Continuer",
   "clear": "Effacer",
   "set": "Définir",
   "load": "Charger",
@@ -441,3 +441,5 @@
   "xMinutesAgo": "Il y a {count} minutes",
   "yesterday": "Hier"
 }
+
+

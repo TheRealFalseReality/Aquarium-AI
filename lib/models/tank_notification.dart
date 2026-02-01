@@ -546,3 +546,4 @@ class TankNotification {
     return type.displayName;
   }
 }
+

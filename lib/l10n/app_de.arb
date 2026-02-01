@@ -293,7 +293,7 @@
   "camera": "Kamera",
   "addPhoto": "Foto Hinzufügen",
   "remove": "Entfernen",
-  "continue": "Weiter",
+  "continueLabel": "Weiter",
   "clear": "Löschen",
   "set": "Einstellen",
   "load": "Laden",
@@ -440,3 +440,5 @@
   "repeatEvery": "Wiederholen Alle",
   "salinity": "Salzgehalt"
 }
+
+

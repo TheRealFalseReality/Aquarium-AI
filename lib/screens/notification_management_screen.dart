@@ -1246,3 +1246,4 @@ class _NotificationFormScreenState
     }
   }
 }
+

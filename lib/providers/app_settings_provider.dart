@@ -166,3 +166,4 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
 final appSettingsProvider = StateNotifierProvider<AppSettingsNotifier, AppSettingsState>(
   (ref) => AppSettingsNotifier(),
 );
+

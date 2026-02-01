@@ -6,7 +6,7 @@ import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
@@ -231,6 +231,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   }
 
   Widget _composer(ChatState chatState) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final focused = _inputFocusNode.hasFocus;
     final loading = chatState.isLoading;
@@ -361,6 +362,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   }
 
 Widget _suggestionMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final expanded = _expandedMenu != null;
 
@@ -531,6 +533,7 @@ Widget _suggestionMenu(BuildContext context) {
   }
 
   Widget _toolButtons(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
@@ -766,6 +769,7 @@ class MessageBubble extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final bubbleColor = isUser
         ? cs.primaryContainer.withOpacity(0.85)

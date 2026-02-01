@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/species_tags_provider.dart';
 import '../services/fish_data_service.dart';
@@ -381,3 +381,4 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     );
   }
 }
+

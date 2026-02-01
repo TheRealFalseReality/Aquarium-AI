@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
@@ -90,6 +90,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   }
 
   void _onCategoryChanged(String category) {
+    final l10n = AppLocalizations.of(context)!;
     // If no inhabitants or same category, just proceed
     if (_inhabitants.isEmpty || _selectedCategory == category) {
       _performCategoryChange(category);
@@ -116,7 +117,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
               Navigator.of(context).pop();
               _performCategoryChange(category);
             },
-            child: Text(l10n.continue_),
+            child: Text(l10n.continueLabel),
           ),
         ],
       ),

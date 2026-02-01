@@ -1,6 +1,6 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/species_tags_provider.dart';
@@ -243,6 +243,7 @@ class FishCompatibilityScreenState
 
   void _showLoadingOverlay(
       BuildContext context, List<Fish> selectedFish, String category) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loadingOverlayEntry != null) return;
 
     _loadingOverlayEntry = OverlayEntry(
@@ -556,6 +557,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildSearchWidget(bool canShowLastReportFab) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 350),
       transitionBuilder: (child, animation) {
@@ -667,6 +669,7 @@ class FishCompatibilityScreenState
 
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return ClipRRect(
       child: BackdropFilter(

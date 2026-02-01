@@ -2015,6 +2015,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showTankDetails(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final screenSize = MediaQuery.of(context).size;
     final isMobile = screenSize.width < 600;
@@ -2982,6 +2983,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
+    final l10n = AppLocalizations.of(context)!;
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
     
@@ -3002,19 +3004,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         fit: BoxFit.contain,
                         errorWidget: (context, url, error) => Container(
                           color: Colors.black,
-                          child: const Center(
+                          child: Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.error_outline,
                                   color: Colors.white,
                                   size: 48,
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Text(
-                                  l10n.failedToLoadImage.replaceAll('{error}', ''),
-                                  style: TextStyle(color: Colors.white),
+                                  l10n.failedToLoadImage(error?.toString() ?? ''),
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ],
                             ),
@@ -3079,7 +3081,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(l10n.failedToLoadImage.replaceAll('{error}', e.toString())),
+                            content: Text(l10n.failedToLoadImage(e.toString())),
                             duration: const Duration(seconds: 3),
                           ),
                         );
@@ -3551,7 +3553,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.deleteTankTitle, textAlign: TextAlign.center),
-        content: Text(l10n.deleteTankConfirm.replaceAll('{tankName}', tank.name), textAlign: TextAlign.center),
+        content: Text(
+          l10n.deleteTankConfirm(tank.name),
+          textAlign: TextAlign.center,
+        ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(

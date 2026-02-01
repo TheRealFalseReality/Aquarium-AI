@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';

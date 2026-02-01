@@ -2,7 +2,7 @@ import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
 import '../widgets/common_buttons.dart';

@@ -90,3 +90,4 @@ class NotificationLog {
     return type.displayName;
   }
 }
+

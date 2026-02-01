@@ -54,3 +54,4 @@ class CancelledException implements Exception {
   @override
   String toString() => 'Future was cancelled';
 }
+

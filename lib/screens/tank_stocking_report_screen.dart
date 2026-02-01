@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/stocking_recommendation.dart';
 import '../models/tank.dart';
 import '../main_layout.dart';
@@ -71,6 +71,7 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Listen for new recommendations and replace current screen
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       if (next.recommendations != null &&
@@ -213,18 +214,18 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
         if (_isRegenerating)
           Container(
             color: Colors.black.withOpacity(0.5),
-            child: const Center(
+            child: Center(
               child: Card(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
                       Text(l10n.generatingNewRecommendations),
-                      SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: 8),
+                      const Text(
                         'This may take up to 60 seconds',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
@@ -930,3 +931,4 @@ class _FishCardGrid extends StatelessWidget {
     }
   }
 }
+
