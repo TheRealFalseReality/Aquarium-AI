@@ -134,7 +134,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
-                    'Turn off AI features to use only calculators and tank management tools. AI features include chatbot, compatibility analysis, stocking assistant, and photo analyzer.',
+                    'Toggle AI features to use only calculators and tank management tools.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
