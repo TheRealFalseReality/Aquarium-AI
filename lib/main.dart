@@ -42,7 +42,7 @@ bool _firebaseInitialized = false;
 /// Returns true if initialization was successful, false otherwise
 Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
   int retries = 0;
-  int delay = 1000; // Initial delay in milliseconds
+  int retryDelayMs = 1000; // Initial delay in milliseconds
   
   while (retries < maxRetries) {
     try {
@@ -66,8 +66,8 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
       }
       
       // Exponential backoff
-      await Future.delayed(Duration(milliseconds: delay));
-      delay *= 2;
+      await Future.delayed(Duration(milliseconds: retryDelayMs));
+      retryDelayMs *= 2;
     } on SocketException catch (e) {
       retries++;
       if (kDebugMode) {
@@ -82,8 +82,8 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
         return false;
       }
       
-      await Future.delayed(Duration(milliseconds: delay));
-      delay *= 2;
+      await Future.delayed(Duration(milliseconds: retryDelayMs));
+      retryDelayMs *= 2;
     } catch (e) {
       // For other errors, log and fail without retrying
       if (kDebugMode) {
@@ -248,21 +248,10 @@ class MyApp extends ConsumerWidget {
   TextTheme _getSafeTextTheme(BuildContext context) {
     try {
       return GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
-    } on HandshakeException catch (e) {
-      if (kDebugMode) {
-        debugPrint('Google Fonts HandshakeException: $e');
-        debugPrint('Using default text theme');
-      }
-      return Theme.of(context).textTheme;
-    } on SocketException catch (e) {
-      if (kDebugMode) {
-        debugPrint('Google Fonts SocketException: $e');
-        debugPrint('Using default text theme');
-      }
-      return Theme.of(context).textTheme;
     } catch (e) {
+      // Catch all network-related errors (HandshakeException, SocketException, etc.)
       if (kDebugMode) {
-        debugPrint('Google Fonts error: $e');
+        debugPrint('Google Fonts loading error: $e');
         debugPrint('Using default text theme');
       }
       return Theme.of(context).textTheme;

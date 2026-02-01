@@ -23,10 +23,7 @@ class ApiErrorHandler {
   /// ```
   static String getFriendlyErrorMessage(String error) {
     // Check for TLS/SSL handshake errors
-    if (error.toLowerCase().contains('handshake') || 
-        error.toLowerCase().contains('certificate') ||
-        error.toLowerCase().contains('ssl') ||
-        error.toLowerCase().contains('tls')) {
+    if (isHandshakeError(error)) {
       return '🔒 **Secure Connection Failed**\n\n'
           'Unable to establish a secure connection. This could be due to:\n'
           '• Network security settings or firewall\n'
@@ -36,23 +33,25 @@ class ApiErrorHandler {
           'Try disabling VPN/proxy or check your network settings.';
     }
     
+    final errorLower = error.toLowerCase();
+    
     // Check for rate limit errors
-    if (error.contains('429') || error.toLowerCase().contains('rate limit')) {
+    if (error.contains('429') || errorLower.contains('rate limit')) {
       return '⚠️ **Rate Limit Reached**\n\nThe AI service is busy. Please try again in a moment.';
     }
     
     // Check for quota exceeded errors
-    if (error.toLowerCase().contains('quota')) {
+    if (errorLower.contains('quota')) {
       return '⚠️ **Quota Exceeded**\n\nYou have exceeded your API quota. Please check your plan and billing details.';
     }
     
     // Check for API key errors
-    if (error.toLowerCase().contains('api key') || error.toLowerCase().contains('unauthorized')) {
+    if (errorLower.contains('api key') || errorLower.contains('unauthorized')) {
       return '⚠️ **Authentication Error**\n\nYour API key may be invalid or missing. Please check your settings.';
     }
     
     // Check for network errors
-    if (error.toLowerCase().contains('network') || error.toLowerCase().contains('connection')) {
+    if (errorLower.contains('network') || errorLower.contains('connection')) {
       return '🔌 **Connection Issue**\n\nCould not reach the AI service. Please check your internet connection.';
     }
     
