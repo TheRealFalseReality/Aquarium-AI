@@ -437,7 +437,7 @@ Widget _suggestionMenu(BuildContext context) {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Column(
                     children: [
-                      _menuTitle(_getMenuTitle(_expandedMenu!), context),
+                      _menuTitle(_getMenuTitle(_expandedMenu!, context), context),
                       const SizedBox(height: 8),
                       _menuContent(_expandedMenu!, context),
                     ],
@@ -450,14 +450,15 @@ Widget _suggestionMenu(BuildContext context) {
     );
   }
 
-  String _getMenuTitle(String menu) {
+  String _getMenuTitle(String menu, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (menu) {
       case 'aquarium':
-        return 'Aquarium Questions';
+        return l10n.aquarium;
       case 'aquapi':
-        return 'AquaPi Questions';
+        return l10n.aquaPi;
       case 'ai_tools':
-        return 'AI Tools';
+        return l10n.aiTools;
       default:
         return '';
     }
