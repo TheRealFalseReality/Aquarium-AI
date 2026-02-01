@@ -93,7 +93,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
         .replaceAll('_', ' ')
         .split(' ')
         .map((word) {
-          if (word.isEmpty || word.length == 0) return '';
+          if (word.isEmpty) return '';
           if (word.length == 1) return word[0].toUpperCase();
           return word[0].toUpperCase() + word.substring(1).toLowerCase();
         })
