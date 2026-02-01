@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -27,9 +28,74 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
 import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
+import './utils/api_error_handler.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// Global flag to track Firebase initialization status
+bool _firebaseInitialized = false;
+
+/// Initialize Firebase with retry logic and error handling
+/// 
+/// Handles TLS/SSL handshake exceptions and other connection issues gracefully
+/// Returns true if initialization was successful, false otherwise
+Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
+  int retries = 0;
+  int retryDelayMs = 1000; // Initial delay in milliseconds
+  
+  while (retries < maxRetries) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      _firebaseInitialized = true;
+      return true;
+    } on HandshakeException catch (e) {
+      retries++;
+      if (kDebugMode) {
+        debugPrint('Firebase initialization HandshakeException (attempt $retries/$maxRetries): $e');
+      }
+      
+      if (retries >= maxRetries) {
+        if (kDebugMode) {
+          debugPrint('Firebase initialization failed after $maxRetries attempts due to handshake error');
+          debugPrint('The app will continue without Firebase features');
+        }
+        return false;
+      }
+      
+      // Exponential backoff
+      await Future.delayed(Duration(milliseconds: retryDelayMs));
+      retryDelayMs *= 2;
+    } on SocketException catch (e) {
+      retries++;
+      if (kDebugMode) {
+        debugPrint('Firebase initialization SocketException (attempt $retries/$maxRetries): $e');
+      }
+      
+      if (retries >= maxRetries) {
+        if (kDebugMode) {
+          debugPrint('Firebase initialization failed after $maxRetries attempts due to network error');
+          debugPrint('The app will continue without Firebase features');
+        }
+        return false;
+      }
+      
+      await Future.delayed(Duration(milliseconds: retryDelayMs));
+      retryDelayMs *= 2;
+    } catch (e) {
+      // For other errors, log and fail without retrying
+      if (kDebugMode) {
+        debugPrint('Firebase initialization failed with unexpected error: $e');
+        debugPrint('The app will continue without Firebase features');
+      }
+      return false;
+    }
+  }
+  
+  return false;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,34 +110,46 @@ void main() async {
     ),
   );
   
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase with retry logic and error handling
+  _firebaseInitialized = await _initializeFirebaseWithRetry();
+  
+  // Only initialize Firebase-dependent services if Firebase initialized successfully
+  if (_firebaseInitialized) {
+    // Initialize notification service with navigator key (non-blocking)
+    NotificationService().initialize(navigatorKey: navigatorKey).catchError((error) {
+      if (kDebugMode) {
+        debugPrint('Notification service initialization error: $error');
+      }
+      // Log to crash reporting if initialization fails
+      try {
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          StackTrace.current,
+          reason: 'Notification service initialization failed',
+          fatal: false,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to log notification error to Crashlytics: $e');
+        }
+      }
+    });
 
-  // Initialize notification service with navigator key (non-blocking)
-  NotificationService().initialize(navigatorKey: navigatorKey).catchError((error) {
+    // Initialize Analytics session tracking (non-blocking)
+    // Don't await this to prevent blocking app startup
+    AnalyticsService.logSessionStart().catchError((error) {
+      if (kDebugMode) {
+        debugPrint('Analytics session start error: $error');
+      }
+    });
+
+    // Set initial screen
+    AnalyticsService.setCurrentScreen('welcome_screen');
+  } else {
     if (kDebugMode) {
-      debugPrint('Notification service initialization error: $error');
+      debugPrint('Skipping Firebase-dependent services initialization');
     }
-    // Log to crash reporting if initialization fails
-    FirebaseCrashlytics.instance.recordError(
-      error,
-      StackTrace.current,
-      reason: 'Notification service initialization failed',
-      fatal: false,
-    );
-  });
-
-  // Initialize Analytics session tracking (non-blocking)
-  // Don't await this to prevent blocking app startup
-  AnalyticsService.logSessionStart().catchError((error) {
-    if (kDebugMode) {
-      print('Analytics session start error: $error');
-    }
-  });
-
-  // Set initial screen
-  AnalyticsService.setCurrentScreen('welcome_screen');
+  }
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
@@ -83,17 +161,27 @@ void main() async {
       // ignore: avoid_print
       print('Stack trace: ${errorDetails.stack}');
     }
-    // Record to Crashlytics
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    // Also log to Analytics (non-blocking)
-    AnalyticsService.logError(
-      errorType: 'flutter_fatal_error',
-      errorMessage: errorDetails.exception.toString(),
-    ).catchError((error) {
-      if (kDebugMode) {
-        print('Analytics error logging failed: $error');
+    
+    // Only record to Crashlytics if Firebase is initialized
+    if (_firebaseInitialized) {
+      try {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to record Flutter error to Crashlytics: $e');
+        }
       }
-    });
+      
+      // Also log to Analytics (non-blocking)
+      AnalyticsService.logError(
+        errorType: 'flutter_fatal_error',
+        errorMessage: errorDetails.exception.toString(),
+      ).catchError((error) {
+        if (kDebugMode) {
+          print('Analytics error logging failed: $error');
+        }
+      });
+    }
   };
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
@@ -104,17 +192,27 @@ void main() async {
       // ignore: avoid_print
       print('Stack trace: $stack');
     }
-    // Record to Crashlytics
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    // Also log to Analytics (non-blocking)
-    AnalyticsService.logError(
-      errorType: 'platform_error',
-      errorMessage: error.toString(),
-    ).catchError((analyticsError) {
-      if (kDebugMode) {
-        print('Analytics error logging failed: $analyticsError');
+    
+    // Only record to Crashlytics if Firebase is initialized
+    if (_firebaseInitialized) {
+      try {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to record platform error to Crashlytics: $e');
+        }
       }
-    });
+      
+      // Also log to Analytics (non-blocking)
+      AnalyticsService.logError(
+        errorType: 'platform_error',
+        errorMessage: error.toString(),
+      ).catchError((analyticsError) {
+        if (kDebugMode) {
+          print('Analytics error logging failed: $analyticsError');
+        }
+      });
+    }
     return true;
   };
 
@@ -131,6 +229,11 @@ class MyApp extends ConsumerWidget {
 
   // Helper method to safely get navigator observers
   List<NavigatorObserver> _getNavigatorObservers() {
+    // Only add analytics observer if Firebase is initialized
+    if (!_firebaseInitialized) {
+      return [];
+    }
+    
     try {
       return [AnalyticsService.observer];
     } catch (e) {
@@ -138,6 +241,20 @@ class MyApp extends ConsumerWidget {
         print('Failed to initialize analytics observer: $e');
       }
       return []; // Return empty list if analytics observer fails
+    }
+  }
+  
+  // Helper method to safely load Google Fonts with fallback
+  TextTheme _getSafeTextTheme(BuildContext context) {
+    try {
+      return GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
+    } catch (e) {
+      // Catch all network-related errors (HandshakeException, SocketException, etc.)
+      if (kDebugMode) {
+        debugPrint('Google Fonts loading error: $e');
+        debugPrint('Using default text theme');
+      }
+      return Theme.of(context).textTheme;
     }
   }
 
@@ -192,8 +309,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
     final appSettings = ref.watch(appSettingsProvider);
-    final textTheme =
-        GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
+    final textTheme = _getSafeTextTheme(context);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -415,12 +531,14 @@ class MyApp extends ConsumerWidget {
                 screenName = 'welcome_screen';
             }
             
-            // Log screen view (non-blocking)
-            AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
-              if (kDebugMode) {
-                print('Analytics screen view error: $error');
-              }
-            });
+            // Log screen view (non-blocking) only if Firebase is initialized
+            if (_firebaseInitialized) {
+              AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
+                if (kDebugMode) {
+                  print('Analytics screen view error: $error');
+                }
+              });
+            }
             
             return FadeSlideRoute(page: page);
           },

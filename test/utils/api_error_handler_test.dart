@@ -43,6 +43,28 @@ void main() {
         expect(result, contains('Connection Issue'));
       });
 
+      test('should detect handshake error', () {
+        final result = ApiErrorHandler.getFriendlyErrorMessage('HandshakeException: Connection terminated during handshake');
+        expect(result, contains('Secure Connection Failed'));
+        expect(result, contains('VPN or proxy'));
+      });
+
+      test('should detect certificate error', () {
+        final result = ApiErrorHandler.getFriendlyErrorMessage('certificate verification failed');
+        expect(result, contains('Secure Connection Failed'));
+        expect(result, contains('device certificates'));
+      });
+
+      test('should detect SSL error', () {
+        final result = ApiErrorHandler.getFriendlyErrorMessage('SSL connection error');
+        expect(result, contains('Secure Connection Failed'));
+      });
+
+      test('should detect TLS error', () {
+        final result = ApiErrorHandler.getFriendlyErrorMessage('TLS handshake failed');
+        expect(result, contains('Secure Connection Failed'));
+      });
+
       test('should return generic error for unknown errors', () {
         final result = ApiErrorHandler.getFriendlyErrorMessage('unknown error occurred');
         expect(result, contains('An Unexpected Error Occurred'));
@@ -75,6 +97,56 @@ void main() {
       test('should return false for non-quota errors', () {
         expect(ApiErrorHandler.isQuotaError('rate limit'), false);
         expect(ApiErrorHandler.isQuotaError('network error'), false);
+      });
+    });
+
+    group('isHandshakeError', () {
+      test('should detect handshake errors', () {
+        expect(ApiErrorHandler.isHandshakeError('HandshakeException occurred'), true);
+        expect(ApiErrorHandler.isHandshakeError('handshake failed'), true);
+      });
+
+      test('should detect certificate errors', () {
+        expect(ApiErrorHandler.isHandshakeError('certificate verification failed'), true);
+        expect(ApiErrorHandler.isHandshakeError('Certificate expired'), true);
+      });
+
+      test('should detect SSL/TLS errors', () {
+        expect(ApiErrorHandler.isHandshakeError('SSL error'), true);
+        expect(ApiErrorHandler.isHandshakeError('TLS handshake failed'), true);
+      });
+
+      test('should return false for non-handshake errors', () {
+        expect(ApiErrorHandler.isHandshakeError('rate limit'), false);
+        expect(ApiErrorHandler.isHandshakeError('quota error'), false);
+      });
+    });
+
+    group('isNetworkError', () {
+      test('should detect network errors', () {
+        expect(ApiErrorHandler.isNetworkError('network error'), true);
+        expect(ApiErrorHandler.isNetworkError('Network connection failed'), true);
+      });
+
+      test('should detect connection errors', () {
+        expect(ApiErrorHandler.isNetworkError('connection timeout'), true);
+        expect(ApiErrorHandler.isNetworkError('Connection refused'), true);
+      });
+
+      test('should detect socket errors', () {
+        expect(ApiErrorHandler.isNetworkError('socket exception'), true);
+        expect(ApiErrorHandler.isNetworkError('SocketException occurred'), true);
+      });
+
+      test('should detect handshake errors as network errors', () {
+        expect(ApiErrorHandler.isNetworkError('HandshakeException'), true);
+        expect(ApiErrorHandler.isNetworkError('certificate error'), true);
+        expect(ApiErrorHandler.isNetworkError('SSL error'), true);
+      });
+
+      test('should return false for non-network errors', () {
+        expect(ApiErrorHandler.isNetworkError('rate limit'), false);
+        expect(ApiErrorHandler.isNetworkError('quota exceeded'), false);
       });
     });
   });
