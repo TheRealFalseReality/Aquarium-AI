@@ -140,11 +140,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
               onTap: () {
                 // Pop all the way back to Information screen
                 // We need to pop breadcrumbs.length + 1 times (all breadcrumbs + current page)
-                int popCount = widget.breadcrumbs.length + 1;
-                for (int i = 0; i < popCount; i++) {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
+                final popCount = widget.breadcrumbs.length + 1;
+                for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
+                  Navigator.of(context).pop();
                 }
               },
               child: Padding(
@@ -186,11 +184,12 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      // Pop until we reach this breadcrumb level
-                      // We need to pop (breadcrumbs.length - index - 1) times
-                      // because the current page is not in the breadcrumbs list
-                      int popCount = widget.breadcrumbs.length - index - 1;
-                      for (int i = 0; i < popCount; i++) {
+                      // Pop until we reach this breadcrumb's page
+                      // We need to pop (breadcrumbs.length - index) times to reach this breadcrumb
+                      // Example: breadcrumbs = [A, B, C], current = D, index = 1 (B)
+                      // popCount = 3 - 1 = 2 (pop D and C to reach B)
+                      final popCount = widget.breadcrumbs.length - index;
+                      for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
                         Navigator.of(context).pop();
                       }
                     },
