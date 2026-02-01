@@ -50,6 +50,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Enable code shrinking, obfuscation, and optimization
+            minifyEnabled = true
             // ProGuard/R8 configuration for flutter_local_notifications
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
