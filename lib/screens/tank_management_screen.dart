@@ -821,7 +821,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
-    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
@@ -3020,7 +3019,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  l10n.failedToLoadImage(error?.toString() ?? ''),
+                                  l10n.failedToLoadImage(error.toString()),
                                   style: const TextStyle(color: Colors.white),
                                 ),
                               ],

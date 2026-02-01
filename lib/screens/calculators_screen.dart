@@ -47,7 +47,6 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     const List<String> calculatorTypes = [
       'Salinity',
       'CO2',
