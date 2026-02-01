@@ -116,10 +116,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   }
 
   Widget _buildBreadcrumbs() {
-    if (widget.breadcrumbs.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
+    // Always show at least the home link
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -166,49 +163,51 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                 ),
               ),
             ),
-            // Breadcrumb trail
-            ...widget.breadcrumbs.asMap().entries.map((entry) {
-              final index = entry.key;
-              final breadcrumb = entry.value;
-              final isLast = index == widget.breadcrumbs.length - 1;
+            // Breadcrumb trail (only if there are breadcrumbs)
+            if (widget.breadcrumbs.isNotEmpty) ...[
+              ...widget.breadcrumbs.asMap().entries.map((entry) {
+                final index = entry.key;
+                final breadcrumb = entry.value;
+                final isLast = index == widget.breadcrumbs.length - 1;
 
-              return Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Icon(
-                      Icons.chevron_right,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Pop until we reach this breadcrumb's page
-                      // We need to pop (breadcrumbs.length - index) times to reach this breadcrumb
-                      // Example: breadcrumbs = [A, B, C], current = D, index = 1 (B)
-                      // popCount = 3 - 1 = 2 (pop D and C to reach B)
-                      final popCount = widget.breadcrumbs.length - index;
-                      for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Text(
-                        breadcrumb.title,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isLast
-                                  ? Theme.of(context).colorScheme.onSurfaceVariant
-                                  : Theme.of(context).colorScheme.primary,
-                              fontWeight: isLast ? FontWeight.normal : FontWeight.w500,
-                            ),
+                return Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  ),
-                ],
-              );
-            }),
+                    InkWell(
+                      onTap: () {
+                        // Pop until we reach this breadcrumb's page
+                        // We need to pop (breadcrumbs.length - index) times to reach this breadcrumb
+                        // Example: breadcrumbs = [A, B, C], current = D, index = 1 (B)
+                        // popCount = 3 - 1 = 2 (pop D and C to reach B)
+                        final popCount = widget.breadcrumbs.length - index;
+                        for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        child: Text(
+                          breadcrumb.title,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: isLast
+                                    ? Theme.of(context).colorScheme.onSurfaceVariant
+                                    : Theme.of(context).colorScheme.primary,
+                                fontWeight: isLast ? FontWeight.normal : FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
             // Current page (not clickable)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
