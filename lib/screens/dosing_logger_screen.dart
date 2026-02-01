@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../models/dosing_entry.dart';
 import '../providers/tank_provider.dart';
@@ -101,6 +102,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tank = _getCurrentTank();
     final groupedEntries = _groupEntriesByTreatment(tank);
     final cs = Theme.of(context).colorScheme;
@@ -114,7 +116,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () => _addDosingEntry(context),
-              tooltip: 'Add Dose',
+              tooltip: l10n.addDose,
             ),
           ],
         ),
@@ -167,7 +169,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                               treatmentName,
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text('${entries.length} dose${entries.length == 1 ? '' : 's'}'),
+                            subtitle: Text('${entries.length} ${entries.length == 1 ? l10n.dose : l10n.doses}'),
                             trailing: IconButton(
                               icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
                               onPressed: () {
@@ -198,13 +200,14 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _addDosingEntry(context),
           icon: const Icon(Icons.add),
-          label: const Text('Add Dose'),
+          label: Text(l10n.addDose),
         ),
       ),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -238,7 +241,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
             FilledButton.icon(
               onPressed: () => _addDosingEntry(context),
               icon: const Icon(Icons.add),
-              label: const Text('Add First Dose'),
+              label: Text(l10n.addFirstDose),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -253,6 +256,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   }
 
   Widget _buildSummaryCard(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final uniqueTreatments = tank.dosingEntries
         .map((e) => e.treatmentName)
@@ -275,7 +279,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                 Icon(Icons.summarize, color: cs.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Dosing Summary',
+                  l10n.dosingSum,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -288,7 +292,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                 Expanded(
                   child: _buildSummaryItem(
                     context,
-                    'Total Doses',
+                    l10n.totalDoses,
                     totalDoses.toString(),
                     Icons.medication,
                   ),
@@ -296,7 +300,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                 Expanded(
                   child: _buildSummaryItem(
                     context,
-                    'Treatments',
+                    l10n.treatments,
                     uniqueTreatments.toString(),
                     Icons.inventory_2,
                   ),
@@ -414,15 +418,16 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   }
 
   void _showDeleteDialog(BuildContext context, DosingEntry entry) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Dose'),
-        content: const Text('Are you sure you want to delete this dosing entry?'),
+        title: Text(l10n.deleteDose),
+        content: Text(l10n.deleteDoseConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -430,7 +435,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
