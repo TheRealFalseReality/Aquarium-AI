@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
 
-class ApiKeyDialog extends ConsumerWidget {
+class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
@@ -19,7 +19,14 @@ class ApiKeyDialog extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ApiKeyDialog> createState() => _ApiKeyDialogState();
+}
+
+class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
+  @override
+  Widget build(BuildContext context) {
+    final appSettings = ref.watch(appSettingsProvider);
+    
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
       content: SingleChildScrollView(
@@ -107,6 +114,36 @@ class ApiKeyDialog extends ConsumerWidget {
               'Please go to the settings screen to add your API key and unlock these AI-powered benefits.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            const SizedBox(height: 24),
+            // AI Toggle Section
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+              child: SwitchListTile(
+                title: Text(
+                  'Enable AI Features',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Turn off AI features to use only calculators and tank management tools. AI features include chatbot, compatibility analysis, stocking assistant, and photo analyzer.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                value: appSettings.enableAI,
+                onChanged: (value) {
+                  ref.read(appSettingsProvider.notifier).setEnableAI(value);
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -117,20 +154,7 @@ class ApiKeyDialog extends ConsumerWidget {
         ),
         TextButton(
           onPressed: () async {
-            // Disable AI instead of just dismissing
-            await ref.read(appSettingsProvider.notifier).setEnableAI(false);
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text(
-            'No AI',
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ),
-        TextButton(
-          onPressed: () async {
-            await setNeverShowAgain();
+            await ApiKeyDialog.setNeverShowAgain();
             if (context.mounted) {
               Navigator.of(context).pop();
             }
