@@ -255,12 +255,21 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     onTap: () => navigate('/tank-volume'),
                   ),
                 ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 500),
+                  child: ListTile(
+                    leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
+                    title: const Text('Information'),
+                    subtitle: const Text('Documentation & Guides'),
+                    onTap: () => navigate('/information'),
+                  ),
+                ),
               ],
             ),
           ),
           const Divider(height: 1),
           AnimatedDrawerItem(
-            delay: const Duration(milliseconds: 500),
+            delay: const Duration(milliseconds: 550),
             child: _buildCollapsibleThemeMenu(),
           ),
           const Divider(height: 1),
@@ -419,7 +428,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       padding: EdgeInsets.fromLTRB(
           16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
-        delay: const Duration(milliseconds: 550),
+        delay: const Duration(milliseconds: 600),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
