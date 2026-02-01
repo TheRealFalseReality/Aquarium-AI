@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
@@ -859,7 +860,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ) : null,
         image: backgroundPhoto != null ? DecorationImage(
           image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
-              ? NetworkImage(backgroundPhoto.imageUrl!) as ImageProvider
+              ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!) as ImageProvider
               : FileImage(File(backgroundPhoto.imagePath!)),
           fit: BoxFit.cover,
           opacity: 0.8,
@@ -957,7 +958,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                                       return imageUrl != null
                                           ? (imageUrl.startsWith('http')
-                                              ? Image.network(imageUrl, fit: BoxFit.cover)
+                                              ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
                                               : Image.file(File(imageUrl), fit: BoxFit.cover))
                                           : Icon(
                                               tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
@@ -1331,10 +1332,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               borderRadius: BorderRadius.circular(7),
                               child: imageUrl != null
                                   ? (imageUrl.startsWith('http')
-                                      ? Image.network(
-                                          imageUrl,
+                                      ? CachedNetworkImage(
+                                          imageUrl: imageUrl,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => Container(
+                                          errorWidget: (context, url, error) => Container(
                                             color: cs.errorContainer,
                                             child: Icon(
                                               Icons.error_outline,
@@ -2205,12 +2206,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                               borderRadius: BorderRadius.circular(6),
                                               child: imageUrl != null
                                                   ? (imageUrl.startsWith('http')
-                                                      ? Image.network(
-                                                          imageUrl,
+                                                      ? CachedNetworkImage(
+                                                          imageUrl: imageUrl,
                                                           fit: BoxFit.cover,
                                                           width: double.infinity,
                                                           height: double.infinity,
-                                                          errorBuilder: (context, error, stackTrace) => Container(
+                                                          errorWidget: (context, url, error) => Container(
                                                             color: cs.errorContainer,
                                                             child: Icon(
                                                               Icons.error_outline,
@@ -2697,7 +2698,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                               radius: 22,
                                               backgroundImage: fishImageUrl != null 
                                                 ? (fishImageUrl.startsWith('http')
-                                                    ? NetworkImage(fishImageUrl)
+                                                    ? CachedNetworkImageProvider(fishImageUrl)
                                                     : FileImage(File(fishImageUrl)) as ImageProvider)
                                                 : null,
                                               backgroundColor: fishImageUrl == null 
@@ -2987,10 +2988,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 minScale: 0.5,
                 maxScale: 4.0,
                 child: imageUrl.startsWith('http')
-                    ? Image.network(
-                        imageUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        errorWidget: (context, url, error) => Container(
                           color: Colors.black,
                           child: const Center(
                             child: Column(
@@ -3236,7 +3237,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     borderRadius: BorderRadius.circular(7),
                     child: imageUrl != null
                         ? (imageUrl.startsWith('http')
-                            ? Image.network(imageUrl, fit: BoxFit.cover)
+                            ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
                             : Image.file(File(imageUrl), fit: BoxFit.cover))
                         : Container(color: Colors.grey),
                   ),
@@ -3355,7 +3356,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             borderRadius: BorderRadius.circular(7),
                             child: imageUrl != null
                                 ? (imageUrl.startsWith('http')
-                                    ? Image.network(imageUrl, fit: BoxFit.cover)
+                                    ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
                                     : Image.file(File(imageUrl), fit: BoxFit.cover))
                                 : Container(color: Colors.grey),
                           ),
@@ -4000,7 +4001,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 radius: 12,
                 backgroundImage: fishImageUrl != null 
                   ? (fishImageUrl.startsWith('http')
-                      ? NetworkImage(fishImageUrl)
+                      ? CachedNetworkImageProvider(fishImageUrl)
                       : FileImage(File(fishImageUrl)) as ImageProvider)
                   : null,
                 backgroundColor: fishImageUrl == null 

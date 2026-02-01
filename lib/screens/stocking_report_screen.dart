@@ -5,6 +5,7 @@ import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/stocking_recommendation.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
@@ -584,8 +585,8 @@ class _FishCardGrid extends StatelessWidget {
                             width: 100,
                             child: Column(
                                 children: [
-                                    Image.network(
-                                        fish.imageURL,
+                                    CachedNetworkImage(
+                                        imageUrl: fish.imageURL,
                                         height: 80,
                                         width: 100,
                                         fit: BoxFit.cover,

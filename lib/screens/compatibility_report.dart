@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
@@ -281,7 +282,7 @@ Widget _buildSelectedFishSection(
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundImage: NetworkImage(fish.imageURL),
+                    backgroundImage: CachedNetworkImageProvider(fish.imageURL),
                   ),
                 const SizedBox(width: 16),
                 Flexible(

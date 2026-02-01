@@ -6,6 +6,7 @@ import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/stocking_recommendation.dart';
 import '../models/tank.dart';
 import '../main_layout.dart';
@@ -810,16 +811,16 @@ class _FishCardGrid extends StatelessWidget {
                                   width: 100,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return Image.network(
-                                      fish.imageURL,
+                                    return CachedNetworkImage(
+                                      imageUrl: fish.imageURL,
                                       height: 80,
                                       width: 100,
                                       fit: BoxFit.cover,
                                     );
                                   },
                                 )
-                              : Image.network(
-                                  imageUrl,
+                              : CachedNetworkImage(
+                                  imageUrl: imageUrl,
                                   height: 80,
                                   width: 100,
                                   fit: BoxFit.cover,

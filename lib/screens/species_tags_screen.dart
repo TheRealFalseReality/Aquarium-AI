@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../main_layout.dart';
 import '../providers/species_tags_provider.dart';
 import '../services/fish_data_service.dart';
@@ -244,7 +245,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                 CircleAvatar(
                   radius: 20,
                   backgroundImage: fish.imageURL.isNotEmpty
-                      ? NetworkImage(fish.imageURL)
+                      ? CachedNetworkImageProvider(fish.imageURL)
                       : null,
                   child: fish.imageURL.isEmpty
                       ? const Icon(Icons.pets, size: 20)
