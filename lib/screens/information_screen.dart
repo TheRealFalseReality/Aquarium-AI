@@ -43,6 +43,7 @@ class InformationScreen extends StatelessWidget {
                     builder: (context) => const MarkdownViewerScreen(
                       assetPath: 'assets/docs/START_HERE_I18N.md',
                       title: 'Internationalization Guide',
+                      breadcrumbs: [], // Start with empty breadcrumbs from Information screen
                     ),
                   ),
                 );
