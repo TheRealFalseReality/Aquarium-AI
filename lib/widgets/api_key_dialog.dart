@@ -23,6 +23,89 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
 }
 
 class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
+  List<Widget> _buildDialogActions(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+
+    if (isSmallScreen) {
+      // For small screens, create a custom compact layout
+      return [
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Dismiss'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () async {
+                        await ApiKeyDialog.setNeverShowAgain();
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                      child: const Text('Never Show Again'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed('/settings');
+                  },
+                  child: const Text('Go to Settings'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ];
+    }
+
+    // For larger screens, use standard button layout
+    return [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Dismiss'),
+      ),
+      TextButton(
+        onPressed: () async {
+          await ApiKeyDialog.setNeverShowAgain();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.error,
+        ),
+        child: const Text('Never Show Again'),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          Navigator.of(context).pushNamed('/settings');
+        },
+        child: const Text('Go to Settings'),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final appSettings = ref.watch(appSettingsProvider);
@@ -149,88 +232,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
       ),
       actionsAlignment: MainAxisAlignment.end,
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      actions: [
-        // Custom layout for better mobile responsiveness
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // For narrow screens, use a more compact 2-row layout
-            if (constraints.maxWidth < 400) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Dismiss'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () async {
-                            await ApiKeyDialog.setNeverShowAgain();
-                            if (context.mounted) {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).colorScheme.error,
-                          ),
-                          child: const Text('Never Show Again'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed('/settings');
-                      },
-                      child: const Text('Go to Settings'),
-                    ),
-                  ),
-                ],
-              );
-            }
-            // For wider screens, use a single row layout
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Dismiss'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await ApiKeyDialog.setNeverShowAgain();
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                  child: const Text('Never Show Again'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushNamed('/settings');
-                  },
-                  child: const Text('Go to Settings'),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+      actions: _buildDialogActions(context),
     );
   }
 }
