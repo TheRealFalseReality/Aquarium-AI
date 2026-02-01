@@ -105,8 +105,7 @@ class NotificationService {
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
   /// 
   /// Returns the calculated next notification date, or null if the notification
-  /// is disabled or non-repeating. This can be used to update the notification
-  /// model's scheduledNextDate field.
+  /// is disabled. This can be used to update the notification model's scheduledNextDate field.
   Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
