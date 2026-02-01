@@ -830,7 +830,7 @@ class _FishCardGrid extends StatelessWidget {
                                   height: 80,
                                   width: 100,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
+                                  errorWidget: (context, url, error) {
                                     return Container(
                                       height: 80,
                                       width: 100,
