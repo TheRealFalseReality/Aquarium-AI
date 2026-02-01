@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
@@ -33,6 +34,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 
     // Tank quick summary from provider
     final tankState = ref.watch(tankProvider);
+    final appSettings = ref.watch(appSettingsProvider);
     final tankCount = tankState.tanks.length;
     // Show a random tank instead of the last tank
     // Initialize random index on first build or when tank count changes
@@ -203,34 +205,36 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 250),
-                  child: ListTile(
-                    leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
-                    title: Text(l10n.aiCompatibilityTool),
-                    subtitle:
-                        Text(l10n.aiCompatibilityDescription),
-                    onTap: () => navigate('/compat-ai'),
+                if (appSettings.enableAI) ...[
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 250),
+                    child: ListTile(
+                      leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
+                      title: Text(l10n.aiCompatibilityTool),
+                      subtitle:
+                          Text(l10n.aiCompatibilityDescription),
+                      onTap: () => navigate('/compat-ai'),
+                    ),
                   ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 300),
-                  child: ListTile(
-                    leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
-                    title: Text(l10n.aiChatbot),
-                    subtitle: Text(l10n.aiChatbotDescription),
-                    onTap: () => navigate('/chatbot'),
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 300),
+                    child: ListTile(
+                      leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(l10n.aiChatbot),
+                      subtitle: Text(l10n.aiChatbotDescription),
+                      onTap: () => navigate('/chatbot'),
+                    ),
                   ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 350),
-                  child: ListTile(
-                    leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
-                    title: Text(l10n.aiStockingAssistant),
-                    subtitle: Text(l10n.aiStockingDescription),
-                    onTap: () => navigate('/stocking'),
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 350),
+                    child: ListTile(
+                      leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
+                      title: Text(l10n.aiStockingAssistant),
+                      subtitle: Text(l10n.aiStockingDescription),
+                      onTap: () => navigate('/stocking'),
+                    ),
                   ),
-                ),
+                ],
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: ListTile(

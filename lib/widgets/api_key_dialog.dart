@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/app_settings_provider.dart';
 
-class ApiKeyDialog extends StatelessWidget {
+class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
@@ -17,7 +19,101 @@ class ApiKeyDialog extends StatelessWidget {
   }
 
   @override
+  ConsumerState<ApiKeyDialog> createState() => _ApiKeyDialogState();
+}
+
+class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
+  // Breakpoint for responsive button layout: screens narrower than 600px use compact 2-row layout
+  // This aligns with Material Design's compact width breakpoint for mobile devices
+  static const double _smallScreenBreakpoint = 600;
+
+  List<Widget> _buildDialogActions(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < _smallScreenBreakpoint;
+
+    if (isSmallScreen) {
+      // For small screens, create a custom compact layout
+      return [
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Dismiss'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () async {
+                        await ApiKeyDialog.setNeverShowAgain();
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                      child: const Text('Never Show Again'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed('/settings');
+                  },
+                  child: const Text('Go to Settings'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ];
+    }
+
+    // For larger screens, use standard button layout
+    return [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Dismiss'),
+      ),
+      TextButton(
+        onPressed: () async {
+          await ApiKeyDialog.setNeverShowAgain();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.error,
+        ),
+        child: const Text('Never Show Again'),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          Navigator.of(context).pushNamed('/settings');
+        },
+        child: const Text('Go to Settings'),
+      ),
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appSettings = ref.watch(appSettingsProvider);
+    
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
       content: SingleChildScrollView(
@@ -105,34 +201,42 @@ class ApiKeyDialog extends StatelessWidget {
               'Please go to the settings screen to add your API key and unlock these AI-powered benefits.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            const SizedBox(height: 24),
+            // AI Toggle Section
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+              child: SwitchListTile(
+                title: Text(
+                  'Enable AI Features',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Toggle AI features to use only calculators and tank management tools.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                value: appSettings.enableAI,
+                onChanged: (value) {
+                  ref.read(appSettingsProvider.notifier).setEnableAI(value);
+                },
+              ),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Dismiss'),
-        ),
-        TextButton(
-          onPressed: () async {
-            await setNeverShowAgain();
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text(
-            'Never Show Again',
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pushNamed('/settings');
-          },
-          child: const Text('Go to Settings'),
-        ),
-      ],
+      actionsAlignment: MainAxisAlignment.end,
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      actions: _buildDialogActions(context),
     );
   }
 }

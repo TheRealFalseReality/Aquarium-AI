@@ -366,6 +366,16 @@
     "description": "Models reset success message"
   },
 
+  "enableAI": "Enable AI Features",
+  "@enableAI": {
+    "description": "Enable AI Features setting title"
+  },
+
+  "enableAIDesc": "Turn AI features on or off. When disabled, AI-related features (chatbot, compatibility analysis, stocking assistant) will be hidden. Non-AI features (calculators, tank management) remain available.",
+  "@enableAIDesc": {
+    "description": "Enable AI Features setting description"
+  },
+
   "showAIStockingButton": "Show AI Stocking Button",
   "@showAIStockingButton": {
     "description": "Show AI Stocking Button setting title"
