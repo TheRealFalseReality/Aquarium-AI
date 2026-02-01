@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 
@@ -77,6 +78,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: 'About',
       bottomNavigationBar: const AdBanner(),
@@ -255,7 +257,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   const SizedBox(height: 16),
                   ListTile(
                     leading: const Icon(Icons.bug_report),
-                    title: const Text('Create Issue on GitHub'),
+                    title: Text(l10n.createIssueOnGitHub),
                     subtitle: const Text(
                         'Report bugs or suggest features on our GitHub repository'),
                     onTap: () => _launchURL(
@@ -263,7 +265,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.email),
-                    title: const Text('Contact Us'),
+                    title: Text(l10n.contactUs),
                     subtitle: const Text('contactus@capitalcityaquatics.com'),
                     onTap: _launchEmail,
                   ),
