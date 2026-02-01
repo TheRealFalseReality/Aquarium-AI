@@ -236,3 +236,4 @@ Future<void> _initializeDefaultTagsAsync(
     // Silently fail - default tags are optional
   }
 }
+

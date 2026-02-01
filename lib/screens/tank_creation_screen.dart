@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../providers/tank_provider.dart';
@@ -89,6 +90,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
   }
 
   void _onCategoryChanged(String category) {
+    final l10n = AppLocalizations.of(context)!;
     // If no inhabitants or same category, just proceed
     if (_inhabitants.isEmpty || _selectedCategory == category) {
       _performCategoryChange(category);
@@ -99,7 +101,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Tank Type'),
+        title: Text(l10n.changeTankType),
         content: Text(
           'Changing the tank type from ${_selectedCategory == 'freshwater' ? 'Freshwater' : 'Saltwater'} '
           'to ${category == 'freshwater' ? 'Freshwater' : 'Saltwater'} will remove all current inhabitants.\n\n'
@@ -108,14 +110,14 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               _performCategoryChange(category);
             },
-            child: const Text('Continue'),
+            child: Text(l10n.continueLabel),
           ),
         ],
       ),
@@ -475,6 +477,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tankState = ref.watch(tankProvider);
 
     return Scaffold(
@@ -736,7 +739,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ElevatedButton.icon(
                         onPressed: _addTankPhoto,
                         icon: const Icon(Icons.add_a_photo),
-                        label: const Text('Add Photo'),
+                        label: Text(l10n.addPhoto),
                       ),
                     ],
                   ),
@@ -821,7 +824,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                       ElevatedButton.icon(
                         onPressed: _availableFish.isEmpty ? null : _addInhabitant,
                         icon: const Icon(Icons.add),
-                        label: const Text('Add'),
+                        label: Text(l10n.add),
                       ),
                     ],
                   ),
@@ -969,7 +972,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> {
                 child: OutlinedButton.icon(
                   onPressed: tankState.isLoading ? null : _cancelAndReturn,
                   icon: const Icon(Icons.cancel),
-                  label: const Text('Cancel'),
+                  label: Text(l10n.cancel),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(
@@ -1225,6 +1228,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       child: SizedBox(
@@ -1552,7 +1556,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                 ElevatedButton.icon(
                   onPressed: _pickImageFromGallery,
                   icon: const Icon(Icons.photo_library_outlined, size: 18),
-                  label: const Text('Gallery'),
+                  label: Text(l10n.gallery),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     textStyle: const TextStyle(fontSize: 12),
@@ -1561,7 +1565,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                 ElevatedButton.icon(
                   onPressed: _pickImageFromCamera,
                   icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                  label: const Text('Camera'),
+                  label: Text(l10n.camera),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     textStyle: const TextStyle(fontSize: 12),
@@ -1571,7 +1575,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   OutlinedButton.icon(
                     onPressed: _clearCustomImage,
                     icon: const Icon(Icons.clear, size: 18),
-                    label: const Text('Clear'),
+                    label: Text(l10n.clear),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       textStyle: const TextStyle(fontSize: 12),
@@ -1602,7 +1606,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
-                  child: const Text('Set'),
+                  child: Text(l10n.set),
                 ),
               ],
             ),
@@ -1619,7 +1623,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -1769,6 +1773,7 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       child: SizedBox(
@@ -1873,18 +1878,18 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                           ElevatedButton.icon(
                             onPressed: _pickImageFromGallery,
                             icon: const Icon(Icons.photo_library_outlined, size: 18),
-                            label: const Text('Gallery'),
+                            label: Text(l10n.gallery),
                           ),
                           ElevatedButton.icon(
                             onPressed: _pickImageFromCamera,
                             icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                            label: const Text('Camera'),
+                            label: Text(l10n.camera),
                           ),
                           if (_getDisplayImageUrl() != null)
                             OutlinedButton.icon(
                               onPressed: _clearCustomImage,
                               icon: const Icon(Icons.clear, size: 18),
-                              label: const Text('Clear'),
+                              label: Text(l10n.clear),
                             ),
                         ],
                       ),
@@ -1913,7 +1918,7 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: _setImageFromUrl,
-                            child: const Text('Load'),
+                            child: Text(l10n.load),
                           ),
                         ],
                       ),
@@ -1966,7 +1971,7 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 16),

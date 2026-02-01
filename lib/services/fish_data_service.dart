@@ -70,3 +70,4 @@ final fishDataProvider = FutureProvider<Map<String, List<Fish>>>((ref) async {
   final service = ref.watch(fishDataServiceProvider);
   return service.loadFishData();
 });
+

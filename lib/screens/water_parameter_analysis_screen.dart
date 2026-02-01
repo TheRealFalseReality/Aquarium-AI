@@ -1,6 +1,7 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
@@ -77,8 +78,9 @@ class TankVolumeCalculatorState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Water Analysis',
+      title: l10n.waterAnalysis,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -91,7 +93,7 @@ class TankVolumeCalculatorState
                 children: [
                   Expanded(
                     child: Text(
-                      'AI Water Parameter Analysis',
+                      l10n.aiWaterParameterAnalysis,
                       style: Theme.of(context)
                           .textTheme
                           .headlineMedium
@@ -107,17 +109,17 @@ class TankVolumeCalculatorState
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter your aquarium\'s parameters below for an expert AI analysis.',
+                l10n.enterParametersForAnalysis,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _tankTypeController,
-                decoration: const InputDecoration(
-                    labelText: 'Tank Type (e.g., Reef, Freshwater)'),
+                decoration: InputDecoration(
+                    labelText: l10n.tankTypeLabel),
                 validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Please enter a tank type' : null,
+                    (value == null || value.isEmpty) ? l10n.pleaseEnterTankType : null,
               ),
               const SizedBox(height: 16),
               Row(
@@ -127,11 +129,11 @@ class TankVolumeCalculatorState
                     child: TextFormField(
                       controller: _tempController,
                       decoration:
-                          const InputDecoration(labelText: 'Temperature'),
+                          InputDecoration(labelText: l10n.temperatureLabel),
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) => (value == null || value.isEmpty)
-                          ? 'Please enter a temperature'
+                          ? l10n.pleaseEnterTemperature
                           : null,
                     ),
                   ),
@@ -144,7 +146,7 @@ class TankVolumeCalculatorState
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phController,
-                decoration: const InputDecoration(labelText: 'pH (Optional)'),
+                decoration: InputDecoration(labelText: l10n.phOptional),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
               ),
@@ -156,7 +158,7 @@ class TankVolumeCalculatorState
                     child: TextFormField(
                       controller: _salinityController,
                       decoration:
-                          const InputDecoration(labelText: 'Salinity (Optional)'),
+                          InputDecoration(labelText: l10n.salinityOptional),
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
@@ -171,7 +173,7 @@ class TankVolumeCalculatorState
               TextFormField(
                 controller: _additionalInfoController,
                 decoration:
-                    const InputDecoration(labelText: 'Additional Info (Optional)'),
+                    InputDecoration(labelText: l10n.additionalInfoOptional),
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
@@ -190,7 +192,7 @@ class TankVolumeCalculatorState
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Submit for Analysis'),
+                    : Text(l10n.submitForAnalysis),
               ),
             ],
           ),

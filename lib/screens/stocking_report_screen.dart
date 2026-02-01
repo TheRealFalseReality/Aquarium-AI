@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../l10n/app_localizations.dart';
 import '../models/stocking_recommendation.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
@@ -75,6 +76,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Listen for new recommendations and replace current screen
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       if (next.recommendations != null && 
@@ -205,18 +207,18 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
         if (_isRegenerating)
           Container(
             color: Colors.black.withOpacity(0.5),
-            child: const Center(
+            child: Center(
               child: Card(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Generating new recommendations...'),
-                      SizedBox(height: 8),
-                      Text(
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(l10n.generatingNewRecommendations),
+                      const SizedBox(height: 8),
+                      const Text(
                         'This may take up to 60 seconds',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
@@ -246,6 +248,7 @@ class _RecommendationTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -361,7 +364,7 @@ class _RecommendationTabView extends StatelessWidget {
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text('Other Options', style: theme.textTheme.titleMedium),
+          Text(l10n.otherOptions, style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
           _FishCardGrid(fishList: report.otherDataBasedFish, tankType: tankType),
         ],

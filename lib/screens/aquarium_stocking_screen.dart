@@ -1,5 +1,6 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
@@ -55,6 +56,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
       // Show/hide loading overlay
       if (next.isLoading && !(previous?.isLoading ?? false)) {
@@ -95,7 +98,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
             ),
           );
         },
-        label: const Text('Last Report'),
+        label: Text(l10n.lastReport),
         icon: const Icon(Icons.history),
       ) : null,
       child: SingleChildScrollView(
@@ -165,9 +168,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: 'gallons', child: Text('Gallons')),
-                        DropdownMenuItem(value: 'liters', child: Text('Liters')),
+                      items: [
+                        DropdownMenuItem(value: 'gallons', child: Text(l10n.gallons)),
+                        DropdownMenuItem(value: 'liters', child: Text(l10n.liters)),
                       ],
                       onChanged: (value) {
                         if (value != null) {
@@ -206,7 +209,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   icon: state.isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
                       : const Icon(Icons.auto_awesome),
-                  label: const Text('Get Recommendations'),
+                  label: Text(l10n.getRecommendations),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -238,6 +241,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   }
 
   void _showLoadingOverlay(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -254,7 +259,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    const Text('Getting stocking recommendations...'),
+                    Text(l10n.gettingStockingRecommendations),
                     const SizedBox(height: 8),
                     const Text(
                       'This may take up to 60 seconds',
@@ -266,7 +271,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                         ref.read(aquariumStockingProvider.notifier).cancel();
                         Navigator.pop(context);
                       },
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ],
                 ),

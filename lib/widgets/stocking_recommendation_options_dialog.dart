@@ -172,3 +172,4 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
     );
   }
 }
+

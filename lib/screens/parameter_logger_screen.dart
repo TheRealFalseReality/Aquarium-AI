@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
@@ -92,44 +93,45 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     return grouped;
   }
 
-  String _getParameterLabel(String parameterType) {
+  String _getParameterLabel(String parameterType, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (parameterType) {
       case 'ammonia':
-        return 'Ammonia';
+        return l10n.ammonia;
       case 'nitrite':
-        return 'Nitrite';
+        return l10n.nitrite;
       case 'nitrate':
-        return 'Nitrate';
+        return l10n.nitrate;
       case 'phosphate':
-        return 'Phosphate';
+        return l10n.phosphate;
       case 'salinity':
-        return 'Salinity';
+        return l10n.salinity;
       case 'calcium':
-        return 'Calcium';
+        return l10n.calcium;
       case 'magnesium':
-        return 'Magnesium';
+        return l10n.magnesium;
       case 'kh':
-        return 'KH (Carbonate Hardness)';
+        return l10n.kh;
       case 'gh':
-        return 'GH (General Hardness)';
+        return l10n.gh;
       case 'alkalinity':
-        return 'Alkalinity';
+        return l10n.alkalinity;
       case 'orp':
-        return 'ORP';
+        return l10n.orp;
       case 'ph':
-        return 'pH';
+        return l10n.ph;
       case 'potassium':
-        return 'Potassium';
+        return l10n.potassium;
       case 'tds':
-        return 'TDS';
+        return l10n.tds;
       case 'iodine':
-        return 'Iodine';
+        return l10n.iodine;
       case 'temperature':
-        return 'Temperature';
+        return l10n.temperature;
       default:
         // For custom parameters, capitalize first letter
         if (parameterType.isEmpty) {
-          return 'Custom';
+          return l10n.custom;
         }
         return parameterType[0].toUpperCase() + (parameterType.length > 1 ? parameterType.substring(1) : '');
     }
@@ -611,6 +613,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
@@ -676,10 +679,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                               ),
                             ),
                             title: Text(
-                              _getParameterLabel(paramType),
+                              _getParameterLabel(paramType, context),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text('${parameters.length} readings'),
+                            subtitle: Text('${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}'),
                             trailing: Icon(
                               isExpanded ? Icons.expand_less : Icons.expand_more,
                             ),
@@ -717,13 +720,14 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _addParameter(context),
           icon: const Icon(Icons.add),
-          label: const Text('Add Reading'),
+          label: Text(l10n.addReading),
         ),
       ),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
@@ -756,7 +760,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             ElevatedButton.icon(
               onPressed: () => _addParameter(context),
               icon: const Icon(Icons.add),
-              label: const Text('Add First Reading'),
+              label: Text(l10n.addFirstReading),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -826,15 +830,16 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   }
 
   void _showDeleteDialog(BuildContext context, WaterParameter parameter) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Reading'),
-        content: const Text('Are you sure you want to delete this parameter reading?'),
+        title: Text(l10n.deleteReading),
+        content: Text(l10n.deleteReadingConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -842,7 +847,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -962,6 +967,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   }
 
   void _saveParameter() {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
@@ -970,8 +976,8 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       // Additional safety check: prevent saving with empty parameter type
       if (parameterType.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a parameter name'),
+          SnackBar(
+            content: Text(l10n.parameterNameRequired),
             backgroundColor: Colors.red,
           ),
         );
@@ -1061,6 +1067,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
 
     return Padding(
@@ -1102,26 +1109,26 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  const DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
-                  const DropdownMenuItem(value: 'ammonia', child: Text('Ammonia')),
-                  const DropdownMenuItem(value: 'nitrite', child: Text('Nitrite')),
-                  const DropdownMenuItem(value: 'nitrate', child: Text('Nitrate')),
-                  const DropdownMenuItem(value: 'phosphate', child: Text('Phosphate')),
-                  const DropdownMenuItem(value: 'kh', child: Text('KH (Carbonate Hardness)')),
-                  const DropdownMenuItem(value: 'gh', child: Text('GH (General Hardness)')),
-                  const DropdownMenuItem(value: 'alkalinity', child: Text('Alkalinity')),
-                  const DropdownMenuItem(value: 'orp', child: Text('ORP')),
-                  const DropdownMenuItem(value: 'ph', child: Text('pH')),
-                  const DropdownMenuItem(value: 'potassium', child: Text('Potassium')),
-                  const DropdownMenuItem(value: 'tds', child: Text('TDS')),
+                  DropdownMenuItem(value: 'temperature', child: Text(l10n.temperature)),
+                  DropdownMenuItem(value: 'ammonia', child: Text(l10n.ammonia)),
+                  DropdownMenuItem(value: 'nitrite', child: Text(l10n.nitrite)),
+                  DropdownMenuItem(value: 'nitrate', child: Text(l10n.nitrate)),
+                  DropdownMenuItem(value: 'phosphate', child: Text(l10n.phosphate)),
+                  DropdownMenuItem(value: 'kh', child: Text(l10n.kh)),
+                  DropdownMenuItem(value: 'gh', child: Text(l10n.gh)),
+                  DropdownMenuItem(value: 'alkalinity', child: Text(l10n.alkalinity)),
+                  DropdownMenuItem(value: 'orp', child: Text(l10n.orp)),
+                  DropdownMenuItem(value: 'ph', child: Text(l10n.ph)),
+                  DropdownMenuItem(value: 'potassium', child: Text(l10n.potassium)),
+                  DropdownMenuItem(value: 'tds', child: Text(l10n.tds)),
                   // Only show salinity, calcium, magnesium, and iodine for marine tanks
                   if (widget.tank.type == 'marine') ...[
-                    const DropdownMenuItem(value: 'salinity', child: Text('Salinity')),
-                    const DropdownMenuItem(value: 'calcium', child: Text('Calcium')),
-                    const DropdownMenuItem(value: 'magnesium', child: Text('Magnesium')),
-                    const DropdownMenuItem(value: 'iodine', child: Text('Iodine')),
+                    DropdownMenuItem(value: 'salinity', child: Text(l10n.salinity)),
+                    DropdownMenuItem(value: 'calcium', child: Text(l10n.calcium)),
+                    DropdownMenuItem(value: 'magnesium', child: Text(l10n.magnesium)),
+                    DropdownMenuItem(value: 'iodine', child: Text(l10n.iodine)),
                   ],
-                  const DropdownMenuItem(value: 'custom', child: Text('Custom')),
+                  DropdownMenuItem(value: 'custom', child: Text(l10n.custom)),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -1247,3 +1254,4 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     );
   }
 }
+

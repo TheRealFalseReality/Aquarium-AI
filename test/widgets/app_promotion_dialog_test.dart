@@ -87,3 +87,4 @@ void main() {
     expect(find.byType(AppPromotionDialog), findsNothing);
   });
 }
+

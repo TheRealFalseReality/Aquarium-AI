@@ -110,3 +110,4 @@ void main() {
     expect(find.byType(ApiKeyDialog), findsNothing);
   });
 }
+

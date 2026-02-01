@@ -1,6 +1,7 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
@@ -53,8 +54,9 @@ class AutomationScriptScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Script Generator',
+      title: l10n.automationScript,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -67,7 +69,7 @@ class AutomationScriptScreenState
                 children: [
                   Expanded(
                     child: Text(
-                      'AI Automation Script Generator',
+                      l10n.aiAutomationScriptGenerator,
                       style: Theme.of(context)
                           .textTheme
                           .headlineMedium
@@ -83,22 +85,21 @@ class AutomationScriptScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                'Describe the automation you want to create for Home Assistant or ESPHome.',
+                l10n.automationDescription,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Automation Description',
-                  hintText:
-                      'e.g., "turn on a pump for 30 seconds every 24 hours"',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.automationDescriptionLabel,
+                  hintText: l10n.automationDescriptionHint,
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 5,
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'Please enter a description'
+                    ? l10n.pleaseEnterDescription
                     : null,
               ),
               const SizedBox(height: 24),
@@ -117,7 +118,7 @@ class AutomationScriptScreenState
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Generate Script'),
+                    : Text(l10n.generateScript),
               ),
               
             const SizedBox(height: 14),

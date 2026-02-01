@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/app_localizations.dart';
 
 import '../models/photo_analysis_result.dart';
 import '../main_layout.dart';
@@ -86,6 +87,7 @@ class _PhotoAnalysisResultScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: 'Photo Analysis',
       child: ListView(
@@ -104,14 +106,14 @@ class _PhotoAnalysisResultScreenState
           const SizedBox(height: 16),
           _fishCard(context),
           const SizedBox(height: 16),
-          _tankHealthCard(context),
+          _tankHealthCard(context, l10n),
           const SizedBox(height: 16),
           // Another Native Ad between sections (optional – remove if you only want one)
           const NativeAdWidget(),
           const SizedBox(height: 16),
-          _waterGuessesCard(context),
+          _waterGuessesCard(context, l10n),
           const SizedBox(height: 16),
-          _howAquaPiHelps(context),
+          _howAquaPiHelps(context, l10n),
           const SizedBox(height: 14),
           const BannerAdWidget(),
           const SizedBox(height: 14),
@@ -310,7 +312,7 @@ class _PhotoAnalysisResultScreenState
     );
   }
 
-  Widget _tankHealthCard(BuildContext context) {
+  Widget _tankHealthCard(BuildContext context, AppLocalizations l10n) {
     final th = widget.result.tankHealth;
     final cs = Theme.of(context).colorScheme;
     return Card(
@@ -319,7 +321,7 @@ class _PhotoAnalysisResultScreenState
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text('Tank Health',
+            Text(l10n.tankHealth,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -352,7 +354,7 @@ class _PhotoAnalysisResultScreenState
     );
   }
 
-  Widget _waterGuessesCard(BuildContext context) {
+  Widget _waterGuessesCard(BuildContext context, AppLocalizations l10n) {
     final g = widget.result.waterQualityGuesses;
     return Card(
       elevation: 2,
@@ -360,7 +362,7 @@ class _PhotoAnalysisResultScreenState
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text('Visual Water Quality Guesses',
+            Text(l10n.visualWaterQualityGuesses,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -379,7 +381,7 @@ class _PhotoAnalysisResultScreenState
     );
   }
 
-  Widget _howAquaPiHelps(BuildContext context) {
+  Widget _howAquaPiHelps(BuildContext context, AppLocalizations l10n) {
     return Card(
       elevation: 2,
       child: Column(
@@ -387,7 +389,7 @@ class _PhotoAnalysisResultScreenState
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-            child: Text('How AquaPi Helps',
+            child: Text(l10n.howAquaPiHelps,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge

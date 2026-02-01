@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/species_tags_provider.dart';
 import '../services/fish_data_service.dart';
@@ -88,6 +89,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final fishDataAsync = ref.watch(fishDataProvider);
     ref.watch(speciesTagsProvider);
     final colorScheme = Theme.of(context).colorScheme;
@@ -143,16 +145,16 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
                   child: SegmentedButton<String>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: 'freshwater',
-                        label: Text('Freshwater'),
-                        icon: Icon(Icons.water_drop, size: 18),
+                        label: Text(l10n.freshwater),
+                        icon: const Icon(Icons.water_drop, size: 18),
                       ),
                       ButtonSegment(
                         value: 'marine',
-                        label: Text('Saltwater'),
-                        icon: Icon(Icons.waves, size: 18),
+                        label: Text(l10n.saltwater),
+                        icon: const Icon(Icons.waves, size: 18),
                       ),
                     ],
                     selected: {_selectedCategory},
@@ -379,3 +381,4 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     );
   }
 }
+

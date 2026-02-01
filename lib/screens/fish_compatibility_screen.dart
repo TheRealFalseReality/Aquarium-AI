@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/species_tags_provider.dart';
@@ -242,6 +243,7 @@ class FishCompatibilityScreenState
 
   void _showLoadingOverlay(
       BuildContext context, List<Fish> selectedFish, String category) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loadingOverlayEntry != null) return;
 
     _loadingOverlayEntry = OverlayEntry(
@@ -321,7 +323,7 @@ class FishCompatibilityScreenState
                     onPressed: () {
                       ref.read(fishCompatibilityProvider.notifier).cancel();
                     },
-                    child: const Text('Cancel'),
+                    child: Text(l10n.cancel),
                   ),
                 ],
               ),
@@ -345,6 +347,7 @@ class FishCompatibilityScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
 
@@ -526,7 +529,7 @@ class FishCompatibilityScreenState
               child: FloatingActionButton.extended(
                 heroTag: 'last_report_fab',
                 icon: const Icon(Icons.history),
-                label: const Text('Last Report'),
+                label: Text(l10n.lastReport),
                 onPressed: () {
                   final last = providerState.lastReport;
                   if (last != null) {
@@ -554,6 +557,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildSearchWidget(bool canShowLastReportFab) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 350),
       transitionBuilder: (child, animation) {
@@ -573,7 +577,7 @@ class FishCompatibilityScreenState
                 key: const ValueKey('search_fab'),
                 heroTag: 'search_fab',
                 icon: const Icon(Icons.search),
-                label: const Text('Search'),
+                label: Text(l10n.search),
                 onPressed: () {
                   setState(() {
                     _isSearchVisible = true;
@@ -665,6 +669,7 @@ class FishCompatibilityScreenState
 
   Widget _buildBottomBar(
       FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return ClipRRect(
       child: BackdropFilter(
@@ -766,7 +771,7 @@ class FishCompatibilityScreenState
                           child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
                         )
                       : const Icon(Icons.analytics_outlined),
-                  label: const Text('Get Report'),
+                  label: Text(l10n.getReport),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 16),

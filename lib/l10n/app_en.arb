@@ -1801,5 +1801,579 @@
   "replaceAllReschedulePreferences": "Replace ALL reschedule preferences",
   "@replaceAllReschedulePreferences": {
     "description": "Warning message for replacing reschedule preferences during restore"
+  },
+
+  "gallery": "Gallery",
+  "@gallery": {
+    "description": "Gallery button label"
+  },
+
+  "camera": "Camera",
+  "@camera": {
+    "description": "Camera button label"
+  },
+
+  "addPhoto": "Add Photo",
+  "@addPhoto": {
+    "description": "Add photo button label"
+  },
+
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove button label"
+  },
+
+  "continueLabel": "Continue",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button label"
+  },
+
+  "set": "Set",
+  "@set": {
+    "description": "Set button label"
+  },
+
+  "load": "Load",
+  "@load": {
+    "description": "Load button label"
+  },
+
+  "lastReport": "Last Report",
+  "@lastReport": {
+    "description": "Last report button label"
+  },
+
+  "getRecommendations": "Get Recommendations",
+  "@getRecommendations": {
+    "description": "Get recommendations button label"
+  },
+
+  "search": "Search",
+  "@search": {
+    "description": "Search button label"
+  },
+
+  "getReport": "Get Report",
+  "@getReport": {
+    "description": "Get report button label"
+  },
+
+  "calculate": "Calculate",
+  "@calculate": {
+    "description": "Calculate button label"
+  },
+
+  "addReading": "Add Reading",
+  "@addReading": {
+    "description": "Add reading button label"
+  },
+
+  "addFirstReading": "Add First Reading",
+  "@addFirstReading": {
+    "description": "Add first reading button label when no readings exist"
+  },
+
+  "addParameter": "Add Parameter",
+  "@addParameter": {
+    "description": "Add parameter button label"
+  },
+
+  "addDose": "Add Dose",
+  "@addDose": {
+    "description": "Add dose button label"
+  },
+
+  "addFirstDose": "Add First Dose",
+  "@addFirstDose": {
+    "description": "Add first dose button label when no doses exist"
+  },
+
+  "editTank": "Edit Tank",
+  "@editTank": {
+    "description": "Edit tank button label"
+  },
+
+  "resetIcon": "Reset Icon",
+  "@resetIcon": {
+    "description": "Reset icon button label"
+  },
+
+  "setAsCardBackground": "Set as Card Background",
+  "@setAsCardBackground": {
+    "description": "Set as card background button label"
+  },
+
+  "setAsTankIcon": "Set as Tank Icon",
+  "@setAsTankIcon": {
+    "description": "Set as tank icon button label"
+  },
+
+  "deleteReading": "Delete Reading",
+  "@deleteReading": {
+    "description": "Delete reading dialog title"
+  },
+
+  "deleteReadingConfirm": "Are you sure you want to delete this parameter reading?",
+  "@deleteReadingConfirm": {
+    "description": "Confirmation message for deleting a parameter reading"
+  },
+
+  "deleteDose": "Delete Dose",
+  "@deleteDose": {
+    "description": "Delete dose dialog title"
+  },
+
+  "deleteDoseConfirm": "Are you sure you want to delete this dosing entry?",
+  "@deleteDoseConfirm": {
+    "description": "Confirmation message for deleting a dosing entry"
+  },
+
+  "deleteTankTitle": "Delete Tank",
+  "@deleteTankTitle": {
+    "description": "Delete tank dialog title"
+  },
+
+  "deleteTankConfirm": "Are you sure you want to delete \"{tankName}\"? This action cannot be undone.",
+  "@deleteTankConfirm": {
+    "description": "Confirmation message for deleting a tank",
+    "placeholders": {
+      "tankName": {
+        "type": "String",
+        "example": "My Tank"
+      }
+    }
+  },
+
+  "changeTankIcon": "Change Tank Icon",
+  "@changeTankIcon": {
+    "description": "Change tank icon dialog title"
+  },
+
+  "changeTankType": "Change Tank Type",
+  "@changeTankType": {
+    "description": "Change tank type dialog title"
+  },
+
+  "createIssueOnGitHub": "Create Issue on GitHub",
+  "@createIssueOnGitHub": {
+    "description": "Create issue on GitHub link title"
+  },
+
+  "contactUs": "Contact Us",
+  "@contactUs": {
+    "description": "Contact us link title"
+  },
+
+  "gettingStockingRecommendations": "Getting stocking recommendations...",
+  "@gettingStockingRecommendations": {
+    "description": "Loading message while getting stocking recommendations"
+  },
+
+  "generatingNewRecommendations": "Generating new recommendations...",
+  "@generatingNewRecommendations": {
+    "description": "Loading message while generating new recommendations"
+  },
+
+  "otherOptions": "Other Options",
+  "@otherOptions": {
+    "description": "Other options section heading"
+  },
+
+  "parameterNameRequired": "Please enter a parameter name",
+  "@parameterNameRequired": {
+    "description": "Validation message for empty parameter name"
+  },
+
+  "aiAnalysisNotSupportedForCloudImages": "AI analysis is not supported for cloud-stored images. Please use local images.",
+  "@aiAnalysisNotSupportedForCloudImages": {
+    "description": "Error message when trying to analyze cloud-stored images"
+  },
+
+  "failedToLoadImage": "Failed to load image: {error}",
+  "@failedToLoadImage": {
+    "description": "Error message when image fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+
+  "failedToPickImage": "Failed to pick image",
+  "@failedToPickImage": {
+    "description": "Error message when image picker fails"
+  },
+
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Temperature water parameter"
+  },
+
+  "ammonia": "Ammonia",
+  "@ammonia": {
+    "description": "Ammonia water parameter"
+  },
+
+  "nitrite": "Nitrite",
+  "@nitrite": {
+    "description": "Nitrite water parameter"
+  },
+
+  "nitrate": "Nitrate",
+  "@nitrate": {
+    "description": "Nitrate water parameter"
+  },
+
+  "phosphate": "Phosphate",
+  "@phosphate": {
+    "description": "Phosphate water parameter"
+  },
+
+  "calcium": "Calcium",
+  "@calcium": {
+    "description": "Calcium water parameter"
+  },
+
+  "magnesium": "Magnesium",
+  "@magnesium": {
+    "description": "Magnesium water parameter"
+  },
+
+  "kh": "KH (Carbonate Hardness)",
+  "@kh": {
+    "description": "KH (Carbonate Hardness) water parameter"
+  },
+
+  "gh": "GH (General Hardness)",
+  "@gh": {
+    "description": "GH (General Hardness) water parameter"
+  },
+
+  "alkalinity": "Alkalinity",
+  "@alkalinity": {
+    "description": "Alkalinity water parameter"
+  },
+
+  "orp": "ORP",
+  "@orp": {
+    "description": "ORP (Oxidation-Reduction Potential) water parameter"
+  },
+
+  "ph": "pH",
+  "@ph": {
+    "description": "pH water parameter"
+  },
+
+  "potassium": "Potassium",
+  "@potassium": {
+    "description": "Potassium water parameter"
+  },
+
+  "tds": "TDS",
+  "@tds": {
+    "description": "TDS (Total Dissolved Solids) water parameter"
+  },
+
+  "iodine": "Iodine",
+  "@iodine": {
+    "description": "Iodine water parameter"
+  },
+
+  "salinity": "Salinity",
+  "@salinity": {
+    "description": "Salinity water parameter"
+  },
+
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom water parameter option"
+  },
+
+  "gallons": "Gallons",
+  "@gallons": {
+    "description": "Gallons unit"
+  },
+
+  "liters": "Liters",
+  "@liters": {
+    "description": "Liters unit"
+  },
+
+  "tankHealth": "Tank Health",
+  "@tankHealth": {
+    "description": "Tank health section heading"
+  },
+
+  "visualWaterQualityGuesses": "Visual Water Quality Guesses",
+  "@visualWaterQualityGuesses": {
+    "description": "Visual water quality guesses section heading"
+  },
+
+  "howAquaPiHelps": "How AquaPi Helps",
+  "@howAquaPiHelps": {
+    "description": "How AquaPi helps button label"
+  },
+
+  "howAquaPiCanHelp": "How AquaPi Can Help",
+  "@howAquaPiCanHelp": {
+    "description": "How AquaPi can help section heading"
+  },
+
+  "estimatedCO2Level": "Estimated CO₂ Level",
+  "@estimatedCO2Level": {
+    "description": "Estimated CO₂ level label"
+  },
+
+  "compatibilityReport": "Compatibility Report",
+  "@compatibilityReport": {
+    "description": "Compatibility report title"
+  },
+
+  "convertSalinity": "Convert Salinity",
+  "@convertSalinity": {
+    "description": "Convert salinity calculator name"
+  },
+
+  "calculateCO2": "Calculate CO₂ (ppm)",
+  "@calculateCO2": {
+    "description": "Calculate CO₂ calculator name"
+  },
+
+  "convertAlkalinity": "Convert Alkalinity",
+  "@convertAlkalinity": {
+    "description": "Convert alkalinity calculator name"
+  },
+
+  "convertTemperature": "Convert Temperature",
+  "@convertTemperature": {
+    "description": "Convert temperature calculator name"
+  },
+
+  "googleAIStudioStep1": "1. Go to the Google AI Studio website.",
+  "@googleAIStudioStep1": {
+    "description": "Google AI Studio setup step 1"
+  },
+
+  "googleAIStudioStep2": "2. Sign in with your Google account.",
+  "@googleAIStudioStep2": {
+    "description": "Google AI Studio setup step 2"
+  },
+
+  "googleAIStudioStep3": "3. Create a new API key.",
+  "@googleAIStudioStep3": {
+    "description": "Google AI Studio setup step 3"
+  },
+
+  "googleAIStudioStep4": "4. Copy the generated API key and paste it above.",
+  "@googleAIStudioStep4": {
+    "description": "Google AI Studio setup step 4"
+  },
+
+  "openAIStep1": "1. Go to the OpenAI API keys page.",
+  "@openAIStep1": {
+    "description": "OpenAI setup step 1"
+  },
+
+  "openAIStep2": "2. Sign in and create a new secret key.",
+  "@openAIStep2": {
+    "description": "OpenAI setup step 2"
+  },
+
+  "openAIStep3": "3. Copy the generated API key and paste it above.",
+  "@openAIStep3": {
+    "description": "OpenAI setup step 3"
+  },
+
+  "groqCloudStep1": "1. Go to the GroqCloud Console website.",
+  "@groqCloudStep1": {
+    "description": "GroqCloud setup step 1"
+  },
+
+  "groqCloudStep2": "2. Sign in and navigate to the API Keys section.",
+  "@groqCloudStep2": {
+    "description": "GroqCloud setup step 2"
+  },
+
+  "groqCloudStep3": "3. Click \"Create API Key\" to create a new secret key.",
+  "@groqCloudStep3": {
+    "description": "GroqCloud setup step 3"
+  },
+
+  "groqCloudStep4": "4. Copy the generated API key and paste it above.",
+  "@groqCloudStep4": {
+    "description": "GroqCloud setup step 4"
+  },
+
+  "analyzing": "Analyzing...",
+  "@analyzing": {
+    "description": "Analyzing status message"
+  },
+
+  "analyzePhoto": "Analyze Photo",
+  "@analyzePhoto": {
+    "description": "Analyze photo button label"
+  },
+
+  "doses": "doses",
+  "@doses": {
+    "description": "Doses plural label"
+  },
+
+  "dose": "dose",
+  "@dose": {
+    "description": "Dose singular label"
+  },
+
+  "readings": "readings",
+  "@readings": {
+    "description": "Readings plural label"
+  },
+
+  "reading": "reading",
+  "@reading": {
+    "description": "Reading singular label"
+  },
+
+  "dosingSum": "Dosing Summary",
+  "@dosingSum": {
+    "description": "Dosing summary heading"
+  },
+
+  "totalDoses": "Total Doses",
+  "@totalDoses": {
+    "description": "Total doses label"
+  },
+
+  "treatments": "Treatments",
+  "@treatments": {
+    "description": "Treatments label"
+  },
+
+  "automationScript": "Automation Script",
+  "@automationScript": {
+    "description": "Automation script feature name"
+  },
+
+  "aiAutomationScriptGenerator": "AI Automation Script Generator",
+  "@aiAutomationScriptGenerator": {
+    "description": "AI automation script generator heading"
+  },
+
+  "automationDescription": "Describe the automation you want to create for Home Assistant or ESPHome.",
+  "@automationDescription": {
+    "description": "Instructions for automation script"
+  },
+
+  "automationDescriptionLabel": "Automation Description",
+  "@automationDescriptionLabel": {
+    "description": "Label for automation description field"
+  },
+
+  "automationDescriptionHint": "e.g., \"turn on a pump for 30 seconds every 24 hours\"",
+  "@automationDescriptionHint": {
+    "description": "Hint text for automation description"
+  },
+
+  "pleaseEnterDescription": "Please enter a description",
+  "@pleaseEnterDescription": {
+    "description": "Validation message for empty description"
+  },
+
+  "generateScript": "Generate Script",
+  "@generateScript": {
+    "description": "Generate script button label"
+  },
+
+  "waterAnalysis": "Water Analysis",
+  "@waterAnalysis": {
+    "description": "Water analysis feature name"
+  },
+
+  "aiWaterParameterAnalysis": "AI Water Parameter Analysis",
+  "@aiWaterParameterAnalysis": {
+    "description": "AI water parameter analysis heading"
+  },
+
+  "enterParametersForAnalysis": "Enter your aquarium's parameters below for an expert AI analysis.",
+  "@enterParametersForAnalysis": {
+    "description": "Instructions for water parameter analysis"
+  },
+
+  "tankTypeLabel": "Tank Type (e.g., Reef, Freshwater)",
+  "@tankTypeLabel": {
+    "description": "Label for tank type field"
+  },
+
+  "pleaseEnterTankType": "Please enter a tank type",
+  "@pleaseEnterTankType": {
+    "description": "Validation message for empty tank type"
+  },
+
+  "temperatureLabel": "Temperature",
+  "@temperatureLabel": {
+    "description": "Label for temperature field"
+  },
+
+  "pleaseEnterTemperature": "Please enter a temperature",
+  "@pleaseEnterTemperature": {
+    "description": "Validation message for empty temperature"
+  },
+
+  "phOptional": "pH (Optional)",
+  "@phOptional": {
+    "description": "Label for optional pH field"
+  },
+
+  "salinityOptional": "Salinity (Optional)",
+  "@salinityOptional": {
+    "description": "Label for optional salinity field"
+  },
+
+  "additionalInfoOptional": "Additional Info (Optional)",
+  "@additionalInfoOptional": {
+    "description": "Label for optional additional info field"
+  },
+
+  "submitForAnalysis": "Submit for Analysis",
+  "@submitForAnalysis": {
+    "description": "Submit for analysis button label"
+  },
+
+  "aquarium": "Aquarium",
+  "@aquarium": {
+    "description": "Aquarium label"
+  },
+
+  "aquaPi": "AquaPi",
+  "@aquaPi": {
+    "description": "AquaPi label"
+  },
+
+  "aiTools": "AI Tools",
+  "@aiTools": {
+    "description": "AI tools section label"
+  },
+
+  "viewAnalysis": "View Analysis",
+  "@viewAnalysis": {
+    "description": "View analysis button label"
+  },
+
+  "viewScript": "View Script",
+  "@viewScript": {
+    "description": "View script button label"
+  },
+
+  "viewPhotoAnalysis": "View Photo Analysis",
+  "@viewPhotoAnalysis": {
+    "description": "View photo analysis button label"
   }
 }
+
+
