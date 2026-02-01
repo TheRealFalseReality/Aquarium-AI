@@ -2,12 +2,9 @@
 # Required to prevent "Missing type parameter" crash when using zonedSchedule
 
 # Keep Flutter Local Notifications plugin classes and all their members
+# This includes ScheduledNotificationReceiver and ScheduledNotificationBootReceiver
 -keep class com.dexterous.** { *; }
 -keep interface com.dexterous.** { *; }
-
-# Keep notification receivers - critical for background notifications
--keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver { *; }
--keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver { *; }
 
 # Keep Gson TypeToken - required for reflection used by flutter_local_notifications
 # This is critical to prevent "Missing type parameter" errors
@@ -31,8 +28,9 @@
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
 
-# Keep all Gson-related generic type information
--keepclassmembers class * {
+# Keep Gson-annotated fields - allows obfuscation while preserving serialization
+# The @SerializedName annotation ensures correct JSON mapping even with obfuscated field names
+-keepclassmembers,allowobfuscation class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
