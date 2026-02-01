@@ -613,6 +613,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
@@ -681,7 +682,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                               _getParameterLabel(paramType, context),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text('${parameters.length} ${parameters.length == 1 ? AppLocalizations.of(context)!.reading : AppLocalizations.of(context)!.readings}'),
+                            subtitle: Text('${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}'),
                             trailing: Icon(
                               isExpanded ? Icons.expand_less : Icons.expand_more,
                             ),
@@ -719,13 +720,14 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _addParameter(context),
           icon: const Icon(Icons.add),
-          label: Text(AppLocalizations.of(context)!.addReading),
+          label: Text(l10n.addReading),
         ),
       ),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
@@ -758,7 +760,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             ElevatedButton.icon(
               onPressed: () => _addParameter(context),
               icon: const Icon(Icons.add),
-              label: Text(AppLocalizations.of(context)!.addFirstReading),
+              label: Text(l10n.addFirstReading),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -965,6 +967,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   }
 
   void _saveParameter() {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
@@ -974,7 +977,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       if (parameterType.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.parameterNameRequired),
+            content: Text(l10n.parameterNameRequired),
             backgroundColor: Colors.red,
           ),
         );
