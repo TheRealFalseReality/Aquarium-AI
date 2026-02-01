@@ -23,6 +23,8 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
 }
 
 class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
+  // Breakpoint for responsive button layout: screens narrower than 600px use compact 2-row layout
+  // This aligns with Material Design's compact width breakpoint for mobile devices
   static const double _smallScreenBreakpoint = 600;
 
   List<Widget> _buildDialogActions(BuildContext context) {
