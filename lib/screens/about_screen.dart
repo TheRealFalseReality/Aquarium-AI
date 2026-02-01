@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -67,13 +68,34 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         fontWeight: fontWeight,
         fontSize: fontSize,
       );
+    } on SocketException catch (e) {
+      // Network connectivity error
+      if (kDebugMode) {
+        debugPrint('Google Fonts SocketException: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+      return TextStyle(
+        color: color,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+      );
+    } on HandshakeException catch (e) {
+      // TLS/SSL handshake error
+      if (kDebugMode) {
+        debugPrint('Google Fonts HandshakeException: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+      return TextStyle(
+        color: color,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+      );
     } catch (e) {
-      // Catch all network-related errors (HandshakeException, SocketException, ClientException, etc.)
+      // Catch any other exceptions (ClientException, etc.)
       if (kDebugMode) {
         debugPrint('Google Fonts loading error: $e');
         debugPrint('Using fallback TextStyle');
       }
-      // Return fallback TextStyle with the same properties
       return TextStyle(
         color: color,
         fontWeight: fontWeight,
