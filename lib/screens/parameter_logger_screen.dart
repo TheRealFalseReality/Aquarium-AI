@@ -681,7 +681,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                               _getParameterLabel(paramType, context),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text('${parameters.length} ${AppLocalizations.of(context)!.readings}'),
+                            subtitle: Text('${parameters.length} ${parameters.length == 1 ? AppLocalizations.of(context)!.reading : AppLocalizations.of(context)!.readings}'),
                             trailing: Icon(
                               isExpanded ? Icons.expand_less : Icons.expand_more,
                             ),
