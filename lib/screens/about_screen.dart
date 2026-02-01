@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,45 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         print('Could not launch email');
       }
     }
+  }
+
+  // Helper method to safely load Google Fonts with fallback
+  TextStyle _getSafeGoogleFont({
+    required Color color,
+    required FontWeight fontWeight,
+    required double fontSize,
+  }) {
+    try {
+      return GoogleFonts.karla(
+        color: color,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+      );
+    } on SocketException catch (e) {
+      // Network connectivity error
+      if (kDebugMode) {
+        debugPrint('Google Fonts SocketException: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+    } on HandshakeException catch (e) {
+      // TLS/SSL handshake error
+      if (kDebugMode) {
+        debugPrint('Google Fonts HandshakeException: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+    } catch (e) {
+      // Catch any other exceptions (ClientException, etc.)
+      if (kDebugMode) {
+        debugPrint('Google Fonts loading error: $e');
+        debugPrint('Using fallback TextStyle');
+      }
+    }
+    // Return fallback TextStyle with the same properties
+    return TextStyle(
+      color: color,
+      fontWeight: fontWeight,
+      fontSize: fontSize,
+    );
   }
 
   Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
@@ -235,7 +275,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                                 'https://www.capitalcityaquatics.com/'),
                             child: Text(
                               'Capital City Aquatics',
-                              style: GoogleFonts.karla(
+                              style: _getSafeGoogleFont(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 26,
