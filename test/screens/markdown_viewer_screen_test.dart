@@ -338,6 +338,20 @@ void main() {
 
       // Verify chevron icons are present
       expect(find.byIcon(Icons.chevron_right), findsWidgets);
+      
+      // Test that breadcrumb items are tappable - verify Page 2 is clickable
+      final page2Finder = find.ancestor(
+        of: find.text('Page 2'),
+        matching: find.byType(InkWell),
+      );
+      expect(page2Finder, findsOneWidget);
+      
+      // Test that breadcrumb items are tappable - verify Page 1 is clickable
+      final page1Finder = find.ancestor(
+        of: find.text('Page 1'),
+        matching: find.byType(InkWell),
+      );
+      expect(page1Finder, findsOneWidget);
     });
 
     testWidgets('Empty breadcrumbs still shows home link',
