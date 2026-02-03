@@ -2373,6 +2373,16 @@
   "viewPhotoAnalysis": "View Photo Analysis",
   "@viewPhotoAnalysis": {
     "description": "View photo analysis button label"
+  },
+
+  "information": "Information",
+  "@information": {
+    "description": "Information drawer item title"
+  },
+
+  "informationDescription": "Documentation & Guides",
+  "@informationDescription": {
+    "description": "Information drawer item subtitle"
   }
 }
 

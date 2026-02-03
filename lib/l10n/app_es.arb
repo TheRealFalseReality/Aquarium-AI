@@ -438,7 +438,9 @@
   "receiveReminders": "Recibir notificaciones push en tu dispositivo para esta tarea",
   "repeat": "Repetir",
   "repeatEvery": "Repetir Cada",
-  "salinity": "Salinidad"
+  "salinity": "Salinidad",
+  "information": "Información",
+  "informationDescription": "Documentación y Guías"
 }
 
 

@@ -438,7 +438,9 @@
   "receiveReminders": "Push-Benachrichtigungen auf Ihrem Gerät für diese Aufgabe erhalten",
   "repeat": "Wiederholen",
   "repeatEvery": "Wiederholen Alle",
-  "salinity": "Salzgehalt"
+  "salinity": "Salzgehalt",
+  "information": "Informationen",
+  "informationDescription": "Dokumentation & Anleitungen"
 }
 
 
