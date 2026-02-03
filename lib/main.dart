@@ -13,6 +13,7 @@ import './theme_provider.dart';
 import './providers/app_settings_provider.dart';
 import './screens/welcome_screen.dart';
 import './screens/about_screen.dart';
+import './screens/information_screen.dart';
 import './screens/tank_volume_calculator.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
@@ -484,6 +485,10 @@ class MyApp extends ConsumerWidget {
               case '/about':
                 page = const AboutScreen();
                 screenName = 'about_screen';
+                break;
+              case '/information':
+                page = const InformationScreen();
+                screenName = 'information_screen';
                 break;
               case '/tank-volume':
                 page = const TankVolumeCalculator();
