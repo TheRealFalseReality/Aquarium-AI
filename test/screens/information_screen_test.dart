@@ -78,9 +78,10 @@ void main() {
         ),
       );
 
-      // Find the InkWell widget inside the card
-      final inkWellFinder = find.descendant(
-        of: find.byType(Card),
+      // Find the InkWell widget that contains the i18n card text
+      final i18nTextFinder = find.text('Internationalization (i18n)');
+      final inkWellFinder = find.ancestor(
+        of: i18nTextFinder,
         matching: find.byType(InkWell),
       );
 
