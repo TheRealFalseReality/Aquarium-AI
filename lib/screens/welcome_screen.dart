@@ -35,6 +35,7 @@ class FeatureInfo {
   final Duration delay;
   final bool openPhotoAnalyzer;
   final String? url;
+  final String? imagePath;
 
   FeatureInfo({
     required this.icon,
@@ -44,6 +45,7 @@ class FeatureInfo {
     required this.delay,
     this.openPhotoAnalyzer = false,
     this.url,
+    this.imagePath,
   });
 }
 
@@ -348,6 +350,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
+        imagePath: 'assets/AquaPiMainSmaller.png',
       ),
     ];
 
@@ -918,6 +921,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 icon: feature.icon,
                 title: feature.title,
                 description: feature.description,
+                imagePath: feature.imagePath,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
@@ -1083,6 +1087,7 @@ class FeatureCard extends ConsumerWidget {
   final String title;
   final String description;
   final VoidCallback onTap;
+  final String? imagePath;
 
   const FeatureCard({
     super.key,
@@ -1090,6 +1095,7 @@ class FeatureCard extends ConsumerWidget {
     required this.title,
     required this.description,
     required this.onTap,
+    this.imagePath,
   });
 
   @override
@@ -1156,6 +1162,18 @@ class FeatureCard extends ConsumerWidget {
                     height: 1.4,
                   ),
                 ),
+                if (imagePath != null) ...[
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      imagePath!,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

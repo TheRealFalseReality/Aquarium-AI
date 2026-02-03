@@ -16,7 +16,7 @@
   "tankVolumeCalculator": "Calculatrice de Volume de Réservoir",
   "tankVolumeDescription": "Calculez le volume et le poids de l'eau pour différentes formes de réservoir.",
   "aquaPiStore": "Boutique AquaPi",
-  "aquaPiStoreDescription": "Visitez la boutique officielle des produits AquaPi.",
+  "aquaPiStoreDescription": "Découvrez AquaPi, le contrôleur d'aquarium intelligent ultime. Surveillez et contrôlez les paramètres de votre aquarium avec des tests automatisés, des alertes en temps réel et une intégration transparente.",
   "myTanks": "Mes Aquariums",
   "noTanksYet": "Pas encore d'aquariums. Touchez pour en ajouter un!",
   "totalTanks": "Total: {count}",
