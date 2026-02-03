@@ -187,8 +187,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                         // Example: breadcrumbs = [A, B, C], current = D, index = 1 (B)
                         // popCount = 3 - 1 = 2 (pop D and C to reach B)
                         final popCount = widget.breadcrumbs.length - index;
-                        for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
-                          Navigator.of(context).pop();
+                        final navigator = Navigator.of(context);
+                        for (int i = 0; i < popCount && navigator.canPop(); i++) {
+                          navigator.pop();
                         }
                       },
                       child: Padding(
