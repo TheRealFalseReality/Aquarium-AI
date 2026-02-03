@@ -63,10 +63,10 @@ flutter_launcher_icons:
     generate: true
   web:
     generate: true
-  image_path: "assets/AquaPi Logo.png"
+  image_path: "assets/AquaAi Logo.png"
 
 flutter_native_splash:
-  image: assets/AquaPi Logo.png
+  image: assets/AquaAi Logo.png
   color: "#d8f3ff"
   color_dark: "#2D3748"
 

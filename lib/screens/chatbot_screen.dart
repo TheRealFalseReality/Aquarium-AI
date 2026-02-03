@@ -793,7 +793,7 @@ class MessageBubble extends ConsumerWidget {
                       : cs.primary.withOpacity(0.15),
                   child: isError
                       ? Icon(Icons.error_outline, color: cs.error)
-                      : Image.asset('assets/AquaPi Logo.png'),
+                      : Image.asset('assets/AquaAi Logo.png'),
                 ),
               if (!isUser) const SizedBox(width: 8),
               Flexible(

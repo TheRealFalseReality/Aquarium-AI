@@ -28,7 +28,7 @@ class MainLayout extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/AquaPi Logo.png',
+                'assets/AquaAi Logo.png',
                 height: 40,
               ),
               const SizedBox(width: 12),

@@ -350,7 +350,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: 'assets/AquaPiMainSmaller.png',
+        imagePath: 'assets/AquaPiEssentials.png',
       ),
     ];
 
@@ -983,7 +983,7 @@ class AnimatedHeaderState extends State<AnimatedHeader> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset('assets/AquaPi Logo.png', height: 125),
+          Image.asset('assets/AquaAi Logo.png', height: 125),
           const SizedBox(width: 16),
           GradientText(
             'Aquarium\nAI',
@@ -1166,26 +1166,29 @@ class FeatureCard extends ConsumerWidget {
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      imagePath!,
-                      height: 120,
+                    child: SizedBox(
+                      height: 300,
                       width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: cs.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: cs.onSurfaceVariant,
-                            size: 48,
-                          ),
-                        );
-                      },
+                      child: Image.asset(
+                        imagePath!,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceVariant,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: cs.onSurfaceVariant,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],
