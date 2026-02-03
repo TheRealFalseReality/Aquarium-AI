@@ -347,12 +347,12 @@ class _NotificationManagementScreenState
     
     if (days > 0) {
       if (days == 1) {
-        return l10n.inOneDay;
+        return l10n.inLessThan2Days;
       }
       return l10n.inXDays(days);
     } else if (hours > 0) {
       if (hours == 1) {
-        return l10n.inOneHour;
+        return l10n.inLessThan2Hours;
       }
       return l10n.inXHours(hours);
     } else if (minutes > 0) {

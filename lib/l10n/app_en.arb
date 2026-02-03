@@ -1049,6 +1049,11 @@
     }
   },
 
+  "inLessThan2Days": "In less than 2 days",
+  "@inLessThan2Days": {
+    "description": "Time remaining: less than 2 days"
+  },
+
   "inOneHour": "In 1 hour",
   "@inOneHour": {
     "description": "Time remaining: in 1 hour"
@@ -1062,6 +1067,11 @@
         "type": "int"
       }
     }
+  },
+
+  "inLessThan2Hours": "In less than 2 hours",
+  "@inLessThan2Hours": {
+    "description": "Time remaining: less than 2 hours"
   },
 
   "inOneMinute": "In 1 minute",
