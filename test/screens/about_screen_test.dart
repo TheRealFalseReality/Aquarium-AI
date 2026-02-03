@@ -49,4 +49,19 @@ void main() {
     expect(find.text('Your intelligent assistant for aquatic compatibility.'), findsOneWidget);
     expect(find.text('Contact & Feedback'), findsOneWidget);
   });
+
+  testWidgets('AboutScreen displays "Get the Mobile App" section on non-mobile platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: AboutScreen(),
+        ),
+      ),
+    );
+
+    // On test environment (non-mobile), the "Get the Mobile App" section should be visible
+    // Tests run on desktop/non-mobile platforms, so the section should be present
+    expect(find.text('Get the Mobile App'), findsOneWidget);
+    expect(find.textContaining('Experience the full power of Aquarium AI with our mobile app'), findsOneWidget);
+  });
 }

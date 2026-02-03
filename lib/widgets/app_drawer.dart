@@ -385,7 +385,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/AquaPi Logo.png', height: 100),
+                Image.asset('assets/AquaAi Logo.png', height: 100),
                 const SizedBox(width: 12),
                 GradientText(
                   'Aquarium\nAI',

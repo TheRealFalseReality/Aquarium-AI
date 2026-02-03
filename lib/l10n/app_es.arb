@@ -16,7 +16,7 @@
   "tankVolumeCalculator": "Calculadora de Volumen del Tanque",
   "tankVolumeDescription": "Calcula el volumen y peso del agua para varias formas de tanque.",
   "aquaPiStore": "Tienda AquaPi",
-  "aquaPiStoreDescription": "Visita la tienda oficial de productos AquaPi.",
+  "aquaPiStoreDescription": "Descubre AquaPi, el controlador inteligente definitivo para acuarios. Monitorea y controla los parámetros de tu acuario con pruebas automatizadas, alertas en tiempo real e integración perfecta.",
   "myTanks": "Mis Acuarios",
   "noTanksYet": "Aún no hay acuarios. ¡Toca para agregar uno!",
   "totalTanks": "Total: {count}",

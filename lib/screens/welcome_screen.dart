@@ -35,6 +35,7 @@ class FeatureInfo {
   final Duration delay;
   final bool openPhotoAnalyzer;
   final String? url;
+  final String? imagePath;
 
   FeatureInfo({
     required this.icon,
@@ -44,6 +45,7 @@ class FeatureInfo {
     required this.delay,
     this.openPhotoAnalyzer = false,
     this.url,
+    this.imagePath,
   });
 }
 
@@ -348,6 +350,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
+        imagePath: 'assets/AquaPiEssentials.png',
       ),
     ];
 
@@ -918,6 +921,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 icon: feature.icon,
                 title: feature.title,
                 description: feature.description,
+                imagePath: feature.imagePath,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
@@ -979,7 +983,7 @@ class AnimatedHeaderState extends State<AnimatedHeader> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset('assets/AquaPi Logo.png', height: 125),
+          Image.asset('assets/AquaAi Logo.png', height: 125),
           const SizedBox(width: 16),
           GradientText(
             'Aquarium\nAI',
@@ -1083,6 +1087,7 @@ class FeatureCard extends ConsumerWidget {
   final String title;
   final String description;
   final VoidCallback onTap;
+  final String? imagePath;
 
   const FeatureCard({
     super.key,
@@ -1090,6 +1095,7 @@ class FeatureCard extends ConsumerWidget {
     required this.title,
     required this.description,
     required this.onTap,
+    this.imagePath,
   });
 
   @override
@@ -1156,6 +1162,36 @@ class FeatureCard extends ConsumerWidget {
                     height: 1.4,
                   ),
                 ),
+                if (imagePath != null) ...[
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: 300,
+                      width: double.infinity,
+                      child: Image.asset(
+                        imagePath!,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceVariant,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: cs.onSurfaceVariant,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

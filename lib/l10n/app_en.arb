@@ -80,7 +80,7 @@
     "description": "Name of the AquaPi store"
   },
   
-  "aquaPiStoreDescription": "Visit the official store for AquaPi products.",
+  "aquaPiStoreDescription": "Discover AquaPi, the ultimate smart aquarium controller. Monitor and control your aquarium parameters with automated testing, real-time alerts, and seamless integration.",
   "@aquaPiStoreDescription": {
     "description": "Description of the AquaPi store"
   },
