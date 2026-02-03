@@ -18,6 +18,7 @@ This directory contains comprehensive tests for the Aquarium AI Flutter applicat
 - `chatbot_screen_test.dart` - AI chatbot interface tests
 - `compatibility_report_test.dart` - Fish compatibility report display tests
 - `fish_compatibility_screen_test.dart` - Fish compatibility tool tests
+- `markdown_viewer_screen_test.dart` - Markdown content viewer with breadcrumb navigation tests
 - `photo_analysis_result_screen_test.dart` - Photo analysis results display tests
 - `photo_analysis_screen_test.dart` - Photo capture/selection interface tests
 - `settings_screen_test.dart` - App settings and configuration tests
