@@ -119,6 +119,10 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Only show "Get the Mobile App" section on non-mobile platforms (web, desktop)
+    // Hide on Android/iOS as it's redundant when already using the mobile app
+    final shouldShowMobileAppSection = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+    
     return MainLayout(
       title: 'About',
       bottomNavigationBar: const AdBanner(),
@@ -148,9 +152,8 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 32),
           
-          // Get the App Section - only show on non-mobile platforms (web, desktop)
-          // Hide on Android/iOS as it's redundant when already using the mobile app
-          if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) ...[
+          // Get the App Section
+          if (shouldShowMobileAppSection) ...[
             Card(
               elevation: 2,
               child: Padding(
