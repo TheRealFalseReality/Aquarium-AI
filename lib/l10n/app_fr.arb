@@ -439,7 +439,9 @@
   "today": "Aujourd'hui",
   "xHoursAgo": "Il y a {count} heures",
   "xMinutesAgo": "Il y a {count} minutes",
-  "yesterday": "Hier"
+  "yesterday": "Hier",
+  "information": "Informations",
+  "informationDescription": "Documentation et Guides"
 }
 
 

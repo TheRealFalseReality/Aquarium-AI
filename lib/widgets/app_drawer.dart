@@ -259,8 +259,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   delay: const Duration(milliseconds: 500),
                   child: ListTile(
                     leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
-                    title: const Text('Information'),
-                    subtitle: const Text('Documentation & Guides'),
+                    title: Text(l10n.information),
+                    subtitle: Text(l10n.informationDescription),
                     onTap: () => navigate('/information'),
                   ),
                 ),
