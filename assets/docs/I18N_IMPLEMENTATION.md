@@ -49,7 +49,7 @@ The following files have been updated to use localized strings:
 | `LOCALIZATION_DEV_GUIDE.md` | Developer guide for using l10n in code |
 | `TESTING_I18N.md` | Testing guide for i18n implementation |
 | `CONTRIBUTING.md` | General contribution guidelines |
-| `README.md` | Updated with translation information |
+| Root project README | Updated with translation information |
 
 ### 6. Tools
 
