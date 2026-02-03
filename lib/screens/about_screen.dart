@@ -148,36 +148,39 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 32),
           
-          // Get the App Section
-          Card(
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle(context, 'Get the Mobile App', Icons.phone_android),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
-                      child: Image.asset(
-                        'assets/google_play_badge.png',
-                        height: 60,
-                        fit: BoxFit.contain,
+          // Get the App Section - only show on non-mobile platforms (web, desktop)
+          // Hide on Android/iOS as it's redundant when already using the mobile app
+          if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) ...[
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle(context, 'Get the Mobile App', Icons.phone_android),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
+                        child: Image.asset(
+                          'assets/google_play_badge.png',
+                          height: 60,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ],
           // API Key Section
           Card(
             elevation: 2,
