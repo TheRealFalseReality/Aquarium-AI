@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/google_drive_service.dart';
@@ -65,8 +66,10 @@ class GoogleDriveNotifier extends StateNotifier<GoogleDriveState> {
     state = state.copyWith(isLoading: true, clearError: true);
     
     try {
+      debugPrint('GoogleDriveProvider: Starting sign-in process...');
       final user = await _service.signIn();
       if (user != null) {
+        debugPrint('GoogleDriveProvider: Sign-in successful');
         state = state.copyWith(
           isSignedIn: true,
           user: user,
@@ -74,13 +77,17 @@ class GoogleDriveNotifier extends StateNotifier<GoogleDriveState> {
         );
         return true;
       } else {
+        debugPrint('GoogleDriveProvider: Sign-in returned null');
         state = state.copyWith(
           isLoading: false,
           error: 'Sign-in was cancelled or failed. Please ensure Google Sign-In is properly configured.',
         );
         return false;
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('GoogleDriveProvider: Exception during sign-in: $e');
+      debugPrint('GoogleDriveProvider: Stack trace: $stackTrace');
+      
       // Provide more helpful error message for common configuration issues
       String errorMessage = 'Sign-in error: $e';
       

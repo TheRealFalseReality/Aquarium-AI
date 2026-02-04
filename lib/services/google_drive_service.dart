@@ -39,13 +39,18 @@ class GoogleDriveService {
   /// Sign in to Google account
   Future<GoogleSignInAccount?> signIn() async {
     try {
+      debugPrint('GoogleDriveService: Attempting sign-in...');
       _currentUser = await _googleSignIn.signIn();
       if (_currentUser != null) {
+        debugPrint('GoogleDriveService: Sign-in successful for ${_currentUser!.email}');
         await _initializeDriveApi();
+      } else {
+        debugPrint('GoogleDriveService: Sign-in returned null (user may have cancelled)');
       }
       return _currentUser;
-    } catch (e) {
-      debugPrint('Error signing in: $e');
+    } catch (e, stackTrace) {
+      debugPrint('GoogleDriveService: Error signing in: $e');
+      debugPrint('GoogleDriveService: Stack trace: $stackTrace');
       return null;
     }
   }
