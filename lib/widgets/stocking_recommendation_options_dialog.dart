@@ -11,7 +11,12 @@ class StockingRecommendationOptions {
 }
 
 class StockingRecommendationOptionsDialog extends StatefulWidget {
-  const StockingRecommendationOptionsDialog({super.key});
+  final bool isCompatibilityAnalysis;
+  
+  const StockingRecommendationOptionsDialog({
+    super.key,
+    this.isCompatibilityAnalysis = false,
+  });
 
   @override
   State<StockingRecommendationOptionsDialog> createState() => _StockingRecommendationOptionsDialogState();
@@ -30,18 +35,21 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCompatibility = widget.isCompatibilityAnalysis;
     
     return AlertDialog(
       title: Row(
         children: [
           Icon(
-            Icons.auto_awesome,
+            isCompatibility ? Icons.biotech : Icons.auto_awesome,
             color: theme.colorScheme.primary,
             size: 24,
           ),
           const SizedBox(width: 8),
-          const Expanded(
-            child: Text('AI Stocking Recommendation Options'),
+          Expanded(
+            child: Text(isCompatibility 
+              ? 'AI Compatibility Analysis Options' 
+              : 'AI Stocking Recommendation Options'),
           ),
         ],
       ),
@@ -51,7 +59,9 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Configure how the AI analyzes your tank for stocking recommendations.',
+              isCompatibility
+                ? 'Configure how the AI analyzes your tank\'s compatibility.'
+                : 'Configure how the AI analyzes your tank for stocking recommendations.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -142,7 +152,9 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
             ),
             const SizedBox(height: 8),
             Text(
-              'Add specific requests or preferences to guide the AI\'s recommendations.',
+              isCompatibility
+                ? 'Add specific requests or preferences to guide the AI\'s analysis.'
+                : 'Add specific requests or preferences to guide the AI\'s recommendations.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
@@ -165,8 +177,8 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
               ),
             );
           },
-          icon: const Icon(Icons.auto_awesome, size: 18),
-          label: const Text('Get Recommendations'),
+          icon: Icon(isCompatibility ? Icons.biotech : Icons.auto_awesome, size: 18),
+          label: Text(isCompatibility ? 'Analyze Compatibility' : 'Get Recommendations'),
         ),
       ],
     );

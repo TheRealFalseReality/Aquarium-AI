@@ -376,14 +376,14 @@
     "description": "Enable AI Features setting description"
   },
 
-  "showAIStockingButton": "Show AI Stocking Button",
+  "showAIStockingButton": "Show AI Analysis Buttons",
   "@showAIStockingButton": {
-    "description": "Show AI Stocking Button setting title"
+    "description": "Show AI Analysis Buttons setting title"
   },
 
-  "showAIStockingButtonDesc": "Display the full \"AI Stocking Recommendations\" button on tank cards. The option remains available in the menu.",
+  "showAIStockingButtonDesc": "Display the \"AI Stocking Ideas\" and \"Compatibility Analysis\" buttons on tank cards. These options remain available in the menu.",
   "@showAIStockingButtonDesc": {
-    "description": "Show AI Stocking Button setting description"
+    "description": "Show AI Analysis Buttons setting description"
   },
 
   "speciesTags": "Species Tags",

@@ -1507,7 +1507,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             onPressed: () => _getTankStockingRecommendations(context, ref, tank),
                             icon: const Icon(Icons.auto_awesome, size: 16),
                             label: Text(
-                              'AI Stocking Recommendations',
+                              'AI Stocking Ideas',
                               style: TextStyle(
                                 fontSize: isLargeScreen ? 13 : 14,
                                 fontWeight: FontWeight.w600,
@@ -1526,8 +1526,56 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                       ),
-                    // Space for future buttons (dosing, parameters, etc.)
+                    // Space between buttons
                     if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
+                    
+                    // AI compatibility analysis button - conditionally shown based on app settings
+                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                      Expanded(
+                        child: Container(
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.teal.shade400,
+                                Colors.green.shade500,
+                                Colors.cyan.shade300,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _getTankCompatibilityAnalysis(context, ref, tank),
+                            icon: const Icon(Icons.biotech, size: 16),
+                            label: Text(
+                              'Compatibility Analysis',
+                              style: TextStyle(
+                                fontSize: isLargeScreen ? 13 : 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 
@@ -4331,7 +4379,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Show options dialog first
     final options = await showDialog<StockingRecommendationOptions>(
       context: context,
-      builder: (context) => const StockingRecommendationOptionsDialog(),
+      builder: (context) => const StockingRecommendationOptionsDialog(isCompatibilityAnalysis: true),
     );
 
     // User cancelled the dialog
