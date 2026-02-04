@@ -1172,7 +1172,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
                             PopupMenuItem(
                               value: 'recommendations',
                               child: Row(
