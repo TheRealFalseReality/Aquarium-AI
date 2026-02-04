@@ -76,14 +76,26 @@ class GoogleDriveNotifier extends StateNotifier<GoogleDriveState> {
       } else {
         state = state.copyWith(
           isLoading: false,
-          error: 'Sign-in was cancelled or failed',
+          error: 'Sign-in was cancelled or failed. Please ensure Google Sign-In is properly configured.',
         );
         return false;
       }
     } catch (e) {
+      // Provide more helpful error message for common configuration issues
+      String errorMessage = 'Sign-in error: $e';
+      if (e.toString().contains('PlatformException') || 
+          e.toString().contains('ApiException') ||
+          e.toString().contains('10:') ||
+          e.toString().contains('12500')) {
+        errorMessage = 'Sign-in failed. Please check that:\n'
+            '1. Google Sign-In is configured in Firebase\n'
+            '2. SHA-1 fingerprints are added\n'
+            '3. google-services.json is up to date\n'
+            'Error: $e';
+      }
       state = state.copyWith(
         isLoading: false,
-        error: 'Sign-in error: $e',
+        error: errorMessage,
       );
       return false;
     }

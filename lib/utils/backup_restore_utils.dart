@@ -373,7 +373,9 @@ class BackupRestoreUtils {
             children: [
               const Icon(Icons.cloud, color: Colors.blue),
               const SizedBox(width: 8),
-              const Text('Sign in to Google Drive'),
+              Expanded(
+                child: const Text('Sign in to Google Drive'),
+              ),
             ],
           ),
           content: const Text(
@@ -405,9 +407,11 @@ class BackupRestoreUtils {
         final signedIn = await googleDriveNotifier.signIn();
         if (!signedIn) {
           if (context.mounted) {
+            final errorMessage = ref.read(googleDriveProvider).error ?? 
+                'Failed to sign in to Google Drive. Please try again.';
             context.showAccessibleMessage(
-              'Failed to sign in to Google Drive. Please try again.',
-              duration: const Duration(seconds: 3),
+              errorMessage,
+              duration: const Duration(seconds: 5),
             );
           }
           return;
@@ -424,7 +428,9 @@ class BackupRestoreUtils {
           children: [
             const Icon(Icons.cloud_upload, color: Colors.blue),
             const SizedBox(width: 8),
-            const Text('Back Up to Google Drive'),
+            Expanded(
+              child: const Text('Back Up to Google Drive'),
+            ),
           ],
         ),
         content: Column(
@@ -577,7 +583,9 @@ class BackupRestoreUtils {
             children: [
               const Icon(Icons.cloud, color: Colors.blue),
               const SizedBox(width: 8),
-              const Text('Sign in to Google Drive'),
+              Expanded(
+                child: const Text('Sign in to Google Drive'),
+              ),
             ],
           ),
           content: const Text(
@@ -608,9 +616,11 @@ class BackupRestoreUtils {
         final signedIn = await googleDriveNotifier.signIn();
         if (!signedIn) {
           if (context.mounted) {
+            final errorMessage = ref.read(googleDriveProvider).error ?? 
+                'Failed to sign in to Google Drive. Please try again.';
             context.showAccessibleMessage(
-              'Failed to sign in to Google Drive. Please try again.',
-              duration: const Duration(seconds: 3),
+              errorMessage,
+              duration: const Duration(seconds: 5),
             );
           }
           return;
@@ -638,7 +648,9 @@ class BackupRestoreUtils {
             children: [
               Icon(Icons.cloud_download, color: Colors.green),
               SizedBox(width: 8),
-              Text('Select Backup to Restore'),
+              Expanded(
+                child: Text('Select Backup to Restore'),
+              ),
             ],
           ),
           content: SizedBox(
@@ -684,7 +696,9 @@ class BackupRestoreUtils {
               children: [
                 const Icon(Icons.restore, color: Colors.green),
                 const SizedBox(width: 8),
-                Text(l10n.restoreDialogTitle),
+                Expanded(
+                  child: Text(l10n.restoreDialogTitle),
+                ),
               ],
             ),
             content: Column(

@@ -2,6 +2,17 @@
 
 This document describes the Google Drive backup and restore functionality for Aquarium AI.
 
+## ⚠️ Setup Required
+
+Before using Google Drive backup/restore, you **must** configure Google Sign-In for your platform. See [GOOGLE_SIGN_IN_SETUP.md](GOOGLE_SIGN_IN_SETUP.md) for detailed setup instructions.
+
+**Quick Setup Checklist:**
+- [ ] Add SHA-1 fingerprints to Firebase (Android)
+- [ ] Download updated `google-services.json` (Android)
+- [ ] Configure URL schemes (iOS)
+- [ ] Enable Google Sign-In in Firebase Authentication
+- [ ] Rebuild the app after configuration changes
+
 ## Overview
 
 The Google Drive integration allows users to backup and restore their aquarium data (tanks, species tags, notifications, and preferences) directly to/from their personal Google Drive account. This provides a cloud-based backup solution in addition to the existing local file backup.
@@ -186,16 +197,32 @@ flutter test test/providers/google_drive_backup_test.dart
 ## Troubleshooting
 
 ### Sign-In Fails
-- Ensure Google Play Services is installed (Android)
-- Check internet connection
-- Verify OAuth configuration
-- Check app permissions
+Most sign-in issues are due to missing or incorrect configuration. 
+
+**Common errors:**
+- `PlatformException(sign_in_failed, ...)`
+- `ApiException: 10` (missing/incorrect SHA-1)
+- `ApiException: 12500` (package name mismatch)
+
+**Solution:** See the comprehensive [Google Sign-In Setup Guide](GOOGLE_SIGN_IN_SETUP.md) for:
+- How to get SHA-1 fingerprints
+- How to configure Firebase
+- How to update google-services.json
+- Platform-specific setup steps
+- Step-by-step troubleshooting
+
+**Quick fix checklist:**
+- [ ] SHA-1 fingerprints added to Firebase
+- [ ] google-services.json is up to date
+- [ ] Google Sign-In enabled in Firebase Authentication
+- [ ] App rebuilt after configuration changes
 
 ### Upload/Download Fails
 - Check internet connection
 - Verify Google Drive permissions
 - Ensure sufficient Google Drive storage space
 - Check for API quota limits
+- Re-authenticate if needed (sign out and sign in again)
 
 ### Backup Not Appearing
 - Refresh the backup list
