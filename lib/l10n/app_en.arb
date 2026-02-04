@@ -1039,7 +1039,7 @@
     "description": "Time remaining: in 1 day"
   },
 
-  "inXDays": "In {count} days",
+  "inXDays": "In {count} {count, plural, =1{day} other{days}}",
   "@inXDays": {
     "description": "Time remaining: in X days",
     "placeholders": {
@@ -1049,12 +1049,17 @@
     }
   },
 
+  "inLessThan2Days": "In less than 2 days",
+  "@inLessThan2Days": {
+    "description": "Time remaining: less than 2 days"
+  },
+
   "inOneHour": "In 1 hour",
   "@inOneHour": {
     "description": "Time remaining: in 1 hour"
   },
 
-  "inXHours": "In {count} hours",
+  "inXHours": "In {count} {count, plural, =1{hour} other{hours}}",
   "@inXHours": {
     "description": "Time remaining: in X hours",
     "placeholders": {
@@ -1064,12 +1069,17 @@
     }
   },
 
+  "inLessThan2Hours": "In less than 2 hours",
+  "@inLessThan2Hours": {
+    "description": "Time remaining: less than 2 hours"
+  },
+
   "inOneMinute": "In 1 minute",
   "@inOneMinute": {
     "description": "Time remaining: in 1 minute"
   },
 
-  "inXMinutes": "In {count} minutes",
+  "inXMinutes": "In {count} {count, plural, =1{minute} other{minutes}}",
   "@inXMinutes": {
     "description": "Time remaining: in X minutes",
     "placeholders": {

@@ -1654,9 +1654,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           final daysUntil = nextDate.difference(now).inDays;
           
           if (daysUntil > 0) {
-            timeDisplay = l10n.inXDays(daysUntil);
+            if (daysUntil == 1) {
+              timeDisplay = l10n.inLessThan2Days;
+            } else {
+              timeDisplay = l10n.inXDays(daysUntil);
+            }
           } else if (hoursUntil > 0) {
-            timeDisplay = hoursUntil == 1 ? l10n.inOneHour : l10n.inXHours(hoursUntil);
+            if (hoursUntil == 1) {
+              timeDisplay = l10n.inLessThan2Hours;
+            } else {
+              timeDisplay = l10n.inXHours(hoursUntil);
+            }
           } else if (minutesUntil > 0) {
             timeDisplay = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
           } else {
