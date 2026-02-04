@@ -484,7 +484,10 @@ class TankNotifier extends StateNotifier<TankState> {
 
       // Restore reschedule preferences if present in backup
       if (backupData.containsKey('reschedulePreferences')) {
-        final reschedulePreferences = backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final reschedulePreferencesData = backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final reschedulePreferences = reschedulePreferencesData.map(
+          (key, value) => MapEntry(key, value as int),
+        );
         final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
         await appSettingsNotifier.importReschedulePreferences(reschedulePreferences);
       }
