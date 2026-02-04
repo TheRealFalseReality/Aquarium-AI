@@ -555,6 +555,14 @@
   "@getStockingIdeas": {
     "description": "Get stocking ideas menu option"
   },
+  "compatibilityAnalysis": "Compatibility Analysis",
+  "@compatibilityAnalysis": {
+    "description": "Compatibility analysis menu option"
+  },
+  "analyzingTankCompatibility": "Analyzing Tank Compatibility...",
+  "@analyzingTankCompatibility": {
+    "description": "Message shown while analyzing tank compatibility"
+  },
 
   "duplicate": "Duplicate",
   "@duplicate": {

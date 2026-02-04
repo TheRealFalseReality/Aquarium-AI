@@ -58,6 +58,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   bool _includeCustomNames = false; // Track if custom names were included
   String _additionalNotes = ''; // Track additional notes
   Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
+  bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
 
   @override
   void initState() {
@@ -166,8 +167,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
       if (next.report != null && previous?.report != next.report && _currentTankForCompatibility != null) {
         // Hide loading dialog if it's showing
-        if (Navigator.canPop(context)) {
+        if (_isCompatibilityLoading && Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
+          _isCompatibilityLoading = false;
         }
         
         // Show the compatibility report
@@ -181,8 +183,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       
       if (next.error != null && previous?.error != next.error && _currentTankForCompatibility != null) {
         // Hide loading dialog if it's showing
-        if (Navigator.canPop(context)) {
+        if (_isCompatibilityLoading && Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
+          _isCompatibilityLoading = false;
         }
         
         // Show error with appropriate action
@@ -1238,7 +1241,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 children: [
                                   const Icon(Icons.biotech, color: Colors.teal, size: 18),
                                   const SizedBox(width: 8),
-                                  const Text('Compatibility Analysis', style: TextStyle(color: Colors.teal)),
+                                  Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal)),
                                 ],
                               ),
                             ),
@@ -4386,7 +4389,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       }
       
       // Add individual fish based on quantity (only add once per species for compatibility check)
-      if (!tankFishList.any((f) => f.name == fish.name)) {
+      // Use inhabitant.fishUnit for deduplication to avoid duplicates when custom names are used
+      if (!tankFishList.any((f) => f.name.contains(inhabitant.fishUnit))) {
         tankFishList.add(fish);
       }
     }
@@ -4408,7 +4412,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    const Text('Analyzing Tank Compatibility...'),
+                    Text(l10n.analyzingTankCompatibility),
                     const SizedBox(height: 8),
                     const Text(
                       'This may take up to 60 seconds',
@@ -4418,6 +4422,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     TextButton(
                       onPressed: () {
                         ref.read(fishCompatibilityProvider.notifier).cancel();
+                        _isCompatibilityLoading = false;
+                        _currentTankForCompatibility = null;
                         Navigator.pop(context);
                       },
                       child: Text(l10n.cancel),
@@ -4451,6 +4457,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Store the current tank for the listener
     _currentTankForCompatibility = tank;
+    _isCompatibilityLoading = true;
 
     // Clear any previous selection and set the tank fish as selected
     ref.read(fishCompatibilityProvider.notifier).clearSelection();
