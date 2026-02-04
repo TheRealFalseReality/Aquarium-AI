@@ -567,6 +567,14 @@
   "@mayTakeUpToSeconds": {
     "description": "Time estimate message for AI operations"
   },
+  "tankMustHaveInhabitantsForCompatibility": "Tank must have existing inhabitants to run compatibility analysis.",
+  "@tankMustHaveInhabitantsForCompatibility": {
+    "description": "Error message when trying to analyze compatibility of empty tank"
+  },
+  "fishDataNotAvailable": "Fish data is not available. Please try again later.",
+  "@fishDataNotAvailable": {
+    "description": "Error message when fish data is not loaded"
+  },
 
   "duplicate": "Duplicate",
   "@duplicate": {

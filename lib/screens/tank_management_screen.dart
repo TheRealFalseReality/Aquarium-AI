@@ -4308,7 +4308,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
-        'Tank must have existing inhabitants to run compatibility analysis.'
+        l10n.tankMustHaveInhabitantsForCompatibility
       );
       return;
     }
@@ -4323,7 +4323,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Check if fish data is available
     if (fishData == null) {
       context.showAccessibleMessage(
-        'Fish data is not available. Please try again later.'
+        l10n.fishDataNotAvailable
       );
       return;
     }
@@ -4342,8 +4342,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Get the fish from the tank inhabitants
     final categoryFish = fishData[tank.type] ?? [];
     final tankFishList = <Fish>[];
+    final addedSpecies = <String>{}; // Track species by their fishUnit to avoid duplicates
     
     for (final inhabitant in tank.inhabitants) {
+      // Skip if we've already added this species
+      if (addedSpecies.contains(inhabitant.fishUnit)) {
+        continue;
+      }
+      
       Fish fish;
       
       // If custom names should be included and the inhabitant has a custom name, create a fish with both names
@@ -4388,11 +4394,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
       }
       
-      // Add individual fish based on quantity (only add once per species for compatibility check)
-      // Use exact matching on inhabitant.fishUnit to avoid false matches (e.g., "Neon Tetra" vs "Black Neon Tetra")
-      if (!tankFishList.any((f) => f.name == inhabitant.fishUnit || f.name.endsWith('(${inhabitant.fishUnit})'))) {
-        tankFishList.add(fish);
-      }
+      // Add the fish and mark this species as added
+      tankFishList.add(fish);
+      addedSpecies.add(inhabitant.fishUnit);
     }
 
     // Show loading overlay
