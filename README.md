@@ -40,6 +40,17 @@ Analyze photos of your fish for personalized feedback. Our AI can help identify 
 
 Access essential tools for managing your aquarium's technical details. The app includes a handy **Tank Volume Calculator** to help you accurately determine the water capacity of your aquarium, with more tools on the way.
 
+### ☁️ Backup & Restore with Google Drive
+
+Protect your aquarium data with integrated backup solutions:
+
+* **Local Backups:** Export your tank data to files on your device
+* **Google Drive Integration:** Back up and restore your data directly to/from your Google Drive account
+* **Complete Data Protection:** All tanks, fish, parameters, notifications, and preferences are backed up
+* **Easy Restore:** Browse and select from your available backups in Google Drive
+
+See [GOOGLE_DRIVE_INTEGRATION.md](GOOGLE_DRIVE_INTEGRATION.md) for detailed information about Google Drive integration.
+
 ## 🌟 Why Aquarium AI?
 
 * **Data-Driven Decisions:** Make informed decisions based on a vast database of aquatic knowledge and AI-powered insights.
