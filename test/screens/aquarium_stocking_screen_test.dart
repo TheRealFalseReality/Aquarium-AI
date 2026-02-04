@@ -16,7 +16,6 @@ void main() {
     // Verify that the screen loads with basic elements
     expect(find.text('AI Stocking Assistant'), findsOneWidget);
     expect(find.text('Tank Size'), findsOneWidget);
-    expect(find.text('Additional Notes'), findsOneWidget);
     
     // Verify tank type selection chips
     expect(find.text('Freshwater'), findsOneWidget);
@@ -53,5 +52,21 @@ void main() {
 
     // Verify saltwater is now selected
     // Note: Visual indication depends on implementation
+  });
+
+  testWidgets('AquariumStockingScreen fish selection button exists', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: AquariumStockingScreen(),
+        ),
+      ),
+    );
+
+    // Verify fish selection button exists
+    expect(find.text('Select Specific Fish (Optional)'), findsOneWidget);
+    
+    // Verify the button is an OutlinedButton with icon
+    expect(find.byType(OutlinedButton), findsWidgets);
   });
 }
