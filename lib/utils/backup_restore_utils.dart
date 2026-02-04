@@ -825,7 +825,6 @@ class BackupRestoreUtils {
         );
       }
     }
-    }
   }
 }
 
