@@ -21,12 +21,14 @@ class AquariumStockingState {
   final List<StockingRecommendation>? recommendations;
   final List<StockingRecommendation>? lastRecommendations;
   final String? error;
+  final List<Fish> selectedFish;
 
   AquariumStockingState({
     this.isLoading = false,
     this.recommendations,
     this.lastRecommendations,
     this.error,
+    this.selectedFish = const [],
   });
 
   AquariumStockingState copyWith({
@@ -34,6 +36,7 @@ class AquariumStockingState {
     List<StockingRecommendation>? recommendations,
     List<StockingRecommendation>? lastRecommendations,
     String? error,
+    List<Fish>? selectedFish,
     bool clearError = false,
     bool clearRecommendation = false,
   }) {
@@ -43,6 +46,7 @@ class AquariumStockingState {
           clearRecommendation ? null : recommendations ?? this.recommendations,
       lastRecommendations: lastRecommendations ?? this.lastRecommendations,
       error: clearError ? null : error ?? this.error,
+      selectedFish: selectedFish ?? this.selectedFish,
     );
   }
 }
@@ -56,6 +60,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(isLoading: false, clearError: true);
   }
 
+  void selectFish(Fish fish) {
+    final newSelectedFish = List<Fish>.from(state.selectedFish);
+    if (newSelectedFish.contains(fish)) {
+      newSelectedFish.remove(fish);
+    } else {
+      newSelectedFish.add(fish);
+    }
+    state = state.copyWith(selectedFish: newSelectedFish);
+  }
+
+  void clearSelectedFish() {
+    state = state.copyWith(selectedFish: []);
+  }
 
 
   Future<void> getStockingRecommendations({
@@ -93,7 +110,13 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
     
     final processedTankSize = _processTankSize(tankSize);
-    final prompt = buildStockingRecommendationPrompt(processedTankSize, tankType, userNotes, allFish);
+    final prompt = buildStockingRecommendationPrompt(
+      processedTankSize, 
+      tankType, 
+      userNotes, 
+      allFish,
+      selectedFish: state.selectedFish,
+    );
 
     try {
       String? responseText;
