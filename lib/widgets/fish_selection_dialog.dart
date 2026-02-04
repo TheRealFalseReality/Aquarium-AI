@@ -71,10 +71,18 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fishDataAsync = ref.watch(fishDataProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 800, maxHeight: 700),
+        constraints: BoxConstraints(
+          maxWidth: 800, 
+          maxHeight: screenHeight * 0.85, // Use 85% of screen height
+        ),
         child: Column(
           children: [
             // Header
@@ -82,6 +90,10 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
                 border: Border(
                   bottom: BorderSide(
                     color: theme.colorScheme.outline.withOpacity(0.2),
@@ -197,13 +209,11 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                     itemBuilder: (context, index) {
                       final fish = _filteredFishList[index];
                       final isSelected = _selectedFish.contains(fish);
-                      return GestureDetector(
+                      return FishCard(
+                        fish: fish,
+                        isSelected: isSelected,
+                        category: widget.category,
                         onTap: () => _toggleFishSelection(fish),
-                        child: FishCard(
-                          fish: fish,
-                          isSelected: isSelected,
-                          category: widget.category,
-                        ),
                       );
                     },
                   );
@@ -215,6 +225,10 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
                 border: Border(
                   top: BorderSide(
                     color: theme.colorScheme.outline.withOpacity(0.2),
