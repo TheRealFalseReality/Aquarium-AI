@@ -14,6 +14,7 @@ import '../models/tank_notification.dart';
 import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../providers/fish_compatibility_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
 import '../services/notification_service.dart';
@@ -31,6 +32,7 @@ import 'parameter_logger_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'notification_logger_screen.dart';
+import 'compatibility_report.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
@@ -55,6 +57,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   bool _isSortMenuExpanded = false; // Track sort menu expansion
   bool _includeCustomNames = false; // Track if custom names were included
   String _additionalNotes = ''; // Track additional notes
+  Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
+  bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
 
   @override
   void initState() {
@@ -156,6 +160,50 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? 'Settings'
               : null,
         );
+      }
+    });
+
+    // Listen for compatibility analysis reports
+    ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
+      if (next.report != null && previous?.report != next.report && _currentTankForCompatibility != null) {
+        // Hide loading dialog if it's showing
+        if (_isCompatibilityLoading && Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+          _isCompatibilityLoading = false;
+        }
+        
+        // Show the compatibility report
+        if (context.mounted) {
+          showReportDialog(context, next.report!, fishType: _currentTankForCompatibility!.type);
+        }
+        
+        // Clear the current tank reference
+        _currentTankForCompatibility = null;
+      }
+      
+      if (next.error != null && previous?.error != next.error && _currentTankForCompatibility != null) {
+        // Hide loading dialog if it's showing
+        if (_isCompatibilityLoading && Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+          _isCompatibilityLoading = false;
+        }
+        
+        // Show error with appropriate action
+        if (context.mounted) {
+          context.showAccessibleMessage(
+            next.error!,
+            onAction: next.error!.toLowerCase().contains('api key not set')
+                ? () => Navigator.pushNamed(context, '/settings')
+                : null,
+            actionLabel: next.error!.toLowerCase().contains('api key not set')
+                ? 'Settings'
+                : null,
+          );
+          ref.read(fishCompatibilityProvider.notifier).clearError();
+        }
+        
+        // Clear the current tank reference
+        _currentTankForCompatibility = null;
       }
     });
 
@@ -1079,6 +1127,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           case 'recommendations':
                             _getTankStockingRecommendations(context, ref, tank);
                             break;
+                          case 'compatibility_analysis':
+                            _getTankCompatibilityAnalysis(context, ref, tank);
+                            break;
                           case 'duplicate':
                             _duplicateTank(context, ref, tank);
                             break;
@@ -1180,6 +1231,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                   const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                                   const SizedBox(width: 8),
                                   Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                                ],
+                              ),
+                            ),
+                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
+                            PopupMenuItem(
+                              value: 'compatibility_analysis',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.biotech, color: Colors.teal, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal)),
                                 ],
                               ),
                             ),
@@ -1421,7 +1483,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
-                          height: 36,
+                          height: 44,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -1445,7 +1507,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             onPressed: () => _getTankStockingRecommendations(context, ref, tank),
                             icon: const Icon(Icons.auto_awesome, size: 16),
                             label: Text(
-                              'AI Stocking Recommendations',
+                              'Stocking Ideas',
                               style: TextStyle(
                                 fontSize: isLargeScreen ? 13 : 14,
                                 fontWeight: FontWeight.w600,
@@ -1464,8 +1526,56 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                       ),
-                    // Space for future buttons (dosing, parameters, etc.)
+                    // Space between buttons
                     if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
+                    
+                    // AI compatibility analysis button - conditionally shown based on app settings
+                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                      Expanded(
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.teal.shade400,
+                                Colors.green.shade500,
+                                Colors.cyan.shade300,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _getTankCompatibilityAnalysis(context, ref, tank),
+                            icon: const Icon(Icons.biotech, size: 16),
+                            label: Text(
+                              'Compatibility',
+                              style: TextStyle(
+                                fontSize: isLargeScreen ? 13 : 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 
@@ -4249,6 +4359,176 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       additionalNotes: options.additionalNotes,
     );
   }
+
+  Future<void> _getTankCompatibilityAnalysis(BuildContext context, WidgetRef ref, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (tank.inhabitants.isEmpty) {
+      context.showAccessibleMessage(
+        l10n.tankMustHaveInhabitantsForCompatibility
+      );
+      return;
+    }
+
+    // Get fish data from provider
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    
+    // Check if fish data is available
+    if (fishData == null) {
+      context.showAccessibleMessage(
+        l10n.fishDataNotAvailable
+      );
+      return;
+    }
+
+    // Show options dialog first
+    final options = await showDialog<StockingRecommendationOptions>(
+      context: context,
+      builder: (context) => const StockingRecommendationOptionsDialog(isCompatibilityAnalysis: true),
+    );
+
+    // User cancelled the dialog
+    if (options == null || !context.mounted) {
+      return;
+    }
+    
+    // Get the fish from the tank inhabitants
+    final categoryFish = fishData[tank.type] ?? [];
+    final tankFishList = <Fish>[];
+    final addedSpecies = <String>{}; // Track species by their fishUnit to avoid duplicates
+    
+    for (final inhabitant in tank.inhabitants) {
+      // Skip if we've already added this species
+      if (addedSpecies.contains(inhabitant.fishUnit)) {
+        continue;
+      }
+      
+      Fish fish;
+      
+      // If custom names should be included and the inhabitant has a custom name, create a fish with both names
+      if (options.includeCustomNames && inhabitant.customName.isNotEmpty) {
+        // Try to find the fish by database name first
+        final databaseFish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+        
+        // Create a new fish with custom name included for the AI prompt
+        fish = Fish(
+          name: '${inhabitant.customName} (${inhabitant.fishUnit})',
+          commonNames: databaseFish.commonNames,
+          imageURL: databaseFish.imageURL,
+          compatible: databaseFish.compatible,
+          notRecommended: databaseFish.notRecommended,
+          notCompatible: databaseFish.notCompatible,
+          withCaution: databaseFish.withCaution,
+        );
+      } else {
+        // Just use the database fish name
+        fish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+      }
+      
+      // Add the fish and mark this species as added
+      tankFishList.add(fish);
+      addedSpecies.add(inhabitant.fishUnit);
+    }
+
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button during loading
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(l10n.analyzingTankCompatibility),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.mayTakeUpToSeconds,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        ref.read(fishCompatibilityProvider.notifier).cancel();
+                        _isCompatibilityLoading = false;
+                        _currentTankForCompatibility = null;
+                        Navigator.pop(context);
+                      },
+                      child: Text(l10n.cancel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Log tank compatibility analysis request
+    AnalyticsService.logFeatureUsed(
+      featureName: 'tank_compatibility_analysis',
+      parameters: {
+        'tank_type': tank.type,
+        'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
+        'existing_inhabitants_count': tank.inhabitants.length,
+        'source': 'tank_management',
+        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
+      },
+    );
+    AnalyticsService.logTankAction(
+      action: 'compatibility_analysis',
+      tankType: tank.type,
+      tankSize: tank.sizeGallons?.toInt(),
+    );
+
+    // Store the current tank for the listener
+    _currentTankForCompatibility = tank;
+    _isCompatibilityLoading = true;
+
+    // Clear any previous selection and set the tank fish as selected
+    ref.read(fishCompatibilityProvider.notifier).clearSelection();
+    for (final fish in tankFishList) {
+      ref.read(fishCompatibilityProvider.notifier).selectFish(fish);
+    }
+
+    // Get the compatibility report
+    ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(tank.type, additionalNotes: options.additionalNotes);
+  }
+
 
 
 }

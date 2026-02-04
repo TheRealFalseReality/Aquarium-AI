@@ -376,14 +376,14 @@
     "description": "Enable AI Features setting description"
   },
 
-  "showAIStockingButton": "Show AI Stocking Button",
+  "showAIStockingButton": "Show AI Analysis Buttons",
   "@showAIStockingButton": {
-    "description": "Show AI Stocking Button setting title"
+    "description": "Show AI Analysis Buttons setting title"
   },
 
-  "showAIStockingButtonDesc": "Display the full \"AI Stocking Recommendations\" button on tank cards. The option remains available in the menu.",
+  "showAIStockingButtonDesc": "Display the \"Stocking Ideas\" and \"Compatibility\" buttons on tank cards. These options remain available in the menu.",
   "@showAIStockingButtonDesc": {
-    "description": "Show AI Stocking Button setting description"
+    "description": "Show AI Analysis Buttons setting description"
   },
 
   "speciesTags": "Species Tags",
@@ -554,6 +554,26 @@
   "getStockingIdeas": "Get Stocking Ideas",
   "@getStockingIdeas": {
     "description": "Get stocking ideas menu option"
+  },
+  "compatibilityAnalysis": "Compatibility Analysis",
+  "@compatibilityAnalysis": {
+    "description": "Compatibility analysis menu option"
+  },
+  "analyzingTankCompatibility": "Analyzing Tank Compatibility...",
+  "@analyzingTankCompatibility": {
+    "description": "Message shown while analyzing tank compatibility"
+  },
+  "mayTakeUpToSeconds": "This may take up to 60 seconds",
+  "@mayTakeUpToSeconds": {
+    "description": "Time estimate message for AI operations"
+  },
+  "tankMustHaveInhabitantsForCompatibility": "Tank must have existing inhabitants to run compatibility analysis.",
+  "@tankMustHaveInhabitantsForCompatibility": {
+    "description": "Error message when trying to analyze compatibility of empty tank"
+  },
+  "fishDataNotAvailable": "Fish data is not available. Please try again later.",
+  "@fishDataNotAvailable": {
+    "description": "Error message when fish data is not loaded"
   },
 
   "duplicate": "Duplicate",

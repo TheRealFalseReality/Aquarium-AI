@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Aquarium-AI (Flutter Pixel 9 Pro (wireless))",
+            "program": "lib/main.dart",
+            "deviceId": "adb-4C211FDAP001E4-NIRNP9._adb-tls-connect._tcp",
+            "request": "launch",
+            "type": "dart",
+            "args": ["--flavor", "staging", "-t", "lib/main.dart"]
+        }
+    ]
+}
