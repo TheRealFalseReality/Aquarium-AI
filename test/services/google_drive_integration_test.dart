@@ -2,7 +2,6 @@ import 'package:fish_ai/providers/google_drive_provider.dart';
 import 'package:fish_ai/services/google_drive_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 void main() {
   group('Google Drive Integration Tests', () {
