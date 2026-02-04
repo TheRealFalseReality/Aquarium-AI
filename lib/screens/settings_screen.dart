@@ -1117,6 +1117,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         if (mounted) setState(() {});
                       },
                     ),
+                    const Divider(height: 16),
+                    // Google Drive Backup
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.cloud_upload,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      title: const Text('Back Up to Google Drive'),
+                      subtitle: const Text('Upload backup to your Google Drive'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () async {
+                        await BackupRestoreUtils.exportToGoogleDrive(context, ref, source: 'settings');
+                        // Rebuild to refresh statistics
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                    const Divider(height: 16),
+                    // Google Drive Restore
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.cloud_download,
+                          color: Colors.green,
+                        ),
+                      ),
+                      title: const Text('Restore from Google Drive'),
+                      subtitle: const Text('Download backup from your Google Drive'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () async {
+                        await BackupRestoreUtils.importFromGoogleDrive(context, ref, source: 'settings');
+                        // Rebuild to refresh statistics
+                        if (mounted) setState(() {});
+                      },
+                    ),
                   ],
                 ),
               ),

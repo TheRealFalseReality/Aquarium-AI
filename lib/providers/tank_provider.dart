@@ -417,4 +417,118 @@ class TankNotifier extends StateNotifier<TankState> {
       'version': '1.0.0',
     };
   }
+
+  /// Create backup data structure without writing to file
+  /// Returns the backup data as a Map, or null on error
+  Future<Map<String, dynamic>?> createBackupData() async {
+    try {
+      // Get species tags for backup
+      final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
+      final speciesTags = speciesTagsNotifier.exportTags();
+
+      // Get reschedule preferences for backup
+      final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
+      final reschedulePreferences = await appSettingsNotifier.exportReschedulePreferences();
+
+      // Create backup data with metadata
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': state.tanks.length,
+        'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
+        'speciesTags': speciesTags,
+        'reschedulePreferences': reschedulePreferences,
+      };
+
+      return backupData;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to create backup data: $e');
+      return null;
+    }
+  }
+
+  /// Restore tanks and related data from a JSON string
+  /// Returns true on success, false on error
+  Future<bool> restoreFromBackupData(String jsonString) async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Log restore attempt
+      AnalyticsService.logTankAction(
+        action: 'restore_start',
+        tankSize: state.tanks.length, // Current tank count before restore
+      );
+
+      final backupData = json.decode(jsonString) as Map<String, dynamic>;
+
+      // Validate backup format
+      if (!backupData.containsKey('tanks') || !backupData.containsKey('version')) {
+        throw const FormatException('Invalid backup file format');
+      }
+
+      // Parse tanks
+      final tanksList = backupData['tanks'] as List;
+      final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+
+      // Restore species tags if present in backup
+      if (backupData.containsKey('speciesTags')) {
+        final speciesTagsData = backupData['speciesTags'] as Map<String, dynamic>;
+        final speciesTagsMap = speciesTagsData.map(
+          (key, value) => MapEntry(key, List<String>.from(value)),
+        );
+
+        final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
+        await speciesTagsNotifier.importTags(speciesTagsMap);
+      }
+
+      // Restore reschedule preferences if present in backup
+      if (backupData.containsKey('reschedulePreferences')) {
+        final reschedulePreferences = backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
+        await appSettingsNotifier.importReschedulePreferences(reschedulePreferences);
+      }
+
+      // Replace current tanks with imported tanks
+      state = state.copyWith(tanks: importedTanks, isLoading: false);
+      await _saveTanks();
+
+      // Log successful restore
+      AnalyticsService.logTankAction(
+        action: 'restore_success',
+        tankSize: importedTanks.length,
+      );
+
+      // Log feature usage
+      AnalyticsService.logFeatureUsed(
+        featureName: 'tank_restore',
+        parameters: {
+          'tank_count': importedTanks.length,
+          'had_species_tags': backupData.containsKey('speciesTags'),
+          'had_reschedule_prefs': backupData.containsKey('reschedulePreferences'),
+        },
+      );
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to restore data: $e',
+      );
+
+      // Log restore failure
+      AnalyticsService.logTankAction(
+        action: 'restore_failed',
+        tankSize: state.tanks.length,
+      );
+
+      AnalyticsService.logError(
+        errorType: 'restore_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+
+      return false;
+    }
+  }
 }

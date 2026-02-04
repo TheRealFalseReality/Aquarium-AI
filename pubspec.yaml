@@ -39,6 +39,11 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.1
   cached_network_image: ^3.4.1
+  googleapis: ^13.1.0
+  googleapis_auth: ^2.0.0
+  google_sign_in: ^7.8.0
+  extension_google_sign_in_as_googleapis_auth: ^2.0.11
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
