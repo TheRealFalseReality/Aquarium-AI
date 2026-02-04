@@ -83,16 +83,23 @@ class GoogleDriveNotifier extends StateNotifier<GoogleDriveState> {
     } catch (e) {
       // Provide more helpful error message for common configuration issues
       String errorMessage = 'Sign-in error: $e';
-      if (e.toString().contains('PlatformException') || 
-          e.toString().contains('ApiException') ||
-          e.toString().contains('10:') ||
-          e.toString().contains('12500')) {
-        errorMessage = 'Sign-in failed. Please check that:\n'
-            '1. Google Sign-In is configured in Firebase\n'
-            '2. SHA-1 fingerprints are added\n'
-            '3. google-services.json is up to date\n'
-            'Error: $e';
+      
+      // Check for common configuration errors
+      final errorString = e.toString();
+      final isPlatformException = errorString.contains('PlatformException') || 
+                                   errorString.contains('ApiException');
+      final isConfigError = errorString.contains('10:') || 
+                           errorString.contains('12500') ||
+                           errorString.contains('sign_in_failed');
+      
+      if (isPlatformException && isConfigError) {
+        // Configuration error - provide helpful guidance
+        errorMessage = 'Sign-in failed - configuration issue detected. '
+            'Please verify: Google Sign-In is enabled in Firebase, '
+            'SHA-1 fingerprints are added, and google-services.json is up to date. '
+            'See GOOGLE_SIGN_IN_SETUP.md for details.';
       }
+      
       state = state.copyWith(
         isLoading: false,
         error: errorMessage,
