@@ -14,6 +14,7 @@ import '../models/tank_notification.dart';
 import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../providers/fish_compatibility_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/fish_data_service.dart';
 import '../services/notification_service.dart';
@@ -31,6 +32,7 @@ import 'parameter_logger_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'notification_logger_screen.dart';
+import 'compatibility_report.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 
 enum TankSortOption {
@@ -1079,6 +1081,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           case 'recommendations':
                             _getTankStockingRecommendations(context, ref, tank);
                             break;
+                          case 'compatibility_analysis':
+                            _getTankCompatibilityAnalysis(context, ref, tank);
+                            break;
                           case 'duplicate':
                             _duplicateTank(context, ref, tank);
                             break;
@@ -1180,6 +1185,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                   const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                                   const SizedBox(width: 8),
                                   Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                                ],
+                              ),
+                            ),
+                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                            PopupMenuItem(
+                              value: 'compatibility_analysis',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.biotech, color: Colors.teal, size: 18),
+                                  const SizedBox(width: 8),
+                                  const Text('Compatibility Analysis', style: TextStyle(color: Colors.teal)),
                                 ],
                               ),
                             ),
@@ -4241,6 +4257,203 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       additionalNotes: options.additionalNotes,
     );
   }
+
+  Future<void> _getTankCompatibilityAnalysis(BuildContext context, WidgetRef ref, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (tank.inhabitants.isEmpty) {
+      context.showAccessibleMessage(
+        'Tank must have existing inhabitants to run compatibility analysis.'
+      );
+      return;
+    }
+
+    // Get fish data from provider
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    
+    // Check if fish data is available
+    if (fishData == null) {
+      context.showAccessibleMessage(
+        'Fish data is not available. Please try again later.'
+      );
+      return;
+    }
+
+    // Show options dialog first
+    final options = await showDialog<StockingRecommendationOptions>(
+      context: context,
+      builder: (context) => const StockingRecommendationOptionsDialog(),
+    );
+
+    // User cancelled the dialog
+    if (options == null || !context.mounted) {
+      return;
+    }
+    
+    // Get the fish from the tank inhabitants
+    final categoryFish = fishData[tank.type] ?? [];
+    final tankFishList = <Fish>[];
+    
+    for (final inhabitant in tank.inhabitants) {
+      Fish fish;
+      
+      // If custom names should be included and the inhabitant has a custom name, create a fish with both names
+      if (options.includeCustomNames && inhabitant.customName != null && inhabitant.customName!.isNotEmpty) {
+        // Try to find the fish by database name first
+        final databaseFish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+        
+        // Create a new fish with custom name included for the AI prompt
+        fish = Fish(
+          name: '${inhabitant.customName} (${inhabitant.fishUnit})',
+          commonNames: databaseFish.commonNames,
+          imageURL: databaseFish.imageURL,
+          compatible: databaseFish.compatible,
+          notRecommended: databaseFish.notRecommended,
+          notCompatible: databaseFish.notCompatible,
+          withCaution: databaseFish.withCaution,
+        );
+      } else {
+        // Just use the database fish name
+        fish = categoryFish.firstWhere(
+          (f) => f.name == inhabitant.fishUnit,
+          orElse: () => Fish(
+            name: inhabitant.fishUnit,
+            commonNames: [],
+            imageURL: '',
+            compatible: [],
+            notRecommended: [],
+            notCompatible: [],
+            withCaution: [],
+          ),
+        );
+      }
+      
+      // Add individual fish based on quantity (only add once per species for compatibility check)
+      if (!tankFishList.any((f) => f.name == fish.name)) {
+        tankFishList.add(fish);
+      }
+    }
+
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button during loading
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Analyzing Tank Compatibility...'),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'This may take up to 60 seconds',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        ref.read(fishCompatibilityProvider.notifier).cancel();
+                        Navigator.pop(context);
+                      },
+                      child: Text(l10n.cancel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Log tank compatibility analysis request
+    AnalyticsService.logFeatureUsed(
+      featureName: 'tank_compatibility_analysis',
+      parameters: {
+        'tank_type': tank.type,
+        'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
+        'existing_inhabitants_count': tank.inhabitants.length,
+        'source': 'tank_management',
+        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
+      },
+    );
+    AnalyticsService.logTankAction(
+      action: 'compatibility_analysis',
+      tankType: tank.type,
+      tankSize: tank.sizeGallons?.toInt(),
+    );
+
+    // Clear any previous selection and set the tank fish as selected
+    ref.read(fishCompatibilityProvider.notifier).clearSelection();
+    for (final fish in tankFishList) {
+      ref.read(fishCompatibilityProvider.notifier).toggleFishSelection(fish);
+    }
+    
+    // Listen for the compatibility report
+    final subscription = ref.listen<FishCompatibilityState>(
+      fishCompatibilityProvider,
+      (previous, next) {
+        if (next.report != null && previous?.report != next.report) {
+          // Hide loading dialog
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
+          
+          // Show the compatibility report
+          if (context.mounted) {
+            showReportDialog(context, next.report!, fishType: tank.type);
+          }
+        }
+        
+        if (next.error != null && previous?.error != next.error) {
+          // Hide loading dialog
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
+          
+          // Show error with appropriate action
+          if (context.mounted) {
+            context.showAccessibleMessage(
+              next.error!,
+              onAction: next.error!.toLowerCase().contains('api key not set')
+                  ? () => Navigator.pushNamed(context, '/settings')
+                  : null,
+              actionLabel: next.error!.toLowerCase().contains('api key not set')
+                  ? 'Settings'
+                  : null,
+            );
+          }
+        }
+      },
+    );
+
+    // Get the compatibility report
+    await ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(tank.type, additionalNotes: options.additionalNotes);
+  }
+
 
 
 }
