@@ -4401,7 +4401,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       Fish fish;
       
       // If custom names should be included and the inhabitant has a custom name, create a fish with both names
-      if (options.includeCustomNames && inhabitant.customName != null && inhabitant.customName!.isNotEmpty) {
+      if (options.includeCustomNames && inhabitant.customName.isNotEmpty) {
         // Try to find the fish by database name first
         final databaseFish = categoryFish.firstWhere(
           (f) => f.name == inhabitant.fishUnit,
