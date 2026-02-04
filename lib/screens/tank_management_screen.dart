@@ -4389,8 +4389,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       }
       
       // Add individual fish based on quantity (only add once per species for compatibility check)
-      // Use inhabitant.fishUnit for deduplication to avoid duplicates when custom names are used
-      if (!tankFishList.any((f) => f.name.contains(inhabitant.fishUnit))) {
+      // Use exact matching on inhabitant.fishUnit to avoid false matches (e.g., "Neon Tetra" vs "Black Neon Tetra")
+      if (!tankFishList.any((f) => f.name == inhabitant.fishUnit || f.name.endsWith('(${inhabitant.fishUnit})'))) {
         tankFishList.add(fish);
       }
     }
@@ -4414,9 +4414,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     const SizedBox(height: 16),
                     Text(l10n.analyzingTankCompatibility),
                     const SizedBox(height: 8),
-                    const Text(
-                      'This may take up to 60 seconds',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    Text(
+                      l10n.mayTakeUpToSeconds,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
                     TextButton(

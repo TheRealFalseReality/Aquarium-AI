@@ -563,6 +563,10 @@
   "@analyzingTankCompatibility": {
     "description": "Message shown while analyzing tank compatibility"
   },
+  "mayTakeUpToSeconds": "This may take up to 60 seconds",
+  "@mayTakeUpToSeconds": {
+    "description": "Time estimate message for AI operations"
+  },
 
   "duplicate": "Duplicate",
   "@duplicate": {
