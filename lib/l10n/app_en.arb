@@ -381,7 +381,7 @@
     "description": "Show AI Analysis Buttons setting title"
   },
 
-  "showAIStockingButtonDesc": "Display the \"AI Stocking Ideas\" and \"Compatibility Analysis\" buttons on tank cards. These options remain available in the menu.",
+  "showAIStockingButtonDesc": "Display the \"Stocking Ideas\" and \"Compatibility\" buttons on tank cards. These options remain available in the menu.",
   "@showAIStockingButtonDesc": {
     "description": "Show AI Analysis Buttons setting description"
   },

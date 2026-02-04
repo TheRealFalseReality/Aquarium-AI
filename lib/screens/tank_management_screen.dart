@@ -1223,7 +1223,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
                             PopupMenuItem(
                               value: 'recommendations',
                               child: Row(
@@ -1234,7 +1234,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
                             PopupMenuItem(
                               value: 'compatibility_analysis',
                               child: Row(
@@ -1507,7 +1507,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             onPressed: () => _getTankStockingRecommendations(context, ref, tank),
                             icon: const Icon(Icons.auto_awesome, size: 16),
                             label: Text(
-                              'AI Stocking Ideas',
+                              'Stocking Ideas',
                               style: TextStyle(
                                 fontSize: isLargeScreen ? 13 : 14,
                                 fontWeight: FontWeight.w600,
@@ -1557,7 +1557,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             onPressed: () => _getTankCompatibilityAnalysis(context, ref, tank),
                             icon: const Icon(Icons.biotech, size: 16),
                             label: Text(
-                              'Compatibility Analysis',
+                              'Compatibility',
                               style: TextStyle(
                                 fontSize: isLargeScreen ? 13 : 14,
                                 fontWeight: FontWeight.w600,
