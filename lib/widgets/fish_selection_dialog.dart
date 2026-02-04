@@ -250,21 +250,12 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                     )
                   else
                     const SizedBox.shrink(),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop(_selectedFish);
-                        },
-                        icon: const Icon(Icons.check, size: 18),
-                        label: Text(_selectedFish.isEmpty ? 'Done' : 'Confirm (${_selectedFish.length})'),
-                      ),
-                    ],
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop(_selectedFish);
+                    },
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text(_selectedFish.isEmpty ? 'Done' : 'Confirm (${_selectedFish.length})'),
                   ),
                 ],
               ),
