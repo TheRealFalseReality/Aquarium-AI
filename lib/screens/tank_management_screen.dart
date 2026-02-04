@@ -4466,7 +4466,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Clear any previous selection and set the tank fish as selected
     ref.read(fishCompatibilityProvider.notifier).clearSelection();
     for (final fish in tankFishList) {
-      ref.read(fishCompatibilityProvider.notifier).toggleFishSelection(fish);
+      ref.read(fishCompatibilityProvider.notifier).selectFish(fish);
     }
 
     // Get the compatibility report
