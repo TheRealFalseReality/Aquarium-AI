@@ -1483,7 +1483,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
-                          height: 36,
+                          height: 44,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -1533,7 +1533,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
-                          height: 36,
+                          height: 44,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
