@@ -57,6 +57,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   bool _isSortMenuExpanded = false; // Track sort menu expansion
   bool _includeCustomNames = false; // Track if custom names were included
   String _additionalNotes = ''; // Track additional notes
+  Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
 
   @override
   void initState() {
@@ -158,6 +159,48 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ? 'Settings'
               : null,
         );
+      }
+    });
+
+    // Listen for compatibility analysis reports
+    ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
+      if (next.report != null && previous?.report != next.report && _currentTankForCompatibility != null) {
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
+        
+        // Show the compatibility report
+        if (context.mounted) {
+          showReportDialog(context, next.report!, fishType: _currentTankForCompatibility!.type);
+        }
+        
+        // Clear the current tank reference
+        _currentTankForCompatibility = null;
+      }
+      
+      if (next.error != null && previous?.error != next.error && _currentTankForCompatibility != null) {
+        // Hide loading dialog if it's showing
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Close loading dialog
+        }
+        
+        // Show error with appropriate action
+        if (context.mounted) {
+          context.showAccessibleMessage(
+            next.error!,
+            onAction: next.error!.toLowerCase().contains('api key not set')
+                ? () => Navigator.pushNamed(context, '/settings')
+                : null,
+            actionLabel: next.error!.toLowerCase().contains('api key not set')
+                ? 'Settings'
+                : null,
+          );
+          ref.read(fishCompatibilityProvider.notifier).clearError();
+        }
+        
+        // Clear the current tank reference
+        _currentTankForCompatibility = null;
       }
     });
 
@@ -4406,52 +4449,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       tankSize: tank.sizeGallons?.toInt(),
     );
 
+    // Store the current tank for the listener
+    _currentTankForCompatibility = tank;
+
     // Clear any previous selection and set the tank fish as selected
     ref.read(fishCompatibilityProvider.notifier).clearSelection();
     for (final fish in tankFishList) {
       ref.read(fishCompatibilityProvider.notifier).toggleFishSelection(fish);
     }
-    
-    // Listen for the compatibility report
-    final subscription = ref.listen<FishCompatibilityState>(
-      fishCompatibilityProvider,
-      (previous, next) {
-        if (next.report != null && previous?.report != next.report) {
-          // Hide loading dialog
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
-          
-          // Show the compatibility report
-          if (context.mounted) {
-            showReportDialog(context, next.report!, fishType: tank.type);
-          }
-        }
-        
-        if (next.error != null && previous?.error != next.error) {
-          // Hide loading dialog
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
-          
-          // Show error with appropriate action
-          if (context.mounted) {
-            context.showAccessibleMessage(
-              next.error!,
-              onAction: next.error!.toLowerCase().contains('api key not set')
-                  ? () => Navigator.pushNamed(context, '/settings')
-                  : null,
-              actionLabel: next.error!.toLowerCase().contains('api key not set')
-                  ? 'Settings'
-                  : null,
-            );
-          }
-        }
-      },
-    );
 
     // Get the compatibility report
-    await ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(tank.type, additionalNotes: options.additionalNotes);
+    ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(tank.type, additionalNotes: options.additionalNotes);
   }
 
 
