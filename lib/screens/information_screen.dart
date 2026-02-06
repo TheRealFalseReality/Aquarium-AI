@@ -43,10 +43,10 @@ class InformationScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MarkdownViewerScreen(
+                    builder: (context) => MarkdownViewerScreen(
                       assetPath: 'assets/docs/HELP_WANTED.md',
-                      title: 'Help Wanted for Coders',
-                      breadcrumbs: [],
+                      title: AppLocalizations.of(context)!.helpWantedForCoders,
+                      breadcrumbs: const [],
                     ),
                   ),
                 );
