@@ -6,7 +6,9 @@ import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
 import '../services/analytics_service.dart';
-import 'stocking_report_screen.dart'; 
+import 'stocking_report_screen.dart';
+import '../widgets/fish_selection_dialog.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
 
 class AquariumStockingScreen extends ConsumerStatefulWidget {
   const AquariumStockingScreen({super.key});
@@ -33,6 +35,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     if (_formKey.currentState!.validate()) {
       // Build tank size string with unit
       final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
+      final state = ref.read(aquariumStockingProvider);
       
       // Log actual feature usage
       AnalyticsService.logFeatureUsed(
@@ -43,6 +46,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
           'tank_unit': _selectedUnit,
           'has_notes': _notesController.text.isNotEmpty ? 'true' : 'false',
           'notes_length': _notesController.text.length,
+          'selected_fish_count': state.selectedFish.length,
+          'has_selected_fish': state.selectedFish.isNotEmpty ? 'true' : 'false',
         },
       );
       
@@ -51,6 +56,25 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
             tankType: _selectedCategory,
             userNotes: _notesController.text,
           );
+    }
+  }
+
+  Future<void> _openFishSelectionDialog() async {
+    final state = ref.read(aquariumStockingProvider);
+    final result = await showDialog(
+      context: context,
+      builder: (context) => FishSelectionDialog(
+        category: _selectedCategory,
+        initialSelectedFish: state.selectedFish,
+      ),
+    );
+    
+    if (result != null && result is List) {
+      // Clear and set selected fish
+      ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+      for (var fish in result) {
+        ref.read(aquariumStockingProvider.notifier).selectFish(fish);
+      }
     }
   }
 
@@ -128,13 +152,21 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                     label: 'Freshwater',
                     emoji: '🐟',
                     selected: _selectedCategory == 'freshwater',
-                    onTap: () => setState(() => _selectedCategory = 'freshwater'),
+                    onTap: () {
+                      setState(() => _selectedCategory = 'freshwater');
+                      // Clear selected fish when changing category
+                      ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+                    },
                   ),
                   ModernSelectableChip(
                     label: 'Saltwater',
                     emoji: '🐠',
                     selected: _selectedCategory == 'marine',
-                    onTap: () => setState(() => _selectedCategory = 'marine'),
+                    onTap: () {
+                      setState(() => _selectedCategory = 'marine');
+                      // Clear selected fish when changing category
+                      ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+                    },
                   ),
                 ],
               ),
@@ -190,6 +222,83 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 ),
                 maxLines: 3,
               ),
+              const SizedBox(height: 16),
+              // Fish selection section
+              OutlinedButton.icon(
+                onPressed: _openFishSelectionDialog,
+                icon: const Icon(Icons.add_circle_outline),
+                label: Text(
+                  state.selectedFish.isEmpty 
+                    ? 'Select Specific Fish (Optional)' 
+                    : 'Selected Fish (${state.selectedFish.length})',
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              if (state.selectedFish.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: cs.primary.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Selected Fish',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: cs.primary,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+                            },
+                            icon: const Icon(Icons.clear, size: 16),
+                            label: const Text('Clear'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: const Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: state.selectedFish.map((fish) {
+                          return Chip(
+                            avatar: CircleAvatar(
+                              backgroundImage: CachedNetworkImageProvider(fish.imageURL),
+                            ),
+                            label: Text(fish.name),
+                            onDeleted: () {
+                              ref.read(aquariumStockingProvider.notifier).selectFish(fish);
+                            },
+                            deleteIcon: const Icon(Icons.close, size: 18),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(

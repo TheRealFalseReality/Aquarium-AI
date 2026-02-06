@@ -13,6 +13,7 @@ class FishCard extends ConsumerWidget {
   final bool isSelected;
   final String category;
   final bool showSpeciesTags;
+  final VoidCallback? onTap;
 
   const FishCard({
     super.key,
@@ -20,6 +21,7 @@ class FishCard extends ConsumerWidget {
     required this.isSelected,
     required this.category,
     this.showSpeciesTags = false,
+    this.onTap,
   });
 
   Future<void> _launchURL(String url) async {
@@ -102,7 +104,7 @@ class FishCard extends ConsumerWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(22),
-          onTap: () => notifier.selectFish(fish),
+          onTap: onTap ?? () => notifier.selectFish(fish),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -2,11 +2,24 @@ import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<Fish>? selectedFish}) {
   final fishListWithCompat = allFish.map((f) => {
     'name': f.name,
     'compatible': f.compatible,
   }).toList();
+
+  // Build selected fish context if any fish are selected
+  String selectedFishContext = '';
+  if (selectedFish != null && selectedFish.isNotEmpty) {
+    final selectedFishNames = selectedFish.map((f) => f.name).join(', ');
+    selectedFishContext = '''
+
+    IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
+    $selectedFishNames
+    
+    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish.
+    ''';
+  }
 
   return '''
     You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
@@ -18,7 +31,7 @@ String buildStockingRecommendationPrompt(
     User's Input:
     - Tank Size: "$tankSize"
     - Tank Type: "$tankType"
-    - Notes: "$userNotes"
+    - Notes: "$userNotes"$selectedFishContext
 
     Available Fish and their compatibility data (use this for "coreFish" and "otherDataBasedFish"):
     ${json.encode(fishListWithCompat)}
