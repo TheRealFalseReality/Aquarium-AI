@@ -443,7 +443,20 @@
   "xMinutesAgo": "Il y a {count} minutes",
   "yesterday": "Hier",
   "information": "Informations",
-  "informationDescription": "Documentation et Guides"
+  "informationDescription": "Documentation et Guides",
+  "helpWantedForCoders": "Développeurs Recherchés",
+  "helpWantedDescription": "Rejoignez notre équipe de développement et aidez à améliorer Aquarium AI",
+  "helpWantedCardTitle": "Nous Avons Besoin de Votre Aide !",
+  "helpWantedCardSubtitle": "À la recherche de développeurs pour contribuer aux fonctionnalités",
+  "helpWantedDetailsTitle": "Aide Recherchée : Développeurs Nécessaires !",
+  "helpWantedIntro": "Je ne peux pas tout faire seul ! Aquarium AI se développe et j'ai besoin de développeurs talentueux pour faire passer ce projet au niveau supérieur.",
+  "helpWantedWhatWeNeed": "Ce Dont Nous Avons Besoin :",
+  "helpWantedRemoveAds": "**Supprimer les Publicités pour les Utilisateurs Payants** : Mettre en place un système permettant aux utilisateurs qui souhaitent soutenir le projet de payer pour une expérience sans publicité.",
+  "helpWantedFishIntegration": "**Fonctionnalités Complexes d'Intégration des Poissons** : Ajouter une intégration avancée de base de données de poissons, des algorithmes de compatibilité des espèces et des fonctionnalités intelligentes de gestion d'aquarium.",
+  "helpWantedHowToContribute": "Comment Contribuer :",
+  "helpWantedContactEmail": "📧 **Email** : contactus@capitalcityaquatics.com",
+  "helpWantedGitHub": "🔗 **GitHub** : Visitez le [dépôt Aquarium-AI](https://github.com/TheRealFalseReality/Aquarium-AI) pour explorer le code, ouvrir des issues ou soumettre des pull requests.",
+  "helpWantedClosing": "Que vous soyez expérimenté ou débutant, vos contributions peuvent vraiment faire la différence ! Construisons quelque chose d'incroyable ensemble. 🐠"
 }
 
 

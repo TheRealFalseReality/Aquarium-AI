@@ -2413,6 +2413,71 @@
   "informationDescription": "Documentation & Guides",
   "@informationDescription": {
     "description": "Information drawer item subtitle"
+  },
+
+  "helpWantedForCoders": "Help Wanted for Coders",
+  "@helpWantedForCoders": {
+    "description": "Help wanted section title"
+  },
+
+  "helpWantedDescription": "Join our development team and help improve Aquarium AI",
+  "@helpWantedDescription": {
+    "description": "Help wanted section description"
+  },
+
+  "helpWantedCardTitle": "We Need Your Help!",
+  "@helpWantedCardTitle": {
+    "description": "Help wanted card title in information screen"
+  },
+
+  "helpWantedCardSubtitle": "Looking for developers to contribute code features",
+  "@helpWantedCardSubtitle": {
+    "description": "Help wanted card subtitle in information screen"
+  },
+
+  "helpWantedDetailsTitle": "Help Wanted: Coders Needed!",
+  "@helpWantedDetailsTitle": {
+    "description": "Help wanted details page title"
+  },
+
+  "helpWantedIntro": "I can only do so much! Aquarium AI is growing, and I need talented developers to help take this project to the next level.",
+  "@helpWantedIntro": {
+    "description": "Help wanted introduction text"
+  },
+
+  "helpWantedWhatWeNeed": "What We Need Help With:",
+  "@helpWantedWhatWeNeed": {
+    "description": "What we need help with section header"
+  },
+
+  "helpWantedRemoveAds": "**Remove Ads for Paying Users**: Implement a system to allow users who want to support the project to pay for an ad-free experience.",
+  "@helpWantedRemoveAds": {
+    "description": "Help wanted: remove ads feature"
+  },
+
+  "helpWantedFishIntegration": "**Complex Fish Integration Features**: Add advanced fish database integration, species compatibility algorithms, and intelligent tank management features.",
+  "@helpWantedFishIntegration": {
+    "description": "Help wanted: fish integration features"
+  },
+
+  "helpWantedHowToContribute": "How to Contribute:",
+  "@helpWantedHowToContribute": {
+    "description": "How to contribute section header"
+  },
+
+  "helpWantedContactEmail": "📧 **Email**: contactus@capitalcityaquatics.com",
+  "@helpWantedContactEmail": {
+    "description": "Contact email for help wanted"
+  },
+
+  "helpWantedGitHub": "🔗 **GitHub**: Visit the [Aquarium-AI repository](https://github.com/TheRealFalseReality/Aquarium-AI) to explore the code, open issues, or submit pull requests.",
+  "@helpWantedGitHub": {
+    "description": "GitHub repository link for help wanted"
+  },
+
+  "helpWantedClosing": "Whether you're experienced or just starting out, your contributions can make a real difference! Let's build something amazing together. 🐠",
+  "@helpWantedClosing": {
+    "description": "Help wanted closing message"
   }
 }
 
