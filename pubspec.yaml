@@ -61,6 +61,7 @@ flutter:
     - assets/docs/LOCALIZATION_DEV_GUIDE.md
     - assets/docs/TESTING_I18N.md
     - assets/docs/I18N_IMPLEMENTATION.md
+    - assets/docs/HELP_WANTED.md
 
 flutter_launcher_icons:
   android: true

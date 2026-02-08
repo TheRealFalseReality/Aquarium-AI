@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 import 'markdown_viewer_screen.dart';
@@ -8,15 +9,17 @@ class InformationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return MainLayout(
-      title: 'Information',
+      title: l10n.information,
       bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           const SizedBox(height: 16),
           Text(
-            'Documentation & Guides',
+            l10n.informationDescription,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -30,6 +33,71 @@ class InformationScreen extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 24),
+          
+          // Help Wanted Card
+          Card(
+            elevation: 2,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MarkdownViewerScreen(
+                      assetPath: 'assets/docs/HELP_WANTED.md',
+                      title: AppLocalizations.of(context)!.helpWantedForCoders,
+                      breadcrumbs: const [],
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.code,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.helpWantedCardTitle,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.helpWantedCardSubtitle,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           
           // i18n Documentation Card
           Card(
