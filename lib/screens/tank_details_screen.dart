@@ -203,6 +203,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Stats chips
@@ -400,6 +401,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.tank.waterParameters.isNotEmpty) ...[
             _buildSectionCard(
@@ -452,6 +454,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.tank.notificationLogs.isNotEmpty) ...[
             _buildSectionCard(
@@ -505,6 +508,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.tank.dosingEntries.isNotEmpty) ...[
             _buildSectionCard(
@@ -558,6 +562,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildSectionCard(
             context,
@@ -575,6 +580,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     ),
                   )
                 : Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: widget.tank.inhabitants.map((inhabitant) {
                       final fishImageUrl = _getFishImageUrl(
                         widget.tank.type,
@@ -1062,6 +1068,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...recentLogs.map((log) {
@@ -1149,6 +1156,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final recentEntries = sortedEntries.take(5).toList();
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...recentEntries.map((entry) {
