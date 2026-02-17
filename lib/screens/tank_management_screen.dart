@@ -2320,6 +2320,431 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
+  void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    if (tank.photos.isEmpty) {
+      context.showAccessibleMessage('No photos available. Add photos to your tank first.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.setCardBackground),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: tank.photos.length,
+            itemBuilder: (context, index) {
+              final photo = tank.photos[index];
+              final imageUrl = photo.imageUrl ?? photo.imagePath;
+              final isSelected = tank.customBackgroundPhotoId == photo.id;
+              
+              return GestureDetector(
+                onTap: () {
+                  _setTankBackground(context, ref, tank, photo.id);
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                      width: isSelected ? 3 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: imageUrl != null
+                        ? (imageUrl.startsWith('http')
+                            ? CachedNetworkImage(
+                                imageUrl: imageUrl, 
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey,
+                                  child: const Icon(Icons.error_outline, color: Colors.white),
+                                ),
+                              )
+                            : Image.file(File(imageUrl), fit: BoxFit.cover))
+                        : Container(color: Colors.grey),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankBackground(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+    try {
+      final updatedTank = tank.copyWith(customBackgroundPhotoId: photoId);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Card background updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update background: $e');
+      }
+    }
+  }
+
+  // Predefined icons for tanks - keeping this as a static constant list
+  static const List<IconData> _tankIcons = [
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.shower,
+    Icons.opacity,
+    Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
+  // Helper method to get const IconData from codePoint
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return _tankIcons.firstWhere((icon) => icon.codePoint == codePoint);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void _showSetIconDialog(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final icons = _tankIcons;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.changeTankIcon),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tank photos section (if available)
+                if (tank.photos.isNotEmpty) ...[
+                  Text(
+                    'Tank Photos',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: tank.photos.length,
+                    itemBuilder: (context, index) {
+                      final photo = tank.photos[index];
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      final isSelected = tank.customIconPhotoId == photo.id;
+                      
+                      return GestureDetector(
+                        onTap: () {
+                          _setTankIconFromPhoto(context, ref, tank, photo.id);
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected 
+                                  ? Theme.of(context).colorScheme.primary 
+                                  : Colors.grey,
+                              width: isSelected ? 3 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: imageUrl != null
+                                ? (imageUrl.startsWith('http')
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageUrl, 
+                                        fit: BoxFit.cover,
+                                        errorWidget: (context, url, error) => Container(
+                                          color: Colors.grey,
+                                          child: const Icon(Icons.error_outline, color: Colors.white),
+                                        ),
+                                      )
+                                    : Image.file(File(imageUrl), fit: BoxFit.cover))
+                                : Container(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                // Material icons section
+                Text(
+                  'Material Icons',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: icons.length,
+                  itemBuilder: (context, index) {
+                    final icon = icons[index];
+                    final isSelected = tank.customIconCodePoint == icon.codePoint;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        _setTankIcon(context, ref, tank, icon.codePoint);
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surfaceVariant,
+                          border: Border.all(
+                            color: isSelected 
+                                ? Theme.of(context).colorScheme.primary 
+                                : Colors.grey,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(icon, size: 32),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          if (tank.customIconCodePoint != null || tank.customIconPhotoId != null)
+            TextButton(
+              onPressed: () {
+                _resetTankIcon(context, ref, tank);
+                Navigator.of(context).pop();
+              },
+              child: Text(l10n.resetIcon),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setTankIcon(BuildContext context, WidgetRef ref, Tank tank, int codePoint) async {
+    try {
+      final updatedTank = tank.copyWith(customIconCodePoint: codePoint);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon updated');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _setTankIconFromPhoto(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+    try {
+      // Set the icon photo and clear custom icon code point to use photo as icon
+      final updatedTank = tank.copyWith(
+        customIconPhotoId: photoId,
+        clearCustomIconCodePoint: true,
+      );
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon set to photo');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to update icon: $e');
+      }
+    }
+  }
+
+  void _resetTankIcon(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final updatedTank = tank.copyWith(
+        clearCustomIconCodePoint: true,
+        clearCustomIconPhotoId: true,
+      );
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank icon reset to default');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to reset icon: $e');
+      }
+    }
+  }
+
+  void _resetTankBackground(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final updatedTank = tank.copyWith(clearCustomBackgroundPhotoId: true);
+      await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      if (context.mounted) {
+        context.showAccessibleMessage('Background reset to default');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to reset background: $e');
+      }
+    }
+  }
+
+  void _duplicateTank(BuildContext context, WidgetRef ref, Tank tank) async {
+    try {
+      final duplicatedTank = Tank.create(
+        name: '${tank.name} (Copy)',
+        type: tank.type,
+        inhabitants: List.from(tank.inhabitants),
+        sizeGallons: tank.sizeGallons,
+        sizeLiters: tank.sizeLiters,
+        notes: tank.notes,
+        harmonyScore: tank.harmonyScore,
+        calculationBreakdown: tank.calculationBreakdown,
+      );
+      
+      await ref.read(tankProvider.notifier).addTank(duplicatedTank);
+      
+      if (context.mounted) {
+        context.showAccessibleMessage('Tank "${tank.name}" duplicated successfully');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage('Failed to duplicate tank: $e');
+      }
+    }
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteTankTitle, textAlign: TextAlign.center),
+        content: Text(
+          l10n.deleteTankConfirm(tank.name),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              
+              // Log tank deletion
+              AnalyticsService.logTankAction(
+                action: 'delete_tank',
+                tankType: tank.type,
+                tankSize: tank.sizeGallons?.toInt() ?? 0,
+              );
+              
+              await ref.read(tankProvider.notifier).deleteTank(tank.id);
+              if (context.mounted) {
+                context.showAccessibleMessage('Tank "${tank.name}" deleted');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return 'today';
+    } else if (difference.inDays == 1) {
+      return 'yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${date.month}/${date.day}/${date.year}';
+    }
+  }
+
+  String _formatTankSize(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gal (${tank.sizeLiters!.toStringAsFixed(0)} L)';
+    } else if (tank.sizeGallons != null) {
+      return '${tank.sizeGallons!.toStringAsFixed(0)} gallons';
+    } else if (tank.sizeLiters != null) {
+      return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
+    }
+    return '';
+  }
+
+  String _formatWaterWeight(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeLiters != null) {
+      final pounds = tank.sizeGallons! * 8.34;
+      final kilograms = tank.sizeLiters!; // 1 liter = 1 kg approximately
+      return '${pounds.toStringAsFixed(0)} lbs (${kilograms.toStringAsFixed(0)} kg)';
+    } else if (tank.sizeGallons != null) {
+      final pounds = tank.sizeGallons! * 8.34;
+      return '${pounds.toStringAsFixed(0)} pounds';
+    } else if (tank.sizeLiters != null) {
+      final kilograms = tank.sizeLiters!;
+      return '${kilograms.toStringAsFixed(0)} kilograms';
+    }
+    return '';
+  }
+
   Widget _buildHarmonyScoreChip(Tank tank) {
     final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
