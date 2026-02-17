@@ -215,7 +215,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 _buildStatChip(context, Icons.straighten, _formatTankSize(widget.tank)),
               if (widget.tank.sizeGallons != null || widget.tank.sizeLiters != null)
                 _buildStatChip(context, Icons.line_weight, _formatWaterWeight(widget.tank)),
-              if (widget.tank.inhabitants.isNotEmpty && widget.fishData != null)
+              if ((widget.tank.inhabitants?.isNotEmpty ?? false) && widget.fishData != null)
                 _buildHarmonyScoreChip(widget.tank),
             ],
           ),
@@ -223,16 +223,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           const SizedBox(height: 20),
 
           // Tank photos section
-          if (widget.tank.photos.isNotEmpty) ...[
+          if (widget.tank.photos?.isNotEmpty ?? false) ...[
             _buildSectionCard(
               context,
               cs,
-              title: 'Tank Photos (${widget.tank.photos.length})',
+              title: 'Tank Photos (${widget.tank.photos?.length ?? 0})',
               icon: Icons.photo_library_outlined,
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: widget.tank.photos.where((photo) => photo != null).map((photo) {
+                children: (widget.tank.photos ?? []).where((photo) => photo != null).map((photo) {
                   final imageUrl = photo.imageUrl ?? photo.imagePath;
                   return GestureDetector(
                     onTap: () => _showPhotoMaximized(context, photo),
@@ -337,7 +337,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           ],
 
           // Calculation Breakdown
-          if (widget.tank.inhabitants.isNotEmpty && widget.fishData != null) ...[
+          if ((widget.tank.inhabitants?.isNotEmpty ?? false) && widget.fishData != null) ...[
             _buildSectionCard(
               context,
               cs,
@@ -411,7 +411,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.tank.waterParameters.isNotEmpty) ...[
+          if (widget.tank.waterParameters?.isNotEmpty ?? false) ...[
             _buildSectionCard(
               context,
               cs,
@@ -464,7 +464,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.tank.notificationLogs.isNotEmpty) ...[
+          if (widget.tank.notificationLogs?.isNotEmpty ?? false) ...[
             _buildSectionCard(
               context,
               cs,
@@ -518,7 +518,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.tank.dosingEntries.isNotEmpty) ...[
+          if (widget.tank.dosingEntries?.isNotEmpty ?? false) ...[
             _buildSectionCard(
               context,
               cs,
@@ -575,9 +575,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           _buildSectionCard(
             context,
             cs,
-            title: 'Inhabitants (${_getTotalInhabitantCount(widget.tank.inhabitants)})',
+            title: 'Inhabitants (${_getTotalInhabitantCount(widget.tank.inhabitants ?? [])})',
             icon: Icons.pets,
-            child: widget.tank.inhabitants.isEmpty
+            child: (widget.tank.inhabitants?.isEmpty ?? true)
                 ? Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
@@ -589,7 +589,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   )
                 : Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: widget.tank.inhabitants.where((inhabitant) => inhabitant != null).map((inhabitant) {
+                    children: (widget.tank.inhabitants ?? []).where((inhabitant) => inhabitant != null).map((inhabitant) {
                       final fishImageUrl = _getFishImageUrl(
                         widget.tank.type,
                         inhabitant.fishUnit,
@@ -970,12 +970,12 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   Widget _buildLatestParameters(BuildContext context, Tank tank, ColorScheme cs) {
-    if (tank.waterParameters.isEmpty) {
+    if (tank.waterParameters?.isEmpty ?? true) {
       return const SizedBox.shrink();
     }
 
     final latestByType = <String, WaterParameter>{};
-    for (var param in tank.waterParameters.where((p) => p != null)) {
+    for (var param in (tank.waterParameters ?? []).where((p) => p != null)) {
       if (!latestByType.containsKey(param.parameterType) ||
           param.dateRecorded.isAfter(latestByType[param.parameterType]!.dateRecorded)) {
         latestByType[param.parameterType] = param;
@@ -1070,11 +1070,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   Widget _buildLatestActivityLogs(BuildContext context, Tank tank, ColorScheme cs) {
-    if (tank.notificationLogs.isEmpty) {
+    if (tank.notificationLogs?.isEmpty ?? true) {
       return const SizedBox.shrink();
     }
 
-    final sortedLogs = List.from(tank.notificationLogs.where((log) => log != null))
+    final sortedLogs = List.from((tank.notificationLogs ?? []).where((log) => log != null))
       ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
     final recentLogs = sortedLogs.take(5).toList();
 
@@ -1144,11 +1144,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           );
         }),
-        if (tank.notificationLogs.length > 5)
+        if ((tank.notificationLogs?.length ?? 0) > 5)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              l10n.moreActivities(tank.notificationLogs.length - 5),
+              l10n.moreActivities((tank.notificationLogs?.length ?? 0) - 5),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
@@ -1160,11 +1160,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   Widget _buildLatestDosingEntries(BuildContext context, Tank tank, ColorScheme cs) {
-    if (tank.dosingEntries.isEmpty) {
+    if (tank.dosingEntries?.isEmpty ?? true) {
       return const SizedBox.shrink();
     }
 
-    final sortedEntries = List<DosingEntry>.from(tank.dosingEntries.where((entry) => entry != null))
+    final sortedEntries = List<DosingEntry>.from((tank.dosingEntries ?? []).where((entry) => entry != null))
       ..sort((a, b) => b.dateDosed.compareTo(a.dateDosed));
     final recentEntries = sortedEntries.take(5).toList();
 
@@ -1228,11 +1228,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           );
         }),
-        if (tank.dosingEntries.length > 5)
+        if ((tank.dosingEntries?.length ?? 0) > 5)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '+${tank.dosingEntries.length - 5} more doses',
+              '+${(tank.dosingEntries?.length ?? 0) - 5} more doses',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
