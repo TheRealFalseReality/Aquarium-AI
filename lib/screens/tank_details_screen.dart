@@ -232,7 +232,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: widget.tank.photos.map((photo) {
+                children: widget.tank.photos.where((photo) => photo != null).map((photo) {
                   final imageUrl = photo.imageUrl ?? photo.imagePath;
                   return GestureDetector(
                     onTap: () => _showPhotoMaximized(context, photo),
@@ -268,6 +268,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                                         fit: BoxFit.cover,
                                         width: double.infinity,
                                         height: double.infinity,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            Container(
+                                          color: cs.errorContainer,
+                                          child: Icon(
+                                            Icons.error_outline,
+                                            color: cs.onErrorContainer,
+                                          ),
+                                        ),
                                       ))
                                 : Container(
                                     color: cs.surfaceVariant,
@@ -581,7 +589,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   )
                 : Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: widget.tank.inhabitants.map((inhabitant) {
+                    children: widget.tank.inhabitants.where((inhabitant) => inhabitant != null).map((inhabitant) {
                       final fishImageUrl = _getFishImageUrl(
                         widget.tank.type,
                         inhabitant.fishUnit,
@@ -601,6 +609,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                                           ? CachedNetworkImageProvider(fishImageUrl)
                                           : FileImage(File(fishImageUrl))
                                               as ImageProvider)
+                                      : null,
+                                  onBackgroundImageError: fishImageUrl != null
+                                      ? (exception, stackTrace) {
+                                          // Handle image load error silently
+                                        }
                                       : null,
                                   backgroundColor:
                                       fishImageUrl == null ? cs.primaryContainer : null,
@@ -962,7 +975,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     }
 
     final latestByType = <String, WaterParameter>{};
-    for (var param in tank.waterParameters) {
+    for (var param in tank.waterParameters.where((p) => p != null)) {
       if (!latestByType.containsKey(param.parameterType) ||
           param.dateRecorded.isAfter(latestByType[param.parameterType]!.dateRecorded)) {
         latestByType[param.parameterType] = param;
@@ -1061,7 +1074,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       return const SizedBox.shrink();
     }
 
-    final sortedLogs = List.from(tank.notificationLogs)
+    final sortedLogs = List.from(tank.notificationLogs.where((log) => log != null))
       ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
     final recentLogs = sortedLogs.take(5).toList();
 
@@ -1151,7 +1164,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       return const SizedBox.shrink();
     }
 
-    final sortedEntries = List<DosingEntry>.from(tank.dosingEntries)
+    final sortedEntries = List<DosingEntry>.from(tank.dosingEntries.where((entry) => entry != null))
       ..sort((a, b) => b.dateDosed.compareTo(a.dateDosed));
     final recentEntries = sortedEntries.take(5).toList();
 
@@ -1308,6 +1321,26 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     : Image.file(
                         File(imageUrl),
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.failedToLoadImage(error.toString()),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
               ),
             ),
