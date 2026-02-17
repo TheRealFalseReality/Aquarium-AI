@@ -155,10 +155,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   tabAlignment: isMobile ? TabAlignment.start : TabAlignment.fill,
                   tabs: const [
                     Tab(text: 'Overview', icon: Icon(Icons.dashboard_outlined, size: 20)),
+                    Tab(text: 'Inhabitants', icon: Icon(Icons.pets, size: 20)),
                     Tab(text: 'Parameters', icon: Icon(Icons.science_outlined, size: 20)),
                     Tab(text: 'Activity', icon: Icon(Icons.history, size: 20)),
                     Tab(text: 'Dosing', icon: Icon(Icons.medication_liquid, size: 20)),
-                    Tab(text: 'Inhabitants', icon: Icon(Icons.pets, size: 20)),
                   ],
                 ),
               ),
@@ -177,10 +177,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             controller: _tabController,
             children: [
               _buildOverviewTab(context, cs),
+              _buildInhabitantsTab(context, cs),
               _buildParametersTab(context, cs, l10n),
               _buildActivityTab(context, cs, l10n),
               _buildDosingTab(context, cs, l10n),
-              _buildInhabitantsTab(context, cs),
             ],
           ),
         ),
