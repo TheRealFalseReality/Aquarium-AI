@@ -761,12 +761,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   Widget _buildInhabitantsSection(BuildContext context, Tank tank, Map<String, List<Fish>> fishData) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    
-    // Group inhabitants by fishUnit
-    final inhabitantsByType = <String, List<TankInhabitant>>{};
-    for (final inhabitant in tank.inhabitants) {
-      inhabitantsByType.putIfAbsent(inhabitant.fishUnit, () => []).add(inhabitant);
-    }
 
     return Card(
       child: Padding(
@@ -787,23 +781,65 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ],
             ),
             const SizedBox(height: 12),
-            ...inhabitantsByType.entries.map((entry) {
-              final inhabitants = entry.value;
-              final totalQuantity = inhabitants.fold(0, (sum, i) => sum + i.quantity);
-              
+            ...tank.inhabitants.map((inhabitant) {
+              final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    // Fish image placeholder
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: cs.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.phishing, color: cs.onPrimaryContainer),
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundImage: fishImageUrl != null 
+                            ? (fishImageUrl.startsWith('http')
+                                ? CachedNetworkImageProvider(fishImageUrl)
+                                : FileImage(File(fishImageUrl)) as ImageProvider)
+                            : null,
+                          backgroundColor: fishImageUrl == null 
+                            ? cs.primaryContainer 
+                            : null,
+                          child: fishImageUrl == null 
+                            ? Icon(
+                                Icons.shape_line,
+                                color: cs.onPrimaryContainer,
+                                size: 22,
+                              ) 
+                            : null,
+                        ),
+                        // Quantity badge
+                        if (inhabitant.quantity > 1)
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: cs.primary,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: cs.surface,
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                '${inhabitant.quantity}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: cs.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -811,17 +847,21 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            inhabitants.first.customName,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            inhabitant.customName,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            '${l10n.qty}: $totalQuantity',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface.withOpacity(0.6),
-                            ),
+                            inhabitant.fishUnit,
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
+                          if (inhabitant.dateAdded != null)
+                            Text(
+                              'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant.withOpacity(0.7),
+                                fontSize: 11,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -833,6 +873,38 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ),
       ),
     );
+  }
+
+  /// Helper method to get fish image URL (prioritizes custom images)
+  String? _getFishImageUrl(String tankType, String fishName, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
+    // Prioritize custom images if inhabitant is provided
+    if (inhabitant != null) {
+      if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+        return inhabitant.customImageUrl;
+      }
+      if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+        return inhabitant.customImagePath;
+      }
+    }
+    
+    // Fall back to default fish image
+    if (fishData == null) return null;
+    
+    final categoryFish = fishData[tankType] ?? [];
+    final fish = categoryFish.firstWhere(
+      (f) => f.name == fishName,
+      orElse: () => Fish(
+        name: '',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      ),
+    );
+    
+    return fish.imageURL.isNotEmpty ? fish.imageURL : null;
   }
 
   Widget _buildCompatibilitySection(BuildContext context, Tank tank) {
