@@ -473,7 +473,10 @@
   "recentActivity": "Letzte Aktivität",
   "addPhotosHint": "Fotos im Bearbeitungsbildschirm hinzufügen",
   "timestamps": "Zeitstempel",
-  "lastUpdated": "Zuletzt Aktualisiert"
+  "lastUpdated": "Zuletzt Aktualisiert",
+  
+  "harmony": "Harmonie",
+  "qty": "Anz"
 }
 
 

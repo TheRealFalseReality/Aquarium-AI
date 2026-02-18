@@ -2563,6 +2563,16 @@
   "lastUpdated": "Last Updated",
   "@lastUpdated": {
     "description": "Label for last updated timestamp"
+  },
+
+  "harmony": "Harmony",
+  "@harmony": {
+    "description": "Label for harmony score"
+  },
+
+  "qty": "Qty",
+  "@qty": {
+    "description": "Abbreviation for quantity"
   }
 }
 

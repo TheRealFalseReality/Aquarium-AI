@@ -473,7 +473,10 @@
   "recentActivity": "Actividad Reciente",
   "addPhotosHint": "Agregar fotos en la pantalla de edición",
   "timestamps": "Marcas de Tiempo",
-  "lastUpdated": "Última Actualización"
+  "lastUpdated": "Última Actualización",
+  
+  "harmony": "Armonía",
+  "qty": "Cant"
 }
 
 

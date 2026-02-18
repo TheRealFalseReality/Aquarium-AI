@@ -712,6 +712,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   Widget _buildHarmonyScoreChip(Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final score = tank.harmonyScore ?? 0.0;
     final percentage = (score * 100).toInt();
@@ -740,7 +741,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           Icon(Icons.favorite, size: 16, color: scoreColor),
           const SizedBox(width: 6),
           Text(
-            'Harmony: $percentage%',
+            '${l10n.harmony ?? 'Harmony'}: $percentage%',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -832,7 +833,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             ),
                           ),
                           Text(
-                            'Qty: $totalQuantity',
+                            '${l10n.qty ?? 'Qty'}: $totalQuantity',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: cs.onSurface.withOpacity(0.6),
                             ),
@@ -1002,6 +1003,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   void _showParameterDetails(BuildContext context, WaterParameter param) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -1015,7 +1017,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close ?? 'Close'),
           ),
         ],
       ),
