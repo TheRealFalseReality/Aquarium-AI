@@ -455,7 +455,25 @@
   "helpWantedHowToContribute": "Wie Sie Beitragen Können:",
   "helpWantedContactEmail": "📧 **E-Mail**: contactus@capitalcityaquatics.com",
   "helpWantedGitHub": "🔗 **GitHub**: Besuchen Sie das [Aquarium-AI-Repository](https://github.com/TheRealFalseReality/Aquarium-AI), um den Code zu erkunden, Issues zu öffnen oder Pull Requests einzureichen.",
-  "helpWantedClosing": "Egal ob Sie erfahren sind oder gerade erst anfangen, Ihre Beiträge können einen echten Unterschied machen! Lassen Sie uns gemeinsam etwas Großartiges aufbauen. 🐠"
+  "helpWantedClosing": "Egal ob Sie erfahren sind oder gerade erst anfangen, Ihre Beiträge können einen echten Unterschied machen! Lassen Sie uns gemeinsam etwas Großartiges aufbauen. 🐠",
+  
+  "overview": "Übersicht",
+  "photos": "Fotos",
+  "waterParameters": "Parameter",
+  "dosing": "Dosierung",
+  "activity": "Aktivität",
+  "noPhotos": "Noch keine Fotos",
+  "noParameters": "Keine Wasserparameter protokolliert",
+  "noDosing": "Keine Dosierungseinträge",
+  "noActivity": "Keine Aktivität protokolliert",
+  "noNotes": "Keine Notizen",
+  "latestWaterParameters": "Neueste Wasserparameter",
+  "parameterHistory": "Parameterverlauf",
+  "recentDosing": "Letzte Dosierung",
+  "recentActivity": "Letzte Aktivität",
+  "addPhotosHint": "Fotos im Bearbeitungsbildschirm hinzufügen",
+  "timestamps": "Zeitstempel",
+  "lastUpdated": "Zuletzt Aktualisiert"
 }
 
 
