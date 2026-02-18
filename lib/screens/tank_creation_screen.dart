@@ -554,13 +554,16 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
           
           // TabBarView Content
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildGeneralTab(),
-                _buildInhabitantsTab(),
-                _buildPhotosTab(),
-              ],
+            child: Form(
+              key: _formKey,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildGeneralTab(),
+                  _buildInhabitantsTab(),
+                  _buildPhotosTab(),
+                ],
+              ),
             ),
           ),
           
@@ -673,27 +676,25 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Tank Name
-            TextFormField(
-              controller: _tankNameController,
-              decoration: const InputDecoration(
-                labelText: 'Tank Name',
-                hintText: 'My Community Tank',
-                border: OutlineInputBorder(),
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a tank name';
-                }
-                return null;
-              },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Tank Name
+          TextFormField(
+            controller: _tankNameController,
+            decoration: const InputDecoration(
+              labelText: 'Tank Name',
+              hintText: 'My Community Tank',
+              border: OutlineInputBorder(),
             ),
+            textAlign: TextAlign.center,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter a tank name';
+              }
+              return null;
+            },
+          ),
             const SizedBox(height: 24),
             
             // Tank Type Selection
@@ -941,7 +942,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap "Add Fish" to start building your tank community',
+                      'Tap the Add button to start building your tank community',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
