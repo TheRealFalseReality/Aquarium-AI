@@ -878,7 +878,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     TankPhoto? backgroundPhoto;
     if (tank.customBackgroundPhotoId != null) {
       try {
-        backgroundPhoto = tank.photos.firstWhere(
+        backgroundPhoto = (tank.photos ?? []).firstWhere(
           (photo) => photo.id == tank.customBackgroundPhotoId,
         );
       } catch (e) {
@@ -1001,7 +1001,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                   child: () {
                                     try {
-                                      final photo = tank.photos.firstWhere(
+                                      final photo = (tank.photos ?? []).firstWhere(
                                         (p) => p.id == tank.customIconPhotoId,
                                       );
                                       final imageUrl = photo.imageUrl ?? photo.imagePath;
@@ -1192,7 +1192,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ],
                             ),
                           ),
-                          if (tank.photos.isNotEmpty)
+                          if (tank.photos?.isNotEmpty ?? false)
                             PopupMenuItem(
                               value: 'set_background',
                               child: Row(
@@ -1224,7 +1224,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
+                          if (tank.inhabitants?.isNotEmpty ?? false && appSettings.enableAI)
                             PopupMenuItem(
                               value: 'recommendations',
                               child: Row(
@@ -1235,7 +1235,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ],
                               ),
                             ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
+                          if (tank.inhabitants?.isNotEmpty ?? false && appSettings.enableAI)
                             PopupMenuItem(
                               value: 'compatibility_analysis',
                               child: Row(
@@ -1285,7 +1285,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         Icons.straighten,
                         _formatTankSize(tank),
                       ),
-                    if (tank.inhabitants.isNotEmpty && fishData != null)
+                    if (tank.inhabitants?.isNotEmpty ?? false && fishData != null)
                       _buildHarmonyScoreChip(tank),
                   ],
                 ),
@@ -1293,7 +1293,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const SizedBox(height: 14),
                 
                 // Inhabitants section with modern styling
-                if (tank.inhabitants.isEmpty)
+                if (tank.inhabitants?.isEmpty ?? true)
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -1342,7 +1342,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                              '${_getTotalInhabitantCount(tank.inhabitants ?? [])} inhabitant${_groupInhabitantsByFishType(tank.inhabitants ?? []).length == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants ?? []).length} type${_groupInhabitantsByFishType(tank.inhabitants ?? []).length == 1 ? '' : 's'}',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: cs.onPrimaryContainer,
@@ -1359,7 +1359,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const SizedBox(height: 14),
                 
                 // Tank photos section (if photos exist)
-                if (tank.photos.isNotEmpty) ...[
+                if (tank.photos?.isNotEmpty ?? false) ...[
                   Row(
                     children: [
                       Icon(
@@ -1369,7 +1369,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Tank Photos (${tank.photos.length})',
+                        'Tank Photos (${tank.photos?.length ?? 0})',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
@@ -1382,9 +1382,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     height: 60,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: tank.photos.length,
+                      itemCount: tank.photos?.length ?? 0,
                       itemBuilder: (context, index) {
-                        final photo = tank.photos[index];
+                        final photo = (tank.photos ?? [])[index];
                         final imageUrl = photo.imageUrl ?? photo.imagePath;
                         return GestureDetector(
                           onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
@@ -1481,7 +1481,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 Row(
                   children: [
                     // AI stocking button - conditionally shown based on app settings
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                    if (tank.inhabitants?.isNotEmpty ?? false && appSettings.enableAI && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
                           height: 44,
@@ -1528,10 +1528,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                     // Space between buttons
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
+                    if (tank.inhabitants?.isNotEmpty ?? false && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
                     
                     // AI compatibility analysis button - conditionally shown based on app settings
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                    if (tank.inhabitants?.isNotEmpty ?? false && appSettings.enableAI && appSettings.showStockingButton)
                       Expanded(
                         child: Container(
                           height: 44,
@@ -1641,8 +1641,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final List<Widget> notificationItems = [];
     
     // Get most recent activity log
-    if (tank.notificationLogs.isNotEmpty) {
-      final sortedLogs = List.from(tank.notificationLogs)
+    if (tank.notificationLogs?.isNotEmpty ?? false) {
+      final sortedLogs = List.from(tank.notificationLogs ?? [])
         ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
       final recentLog = sortedLogs.first;
       
@@ -1726,7 +1726,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
-        nextDate = notification.getNextNotificationDateWithActivity(tank.notificationLogs);
+        nextDate = notification.getNextNotificationDateWithActivity(tank.notificationLogs ?? []);
       } else {
         nextDate = notification.notificationDateTime;
       }
@@ -2322,7 +2322,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
     final l10n = AppLocalizations.of(context)!;
-    if (tank.photos.isEmpty) {
+    if (tank.photos?.isEmpty ?? true) {
       context.showAccessibleMessage('No photos available. Add photos to your tank first.');
       return;
     }
@@ -2340,9 +2340,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: tank.photos.length,
+            itemCount: tank.photos?.length ?? 0,
             itemBuilder: (context, index) {
-              final photo = tank.photos[index];
+              final photo = (tank.photos ?? [])[index];
               final imageUrl = photo.imageUrl ?? photo.imagePath;
               final isSelected = tank.customBackgroundPhotoId == photo.id;
               
@@ -2449,7 +2449,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Tank photos section (if available)
-                if (tank.photos.isNotEmpty) ...[
+                if (tank.photos?.isNotEmpty ?? false) ...[
                   Text(
                     'Tank Photos',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -2465,9 +2465,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
                     ),
-                    itemCount: tank.photos.length,
+                    itemCount: tank.photos?.length ?? 0,
                     itemBuilder: (context, index) {
-                      final photo = tank.photos[index];
+                      final photo = (tank.photos ?? [])[index];
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       final isSelected = tank.customIconPhotoId == photo.id;
                       
@@ -2843,7 +2843,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   List<Widget> _buildFishGroupDisplay(Tank tank, Map<String, List<Fish>>? fishData) {
-    final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
+    final groupedFish = _groupInhabitantsByFishType(tank.inhabitants ?? []);
     final widgets = <Widget>[];
     
     int displayedGroups = 0;
@@ -2939,7 +2939,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
-    if (tank.inhabitants.isEmpty) {
+    if (tank.inhabitants?.isEmpty ?? true) {
       context.showAccessibleMessage(
         'Tank must have existing inhabitants to get stocking recommendations.'
       );
@@ -3054,7 +3054,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       parameters: {
         'tank_type': tank.type,
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
-        'existing_inhabitants_count': tank.inhabitants.length,
+        'existing_inhabitants_count': tank.inhabitants?.length ?? 0,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
         'include_custom_names': options.includeCustomNames ? 'true' : 'false',
@@ -3077,7 +3077,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Future<void> _getTankCompatibilityAnalysis(BuildContext context, WidgetRef ref, Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
-    if (tank.inhabitants.isEmpty) {
+    if (tank.inhabitants?.isEmpty ?? true) {
       context.showAccessibleMessage(
         l10n.tankMustHaveInhabitantsForCompatibility
       );
@@ -3218,7 +3218,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       parameters: {
         'tank_type': tank.type,
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
-        'existing_inhabitants_count': tank.inhabitants.length,
+        'existing_inhabitants_count': tank.inhabitants?.length ?? 0,
         'source': 'tank_management',
         'include_custom_names': options.includeCustomNames ? 'true' : 'false',
         'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
