@@ -26,6 +26,7 @@ import '../widgets/notification_reschedule_dialog.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
+import 'tank_details_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
 import 'parameter_logger_screen.dart';
@@ -937,7 +938,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(20),
-              onTap: () => _showTankDetails(context, tank, fishData),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => TankDetailsScreen(tank: tank),
+                  ),
+                );
+              },
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Column(
