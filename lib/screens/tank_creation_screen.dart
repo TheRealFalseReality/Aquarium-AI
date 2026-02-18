@@ -45,6 +45,13 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     
     _tabController = TabController(length: 3, vsync: this);
     
+    // Add listener to rebuild when tab changes
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    
     if (widget.existingTank != null) {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
@@ -545,10 +552,38 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
           // TabBar
           TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.info_outline), text: 'General'),
-              Tab(icon: Icon(Icons.pets), text: 'Inhabitants'),
-              Tab(icon: Icon(Icons.photo_library), text: 'Photos'),
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            indicatorWeight: 3,
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            tabs: [
+              Tab(
+                icon: Icon(
+                  Icons.info_outline,
+                  color: _tabController.index == 0 
+                    ? Theme.of(context).colorScheme.primary 
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
+                text: 'General',
+              ),
+              Tab(
+                icon: Icon(
+                  Icons.pets,
+                  color: _tabController.index == 1 
+                    ? Theme.of(context).colorScheme.secondary 
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
+                text: 'Inhabitants',
+              ),
+              Tab(
+                icon: Icon(
+                  Icons.photo_library,
+                  color: _tabController.index == 2 
+                    ? Theme.of(context).colorScheme.tertiary 
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
+                text: 'Photos',
+              ),
             ],
           ),
           
@@ -698,12 +733,29 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 24),
             
             // Tank Type Selection
-            Text(
-              'Tank Type',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-              textAlign: TextAlign.center,
+                  child: Icon(
+                    Icons.category,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tank Type',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -727,12 +779,29 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 24),
             
             // Tank Size Section
-            Text(
-              'Tank Size (Optional)',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-              textAlign: TextAlign.center,
+                  child: Icon(
+                    Icons.straighten,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tank Size (Optional)',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -811,12 +880,29 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 24),
             
             // Tank Notes Section
-            Text(
-              'Tank Notes (Optional)',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-              textAlign: TextAlign.center,
+                  child: Icon(
+                    Icons.note_outlined,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tank Notes (Optional)',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -833,12 +919,29 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 24),
             
             // Creation Date Selection
-            Text(
-              'Creation Date',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-              textAlign: TextAlign.center,
+                  child: Icon(
+                    Icons.calendar_today,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Creation Date',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             InkWell(

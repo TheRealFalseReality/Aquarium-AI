@@ -40,6 +40,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
     
+    // Add listener to rebuild when tab changes
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    
     // Log screen view
     AnalyticsService.logScreenView(screenName: 'tank_details_screen');
   }
@@ -75,14 +82,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     // Gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
         ? [
-            Colors.blue.shade400.withOpacity(0.15),
-            Colors.cyan.shade300.withOpacity(0.15),
-            cs.primaryContainer.withOpacity(0.05),
+            cs.primary.withOpacity(0.08),
+            cs.primaryContainer.withOpacity(0.15),
+            cs.surface,
           ]
         : [
-            Colors.indigo.shade400.withOpacity(0.15),
-            Colors.purple.shade300.withOpacity(0.15),
-            cs.secondaryContainer.withOpacity(0.05),
+            cs.secondary.withOpacity(0.08),
+            cs.secondaryContainer.withOpacity(0.15),
+            cs.surface,
           ];
 
     return MainLayout(
@@ -104,13 +111,17 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             bottom: TabBar(
               controller: _tabController,
               isScrollable: true,
+              indicatorColor: cs.primary,
+              indicatorWeight: 3,
+              labelColor: cs.primary,
+              unselectedLabelColor: cs.onSurface.withOpacity(0.6),
               tabs: [
-                Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.overview),
-                Tab(icon: const Icon(Icons.photo_library_outlined), text: l10n.photos),
-                Tab(icon: const Icon(Icons.science_outlined), text: l10n.waterParameters),
-                Tab(icon: const Icon(Icons.medication_outlined), text: l10n.dosing),
-                Tab(icon: const Icon(Icons.history), text: l10n.activity),
-                Tab(icon: const Icon(Icons.note_outlined), text: l10n.notes),
+                Tab(icon: Icon(Icons.dashboard_outlined, color: _tabController.index == 0 ? cs.primary : cs.onSurface.withOpacity(0.6)), text: l10n.overview),
+                Tab(icon: Icon(Icons.photo_library_outlined, color: _tabController.index == 1 ? cs.secondary : cs.onSurface.withOpacity(0.6)), text: l10n.photos),
+                Tab(icon: Icon(Icons.science_outlined, color: _tabController.index == 2 ? cs.tertiary : cs.onSurface.withOpacity(0.6)), text: l10n.waterParameters),
+                Tab(icon: Icon(Icons.medication_outlined, color: _tabController.index == 3 ? cs.primary : cs.onSurface.withOpacity(0.6)), text: l10n.dosing),
+                Tab(icon: Icon(Icons.history, color: _tabController.index == 4 ? cs.secondary : cs.onSurface.withOpacity(0.6)), text: l10n.activity),
+                Tab(icon: Icon(Icons.note_outlined, color: _tabController.index == 5 ? cs.tertiary : cs.onSurface.withOpacity(0.6)), text: l10n.notes),
               ],
             ),
             actions: [
@@ -178,8 +189,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: tank.type == 'freshwater'
-                              ? [Colors.blue.shade300, Colors.cyan.shade400]
-                              : [Colors.indigo.shade300, Colors.purple.shade400],
+                              ? [cs.primary, cs.primary.withOpacity(0.7)]
+                              : [cs.secondary, cs.secondary.withOpacity(0.7)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -187,8 +198,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         boxShadow: [
                           BoxShadow(
                             color: (tank.type == 'freshwater' 
-                                ? Colors.blue 
-                                : Colors.purple).withOpacity(0.3),
+                                ? cs.primary 
+                                : cs.secondary).withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -770,7 +781,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           children: [
             Row(
               children: [
-                Icon(Icons.pets, color: cs.primary),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cs.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.pets, color: cs.onSecondaryContainer, size: 20),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   l10n.inhabitantsLabel,
@@ -925,7 +943,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               },
               child: Row(
                 children: [
-                  Icon(Icons.calculate, color: cs.primary),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.calculate, color: cs.onTertiaryContainer, size: 20),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
