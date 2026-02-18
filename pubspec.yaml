@@ -87,6 +87,7 @@ flutter_native_splash:
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
         - asset: assets/fonts/Poppins-Italic.ttf
+          weight: 400
           style: italic
     - family: Karla
       fonts:
