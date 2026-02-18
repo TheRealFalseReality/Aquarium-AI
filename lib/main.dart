@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './theme_provider.dart';
@@ -244,18 +244,11 @@ class MyApp extends ConsumerWidget {
     }
   }
   
-  // Helper method to safely load Google Fonts with fallback
-  TextTheme _getSafeTextTheme(BuildContext context) {
-    try {
-      return GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
-    } catch (e) {
-      // Catch all network-related errors (HandshakeException, SocketException, etc.)
-      if (kDebugMode) {
-        debugPrint('Google Fonts loading error: $e');
-        debugPrint('Using default text theme');
-      }
-      return Theme.of(context).textTheme;
-    }
+  // Use locally bundled Poppins font
+  TextTheme _getLocalTextTheme(BuildContext context) {
+    final baseTheme = Theme.of(context).textTheme;
+    // Apply Poppins font family to all text styles
+    return baseTheme.apply(fontFamily: 'Poppins');
   }
 
   // Helper method to update system UI overlay based on theme
@@ -309,7 +302,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
     final appSettings = ref.watch(appSettingsProvider);
-    final textTheme = _getSafeTextTheme(context);
+    final textTheme = _getLocalTextTheme(context);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {

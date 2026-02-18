@@ -10,7 +10,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  google_fonts: ^8.0.1
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.4
@@ -81,6 +80,21 @@ flutter_native_splash:
 
 
   fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-Italic.ttf
+          weight: 400
+          style: italic
+    - family: Karla
+      fonts:
+        - asset: assets/fonts/Karla-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Karla-Bold.ttf
+          weight: 700
     - family: NotoSans
       fonts:
         - asset: assets/fonts/NotoSans-Regular.ttf
