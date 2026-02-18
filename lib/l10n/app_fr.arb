@@ -477,7 +477,10 @@
   "lastUpdated": "Dernière Mise à Jour",
   
   "harmony": "Harmonie",
-  "qty": "Qté"
+  "qty": "Qté",
+  
+  "createdLabel": "Créé",
+  "inhabitantsLabel": "Habitants"
 }
 
 

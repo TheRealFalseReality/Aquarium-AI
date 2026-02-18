@@ -476,7 +476,10 @@
   "lastUpdated": "Última Actualización",
   
   "harmony": "Armonía",
-  "qty": "Cant"
+  "qty": "Cant",
+  
+  "createdLabel": "Creado",
+  "inhabitantsLabel": "Habitantes"
 }
 
 

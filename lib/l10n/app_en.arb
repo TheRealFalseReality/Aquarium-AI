@@ -2573,6 +2573,16 @@
   "qty": "Qty",
   "@qty": {
     "description": "Abbreviation for quantity"
+  },
+
+  "createdLabel": "Created",
+  "@createdLabel": {
+    "description": "Label for creation date"
+  },
+
+  "inhabitantsLabel": "Inhabitants",
+  "@inhabitantsLabel": {
+    "description": "Label for inhabitants section"
   }
 }
 

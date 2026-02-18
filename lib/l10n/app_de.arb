@@ -476,7 +476,10 @@
   "lastUpdated": "Zuletzt Aktualisiert",
   
   "harmony": "Harmonie",
-  "qty": "Anz"
+  "qty": "Anz",
+  
+  "createdLabel": "Erstellt",
+  "inhabitantsLabel": "Bewohner"
 }
 
 

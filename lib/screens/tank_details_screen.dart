@@ -10,7 +10,7 @@ import '../models/water_parameter.dart';
 import '../models/dosing_entry.dart';
 import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
-import '../providers/fish_compatibility_provider.dart';
+import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
@@ -105,23 +105,23 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.overview ?? 'Overview'),
-                Tab(icon: const Icon(Icons.photo_library_outlined), text: l10n.photos ?? 'Photos'),
-                Tab(icon: const Icon(Icons.science_outlined), text: l10n.waterParameters ?? 'Parameters'),
-                Tab(icon: const Icon(Icons.medication_outlined), text: l10n.dosing ?? 'Dosing'),
-                Tab(icon: const Icon(Icons.history), text: l10n.activity ?? 'Activity'),
-                Tab(icon: const Icon(Icons.note_outlined), text: l10n.notes ?? 'Notes'),
+                Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.overview),
+                Tab(icon: const Icon(Icons.photo_library_outlined), text: l10n.photos),
+                Tab(icon: const Icon(Icons.science_outlined), text: l10n.waterParameters),
+                Tab(icon: const Icon(Icons.medication_outlined), text: l10n.dosing),
+                Tab(icon: const Icon(Icons.history), text: l10n.activity),
+                Tab(icon: const Icon(Icons.note_outlined), text: l10n.notes),
               ],
             ),
             actions: [
               // Edit button
               IconButton(
                 icon: const Icon(Icons.edit),
-                tooltip: l10n.editTank ?? 'Edit Tank',
+                tooltip: l10n.editTank,
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => TankCreationScreen(tankToEdit: tank),
+                      builder: (context) => TankCreationScreen(existingTank: tank),
                     ),
                   );
                 },
@@ -129,7 +129,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               // Notifications button
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                tooltip: l10n.notifications ?? 'Notifications',
+                tooltip: l10n.notifications,
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -213,8 +213,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                           ),
                           Text(
                             tank.type == 'freshwater' 
-                                ? (l10n.freshwaterTank ?? 'Freshwater Tank') 
-                                : (l10n.saltwaterTank ?? 'Saltwater Tank'),
+                                ? l10n.freshwaterTank
+                                : l10n.saltwaterTank,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: cs.primary,
                               fontWeight: FontWeight.w600,
@@ -279,14 +279,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             Icon(Icons.photo_library_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              l10n.noPhotos ?? 'No photos yet',
+              l10n.noPhotos,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: cs.onSurface.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.addPhotosHint ?? 'Add photos in the edit screen',
+              l10n.addPhotosHint,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: cs.onSurface.withOpacity(0.5),
               ),
@@ -386,7 +386,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             Icon(Icons.science_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              l10n.noParameters ?? 'No water parameters logged',
+              l10n.noParameters,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: cs.onSurface.withOpacity(0.6),
               ),
@@ -396,67 +396,61 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       );
     }
 
-    // Get latest parameters
-    final latestParams = tank.waterParameters.last;
+    // Sort parameters by date and group by type
+    final sortedParams = List<WaterParameter>.from(tank.waterParameters)
+      ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
     
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.science_outlined, color: cs.primary),
-                    const SizedBox(width: 8),
+        Text(
+          l10n.latestWaterParameters,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // Show all parameters as cards
+        ...sortedParams.map((param) {
+          return Card(
+            child: ListTile(
+              leading: Icon(Icons.science_outlined, color: cs.primary),
+              title: Text(param.parameterType.toUpperCase()),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${param.value} ${param.unit ?? ''}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat.yMMMd().add_jm().format(param.dateRecorded),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: cs.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  if (param.notes != null && param.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
                     Text(
-                      l10n.latestWaterParameters ?? 'Latest Water Parameters',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      param.notes!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: cs.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  DateFormat.yMMMd().add_jm().format(latestParams.dateTested),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(0.6),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ..._buildParameterRows(latestParams),
-              ],
-            ),
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Show all parameters history
-        if (tank.waterParameters.length > 1) ...[
-          Text(
-            l10n.parameterHistory ?? 'Parameter History',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...tank.waterParameters.reversed.skip(1).map((param) {
-            return Card(
-              child: ListTile(
-                leading: Icon(Icons.water_drop_outlined, color: cs.primary),
-                title: Text(DateFormat.yMMMd().format(param.dateTested)),
-                subtitle: Text(_getParameterSummary(param)),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showParameterDetails(context, param),
+                ],
               ),
-            );
-          }).toList(),
-        ],
+            ),
+          );
+        }).toList(),
       ],
     );
   }
@@ -474,7 +468,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             Icon(Icons.medication_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              l10n.noDosing ?? 'No dosing entries',
+              l10n.noDosing,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: cs.onSurface.withOpacity(0.6),
               ),
@@ -491,7 +485,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          '${l10n.recentDosing ?? 'Recent Dosing'} (${recentEntries.length}/${tank.dosingEntries.length})',
+          '${l10n.recentDosing} (${recentEntries.length}/${tank.dosingEntries.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -501,13 +495,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           return Card(
             child: ListTile(
               leading: Icon(Icons.medication, color: cs.primary),
-              title: Text(entry.substance),
+              title: Text(entry.treatmentName),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('${entry.amount} ${entry.unit}'),
                   Text(
-                    DateFormat.yMMMd().add_jm().format(entry.dateAdded),
+                    DateFormat.yMMMd().add_jm().format(entry.dateDosed),
                     style: TextStyle(
                       fontSize: 12,
                       color: cs.onSurface.withOpacity(0.6),
@@ -538,7 +532,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             Icon(Icons.history, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              l10n.noActivity ?? 'No activity logged',
+              l10n.noActivity,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: cs.onSurface.withOpacity(0.6),
               ),
@@ -555,7 +549,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          '${l10n.recentActivity ?? 'Recent Activity'} (${recentLogs.length}/${tank.notificationLogs.length})',
+          '${l10n.recentActivity} (${recentLogs.length}/${tank.notificationLogs.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -567,7 +561,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               leading: Icon(_getActivityIcon(log.type), color: cs.primary),
               title: Text(log.customCategory ?? log.type.toString().split('.').last),
               subtitle: Text(
-                DateFormat.yMMMd().add_jm().format(log.completedAt),
+                DateFormat.yMMMd().add_jm().format(log.loggedAt),
                 style: TextStyle(
                   fontSize: 12,
                   color: cs.onSurface.withOpacity(0.6),
@@ -596,7 +590,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             Icon(Icons.note_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              l10n.noNotes ?? 'No notes',
+              l10n.noNotes,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: cs.onSurface.withOpacity(0.6),
               ),
@@ -622,7 +616,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       Icon(Icons.note, color: cs.primary),
                       const SizedBox(width: 8),
                       Text(
-                        l10n.tankNotes ?? 'Tank Notes',
+                        l10n.tankNotes,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -641,7 +635,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         // Tank notes list
         if (tank.tankNotes.isNotEmpty) ...[
           Text(
-            l10n.notesSection ?? 'Notes',
+            l10n.notesSection,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -654,15 +648,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (note.title != null && note.title!.isNotEmpty) ...[
-                      Text(
-                        note.title!,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                    ],
                     Text(note.content),
                     const SizedBox(height: 8),
                     Text(
@@ -741,7 +726,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           Icon(Icons.favorite, size: 16, color: scoreColor),
           const SizedBox(width: 6),
           Text(
-            '${l10n.harmony ?? 'Harmony'}: $percentage%',
+            '${l10n.harmony}: $percentage%',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -794,7 +779,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 Icon(Icons.pets, color: cs.primary),
                 const SizedBox(width: 8),
                 Text(
-                  l10n.inhabitants ?? 'Inhabitants',
+                  l10n.inhabitantsLabel,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -803,7 +788,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
             const SizedBox(height: 12),
             ...inhabitantsByType.entries.map((entry) {
-              final fishUnit = entry.key;
               final inhabitants = entry.value;
               final totalQuantity = inhabitants.fold(0, (sum, i) => sum + i.quantity);
               
@@ -833,7 +817,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             ),
                           ),
                           Text(
-                            '${l10n.qty ?? 'Qty'}: $totalQuantity',
+                            '${l10n.qty}: $totalQuantity',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: cs.onSurface.withOpacity(0.6),
                             ),
@@ -873,7 +857,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      l10n.compatibilityCalculation ?? 'Compatibility Calculation',
+                      l10n.compatibilityCalculation,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -916,7 +900,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 Icon(Icons.access_time, color: cs.onSurface.withOpacity(0.6)),
                 const SizedBox(width: 8),
                 Text(
-                  l10n.timestamps ?? 'Timestamps',
+                  l10n.timestamps,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.onSurface.withOpacity(0.6),
@@ -926,100 +910,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '${l10n.created ?? 'Created'}: ${DateFormat.yMMMd().add_jm().format(tank.createdAt)}',
+              '${l10n.createdLabel}: ${DateFormat.yMMMd().add_jm().format(tank.createdAt)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '${l10n.lastUpdated ?? 'Last Updated'}: ${DateFormat.yMMMd().add_jm().format(tank.updatedAt)}',
+              '${l10n.lastUpdated}: ${DateFormat.yMMMd().add_jm().format(tank.updatedAt)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  List<Widget> _buildParameterRows(WaterParameter param) {
-    final rows = <Widget>[];
-    
-    if (param.temperature != null) {
-      rows.add(_buildParameterRow('Temperature', '${param.temperature}°${param.temperatureUnit ?? 'F'}'));
-    }
-    if (param.ph != null) {
-      rows.add(_buildParameterRow('pH', param.ph.toString()));
-    }
-    if (param.ammonia != null) {
-      rows.add(_buildParameterRow('Ammonia', '${param.ammonia} ppm'));
-    }
-    if (param.nitrite != null) {
-      rows.add(_buildParameterRow('Nitrite', '${param.nitrite} ppm'));
-    }
-    if (param.nitrate != null) {
-      rows.add(_buildParameterRow('Nitrate', '${param.nitrate} ppm'));
-    }
-    if (param.kh != null) {
-      rows.add(_buildParameterRow('KH', '${param.kh} dKH'));
-    }
-    if (param.gh != null) {
-      rows.add(_buildParameterRow('GH', '${param.gh} dGH'));
-    }
-    if (param.salinity != null) {
-      rows.add(_buildParameterRow('Salinity', '${param.salinity} ppt'));
-    }
-    
-    return rows;
-  }
-
-  Widget _buildParameterRow(String label, String value) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: cs.onSurface.withOpacity(0.7),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getParameterSummary(WaterParameter param) {
-    final parts = <String>[];
-    if (param.temperature != null) parts.add('${param.temperature}°');
-    if (param.ph != null) parts.add('pH ${param.ph}');
-    if (param.ammonia != null) parts.add('NH3 ${param.ammonia}');
-    return parts.take(3).join(' • ');
-  }
-
-  void _showParameterDetails(BuildContext context, WaterParameter param) {
-    final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(DateFormat.yMMMd().format(param.dateTested)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildParameterRows(param),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.close ?? 'Close'),
-          ),
-        ],
       ),
     );
   }
