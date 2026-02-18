@@ -3,7 +3,7 @@ import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
@@ -57,39 +57,14 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     }
   }
 
-  // Helper method to safely load Google Fonts with fallback
-  TextStyle _getSafeGoogleFont({
+  // Use locally bundled Karla font with fallback
+  TextStyle _getLocalKarlaFont({
     required Color color,
     required FontWeight fontWeight,
     required double fontSize,
   }) {
-    try {
-      return GoogleFonts.karla(
-        color: color,
-        fontWeight: fontWeight,
-        fontSize: fontSize,
-      );
-    } on SocketException catch (e) {
-      // Network connectivity error
-      if (kDebugMode) {
-        debugPrint('Google Fonts SocketException: $e');
-        debugPrint('Using fallback TextStyle');
-      }
-    } on HandshakeException catch (e) {
-      // TLS/SSL handshake error
-      if (kDebugMode) {
-        debugPrint('Google Fonts HandshakeException: $e');
-        debugPrint('Using fallback TextStyle');
-      }
-    } catch (e) {
-      // Catch any other exceptions (ClientException, etc.)
-      if (kDebugMode) {
-        debugPrint('Google Fonts loading error: $e');
-        debugPrint('Using fallback TextStyle');
-      }
-    }
-    // Return fallback TextStyle with the same properties
     return TextStyle(
+      fontFamily: 'Karla',
       color: color,
       fontWeight: fontWeight,
       fontSize: fontSize,
@@ -283,7 +258,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                                 'https://www.capitalcityaquatics.com/'),
                             child: Text(
                               'Capital City Aquatics',
-                              style: _getSafeGoogleFont(
+                              style: _getLocalKarlaFont(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 26,
