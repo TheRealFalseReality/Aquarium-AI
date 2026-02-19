@@ -2478,6 +2478,111 @@
   "helpWantedClosing": "Whether you're experienced or just starting out, your contributions can make a real difference! Let's build something amazing together. 🐠",
   "@helpWantedClosing": {
     "description": "Help wanted closing message"
+  },
+
+  "overview": "Overview",
+  "@overview": {
+    "description": "Tab label for tank overview"
+  },
+
+  "photos": "Photos",
+  "@photos": {
+    "description": "Tab label for tank photos"
+  },
+
+  "waterParameters": "Parameters",
+  "@waterParameters": {
+    "description": "Tab label for water parameters"
+  },
+
+  "dosing": "Dosing",
+  "@dosing": {
+    "description": "Tab label for dosing entries"
+  },
+
+  "activity": "Activity",
+  "@activity": {
+    "description": "Tab label for activity logs"
+  },
+
+  "noPhotos": "No photos yet",
+  "@noPhotos": {
+    "description": "Empty state message for photos tab"
+  },
+
+  "noParameters": "No water parameters logged",
+  "@noParameters": {
+    "description": "Empty state message for parameters tab"
+  },
+
+  "noDosing": "No dosing entries",
+  "@noDosing": {
+    "description": "Empty state message for dosing tab"
+  },
+
+  "noActivity": "No activity logged",
+  "@noActivity": {
+    "description": "Empty state message for activity tab"
+  },
+
+  "noNotes": "No notes",
+  "@noNotes": {
+    "description": "Empty state message for notes tab"
+  },
+
+  "latestWaterParameters": "Latest Water Parameters",
+  "@latestWaterParameters": {
+    "description": "Header for latest water parameters section"
+  },
+
+  "parameterHistory": "Parameter History",
+  "@parameterHistory": {
+    "description": "Header for parameter history section"
+  },
+
+  "recentDosing": "Recent Dosing",
+  "@recentDosing": {
+    "description": "Header for recent dosing entries"
+  },
+
+  "recentActivity": "Recent Activity",
+  "@recentActivity": {
+    "description": "Header for recent activity logs"
+  },
+
+  "addPhotosHint": "Add photos in the edit screen",
+  "@addPhotosHint": {
+    "description": "Hint for adding photos"
+  },
+
+  "timestamps": "Timestamps",
+  "@timestamps": {
+    "description": "Header for timestamps section"
+  },
+
+  "lastUpdated": "Last Updated",
+  "@lastUpdated": {
+    "description": "Label for last updated timestamp"
+  },
+
+  "harmony": "Harmony",
+  "@harmony": {
+    "description": "Label for harmony score"
+  },
+
+  "qty": "Qty",
+  "@qty": {
+    "description": "Abbreviation for quantity"
+  },
+
+  "createdLabel": "Created",
+  "@createdLabel": {
+    "description": "Label for creation date"
+  },
+
+  "inhabitantsLabel": "Inhabitants",
+  "@inhabitantsLabel": {
+    "description": "Label for inhabitants section"
   }
 }
 
