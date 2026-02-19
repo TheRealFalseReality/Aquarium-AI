@@ -709,21 +709,9 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   Widget _buildGeneralTab() {
     final l10n = AppLocalizations.of(context)!;
     
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-            Theme.of(context).colorScheme.primary.withOpacity(0.05),
-            Theme.of(context).colorScheme.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Tank Name
@@ -1006,31 +994,18 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 32),
           ],
         ),
-        ),
-      )
-    ;
+      ),
+    );
   }
 
   // Inhabitants Tab
   Widget _buildInhabitantsTab() {
     final l10n = AppLocalizations.of(context)!;
     
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-            Theme.of(context).colorScheme.secondary.withOpacity(0.05),
-            Theme.of(context).colorScheme.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Inhabitants Section
           Row(
@@ -1156,7 +1131,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             }),
           const SizedBox(height: 32),
         ],
-        ),
       ),
     );
   }
@@ -1165,22 +1139,10 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   Widget _buildPhotosTab() {
     final l10n = AppLocalizations.of(context)!;
     
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
-            Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
-            Theme.of(context).colorScheme.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Tank Photos Section
           Row(
@@ -1240,7 +1202,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             ),
           const SizedBox(height: 32),
         ],
-        ),
       ),
     );
   }

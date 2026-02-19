@@ -172,59 +172,45 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.primaryContainer.withOpacity(0.3),
-            cs.primary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Tank info card
-          Card(
-            elevation: 4,
-            color: cs.surface,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: tank.type == 'freshwater'
-                                ? [cs.primary, cs.primary.withOpacity(0.7)]
-                                : [cs.secondary, cs.secondary.withOpacity(0.7)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Tank info card
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: tank.type == 'freshwater'
+                              ? [cs.primary, cs.primary.withOpacity(0.7)]
+                              : [cs.secondary, cs.secondary.withOpacity(0.7)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (tank.type == 'freshwater' 
+                                ? cs.primary 
+                                : cs.secondary).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (tank.type == 'freshwater' 
-                                  ? cs.primary 
-                                  : cs.secondary).withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                          size: 28,
-                          color: Colors.white,
-                        ),
+                        ],
                       ),
+                      child: Icon(
+                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        size: 28,
+                        color: Colors.white,
+                      ),
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -288,7 +274,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         // Timestamps
         _buildTimestampsCard(context, tank),
       ],
-      ),
     );
   }
 
@@ -297,30 +282,18 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.secondaryContainer.withOpacity(0.3),
-            cs.secondary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: tank.photos.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.photo_library_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.noPhotos,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: cs.onSurface.withOpacity(0.6),
-                  ),
+    if (tank.photos.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.photo_library_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
+            const SizedBox(height: 16),
+            Text(
+              l10n.noPhotos,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: cs.onSurface.withOpacity(0.6),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -331,11 +304,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ],
         ),
-      )
-      : GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+      );
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 1,
@@ -406,7 +381,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           ),
         );
       },
-      ),
     );
   }
 
@@ -415,22 +389,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.tertiaryContainer.withOpacity(0.3),
-            cs.tertiary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: tank.waterParameters.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    if (tank.waterParameters.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.science_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
@@ -442,16 +404,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ],
         ),
-      )
-      : Builder(
-          builder: (context) {
-            // Sort parameters by date
-            final sortedParams = List<WaterParameter>.from(tank.waterParameters)
-              ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
-            
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
+      );
+    }
+
+    // Sort parameters by date and group by type
+    final sortedParams = List<WaterParameter>.from(tank.waterParameters)
+      ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
+    
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         Text(
           l10n.latestWaterParameters,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -501,9 +463,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           );
         }).toList(),
       ],
-            );
-          },
-        ),
     );
   }
 
@@ -512,22 +471,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.primaryContainer.withOpacity(0.25),
-            cs.primary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: tank.dosingEntries.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    if (tank.dosingEntries.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.medication_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
@@ -539,15 +486,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ],
         ),
-      )
-      : Builder(
-          builder: (context) {
-            // Get latest 10 dosing entries
-            final recentEntries = tank.dosingEntries.reversed.take(10).toList();
-            
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
+      );
+    }
+
+    // Get latest 10 dosing entries
+    final recentEntries = tank.dosingEntries.reversed.take(10).toList();
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         Text(
           '${l10n.recentDosing} (${recentEntries.length}/${tank.dosingEntries.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -580,9 +527,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           );
         }).toList(),
       ],
-            );
-          },
-        ),
     );
   }
 
@@ -591,22 +535,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.secondaryContainer.withOpacity(0.25),
-            cs.secondary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: tank.notificationLogs.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    if (tank.notificationLogs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.history, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
@@ -618,15 +550,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ],
         ),
-      )
-      : Builder(
-          builder: (context) {
-            // Get latest 10 activity logs
-            final recentLogs = tank.notificationLogs.reversed.take(10).toList();
-            
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
+      );
+    }
+
+    // Get latest 10 activity logs
+    final recentLogs = tank.notificationLogs.reversed.take(10).toList();
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         Text(
           '${l10n.recentActivity} (${recentLogs.length}/${tank.notificationLogs.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -653,9 +585,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           );
         }).toList(),
       ],
-            );
-          },
-        ),
     );
   }
 
@@ -664,22 +593,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            cs.tertiaryContainer.withOpacity(0.25),
-            cs.tertiary.withOpacity(0.05),
-            cs.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: (tank.tankNotes.isEmpty && (tank.notes == null || tank.notes!.isEmpty))
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    if (tank.tankNotes.isEmpty && (tank.notes == null || tank.notes!.isEmpty)) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.note_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
             const SizedBox(height: 16),
@@ -691,10 +608,12 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ],
         ),
-      )
-      : ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         // Legacy notes field
         if (tank.notes != null && tank.notes!.isNotEmpty) ...[
           Card(
@@ -756,7 +675,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           }).toList(),
         ],
       ],
-      ),
     );
   }
 
