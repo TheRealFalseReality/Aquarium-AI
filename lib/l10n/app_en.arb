@@ -20,7 +20,7 @@
     "description": "Name of the AI compatibility tool feature"
   },
   
-  "aiCompatibilityDescription": "Get detailed compatibility reports with care guides and recommendations.",
+  "aiCompatibilityDescription": "Access our database of 69+ species to get instant, AI-powered compatibility reports. Receive detailed care guides, behavioral insights, and tank parameter recommendations for peaceful community planning.",
   "@aiCompatibilityDescription": {
     "description": "Description of the AI compatibility tool"
   },
@@ -30,7 +30,7 @@
     "description": "Name of the AI chatbot feature"
   },
   
-  "aiChatbotDescription": "Ask questions, analyze water parameters, and get expert advice.",
+  "aiChatbotDescription": "Your 24/7 aquarium expert powered by advanced AI. Ask questions about fish care, troubleshoot water chemistry issues, get disease diagnosis help, and receive maintenance schedules tailored to your setup.",
   "@aiChatbotDescription": {
     "description": "Description of the AI chatbot"
   },
@@ -40,7 +40,7 @@
     "description": "Name of the photo analyzer feature"
   },
   
-  "photoAnalyzerDescription": "Identify fish species and assess tank health from photos.",
+  "photoAnalyzerDescription": "Upload photos for instant AI analysis. Identify unknown fish species, detect potential health issues, assess water clarity, and get specific recommendations to improve your aquarium conditions.",
   "@photoAnalyzerDescription": {
     "description": "Description of the photo analyzer"
   },
@@ -50,7 +50,7 @@
     "description": "Name of the AI stocking assistant feature"
   },
   
-  "aiStockingDescription": "Get custom stocking plans to build a harmonious aquatic community.",
+  "aiStockingDescription": "Plan your dream tank with confidence. Get personalized stocking recommendations based on your tank size, water type, and experience level. Avoid overcrowding while building a balanced, thriving community.",
   "@aiStockingDescription": {
     "description": "Description of the AI stocking assistant"
   },
@@ -60,7 +60,7 @@
     "description": "Name of the aquarium calculators feature"
   },
   
-  "aquariumCalculatorsDescription": "Essential tools for salinity, CO₂, alkalinity and more.",
+  "aquariumCalculatorsDescription": "Precision tools for serious aquarists. Convert and calculate salinity (PPT/SG), CO₂ levels (KH/pH method), alkalinity (dKH/ppm), and temperature (°F/°C) with instant results.",
   "@aquariumCalculatorsDescription": {
     "description": "Description of the aquarium calculators"
   },
@@ -70,7 +70,7 @@
     "description": "Name of the tank volume calculator feature"
   },
   
-  "tankVolumeDescription": "Calculate volume and water weight for various tank shapes.",
+  "tankVolumeDescription": "Accurately calculate water volume and weight for rectangular, bow-front, cylindrical, and custom tank shapes. Support for both gallons and liters with precise dimensional inputs.",
   "@tankVolumeDescription": {
     "description": "Description of the tank volume calculator"
   },
