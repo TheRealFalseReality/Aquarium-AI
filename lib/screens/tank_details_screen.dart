@@ -114,14 +114,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               unselectedLabelColor: cs.onSurface.withOpacity(0.6),
               dividerColor: cs.outlineVariant.withOpacity(0.2),
               indicatorSize: TabBarIndicatorSize.tab,
-              indicator: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: cs.primary,
-                    width: 3,
-                  ),
-                ),
-              ),
               tabs: [
                 Tab(
                   icon: Icon(
