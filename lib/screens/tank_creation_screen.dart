@@ -707,7 +707,6 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
 
   // General Tab: Tank name, size, notes, date, type
   Widget _buildGeneralTab() {
-    final l10n = AppLocalizations.of(context)!;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),

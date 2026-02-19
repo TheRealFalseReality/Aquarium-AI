@@ -7,11 +7,8 @@ import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../models/water_parameter.dart';
-import '../models/dosing_entry.dart';
-import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
 import '../services/fish_data_service.dart';
-import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
@@ -461,7 +458,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -525,7 +522,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   : null,
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -583,7 +580,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   : null,
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -672,7 +669,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ],
     );
@@ -709,7 +706,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
   Widget _buildHarmonyScoreChip(Tank tank) {
     final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
     final score = tank.harmonyScore ?? 0.0;
     final percentage = (score * 100).toInt();
     
@@ -886,7 +882,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
