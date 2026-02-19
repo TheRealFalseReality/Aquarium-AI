@@ -1109,22 +1109,31 @@ class FeatureCard extends ConsumerWidget {
       elevation: isMaterialYou ? 3 : 2,
       shadowColor: cs.shadow.withOpacity(0.2),
       color: isMaterialYou ? cs.surface : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: cs.primary.withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
       child: Container(
-        decoration: isMaterialYou ? BoxDecoration(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: cs.outlineVariant.withOpacity(0.4),
-            width: 1,
-          ),
           gradient: LinearGradient(
-            colors: [
-              cs.secondary.withOpacity(0.3),
-              cs.primaryContainer.withOpacity(0.8),
-            ],
+            colors: isMaterialYou 
+                ? [
+                    cs.primaryContainer.withOpacity(0.3),
+                    cs.secondaryContainer.withOpacity(0.2),
+                    cs.tertiaryContainer.withOpacity(0.1),
+                  ]
+                : [
+                    cs.primaryContainer.withOpacity(0.15),
+                    cs.secondaryContainer.withOpacity(0.1),
+                  ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-        ) : null,
+        ),
         child: InkWell(
           onTap: onTap,
           splashColor: cs.primary.withOpacity(0.1),
@@ -1136,7 +1145,18 @@ class FeatureCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text(icon, style: const TextStyle(fontSize: 32)),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: cs.primaryContainer.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: cs.primary.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(icon, style: const TextStyle(fontSize: 28)),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -1150,7 +1170,7 @@ class FeatureCard extends ConsumerWidget {
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: cs.onSurfaceVariant,
+                      color: cs.primary.withOpacity(0.7),
                     ),
                   ],
                 ),
@@ -1158,7 +1178,7 @@ class FeatureCard extends ConsumerWidget {
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isMaterialYou ? cs.onSurfaceVariant : null,
+                    color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),

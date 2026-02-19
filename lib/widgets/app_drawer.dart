@@ -141,9 +141,16 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
-                        width: 1,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                        width: 1.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Material(
                       color: Colors.transparent,
@@ -206,73 +213,206 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 if (appSettings.enableAI) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'AI Tools',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 250),
-                    child: ListTile(
-                      leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
-                      title: Text(l10n.aiCompatibilityTool),
-                      subtitle:
-                          Text(l10n.aiCompatibilityDescription),
-                      onTap: () => navigate('/compat-ai'),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
+                        title: Text(l10n.aiCompatibilityTool),
+                        subtitle:
+                            Text(l10n.aiCompatibilityDescription),
+                        onTap: () => navigate('/compat-ai'),
+                      ),
                     ),
                   ),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 300),
-                    child: ListTile(
-                      leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
-                      title: Text(l10n.aiChatbot),
-                      subtitle: Text(l10n.aiChatbotDescription),
-                      onTap: () => navigate('/chatbot'),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
+                        title: Text(l10n.aiChatbot),
+                        subtitle: Text(l10n.aiChatbotDescription),
+                        onTap: () => navigate('/chatbot'),
+                      ),
                     ),
                   ),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 350),
-                    child: ListTile(
-                      leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
-                      title: Text(l10n.aiStockingAssistant),
-                      subtitle: Text(l10n.aiStockingDescription),
-                      onTap: () => navigate('/stocking'),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
+                        title: Text(l10n.aiStockingAssistant),
+                        subtitle: Text(l10n.aiStockingDescription),
+                        onTap: () => navigate('/stocking'),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Divider(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      thickness: 1,
                     ),
                   ),
                 ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 3,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tools & Resources',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
-                  child: ListTile(
-                    leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
-                    title: Text(l10n.aquariumCalculators),
-                    subtitle:
-                        Text(l10n.aquariumCalculatorsDescription),
-                    onTap: () => navigate('/calculators'),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
+                      title: Text(l10n.aquariumCalculators),
+                      subtitle:
+                          Text(l10n.aquariumCalculatorsDescription),
+                      onTap: () => navigate('/calculators'),
+                    ),
                   ),
                 ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 450),
-                  child: ListTile(
-                    leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
-                    title: Text(l10n.tankVolumeCalculator),
-                    subtitle:
-                        Text(l10n.tankVolumeDescription),
-                    onTap: () => navigate('/tank-volume'),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(l10n.tankVolumeCalculator),
+                      subtitle:
+                          Text(l10n.tankVolumeDescription),
+                      onTap: () => navigate('/tank-volume'),
+                    ),
                   ),
                 ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 500),
-                  child: ListTile(
-                    leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
-                    title: Text(l10n.information),
-                    subtitle: Text(l10n.informationDescription),
-                    onTap: () => navigate('/information'),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
+                      title: Text(l10n.information),
+                      subtitle: Text(l10n.informationDescription),
+                      onTap: () => navigate('/information'),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Divider(
+              color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+              thickness: 1,
+            ),
+          ),
           AnimatedDrawerItem(
             delay: const Duration(milliseconds: 550),
             child: _buildCollapsibleThemeMenu(),
           ),
-          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Divider(
+              color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+              thickness: 1,
+            ),
+          ),
           _buildDrawerFooter(context, navigate),
         ],
       ),
@@ -286,7 +426,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid);
 
     final collapsibleContent = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       child: Column(
         children: [
           ToggleButtons(
@@ -299,35 +439,52 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               themeNotifier.setThemeMode(themeModes[index]);
             },
             borderRadius: BorderRadius.circular(8.0),
+            constraints: const BoxConstraints(
+              minHeight: 36.0,
+              minWidth: 48.0,
+            ),
             children: const [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'Light Mode',
-                    child: Icon(Icons.light_mode_outlined, size: 20)),
+                    child: Icon(Icons.light_mode_outlined, size: 18)),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'System Default',
-                    child: Icon(Icons.brightness_auto_outlined, size: 20)),
+                    child: Icon(Icons.brightness_auto_outlined, size: 18)),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'Dark Mode',
-                    child: Icon(Icons.dark_mode_outlined, size: 20)),
+                    child: Icon(Icons.dark_mode_outlined, size: 18)),
               ),
             ],
           ),
           if (isMaterialYouAvailable) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             FilterChip(
               label: const Text('Material You'),
               labelStyle:
                   TextStyle(color: Theme.of(context).colorScheme.onSurface),
-              avatar: const Icon(Icons.color_lens_outlined, size: 18),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+              visualDensity: VisualDensity.compact,
+              avatar: Icon(
+                themeState.useMaterialYou 
+                    ? Icons.check_circle 
+                    : Icons.color_lens_outlined, 
+                size: 16,
+                color: themeState.useMaterialYou 
+                    ? Theme.of(context).colorScheme.primary 
+                    : null,
+              ),
               selected: themeState.useMaterialYou,
+              selectedColor: Theme.of(context).colorScheme.primaryContainer,
+              checkmarkColor: Theme.of(context).colorScheme.primary,
               onSelected: (isSelected) {
                 themeNotifier.toggleMaterialYou(isSelected);
               },
@@ -340,7 +497,21 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     return Column(
       children: [
         ListTile(
-          title: Text('Appearance', style: Theme.of(context).textTheme.titleSmall),
+          dense: true,
+          visualDensity: VisualDensity.compact,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          leading: Icon(
+            Icons.palette_outlined,
+            color: Theme.of(context).colorScheme.tertiary,
+            size: 20,
+          ),
+          title: Text(
+            'Appearance',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           onTap: () {
             setState(() {
               _isAppearanceExpanded = !_isAppearanceExpanded;
@@ -349,7 +520,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           trailing: AnimatedRotation(
             turns: _isAppearanceExpanded ? 0.5 : 0.0,
             duration: const Duration(milliseconds: 300),
-            child: const Icon(Icons.expand_more),
+            child: Icon(
+              Icons.expand_more,
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
           ),
         ),
         AnimatedSize(
@@ -429,25 +603,45 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
       child: AnimatedDrawerItem(
         delay: const Duration(milliseconds: 600),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home_outlined),
-              onPressed: () => navigate('/'),
-              tooltip: 'Home',
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                width: 1,
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              onPressed: () => navigate('/about'),
-              tooltip: 'About',
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              onPressed: () => navigate('/settings'),
-              tooltip: 'Settings',
-            ),
-          ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.home_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () => navigate('/'),
+                tooltip: 'Home',
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                onPressed: () => navigate('/about'),
+                tooltip: 'About',
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.settings_outlined,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+                onPressed: () => navigate('/settings'),
+                tooltip: 'Settings',
+              ),
+            ],
+          ),
         ),
       ),
     );
