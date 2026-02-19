@@ -994,8 +994,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             const SizedBox(height: 32),
           ],
         ),
-      ),
-    );
+      )
+    ;
   }
 
   // Inhabitants Tab
