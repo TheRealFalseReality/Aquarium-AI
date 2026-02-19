@@ -1120,11 +1120,16 @@ class FeatureCard extends ConsumerWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: [
-              cs.primaryContainer.withOpacity(0.3),
-              cs.secondaryContainer.withOpacity(0.2),
-              cs.tertiaryContainer.withOpacity(0.1),
-            ],
+            colors: isMaterialYou 
+                ? [
+                    cs.primaryContainer.withOpacity(0.3),
+                    cs.secondaryContainer.withOpacity(0.2),
+                    cs.tertiaryContainer.withOpacity(0.1),
+                  ]
+                : [
+                    cs.primaryContainer.withOpacity(0.15),
+                    cs.secondaryContainer.withOpacity(0.1),
+                  ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -1158,7 +1163,7 @@ class FeatureCard extends ConsumerWidget {
                         title,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: cs.primary,
+                              color: isMaterialYou ? cs.onSurface : cs.primary,
                             ),
                       ),
                     ),
