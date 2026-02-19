@@ -1007,8 +1007,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
           ],
         ),
         ),
-      ),
-    );
+      )
+    ;
   }
 
   // Inhabitants Tab
