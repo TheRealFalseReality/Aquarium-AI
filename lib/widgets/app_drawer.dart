@@ -396,7 +396,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Divider(
               color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
               thickness: 1,
@@ -407,7 +407,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: _buildCollapsibleThemeMenu(),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Divider(
               color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
               thickness: 1,
@@ -426,7 +426,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid);
 
     final collapsibleContent = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       child: Column(
         children: [
           ToggleButtons(
@@ -439,38 +439,45 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               themeNotifier.setThemeMode(themeModes[index]);
             },
             borderRadius: BorderRadius.circular(8.0),
+            constraints: const BoxConstraints(
+              minHeight: 36.0,
+              minWidth: 48.0,
+            ),
             children: const [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'Light Mode',
-                    child: Icon(Icons.light_mode_outlined, size: 20)),
+                    child: Icon(Icons.light_mode_outlined, size: 18)),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'System Default',
-                    child: Icon(Icons.brightness_auto_outlined, size: 20)),
+                    child: Icon(Icons.brightness_auto_outlined, size: 18)),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
                     message: 'Dark Mode',
-                    child: Icon(Icons.dark_mode_outlined, size: 20)),
+                    child: Icon(Icons.dark_mode_outlined, size: 18)),
               ),
             ],
           ),
           if (isMaterialYouAvailable) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             FilterChip(
               label: const Text('Material You'),
               labelStyle:
                   TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+              visualDensity: VisualDensity.compact,
               avatar: Icon(
                 themeState.useMaterialYou 
                     ? Icons.check_circle 
                     : Icons.color_lens_outlined, 
-                size: 18,
+                size: 16,
                 color: themeState.useMaterialYou 
                     ? Theme.of(context).colorScheme.primary 
                     : null,
@@ -490,6 +497,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     return Column(
       children: [
         ListTile(
+          dense: true,
+          visualDensity: VisualDensity.compact,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
           leading: Icon(
             Icons.palette_outlined,
             color: Theme.of(context).colorScheme.tertiary,

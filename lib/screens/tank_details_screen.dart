@@ -112,13 +112,59 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               indicatorWeight: 3,
               labelColor: cs.primary,
               unselectedLabelColor: cs.onSurface.withOpacity(0.6),
+              dividerColor: cs.outlineVariant.withOpacity(0.2),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: cs.primary,
+                    width: 3,
+                  ),
+                ),
+              ),
               tabs: [
-                Tab(icon: Icon(Icons.dashboard_outlined, color: _tabController.index == 0 ? cs.primary : cs.onSurface.withOpacity(0.6)), text: l10n.overview),
-                Tab(icon: Icon(Icons.photo_library_outlined, color: _tabController.index == 1 ? cs.secondary : cs.onSurface.withOpacity(0.6)), text: l10n.photos),
-                Tab(icon: Icon(Icons.science_outlined, color: _tabController.index == 2 ? cs.tertiary : cs.onSurface.withOpacity(0.6)), text: l10n.waterParameters),
-                Tab(icon: Icon(Icons.medication_outlined, color: _tabController.index == 3 ? cs.primary : cs.onSurface.withOpacity(0.6)), text: l10n.dosing),
-                Tab(icon: Icon(Icons.history, color: _tabController.index == 4 ? cs.secondary : cs.onSurface.withOpacity(0.6)), text: l10n.activity),
-                Tab(icon: Icon(Icons.note_outlined, color: _tabController.index == 5 ? cs.tertiary : cs.onSurface.withOpacity(0.6)), text: l10n.notes),
+                Tab(
+                  icon: Icon(
+                    Icons.dashboard_outlined,
+                    color: _tabController.index == 0 ? cs.primary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.overview,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.photo_library_outlined,
+                    color: _tabController.index == 1 ? cs.secondary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.photos,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.science_outlined,
+                    color: _tabController.index == 2 ? cs.tertiary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.waterParameters,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.medication_outlined,
+                    color: _tabController.index == 3 ? cs.primary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.dosing,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.history,
+                    color: _tabController.index == 4 ? cs.secondary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.activity,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.note_outlined,
+                    color: _tabController.index == 5 ? cs.tertiary : cs.onSurface.withOpacity(0.6),
+                  ),
+                  text: l10n.notes,
+                ),
               ],
             ),
             actions: [

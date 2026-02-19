@@ -556,6 +556,16 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             indicatorWeight: 3,
             labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            dividerColor: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 3,
+                ),
+              ),
+            ),
             tabs: [
               Tab(
                 icon: Icon(
