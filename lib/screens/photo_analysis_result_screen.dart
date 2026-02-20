@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../models/photo_analysis_result.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
@@ -121,6 +122,7 @@ class _PhotoAnalysisResultScreenState
             onRegenerate: _regenerate,
             isRegenerating: _regenerating,
             regenerateLabel: 'Regenerate',
+            onShare: () => sharePhotoAnalysisResult(widget.result),
           ),
           const SizedBox(height: 12),
           const TipText(

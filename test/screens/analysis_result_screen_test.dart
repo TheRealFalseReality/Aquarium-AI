@@ -66,6 +66,8 @@ void main() {
     
     // Verify close button
     expect(find.text('Close'), findsOneWidget);
+    // Verify share button
+    expect(find.text('Share'), findsOneWidget);
   });
 
   testWidgets('AnalysisResultScreen close functionality', (WidgetTester tester) async {

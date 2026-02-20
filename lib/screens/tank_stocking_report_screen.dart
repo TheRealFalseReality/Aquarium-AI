@@ -14,7 +14,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../services/analytics_service.dart';
-import '../widgets/common_buttons.dart';
+import '../utils/share_utils.dart';
 import '../widgets/helper_text.dart';
 
 class TankStockingReportScreen extends ConsumerStatefulWidget {
@@ -37,8 +37,33 @@ class TankStockingReportScreen extends ConsumerStatefulWidget {
   ConsumerState<TankStockingReportScreen> createState() => _TankStockingReportScreenState();
 }
 
-class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScreen> {
+class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScreen>
+    // SingleTickerProviderStateMixin is required so we can create an explicit
+    // TabController, which lets us read _tabController.index at share-time to
+    // know which tab's report the user is currently viewing.
+    with SingleTickerProviderStateMixin {
   bool _isRegenerating = false;
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: widget.reports.length,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _shareCurrentReport() {
+    final report = widget.reports[_tabController.index];
+    shareStockingReport(report);
+  }
 
   void _regenerateRecommendations() {
     if (_isRegenerating) return; // Prevent multiple calls
@@ -114,100 +139,131 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
 
     return Stack(
       children: [
-        DefaultTabController(
-          length: widget.reports.length,
-          child: MainLayout(
-            title: _getDisplayTitle,
-            child: Column(
-              children: [
-                // Merged header with title, tabs, and close button
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: Column(
-                    children: [
-                      // Page title with close button
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _getDisplayTitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                            ),
+        MainLayout(
+          title: _getDisplayTitle,
+          child: Column(
+            children: [
+              // Merged header with title, tabs, and close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Column(
+                  children: [
+                    // Page title with close button
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _getDisplayTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
                           ),
-                          // Close button - stays at top right
-                          SizedBox(
-                            width: 50,
-                            child: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.of(context).pop(),
-                              tooltip: 'Close Report',
-                            ),
+                        ),
+                        // Close button - stays at top right
+                        SizedBox(
+                          width: 50,
+                          child: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.of(context).pop(),
+                            tooltip: 'Close Report',
                           ),
-                        ],
-                      ),
-                      // Tab bar centered
-                      TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.center,
-                        tabs: List.generate(widget.reports.length, (index) {
-                          final harmony = (widget.reports[index].harmonyScore * 100).toInt();
-                          return Tab(text: 'Option ${index + 1} ($harmony%)');
-                        }),
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    // Tab bar centered
+                    TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.center,
+                      tabs: List.generate(widget.reports.length, (index) {
+                        final harmony = (widget.reports[index].harmonyScore * 100).toInt();
+                        return Tab(text: 'Option ${index + 1} ($harmony%)');
+                      }),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: Builder(
-                    builder: (context) {
-                      // Debug: Print values before creating TabBarView
-                      debugPrint('TankStockingReportScreen build - includeCustomNames: ${widget.includeCustomNames}');
-                      debugPrint('TankStockingReportScreen build - additionalNotes: "${widget.additionalNotes}"');
-                      
-                      return TabBarView(
-                        children: widget.reports.asMap().entries.map((entry) {
-                          debugPrint('Creating TabView child ${entry.key} - includeCustomNames: ${widget.includeCustomNames}, additionalNotes: "${widget.additionalNotes}"');
-                          return _TankRecommendationTabView(
-                            key: ValueKey('tab_${entry.key}_${widget.includeCustomNames}_${widget.additionalNotes}'),
-                            report: entry.value,
-                            originalTank: widget.originalTank,
-                            existingFish: widget.existingFish,
-                            includeCustomNames: widget.includeCustomNames,
-                            additionalNotes: widget.additionalNotes,
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
+              ),
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    // Debug: Print values before creating TabBarView
+                    debugPrint('TankStockingReportScreen build - includeCustomNames: ${widget.includeCustomNames}');
+                    debugPrint('TankStockingReportScreen build - additionalNotes: "${widget.additionalNotes}"');
+                    
+                    return TabBarView(
+                      controller: _tabController,
+                      children: widget.reports.asMap().entries.map((entry) {
+                        debugPrint('Creating TabView child ${entry.key} - includeCustomNames: ${widget.includeCustomNames}, additionalNotes: "${widget.additionalNotes}"');
+                        return _TankRecommendationTabView(
+                          key: ValueKey('tab_${entry.key}_${widget.includeCustomNames}_${widget.additionalNotes}'),
+                          report: entry.value,
+                          originalTank: widget.originalTank,
+                          existingFish: widget.existingFish,
+                          includeCustomNames: widget.includeCustomNames,
+                          additionalNotes: widget.additionalNotes,
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
-                // Bottom buttons with extra padding
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
+              ),
+              // Bottom buttons with extra padding
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 1,
                     ),
                   ),
-                  child: Column(
-                    children: [
-                      ActionButtonRow(
-                        onRegenerate: _regenerateRecommendations,
-                        isRegenerating: _isRegenerating,
-                      ),
-                      const SizedBox(height: 8), // Extra padding below buttons
-                    ],
-                  ),
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    // Regenerate: compact icon button
+                    OutlinedButton(
+                      onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        minimumSize: Size.zero,
+                      ),
+                      child: _isRegenerating
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.refresh),
+                    ),
+                    const SizedBox(width: 12),
+                    // Share: main action button
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _shareCurrentReport,
+                        icon: const Icon(Icons.share),
+                        label: const Text('Share'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Close: compact icon button
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        minimumSize: Size.zero,
+                      ),
+                      child: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         // Loading overlay

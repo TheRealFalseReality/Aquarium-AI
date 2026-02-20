@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 
@@ -125,6 +126,15 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                           fontStyle: FontStyle.italic,
                         ),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => shareCompatibilityReport(report),
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share Report'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                    ),
                   ),
                 ],
               ),

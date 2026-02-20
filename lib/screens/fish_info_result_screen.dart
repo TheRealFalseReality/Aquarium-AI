@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish_info_result.dart';
 import '../main_layout.dart';
+import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/modern_chip.dart';
@@ -38,7 +39,22 @@ class FishInfoResultScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 const BannerAdWidget(),
                 const SizedBox(height: 12),
-                const CommonCloseButton(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => shareFishInfoResult(result),
+                        icon: const Icon(Icons.share),
+                        label: const Text('Share'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(child: CommonCloseButton()),
+                  ],
+                ),
                 const SizedBox(height: 16),
               ],
             );

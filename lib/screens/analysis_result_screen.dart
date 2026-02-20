@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../models/analysis_result.dart';
 import '../main_layout.dart';
+import '../utils/share_utils.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
 
@@ -43,7 +44,19 @@ class AnalysisResultScreen extends StatelessWidget {
           const SizedBox(height: 18),
           _howAquaPiHelpsCard(context, l10n, result.howAquaPiHelps),
           const SizedBox(height: 20),
-          const CommonCloseButton(),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => shareWaterAnalysisResult(result),
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(child: CommonCloseButton()),
+            ],
+          ),
         ],
       ),
     );
