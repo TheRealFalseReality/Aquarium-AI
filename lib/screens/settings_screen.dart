@@ -801,10 +801,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Free-tier rate limit notice (shown when using the developer key)
+                  // Free-tier rate limit notice (shown only when the developer key is active for at least one provider)
                   Builder(builder: (context) {
                     final models = ref.watch(modelProvider);
-                    if (!models.usingDeveloperGroqKey) return const SizedBox.shrink();
+                    final devKeyInUse = models.usingDeveloperGroqKey &&
+                        (models.activeTextProvider == AIProvider.groq ||
+                            models.activeImageProvider == AIProvider.groq);
+                    if (!devKeyInUse) return const SizedBox.shrink();
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(12),
@@ -824,7 +827,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               const Icon(Icons.speed, color: Colors.amber, size: 16),
                               const SizedBox(width: 6),
                               Text(
-                                'Free-tier limits (shared developer key)',
+                                'Free-tier limits',
                                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                   color: Colors.amber.shade800,
                                   fontWeight: FontWeight.bold,
@@ -1823,7 +1826,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 : 'Groq API Key',
             border: const OutlineInputBorder(),
             helperText: developerGroqApiKey.isNotEmpty
-                ? 'Using shared developer key. Add your own key for dedicated rate limits and better performance.'
+                ? 'Add your own key for dedicated rate limits and better performance.'
                 : null,
             helperMaxLines: 2,
             suffixIcon: IconButton(
