@@ -3,10 +3,7 @@ import 'package:fish_ai/models/fish.dart';
 
 String buildStockingRecommendationPrompt(
     String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<Fish>? selectedFish}) {
-  final fishListWithCompat = allFish.map((f) => {
-    'name': f.name,
-    'compatible': f.compatible,
-  }).toList();
+  final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected
   String selectedFishContext = '';
@@ -24,28 +21,27 @@ String buildStockingRecommendationPrompt(
   return '''
     You are an expert aquarium stocking advisor. Your primary goal is to create stocking plans with the highest possible harmony.
 
-    A group of fish has HIGH HARMONY **ONLY IF** every fish in the group is present in the 'compatible' list of **EVERY OTHER** fish in that same group. 
-    If you cannot find a group of fish that meet the HIGH HARMONY rule, you may include fish that are listed as "With Caution" with **ALL** other fish in the group, but this should be avoided if possible.
-    Fish listed as "Not Compatible" with any other fish in the group are NOT allowed.
+    Focus on naturally compatible fish groups. Avoid pairing aggressive species with peaceful ones.
+    Note: The app validates final compatibility scores independently, so provide diverse, well-reasoned options.
 
     User's Input:
     - Tank Size: "$tankSize"
     - Tank Type: "$tankType"
     - Notes: "$userNotes"$selectedFishContext
 
-    Available Fish and their compatibility data (use this for "coreFish" and "otherDataBasedFish"):
-    ${json.encode(fishListWithCompat)}
+    Available Fish (choose "coreFish" and "otherDataBasedFish" only from this list):
+    ${json.encode(fishNames)}
 
-    Based on the user's input, provide 3 distinct stocking recommendations. Prioritize groups that meet the HIGH HARMONY rule.
+    Based on the user's input, provide 3 distinct stocking recommendations. Prioritize naturally compatible groups.
 
     For each recommendation, provide a JSON object with:
     - "title": A creative and descriptive title for the aquarium setup.
-    - "summary": An elaborate, detailed summary (2-3 sentences) describing the tank's atmosphere, activity level, the temperament of the fish, and where in the water column the fish will live (top, middle, bottom dwellers).
-    - "coreFish": A list of 2-7 fish names that form the main, high-harmony group for this recommendation.
-    - "otherDataBasedFish": A list of other fish from the provided data that are compatible or listed "With Caution" with **all** of the "coreFish".
-    - "aiTankMatesSummary": A detailed summary explaining why the "aiRecommendedTankMates" are a good fit for the core group of fish.
-    - "aiRecommendedTankMates": A list of 5-10 common fish names ONLY (not from the provided data) that you, as an AI, would recommend as additional tank mates.
+    - "summary": A 2-3 sentence summary describing the tank's atmosphere, activity level, temperament, and water column usage (top, middle, bottom dwellers).
+    - "coreFish": A list of 2-7 fish names from the list above that form the main compatible group.
+    - "otherDataBasedFish": Other fish from the list above that are compatible with all "coreFish".
+    - "aiTankMatesSummary": Why the "aiRecommendedTankMates" are a good fit for the core group.
+    - "aiRecommendedTankMates": 5-10 common fish names (not from the provided list) as additional tank mate suggestions.
 
-    Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
+    Return a single JSON object with a key "recommendations" containing a list of these recommendation objects.
     ''';
 }

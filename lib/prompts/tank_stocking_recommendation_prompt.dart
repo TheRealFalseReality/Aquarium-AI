@@ -10,10 +10,7 @@ String buildTankStockingRecommendationPrompt(
     bool includeCustomNames = false,
     String additionalNotes = '',
   }) {
-  final fishListWithCompat = allFish.map((f) => {
-    'name': f.name,
-    'compatible': f.compatible,
-  }).toList();
+  final availableFishNames = allFish.map((f) => f.name).toList();
 
   final existingFishNames = existingFish.map((f) => f.name).toList();
   final tankSizeText = _formatTankSize(tank);
@@ -50,52 +47,42 @@ String buildTankStockingRecommendationPrompt(
   return '''
     You are an expert aquarium stocking advisor. Your goal is to recommend additional fish to ADD to an existing tank while maintaining the highest possible harmony.
 
-    CRITICAL REQUIREMENTS:
-    1. MAINTAIN CURRENT HARMONY: The tank currently has $currentHarmonyPercentage% harmony - this MUST be maintained or improved
-      If you cannot find a group of fish that meet the HIGH HARMONY rule, you may include fish that are listed as "With Caution" with **ALL** other fish in the group, but this should be avoided if possible.
-      Fish listed as "Not Compatible" with any other fish in the group are NOT allowed.
-    2. All recommended fish must be compatible with EVERY existing fish in the tank
-    3. All recommended fish must be compatible with each other
-    4. Priority is maintaining current harmony score ($currentHarmonyPercentage%) above all else
-    5. Consider tank size limitations when making recommendations
-    6. Only recommend fish that will enhance the ecosystem without causing stress
+    Focus on fish that are naturally compatible with the existing inhabitants. Avoid pairing aggressive species with peaceful ones.
+    Note: The app validates final compatibility scores independently, so provide diverse, well-reasoned options.
+
+    REQUIREMENTS:
+    1. All recommended fish must be naturally compatible with the existing inhabitants.
+    2. Recommended fish must be compatible with each other.
+    3. Maintain or improve the current harmony score ($currentHarmonyPercentage%).
+    4. Consider tank size limitations.
 
     Tank Information:
     - Tank Name: "${tank.name}"
     - Tank Size: "$tankSizeText"
     - Tank Type: "${tank.type}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
-    - Current Harmony Score: $currentHarmonyPercentage% (THIS MUST BE MAINTAINED OR IMPROVED)
+    - Current Harmony Score: $currentHarmonyPercentage%
     - Current Inhabitants: ${json.encode(existingFishNames)}$customNamesInfo$additionalNotesSection
 
-    Current Fish Compatibility Data:
-    ${json.encode(existingFish.map((f) => {
-      'name': f.name,
-      'compatible': f.compatible,
-    }).toList())}
+    Available Fish Database (choose recommendations only from this list):
+    ${json.encode(availableFishNames)}
 
-    Available Fish Database (use this for recommendations):
-    ${json.encode(fishListWithCompat)}
-
-    Based on the current tank setup, provide 3 distinct recommendations for ADDITIONAL fish to add. Each recommendation should:
-    - MAINTAIN OR IMPROVE the current $currentHarmonyPercentage% harmony score
-    - Be compatible with ALL existing fish or Current Inhabitants
-    - Consider appropriate stocking levels for the tank size
-    - Suggest fish that complement the existing ecosystem
-    - Account for water column usage (top, middle, bottom dwellers)
-    - Consider bioload and tank capacity
-    - Prioritize harmony preservation above variety
+    Provide 3 distinct recommendations for ADDITIONAL fish to add. Each should:
+    - Be compatible with ALL existing fish
+    - Maintain or improve the $currentHarmonyPercentage% harmony score
+    - Fit the tank size and bioload
+    - Complement the existing ecosystem (consider water column usage)
 
     For each recommendation, provide a JSON object with:
-    - "title": A creative title describing what this addition would bring to the tank (e.g., "Bottom Dweller Cleanup Crew", "Colorful Mid-Water Community")
-    - "summary": A detailed 2-3 sentence summary explaining how these additions will enhance the tank ecosystem, their behavior, and where they'll position in the water column
-    - "coreFish": A list of 2-7 (at least 3 preferred) fish names from the database that are the main additions and compatible (preferred) or listed "With Caution" with all of the existing fish. These should form the core of the new additions.
-    - "otherDataBasedFish": A list of other compatible fish from the database that could also be added safely and compatible or listed "With Caution" with most of the existing fish
-    - "aiTankMatesSummary": Explanation of why these additions work well with the existing community
-    - "aiRecommendedTankMates": A list of 3-10 common fish names ONLY (not from the database) that would also be good additions.
-    - "compatibilityNotes": Specific notes about how these additions interact with the existing fish and any special considerations
+    - "title": A creative title describing the addition (e.g., "Bottom Dweller Cleanup Crew")
+    - "summary": 2-3 sentences on how these additions enhance the tank, their behavior, and water column position
+    - "coreFish": 2-7 fish names from the database compatible with all existing fish
+    - "otherDataBasedFish": Other compatible fish from the database that could also be added safely
+    - "aiTankMatesSummary": Why these additions work well with the existing community
+    - "aiRecommendedTankMates": 3-10 common fish names (not from the database) as additional suggestions
+    - "compatibilityNotes": Notes on how these additions interact with existing fish
 
-    Return a single JSON object with a key "recommendations" that contains a list of these recommendation objects.
+    Return a single JSON object with a key "recommendations" containing a list of these recommendation objects.
     ''';
 }
 
