@@ -169,11 +169,11 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         _cancellableCompleter?.complete(response);
         responseText = response.text;
       } else if (models.activeProvider == AIProvider.groq) {
-        if (models.groqApiKey.isEmpty) {
+        if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = GroqHelper.createClient(
-          apiKey: models.groqApiKey,
+          apiKey: models.effectiveGroqApiKey,
           model: models.groqModel,
         );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
