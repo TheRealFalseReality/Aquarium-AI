@@ -90,16 +90,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
   String? _lastPhotoNote;
 
   void _initializeProvider() {
-    switch (_modelState.activeProvider) {
-      case AIProvider.gemini:
-        if (_modelState.geminiApiKey.isNotEmpty) _initGeminiSession();
-        break;
-      case AIProvider.openAI:
-        if (_modelState.openAIApiKey.isNotEmpty) OpenAI.apiKey = _modelState.openAIApiKey;
-        break;
-      case AIProvider.groq:
-        if (_modelState.groqApiKey.isNotEmpty) _initGroqSession();
-        break;
+    // Collect all distinct providers needed (text and image may be the same or different).
+    // Each provider is initialized at most once even if selected for both roles.
+    final selectedProviders = {_modelState.activeTextProvider, _modelState.activeImageProvider};
+    if (selectedProviders.contains(AIProvider.gemini) && _modelState.geminiApiKey.isNotEmpty) {
+      _initGeminiSession();
+    }
+    if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
+      OpenAI.apiKey = _modelState.openAIApiKey;
+    }
+    if (selectedProviders.contains(AIProvider.groq) && _modelState.groqApiKey.isNotEmpty) {
+      _initGroqSession();
     }
   }
 
@@ -129,9 +130,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = ChatState(messages: state.messages, isLoading: false);
   }
 
-  // Returns the missing-key error message for the active provider, or null if a key is set.
+  // Returns the missing-key error message for the active text provider, or null if a key is set.
   String? _missingApiKeyError() {
-    switch (_modelState.activeProvider) {
+    switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) return 'Gemini API Key is not set. Please add your key in Settings.';
         break;
@@ -147,7 +148,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) {
-    switch (_modelState.activeProvider) {
+    switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
         return _sendGeminiMessage(message);
@@ -161,7 +162,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> retryMessage(String original) {
-    switch (_modelState.activeProvider) {
+    switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         return _sendGeminiMessage(original, isRetry: true);
       case AIProvider.openAI:
@@ -366,7 +367,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _cancellable = CancellableCompleter();
     try {
       String? responseText;
-      switch (_modelState.activeProvider) {
+      switch (_modelState.activeTextProvider) {
         case AIProvider.gemini:
           final model = GenerativeModel(model: _modelState.geminiModel, apiKey: _modelState.geminiApiKey);
           final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 30));
@@ -403,7 +404,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _cancellable = CancellableCompleter();
     try {
       String? responseText;
-      switch (_modelState.activeProvider) {
+      switch (_modelState.activeImageProvider) {
         case AIProvider.gemini:
           final model = GenerativeModel(model: _modelState.geminiImageModel, apiKey: _modelState.geminiApiKey);
           final content = [Content.multi([DataPart(mimeType, imageBytes), TextPart(prompt)])];

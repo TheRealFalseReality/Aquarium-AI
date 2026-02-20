@@ -430,34 +430,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),
-                            if (modelState.activeProvider == AIProvider.gemini) ...[
-                              Text(
-                                '${modelState.geminiModel} (text)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                '${modelState.geminiImageModel} (image)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ] else if (modelState.activeProvider == AIProvider.groq) ...[
-                              Text(
-                                '${modelState.groqModel} (text)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                '${modelState.groqImageModel} (image)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ] else ...[
-                              Text(
-                                '${modelState.chatGPTModel} (text)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                '${modelState.chatGPTImageModel} (image)',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ]
+                            Text(
+                              '${_getTextModelName(modelState)} (text)',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              '${_getImageModelName(modelState)} (image)',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
                           ],
                         ),
                       )
@@ -469,6 +449,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
   
+  String _getTextModelName(ModelState modelState) {
+    switch (modelState.activeTextProvider) {
+      case AIProvider.gemini:
+        return modelState.geminiModel;
+      case AIProvider.openAI:
+        return modelState.chatGPTModel;
+      case AIProvider.groq:
+        return modelState.groqModel;
+    }
+  }
+
+  String _getImageModelName(ModelState modelState) {
+    switch (modelState.activeImageProvider) {
+      case AIProvider.gemini:
+        return modelState.geminiImageModel;
+      case AIProvider.openAI:
+        return modelState.chatGPTImageModel;
+      case AIProvider.groq:
+        return modelState.groqImageModel;
+    }
+  }
+
   Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;

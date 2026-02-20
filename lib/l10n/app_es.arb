@@ -74,6 +74,8 @@
   "customizeAppBehavior": "Personalizar comportamiento y características de la aplicación",
   "backupRestoreData": "Hacer copia de seguridad y restaurar sus datos",
   "activeAIProvider": "Proveedor de IA Activo",
+  "textProvider": "Proveedor de Texto / Chat",
+  "imageProvider": "Proveedor de Imagen / Multimedia",
   "geminiRecommended": "Gemini es recomendado y gratuito",
   "resetModels": "Restablecer Modelos",
   "modelsResetDefault": "Modelos restablecidos a predeterminados.",

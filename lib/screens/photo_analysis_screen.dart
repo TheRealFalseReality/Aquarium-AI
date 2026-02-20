@@ -121,8 +121,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final activeProvider = ref.watch(modelProvider).activeProvider;
-    final isGroq = activeProvider == AIProvider.groq;
+    final activeImageProvider = ref.watch(modelProvider).activeImageProvider;
+    final isGroq = activeImageProvider == AIProvider.groq;
     
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
