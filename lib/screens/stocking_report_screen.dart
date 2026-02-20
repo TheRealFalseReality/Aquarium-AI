@@ -13,7 +13,6 @@ import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
-import '../widgets/common_buttons.dart';
 import '../widgets/helper_text.dart';
 
 class StockingReportScreen extends ConsumerStatefulWidget {
@@ -205,7 +204,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen>
                 ),
                 // Bottom buttons with extra padding
                 Container(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
@@ -215,14 +214,45 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen>
                       ),
                     ),
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
-                      ActionButtonRow(
-                        onRegenerate: _regenerateRecommendations,
-                        isRegenerating: _isRegenerating,
-                        onShare: _shareCurrentReport,
+                      // Regenerate: compact icon button
+                      OutlinedButton(
+                        onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                          minimumSize: Size.zero,
+                        ),
+                        child: _isRegenerating
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.refresh),
                       ),
-                      const SizedBox(height: 8), // Extra padding below buttons
+                      const SizedBox(width: 12),
+                      // Share: main action button
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _shareCurrentReport,
+                          icon: const Icon(Icons.share),
+                          label: const Text('Share'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Close: compact icon button
+                      OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                          minimumSize: Size.zero,
+                        ),
+                        child: const Icon(Icons.close),
+                      ),
                     ],
                   ),
                 ),
