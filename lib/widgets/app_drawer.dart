@@ -406,13 +406,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             delay: const Duration(milliseconds: 550),
             child: _buildCollapsibleThemeMenu(),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Divider(
-              color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-              thickness: 1,
-            ),
-          ),
           _buildDrawerFooter(context, navigate),
         ],
       ),
