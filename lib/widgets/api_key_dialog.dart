@@ -139,7 +139,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    'Higher AI API Call Limits: Enjoy significantly more interactions with our AI, including the powerful Gemini 2.5 flash.',
+                    'Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
