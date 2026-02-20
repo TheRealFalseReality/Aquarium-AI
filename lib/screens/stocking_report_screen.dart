@@ -12,6 +12,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/share_utils.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/helper_text.dart';
 
@@ -35,8 +36,33 @@ class StockingReportScreen extends ConsumerStatefulWidget {
   ConsumerState<StockingReportScreen> createState() => _StockingReportScreenState();
 }
 
-class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
+class _StockingReportScreenState extends ConsumerState<StockingReportScreen>
+    // SingleTickerProviderStateMixin is required so we can create an explicit
+    // TabController, which lets us read _tabController.index at share-time to
+    // know which tab's report the user is currently viewing.
+    with SingleTickerProviderStateMixin {
   bool _isRegenerating = false;
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: widget.reports.length,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _shareCurrentReport() {
+    final report = widget.reports[_tabController.index];
+    shareStockingReport(report);
+  }
 
   void _regenerateRecommendations() {
     if (_isRegenerating) return; // Prevent multiple calls
@@ -118,9 +144,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
 
     return Stack(
       children: [
-        DefaultTabController(
-          length: widget.reports.length,
-          child: MainLayout(
+        MainLayout(
             title: _getDisplayTitle,
             child: Column(
               children: [
@@ -155,6 +179,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                       ),
                       // Tab bar centered
                       TabBar(
+                        controller: _tabController,
                         isScrollable: true,
                         tabAlignment: TabAlignment.center,
                         tabs: List.generate(widget.reports.length, (index) {
@@ -167,6 +192,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                 ),
                 Expanded(
                   child: TabBarView(
+                    controller: _tabController,
                     children: widget.reports.map((report) {
                       return _RecommendationTabView(
                         report: report,
@@ -194,6 +220,7 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
                       ActionButtonRow(
                         onRegenerate: _regenerateRecommendations,
                         isRegenerating: _isRegenerating,
+                        onShare: _shareCurrentReport,
                       ),
                       const SizedBox(height: 8), // Extra padding below buttons
                     ],
@@ -202,7 +229,6 @@ class _StockingReportScreenState extends ConsumerState<StockingReportScreen> {
               ],
             ),
           ),
-        ),
         // Loading overlay
         if (_isRegenerating)
           Container(

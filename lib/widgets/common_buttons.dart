@@ -74,6 +74,7 @@ class RegenerateButton extends StatelessWidget {
 class ActionButtonRow extends StatelessWidget {
   final VoidCallback? onRegenerate;
   final VoidCallback? onClose;
+  final VoidCallback? onShare;
   final bool isRegenerating;
   final String? regenerateLabel;
   final String? closeLabel;
@@ -82,6 +83,7 @@ class ActionButtonRow extends StatelessWidget {
     super.key,
     this.onRegenerate,
     this.onClose,
+    this.onShare,
     this.isRegenerating = false,
     this.regenerateLabel,
     this.closeLabel,
@@ -97,6 +99,16 @@ class ActionButtonRow extends StatelessWidget {
               onPressed: onRegenerate,
               isLoading: isRegenerating,
               label: regenerateLabel,
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+        if (onShare != null) ...[
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onShare,
+              icon: const Icon(Icons.share),
+              label: const Text('Share'),
             ),
           ),
           const SizedBox(width: 16),
