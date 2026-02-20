@@ -2,6 +2,8 @@ import 'package:fish_ai/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+export 'package:fish_ai/constants.dart' show developerGroqApiKey;
+
 // Define default values as constants for reusability
 const String defaultGeminiModel = geminiModelDefault;
 const String defaultGeminiImageModel = geminiImageModelDefault;
@@ -9,7 +11,7 @@ const String defaultChatGPTModel = openAIModelDefault;
 const String defaultChatGPTImageModel = openAIImageModelDefault;
 const String defaultGroqModel = groqModelDefault;
 const String defaultGroqImageModel = groqImageModelDefault;
-const AIProvider defaultAIProvider = AIProvider.gemini;
+const AIProvider defaultAIProvider = AIProvider.groq;
 
 enum AIProvider { gemini, openAI, groq }
 
@@ -47,6 +49,18 @@ class ModelState {
 
   /// Convenience getter: returns the text provider (kept for backward compat)
   AIProvider get activeProvider => activeTextProvider;
+
+  /// The Groq API key to actually use: user's own key takes priority;
+  /// falls back to the developer-supplied key compiled into the app.
+  String get effectiveGroqApiKey =>
+      groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+
+  /// Whether the app has any Groq key available (user-provided or developer fallback).
+  bool get hasGroqKey => effectiveGroqApiKey.isNotEmpty;
+
+  /// Whether the current effective Groq key is the developer fallback (not user-provided).
+  bool get usingDeveloperGroqKey =>
+      groqApiKey.isEmpty && developerGroqApiKey.isNotEmpty;
 }
 
 // 2. Create the Notifier

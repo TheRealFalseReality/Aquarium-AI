@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
@@ -258,7 +259,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return; // Stop the function
     }
     if (_selectedTextProvider == AIProvider.groq &&
-        _groqApiKeyController.text.trim().isEmpty) {
+        _groqApiKeyController.text.trim().isEmpty &&
+        developerGroqApiKey.isEmpty) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
@@ -275,7 +277,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
       if (_selectedImageProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty) {
+          _groqApiKeyController.text.trim().isEmpty &&
+          developerGroqApiKey.isEmpty) {
         context.showAccessibleMessage(l10n.enterGroqApiKey);
         return;
       }
@@ -1759,8 +1762,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           controller: _groqApiKeyController,
           obscureText: !_isGroqApiKeyVisible,
           decoration: InputDecoration(
-            labelText: 'Groq API Key',
+            labelText: developerGroqApiKey.isNotEmpty
+                ? 'Groq API Key (Optional)'
+                : 'Groq API Key',
             border: const OutlineInputBorder(),
+            helperText: developerGroqApiKey.isNotEmpty
+                ? 'Using shared developer key. Add your own key for dedicated rate limits and better performance.'
+                : null,
+            helperMaxLines: 2,
             suffixIcon: IconButton(
               icon: Icon(
                 _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,

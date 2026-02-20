@@ -99,7 +99,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
-    if (selectedProviders.contains(AIProvider.groq) && _modelState.groqApiKey.isNotEmpty) {
+    if (selectedProviders.contains(AIProvider.groq) && _modelState.hasGroqKey) {
       _initGroqSession();
     }
   }
@@ -116,9 +116,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
   
   void _initGroqSession() {
-    if (_modelState.groqApiKey.isEmpty) return;
+    if (!_modelState.hasGroqKey) return;
     _groqChatSession = GroqHelper.createClient(
-      apiKey: _modelState.groqApiKey,
+      apiKey: _modelState.effectiveGroqApiKey,
       model: _modelState.groqModel,
       systemPrompt: systemPrompt,
     );
@@ -140,7 +140,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return 'OpenAI API Key is not set. Please add your key in Settings.';
         break;
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return 'Groq API Key is not set. Please add your key in Settings.';
+        if (!_modelState.hasGroqKey) return 'Groq API Key is not set. Please add your key in Settings.';
         break;
     }
     return null;
@@ -156,7 +156,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return _handleError('OpenAI API Key is not set.', message);
         return _sendOpenAIMessage(message);
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
+        if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
         return _sendGroqMessage(message);
     }
   }
@@ -388,7 +388,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
            final groq = GroqHelper.createClient(
-             apiKey: _modelState.groqApiKey,
+             apiKey: _modelState.effectiveGroqApiKey,
              model: _modelState.groqModel,
            );
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
@@ -431,7 +431,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
           final responseGroq = await GroqHelper.generateWithImage(
-            apiKey: _modelState.groqApiKey,
+            apiKey: _modelState.effectiveGroqApiKey,
             model: _modelState.groqImageModel,
             prompt: prompt,
             base64Image: base64Image,
