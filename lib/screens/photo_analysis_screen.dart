@@ -194,7 +194,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Groq photo analysis requires a vision-capable model (e.g. llama-3.2-11b-vision-preview). '
+                        'Groq photo analysis requires a vision-capable model (e.g. meta-llama/llama-4-scout-17b-16e-instruct). '
                         'Ensure your Groq Multimedia Model in Settings supports vision. '
                         'For best results, use Gemini or OpenAI.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
