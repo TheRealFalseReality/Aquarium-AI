@@ -2693,6 +2693,11 @@
   "changelogAllReleases": "All Releases",
   "@changelogAllReleases": {
     "description": "Button label to open all GitHub releases in browser"
+  },
+
+  "changelogGotIt": "Got it",
+  "@changelogGotIt": {
+    "description": "Dismiss button label for the changelog update dialog"
   }
 }
 

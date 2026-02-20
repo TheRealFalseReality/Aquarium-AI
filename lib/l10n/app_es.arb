@@ -502,7 +502,8 @@
   "changelog": "Novedades",
   "changelogDesc": "Ver las últimas notas de versión y actualizaciones",
   "changelogLatestRelease": "Última versión",
-  "changelogAllReleases": "Todas las versiones"
+  "changelogAllReleases": "Todas las versiones",
+  "changelogGotIt": "Entendido"
 }
 
 

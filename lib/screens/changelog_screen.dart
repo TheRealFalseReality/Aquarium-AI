@@ -7,7 +7,11 @@ import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 
 class ChangelogScreen extends StatefulWidget {
-  const ChangelogScreen({super.key});
+  /// Optional title of the parent screen to show as a breadcrumb.
+  /// When set, a breadcrumb bar is shown at the top (e.g. "Information > What's New").
+  final String? breadcrumbTitle;
+
+  const ChangelogScreen({super.key, this.breadcrumbTitle});
 
   @override
   State<ChangelogScreen> createState() => _ChangelogScreenState();
@@ -75,6 +79,69 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
     await _launchUrl(href);
   }
 
+  Widget _buildBreadcrumb(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.home_outlined,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      widget.breadcrumbTitle ?? '',
+                      style:
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              l10n.changelog,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -83,6 +150,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       bottomNavigationBar: const AdBanner(),
       child: Column(
         children: [
+          if (widget.breadcrumbTitle != null) _buildBreadcrumb(context),
           // Action buttons row
           Container(
             padding:

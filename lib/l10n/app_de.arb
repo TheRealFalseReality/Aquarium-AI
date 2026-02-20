@@ -502,7 +502,8 @@
   "changelog": "Was ist neu",
   "changelogDesc": "Neueste Versionshinweise und Updates anzeigen",
   "changelogLatestRelease": "Neueste Version",
-  "changelogAllReleases": "Alle Versionen"
+  "changelogAllReleases": "Alle Versionen",
+  "changelogGotIt": "Verstanden"
 }
 
 
