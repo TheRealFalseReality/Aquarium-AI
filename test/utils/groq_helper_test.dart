@@ -106,7 +106,7 @@ void main() {
 
         // Caller is responsible for trimming; verify the method passes exactly
         // what it receives so trimming logic in the caller works correctly.
-        final trimmedHistory = longHistory.sublist(longHistory.length - 10);
+        final trimmedHistory = longHistory.sublist(longHistory.length - 3);
 
         await GroqHelper.sendChatMessages(
           apiKey: 'test-key',
@@ -118,8 +118,8 @@ void main() {
 
         final body = jsonDecode(capturedRequests.first.body) as Map<String, dynamic>;
         final messages = body['messages'] as List;
-        // 1 system + 10 history = 11 total
-        expect(messages, hasLength(11));
+        // 1 system + 3 history = 4 total
+        expect(messages, hasLength(4));
       });
 
       test('throws exception on non-200 response', () async {

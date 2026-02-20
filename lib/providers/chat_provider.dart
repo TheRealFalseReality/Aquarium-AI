@@ -83,7 +83,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   final ModelState _modelState;
-  ChatSession? _geminiChatSession;
 
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
@@ -93,23 +92,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     // Collect all distinct providers needed (text and image may be the same or different).
     // Each provider is initialized at most once even if selected for both roles.
     final selectedProviders = {_modelState.activeTextProvider, _modelState.activeImageProvider};
-    if (selectedProviders.contains(AIProvider.gemini) && _modelState.geminiApiKey.isNotEmpty) {
-      _initGeminiSession();
-    }
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
-  }
-
-  void _initGeminiSession() {
-    if (_modelState.geminiApiKey.isEmpty) return;
-    final model = GenerativeModel(
-      model: _modelState.geminiModel,
-      apiKey: _modelState.geminiApiKey,
-    );
-    _geminiChatSession = model.startChat(
-      history: [Content.model([TextPart(systemPrompt)])],
-    );
   }
 
 
@@ -161,11 +146,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGeminiMessage(String message, {bool isRetry = false}) async {
-    if (_geminiChatSession == null) return _handleError('Gemini session not initialized. API key might be missing or invalid.', message);
+    if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _geminiChatSession!.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
+      // Build a fresh session each request with the last 3 non-ad, non-error
+      // messages (excluding the current one just added by _prepareForSending)
+      // as seed history, so the session never accumulates unbounded tokens.
+      final allMessages = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      // Drop the current user message (last entry added by _prepareForSending).
+      final priorMessages = allMessages.length > 1 ? allMessages.sublist(0, allMessages.length - 1) : <ChatMessage>[];
+      final recentHistory = priorMessages.length > 3 ? priorMessages.sublist(priorMessages.length - 3) : priorMessages;
+      final seedHistory = [
+        Content.model([TextPart(systemPrompt)]),
+        ...recentHistory.map((m) => m.isUser
+            ? Content.text(m.text)
+            : Content.model([TextPart(m.text)])),
+      ];
+      final model = GenerativeModel(
+        model: _modelState.geminiModel,
+        apiKey: _modelState.geminiApiKey,
+      );
+      final session = model.startChat(history: seedHistory);
+      final response = await session.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
       if (response.text == null) throw Exception('No response received from Gemini');
       _processTextResponse(response.text!);
@@ -178,9 +181,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 10 non-ad, non-error messages to reduce token usage.
+      // Limit history to the last 3 non-ad, non-error messages to reduce token usage.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final recentHistory = allHistory.length > 3 ? allHistory.sublist(allHistory.length - 3) : allHistory;
       final history = recentHistory.map((m) => OpenAIChatCompletionChoiceMessageModel(
           content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(m.text)],
           role: m.isUser ? OpenAIChatMessageRole.user : OpenAIChatMessageRole.assistant,
@@ -207,11 +210,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 10 non-ad, non-error messages to reduce token
+      // Limit history to the last 3 non-ad, non-error messages to reduce token
       // usage. The current user message was already added to state.messages by
       // _prepareForSending, so it is included within this window.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final recentHistory = allHistory.length > 3 ? allHistory.sublist(allHistory.length - 3) : allHistory;
       final messages = recentHistory.map((m) => {
         'role': m.isUser ? 'user' : 'assistant',
         'content': m.text,
