@@ -400,7 +400,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: FilledButton.icon(
+                        child: TextButton.icon(
                           onPressed: () {
                             Navigator.of(dialogContext).pop();
                             launchUrl(
