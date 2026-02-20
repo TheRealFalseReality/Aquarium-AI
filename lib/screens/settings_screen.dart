@@ -611,17 +611,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                       ButtonSegment(
-                        value: AIProvider.openAI, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.psychology, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.openAI),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment(
                         value: AIProvider.groq, 
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -629,6 +618,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             const Icon(Icons.flash_on, size: 16),
                             const SizedBox(width: 4),
                             Text(l10n.groq),
+                          ],
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: AIProvider.openAI, 
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.psychology, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.openAI),
                           ],
                         ),
                       ),
@@ -694,17 +694,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                       ButtonSegment(
-                        value: AIProvider.openAI, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.psychology, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.openAI),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment(
                         value: AIProvider.groq, 
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -712,6 +701,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             const Icon(Icons.flash_on, size: 16),
                             const SizedBox(width: 4),
                             Text(l10n.groq),
+                          ],
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: AIProvider.openAI, 
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.psychology, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.openAI),
                           ],
                         ),
                       ),
@@ -1486,6 +1486,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 8),
+        _buildApiKeyGuide(
+          title: 'Gemini Models & Rate Limits:',
+          children: [
+            const Text('View available models and free-tier rate limits:'),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
+              child: Text(
+                'ai.google.dev/gemini-api/docs/models/gemini',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
+              child: Text(
+                'Rate Limits',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -1630,6 +1659,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 8),
+        _buildApiKeyGuide(
+          title: 'OpenAI Models & Rate Limits:',
+          children: [
+            const Text('View available models and usage limits:'),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
+              child: Text(
+                'platform.openai.com/docs/models',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
+              child: Text(
+                'Rate Limits',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -1768,6 +1826,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _buildApiKeyGuide(
+          title: 'Groq Models & Rate Limits:',
+          children: [
+            const Text('View available models and free-tier rate limits:'),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
+              child: Text(
+                'console.groq.com/docs/models',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+              child: Text(
+                'Rate Limits',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
