@@ -1254,6 +1254,8 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   String? _customImageUrl;
   String? _customImagePath;
   DateTime? _dateAdded;
+  bool _fishSelectorExpanded = false;
+  bool _customNameUserModified = false;
 
   @override
   void initState() {
@@ -1268,14 +1270,35 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
       _customImagePath = widget.existingInhabitant!.customImagePath;
       _dateAdded = widget.existingInhabitant!.dateAdded;
       _urlController.text = _customImageUrl ?? '';
+      // When editing, check if the name has been user-modified (not the default pattern)
+      final defaultName = 'My ${widget.existingInhabitant!.fishUnit}';
+      _customNameUserModified = widget.existingInhabitant!.customName != defaultName;
+      // Start collapsed since a fish type is already selected
+      _fishSelectorExpanded = false;
     } else {
       _quantityController.text = '1';
       _dateAdded = DateTime.now(); // Default to now for new inhabitants
+      // Start expanded so user can pick a fish type
+      _fishSelectorExpanded = true;
+    }
+    _customNameController.addListener(_onCustomNameChanged);
+  }
+
+  void _onCustomNameChanged() {
+    if (!_customNameUserModified) {
+      // Check if the current value deviates from the auto-generated default
+      final currentDefault = _selectedFishUnit != null ? 'My $_selectedFishUnit' : '';
+      if (_customNameController.text != currentDefault) {
+        setState(() {
+          _customNameUserModified = true;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
+    _customNameController.removeListener(_onCustomNameChanged);
     _customNameController.dispose();
     _quantityController.dispose();
     _searchController.dispose();
@@ -1390,11 +1413,193 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     }
   }
 
+  Widget _buildFishSelector(BuildContext context) {
+    final selectedFish = _selectedFishUnit != null
+        ? widget.availableFish.where((f) => f.name == _selectedFishUnit).firstOrNull
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row with title and expand/change button
+        Row(
+          children: [
+            Text(
+              'Fish Type',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            if (selectedFish != null && !_fishSelectorExpanded)
+              TextButton.icon(
+                onPressed: () => setState(() => _fishSelectorExpanded = true),
+                icon: const Icon(Icons.edit, size: 16),
+                label: const Text('Change'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Collapsed: show only the selected fish chip
+        if (selectedFish != null && !_fishSelectorExpanded)
+          InkWell(
+            onTap: () => setState(() => _fishSelectorExpanded = true),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.primaryContainer,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: CachedNetworkImage(
+                      imageUrl: selectedFish.imageURL,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.pets,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    selectedFish.name,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Expanded: show search + full grid
+        if (_fishSelectorExpanded) ...[
+          TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(
+              labelText: 'Search Fish',
+              hintText: 'Search by name...',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 380),
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _filteredFish.map((fish) {
+                  final isSelected = _selectedFishUnit == fish.name;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedFishUnit = fish.name;
+                        // Only auto-fill custom name if user hasn't modified it
+                        if (!_customNameUserModified) {
+                          _customNameController.text = 'My ${fish.name}';
+                        }
+                        // Collapse the selector after picking a fish
+                        _fishSelectorExpanded = false;
+                      });
+                    },
+                    child: Container(
+                      width: 100,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                          width: isSelected ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: CachedNetworkImage(
+                              imageUrl: fish.imageURL,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) => Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.pets,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            fish.name,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                                  : null,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+      insetPadding: const EdgeInsets.fromLTRB(12, 48, 12, 24),
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.95,
         height: MediaQuery.of(context).size.height * 0.9,
@@ -1499,102 +1704,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             const SizedBox(height: 16),
             
             // Fish Type Selection with Images
-            Text(
-              'Fish Type',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Search Field
-            TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                labelText: 'Search Fish',
-                hintText: 'Search by name...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 450),
-              child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _filteredFish.map((fish) {
-                    final isSelected = _selectedFishUnit == fish.name;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedFishUnit = fish.name;
-                          // Prefill custom name when fish is selected (update if new inhabitant)
-                          if (widget.existingInhabitant == null) {
-                            _customNameController.text = 'My ${fish.name}';
-                          }
-                        });
-                      },
-                      child: Container(
-                        width: 100,
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: isSelected 
-                              ? Theme.of(context).colorScheme.primary 
-                              : Theme.of(context).colorScheme.outline,
-                            width: isSelected ? 2 : 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          color: isSelected 
-                            ? Theme.of(context).colorScheme.primaryContainer 
-                            : null,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: CachedNetworkImage(
-                                imageUrl: fish.imageURL,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceVariant,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.pets,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              fish.name,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.onPrimaryContainer 
-                                  : null,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
+            _buildFishSelector(context),
             if (_selectedFishUnit == null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
