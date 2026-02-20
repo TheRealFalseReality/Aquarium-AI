@@ -15,6 +15,8 @@ import '../models/tank.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -108,6 +110,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       );
       return;
     }
+
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
+    }
     
     final processedTankSize = _processTankSize(tankSize);
     final prompt = buildStockingRecommendationPrompt(
@@ -138,11 +153,11 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           timeout: const Duration(seconds: 45),
         );
       } else if (models.activeProvider == AIProvider.groq) {
-        if (models.groqApiKey.isEmpty) {
+        if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = GroqHelper.createClient(
-          apiKey: models.groqApiKey,
+          apiKey: models.effectiveGroqApiKey,
           model: models.groqModel,
         );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
@@ -260,6 +275,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       return;
     }
 
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
+    }
+
     // Get existing fish from tank inhabitants
     final existingFish = <Fish>[];
     for (final inhabitant in tank.inhabitants) {
@@ -321,11 +349,11 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           timeout: const Duration(seconds: 45),
         );
       } else if (models.activeProvider == AIProvider.groq) {
-        if (models.groqApiKey.isEmpty) {
+        if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = GroqHelper.createClient(
-          apiKey: models.groqApiKey,
+          apiKey: models.effectiveGroqApiKey,
           model: models.groqModel,
         );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));

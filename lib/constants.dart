@@ -1,3 +1,10 @@
+// Developer Groq API key – injected at build time via:
+//   flutter build ... --dart-define=DEVELOPER_GROQ_API_KEY=<your-key>
+// Used as a free fallback when the user has not provided their own Groq key.
+// Leave empty to disable the fallback (users must supply their own key).
+const String developerGroqApiKey =
+    String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
+
 // Default model constants
 const String geminiModelDefault = 'gemini-flash-lite-latest';
 const String geminiImageModelDefault = 'gemini-flash-latest';

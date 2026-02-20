@@ -25,7 +25,14 @@ import '../services/analytics_service.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
-  const ChatbotScreen({super.key, this.autoOpenPhotoAnalyzer = false});
+  final bool autoOpenWaterAnalysis;
+  final bool autoOpenFishInfo;
+  const ChatbotScreen({
+    super.key,
+    this.autoOpenPhotoAnalyzer = false,
+    this.autoOpenWaterAnalysis = false,
+    this.autoOpenFishInfo = false,
+  });
 
   @override
   ChatbotScreenState createState() => ChatbotScreenState();
@@ -51,7 +58,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       vsync: this,
       duration: const Duration(milliseconds: 380),
     );
-    // If requested via route arguments, open the Photo Analyzer after first frame
+    // If requested via route arguments, open the appropriate tool after first frame
     if (widget.autoOpenPhotoAnalyzer) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_autoOpened) {
@@ -59,6 +66,26 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const PhotoAnalysisScreen()),
+          );
+        }
+      });
+    } else if (widget.autoOpenWaterAnalysis) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_autoOpened) {
+          _autoOpened = true;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const WaterParameterAnalysisScreen()),
+          );
+        }
+      });
+    } else if (widget.autoOpenFishInfo) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_autoOpened) {
+          _autoOpened = true;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FishInfoScreen()),
           );
         }
       });

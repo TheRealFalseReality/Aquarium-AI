@@ -26,8 +26,7 @@ import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
-import './water_parameter_analysis_screen.dart';
-import './fish_info_screen.dart';
+
 
 class _ToolChipInfo {
   final String label;
@@ -286,9 +285,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) async {
-      // If the provider is no longer loading and the API key is empty, show the dialog.
-      if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty && next.groqApiKey.isEmpty) {
-        // Check if user has chosen to never show the dialog again
+      // Show the API key dialog once loading completes if:
+      //   • no user-supplied key for any provider, AND
+      //   • AI features are enabled, AND
+      //   • the user hasn't chosen "Never show again"
+      if (previous!.isLoading && !next.isLoading &&
+          next.geminiApiKey.isEmpty &&
+          next.openAIApiKey.isEmpty &&
+          next.groqApiKey.isEmpty &&
+          ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (shouldShow && mounted) {
           showDialog(
@@ -332,21 +337,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             _ToolChipInfo(
               label: l10n.waterAnalysis,
               icon: Icons.water_drop_outlined,
-              onTap: () => Navigator.push(
+              onTap: () => Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const WaterParameterAnalysisScreen(),
-                ),
+                '/chatbot',
+                arguments: {'openWaterAnalysis': true},
               ),
             ),
             _ToolChipInfo(
               label: l10n.fishInfo,
               icon: Icons.manage_search_outlined,
-              onTap: () => Navigator.push(
+              onTap: () => Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const FishInfoScreen(),
-                ),
+                '/chatbot',
+                arguments: {'openFishInfo': true},
               ),
             ),
           ],

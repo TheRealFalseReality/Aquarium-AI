@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
+import '../utils/dev_limits.dart';
 
 class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
@@ -165,26 +166,6 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '• ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Configurable Chat Memory: Set how many past messages the AI remembers (up to 20). Without your own key, the free service is capped at 3 messages for a more personal, cost-efficient experience.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -206,7 +187,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier includes a 3-message chat history limit. Add your own key in Settings to unlock full customization.',
+                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $devMaxRequestsPerMinute AI requests per minute and $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onTertiaryContainer,
                       ),

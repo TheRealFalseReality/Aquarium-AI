@@ -19,6 +19,8 @@ import '../prompts/fish_info_prompt.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {
@@ -126,14 +128,24 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return 'OpenAI API Key is not set. Please add your key in Settings.';
         break;
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return 'Groq API Key is not set. Please add your key in Settings.';
+        if (!_modelState.hasGroqKey) return 'Groq API Key is not set. Please add your key in Settings.';
         break;
     }
     return null;
   }
 
   // ================== Generic Chat ==================
-  Future<void> sendMessage(String message) {
+  Future<void> sendMessage(String message) async {
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        return _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          message,
+        );
+      }
+    }
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
@@ -142,7 +154,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return _handleError('OpenAI API Key is not set.', message);
         return _sendOpenAIMessage(message);
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
+        if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
         return _sendGroqMessage(message);
     }
   }
@@ -221,7 +233,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
+    if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
@@ -237,7 +249,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       }).toList();
 
       final responseText = await GroqHelper.sendChatMessages(
-        apiKey: _modelState.groqApiKey,
+        apiKey: _modelState.effectiveGroqApiKey,
         model: _modelState.groqModel,
         systemPrompt: systemPrompt,
         messages: messages,
@@ -257,6 +269,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final userMsg = 'Please analyze my water parameters.';
       await _handleError(keyError, userMsg);
       return null;
+    }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final userMsg = 'Please analyze my water parameters.';
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          userMsg,
+        );
+        return null;
+      }
     }
     final userMsg = 'Please analyze my water parameters for my ${params['tankType']} tank.\n'
         'Temp: ${params['temp']}°${params['tempUnit']}'
@@ -292,6 +316,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _handleError(keyError, 'Generate an automation script.');
       return null;
     }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Generate an automation script.',
+        );
+        return null;
+      }
+    }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
     final prompt = buildAutomationScriptPrompt(description);
@@ -317,6 +352,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (keyError != null) {
       await _handleError(keyError, 'Look up fish info: $fishNames.');
       return null;
+    }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Look up fish info: $fishNames.',
+        );
+        return null;
+      }
     }
     final userMsg = 'Give me comprehensive information about: $fishNames'
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
@@ -351,6 +397,49 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // ================== Photo Analysis ==================
   Future<PhotoAnalysisResult?> analyzePhoto({required Uint8List imageBytes, String? userNote, String mimeType = 'image/jpeg', bool isRegeneration = false}) async {
+    // Check rate limits before showing the loading state, so the user sees the
+    // error as a chat message rather than a silent failure.
+    if (_modelState.usingDeveloperGroqKey) {
+      // Per-minute request limit checked first — no quota consumed if this fails.
+      final reqAllowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!reqAllowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: '⏱️ **Free-tier limit reached** ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+              isUser: false,
+              isError: true,
+              isRetryable: true,
+              originalMessage: 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}',
+              photoBytes: imageBytes,
+            ),
+          ],
+          isLoading: false,
+        );
+        return null;
+      }
+      // Daily photo limit (only for new analyses, not regenerations)
+      if (!isRegeneration) {
+        final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis();
+        if (!photoAllowed) {
+          state = ChatState(
+            messages: [
+              ...state.messages,
+              ChatMessage(
+                text: '📸 **Daily Photo Limit Reached**\n\nFree tier allows $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own Groq API key in Settings for unlimited access.',
+                isUser: false,
+                isError: true,
+                isRetryable: false,
+              ),
+            ],
+            isLoading: false,
+          );
+          return null;
+        }
+      }
+    }
     final note = (userNote?.trim().isNotEmpty ?? false) ? 'User note: ${userNote!.trim()}' : 'No additional user note.';
     if (!isRegeneration) {
       state = ChatState(messages: [...state.messages, ChatMessage(text: '📷 Submitted an aquarium photo for AI analysis.\n\n$note', isUser: true, photoBytes: imageBytes)], isLoading: true);
@@ -410,7 +499,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
            final groq = GroqHelper.createClient(
-             apiKey: _modelState.groqApiKey,
+             apiKey: _modelState.effectiveGroqApiKey,
              model: _modelState.groqModel,
            );
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
@@ -453,7 +542,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
           final responseGroq = await GroqHelper.generateWithImage(
-            apiKey: _modelState.groqApiKey,
+            apiKey: _modelState.effectiveGroqApiKey,
             model: _modelState.groqImageModel,
             prompt: prompt,
             base64Image: base64Image,

@@ -19,7 +19,7 @@ bool checkApiKey(BuildContext context, WidgetRef ref) {
       if (modelState.openAIApiKey.isEmpty) hasKey = false;
       break;
     case AIProvider.groq:
-      if (modelState.groqApiKey.isEmpty) hasKey = false;
+      if (!modelState.hasGroqKey) hasKey = false;
       break;
   }
 
@@ -33,7 +33,7 @@ bool checkApiKey(BuildContext context, WidgetRef ref) {
         if (modelState.openAIApiKey.isEmpty) hasKey = false;
         break;
       case AIProvider.groq:
-        if (modelState.groqApiKey.isEmpty) hasKey = false;
+        if (!modelState.hasGroqKey) hasKey = false;
         break;
     }
   }
