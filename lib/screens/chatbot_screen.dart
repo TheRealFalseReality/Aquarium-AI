@@ -16,6 +16,7 @@ import './analysis_result_screen.dart';
 import './automation_script_result_screen.dart';
 import './photo_analysis_screen.dart';
 import './photo_analysis_result_screen.dart';
+import './fish_info_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 import '../services/analytics_service.dart';
@@ -566,6 +567,22 @@ Widget _suggestionMenu(BuildContext context) {
               context,
               MaterialPageRoute(
                 builder: (_) => const AutomationScriptScreen(),
+              ),
+            );
+            setState(() => _expandedMenu = null);
+          },
+        ),
+        MiniAIChip(
+          label: l10n.fishInfo,
+          icon: Icons.manage_search_outlined,
+          customGradient: LinearGradient(
+            colors: [Colors.green.shade400, Colors.teal.shade400],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FishInfoScreen(),
               ),
             );
             setState(() => _expandedMenu = null);

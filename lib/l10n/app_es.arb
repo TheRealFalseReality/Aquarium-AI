@@ -479,7 +479,18 @@
   "qty": "Cant",
   
   "createdLabel": "Creado",
-  "inhabitantsLabel": "Habitantes"
+  "inhabitantsLabel": "Habitantes",
+
+  "fishInfo": "Info del Pez",
+  "aiFishInfoLookup": "Búsqueda de Info de Peces con IA",
+  "fishInfoDescription": "Ingresa el nombre de un pez o varios peces para obtener información completa, incluyendo nombre latino, origen, datos curiosos, cuidados en el acuario y compañeros compatibles.",
+  "fishNamesLabel": "Nombre(s) del Pez",
+  "fishNamesHint": "p. ej., Pez Payaso, Tetra Neón, Betta splendens",
+  "pleaseEnterFishName": "Por favor, ingresa al menos un nombre de pez",
+  "tankSizeOptional": "Tamaño del Acuario (Opcional)",
+  "tankSizeHint": "p. ej., 75 litros, 20 galones",
+  "fishInfoAdditionalNotesHint": "p. ej., acuario agresivo, acuario plantado, configuración para principiantes",
+  "lookUpFishInfo": "Buscar Info del Pez"
 }
 
 

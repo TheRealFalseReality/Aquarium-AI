@@ -14,6 +14,7 @@ import '../prompts/system_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
+import '../prompts/fish_info_prompt.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
@@ -247,6 +248,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
       return null;
+    }
+  }
+
+  // ================== Fish Info ==================
+  Future<void> getFishInfo({
+    required String fishNames,
+    String? tankSize,
+    String? additionalNotes,
+  }) async {
+    final userMsg = 'Give me comprehensive information about: $fishNames'
+        '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
+        '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
+    _prepareForSending(userMsg);
+    final prompt = buildFishInfoPrompt(
+      fishNames: fishNames,
+      tankSize: tankSize,
+      additionalNotes: additionalNotes,
+    );
+    try {
+      final responseText = await _generateContent(prompt);
+      _processTextResponse(responseText);
+    } catch (e) {
+      if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
     }
   }
 

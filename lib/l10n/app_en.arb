@@ -2583,6 +2583,56 @@
   "inhabitantsLabel": "Inhabitants",
   "@inhabitantsLabel": {
     "description": "Label for inhabitants section"
+  },
+
+  "fishInfo": "Fish Info",
+  "@fishInfo": {
+    "description": "Fish info tool name"
+  },
+
+  "aiFishInfoLookup": "AI Fish Info Lookup",
+  "@aiFishInfoLookup": {
+    "description": "AI fish info lookup heading"
+  },
+
+  "fishInfoDescription": "Enter a fish or fish species name to get comprehensive information including latin name, origin, facts, fun facts, tank care, and compatible tank mates.",
+  "@fishInfoDescription": {
+    "description": "Description for fish info tool"
+  },
+
+  "fishNamesLabel": "Fish Name(s)",
+  "@fishNamesLabel": {
+    "description": "Label for fish names field"
+  },
+
+  "fishNamesHint": "e.g., Clownfish, Neon Tetra, Betta splendens",
+  "@fishNamesHint": {
+    "description": "Hint text for fish names field"
+  },
+
+  "pleaseEnterFishName": "Please enter at least one fish name",
+  "@pleaseEnterFishName": {
+    "description": "Validation message for empty fish name"
+  },
+
+  "tankSizeOptional": "Tank Size (Optional)",
+  "@tankSizeOptional": {
+    "description": "Label for optional tank size field"
+  },
+
+  "tankSizeHint": "e.g., 20 gallons, 75L",
+  "@tankSizeHint": {
+    "description": "Hint text for tank size field"
+  },
+
+  "fishInfoAdditionalNotesHint": "e.g., aggressive tank, planted tank, beginner setup",
+  "@fishInfoAdditionalNotesHint": {
+    "description": "Hint text for additional notes in fish info lookup"
+  },
+
+  "lookUpFishInfo": "Look Up Fish Info",
+  "@lookUpFishInfo": {
+    "description": "Button label for fish info lookup"
   }
 }
 

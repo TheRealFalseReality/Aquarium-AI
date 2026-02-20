@@ -26,6 +26,21 @@ import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
+import './water_parameter_analysis_screen.dart';
+import './automation_script_screen.dart';
+import './fish_info_screen.dart';
+
+class _ToolChipInfo {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ToolChipInfo({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+}
 
 class FeatureInfo {
   final String icon;
@@ -36,6 +51,7 @@ class FeatureInfo {
   final bool openPhotoAnalyzer;
   final String? url;
   final String? imagePath;
+  final List<_ToolChipInfo>? toolChips;
 
   FeatureInfo({
     required this.icon,
@@ -46,6 +62,7 @@ class FeatureInfo {
     this.openPhotoAnalyzer = false,
     this.url,
     this.imagePath,
+    this.toolChips,
   });
 }
 
@@ -312,6 +329,38 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           description: l10n.aiChatbotDescription,
           routeName: '/chatbot',
           delay: const Duration(milliseconds: 700),
+          toolChips: [
+            _ToolChipInfo(
+              label: l10n.waterAnalysis,
+              icon: Icons.water_drop_outlined,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const WaterParameterAnalysisScreen(),
+                ),
+              ),
+            ),
+            _ToolChipInfo(
+              label: l10n.fishInfo,
+              icon: Icons.manage_search_outlined,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FishInfoScreen(),
+                ),
+              ),
+            ),
+            _ToolChipInfo(
+              label: l10n.automationScript,
+              icon: Icons.code_outlined,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AutomationScriptScreen(),
+                ),
+              ),
+            ),
+          ],
         ),
         FeatureInfo(
           icon: '📷',
@@ -922,6 +971,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 title: feature.title,
                 description: feature.description,
                 imagePath: feature.imagePath,
+                toolChips: feature.toolChips,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
@@ -1088,6 +1138,7 @@ class FeatureCard extends ConsumerWidget {
   final String description;
   final VoidCallback onTap;
   final String? imagePath;
+  final List<_ToolChipInfo>? toolChips;
 
   const FeatureCard({
     super.key,
@@ -1096,6 +1147,7 @@ class FeatureCard extends ConsumerWidget {
     required this.description,
     required this.onTap,
     this.imagePath,
+    this.toolChips,
   });
 
   @override
@@ -1182,6 +1234,33 @@ class FeatureCard extends ConsumerWidget {
                     height: 1.4,
                   ),
                 ),
+                if (toolChips != null && toolChips!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: toolChips!.map((chip) {
+                      return ActionChip(
+                        avatar: Icon(chip.icon, size: 16, color: cs.primary),
+                        label: Text(
+                          chip.label,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        backgroundColor: cs.primaryContainer.withOpacity(0.5),
+                        side: BorderSide(
+                          color: cs.primary.withOpacity(0.3),
+                          width: 1,
+                        ),
+                        onPressed: chip.onTap,
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                      );
+                    }).toList(),
+                  ),
+                ],
                 if (imagePath != null) ...[
                   const SizedBox(height: 16),
                   ClipRRect(
