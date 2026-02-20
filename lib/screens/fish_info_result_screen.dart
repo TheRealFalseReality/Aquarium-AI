@@ -276,22 +276,37 @@ class FishInfoResultScreen extends StatelessWidget {
           _infoSection(
             context,
             title: '⚠️ Species to Avoid',
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: fish.incompatibleSpecies.map((species) {
-                return Chip(
-                  label: Text(species),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.errorContainer.withOpacity(0.4),
-                  labelStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.4),
-                  ),
-                );
-              }).toList(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: fish.incompatibleSpecies.map((species) {
+                    return ModernSelectableChip(
+                      label: species,
+                      selected: false,
+                      dense: true,
+                      selectedColor: Theme.of(context).colorScheme.errorContainer,
+                      selectedTextColor: Theme.of(context).colorScheme.onErrorContainer,
+                      onTap: () async {
+                        final url = Uri.parse(
+                            'https://www.google.com/search?q=${Uri.encodeComponent('$species fish')}');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '(Tap a name to search)',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ],
             ),
           ),
 

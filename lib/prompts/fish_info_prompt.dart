@@ -41,13 +41,15 @@ Return a single valid JSON object with the following structure. Do not include a
         "tankSetup": "Substrate, plants, hiding spots, flow, etc.",
         "difficultyLevel": "Beginner / Intermediate / Expert"${tankSize != null && tankSize.isNotEmpty ? ',\n        "tankSizeNote": "Suitability notes for a $tankSize tank"' : ''}
       },
-      "compatibleTankMates": ["Species A", "Species B"],
-      "incompatibleSpecies": ["Species X", "Species Y"]
+      "compatibleTankMates": ["Common Name A", "Common Name B"],
+      "incompatibleSpecies": ["Common Name X", "Common Name Y"]
     }
   ]
 }
 
-If multiple fish names are provided, include one entry per fish in the "fish" array. Be accurate and thorough.
+If multiple fish names are provided, include one entry per fish in the "fish" array.
+Use common (everyday) fish names — not scientific names — in the "compatibleTankMates" and "incompatibleSpecies" arrays.
+Be accurate and thorough.
 ''';
 
   return prompt;
