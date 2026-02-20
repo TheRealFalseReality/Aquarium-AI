@@ -2,6 +2,8 @@ import 'package:fish_ai/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+export 'package:fish_ai/constants.dart' show developerGroqApiKey;
+
 // Define default values as constants for reusability
 const String defaultGeminiModel = geminiModelDefault;
 const String defaultGeminiImageModel = geminiImageModelDefault;
@@ -9,7 +11,11 @@ const String defaultChatGPTModel = openAIModelDefault;
 const String defaultChatGPTImageModel = openAIImageModelDefault;
 const String defaultGroqModel = groqModelDefault;
 const String defaultGroqImageModel = groqImageModelDefault;
-const AIProvider defaultAIProvider = AIProvider.gemini;
+const AIProvider defaultAIProvider = AIProvider.groq;
+
+const int defaultChatHistoryLimit = 3;
+const int minChatHistoryLimit = 1;
+const int maxChatHistoryLimit = 20;
 
 enum AIProvider { gemini, openAI, groq }
 
@@ -24,6 +30,10 @@ class ModelState {
   final String groqModel;
   final String groqImageModel;
   final String groqApiKey;
+  /// Number of past messages sent to the AI on each chat request.
+  /// Users who supply their own API key can configure this (1–20); the free
+  /// service tier always uses [defaultChatHistoryLimit].
+  final int chatHistoryLimit;
   /// Provider used for text/chat operations
   final AIProvider activeTextProvider;
   /// Provider used for image/multimedia analysis operations
@@ -40,6 +50,7 @@ class ModelState {
     required this.groqModel,
     required this.groqImageModel,
     required this.groqApiKey,
+    this.chatHistoryLimit = defaultChatHistoryLimit,
     required this.activeTextProvider,
     required this.activeImageProvider,
     this.isLoading = true,
@@ -47,6 +58,18 @@ class ModelState {
 
   /// Convenience getter: returns the text provider (kept for backward compat)
   AIProvider get activeProvider => activeTextProvider;
+
+  /// The Groq API key to actually use: user's own key takes priority;
+  /// falls back to the developer-supplied key compiled into the app.
+  String get effectiveGroqApiKey =>
+      groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+
+  /// Whether the app has any Groq key available (user-provided or developer fallback).
+  bool get hasGroqKey => effectiveGroqApiKey.isNotEmpty;
+
+  /// Whether the current effective Groq key is the developer fallback (not user-provided).
+  bool get usingDeveloperGroqKey =>
+      groqApiKey.isEmpty && developerGroqApiKey.isNotEmpty;
 }
 
 // 2. Create the Notifier
@@ -82,6 +105,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final groqImageModel =
         prefs.getString('groqImageModel') ?? defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
+    final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
+        .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
     final legacyProviderIndex = prefs.getInt('activeProvider');
     final activeTextProvider = AIProvider.values[
@@ -99,6 +124,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: groqModel,
       groqImageModel: groqImageModel,
       groqApiKey: groqApiKey,
+      chatHistoryLimit: chatHistoryLimit,
       activeTextProvider: activeTextProvider,
       activeImageProvider: activeImageProvider,
       isLoading: false,
@@ -117,6 +143,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     required String newGroqApiKey,
     required AIProvider newActiveTextProvider,
     required AIProvider newActiveImageProvider,
+    int newChatHistoryLimit = defaultChatHistoryLimit,
   }) async {
     if (newGeminiModel.isEmpty ||
         newGeminiImageModel.isEmpty ||
@@ -137,6 +164,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setString('groqModel', newGroqModel);
     await prefs.setString('groqImageModel', newGroqImageModel);
     await prefs.setString('groqApiKey', newGroqApiKey);
+    await prefs.setInt('chatHistoryLimit', newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit));
     await prefs.setInt('activeTextProvider', newActiveTextProvider.index);
     await prefs.setInt('activeImageProvider', newActiveImageProvider.index);
 
@@ -150,6 +178,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: newGroqModel,
       groqImageModel: newGroqImageModel,
       groqApiKey: newGroqApiKey,
+      chatHistoryLimit: newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
       activeTextProvider: newActiveTextProvider,
       activeImageProvider: newActiveImageProvider,
       isLoading: false,
@@ -177,6 +206,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: defaultGroqModel,
       groqImageModel: defaultGroqImageModel,
       groqApiKey: state.groqApiKey,
+      chatHistoryLimit: state.chatHistoryLimit,
       activeTextProvider: state.activeTextProvider,
       activeImageProvider: state.activeImageProvider,
       isLoading: false,

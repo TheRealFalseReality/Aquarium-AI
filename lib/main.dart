@@ -497,10 +497,18 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/chatbot':
                 bool autoOpen = false;
-                if (args is Map && args['openPhotoAnalyzer'] == true) {
-                  autoOpen = true;
+                bool autoOpenWaterAnalysis = false;
+                bool autoOpenFishInfo = false;
+                if (args is Map) {
+                  if (args['openPhotoAnalyzer'] == true) autoOpen = true;
+                  if (args['openWaterAnalysis'] == true) autoOpenWaterAnalysis = true;
+                  if (args['openFishInfo'] == true) autoOpenFishInfo = true;
                 }
-                page = ChatbotScreen(autoOpenPhotoAnalyzer: autoOpen);
+                page = ChatbotScreen(
+                  autoOpenPhotoAnalyzer: autoOpen,
+                  autoOpenWaterAnalysis: autoOpenWaterAnalysis,
+                  autoOpenFishInfo: autoOpenFishInfo,
+                );
                 screenName = 'chatbot_screen';
                 break;
               case '/compat-ai':

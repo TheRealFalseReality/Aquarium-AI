@@ -50,6 +50,51 @@ Access essential tools for managing your aquarium's technical details. The app i
 
 Stop guessing and start thriving! Try **Aquarium AI** now and let it be your guide to a healthier, more beautiful aquarium.
 
+## 🔑 Developer Groq API Key (Free Fallback)
+
+Aquarium AI supports a **developer-provided Groq API key** that lets users try the app without supplying their own API key. When a user has not entered their own Groq key, the app automatically falls back to the embedded developer key.
+
+### How it works
+
+- The developer key is compiled into the app at build time via `--dart-define`.
+- It is **never committed to the repository** – it lives only in GitHub Secrets / local build environments.
+- If the user provides their own Groq key in Settings, that key is always preferred.
+- Groq is now the **default AI provider** so new users get a working experience immediately.
+
+### Building with the developer key
+
+```bash
+# Local development build (web)
+flutter build web --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+
+# Local run
+flutter run --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+
+# Android release
+flutter build apk --flavor production --release \
+  --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+```
+
+### GitHub Actions / CI
+
+Add your key as a repository secret named **`DEVELOPER_GROQ_API_KEY`** in
+**Settings → Secrets and variables → Actions → New repository secret**.
+
+The Firebase hosting and Android release workflows already pass this secret to
+the build command automatically.
+
+### Getting a Groq API key
+
+1. Visit [https://console.groq.com/keys](https://console.groq.com/keys)
+2. Sign up / log in and create a new API key.
+3. Copy the key (it starts with `gsk_`).
+4. Paste it into the `DEVELOPER_GROQ_API_KEY` GitHub secret.
+
+> **Security note:** Although `--dart-define` values end up compiled into the
+> app binary, a determined user could extract the key from the web bundle or APK.
+> Groq's free-tier rate limits are the primary protection against abuse. Plan to
+> add server-side rate limiting in the future for additional protection.
+
 ## 🌍 Contributing Translations
 
 Aquarium AI is now available in multiple languages! We welcome community contributions to make the app accessible to aquarium enthusiasts worldwide.

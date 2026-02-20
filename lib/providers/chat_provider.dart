@@ -19,6 +19,8 @@ import '../prompts/fish_info_prompt.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {
@@ -83,45 +85,31 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   final ModelState _modelState;
-  ChatSession? _geminiChatSession;
-  Groq? _groqChatSession;
+
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
+
+  /// Returns the effective chat history limit.
+  /// Users who supply their own API key for the active text provider use their
+  /// configured [ModelState.chatHistoryLimit]. Everyone else (free service tier
+  /// with no personal key) is hard-capped at [defaultChatHistoryLimit] (3).
+  int get _historyLimit {
+    final hasOwnKey = switch (_modelState.activeTextProvider) {
+      AIProvider.gemini => _modelState.geminiApiKey.isNotEmpty,
+      AIProvider.openAI => _modelState.openAIApiKey.isNotEmpty,
+      AIProvider.groq => _modelState.groqApiKey.isNotEmpty,
+    };
+    return hasOwnKey ? _modelState.chatHistoryLimit : defaultChatHistoryLimit;
+  }
 
   void _initializeProvider() {
     // Collect all distinct providers needed (text and image may be the same or different).
     // Each provider is initialized at most once even if selected for both roles.
     final selectedProviders = {_modelState.activeTextProvider, _modelState.activeImageProvider};
-    if (selectedProviders.contains(AIProvider.gemini) && _modelState.geminiApiKey.isNotEmpty) {
-      _initGeminiSession();
-    }
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
-    if (selectedProviders.contains(AIProvider.groq) && _modelState.groqApiKey.isNotEmpty) {
-      _initGroqSession();
-    }
-  }
-
-  void _initGeminiSession() {
-    if (_modelState.geminiApiKey.isEmpty) return;
-    final model = GenerativeModel(
-      model: _modelState.geminiModel,
-      apiKey: _modelState.geminiApiKey,
-    );
-    _geminiChatSession = model.startChat(
-      history: [Content.model([TextPart(systemPrompt)])],
-    );
-  }
-  
-  void _initGroqSession() {
-    if (_modelState.groqApiKey.isEmpty) return;
-    _groqChatSession = GroqHelper.createClient(
-      apiKey: _modelState.groqApiKey,
-      model: _modelState.groqModel,
-      systemPrompt: systemPrompt,
-    );
   }
 
 
@@ -140,14 +128,24 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return 'OpenAI API Key is not set. Please add your key in Settings.';
         break;
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return 'Groq API Key is not set. Please add your key in Settings.';
+        if (!_modelState.hasGroqKey) return 'Groq API Key is not set. Please add your key in Settings.';
         break;
     }
     return null;
   }
 
   // ================== Generic Chat ==================
-  Future<void> sendMessage(String message) {
+  Future<void> sendMessage(String message) async {
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        return _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          message,
+        );
+      }
+    }
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
@@ -156,7 +154,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         if (_modelState.openAIApiKey.isEmpty) return _handleError('OpenAI API Key is not set.', message);
         return _sendOpenAIMessage(message);
       case AIProvider.groq:
-        if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
+        if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
         return _sendGroqMessage(message);
     }
   }
@@ -173,11 +171,30 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGeminiMessage(String message, {bool isRetry = false}) async {
-    if (_geminiChatSession == null) return _handleError('Gemini session not initialized. API key might be missing or invalid.', message);
+    if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _geminiChatSession!.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
+      // Build a fresh session each request with the last N non-ad, non-error
+      // messages (excluding the current one just added by _prepareForSending)
+      // as seed history, so the session never accumulates unbounded tokens.
+      final allMessages = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      // Drop the current user message (last entry added by _prepareForSending).
+      final priorMessages = allMessages.length > 1 ? allMessages.sublist(0, allMessages.length - 1) : <ChatMessage>[];
+      final limit = _historyLimit;
+      final recentHistory = priorMessages.length > limit ? priorMessages.sublist(priorMessages.length - limit) : priorMessages;
+      final seedHistory = [
+        Content.model([TextPart(systemPrompt)]),
+        ...recentHistory.map((m) => m.isUser
+            ? Content.text(m.text)
+            : Content.model([TextPart(m.text)])),
+      ];
+      final model = GenerativeModel(
+        model: _modelState.geminiModel,
+        apiKey: _modelState.geminiApiKey,
+      );
+      final session = model.startChat(history: seedHistory);
+      final response = await session.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
       if (response.text == null) throw Exception('No response received from Gemini');
       _processTextResponse(response.text!);
@@ -190,9 +207,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 10 non-ad, non-error messages to reduce token usage.
+      // Limit history to the last N non-ad, non-error messages to reduce token usage.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
       final history = recentHistory.map((m) => OpenAIChatCompletionChoiceMessageModel(
           content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(m.text)],
           role: m.isUser ? OpenAIChatMessageRole.user : OpenAIChatMessageRole.assistant,
@@ -215,13 +233,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (_groqChatSession == null) return _handleError('Groq session not initialized. API key might be missing or invalid.', message);
+    if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _groqChatSession!.sendMessage(message).timeout(const Duration(seconds: 30));
-      _cancellable?.complete(response);
-      final responseText = response.choices.first.message.content;
+      // Limit history to the last N non-ad, non-error messages to reduce token
+      // usage. The current user message was already added to state.messages by
+      // _prepareForSending, so it is included within this window.
+      final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
+      final messages = recentHistory.map((m) => {
+        'role': m.isUser ? 'user' : 'assistant',
+        'content': m.text,
+      }).toList();
+
+      final responseText = await GroqHelper.sendChatMessages(
+        apiKey: _modelState.effectiveGroqApiKey,
+        model: _modelState.groqModel,
+        systemPrompt: systemPrompt,
+        messages: messages,
+      );
+      _cancellable?.complete(responseText);
+      if (responseText == null) throw Exception('No response received from Groq');
       _processTextResponse(responseText);
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), message);
@@ -235,6 +269,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final userMsg = 'Please analyze my water parameters.';
       await _handleError(keyError, userMsg);
       return null;
+    }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final userMsg = 'Please analyze my water parameters.';
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          userMsg,
+        );
+        return null;
+      }
     }
     final userMsg = 'Please analyze my water parameters for my ${params['tankType']} tank.\n'
         'Temp: ${params['temp']}°${params['tempUnit']}'
@@ -270,6 +316,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _handleError(keyError, 'Generate an automation script.');
       return null;
     }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Generate an automation script.',
+        );
+        return null;
+      }
+    }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
     final prompt = buildAutomationScriptPrompt(description);
@@ -295,6 +352,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (keyError != null) {
       await _handleError(keyError, 'Look up fish info: $fishNames.');
       return null;
+    }
+    if (_modelState.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        await _handleError(
+          '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Look up fish info: $fishNames.',
+        );
+        return null;
+      }
     }
     final userMsg = 'Give me comprehensive information about: $fishNames'
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
@@ -329,6 +397,49 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // ================== Photo Analysis ==================
   Future<PhotoAnalysisResult?> analyzePhoto({required Uint8List imageBytes, String? userNote, String mimeType = 'image/jpeg', bool isRegeneration = false}) async {
+    // Check rate limits before showing the loading state, so the user sees the
+    // error as a chat message rather than a silent failure.
+    if (_modelState.usingDeveloperGroqKey) {
+      // Per-minute request limit checked first — no quota consumed if this fails.
+      final reqAllowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!reqAllowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: '⏱️ **Free-tier limit reached** ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+              isUser: false,
+              isError: true,
+              isRetryable: true,
+              originalMessage: 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}',
+              photoBytes: imageBytes,
+            ),
+          ],
+          isLoading: false,
+        );
+        return null;
+      }
+      // Daily photo limit (only for new analyses, not regenerations)
+      if (!isRegeneration) {
+        final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis();
+        if (!photoAllowed) {
+          state = ChatState(
+            messages: [
+              ...state.messages,
+              ChatMessage(
+                text: '📸 **Daily Photo Limit Reached**\n\nFree tier allows $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own Groq API key in Settings for unlimited access.',
+                isUser: false,
+                isError: true,
+                isRetryable: false,
+              ),
+            ],
+            isLoading: false,
+          );
+          return null;
+        }
+      }
+    }
     final note = (userNote?.trim().isNotEmpty ?? false) ? 'User note: ${userNote!.trim()}' : 'No additional user note.';
     if (!isRegeneration) {
       state = ChatState(messages: [...state.messages, ChatMessage(text: '📷 Submitted an aquarium photo for AI analysis.\n\n$note', isUser: true, photoBytes: imageBytes)], isLoading: true);
@@ -388,7 +499,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
            final groq = GroqHelper.createClient(
-             apiKey: _modelState.groqApiKey,
+             apiKey: _modelState.effectiveGroqApiKey,
              model: _modelState.groqModel,
            );
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
@@ -431,7 +542,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
           final responseGroq = await GroqHelper.generateWithImage(
-            apiKey: _modelState.groqApiKey,
+            apiKey: _modelState.effectiveGroqApiKey,
             model: _modelState.groqImageModel,
             prompt: prompt,
             base64Image: base64Image,

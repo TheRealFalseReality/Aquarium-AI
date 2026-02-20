@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart';
+import '../utils/dev_limits.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
@@ -34,6 +36,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
+  int _chatHistoryLimit = defaultChatHistoryLimit;
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _groqApiKeyController = TextEditingController(text: models.groqApiKey);
     _selectedTextProvider = models.activeTextProvider;
     _selectedImageProvider = models.activeImageProvider;
+    _chatHistoryLimit = models.chatHistoryLimit;
   }
 
   @override
@@ -259,7 +263,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return; // Stop the function
     }
     if (_selectedTextProvider == AIProvider.groq &&
-        _groqApiKeyController.text.trim().isEmpty) {
+        _groqApiKeyController.text.trim().isEmpty &&
+        developerGroqApiKey.isEmpty) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
@@ -276,7 +281,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
       if (_selectedImageProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty) {
+          _groqApiKeyController.text.trim().isEmpty &&
+          developerGroqApiKey.isEmpty) {
         context.showAccessibleMessage(l10n.enterGroqApiKey);
         return;
       }
@@ -305,6 +311,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newGroqApiKey: _groqApiKeyController.text,
           newActiveTextProvider: _selectedTextProvider,
           newActiveImageProvider: _selectedImageProvider,
+          newChatHistoryLimit: _chatHistoryLimit,
         );
 
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
@@ -374,6 +381,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _selectedImageProvider = next.activeImageProvider;
         });
       }
+      if (_chatHistoryLimit != next.chatHistoryLimit) {
+        setState(() {
+          _chatHistoryLimit = next.chatHistoryLimit;
+        });
+      }
     });
 
     return MainLayout(
@@ -405,26 +417,51 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 32),
-        if (appSettings.enableAI) ...[
-          _buildMenuCard(
-            context: context,
-            title: l10n.aiProvider,
-            subtitle: l10n.configureAIProviders,
-            icon: Icons.smart_toy,
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        const SizedBox(height: 24),
+        // Enable AI toggle – lives directly on the root settings page
+        Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 2,
+          child: SwitchListTile(
+            secondary: Icon(
+              Icons.smart_toy_outlined,
+              color: appSettings.enableAI
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            iconColor: Theme.of(context).colorScheme.primary,
-            onTap: () => _showAIProviderDialog(),
+            title: Text(l10n.enableAI),
+            subtitle: Text(l10n.enableAIDesc),
+            value: appSettings.enableAI,
+            onChanged: (value) {
+              AnalyticsService.logSettingsChange(
+                settingName: 'enable_ai',
+                newValue: value.toString(),
+                oldValue: appSettings.enableAI.toString(),
+              );
+              ref.read(appSettingsProvider.notifier).setEnableAI(value);
+              setState(() {});
+            },
           ),
-          const SizedBox(height: 16),
-        ],
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.aiProvider,
+          subtitle: l10n.configureAIProviders,
+          icon: Icons.smart_toy,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () => _showAIProviderDialog(),
+          enabled: appSettings.enableAI,
+        ),
+        const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
           title: l10n.appSettings,
@@ -493,55 +530,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required Gradient gradient,
     required Color iconColor,
     required VoidCallback onTap,
+    bool enabled = true,
   }) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  borderRadius: BorderRadius.circular(12),
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.4,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 32,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 20,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -791,8 +832,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Free-tier rate limit notice (shown only when the developer key is active for at least one provider)
+                  Builder(builder: (context) {
+                    final models = ref.watch(modelProvider);
+                    final devKeyInUse = models.usingDeveloperGroqKey &&
+                        (models.activeTextProvider == AIProvider.groq ||
+                            models.activeImageProvider == AIProvider.groq);
+                    if (!devKeyInUse) return const SizedBox.shrink();
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.amber.withOpacity(0.4),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.speed, color: Colors.amber, size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Free-tier limits',
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '• $devMaxRequestsPerMinute AI requests per minute\n'
+                            '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                            '• $defaultChatHistoryLimit-message chat history per request',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade800,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                   // Display settings for all providers that are in use
                   ..._buildProviderSettingsSections(setDialogState),
+                  const SizedBox(height: 24),
+                  // Chat History Limit
+                  _buildChatHistoryLimitSection(setDialogState),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -913,31 +1019,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     subtitle: Text(_getLanguageDisplayName(appSettings.localeCode)),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () => _showLanguageDialog(setDialogState),
-                  ),
-                  const Divider(height: 24),
-                  
-                  SwitchListTile(
-                    title: Text(l10n.enableAI),
-                    subtitle: Text(l10n.enableAIDesc),
-                    value: appSettings.enableAI,
-                    onChanged: (value) {
-                      // Log settings change
-                      AnalyticsService.logSettingsChange(
-                        settingName: 'enable_ai',
-                        newValue: value.toString(),
-                        oldValue: appSettings.enableAI.toString(),
-                      );
-                      
-                      // Update the provider
-                      ref.read(appSettingsProvider.notifier).setEnableAI(value);
-                      
-                      // Update UI
-                      if (setDialogState != null) {
-                        setDialogState(() {});
-                      } else {
-                        setState(() {});
-                      }
-                    },
                   ),
                   const Divider(height: 24),
                   
@@ -1370,6 +1451,145 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return widgets;
   }
 
+  Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
+    // Determine if the user has provided their own key for the active text provider
+    final hasOwnKey = switch (_selectedTextProvider) {
+      AIProvider.gemini => _geminiApiKeyController.text.trim().isNotEmpty,
+      AIProvider.openAI => _openAIApiKeyController.text.trim().isNotEmpty,
+      AIProvider.groq => _groqApiKeyController.text.trim().isNotEmpty,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.history, color: Theme.of(context).colorScheme.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Chat History Limit',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              if (!hasOwnKey)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Free Tier',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            hasOwnKey
+                ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
+                : 'Without your own API key, the app uses our free service tier with a fixed limit of $defaultChatHistoryLimit past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (hasOwnKey) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Slider(
+                    value: _chatHistoryLimit.toDouble(),
+                    min: minChatHistoryLimit.toDouble(),
+                    max: maxChatHistoryLimit.toDouble(),
+                    divisions: maxChatHistoryLimit - minChatHistoryLimit,
+                    label: _chatHistoryLimit.toString(),
+                    onChanged: (value) {
+                      final newLimit = value.round();
+                      setState(() => _chatHistoryLimit = newLimit);
+                      if (setDialogState != null) {
+                        setDialogState(() => _chatHistoryLimit = newLimit);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 48,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$_chatHistoryLimit',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('$minChatHistoryLimit msg', style: Theme.of(context).textTheme.labelSmall),
+                Text('$maxChatHistoryLimit msgs', style: Theme.of(context).textTheme.labelSmall),
+              ],
+            ),
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Slider(
+                    value: defaultChatHistoryLimit.toDouble(),
+                    min: minChatHistoryLimit.toDouble(),
+                    max: maxChatHistoryLimit.toDouble(),
+                    divisions: maxChatHistoryLimit - minChatHistoryLimit,
+                    label: defaultChatHistoryLimit.toString(),
+                    onChanged: null, // disabled for free tier
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 48,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$defaultChatHistoryLimit',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildGeminiSettings([StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
@@ -1782,8 +2002,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           controller: _groqApiKeyController,
           obscureText: !_isGroqApiKeyVisible,
           decoration: InputDecoration(
-            labelText: 'Groq API Key',
+            labelText: developerGroqApiKey.isNotEmpty
+                ? 'Groq API Key (Optional)'
+                : 'Groq API Key',
             border: const OutlineInputBorder(),
+            helperText: developerGroqApiKey.isNotEmpty
+                ? 'Add your own key for dedicated rate limits and better performance.'
+                : null,
+            helperMaxLines: 2,
             suffixIcon: IconButton(
               icon: Icon(
                 _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,

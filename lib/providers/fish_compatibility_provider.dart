@@ -13,6 +13,8 @@ import '../utils/cancellable_completer.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -156,6 +158,19 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes);
 
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
+    }
+
     _cancellableCompleter = CancellableCompleter();
 
     try {
@@ -169,11 +184,11 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         _cancellableCompleter?.complete(response);
         responseText = response.text;
       } else if (models.activeProvider == AIProvider.groq) {
-        if (models.groqApiKey.isEmpty) {
+        if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
         final groq = GroqHelper.createClient(
-          apiKey: models.groqApiKey,
+          apiKey: models.effectiveGroqApiKey,
           model: models.groqModel,
         );
         final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
