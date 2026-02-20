@@ -846,7 +846,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(height: 6),
                           Text(
                             '• $devMaxRequestsPerMinute AI requests per minute\n'
-                            '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day',
+                            '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                            '• $defaultChatHistoryLimit-message chat history per request',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.amber.shade900,
                             ),
