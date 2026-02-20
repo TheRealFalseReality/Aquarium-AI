@@ -190,7 +190,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final history = state.messages.where((m) => !m.isAd && !m.isError).map((m) => OpenAIChatCompletionChoiceMessageModel(
+      // Limit history to the last 10 non-ad, non-error messages to reduce token usage.
+      final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final history = recentHistory.map((m) => OpenAIChatCompletionChoiceMessageModel(
           content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(m.text)],
           role: m.isUser ? OpenAIChatMessageRole.user : OpenAIChatMessageRole.assistant,
         )).toList();
