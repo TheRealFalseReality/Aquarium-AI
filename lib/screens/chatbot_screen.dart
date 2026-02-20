@@ -769,7 +769,12 @@ class MessageBubble extends ConsumerWidget {
                   Center(
                     child: InteractiveViewer(
                       maxScale: 5,
-                      child: Image.memory(photoBytes!),
+                      child: Image.memory(
+                        photoBytes!,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -876,6 +881,13 @@ class MessageBubble extends ConsumerWidget {
                                       height: 120,
                                       width: 180,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => const SizedBox(
+                                        height: 120,
+                                        width: 180,
+                                        child: Center(
+                                          child: Icon(Icons.broken_image_outlined, size: 40),
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       bottom: 4,

@@ -242,6 +242,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(Icons.broken_image_outlined, size: 48),
+                        ),
                       ),
                     ),
             ),
