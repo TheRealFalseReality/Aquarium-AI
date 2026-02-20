@@ -9,11 +9,13 @@ import 'package:groq/groq.dart';
 import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
+import '../models/fish_info_result.dart';
 import 'model_provider.dart';
 import '../prompts/system_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
+import '../prompts/fish_info_prompt.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
@@ -26,6 +28,7 @@ class ChatMessage {
   final WaterAnalysisResult? analysisResult;
   final AutomationScript? automationScript;
   final PhotoAnalysisResult? photoAnalysisResult;
+  final FishInfoResult? fishInfoResult;
   final Uint8List? photoBytes;
   final bool isError;
   final bool isRetryable;
@@ -39,6 +42,7 @@ class ChatMessage {
     this.analysisResult,
     this.automationScript,
     this.photoAnalysisResult,
+    this.fishInfoResult,
     this.photoBytes,
     this.isError = false,
     this.isRetryable = false,
@@ -125,6 +129,22 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = ChatState(messages: state.messages, isLoading: false);
   }
 
+  // Returns the missing-key error message for the active provider, or null if a key is set.
+  String? _missingApiKeyError() {
+    switch (_modelState.activeProvider) {
+      case AIProvider.gemini:
+        if (_modelState.geminiApiKey.isEmpty) return 'Gemini API Key is not set. Please add your key in Settings.';
+        break;
+      case AIProvider.openAI:
+        if (_modelState.openAIApiKey.isEmpty) return 'OpenAI API Key is not set. Please add your key in Settings.';
+        break;
+      case AIProvider.groq:
+        if (_modelState.groqApiKey.isEmpty) return 'Groq API Key is not set. Please add your key in Settings.';
+        break;
+    }
+    return null;
+  }
+
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) {
     switch (_modelState.activeProvider) {
@@ -206,6 +226,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
   
   // ================== Water Parameter Analysis ==================
   Future<WaterAnalysisResult?> analyzeWaterParameters(Map<String, String> params) async {
+    final keyError = _missingApiKeyError();
+    if (keyError != null) {
+      final userMsg = 'Please analyze my water parameters.';
+      await _handleError(keyError, userMsg);
+      return null;
+    }
     final userMsg = 'Please analyze my water parameters for my ${params['tankType']} tank.\n'
         'Temp: ${params['temp']}°${params['tempUnit']}'
         '${params['ph']!.isNotEmpty ? ', pH: ${params['ph']}' : ''}'
@@ -235,6 +261,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // ================== Automation Script ==================
   Future<AutomationScript?> generateAutomationScript(String description) async {
+    final keyError = _missingApiKeyError();
+    if (keyError != null) {
+      await _handleError(keyError, 'Generate an automation script.');
+      return null;
+    }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
     final prompt = buildAutomationScriptPrompt(description);
@@ -244,6 +275,48 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final script = AutomationScript.fromJson(decoded);
       state = ChatState(messages: [...state.messages, ChatMessage(text: 'Here is your automation script:', isUser: false, automationScript: script)], isLoading: false);
       return script;
+    } catch (e) {
+      if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
+      return null;
+    }
+  }
+
+  // ================== Fish Info ==================
+  Future<FishInfoResult?> getFishInfo({
+    required String fishNames,
+    String? tankSize,
+    String? additionalNotes,
+  }) async {
+    final keyError = _missingApiKeyError();
+    if (keyError != null) {
+      await _handleError(keyError, 'Look up fish info: $fishNames.');
+      return null;
+    }
+    final userMsg = 'Give me comprehensive information about: $fishNames'
+        '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
+        '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
+    _prepareForSending(userMsg);
+    final prompt = buildFishInfoPrompt(
+      fishNames: fishNames,
+      tankSize: tankSize,
+      additionalNotes: additionalNotes,
+    );
+    try {
+      final responseText = await _generateContent(prompt, expectJson: true);
+      final parsed = FishInfoResult.tryParseJson(extractJson(responseText));
+      if (parsed == null) throw const FormatException('Malformed JSON from AI fish info.');
+      state = ChatState(
+        messages: [
+          ...state.messages,
+          ChatMessage(
+            text: '🐟 Fish info lookup complete. Tap to view detailed results.',
+            isUser: false,
+            fishInfoResult: parsed,
+          ),
+        ],
+        isLoading: false,
+      );
+      return parsed;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
       return null;

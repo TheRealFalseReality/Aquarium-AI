@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
 import 'package:fish_ai/models/photo_analysis_result.dart';
+import 'package:fish_ai/models/fish_info_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -16,6 +17,8 @@ import './analysis_result_screen.dart';
 import './automation_script_result_screen.dart';
 import './photo_analysis_screen.dart';
 import './photo_analysis_result_screen.dart';
+import './fish_info_screen.dart';
+import './fish_info_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 import '../services/analytics_service.dart';
@@ -196,6 +199,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   analysisResult: item.analysisResult,
                   automationScript: item.automationScript,
                   photoAnalysisResult: item.photoAnalysisResult,
+                  fishInfoResult: item.fishInfoResult,
                   photoBytes: item.photoBytes,
                   isError: item.isError,
                   isRetryable: item.isRetryable,
@@ -572,6 +576,22 @@ Widget _suggestionMenu(BuildContext context) {
           },
         ),
         MiniAIChip(
+          label: l10n.fishInfo,
+          icon: Icons.manage_search_outlined,
+          customGradient: LinearGradient(
+            colors: [Colors.green.shade400, Colors.teal.shade400],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FishInfoScreen(),
+              ),
+            );
+            setState(() => _expandedMenu = null);
+          },
+        ),
+        MiniAIChip(
           label: l10n.photoAnalyzer,
           icon: Icons.camera_alt_outlined,
           customGradient: LinearGradient(
@@ -712,6 +732,7 @@ class MessageBubble extends ConsumerWidget {
   final WaterAnalysisResult? analysisResult;
   final AutomationScript? automationScript;
   final PhotoAnalysisResult? photoAnalysisResult;
+  final FishInfoResult? fishInfoResult;
   final Uint8List? photoBytes;
   final bool isError;
   final bool isRetryable;
@@ -725,6 +746,7 @@ class MessageBubble extends ConsumerWidget {
     this.analysisResult,
     this.automationScript,
     this.photoAnalysisResult,
+    this.fishInfoResult,
     this.photoBytes,
     this.isError = false,
     this.isRetryable = false,
@@ -941,6 +963,19 @@ class MessageBubble extends ConsumerWidget {
                       result: photoAnalysisResult!,
                       photoBytes: photoBytes,
                     ),
+                  ),
+                );
+              },
+            ),
+          if (fishInfoResult != null)
+            _ResultButton(
+              label: l10n.viewFishInfo,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        FishInfoResultScreen(result: fishInfoResult!),
                   ),
                 );
               },

@@ -5,16 +5,21 @@
   "welcomeSubtitle": "Ihr intelligenter Assistent für alles rund ums Aquarium.",
   "aiCompatibilityTool": "KI-Kompatibilitätstool",
   "aiCompatibilityDescription": "Greifen Sie auf unsere Datenbank mit über 69 Arten zu, um sofortige KI-gestützte Kompatibilitätsberichte zu erhalten. Erhalten Sie detaillierte Pflegeanleitungen, Verhaltenseinblicke und Tankparameter-Empfehlungen für eine friedliche Gemeinschaftsplanung.",
+  "aiCompatibilityDrawerDescription": "Erhalten Sie sofortige Kompatibilitätsberichte für 69+ Arten mit Pflegeanleitungen und Empfehlungen.",
   "aiChatbot": "KI-Chatbot",
   "aiChatbotDescription": "Ihr 24/7 Aquarium-Experte angetrieben von fortschrittlicher KI. Stellen Sie Fragen zur Fischpflege, beheben Sie Wasserchemie-Probleme, erhalten Sie Hilfe bei Krankheitsdiagnosen und individuelle Wartungspläne für Ihre Konfiguration.",
+  "aiChatbotDrawerDescription": "Fragen Sie zu Fischpflege, Wasserchemie und Krankheitsdiagnose. Erhalten Sie fachkundige Beratung für Ihre Konfiguration.",
   "photoAnalyzer": "Foto-Analysator",
   "photoAnalyzerDescription": "Laden Sie Fotos für sofortige KI-Analyse hoch. Identifizieren Sie unbekannte Fischarten, erkennen Sie potenzielle Gesundheitsprobleme, bewerten Sie die Wasserklarheit und erhalten Sie spezifische Empfehlungen zur Verbesserung Ihrer Aquarienbedingungen.",
   "aiStockingAssistant": "KI-Besatzassistent",
   "aiStockingDescription": "Planen Sie Ihr Traum-Aquarium mit Zuversicht. Erhalten Sie personalisierte Besatzempfehlungen basierend auf Ihrer Aquariengröße, Wasserart und Erfahrungsniveau. Vermeiden Sie Überbelegung beim Aufbau einer ausgewogenen, blühenden Gemeinschaft.",
+  "aiStockingDrawerDescription": "Erhalten Sie personalisierte Besatzempfehlungen basierend auf Aquariengröße, Wasserart und Erfahrungsniveau.",
   "aquariumCalculators": "Aquarium-Rechner",
   "aquariumCalculatorsDescription": "Präzisionswerkzeuge für ernsthafte Aquarianer. Konvertieren und berechnen Sie Salzgehalt (PPT/SG), CO₂-Werte (KH/pH-Methode), Alkalität (dKH/ppm) und Temperatur (°F/°C) mit sofortigen Ergebnissen.",
+  "aquariumCalculatorsDrawerDescription": "Berechnen Sie Salzgehalt (PPT/SG), CO₂ (KH/pH), Alkalität (dKH/ppm) und Temperatur (°F/°C) sofort.",
   "tankVolumeCalculator": "Beckenvolumen-Rechner",
   "tankVolumeDescription": "Berechnen Sie präzise das Wasservolumen und -gewicht für rechteckige, Bug-Front-, zylindrische und kundenspezifische Beckenformen. Unterstützung für Gallonen und Liter mit präzisen Maßeingaben.",
+  "tankVolumeDrawerDescription": "Berechnen Sie Wasservolumen und -gewicht für rechteckige, Bug-Front-, zylindrische und individuelle Beckenformen.",
   "aquaPiStore": "AquaPi Store",
   "aquaPiStoreDescription": "Entdecken Sie AquaPi, den ultimativen intelligenten Aquarium-Controller. Überwachen und steuern Sie Ihre Aquarium-Parameter mit automatisierten Tests, Echtzeit-Benachrichtigungen und nahtloser Integration.",
   "myTanks": "Meine Aquarien",
@@ -403,6 +408,7 @@
   "viewAnalysis": "Analyse Anzeigen",
   "viewScript": "Skript Anzeigen",
   "viewPhotoAnalysis": "Fotoanalyse Anzeigen",
+  "viewFishInfo": "Fischinfo Anzeigen",
 
   "addNotesPlaceholder": "Fügen Sie zusätzliche Notizen hinzu...",
   "addNotification": "Benachrichtigung Hinzufügen",
@@ -479,7 +485,18 @@
   "qty": "Anz",
   
   "createdLabel": "Erstellt",
-  "inhabitantsLabel": "Bewohner"
+  "inhabitantsLabel": "Bewohner",
+
+  "fishInfo": "Fischinfo",
+  "aiFishInfoLookup": "KI-Fischinformationen",
+  "fishInfoDescription": "Geben Sie einen oder mehrere Fischnamen ein, um umfassende Informationen zu erhalten, einschließlich lateinischem Namen, Herkunft, Fakten, Spaßfakten, Pflege im Aquarium und kompatiblen Tankgenossen.",
+  "fishNamesLabel": "Fischnamen",
+  "fishNamesHint": "z. B. Clownfisch, Neon Tetra, Betta splendens",
+  "pleaseEnterFishName": "Bitte mindestens einen Fischnamen eingeben",
+  "tankSizeOptional": "Beckengröße (Optional)",
+  "tankSizeHint": "z. B. 80 Liter, 20 Gallonen",
+  "fishInfoAdditionalNotesHint": "z. B. aggressives Becken, bepflanztes Becken, Anfänger-Setup",
+  "lookUpFishInfo": "Fischinformationen abrufen"
 }
 
 

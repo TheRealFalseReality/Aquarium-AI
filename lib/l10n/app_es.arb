@@ -5,16 +5,21 @@
   "welcomeSubtitle": "Tu asistente inteligente para todo lo acuático.",
   "aiCompatibilityTool": "Herramienta de Compatibilidad IA",
   "aiCompatibilityDescription": "Accede a nuestra base de datos de más de 69 especies para obtener informes de compatibilidad instantáneos impulsados por IA. Recibe guías de cuidado detalladas, información sobre comportamiento y recomendaciones de parámetros del tanque para una planificación de comunidad pacífica.",
+  "aiCompatibilityDrawerDescription": "Obtén informes de compatibilidad instantáneos para 69+ especies con guías de cuidado y recomendaciones.",
   "aiChatbot": "Chatbot IA",
   "aiChatbotDescription": "Tu experto en acuarios 24/7 impulsado por IA avanzada. Haz preguntas sobre el cuidado de peces, soluciona problemas de química del agua, obtén ayuda con diagnósticos de enfermedades y recibe programas de mantenimiento adaptados a tu configuración.",
+  "aiChatbotDrawerDescription": "Pregunta sobre cuidado de peces, química del agua y diagnóstico de enfermedades. Obtén asesoramiento experto adaptado a tu configuración.",
   "photoAnalyzer": "Analizador de Fotos",
   "photoAnalyzerDescription": "Sube fotos para análisis instantáneo con IA. Identifica especies de peces desconocidas, detecta problemas potenciales de salud, evalúa la claridad del agua y obtén recomendaciones específicas para mejorar las condiciones de tu acuario.",
   "aiStockingAssistant": "Asistente de Poblado IA",
   "aiStockingDescription": "Planifica tu tanque soñado con confianza. Obtén recomendaciones personalizadas de población basadas en el tamaño de tu tanque, tipo de agua y nivel de experiencia. Evita el hacinamiento mientras construyes una comunidad equilibrada y próspera.",
+  "aiStockingDrawerDescription": "Obtén recomendaciones personalizadas de población según el tamaño del tanque, tipo de agua y nivel de experiencia.",
   "aquariumCalculators": "Calculadoras de Acuario",
   "aquariumCalculatorsDescription": "Herramientas de precisión para acuaristas serios. Convierte y calcula salinidad (PPT/SG), niveles de CO₂ (método KH/pH), alcalinidad (dKH/ppm) y temperatura (°F/°C) con resultados instantáneos.",
+  "aquariumCalculatorsDrawerDescription": "Calcula salinidad (PPT/SG), CO₂ (KH/pH), alcalinidad (dKH/ppm) y temperatura (°F/°C) al instante.",
   "tankVolumeCalculator": "Calculadora de Volumen del Tanque",
   "tankVolumeDescription": "Calcula con precisión el volumen y peso del agua para tanques rectangulares, de arco frontal, cilíndricos y formas personalizadas. Compatible con galones y litros con entradas dimensionales precisas.",
+  "tankVolumeDrawerDescription": "Calcula el volumen y peso del agua para tanques rectangulares, de arco frontal, cilíndricos y formas personalizadas.",
   "aquaPiStore": "Tienda AquaPi",
   "aquaPiStoreDescription": "Descubre AquaPi, el controlador inteligente definitivo para acuarios. Monitorea y controla los parámetros de tu acuario con pruebas automatizadas, alertas en tiempo real e integración perfecta.",
   "myTanks": "Mis Acuarios",
@@ -403,6 +408,7 @@
   "viewAnalysis": "Ver Análisis",
   "viewScript": "Ver Script",
   "viewPhotoAnalysis": "Ver Análisis de Foto",
+  "viewFishInfo": "Ver Info del Pez",
 
   "addNotesPlaceholder": "Agregar notas adicionales...",
   "addNotification": "Agregar Notificación",
@@ -479,7 +485,18 @@
   "qty": "Cant",
   
   "createdLabel": "Creado",
-  "inhabitantsLabel": "Habitantes"
+  "inhabitantsLabel": "Habitantes",
+
+  "fishInfo": "Info del Pez",
+  "aiFishInfoLookup": "Búsqueda de Info de Peces con IA",
+  "fishInfoDescription": "Ingresa el nombre de un pez o varios peces para obtener información completa, incluyendo nombre latino, origen, datos curiosos, cuidados en el acuario y compañeros compatibles.",
+  "fishNamesLabel": "Nombre(s) del Pez",
+  "fishNamesHint": "p. ej., Pez Payaso, Tetra Neón, Betta splendens",
+  "pleaseEnterFishName": "Por favor, ingresa al menos un nombre de pez",
+  "tankSizeOptional": "Tamaño del Acuario (Opcional)",
+  "tankSizeHint": "p. ej., 75 litros, 20 galones",
+  "fishInfoAdditionalNotesHint": "p. ej., acuario agresivo, acuario plantado, configuración para principiantes",
+  "lookUpFishInfo": "Buscar Info del Pez"
 }
 
 
