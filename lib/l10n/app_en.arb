@@ -22,7 +22,12 @@
   
   "aiCompatibilityDescription": "Access our database of 69+ species to get instant, AI-powered compatibility reports. Receive detailed care guides, behavioral insights, and tank parameter recommendations for peaceful community planning.",
   "@aiCompatibilityDescription": {
-    "description": "Description of the AI compatibility tool"
+    "description": "Description of the AI compatibility tool (welcome screen)"
+  },
+
+  "aiCompatibilityDrawerDescription": "Get instant compatibility reports for 69+ species with care guides and recommendations.",
+  "@aiCompatibilityDrawerDescription": {
+    "description": "Short description of the AI compatibility tool (app drawer)"
   },
   
   "aiChatbot": "AI Chatbot",
@@ -32,7 +37,12 @@
   
   "aiChatbotDescription": "Your 24/7 aquarium expert powered by advanced AI. Ask questions about fish care, troubleshoot water chemistry issues, get disease diagnosis help, and receive maintenance schedules tailored to your setup.",
   "@aiChatbotDescription": {
-    "description": "Description of the AI chatbot"
+    "description": "Description of the AI chatbot (welcome screen)"
+  },
+
+  "aiChatbotDrawerDescription": "Ask about fish care, water chemistry, and disease diagnosis. Get expert advice tailored to your setup.",
+  "@aiChatbotDrawerDescription": {
+    "description": "Short description of the AI chatbot (app drawer)"
   },
   
   "photoAnalyzer": "Photo Analyzer",
@@ -42,7 +52,7 @@
   
   "photoAnalyzerDescription": "Upload photos for instant AI analysis. Identify unknown fish species, detect potential health issues, assess water clarity, and get specific recommendations to improve your aquarium conditions.",
   "@photoAnalyzerDescription": {
-    "description": "Description of the photo analyzer"
+    "description": "Description of the photo analyzer (welcome screen)"
   },
   
   "aiStockingAssistant": "AI Stocking Assistant",
@@ -52,7 +62,12 @@
   
   "aiStockingDescription": "Plan your dream tank with confidence. Get personalized stocking recommendations based on your tank size, water type, and experience level. Avoid overcrowding while building a balanced, thriving community.",
   "@aiStockingDescription": {
-    "description": "Description of the AI stocking assistant"
+    "description": "Description of the AI stocking assistant (welcome screen)"
+  },
+
+  "aiStockingDrawerDescription": "Get personalized stocking recommendations based on your tank size, water type, and experience level.",
+  "@aiStockingDrawerDescription": {
+    "description": "Short description of the AI stocking assistant (app drawer)"
   },
   
   "aquariumCalculators": "Aquarium Calculators",
@@ -62,7 +77,12 @@
   
   "aquariumCalculatorsDescription": "Precision tools for serious aquarists. Convert and calculate salinity (PPT/SG), CO₂ levels (KH/pH method), alkalinity (dKH/ppm), and temperature (°F/°C) with instant results.",
   "@aquariumCalculatorsDescription": {
-    "description": "Description of the aquarium calculators"
+    "description": "Description of the aquarium calculators (welcome screen)"
+  },
+
+  "aquariumCalculatorsDrawerDescription": "Calculate salinity (PPT/SG), CO₂ (KH/pH), alkalinity (dKH/ppm), and temperature (°F/°C) instantly.",
+  "@aquariumCalculatorsDrawerDescription": {
+    "description": "Short description of the aquarium calculators (app drawer)"
   },
   
   "tankVolumeCalculator": "Tank Volume Calculator",
@@ -72,7 +92,12 @@
   
   "tankVolumeDescription": "Accurately calculate water volume and weight for rectangular, bow-front, cylindrical, and custom tank shapes. Support for both gallons and liters with precise dimensional inputs.",
   "@tankVolumeDescription": {
-    "description": "Description of the tank volume calculator"
+    "description": "Description of the tank volume calculator (welcome screen)"
+  },
+
+  "tankVolumeDrawerDescription": "Calculate water volume and weight for rectangular, bow-front, cylindrical, and custom shapes.",
+  "@tankVolumeDrawerDescription": {
+    "description": "Short description of the tank volume calculator (app drawer)"
   },
   
   "aquaPiStore": "AquaPi Store",
@@ -82,7 +107,7 @@
   
   "aquaPiStoreDescription": "Discover AquaPi, the ultimate smart aquarium controller. Monitor and control your aquarium parameters with automated testing, real-time alerts, and seamless integration.",
   "@aquaPiStoreDescription": {
-    "description": "Description of the AquaPi store"
+    "description": "Description of the AquaPi store (welcome screen)"
   },
   
   "myTanks": "My Tanks",

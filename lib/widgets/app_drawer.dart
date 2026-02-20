@@ -253,7 +253,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
                         title: Text(l10n.aiCompatibilityTool),
                         subtitle:
-                            Text(l10n.aiCompatibilityDescription),
+                            Text(l10n.aiCompatibilityDrawerDescription),
                         onTap: () => navigate('/compat-ai'),
                       ),
                     ),
@@ -273,7 +273,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       child: ListTile(
                         leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
                         title: Text(l10n.aiChatbot),
-                        subtitle: Text(l10n.aiChatbotDescription),
+                        subtitle: Text(l10n.aiChatbotDrawerDescription),
                         onTap: () => navigate('/chatbot'),
                       ),
                     ),
@@ -293,7 +293,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       child: ListTile(
                         leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
                         title: Text(l10n.aiStockingAssistant),
-                        subtitle: Text(l10n.aiStockingDescription),
+                        subtitle: Text(l10n.aiStockingDrawerDescription),
                         onTap: () => navigate('/stocking'),
                       ),
                     ),
@@ -346,7 +346,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
                       title: Text(l10n.aquariumCalculators),
                       subtitle:
-                          Text(l10n.aquariumCalculatorsDescription),
+                          Text(l10n.aquariumCalculatorsDrawerDescription),
                       onTap: () => navigate('/calculators'),
                     ),
                   ),
@@ -367,7 +367,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
                       title: Text(l10n.tankVolumeCalculator),
                       subtitle:
-                          Text(l10n.tankVolumeDescription),
+                          Text(l10n.tankVolumeDrawerDescription),
                       onTap: () => navigate('/tank-volume'),
                     ),
                   ),
@@ -405,13 +405,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           AnimatedDrawerItem(
             delay: const Duration(milliseconds: 550),
             child: _buildCollapsibleThemeMenu(),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Divider(
-              color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-              thickness: 1,
-            ),
           ),
           _buildDrawerFooter(context, navigate),
         ],
