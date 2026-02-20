@@ -498,7 +498,9 @@
   "tankSizeOptional": "Tamaño del Acuario (Opcional)",
   "tankSizeHint": "p. ej., 75 litros, 20 galones",
   "fishInfoAdditionalNotesHint": "p. ej., acuario agresivo, acuario plantado, configuración para principiantes",
-  "lookUpFishInfo": "Buscar Info del Pez"
+  "lookUpFishInfo": "Buscar Info del Pez",
+  "changelog": "Novedades",
+  "changelogDesc": "Ver las últimas notas de versión y actualizaciones"
 }
 
 

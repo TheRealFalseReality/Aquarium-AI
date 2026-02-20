@@ -499,7 +499,9 @@
   "tankSizeOptional": "Taille du Bac (Optionnel)",
   "tankSizeHint": "ex. 75 litres, 20 gallons",
   "fishInfoAdditionalNotesHint": "ex. bac agressif, bac planté, configuration débutant",
-  "lookUpFishInfo": "Rechercher Info Poisson"
+  "lookUpFishInfo": "Rechercher Info Poisson",
+  "changelog": "Nouveautés",
+  "changelogDesc": "Voir les dernières notes de version et mises à jour"
 }
 
 
