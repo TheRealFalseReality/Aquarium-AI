@@ -843,9 +843,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               color: Colors.amber.shade900,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
-                            'Add your own Groq API key below to remove these limits.',
+                            'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.amber.shade800,
                               fontStyle: FontStyle.italic,
