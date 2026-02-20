@@ -6,7 +6,7 @@ const String developerGroqApiKey =
     String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
 
 // Default model constants
-const String geminiModelDefault = 'gemini-flash-lite-latest';
+const String geminiModelDefault = 'gemini-flash-latest';
 const String geminiImageModelDefault = 'gemini-flash-latest';
 const String openAIModelDefault = 'gpt-4o';
 const String openAIImageModelDefault = 'gpt-4-vision-preview';
