@@ -85,19 +85,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   final ModelState _modelState;
-  ChatSession? _geminiChatSession;
-  Groq? _groqChatSession;
+
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
+
+  /// Returns the effective chat history limit.
+  /// Users who supply their own API key for the active text provider use their
+  /// configured [ModelState.chatHistoryLimit]. Everyone else (free service tier
+  /// with no personal key) is hard-capped at [defaultChatHistoryLimit] (3).
+  int get _historyLimit {
+    final hasOwnKey = switch (_modelState.activeTextProvider) {
+      AIProvider.gemini => _modelState.geminiApiKey.isNotEmpty,
+      AIProvider.openAI => _modelState.openAIApiKey.isNotEmpty,
+      AIProvider.groq => _modelState.groqApiKey.isNotEmpty,
+    };
+    return hasOwnKey ? _modelState.chatHistoryLimit : defaultChatHistoryLimit;
+  }
 
   void _initializeProvider() {
     // Collect all distinct providers needed (text and image may be the same or different).
     // Each provider is initialized at most once even if selected for both roles.
     final selectedProviders = {_modelState.activeTextProvider, _modelState.activeImageProvider};
-    if (selectedProviders.contains(AIProvider.gemini) && _modelState.geminiApiKey.isNotEmpty) {
-      _initGeminiSession();
-    }
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
@@ -185,11 +194,30 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGeminiMessage(String message, {bool isRetry = false}) async {
-    if (_geminiChatSession == null) return _handleError('Gemini session not initialized. API key might be missing or invalid.', message);
+    if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _geminiChatSession!.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
+      // Build a fresh session each request with the last N non-ad, non-error
+      // messages (excluding the current one just added by _prepareForSending)
+      // as seed history, so the session never accumulates unbounded tokens.
+      final allMessages = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      // Drop the current user message (last entry added by _prepareForSending).
+      final priorMessages = allMessages.length > 1 ? allMessages.sublist(0, allMessages.length - 1) : <ChatMessage>[];
+      final limit = _historyLimit;
+      final recentHistory = priorMessages.length > limit ? priorMessages.sublist(priorMessages.length - limit) : priorMessages;
+      final seedHistory = [
+        Content.model([TextPart(systemPrompt)]),
+        ...recentHistory.map((m) => m.isUser
+            ? Content.text(m.text)
+            : Content.model([TextPart(m.text)])),
+      ];
+      final model = GenerativeModel(
+        model: _modelState.geminiModel,
+        apiKey: _modelState.geminiApiKey,
+      );
+      final session = model.startChat(history: seedHistory);
+      final response = await session.sendMessage(Content.text(message)).timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
       if (response.text == null) throw Exception('No response received from Gemini');
       _processTextResponse(response.text!);
@@ -202,9 +230,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 10 non-ad, non-error messages to reduce token usage.
+      // Limit history to the last N non-ad, non-error messages to reduce token usage.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
       final history = recentHistory.map((m) => OpenAIChatCompletionChoiceMessageModel(
           content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(m.text)],
           role: m.isUser ? OpenAIChatMessageRole.user : OpenAIChatMessageRole.assistant,
@@ -227,13 +256,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (_groqChatSession == null) return _handleError('Groq session not initialized. API key might be missing or invalid.', message);
+    if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _groqChatSession!.sendMessage(message).timeout(const Duration(seconds: 30));
-      _cancellable?.complete(response);
-      final responseText = response.choices.first.message.content;
+      // Limit history to the last N non-ad, non-error messages to reduce token
+      // usage. The current user message was already added to state.messages by
+      // _prepareForSending, so it is included within this window.
+      final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
+      final messages = recentHistory.map((m) => {
+        'role': m.isUser ? 'user' : 'assistant',
+        'content': m.text,
+      }).toList();
+
+      final responseText = await GroqHelper.sendChatMessages(
+        apiKey: _modelState.groqApiKey,
+        model: _modelState.groqModel,
+        systemPrompt: systemPrompt,
+        messages: messages,
+      );
+      _cancellable?.complete(responseText);
+      if (responseText == null) throw Exception('No response received from Groq');
       _processTextResponse(responseText);
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), message);
