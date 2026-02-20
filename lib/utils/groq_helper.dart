@@ -45,6 +45,70 @@ class GroqHelper {
     return groq;
   }
 
+  /// Sends a chat request with an explicit message history to Groq's chat
+  /// completions endpoint.
+  ///
+  /// This method constructs the full messages array manually so callers can
+  /// limit history to a fixed number of exchanges, preventing unbounded token
+  /// growth over long conversations.
+  ///
+  /// Parameters:
+  /// - [apiKey]: The Groq API key
+  /// - [model]: The Groq model to use (e.g., 'llama-3.1-8b-instant')
+  /// - [systemPrompt]: The system prompt to include as the first message
+  /// - [messages]: Ordered list of prior messages, each a map with 'role'
+  ///   ('user' or 'assistant') and 'content' keys
+  /// - [timeout]: Timeout duration for the request (default: 30 seconds)
+  /// - [httpClient]: Optional HTTP client, primarily used for testing. If not
+  ///   provided, a default [http.Client] is created.
+  ///
+  /// Returns the assistant's reply text, or null if no content was returned.
+  /// Throws an [Exception] if the API returns a non-200 status.
+  static Future<String?> sendChatMessages({
+    required String apiKey,
+    required String model,
+    required String systemPrompt,
+    required List<Map<String, String>> messages,
+    Duration timeout = const Duration(seconds: 30),
+    http.Client? httpClient,
+  }) async {
+    final client = httpClient ?? http.Client();
+    final requestBody = jsonEncode({
+      'model': model,
+      'messages': [
+        {'role': 'system', 'content': systemPrompt},
+        ...messages,
+      ],
+    });
+
+    final http.Response response;
+    try {
+      response = await client.post(
+        Uri.parse(_groqChatEndpoint),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: requestBody,
+      ).timeout(timeout);
+    } finally {
+      if (httpClient == null) client.close();
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('Groq chat API error (${response.statusCode}): ${response.body}');
+    }
+
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final choices = decoded['choices'] as List?;
+    if (choices == null || choices.isEmpty) return null;
+    final firstChoice = choices.first;
+    if (firstChoice is! Map) return null;
+    final message = firstChoice['message'];
+    if (message is! Map) return null;
+    return message['content'] as String?;
+  }
+
   /// Sends a vision (image + text) request directly to Groq's chat completions
   /// endpoint using the `http` package.
   ///

@@ -84,7 +84,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   final ModelState _modelState;
   ChatSession? _geminiChatSession;
-  Groq? _groqChatSession;
+
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
@@ -99,9 +99,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
-    if (selectedProviders.contains(AIProvider.groq) && _modelState.groqApiKey.isNotEmpty) {
-      _initGroqSession();
-    }
   }
 
   void _initGeminiSession() {
@@ -112,15 +109,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
     _geminiChatSession = model.startChat(
       history: [Content.model([TextPart(systemPrompt)])],
-    );
-  }
-  
-  void _initGroqSession() {
-    if (_modelState.groqApiKey.isEmpty) return;
-    _groqChatSession = GroqHelper.createClient(
-      apiKey: _modelState.groqApiKey,
-      model: _modelState.groqModel,
-      systemPrompt: systemPrompt,
     );
   }
 
@@ -215,13 +203,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (_groqChatSession == null) return _handleError('Groq session not initialized. API key might be missing or invalid.', message);
+    if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      final response = await _groqChatSession!.sendMessage(message).timeout(const Duration(seconds: 30));
-      _cancellable?.complete(response);
-      final responseText = response.choices.first.message.content;
+      // Limit history to the last 10 non-ad, non-error messages to reduce token
+      // usage. The current user message was already added to state.messages by
+      // _prepareForSending, so it is included within this window.
+      final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
+      final recentHistory = allHistory.length > 10 ? allHistory.sublist(allHistory.length - 10) : allHistory;
+      final messages = recentHistory.map((m) => {
+        'role': m.isUser ? 'user' : 'assistant',
+        'content': m.text,
+      }).toList();
+
+      final responseText = await GroqHelper.sendChatMessages(
+        apiKey: _modelState.groqApiKey,
+        model: _modelState.groqModel,
+        systemPrompt: systemPrompt,
+        messages: messages,
+      );
+      _cancellable?.complete(responseText);
+      if (responseText == null) throw Exception('No response received from Groq');
       _processTextResponse(responseText);
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), message);
