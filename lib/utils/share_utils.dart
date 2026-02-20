@@ -6,6 +6,11 @@ import '../models/fish_info_result.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/stocking_recommendation.dart';
 
+const _appFooter =
+    '\n─────────────────────\n'
+    'Shared via Aquarium AI\n'
+    'Get the app: https://play.google.com/store/apps/details?id=com.cca.fishai';
+
 /// Converts a [WaterAnalysisResult] to a plain-text summary and shares it.
 Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {
   final buffer = StringBuffer();
@@ -25,6 +30,7 @@ Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {
 
   buffer.writeln('How AquaPi Can Help:');
   buffer.writeln(result.howAquaPiHelps);
+  buffer.write(_appFooter);
 
   await Share.share(
     buffer.toString(),
@@ -84,6 +90,7 @@ Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
   buffer.writeln();
   buffer.writeln('How AquaPi Can Help:');
   buffer.writeln(result.howAquaPiHelps);
+  buffer.write(_appFooter);
 
   await Share.share(
     buffer.toString(),
@@ -125,6 +132,7 @@ Future<void> shareCompatibilityReport(CompatibilityReport report) async {
   buffer.writeln();
   buffer.writeln('Care Guide:');
   buffer.writeln(report.careGuide);
+  buffer.write(_appFooter);
 
   await Share.share(
     buffer.toString(),
@@ -158,6 +166,7 @@ Future<void> shareStockingReport(StockingRecommendation report) async {
       buffer.writeln(report.aiRecommendedTankMates.join(', '));
     }
   }
+  buffer.write(_appFooter);
 
   await Share.share(
     buffer.toString(),
@@ -228,6 +237,7 @@ Future<void> shareFishInfoResult(FishInfoResult result) async {
       buffer.writeln();
     }
   }
+  buffer.write(_appFooter);
 
   await Share.share(
     buffer.toString(),
