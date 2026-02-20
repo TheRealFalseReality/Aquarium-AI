@@ -26,8 +26,7 @@ import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
-import './water_parameter_analysis_screen.dart';
-import './fish_info_screen.dart';
+
 
 class _ToolChipInfo {
   final String label;
@@ -332,21 +331,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             _ToolChipInfo(
               label: l10n.waterAnalysis,
               icon: Icons.water_drop_outlined,
-              onTap: () => Navigator.push(
+              onTap: () => Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const WaterParameterAnalysisScreen(),
-                ),
+                '/chatbot',
+                arguments: {'openWaterAnalysis': true},
               ),
             ),
             _ToolChipInfo(
               label: l10n.fishInfo,
               icon: Icons.manage_search_outlined,
-              onTap: () => Navigator.push(
+              onTap: () => Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const FishInfoScreen(),
-                ),
+                '/chatbot',
+                arguments: {'openFishInfo': true},
               ),
             ),
           ],
