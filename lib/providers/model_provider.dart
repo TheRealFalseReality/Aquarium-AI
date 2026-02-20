@@ -24,7 +24,10 @@ class ModelState {
   final String groqModel;
   final String groqImageModel;
   final String groqApiKey;
-  final AIProvider activeProvider;
+  /// Provider used for text/chat operations
+  final AIProvider activeTextProvider;
+  /// Provider used for image/multimedia analysis operations
+  final AIProvider activeImageProvider;
   final bool isLoading;
 
   ModelState({
@@ -37,9 +40,13 @@ class ModelState {
     required this.groqModel,
     required this.groqImageModel,
     required this.groqApiKey,
-    required this.activeProvider,
+    required this.activeTextProvider,
+    required this.activeImageProvider,
     this.isLoading = true,
   });
+
+  /// Convenience getter: returns the text provider (kept for backward compat)
+  AIProvider get activeProvider => activeTextProvider;
 }
 
 // 2. Create the Notifier
@@ -55,7 +62,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
           groqModel: defaultGroqModel,
           groqImageModel: defaultGroqImageModel,
           groqApiKey: '',
-          activeProvider: defaultAIProvider,
+          activeTextProvider: defaultAIProvider,
+          activeImageProvider: defaultAIProvider,
         )) {
     _loadModels();
   }
@@ -74,8 +82,12 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final groqImageModel =
         prefs.getString('groqImageModel') ?? defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
-    final activeProvider = AIProvider
-        .values[prefs.getInt('activeProvider') ?? defaultAIProvider.index];
+    // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
+    final legacyProviderIndex = prefs.getInt('activeProvider');
+    final activeTextProvider = AIProvider.values[
+        prefs.getInt('activeTextProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
+    final activeImageProvider = AIProvider.values[
+        prefs.getInt('activeImageProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
 
     state = ModelState(
       geminiModel: geminiModel,
@@ -87,7 +99,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: groqModel,
       groqImageModel: groqImageModel,
       groqApiKey: groqApiKey,
-      activeProvider: activeProvider,
+      activeTextProvider: activeTextProvider,
+      activeImageProvider: activeImageProvider,
       isLoading: false,
     );
   }
@@ -102,7 +115,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     required String newGroqModel,
     required String newGroqImageModel,
     required String newGroqApiKey,
-    required AIProvider newActiveProvider,
+    required AIProvider newActiveTextProvider,
+    required AIProvider newActiveImageProvider,
   }) async {
     if (newGeminiModel.isEmpty ||
         newGeminiImageModel.isEmpty ||
@@ -123,7 +137,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setString('groqModel', newGroqModel);
     await prefs.setString('groqImageModel', newGroqImageModel);
     await prefs.setString('groqApiKey', newGroqApiKey);
-    await prefs.setInt('activeProvider', newActiveProvider.index);
+    await prefs.setInt('activeTextProvider', newActiveTextProvider.index);
+    await prefs.setInt('activeImageProvider', newActiveImageProvider.index);
 
     state = ModelState(
       geminiModel: newGeminiModel,
@@ -135,7 +150,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: newGroqModel,
       groqImageModel: newGroqImageModel,
       groqApiKey: newGroqApiKey,
-      activeProvider: newActiveProvider,
+      activeTextProvider: newActiveTextProvider,
+      activeImageProvider: newActiveImageProvider,
       isLoading: false,
     );
   }
@@ -150,7 +166,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.remove('groqModel');
     await prefs.remove('groqImageModel');
 
-    // Set the state back to the default models, but keep the existing API keys and provider
+    // Set the state back to the default models, but keep the existing API keys and providers
     state = ModelState(
       geminiModel: defaultGeminiModel,
       geminiImageModel: defaultGeminiImageModel,
@@ -161,7 +177,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: defaultGroqModel,
       groqImageModel: defaultGroqImageModel,
       groqApiKey: state.groqApiKey,
-      activeProvider: state.activeProvider,
+      activeTextProvider: state.activeTextProvider,
+      activeImageProvider: state.activeImageProvider,
       isLoading: false,
     );
   }

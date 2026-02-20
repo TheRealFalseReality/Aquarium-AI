@@ -27,7 +27,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _groqModelController;
   late final TextEditingController _groqImageModelController;
   late final TextEditingController _groqApiKeyController;
-  AIProvider _selectedProvider = AIProvider.gemini;
+  AIProvider _selectedTextProvider = AIProvider.gemini;
+  AIProvider _selectedImageProvider = AIProvider.gemini;
 
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
@@ -49,7 +50,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _groqImageModelController =
         TextEditingController(text: models.groqImageModel);
     _groqApiKeyController = TextEditingController(text: models.groqApiKey);
-    _selectedProvider = models.activeProvider;
+    _selectedTextProvider = models.activeTextProvider;
+    _selectedImageProvider = models.activeImageProvider;
   }
 
   @override
@@ -244,28 +246,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _saveSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    // Validation Check: Ensure the API key for the selected provider is not empty.
-    if (_selectedProvider == AIProvider.gemini &&
+    // Validation Check: Ensure the API key for the selected text provider is not empty.
+    if (_selectedTextProvider == AIProvider.gemini &&
         _geminiApiKeyController.text.trim().isEmpty) {
       context.showAccessibleMessage(l10n.enterGeminiApiKey);
       return; // Stop the function
     }
-    if (_selectedProvider == AIProvider.openAI &&
+    if (_selectedTextProvider == AIProvider.openAI &&
         _openAIApiKeyController.text.trim().isEmpty) {
       context.showAccessibleMessage(l10n.enterOpenAIApiKey);
       return; // Stop the function
     }
-    if (_selectedProvider == AIProvider.groq &&
+    if (_selectedTextProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
+    }
+    // Also validate API key for image provider if different from text provider
+    if (_selectedImageProvider != _selectedTextProvider) {
+      if (_selectedImageProvider == AIProvider.gemini &&
+          _geminiApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterGeminiApiKey);
+        return;
+      }
+      if (_selectedImageProvider == AIProvider.openAI &&
+          _openAIApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterOpenAIApiKey);
+        return;
+      }
+      if (_selectedImageProvider == AIProvider.groq &&
+          _groqApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterGroqApiKey);
+        return;
+      }
     }
 
     // Log settings save
     AnalyticsService.logFeatureUsed(
       featureName: 'settings_save',
       parameters: {
-        'provider': _selectedProvider.toString(),
+        'text_provider': _selectedTextProvider.toString(),
+        'image_provider': _selectedImageProvider.toString(),
         'has_api_key': 'true', // We validated it exists above
       },
     );
@@ -281,7 +302,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newGroqModel: _groqModelController.text,
           newGroqImageModel: _groqImageModelController.text,
           newGroqApiKey: _groqApiKeyController.text,
-          newActiveProvider: _selectedProvider,
+          newActiveTextProvider: _selectedTextProvider,
+          newActiveImageProvider: _selectedImageProvider,
         );
 
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
@@ -341,9 +363,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (_groqApiKeyController.text != next.groqApiKey) {
         _groqApiKeyController.text = next.groqApiKey;
       }
-      if (_selectedProvider != next.activeProvider) {
+      if (_selectedTextProvider != next.activeTextProvider) {
         setState(() {
-          _selectedProvider = next.activeProvider;
+          _selectedTextProvider = next.activeTextProvider;
+        });
+      }
+      if (_selectedImageProvider != next.activeImageProvider) {
+        setState(() {
+          _selectedImageProvider = next.activeImageProvider;
         });
       }
     });
@@ -545,8 +572,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Text provider selector
+                  Row(
+                    children: [
+                      const Icon(Icons.chat_bubble_outline, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.textProvider,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   SegmentedButton<AIProvider>(
-                    showSelectedIcon: false, // Remove checkmarks
+                    showSelectedIcon: false,
                     style: SegmentedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -592,25 +633,106 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ],
-                    selected: {_selectedProvider},
+                    selected: {_selectedTextProvider},
                     onSelectionChanged: (newSelection) {
-                      final oldProvider = _selectedProvider;
+                      final oldProvider = _selectedTextProvider;
                       final newProvider = newSelection.first;
                       
-                      // Log settings change
                       AnalyticsService.logSettingsChange(
-                        settingName: 'ai_provider',
+                        settingName: 'ai_text_provider',
                         newValue: newProvider.toString(),
                         oldValue: oldProvider.toString(),
                       );
                       
-                      // Update both parent and dialog state
                       setState(() {
-                        _selectedProvider = newProvider;
+                        _selectedTextProvider = newProvider;
                       });
                       if (setDialogState != null) {
                         setDialogState(() {
-                          _selectedProvider = newProvider;
+                          _selectedTextProvider = newProvider;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Image provider selector
+                  Row(
+                    children: [
+                      const Icon(Icons.image_outlined, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.imageProvider,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<AIProvider>(
+                    showSelectedIcon: false,
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      selectedBackgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      selectedForegroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    segments: [
+                      ButtonSegment(
+                        value: AIProvider.gemini, 
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_awesome, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.gemini),
+                          ],
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: AIProvider.openAI, 
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.psychology, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.openAI),
+                          ],
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: AIProvider.groq, 
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.flash_on, size: 16),
+                            const SizedBox(width: 4),
+                            Text(l10n.groq),
+                          ],
+                        ),
+                      ),
+                    ],
+                    selected: {_selectedImageProvider},
+                    onSelectionChanged: (newSelection) {
+                      final oldProvider = _selectedImageProvider;
+                      final newProvider = newSelection.first;
+                      
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'ai_image_provider',
+                        newValue: newProvider.toString(),
+                        oldValue: oldProvider.toString(),
+                      );
+                      
+                      setState(() {
+                        _selectedImageProvider = newProvider;
+                      });
+                      if (setDialogState != null) {
+                        setDialogState(() {
+                          _selectedImageProvider = newProvider;
                         });
                       }
                     },
@@ -646,13 +768,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Display settings based on the selected provider.
-                  if (_selectedProvider == AIProvider.gemini)
-                    _buildGeminiSettings(setDialogState)
-                  else if (_selectedProvider == AIProvider.openAI)
-                    _buildOpenAISettings(setDialogState)
-                  else
-                    _buildGroqSettings(setDialogState),
+                  // Display settings for all providers that are in use
+                  ..._buildProviderSettingsSections(setDialogState),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1205,6 +1322,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final year = dateTime.year;
       return '$month/$day/$year';
     }
+  }
+
+  /// Builds provider settings sections for all providers in use (text and/or image).
+  /// Shows each provider's section at most once even if selected for both.
+  List<Widget> _buildProviderSettingsSections([StateSetter? setDialogState]) {
+    final selectedProviders = <AIProvider>{_selectedTextProvider, _selectedImageProvider};
+    final widgets = <Widget>[];
+    for (final provider in AIProvider.values) {
+      if (selectedProviders.contains(provider)) {
+        switch (provider) {
+          case AIProvider.gemini:
+            widgets.add(_buildGeminiSettings(setDialogState));
+            break;
+          case AIProvider.openAI:
+            widgets.add(_buildOpenAISettings(setDialogState));
+            break;
+          case AIProvider.groq:
+            widgets.add(_buildGroqSettings(setDialogState));
+            break;
+        }
+      }
+    }
+    return widgets;
   }
 
   Widget _buildGeminiSettings([StateSetter? setDialogState]) {

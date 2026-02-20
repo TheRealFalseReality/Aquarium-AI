@@ -376,6 +376,16 @@
     "description": "Active AI Provider section title"
   },
 
+  "textProvider": "Text / Chat Provider",
+  "@textProvider": {
+    "description": "Label for the AI provider used for text and chat operations"
+  },
+
+  "imageProvider": "Image / Multimedia Provider",
+  "@imageProvider": {
+    "description": "Label for the AI provider used for image and multimedia analysis"
+  },
+
   "geminiRecommended": "Gemini is recommended and free",
   "@geminiRecommended": {
     "description": "Gemini recommendation message"

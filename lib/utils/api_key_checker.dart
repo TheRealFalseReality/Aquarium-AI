@@ -3,23 +3,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
 
-/// Checks whether the currently active AI provider has an API key configured.
+/// Checks whether the currently active AI providers (text and image) have API keys configured.
 /// If not, shows the [ApiKeyDialog] and returns `false`.
-/// Returns `true` when a key is present and the caller may proceed.
+/// Returns `true` when keys are present and the caller may proceed.
 bool checkApiKey(BuildContext context, WidgetRef ref) {
   final modelState = ref.read(modelProvider);
-  final bool hasKey;
-  switch (modelState.activeProvider) {
+  bool hasKey = true;
+
+  // Check text provider key
+  switch (modelState.activeTextProvider) {
     case AIProvider.gemini:
-      hasKey = modelState.geminiApiKey.isNotEmpty;
+      if (modelState.geminiApiKey.isEmpty) hasKey = false;
       break;
     case AIProvider.openAI:
-      hasKey = modelState.openAIApiKey.isNotEmpty;
+      if (modelState.openAIApiKey.isEmpty) hasKey = false;
       break;
     case AIProvider.groq:
-      hasKey = modelState.groqApiKey.isNotEmpty;
+      if (modelState.groqApiKey.isEmpty) hasKey = false;
       break;
   }
+
+  // Check image provider key (only if different from text provider)
+  if (hasKey && modelState.activeImageProvider != modelState.activeTextProvider) {
+    switch (modelState.activeImageProvider) {
+      case AIProvider.gemini:
+        if (modelState.geminiApiKey.isEmpty) hasKey = false;
+        break;
+      case AIProvider.openAI:
+        if (modelState.openAIApiKey.isEmpty) hasKey = false;
+        break;
+      case AIProvider.groq:
+        if (modelState.groqApiKey.isEmpty) hasKey = false;
+        break;
+    }
+  }
+
   if (!hasKey) {
     showDialog(
       context: context,
