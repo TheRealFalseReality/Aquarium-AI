@@ -501,7 +501,9 @@
   "fishInfoAdditionalNotesHint": "ex. bac agressif, bac planté, configuration débutant",
   "lookUpFishInfo": "Rechercher Info Poisson",
   "changelog": "Nouveautés",
-  "changelogDesc": "Voir les dernières notes de version et mises à jour"
+  "changelogDesc": "Voir les dernières notes de version et mises à jour",
+  "changelogLatestRelease": "Dernière version",
+  "changelogAllReleases": "Toutes les versions"
 }
 
 

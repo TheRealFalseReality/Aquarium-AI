@@ -500,7 +500,9 @@
   "fishInfoAdditionalNotesHint": "z. B. aggressives Becken, bepflanztes Becken, Anfänger-Setup",
   "lookUpFishInfo": "Fischinformationen abrufen",
   "changelog": "Was ist neu",
-  "changelogDesc": "Neueste Versionshinweise und Updates anzeigen"
+  "changelogDesc": "Neueste Versionshinweise und Updates anzeigen",
+  "changelogLatestRelease": "Neueste Version",
+  "changelogAllReleases": "Alle Versionen"
 }
 
 

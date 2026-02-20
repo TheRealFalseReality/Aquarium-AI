@@ -2683,6 +2683,16 @@
   "changelogDesc": "View latest release notes and updates",
   "@changelogDesc": {
     "description": "Subtitle for changelog/release notes menu item"
+  },
+
+  "changelogLatestRelease": "Latest Release",
+  "@changelogLatestRelease": {
+    "description": "Button label to open the latest GitHub release in browser"
+  },
+
+  "changelogAllReleases": "All Releases",
+  "@changelogAllReleases": {
+    "description": "Button label to open all GitHub releases in browser"
   }
 }
 

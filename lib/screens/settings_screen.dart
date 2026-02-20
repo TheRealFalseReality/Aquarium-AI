@@ -9,6 +9,7 @@ import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
+import 'changelog_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -472,9 +473,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Theme.of(context).colorScheme.primary,
-          onTap: () => launchUrl(
-            Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/releases/latest'),
-            mode: LaunchMode.inAppWebView,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChangelogScreen(),
+            ),
           ),
         ),
         const SizedBox(height: 24),
