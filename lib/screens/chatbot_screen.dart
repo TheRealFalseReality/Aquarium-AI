@@ -164,18 +164,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
               );
             }
           });
-        } else if (last.fishInfoResult != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      FishInfoResultScreen(result: last.fishInfoResult!),
-                ),
-              );
-            }
-          });
         }
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {

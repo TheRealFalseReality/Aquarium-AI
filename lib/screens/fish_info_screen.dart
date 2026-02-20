@@ -6,6 +6,7 @@ import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
 import '../utils/api_key_checker.dart';
+import './fish_info_result_screen.dart';
 
 class FishInfoScreen extends ConsumerStatefulWidget {
   const FishInfoScreen({super.key});
@@ -45,7 +46,7 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
         },
       );
 
-      await ref.read(chatProvider.notifier).getFishInfo(
+      final result = await ref.read(chatProvider.notifier).getFishInfo(
             fishNames: _fishNamesController.text,
             tankSize: _tankSizeController.text.trim().isEmpty
                 ? null
@@ -57,8 +58,20 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
 
       setState(() => _isSubmitting = false);
 
-      if (mounted) {
+      if (!mounted) return;
+      if (result != null) {
+        // Navigate directly to the result screen regardless of what opened this form.
         Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FishInfoResultScreen(result: result),
+          ),
+        );
+      } else {
+        // On error, pop back and navigate to the chatbot so the user sees the error message.
+        Navigator.pop(context);
+        Navigator.pushNamed(context, '/chatbot');
       }
     }
   }
