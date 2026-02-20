@@ -66,7 +66,12 @@ class _PhotoAnalysisResultScreenState
                   Center(
                     child: InteractiveViewer(
                       maxScale: 5,
-                      child: Image.memory(widget.photoBytes!),
+                      child: Image.memory(
+                        widget.photoBytes!,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -174,6 +179,13 @@ class _PhotoAnalysisResultScreenState
                         fit: BoxFit.cover,
                         height: 180,
                         width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => const SizedBox(
+                          height: 180,
+                          width: double.infinity,
+                          child: Center(
+                            child: Icon(Icons.broken_image_outlined, size: 48),
+                          ),
+                        ),
                       ),
                     ),
                     Positioned(
