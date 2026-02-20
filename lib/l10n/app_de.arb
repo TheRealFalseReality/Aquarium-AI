@@ -408,6 +408,7 @@
   "viewAnalysis": "Analyse Anzeigen",
   "viewScript": "Skript Anzeigen",
   "viewPhotoAnalysis": "Fotoanalyse Anzeigen",
+  "viewFishInfo": "Fischinfo Anzeigen",
 
   "addNotesPlaceholder": "Fügen Sie zusätzliche Notizen hinzu...",
   "addNotification": "Benachrichtigung Hinzufügen",
@@ -484,7 +485,18 @@
   "qty": "Anz",
   
   "createdLabel": "Erstellt",
-  "inhabitantsLabel": "Bewohner"
+  "inhabitantsLabel": "Bewohner",
+
+  "fishInfo": "Fischinfo",
+  "aiFishInfoLookup": "KI-Fischinformationen",
+  "fishInfoDescription": "Geben Sie einen oder mehrere Fischnamen ein, um umfassende Informationen zu erhalten, einschließlich lateinischem Namen, Herkunft, Fakten, Spaßfakten, Pflege im Aquarium und kompatiblen Tankgenossen.",
+  "fishNamesLabel": "Fischnamen",
+  "fishNamesHint": "z. B. Clownfisch, Neon Tetra, Betta splendens",
+  "pleaseEnterFishName": "Bitte mindestens einen Fischnamen eingeben",
+  "tankSizeOptional": "Beckengröße (Optional)",
+  "tankSizeHint": "z. B. 80 Liter, 20 Gallonen",
+  "fishInfoAdditionalNotesHint": "z. B. aggressives Becken, bepflanztes Becken, Anfänger-Setup",
+  "lookUpFishInfo": "Fischinformationen abrufen"
 }
 
 

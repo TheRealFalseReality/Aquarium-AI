@@ -396,6 +396,7 @@
   "viewAnalysis": "Voir l'Analyse",
   "viewScript": "Voir le Script",
   "viewPhotoAnalysis": "Voir l'Analyse Photo",
+  "viewFishInfo": "Voir Info Poisson",
 
   "addNotesPlaceholder": "Ajouter des notes supplémentaires...",
   "addNotification": "Ajouter une Notification",
@@ -485,7 +486,18 @@
   "qty": "Qté",
   
   "createdLabel": "Créé",
-  "inhabitantsLabel": "Habitants"
+  "inhabitantsLabel": "Habitants",
+
+  "fishInfo": "Info Poisson",
+  "aiFishInfoLookup": "Recherche d'Info Poisson par IA",
+  "fishInfoDescription": "Entrez le nom d'un ou plusieurs poissons pour obtenir des informations complètes, notamment le nom latin, l'origine, des faits, des anecdotes, les soins en aquarium et les colocataires compatibles.",
+  "fishNamesLabel": "Nom(s) du Poisson",
+  "fishNamesHint": "ex. Poisson Clown, Néon Bleu, Betta splendens",
+  "pleaseEnterFishName": "Veuillez entrer au moins un nom de poisson",
+  "tankSizeOptional": "Taille du Bac (Optionnel)",
+  "tankSizeHint": "ex. 75 litres, 20 gallons",
+  "fishInfoAdditionalNotesHint": "ex. bac agressif, bac planté, configuration débutant",
+  "lookUpFishInfo": "Rechercher Info Poisson"
 }
 
 

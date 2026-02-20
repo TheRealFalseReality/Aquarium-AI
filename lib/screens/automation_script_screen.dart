@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
+import '../utils/api_key_checker.dart';
 
 class AutomationScriptScreen extends ConsumerStatefulWidget {
   const AutomationScriptScreen({super.key});
@@ -26,6 +27,7 @@ class AutomationScriptScreenState
   }
 
   void _submitScriptRequest() async {
+    if (!checkApiKey(context, ref)) return;
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
       
@@ -57,13 +59,15 @@ class AutomationScriptScreenState
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: l10n.automationScript,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -112,13 +116,7 @@ class AutomationScriptScreenState
                   textStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.generateScript),
+                child: Text(l10n.generateScript),
               ),
               
             const SizedBox(height: 14),
@@ -126,6 +124,35 @@ class AutomationScriptScreenState
             ],
           ),
         ),
+      ),
+          if (_isSubmitting)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: Container(
+                  color: Colors.black.withOpacity(0.45),
+                  child: Center(
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Generating script…'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
