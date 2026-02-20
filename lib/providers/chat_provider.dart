@@ -88,6 +88,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
 
+  /// Returns the effective chat history limit.
+  /// Users who supply their own API key for the active text provider use their
+  /// configured [ModelState.chatHistoryLimit]. Everyone else (free service tier
+  /// with no personal key) is hard-capped at [defaultChatHistoryLimit] (3).
+  int get _historyLimit {
+    final hasOwnKey = switch (_modelState.activeTextProvider) {
+      AIProvider.gemini => _modelState.geminiApiKey.isNotEmpty,
+      AIProvider.openAI => _modelState.openAIApiKey.isNotEmpty,
+      AIProvider.groq => _modelState.groqApiKey.isNotEmpty,
+    };
+    return hasOwnKey ? _modelState.chatHistoryLimit : defaultChatHistoryLimit;
+  }
+
   void _initializeProvider() {
     // Collect all distinct providers needed (text and image may be the same or different).
     // Each provider is initialized at most once even if selected for both roles.
@@ -150,13 +163,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Build a fresh session each request with the last 3 non-ad, non-error
+      // Build a fresh session each request with the last N non-ad, non-error
       // messages (excluding the current one just added by _prepareForSending)
       // as seed history, so the session never accumulates unbounded tokens.
       final allMessages = state.messages.where((m) => !m.isAd && !m.isError).toList();
       // Drop the current user message (last entry added by _prepareForSending).
       final priorMessages = allMessages.length > 1 ? allMessages.sublist(0, allMessages.length - 1) : <ChatMessage>[];
-      final recentHistory = priorMessages.length > 3 ? priorMessages.sublist(priorMessages.length - 3) : priorMessages;
+      final limit = _historyLimit;
+      final recentHistory = priorMessages.length > limit ? priorMessages.sublist(priorMessages.length - limit) : priorMessages;
       final seedHistory = [
         Content.model([TextPart(systemPrompt)]),
         ...recentHistory.map((m) => m.isUser
@@ -181,9 +195,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 3 non-ad, non-error messages to reduce token usage.
+      // Limit history to the last N non-ad, non-error messages to reduce token usage.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 3 ? allHistory.sublist(allHistory.length - 3) : allHistory;
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
       final history = recentHistory.map((m) => OpenAIChatCompletionChoiceMessageModel(
           content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(m.text)],
           role: m.isUser ? OpenAIChatMessageRole.user : OpenAIChatMessageRole.assistant,
@@ -210,11 +225,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
-      // Limit history to the last 3 non-ad, non-error messages to reduce token
+      // Limit history to the last N non-ad, non-error messages to reduce token
       // usage. The current user message was already added to state.messages by
       // _prepareForSending, so it is included within this window.
       final allHistory = state.messages.where((m) => !m.isAd && !m.isError).toList();
-      final recentHistory = allHistory.length > 3 ? allHistory.sublist(allHistory.length - 3) : allHistory;
+      final limit = _historyLimit;
+      final recentHistory = allHistory.length > limit ? allHistory.sublist(allHistory.length - limit) : allHistory;
       final messages = recentHistory.map((m) => {
         'role': m.isUser ? 'user' : 'assistant',
         'content': m.text,
