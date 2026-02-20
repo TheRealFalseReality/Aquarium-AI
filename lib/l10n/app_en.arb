@@ -2405,6 +2405,11 @@
     "description": "View photo analysis button label"
   },
 
+  "viewFishInfo": "View Fish Info",
+  "@viewFishInfo": {
+    "description": "View fish info button label"
+  },
+
   "information": "Information",
   "@information": {
     "description": "Information drawer item title"

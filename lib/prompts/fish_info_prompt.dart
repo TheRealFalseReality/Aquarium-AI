@@ -16,45 +16,40 @@ You are an expert aquarist and marine biologist. The user wants comprehensive in
 
   prompt += '''
 
-Please provide a detailed, well-formatted Markdown response covering the following for each fish (if multiple are listed, cover each separately):
+Return a single valid JSON object with the following structure. Do not include any text outside the JSON.
 
-## 🐟 [Common Name] (*Latin/Scientific Name*)
+{
+  "fish": [
+    {
+      "commonName": "Common Name",
+      "scientificName": "Genus species",
+      "originHabitat": "Natural location(s) and habitat description",
+      "keyFacts": [
+        "Adult size: ...",
+        "Lifespan: ...",
+        "Diet: ...",
+        "Temperament: ...",
+        "Swimming level: ..."
+      ],
+      "funFacts": [
+        "Interesting fact 1",
+        "Interesting fact 2"
+      ],
+      "care": {
+        "minimumTankSize": "e.g. 20 gallons",
+        "waterParameters": "Temperature, pH, and any other relevant ranges",
+        "tankSetup": "Substrate, plants, hiding spots, flow, etc.",
+        "difficultyLevel": "Beginner / Intermediate / Expert"${tankSize != null && tankSize.isNotEmpty ? ',\n        "tankSizeNote": "Suitability notes for a $tankSize tank"' : ''}
+      },
+      "compatibleTankMates": ["Species A", "Species B"],
+      "incompatibleSpecies": ["Species X", "Species Y"]
+    }
+  ]
+}
 
-### 📍 Origin & Habitat
-- Natural location(s) of origin (rivers, oceans, regions)
-- Natural habitat type (reef, river, lake, etc.)
-
-### 📋 Key Facts
-- Adult size
-- Lifespan
-- Diet (omnivore, carnivore, herbivore, and specific foods)
-- Temperament (peaceful, semi-aggressive, aggressive)
-- Swimming level (top, middle, bottom)
-
-### ✨ Fun Facts
-- 2–4 interesting or surprising facts about the species
-
-### 🪣 Tank Care
-- Minimum tank size
-- Ideal water parameters (temperature, pH, salinity if applicable)
-- Tank setup recommendations (substrate, plants, hiding spots, flow, etc.)
-- Difficulty level (beginner, intermediate, expert)
-''';
-
-  if (tankSize != null && tankSize.isNotEmpty) {
-    prompt += '''
-- Notes on suitability for a $tankSize tank
-''';
-  }
-
-  prompt += '''
-### 🤝 Compatible Tank Mates
-- List of species that are generally compatible
-- Any species to avoid
-
----
-Keep the response informative, accurate, and friendly. Use Markdown formatting for readability.
+If multiple fish names are provided, include one entry per fish in the "fish" array. Be accurate and thorough.
 ''';
 
   return prompt;
 }
+

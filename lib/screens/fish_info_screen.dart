@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/chat_provider.dart';
 import '../main_layout.dart';
 import '../services/analytics_service.dart';
+import '../utils/api_key_checker.dart';
 
 class FishInfoScreen extends ConsumerStatefulWidget {
   const FishInfoScreen({super.key});
@@ -29,6 +30,7 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
   }
 
   void _submitFishInfoRequest() async {
+    if (!checkApiKey(context, ref)) return;
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
 
@@ -66,11 +68,13 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: l10n.fishInfo,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
@@ -142,19 +146,42 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
                   textStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.lookUpFishInfo),
+                child: Text(l10n.lookUpFishInfo),
               ),
               const SizedBox(height: 14),
               const NativeAdWidget(),
             ],
           ),
         ),
+      ),
+          if (_isSubmitting)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: Container(
+                  color: Colors.black.withOpacity(0.45),
+                  child: Center(
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Looking up fish info…'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

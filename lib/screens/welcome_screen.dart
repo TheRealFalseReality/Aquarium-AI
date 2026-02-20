@@ -27,7 +27,6 @@ import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 import './water_parameter_analysis_screen.dart';
-import './automation_script_screen.dart';
 import './fish_info_screen.dart';
 
 class _ToolChipInfo {
@@ -347,16 +346,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const FishInfoScreen(),
-                ),
-              ),
-            ),
-            _ToolChipInfo(
-              label: l10n.automationScript,
-              icon: Icons.code_outlined,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AutomationScriptScreen(),
                 ),
               ),
             ),
