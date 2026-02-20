@@ -4,7 +4,7 @@ const String geminiImageModelDefault = 'gemini-flash-latest';
 const String openAIModelDefault = 'gpt-4o';
 const String openAIImageModelDefault = 'gpt-4-vision-preview';
 const String groqModelDefault = 'llama-3.1-8b-instant';
-const String groqImageModelDefault = 'llama-3.3-70b-versatile';
+const String groqImageModelDefault = 'llama-3.2-11b-vision-preview';
 
 
 // AdMob constants

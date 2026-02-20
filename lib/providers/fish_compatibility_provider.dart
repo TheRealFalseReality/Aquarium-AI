@@ -12,6 +12,7 @@ import '../services/fish_data_service.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
+import '../utils/groq_helper.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -167,6 +168,17 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 30));
         _cancellableCompleter?.complete(response);
         responseText = response.text;
+      } else if (models.activeProvider == AIProvider.groq) {
+        if (models.groqApiKey.isEmpty) {
+          throw Exception('Groq API Key not set. Please go to settings to add your API key.');
+        }
+        final groq = GroqHelper.createClient(
+          apiKey: models.groqApiKey,
+          model: models.groqModel,
+        );
+        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
+        _cancellableCompleter?.complete(response);
+        responseText = response.choices.first.message.content;
       } else {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
