@@ -13,6 +13,8 @@ import '../utils/cancellable_completer.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -155,6 +157,19 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes);
+
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
+    }
 
     _cancellableCompleter = CancellableCompleter();
 

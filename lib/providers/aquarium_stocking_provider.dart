@@ -15,6 +15,8 @@ import '../models/tank.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/dev_limits.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -107,6 +109,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         isLoading: false,
       );
       return;
+    }
+
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
     }
     
     final processedTankSize = _processTankSize(tankSize);
@@ -258,6 +273,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         isLoading: false,
       );
       return;
+    }
+
+    // Check dev rate limit before consuming the API
+    if (models.usingDeveloperGroqKey) {
+      final allowed = await DevRateLimiter.checkAndRecordRequest();
+      if (!allowed) {
+        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        state = state.copyWith(
+          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      }
     }
 
     // Get existing fish from tank inhabitants
