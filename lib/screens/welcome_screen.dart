@@ -403,11 +403,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         child: FilledButton.icon(
                           onPressed: () {
                             Navigator.of(dialogContext).pop();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ChangelogScreen(),
-                              ),
+                            launchUrl(
+                              Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/releases'),
+                              mode: LaunchMode.externalApplication,
                             );
                           },
                           icon: const Icon(Icons.list, size: 16),
