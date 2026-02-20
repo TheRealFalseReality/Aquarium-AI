@@ -2673,6 +2673,31 @@
   "lookUpFishInfo": "Look Up Fish Info",
   "@lookUpFishInfo": {
     "description": "Button label for fish info lookup"
+  },
+
+  "changelog": "What's New",
+  "@changelog": {
+    "description": "Label for changelog/release notes menu item"
+  },
+
+  "changelogDesc": "View latest release notes and updates",
+  "@changelogDesc": {
+    "description": "Subtitle for changelog/release notes menu item"
+  },
+
+  "changelogLatestRelease": "Latest Release",
+  "@changelogLatestRelease": {
+    "description": "Button label to open the latest GitHub release in browser"
+  },
+
+  "changelogAllReleases": "All Releases",
+  "@changelogAllReleases": {
+    "description": "Button label to open all GitHub releases in browser"
+  },
+
+  "changelogGotIt": "Got it",
+  "@changelogGotIt": {
+    "description": "Dismiss button label for the changelog update dialog"
   }
 }
 

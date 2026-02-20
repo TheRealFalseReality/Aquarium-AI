@@ -3,9 +3,12 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -26,7 +29,9 @@ import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
-
+import './changelog_screen.dart';
+import './water_parameter_analysis_screen.dart';
+import './fish_info_screen.dart';
 
 class _ToolChipInfo {
   final String label;
@@ -117,6 +122,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const int _promotionDialogCooldownHours = 48;
   static const String _aquapiPromotionDialogTimestampKey = 'aquapi_promotion_dialog_timestamp';
   static const int _aquapiPromotionDialogCooldownHours = 72; // Show again after 72 hours have elapsed
+  static const String _changelogShownVersionKey = 'changelog_shown_version';
   
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
@@ -130,6 +136,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
     // Check if we should show the AquaPi promotion dialog
     _checkShowAquaPiPromotionDialog();
+    // Check if we should show the changelog dialog (once per version)
+    _checkShowChangelogDialog();
   }
   
   @override
@@ -269,6 +277,151 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       await prefs.remove(_promotionDialogTimestampKey);
     } catch (e) {
       debugPrint('Error resetting promotion dialog preference: $e');
+    }
+  }
+
+  Future<void> _checkShowChangelogDialog() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = info.version;
+      final prefs = await SharedPreferences.getInstance();
+      final lastShownVersion = prefs.getString(_changelogShownVersionKey);
+      debugPrint('Changelog dialog check: current=$currentVersion, lastShown=$lastShownVersion');
+      if (lastShownVersion == currentVersion) return;
+      // Save immediately so restarts don't re-show the dialog even if the app
+      // is closed before the timer fires or the dialog is shown.
+      await prefs.setString(_changelogShownVersionKey, currentVersion);
+      // New version detected – show after a short delay so the screen settles
+      Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          _showChangelogDialog(currentVersion);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error checking changelog dialog: $e');
+    }
+  }
+
+  Future<void> _showChangelogDialog(String version) async {
+    try {
+      final content = await rootBundle.loadString('assets/docs/CHANGELOG.md');
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(dialogContext).size.height * 0.75,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(dialogContext).colorScheme.primaryContainer.withOpacity(0.4),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.new_releases,
+                        color: Theme.of(dialogContext).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.changelog,
+                          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(dialogContext).colorScheme.primary,
+                              ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        tooltip: l10n.close,
+                      ),
+                    ],
+                  ),
+                ),
+                // Scrollable markdown body
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: MarkdownBody(
+                      data: content,
+                      selectable: false,
+                      onTapLink: (text, href, title) async {
+                        if (href == null) return;
+                        try {
+                          await launchUrl(
+                            Uri.parse(href),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } catch (_) {}
+                      },
+                      styleSheet: MarkdownStyleSheet(
+                        h2: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(dialogContext).colorScheme.primary,
+                            ),
+                        h3: Theme.of(dialogContext).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(dialogContext).colorScheme.secondary,
+                            ),
+                        p: Theme.of(dialogContext).textTheme.bodyMedium,
+                        a: TextStyle(
+                          color: Theme.of(dialogContext).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Footer buttons
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: Text(l10n.changelogGotIt),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            launchUrl(
+                              Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/releases'),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                          icon: const Icon(Icons.list, size: 16),
+                          label: Text(l10n.changelogAllReleases),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error showing changelog dialog: $e');
     }
   }
 

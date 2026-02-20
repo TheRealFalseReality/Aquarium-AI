@@ -11,6 +11,7 @@ import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
+import 'changelog_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -493,6 +494,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           iconColor: Theme.of(context).colorScheme.tertiary,
           onTap: () => _showDataManagementDialog(),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.changelog,
+          subtitle: l10n.changelogDesc,
+          icon: Icons.new_releases,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChangelogScreen(),
+            ),
+          ),
         ),
         const SizedBox(height: 24),
       ],
