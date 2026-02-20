@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../providers/model_provider.dart';
 import '../services/analytics_service.dart';
 import 'photo_analysis_result_screen.dart';
 
@@ -120,6 +121,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final activeProvider = ref.watch(modelProvider).activeProvider;
+    final isGroq = activeProvider == AIProvider.groq;
     
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
@@ -175,6 +178,34 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
+            if (isGroq) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.amber, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Groq photo analysis requires a vision-capable model (e.g. meta-llama/llama-4-scout-17b-16e-instruct). '
+                        'Ensure your Groq Multimedia Model in Settings supports vision. '
+                        'For best results, use Gemini or OpenAI.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber[900],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),

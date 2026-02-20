@@ -1595,6 +1595,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           decoration: const InputDecoration(
             labelText: 'Groq Multimedia Model',
             border: OutlineInputBorder(),
+            helperText: 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+            helperMaxLines: 2,
           ),
         ),
         const SizedBox(height: 16),

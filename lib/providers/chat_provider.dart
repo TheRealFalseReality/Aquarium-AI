@@ -426,18 +426,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
-          // Construct a message with multiple parts, similar to OpenAI
-          final groqMessage = '''
-            $prompt
-            Image data: data:$mimeType;base64,$base64Image
-          ''';
-          final groq = GroqHelper.createClient(
+          final responseGroq = await GroqHelper.generateWithImage(
             apiKey: _modelState.groqApiKey,
             model: _modelState.groqImageModel,
+            prompt: prompt,
+            base64Image: base64Image,
+            mimeType: mimeType,
           );
-          final response = await groq.sendMessage(groqMessage).timeout(const Duration(seconds: 55));
-          _cancellable?.complete(response);
-          responseText = response.choices.first.message.content;
+          _cancellable?.complete();
+          responseText = responseGroq;
           break;
       }
       if (responseText == null) throw Exception('Received no response from the AI service.');
