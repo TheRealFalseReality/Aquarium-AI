@@ -2,6 +2,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../models/analysis_result.dart';
 import '../models/compatibility_report.dart';
+import '../models/fish_info_result.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/stocking_recommendation.dart';
 
@@ -161,5 +162,75 @@ Future<void> shareStockingReport(StockingRecommendation report) async {
   await Share.share(
     buffer.toString(),
     subject: 'Aquarium AI – Stocking Recommendation',
+  );
+}
+
+/// Converts a [FishInfoResult] to a plain-text summary and shares it.
+Future<void> shareFishInfoResult(FishInfoResult result) async {
+  final buffer = StringBuffer();
+  buffer.writeln('🐠 Aquarium AI – Fish Info Lookup');
+
+  for (final fish in result.fish) {
+    buffer.writeln();
+    buffer.writeln('━━━━━━━━━━━━━━━━━━━━');
+    buffer.writeln(fish.commonName);
+    if (fish.scientificName.isNotEmpty) {
+      buffer.writeln(fish.scientificName);
+    }
+    buffer.writeln();
+
+    if (fish.originHabitat.isNotEmpty) {
+      buffer.writeln('📍 Origin & Habitat');
+      buffer.writeln(fish.originHabitat);
+      buffer.writeln();
+    }
+
+    if (fish.keyFacts.isNotEmpty) {
+      buffer.writeln('📋 Key Facts');
+      for (final fact in fish.keyFacts) {
+        buffer.writeln('• $fact');
+      }
+      buffer.writeln();
+    }
+
+    if (fish.funFacts.isNotEmpty) {
+      buffer.writeln('✨ Fun Facts');
+      for (final fact in fish.funFacts) {
+        buffer.writeln('• $fact');
+      }
+      buffer.writeln();
+    }
+
+    buffer.writeln('🪣 Tank Care');
+    if (fish.care.minimumTankSize.isNotEmpty) {
+      buffer.writeln('Minimum Tank Size: ${fish.care.minimumTankSize}');
+    }
+    if (fish.care.difficultyLevel.isNotEmpty) {
+      buffer.writeln('Difficulty: ${fish.care.difficultyLevel}');
+    }
+    if (fish.care.waterParameters.isNotEmpty) {
+      buffer.writeln('Water Parameters: ${fish.care.waterParameters}');
+    }
+    if (fish.care.tankSetup.isNotEmpty) {
+      buffer.writeln('Tank Setup: ${fish.care.tankSetup}');
+    }
+    buffer.writeln();
+
+    if (fish.compatibleTankMates.isNotEmpty) {
+      buffer.writeln('🤝 Compatible Tank Mates');
+      buffer.writeln(fish.compatibleTankMates.join(', '));
+      buffer.writeln();
+    }
+
+    if (fish.incompatibleSpecies.isNotEmpty) {
+      buffer.writeln('⚠️ Species to Avoid');
+      buffer.writeln(fish.incompatibleSpecies.join(', '));
+      buffer.writeln();
+    }
+  }
+
+  await Share.share(
+    buffer.toString(),
+    subject: 'Aquarium AI – Fish Info',
   );
 }
