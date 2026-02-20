@@ -16,4 +16,10 @@ class AutomationScript {
       code: json['code'] ?? '# No code generated',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'explanation': explanation,
+    'code': code,
+  };
 }

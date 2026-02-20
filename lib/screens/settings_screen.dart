@@ -1045,6 +1045,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     },
                   ),
                   const Divider(height: 24),
+                  ListTile(
+                    leading: Icon(
+                      Icons.history,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: const Text('Analysis History'),
+                    subtitle: const Text('View saved AI analysis reports'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/analysis-history');
+                    },
+                  ),
+                  const Divider(height: 24),
                   
                   // Reset Remembered Reschedule Options
                   Column(

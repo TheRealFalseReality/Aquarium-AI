@@ -21,6 +21,13 @@ class FishCare {
       difficultyLevel: json['difficultyLevel'] as String? ?? 'Unknown',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'minimumTankSize': minimumTankSize,
+    'waterParameters': waterParameters,
+    'tankSetup': tankSetup,
+    'difficultyLevel': difficultyLevel,
+  };
 }
 
 class FishInfoEntry {
@@ -62,6 +69,17 @@ class FishInfoEntry {
           List<String>.from(json['incompatibleSpecies'] as List? ?? []),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'commonName': commonName,
+    'scientificName': scientificName,
+    'originHabitat': originHabitat,
+    'keyFacts': keyFacts,
+    'funFacts': funFacts,
+    'care': care.toJson(),
+    'compatibleTankMates': compatibleTankMates,
+    'incompatibleSpecies': incompatibleSpecies,
+  };
 }
 
 class FishInfoResult {
@@ -88,4 +106,8 @@ class FishInfoResult {
     }
     return null;
   }
+
+  Map<String, dynamic> toJson() => {
+    'fish': fish.map((f) => f.toJson()).toList(),
+  };
 }

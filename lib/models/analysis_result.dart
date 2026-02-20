@@ -13,6 +13,12 @@ class AnalysisSummary {
       message: json['message'] ?? 'No summary available.',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'status': status,
+    'title': title,
+    'message': message,
+  };
 }
 
 // Represents the analysis of a single water parameter.
@@ -41,6 +47,14 @@ class ParameterAnalysis {
       advice: json['advice'] ?? 'No advice available.',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'value': value,
+    'idealRange': idealRange,
+    'status': status,
+    'advice': advice,
+  };
 }
 
 // Represents the entire water parameter analysis result.
@@ -68,4 +82,10 @@ class WaterAnalysisResult {
       howAquaPiHelps: json['howAquaPiHelps'] ?? 'AquaPi can help maintain stable water conditions.',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'summary': summary.toJson(),
+    'parameters': parameters.map((p) => p.toJson()).toList(),
+    'howAquaPiHelps': howAquaPiHelps,
+  };
 }
