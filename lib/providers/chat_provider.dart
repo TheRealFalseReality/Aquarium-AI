@@ -110,29 +110,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (selectedProviders.contains(AIProvider.openAI) && _modelState.openAIApiKey.isNotEmpty) {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
-    if (selectedProviders.contains(AIProvider.groq) && _modelState.hasGroqKey) {
-      _initGroqSession();
-    }
-  }
-
-  void _initGeminiSession() {
-    if (_modelState.geminiApiKey.isEmpty) return;
-    final model = GenerativeModel(
-      model: _modelState.geminiModel,
-      apiKey: _modelState.geminiApiKey,
-    );
-    _geminiChatSession = model.startChat(
-      history: [Content.model([TextPart(systemPrompt)])],
-    );
-  }
-  
-  void _initGroqSession() {
-    if (!_modelState.hasGroqKey) return;
-    _groqChatSession = GroqHelper.createClient(
-      apiKey: _modelState.effectiveGroqApiKey,
-      model: _modelState.groqModel,
-      systemPrompt: systemPrompt,
-    );
   }
 
 
@@ -256,7 +233,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (_modelState.groqApiKey.isEmpty) return _handleError('Groq API Key is not set.', message);
+    if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
@@ -272,7 +249,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       }).toList();
 
       final responseText = await GroqHelper.sendChatMessages(
-        apiKey: _modelState.groqApiKey,
+        apiKey: _modelState.effectiveGroqApiKey,
         model: _modelState.groqModel,
         systemPrompt: systemPrompt,
         messages: messages,

@@ -285,9 +285,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) async {
-      // If the provider is no longer loading and the API key is empty, show the dialog.
-      if (previous!.isLoading && !next.isLoading && next.geminiApiKey.isEmpty && next.openAIApiKey.isEmpty && !next.hasGroqKey) {
-        // Check if user has chosen to never show the dialog again
+      // Show the API key dialog once loading completes if:
+      //   • no user-supplied key for any provider, AND
+      //   • AI features are enabled, AND
+      //   • the user hasn't chosen "Never show again"
+      if (previous!.isLoading && !next.isLoading &&
+          next.geminiApiKey.isEmpty &&
+          next.openAIApiKey.isEmpty &&
+          next.groqApiKey.isEmpty &&
+          ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (shouldShow && mounted) {
           showDialog(
