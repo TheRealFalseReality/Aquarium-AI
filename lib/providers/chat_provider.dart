@@ -666,6 +666,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
             apiKey: _modelState.effectiveGroqApiKeyForImage,
             model: _modelState.groqImageModel,
             prompt: prompt,
+            base64Image: base64Image,
             mimeType: mimeType,
           );
           _cancellable?.complete();
