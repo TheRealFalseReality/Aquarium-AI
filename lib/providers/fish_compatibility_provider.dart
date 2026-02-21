@@ -142,7 +142,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       
 
 
-  Future<void> getCompatibilityReport(String category, {String? additionalNotes}) async {
+  Future<void> getCompatibilityReport(String category, {String? additionalNotes, Map<String, List<String>>? selectedSpecies}) async {
     if (state.selectedFish.isEmpty) return;
 
     state = state.copyWith(
@@ -229,6 +229,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         selectedFish: state.selectedFish,
         tankMatesSummary: reportJson['tankMatesSummary']?.toString() ?? '',
         calculationBreakdown: calculationBreakdown, // Use the generated string.
+        selectedSpecies: selectedSpecies ?? const {},
       );
       state = state.copyWith(
           report: report, lastReport: report, isLoading: false);

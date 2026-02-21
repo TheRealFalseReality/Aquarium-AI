@@ -778,7 +778,16 @@ class FishCompatibilityScreenState
                             additionalNotes = 'Specific species selected by user:\n$lines';
                           }
 
-                          notifier.getCompatibilityReport(_selectedCategory, additionalNotes: additionalNotes);
+                          // Build filtered selections map (only entries with selections)
+                          final filteredSelections = Map<String, List<String>>.fromEntries(
+                            speciesSelections.entries.where((e) => e.value.isNotEmpty),
+                          );
+
+                          notifier.getCompatibilityReport(
+                            _selectedCategory,
+                            additionalNotes: additionalNotes,
+                            selectedSpecies: filteredSelections,
+                          );
                         },
                   icon: provider.isLoading
                       ? const SizedBox(
@@ -812,6 +821,8 @@ class FishCompatibilityScreenState
   /// Shows a dialog for the user to select specific species for each selected fish.
   /// Returns a map of fishType -> selected species, or null if the user cancelled.
   Future<Map<String, List<String>>?> _showSpeciesSelectionDialog(List<Fish> selectedFish) async {
+    // Wait for default tags to be fully initialized before reading
+    await ref.read(speciesTagsProvider.notifier).initialized;
     final speciesTagsState = ref.read(speciesTagsProvider);
 
     // Only show dialog if any selected fish have species tags

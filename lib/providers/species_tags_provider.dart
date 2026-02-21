@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,18 @@ class SpeciesTagsState {
 
 /// Notifier for managing species tags
 class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
+  final _initializedCompleter = Completer<void>();
+
+  /// Resolves when default tags from fish data have been fully loaded.
+  Future<void> get initialized => _initializedCompleter.future;
+
+  /// Called by [_initializeDefaultTagsAsync] once initialization completes.
+  void _completeInitialization() {
+    if (!_initializedCompleter.isCompleted) {
+      _initializedCompleter.complete();
+    }
+  }
+
   SpeciesTagsNotifier()
       : super(SpeciesTagsState(
           tags: {},
@@ -219,7 +232,7 @@ final speciesTagsProvider =
     StateNotifierProvider<SpeciesTagsNotifier, SpeciesTagsState>(
   (ref) {
     final notifier = SpeciesTagsNotifier();
-    // Initialize default tags when provider is created
+    // Initialize default tags when provider is created.
     _initializeDefaultTagsAsync(ref, notifier);
     return notifier;
   },
@@ -238,6 +251,8 @@ Future<void> _initializeDefaultTagsAsync(
     await notifier.initializeDefaultTags(rawFishData);
   } catch (e) {
     // Silently fail - default tags are optional
+  } finally {
+    notifier._completeInitialization();
   }
 }
 
