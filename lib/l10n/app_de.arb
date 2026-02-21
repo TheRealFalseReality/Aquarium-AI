@@ -503,7 +503,9 @@
   "changelogDesc": "Neueste Versionshinweise und Updates anzeigen",
   "changelogLatestRelease": "Neueste Version",
   "changelogAllReleases": "Alle Versionen",
-  "changelogGotIt": "Verstanden"
+  "changelogGotIt": "Verstanden",
+
+  "addCustomSpecies": "Benutzerdefinierte Art hinzufügen"
 }
 
 

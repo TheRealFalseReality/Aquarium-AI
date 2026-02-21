@@ -978,13 +978,16 @@ class FishCompatibilityScreenState
                                 ],
                               )
                             else
-                              IconButton(
+                              TextButton.icon(
                                 onPressed: () => setDialogState(() => addTagVisible[fish.name] = true),
-                                icon: const Icon(Icons.add, size: 18),
-                                padding: const EdgeInsets.all(4),
-                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                tooltip: 'Add species tag',
-                                style: IconButton.styleFrom(
+                                icon: const Icon(Icons.add, size: 16),
+                                label: Text(
+                                  AppLocalizations.of(context)!.addCustomSpecies,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   side: BorderSide(
                                     color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
                                   ),

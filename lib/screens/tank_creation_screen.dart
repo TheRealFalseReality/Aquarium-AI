@@ -1448,6 +1448,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   }
 
   Widget _buildFishSelector(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedFish = _selectedFishUnit != null
         ? widget.availableFish.where((f) => f.name == _selectedFishUnit).firstOrNull
         : null;
@@ -1633,13 +1634,13 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               ],
             )
           else
-            IconButton(
+            TextButton.icon(
               onPressed: () => setState(() => _addSpeciesTagVisible = true),
-              icon: const Icon(Icons.add, size: 18),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              tooltip: 'Add species tag',
-              style: IconButton.styleFrom(
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(l10n.addCustomSpecies, style: const TextStyle(fontSize: 12)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 side: BorderSide(
                   color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
                 ),

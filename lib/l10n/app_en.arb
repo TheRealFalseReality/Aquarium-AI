@@ -2698,6 +2698,11 @@
   "changelogGotIt": "Got it",
   "@changelogGotIt": {
     "description": "Dismiss button label for the changelog update dialog"
+  },
+
+  "addCustomSpecies": "Add Custom Species",
+  "@addCustomSpecies": {
+    "description": "Button label to add a custom species tag inline"
   }
 }
 

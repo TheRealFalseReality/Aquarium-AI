@@ -504,7 +504,9 @@
   "changelogDesc": "Voir les dernières notes de version et mises à jour",
   "changelogLatestRelease": "Dernière version",
   "changelogAllReleases": "Toutes les versions",
-  "changelogGotIt": "Compris"
+  "changelogGotIt": "Compris",
+
+  "addCustomSpecies": "Ajouter une espèce personnalisée"
 }
 
 

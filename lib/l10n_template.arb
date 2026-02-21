@@ -52,5 +52,7 @@
   "error": "TRANSLATE: Error",
   "success": "TRANSLATE: Success",
   "warning": "TRANSLATE: Warning",
-  "info": "TRANSLATE: Info"
+  "info": "TRANSLATE: Info",
+
+  "addCustomSpecies": "TRANSLATE: Add Custom Species"
 }
