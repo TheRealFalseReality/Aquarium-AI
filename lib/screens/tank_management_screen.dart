@@ -101,6 +101,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Listen for stocking recommendations globally
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (!context.mounted) return;
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         // Hide loading dialog if it's showing
         if (Navigator.canPop(context)) {
@@ -156,6 +157,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Listen for compatibility analysis reports
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
+      if (!context.mounted) return;
       if (next.report != null && previous?.report != next.report && _currentTankForCompatibility != null) {
         // Hide loading dialog if it's showing
         if (_isCompatibilityLoading && Navigator.canPop(context)) {

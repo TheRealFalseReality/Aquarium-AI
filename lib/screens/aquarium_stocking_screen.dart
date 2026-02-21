@@ -84,6 +84,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     final l10n = AppLocalizations.of(context)!;
     
     ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+      if (!context.mounted) return;
       // Show/hide loading overlay
       if (next.isLoading && !(previous?.isLoading ?? false)) {
         _showLoadingOverlay(context);
@@ -409,7 +410,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   }
 
   void _hideLoadingOverlay() {
-    if (Navigator.canPop(context)) {
+    if (mounted && Navigator.canPop(context)) {
       Navigator.pop(context);
     }
   }
