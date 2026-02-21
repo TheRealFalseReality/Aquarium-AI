@@ -829,8 +829,19 @@ class FishCompatibilityScreenState
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final hasAnySelection =
+                selectedSpecies.values.any((set) => set.isNotEmpty);
             return AlertDialog(
-              title: const Text('Select Specific Species'),
+              title: Row(
+                children: [
+                  const Expanded(child: Text('Select Specific Species')),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Cancel',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -886,10 +897,15 @@ class FishCompatibilityScreenState
                 ),
               ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, {}),
-                  child: const Text('Skip'),
-                ),
+                if (hasAnySelection)
+                  TextButton(
+                    onPressed: () {
+                      setDialogState(() {
+                        selectedSpecies.clear();
+                      });
+                    },
+                    child: const Text('Clear'),
+                  ),
                 ElevatedButton(
                   onPressed: () {
                     final result = selectedSpecies.map(

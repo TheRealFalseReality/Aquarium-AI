@@ -138,9 +138,53 @@ void main() {
       expect(results, contains('Angelfish'));
     });
 
+    test('initializeDefaultTags merges new default tags into existing tags', () async {
+      final notifier = container.read(speciesTagsProvider.notifier);
+
+      // Simulate Tetras already having Neon Tetra and Cardinal Tetra
+      await notifier.setTagsForFishType('Tetras', ['Neon Tetra', 'Cardinal Tetra']);
+
+      // Now initialize with updated fish data that adds Black Skirt Tetra
+      final fishData = {
+        'freshwater': [
+          {
+            'name': 'Tetras',
+            'commonNames': ['Neon Tetra', 'Cardinal Tetra', 'Black Skirt Tetra'],
+          },
+        ],
+      };
+      await notifier.initializeDefaultTags(fishData);
+
+      final tags = notifier.getTagsForFishType('Tetras');
+      expect(tags, contains('Neon Tetra'));
+      expect(tags, contains('Cardinal Tetra'));
+      expect(tags, contains('Black Skirt Tetra'));
+    });
+
+    test('initializeDefaultTags preserves user-added custom tags when merging', () async {
+      final notifier = container.read(speciesTagsProvider.notifier);
+
+      // Simulate user adding a custom tag beyond the defaults
+      await notifier.setTagsForFishType('Barbs', ['Tiger Barb', 'My Custom Tag']);
+
+      final fishData = {
+        'freshwater': [
+          {
+            'name': 'Barbs',
+            'commonNames': ['Tiger Barb', 'Cherry Barb'],
+          },
+        ],
+      };
+      await notifier.initializeDefaultTags(fishData);
+
+      final tags = notifier.getTagsForFishType('Barbs');
+      expect(tags, contains('Tiger Barb'));
+      expect(tags, contains('Cherry Barb'));
+      expect(tags, contains('My Custom Tag'));
+    });
+
     test('clearAllTags removes all tags', () async {
       final notifier = container.read(speciesTagsProvider.notifier);
-      
       await notifier.setTagsForFishType('Fish1', ['Tag1']);
       await notifier.setTagsForFishType('Fish2', ['Tag2']);
       
