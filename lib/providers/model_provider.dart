@@ -39,6 +39,10 @@ class ModelState {
   /// Provider used for image/multimedia analysis operations
   final AIProvider activeImageProvider;
   final bool isLoading;
+  /// When true, the app's built-in developer Groq key is used even if the
+  /// user has stored their own key.  The user's key is preserved in storage
+  /// so they can re-enable it at any time.
+  final bool useDevGroqKey;
 
   ModelState({
     required this.geminiModel,
@@ -54,22 +58,31 @@ class ModelState {
     required this.activeTextProvider,
     required this.activeImageProvider,
     this.isLoading = true,
+    this.useDevGroqKey = false,
   });
 
   /// Convenience getter: returns the text provider (kept for backward compat)
   AIProvider get activeProvider => activeTextProvider;
 
-  /// The Groq API key to actually use: user's own key takes priority;
-  /// falls back to the developer-supplied key compiled into the app.
-  String get effectiveGroqApiKey =>
-      groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+  /// The Groq API key to actually use.
+  /// When [useDevGroqKey] is enabled and the developer key is available, the
+  /// developer key is used unconditionally (the user's stored key is ignored but
+  /// NOT erased).  Otherwise the user's key takes priority and the developer key
+  /// serves as a fallback.
+  String get effectiveGroqApiKey {
+    if (useDevGroqKey && developerGroqApiKey.isNotEmpty) {
+      return developerGroqApiKey;
+    }
+    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+  }
 
   /// Whether the app has any Groq key available (user-provided or developer fallback).
   bool get hasGroqKey => effectiveGroqApiKey.isNotEmpty;
 
   /// Whether the current effective Groq key is the developer fallback (not user-provided).
+  /// True when [useDevGroqKey] is explicitly set, or when the user has no key stored.
   bool get usingDeveloperGroqKey =>
-      groqApiKey.isEmpty && developerGroqApiKey.isNotEmpty;
+      developerGroqApiKey.isNotEmpty && (useDevGroqKey || groqApiKey.isEmpty);
 }
 
 // 2. Create the Notifier
@@ -87,6 +100,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
           groqApiKey: '',
           activeTextProvider: defaultAIProvider,
           activeImageProvider: defaultAIProvider,
+          useDevGroqKey: false,
         )) {
     _loadModels();
   }
@@ -105,6 +119,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final groqImageModel =
         prefs.getString('groqImageModel') ?? defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
+    final useDevGroqKey = prefs.getBool('useDevGroqKey') ?? false;
     final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
         .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
@@ -127,6 +142,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: chatHistoryLimit,
       activeTextProvider: activeTextProvider,
       activeImageProvider: activeImageProvider,
+      useDevGroqKey: useDevGroqKey,
       isLoading: false,
     );
   }
@@ -144,6 +160,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     required AIProvider newActiveTextProvider,
     required AIProvider newActiveImageProvider,
     int newChatHistoryLimit = defaultChatHistoryLimit,
+    bool newUseDevGroqKey = false,
   }) async {
     if (newGeminiModel.isEmpty ||
         newGeminiImageModel.isEmpty ||
@@ -167,6 +184,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setInt('chatHistoryLimit', newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit));
     await prefs.setInt('activeTextProvider', newActiveTextProvider.index);
     await prefs.setInt('activeImageProvider', newActiveImageProvider.index);
+    await prefs.setBool('useDevGroqKey', newUseDevGroqKey);
 
     state = ModelState(
       geminiModel: newGeminiModel,
@@ -181,6 +199,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
       activeTextProvider: newActiveTextProvider,
       activeImageProvider: newActiveImageProvider,
+      useDevGroqKey: newUseDevGroqKey,
       isLoading: false,
     );
   }
@@ -209,6 +228,7 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: state.chatHistoryLimit,
       activeTextProvider: state.activeTextProvider,
       activeImageProvider: state.activeImageProvider,
+      useDevGroqKey: state.useDevGroqKey,
       isLoading: false,
     );
   }

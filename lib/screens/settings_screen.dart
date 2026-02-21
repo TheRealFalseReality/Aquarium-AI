@@ -37,6 +37,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
+  bool _useDevGroqKey = false;
   int _chatHistoryLimit = defaultChatHistoryLimit;
 
   @override
@@ -58,6 +59,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _selectedTextProvider = models.activeTextProvider;
     _selectedImageProvider = models.activeImageProvider;
     _chatHistoryLimit = models.chatHistoryLimit;
+    _useDevGroqKey = models.useDevGroqKey;
   }
 
   @override
@@ -265,6 +267,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (_selectedTextProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty &&
+        !_useDevGroqKey &&
         developerGroqApiKey.isEmpty) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
@@ -283,6 +286,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (_selectedImageProvider == AIProvider.groq &&
           _groqApiKeyController.text.trim().isEmpty &&
+          !_useDevGroqKey &&
           developerGroqApiKey.isEmpty) {
         context.showAccessibleMessage(l10n.enterGroqApiKey);
         return;
@@ -313,6 +317,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveTextProvider: _selectedTextProvider,
           newActiveImageProvider: _selectedImageProvider,
           newChatHistoryLimit: _chatHistoryLimit,
+          newUseDevGroqKey: _useDevGroqKey,
         );
 
     // Update Crashlytics custom keys so crash reports reflect current AI config.
@@ -388,6 +393,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (_groqApiKeyController.text != next.groqApiKey) {
         _groqApiKeyController.text = next.groqApiKey;
       }
+      if (_useDevGroqKey != next.useDevGroqKey) {
+        setState(() {
+          _useDevGroqKey = next.useDevGroqKey;
+        });
+      }
       if (_selectedTextProvider != next.activeTextProvider) {
         setState(() {
           _selectedTextProvider = next.activeTextProvider;
@@ -414,6 +424,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildMainMenu() {
     final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.watch(appSettingsProvider);
+    final models = ref.watch(modelProvider);
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -479,6 +490,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAIProviderDialog(),
           enabled: appSettings.enableAI,
         ),
+        // Indicator: show when the app is using the built-in dev API key
+        if (appSettings.enableAI && models.usingDeveloperGroqKey) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.amber.withOpacity(0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.amber, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Using App\'s Built-in Dev API Key (Groq free tier). '
+                    'Add your own Groq key in AI Provider settings for dedicated limits.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
@@ -2029,17 +2069,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        // Toggle: use the app's built-in developer Groq key
+        if (developerGroqApiKey.isNotEmpty) ...[
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              ),
+            ),
+            child: SwitchListTile(
+              secondary: Icon(
+                Icons.lock_open_outlined,
+                color: _useDevGroqKey
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              title: const Text('Use App\'s Built-in Dev Key'),
+              subtitle: Text(
+                _useDevGroqKey
+                    ? 'Using the app\'s built-in Groq API key (free tier). '
+                      'Your saved key is preserved and can be re-enabled anytime.'
+                    : 'Switch on to use the app\'s built-in Groq key instead of your own.',
+              ),
+              value: _useDevGroqKey,
+              onChanged: (value) {
+                setState(() {
+                  _useDevGroqKey = value;
+                });
+                if (setDialogState != null) {
+                  setDialogState(() {
+                    _useDevGroqKey = value;
+                  });
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         TextField(
           controller: _groqApiKeyController,
+          enabled: !_useDevGroqKey,
           obscureText: !_isGroqApiKeyVisible,
           decoration: InputDecoration(
             labelText: developerGroqApiKey.isNotEmpty
                 ? 'Groq API Key (Optional)'
                 : 'Groq API Key',
             border: const OutlineInputBorder(),
-            helperText: developerGroqApiKey.isNotEmpty
-                ? 'Add your own key for dedicated rate limits and better performance.'
-                : null,
+            helperText: _useDevGroqKey
+                ? 'Disabled: using the app\'s built-in key. Toggle off above to use your own key.'
+                : developerGroqApiKey.isNotEmpty
+                    ? 'Add your own key for dedicated rate limits and better performance.'
+                    : null,
             helperMaxLines: 2,
             suffixIcon: IconButton(
               icon: Icon(
