@@ -1275,6 +1275,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   final _quantityController = TextEditingController();
   final _searchController = TextEditingController();
   final _urlController = TextEditingController();
+  final _addSpeciesTagController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   
   String? _selectedFishUnit;
@@ -1333,6 +1334,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     _quantityController.dispose();
     _searchController.dispose();
     _urlController.dispose();
+    _addSpeciesTagController.dispose();
     super.dispose();
   }
 
@@ -1534,8 +1536,8 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             ),
           ),
 
-        // Species tags section (shown when a fish is selected and tags are available)
-        if (selectedFish != null && !_fishSelectorExpanded && availableSpeciesTags.isNotEmpty) ...[
+        // Species tags section (shown when a fish is selected)
+        if (selectedFish != null && !_fishSelectorExpanded) ...[
           const SizedBox(height: 12),
           Text(
             'Species (Optional)',
@@ -1545,25 +1547,69 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             ),
           ),
           const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: availableSpeciesTags.map((tag) {
-              final isSelected = _selectedSpeciesTags.contains(tag);
-              return FilterChip(
-                label: Text(tag, style: const TextStyle(fontSize: 12)),
-                selected: isSelected,
-                onSelected: (value) {
-                  setState(() {
-                    if (value) {
-                      _selectedSpeciesTags.add(tag);
-                    } else {
-                      _selectedSpeciesTags.remove(tag);
+          if (availableSpeciesTags.isNotEmpty)
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: availableSpeciesTags.map((tag) {
+                final isSelected = _selectedSpeciesTags.contains(tag);
+                return FilterChip(
+                  label: Text(tag, style: const TextStyle(fontSize: 12)),
+                  selected: isSelected,
+                  onSelected: (value) {
+                    setState(() {
+                      if (value) {
+                        _selectedSpeciesTags.add(tag);
+                      } else {
+                        _selectedSpeciesTags.remove(tag);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _addSpeciesTagController,
+                  decoration: InputDecoration(
+                    hintText: 'Add species...',
+                    hintStyle: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    isDense: true,
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                  textCapitalization: TextCapitalization.words,
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty && _selectedFishUnit != null) {
+                      ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
+                      setState(() => _addSpeciesTagController.clear());
                     }
-                  });
+                  },
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  final value = _addSpeciesTagController.text;
+                  if (value.trim().isNotEmpty && _selectedFishUnit != null) {
+                    ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
+                    setState(() => _addSpeciesTagController.clear());
+                  }
                 },
-              );
-            }).toList(),
+                icon: const Icon(Icons.add),
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'Add species tag',
+              ),
+            ],
           ),
         ],
 
