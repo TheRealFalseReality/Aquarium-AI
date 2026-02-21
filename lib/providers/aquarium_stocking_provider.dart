@@ -123,17 +123,22 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         state = state.copyWith(
           error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        state = state.copyWith(
+          error: '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
       }
     }
-    
     final processedTankSize = _processTankSize(tankSize);
     final prompt = buildStockingRecommendationPrompt(
       processedTankSize, 
@@ -307,11 +312,17 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         state = state.copyWith(
           error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        state = state.copyWith(
+          error: '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;

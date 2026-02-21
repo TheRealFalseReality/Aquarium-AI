@@ -927,6 +927,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(height: 6),
                           Text(
                             '• $devMaxRequestsPerMinute AI requests per minute\n'
+                            '• $devMaxRequestsPerDay AI requests per day\n'
                             '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
                             '• $defaultChatHistoryLimit-message chat history per request',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -943,6 +944,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(height: 6),
                           Text(
                             'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade800,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.amber.shade800,
                               fontStyle: FontStyle.italic,

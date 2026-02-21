@@ -1,6 +1,19 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dev_limits.dart';
 
+/// Result of a rate-limit check.
+enum DevRateLimitResult {
+  /// The request is allowed and has been recorded.
+  allowed,
+
+  /// The per-minute limit has been reached. Call [DevRateLimiter.secondsUntilNextSlot]
+  /// to find out how long the user must wait.
+  minuteLimitReached,
+
+  /// The per-day limit has been reached. The user must wait until tomorrow.
+  dailyLimitReached,
+}
+
 /// Enforces in-app rate limits for users on the developer Groq key.
 ///
 /// All methods are static. Call them only when
@@ -9,22 +22,40 @@ import 'dev_limits.dart';
 /// Limits are configured in [dev_limits.dart].
 class DevRateLimiter {
   static const String _requestTimestampsKey = 'dev_rate_request_timestamps';
+  static const String _requestDailyCountKey = 'dev_rate_request_daily_count';
+  static const String _requestDailyDateKey = 'dev_rate_request_daily_date';
   static const String _photoDailyCountKey = 'dev_rate_photo_daily_count';
   static const String _photoDailyDateKey = 'dev_rate_photo_daily_date';
 
   // ----------------------------------------------------------------
-  // Per-minute request limit
+  // Per-minute + per-day request limit
   // ----------------------------------------------------------------
 
-  /// Checks whether a new AI request is within the per-minute limit.
+  /// Checks whether a new AI request is within both the per-minute and per-day
+  /// limits.
   ///
-  /// Returns `true` and records the timestamp if allowed.
-  /// Returns `false` (without recording) if the limit is exceeded.
-  static Future<bool> checkAndRecordRequest() async {
+  /// Checks are applied in this order:
+  /// 1. Per-day limit — returns [DevRateLimitResult.dailyLimitReached] if exceeded.
+  /// 2. Per-minute limit — returns [DevRateLimitResult.minuteLimitReached] if exceeded.
+  ///
+  /// On success, records the timestamp and increments the daily counter, then
+  /// returns [DevRateLimitResult.allowed].
+  static Future<DevRateLimitResult> checkAndRecordRequest() async {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
-    final windowStart = now.subtract(const Duration(minutes: 1));
+    final todayStr = _todayString();
 
+    // --- per-day check ---
+    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    final dailyCount = storedDate == todayStr
+        ? (prefs.getInt(_requestDailyCountKey) ?? 0)
+        : 0;
+    if (dailyCount >= devMaxRequestsPerDay) {
+      return DevRateLimitResult.dailyLimitReached;
+    }
+
+    // --- per-minute check ---
+    final windowStart = now.subtract(const Duration(minutes: 1));
     final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
@@ -33,15 +64,19 @@ class DevRateLimiter {
         .toList();
 
     if (recent.length >= devMaxRequestsPerMinute) {
-      return false;
+      return DevRateLimitResult.minuteLimitReached;
     }
 
+    // --- record ---
     recent.add(now);
     await prefs.setStringList(
       _requestTimestampsKey,
       recent.map((d) => d.toIso8601String()).toList(),
     );
-    return true;
+    await prefs.setString(_requestDailyDateKey, todayStr);
+    await prefs.setInt(_requestDailyCountKey, dailyCount + 1);
+
+    return DevRateLimitResult.allowed;
   }
 
   /// Returns the number of seconds until the oldest in-window request
@@ -66,6 +101,20 @@ class DevRateLimiter {
     final oldest = recent.first;
     final expiresAt = oldest.add(const Duration(minutes: 1));
     final remaining = expiresAt.difference(now).inSeconds;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  /// Returns the number of AI requests remaining today.
+  static Future<int> remainingRequestsToday() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todayStr = _todayString();
+
+    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    final count = storedDate == todayStr
+        ? (prefs.getInt(_requestDailyCountKey) ?? 0)
+        : 0;
+
+    final remaining = devMaxRequestsPerDay - count;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -113,13 +162,15 @@ class DevRateLimiter {
   // Rollback helpers (call when an AI request results in an error)
   // ----------------------------------------------------------------
 
-  /// Removes the most recently recorded per-minute request timestamp so that
-  /// a failed AI call does not count against the user's rate limit.
+  /// Removes the most recently recorded per-minute request timestamp and
+  /// decrements the daily count so that a failed AI call does not count
+  /// against the user's rate limits.
   static Future<void> undoLastRequest() async {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
     final windowStart = now.subtract(const Duration(minutes: 1));
 
+    // Undo per-minute slot
     final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
@@ -127,16 +178,24 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    if (recent.isEmpty) return;
+    if (recent.isNotEmpty) {
+      recent.sort();
+      recent.removeLast();
+      await prefs.setStringList(
+        _requestTimestampsKey,
+        recent.map((d) => d.toIso8601String()).toList(),
+      );
+    }
 
-    // Remove the most recent timestamp (the one we just added).
-    recent.sort();
-    recent.removeLast();
-
-    await prefs.setStringList(
-      _requestTimestampsKey,
-      recent.map((d) => d.toIso8601String()).toList(),
-    );
+    // Undo daily count
+    final todayStr = _todayString();
+    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    if (storedDate == todayStr) {
+      final count = prefs.getInt(_requestDailyCountKey) ?? 0;
+      if (count > 0) {
+        await prefs.setInt(_requestDailyCountKey, count - 1);
+      }
+    }
   }
 
   /// Decrements today's photo analysis count by 1 so that a failed photo

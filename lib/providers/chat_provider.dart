@@ -144,11 +144,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
     if (_modelState.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         return _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          message,
+          isRateLimitError: true,
+        );
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        return _handleError(
+          '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           message,
           isRateLimitError: true,
         );
@@ -279,12 +285,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         final userMsg = 'Please analyze my water parameters.';
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          userMsg,
+          isRateLimitError: true,
+        );
+        return null;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        final userMsg = 'Please analyze my water parameters.';
+        await _handleError(
+          '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           userMsg,
           isRateLimitError: true,
         );
@@ -335,11 +349,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Generate an automation script.',
+          isRateLimitError: true,
+        );
+        return null;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        await _handleError(
+          '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           'Generate an automation script.',
           isRateLimitError: true,
         );
@@ -381,11 +402,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          'Look up fish info: $fishNames.',
+          isRateLimitError: true,
+        );
+        return null;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        await _handleError(
+          '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           'Look up fish info: $fishNames.',
           isRateLimitError: true,
         );
@@ -436,9 +464,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     // Check rate limits before showing the loading state, so the user sees the
     // error as a chat message rather than a silent failure.
     if (_modelState.usingDeveloperGroqKey) {
-      // Per-minute request limit checked first — no quota consumed if this fails.
-      final reqAllowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!reqAllowed) {
+      // Per-minute + per-day request limit checked first — no quota consumed if this fails.
+      final reqResult = await DevRateLimiter.checkAndRecordRequest();
+      if (reqResult == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         state = ChatState(
           messages: [
@@ -450,6 +478,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
               isRetryable: true,
               originalMessage: 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}',
               photoBytes: imageBytes,
+            ),
+          ],
+          isLoading: false,
+        );
+        return null;
+      } else if (reqResult == DevRateLimitResult.dailyLimitReached) {
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: '📅 **Daily free-tier limit reached** ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+              isUser: false,
+              isError: true,
+              isRetryable: false,
             ),
           ],
           isLoading: false,

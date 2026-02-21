@@ -13,6 +13,10 @@
 /// rate-limited by Groq's free tier.
 const int devMaxRequestsPerMinute = 4;
 
+/// Maximum number of AI requests allowed per day per device
+/// when using the developer key.
+const int devMaxRequestsPerDay = 50;
+
 /// Maximum number of photo analyses allowed per day per device
 /// when using the developer key.
 const int devMaxPhotoAnalysesPerDay = 3;
