@@ -9,7 +9,6 @@ import '../providers/fish_compatibility_provider.dart';
 import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
-import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dart_openai/dart_openai.dart';
-import 'package:groq/groq.dart';
 
 import '../models/analysis_result.dart';
 import '../models/analysis_history_entry.dart';
