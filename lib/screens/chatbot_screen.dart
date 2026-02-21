@@ -21,6 +21,7 @@ import './fish_info_screen.dart';
 import './fish_info_result_screen.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
+import '../widgets/ai_error_dialog.dart';
 import '../services/analytics_service.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
@@ -149,10 +150,37 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
 
-    ref.listen(chatProvider, (_, next) {
+    ref.listen(chatProvider, (previous, next) {
       final newMessages = next.messages;
       if (newMessages.isNotEmpty) {
         final last = newMessages.last;
+        // Show the modern AI error dialog when a new error message is added.
+        if (last.isError && !next.isLoading) {
+          final prevCount = previous?.messages.length ?? 0;
+          final isNewMessage = next.messages.length > prevCount;
+          if (isNewMessage) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                // Choose the appropriate retry callback.
+                VoidCallback? retryCallback;
+                if (last.isRetryable) {
+                  if (last.photoBytes != null) {
+                    retryCallback = () => ref.read(chatProvider.notifier).regeneratePhotoAnalysis();
+                  } else if (last.originalMessage != null) {
+                    retryCallback = () => ref.read(chatProvider.notifier).retryMessage(last.originalMessage!);
+                  }
+                }
+                showAiErrorDialog(
+                  context,
+                  errorMessage: last.text,
+                  isApiKeyError: last.isApiKeyError,
+                  isRetryable: last.isRetryable,
+                  onRetry: retryCallback,
+                );
+              }
+            });
+          }
+        }
         if (last.analysisResult != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -200,6 +228,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       });
     });
 
+
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: l10n.aiChatbot,
@@ -230,6 +259,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   photoBytes: item.photoBytes,
                   isError: item.isError,
                   isRetryable: item.isRetryable,
+                  isApiKeyError: item.isApiKeyError,
                   originalMessage: item.originalMessage,
                 );
               },
@@ -763,6 +793,7 @@ class MessageBubble extends ConsumerWidget {
   final Uint8List? photoBytes;
   final bool isError;
   final bool isRetryable;
+  final bool isApiKeyError;
   final String? originalMessage;
 
   const MessageBubble({
@@ -777,6 +808,7 @@ class MessageBubble extends ConsumerWidget {
     this.photoBytes,
     this.isError = false,
     this.isRetryable = false,
+    this.isApiKeyError = false,
     this.originalMessage,
   });
 
@@ -958,11 +990,19 @@ class MessageBubble extends ConsumerWidget {
               ),
             ],
           ),
-          if (isError && isRetryable && originalMessage != null)
+          if (isError && isRetryable)
             _RetryButton(
               onTap: () {
-                ref.read(chatProvider.notifier).retryMessage(originalMessage!);
+                if (photoBytes != null) {
+                  ref.read(chatProvider.notifier).regeneratePhotoAnalysis();
+                } else if (originalMessage != null) {
+                  ref.read(chatProvider.notifier).retryMessage(originalMessage!);
+                }
               },
+            ),
+          if (isError && isApiKeyError)
+            _SettingsButton(
+              onTap: () => Navigator.of(context).pushNamed('/settings'),
             ),
           if (analysisResult != null)
             _ResultButton(
@@ -1105,6 +1145,66 @@ class _RetryButtonState extends State<_RetryButton> {
                 'Retry',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: cs.onError,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _SettingsButton({required this.onTap});
+
+  @override
+  State<_SettingsButton> createState() => _SettingsButtonState();
+}
+
+class _SettingsButtonState extends State<_SettingsButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, left: 48.0),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: _pressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: cs.primary.withOpacity(0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
+          ),
+          transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.settings_outlined, size: 18, color: cs.onPrimary),
+              const SizedBox(width: 8),
+              Text(
+                'AI Provider Settings',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: cs.onPrimary,
                       fontWeight: FontWeight.w600,
                     ),
               ),

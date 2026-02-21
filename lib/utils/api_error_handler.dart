@@ -59,6 +59,16 @@ class ApiErrorHandler {
     return '⚠️ **An Unexpected Error Occurred**\n\n$error';
   }
   
+  /// Checks if an error is API key related (missing or invalid key)
+  static bool isApiKeyError(String error) {
+    final lower = error.toLowerCase();
+    return lower.contains('api key') ||
+           lower.contains('unauthorized') ||
+           lower.contains('authentication') ||
+           lower.contains('invalid_api_key') ||
+           lower.contains('not set. please');
+  }
+
   /// Checks if an error is rate limit related
   static bool isRateLimitError(String error) {
     return error.contains('429') || error.toLowerCase().contains('rate limit');

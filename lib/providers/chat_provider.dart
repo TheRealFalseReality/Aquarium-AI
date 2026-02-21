@@ -23,6 +23,7 @@ import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
 import '../utils/dev_rate_limiter.dart';
 import '../utils/dev_limits.dart';
+import '../utils/api_error_handler.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {
@@ -36,6 +37,7 @@ class ChatMessage {
   final Uint8List? photoBytes;
   final bool isError;
   final bool isRetryable;
+  final bool isApiKeyError;
   final String? originalMessage;
   final bool isAd;
 
@@ -50,6 +52,7 @@ class ChatMessage {
     this.photoBytes,
     this.isError = false,
     this.isRetryable = false,
+    this.isApiKeyError = false,
     this.originalMessage,
     this.isAd = false,
   });
@@ -147,18 +150,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
         return _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           message,
+          isRateLimitError: true,
         );
       }
     }
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
-        if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set.', message);
+        if (_modelState.geminiApiKey.isEmpty) return _handleError('Gemini API Key is not set. Please add your key in Settings.', message);
         return _sendGeminiMessage(message);
       case AIProvider.openAI:
-        if (_modelState.openAIApiKey.isEmpty) return _handleError('OpenAI API Key is not set.', message);
+        if (_modelState.openAIApiKey.isEmpty) return _handleError('OpenAI API Key is not set. Please add your key in Settings.', message);
         return _sendOpenAIMessage(message);
       case AIProvider.groq:
-        if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set.', message);
+        if (!_modelState.hasGroqKey) return _handleError('Groq API Key is not set. Please add your key in Settings.', message);
         return _sendGroqMessage(message);
     }
   }
@@ -282,6 +286,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           userMsg,
+          isRateLimitError: true,
         );
         return null;
       }
@@ -336,6 +341,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           'Generate an automation script.',
+          isRateLimitError: true,
         );
         return null;
       }
@@ -381,6 +387,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         await _handleError(
           '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           'Look up fish info: $fishNames.',
+          isRateLimitError: true,
         );
         return null;
       }
@@ -453,6 +460,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
       if (!isRegeneration) {
         final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis();
         if (!photoAllowed) {
+          // Rollback the per-minute slot we just recorded since the photo won't proceed.
+          await DevRateLimiter.undoLastRequest();
           state = ChatState(
             messages: [
               ...state.messages,
@@ -469,6 +478,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
         }
       }
     }
+    // Store photo bytes/note before the request so that retry via
+    // regeneratePhotoAnalysis() works even if the AI call fails.
+    _lastPhotoBytes = imageBytes;
+    _lastPhotoNote = userNote;
     final note = (userNote?.trim().isNotEmpty ?? false) ? 'User note: ${userNote!.trim()}' : 'No additional user note.';
     if (!isRegeneration) {
       state = ChatState(messages: [...state.messages, ChatMessage(text: '📷 Submitted an aquarium photo for AI analysis.\n\n$note', isUser: true, photoBytes: imageBytes)], isLoading: true);
@@ -481,8 +494,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final responseText = await _generateContentWithImage(prompt, imageBytes, mimeType);
       final parsed = PhotoAnalysisResult.tryParseJson(extractJson(responseText));
       if (parsed == null) throw const FormatException('Malformed JSON from AI photo analysis.');
-      _lastPhotoBytes = imageBytes;
-      _lastPhotoNote = userNote;
       state = ChatState(
         messages: [...state.messages, ChatMessage(text: isRegeneration ? '🖼️ Photo analysis regenerated.' : '🖼️ Photo analysis complete. Tap to view detailed results.', isUser: false, photoAnalysisResult: parsed, photoBytes: imageBytes)],
         isLoading: false,
@@ -505,8 +516,32 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return parsed;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) {
-        final msg = _getPhotoError(e.toString());
-        state = ChatState(messages: [...state.messages, ChatMessage(text: msg, isUser: false, isError: true, isRetryable: true, originalMessage: originalMessage, photoBytes: imageBytes)], isLoading: false);
+        // Rollback rate limit slots since the AI call failed.
+        // The daily photo counter is only incremented for new analyses (not
+        // regenerations), so it is only rolled back in that case.
+        if (_modelState.usingDeveloperGroqKey) {
+          await DevRateLimiter.undoLastRequest();
+          if (!isRegeneration) await DevRateLimiter.undoPhotoAnalysis();
+        }
+        final apiKeyError = ApiErrorHandler.isApiKeyError(e.toString());
+        final msg = apiKeyError
+            ? ApiErrorHandler.getFriendlyErrorMessage(e.toString())
+            : _getPhotoError(e.toString());
+        state = ChatState(
+          messages: [
+            ...state.messages,
+            ChatMessage(
+              text: msg,
+              isUser: false,
+              isError: true,
+              isRetryable: !apiKeyError,
+              isApiKeyError: apiKeyError,
+              originalMessage: apiKeyError ? null : originalMessage,
+              photoBytes: imageBytes,
+            ),
+          ],
+          isLoading: false,
+        );
       }
       return null;
     }
@@ -634,9 +669,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = ChatState(messages: [...state.messages, ChatMessage(text: mainResponse, isUser: false, followUpQuestions: followUps)], isLoading: false);
   }
 
-  Future<void> _handleError(String error, String originalMessage) async {
-    final msg = '⚠️ **An Unexpected Error Occurred**\n\n$error';
-    state = ChatState(messages: [...state.messages, ChatMessage(text: msg, isUser: false, isError: true, isRetryable: true, originalMessage: originalMessage)], isLoading: false);
+  Future<void> _handleError(String error, String originalMessage, {bool isRateLimitError = false}) async {
+    final apiKeyError = !isRateLimitError && ApiErrorHandler.isApiKeyError(error);
+    // Rollback the rate-limit slot for real AI errors (not pre-flight limit checks).
+    if (!isRateLimitError && !apiKeyError && _modelState.usingDeveloperGroqKey) {
+      await DevRateLimiter.undoLastRequest();
+    }
+    // Use the error as-is for already-formatted rate limit messages; otherwise run it
+    // through the friendly-message formatter.
+    final friendlyError = isRateLimitError ? error : ApiErrorHandler.getFriendlyErrorMessage(error);
+    state = ChatState(
+      messages: [
+        ...state.messages,
+        ChatMessage(
+          text: friendlyError,
+          isUser: false,
+          isError: true,
+          isRetryable: !apiKeyError,
+          isApiKeyError: apiKeyError,
+          originalMessage: apiKeyError ? null : originalMessage,
+        ),
+      ],
+      isLoading: false,
+    );
   }
 
   String _getPhotoError(String err) {

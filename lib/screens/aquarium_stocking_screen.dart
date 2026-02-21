@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
+import '../widgets/ai_error_dialog.dart';
 import '../services/analytics_service.dart';
 import 'stocking_report_screen.dart';
 import '../widgets/fish_selection_dialog.dart';
@@ -88,6 +89,21 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
         _showLoadingOverlay(context);
       } else if (!next.isLoading && (previous?.isLoading ?? false)) {
         _hideLoadingOverlay();
+      }
+
+      // Show error dialog when a new error is received.
+      if (next.error != null && previous?.error != next.error) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            showAiErrorDialog(
+              context,
+              errorMessage: next.error!,
+              isApiKeyError: next.isApiKeyError,
+              isRetryable: next.isRetryable,
+            );
+            ref.read(aquariumStockingProvider.notifier).cancel();
+          }
+        });
       }
 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {

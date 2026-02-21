@@ -110,6 +110,51 @@ class DevRateLimiter {
   }
 
   // ----------------------------------------------------------------
+  // Rollback helpers (call when an AI request results in an error)
+  // ----------------------------------------------------------------
+
+  /// Removes the most recently recorded per-minute request timestamp so that
+  /// a failed AI call does not count against the user's rate limit.
+  static Future<void> undoLastRequest() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final windowStart = now.subtract(const Duration(minutes: 1));
+
+    final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
+    final recent = raw
+        .map((s) => DateTime.tryParse(s))
+        .whereType<DateTime>()
+        .where((d) => d.isAfter(windowStart))
+        .toList();
+
+    if (recent.isEmpty) return;
+
+    // Remove the most recent timestamp (the one we just added).
+    recent.sort();
+    recent.removeLast();
+
+    await prefs.setStringList(
+      _requestTimestampsKey,
+      recent.map((d) => d.toIso8601String()).toList(),
+    );
+  }
+
+  /// Decrements today's photo analysis count by 1 so that a failed photo
+  /// analysis call does not count against the daily limit.
+  static Future<void> undoPhotoAnalysis() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todayStr = _todayString();
+
+    final storedDate = prefs.getString(_photoDailyDateKey) ?? '';
+    if (storedDate != todayStr) return;
+
+    final count = prefs.getInt(_photoDailyCountKey) ?? 0;
+    if (count <= 0) return;
+
+    await prefs.setInt(_photoDailyCountKey, count - 1);
+  }
+
+  // ----------------------------------------------------------------
   // Helpers
   // ----------------------------------------------------------------
 

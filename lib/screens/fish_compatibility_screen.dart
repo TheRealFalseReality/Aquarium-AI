@@ -13,6 +13,7 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/fish_card.dart';
+import '../widgets/ai_error_dialog.dart';
 import 'compatibility_report.dart';
 import '../services/analytics_service.dart';
 
@@ -370,26 +371,14 @@ class FishCompatibilityScreenState
       if (next.error != null && previous?.error != next.error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            // Check if the error is related to API key not being set
-            final isApiKeyError = next.error!.toLowerCase().contains('api key not set');
-            
-            // Determine the action based on error type
-            VoidCallback? onAction;
-            String? actionLabel;
-            
-            if (isApiKeyError) {
-              onAction = () => Navigator.pushNamed(context, '/settings');
-              actionLabel = 'Settings';
-            } else if (next.isRetryable) {
-              onAction = () => notifier.retryCompatibilityReport();
-              actionLabel = 'Retry';
-            }
-            
-            context.showAccessibleMessage(
-              next.error!,
-              duration: const Duration(seconds: 6),
-              onAction: onAction,
-              actionLabel: actionLabel,
+            showAiErrorDialog(
+              context,
+              errorMessage: next.error!,
+              isApiKeyError: next.isApiKeyError,
+              isRetryable: next.isRetryable,
+              onRetry: next.isRetryable
+                  ? () => notifier.retryCompatibilityReport()
+                  : null,
             );
             notifier.clearError();
           }

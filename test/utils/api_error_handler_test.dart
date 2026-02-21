@@ -72,6 +72,39 @@ void main() {
       });
     });
 
+    group('isApiKeyError', () {
+      test('should detect API key errors', () {
+        expect(ApiErrorHandler.isApiKeyError('api key is missing'), true);
+        expect(ApiErrorHandler.isApiKeyError('invalid api key provided'), true);
+        expect(ApiErrorHandler.isApiKeyError('Invalid API Key'), true);
+      });
+
+      test('should detect unauthorized errors as API key errors', () {
+        expect(ApiErrorHandler.isApiKeyError('unauthorized access'), true);
+        expect(ApiErrorHandler.isApiKeyError('Unauthorized request'), true);
+      });
+
+      test('should detect authentication errors', () {
+        expect(ApiErrorHandler.isApiKeyError('authentication failed'), true);
+        expect(ApiErrorHandler.isApiKeyError('Authentication error occurred'), true);
+      });
+
+      test('should detect invalid_api_key format', () {
+        expect(ApiErrorHandler.isApiKeyError('error: invalid_api_key'), true);
+      });
+
+      test('should detect "not set. please" pattern', () {
+        expect(ApiErrorHandler.isApiKeyError('Gemini API Key is not set. Please add your key.'), true);
+      });
+
+      test('should return false for non-API-key errors', () {
+        expect(ApiErrorHandler.isApiKeyError('rate limit exceeded'), false);
+        expect(ApiErrorHandler.isApiKeyError('quota exceeded'), false);
+        expect(ApiErrorHandler.isApiKeyError('network error'), false);
+        expect(ApiErrorHandler.isApiKeyError('timeout exception'), false);
+      });
+    });
+
     group('isRateLimitError', () {
       test('should detect 429 error code', () {
         expect(ApiErrorHandler.isRateLimitError('Error 429'), true);
