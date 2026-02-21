@@ -1590,7 +1590,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        // Clear species tags when changing fish type
+                        // Clear species tags only when a different fish type is selected
                         if (_selectedFishUnit != fish.name) {
                           _selectedSpeciesTags = [];
                         }
