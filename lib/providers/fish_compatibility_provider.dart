@@ -5,6 +5,8 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
+import '../models/analysis_history_entry.dart';
+import 'analysis_history_provider.dart';
 import '../prompts/fish_compatibility_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/json_utils.dart';
@@ -232,6 +234,20 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       );
       state = state.copyWith(
           report: report, lastReport: report, isLoading: false);
+      // Save to analysis history
+      final fishNames = state.selectedFish.isNotEmpty
+          ? state.selectedFish.map((f) => f.name).join(', ')
+          : 'Selected Fish';
+      ref.read(analysisHistoryProvider.notifier).addEntry(
+        AnalysisHistoryEntry.create(
+          type: AnalysisType.compatibilityReport,
+          title: 'Compatibility – $fishNames',
+          resultData: {
+            'report': report.toJson(),
+            'fishType': category,
+          },
+        ),
+      );
     } catch (e) {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
         final userFriendlyError = _getFriendlyErrorMessage(e.toString());

@@ -22,4 +22,38 @@ class StockingRecommendation {
     this.compatibilityNotes,
     this.isAdditionRecommendation = false,
   });
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'summary': summary,
+    'coreFish': coreFish.map((f) => f.toJson()).toList(),
+    'otherDataBasedFish': otherDataBasedFish.map((f) => f.toJson()).toList(),
+    'aiTankMatesSummary': aiTankMatesSummary,
+    'aiRecommendedTankMates': aiRecommendedTankMates,
+    'harmonyScore': harmonyScore,
+    'compatibilityNotes': compatibilityNotes,
+    'isAdditionRecommendation': isAdditionRecommendation,
+  };
+
+  factory StockingRecommendation.fromJson(Map<String, dynamic> json) {
+    return StockingRecommendation(
+      title: json['title'] as String? ?? '',
+      summary: json['summary'] as String? ?? '',
+      coreFish: (json['coreFish'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(Fish.fromJson)
+          .toList(),
+      otherDataBasedFish: (json['otherDataBasedFish'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(Fish.fromJson)
+          .toList(),
+      aiTankMatesSummary: json['aiTankMatesSummary'] as String? ?? '',
+      aiRecommendedTankMates:
+          List<String>.from(json['aiRecommendedTankMates'] as List? ?? []),
+      harmonyScore: (json['harmonyScore'] as num?)?.toDouble() ?? 0.0,
+      compatibilityNotes: json['compatibilityNotes'] as String?,
+      isAdditionRecommendation:
+          json['isAdditionRecommendation'] as bool? ?? false,
+    );
+  }
 }

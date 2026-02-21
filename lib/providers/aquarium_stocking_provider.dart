@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
+import '../models/analysis_history_entry.dart';
+import 'analysis_history_provider.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
 import '../utils/tank_harmony_calculator.dart';
@@ -218,6 +220,21 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           lastRecommendations: finalRecs,
           isLoading: false,
         );
+        // Save to analysis history
+        final typeLabel = tankType.isNotEmpty ? tankType : 'Tank';
+        ref.read(analysisHistoryProvider.notifier).addEntry(
+          AnalysisHistoryEntry.create(
+            type: AnalysisType.stockingRecommendation,
+            title: 'Stocking: $typeLabel ${processedTankSize.isNotEmpty ? '($processedTankSize)' : ''}'.trim(),
+            resultData: {
+              'recommendations':
+                  finalRecs.map((r) => r.toJson()).toList(),
+              'tankSize': tankSize,
+              'tankType': tankType,
+              'userNotes': userNotes,
+            },
+          ),
+        );
       } else {
         state = state.copyWith(
           error: 'Could not generate a valid recommendation for your criteria. Try adjusting the notes or tank size.',
@@ -419,6 +436,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           recommendations: finalRecs,
           lastRecommendations: finalRecs,
           isLoading: false,
+        );
+        // Save to analysis history
+        ref.read(analysisHistoryProvider.notifier).addEntry(
+          AnalysisHistoryEntry.create(
+            type: AnalysisType.stockingRecommendation,
+            title: 'Tank Stocking: ${tank.name}',
+            resultData: {
+              'recommendations':
+                  finalRecs.map((r) => r.toJson()).toList(),
+              'tankName': tank.name,
+              'tankType': tank.type,
+            },
+          ),
         );
       } else {
         state = state.copyWith(

@@ -5,7 +5,9 @@ enum AnalysisType {
   waterParameters,
   photoAnalysis,
   fishInfo,
-  automationScript;
+  automationScript,
+  compatibilityReport,
+  stockingRecommendation;
 
   String get displayName {
     switch (this) {
@@ -17,6 +19,10 @@ enum AnalysisType {
         return 'Fish Info';
       case AnalysisType.automationScript:
         return 'Automation Script';
+      case AnalysisType.compatibilityReport:
+        return 'Compatibility Report';
+      case AnalysisType.stockingRecommendation:
+        return 'Stocking Recommendation';
     }
   }
 

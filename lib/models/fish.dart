@@ -39,4 +39,14 @@ class Fish {
       withCaution: parseStringList(json['withCaution']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'commonNames': commonNames,
+    'imageURL': imageURL,
+    'compatible': compatible,
+    'notRecommended': notRecommended,
+    'notCompatible': notCompatible,
+    'withCaution': withCaution,
+  };
 }

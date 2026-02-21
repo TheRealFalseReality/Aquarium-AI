@@ -11,13 +11,17 @@ import '../main_layout.dart';
 import '../models/analysis_history_entry.dart';
 import '../models/analysis_result.dart';
 import '../models/automation_script.dart';
+import '../models/compatibility_report.dart';
 import '../models/fish_info_result.dart';
 import '../models/photo_analysis_result.dart';
+import '../models/stocking_recommendation.dart';
 import '../providers/analysis_history_provider.dart';
 import 'analysis_result_screen.dart';
 import 'automation_script_result_screen.dart';
+import 'compatibility_report.dart' show showReportDialog;
 import 'fish_info_result_screen.dart';
 import 'photo_analysis_result_screen.dart';
+import 'stocking_report_screen.dart';
 
 class AnalysisHistoryScreen extends ConsumerWidget {
   const AnalysisHistoryScreen({super.key});
@@ -134,6 +138,10 @@ class _HistoryEntryTile extends ConsumerWidget {
         return Icons.info_outline;
       case AnalysisType.automationScript:
         return Icons.code;
+      case AnalysisType.compatibilityReport:
+        return Icons.compare_arrows;
+      case AnalysisType.stockingRecommendation:
+        return Icons.auto_awesome;
     }
   }
 
@@ -147,6 +155,10 @@ class _HistoryEntryTile extends ConsumerWidget {
         return cs.tertiary;
       case AnalysisType.automationScript:
         return cs.error;
+      case AnalysisType.compatibilityReport:
+        return Colors.teal;
+      case AnalysisType.stockingRecommendation:
+        return Colors.deepPurple;
     }
   }
 
@@ -197,6 +209,39 @@ class _HistoryEntryTile extends ConsumerWidget {
             MaterialPageRoute(
                 builder: (_) =>
                     AutomationScriptResultScreen(script: script)),
+          );
+          break;
+
+        case AnalysisType.compatibilityReport:
+          final report = CompatibilityReport.fromJson(
+            entry.resultData['report'] as Map<String, dynamic>? ?? {},
+          );
+          final fishType = entry.resultData['fishType'] as String?;
+          showReportDialog(context, report, fromHistory: true, fishType: fishType);
+          break;
+
+        case AnalysisType.stockingRecommendation:
+          final recsRaw = entry.resultData['recommendations'] as List<dynamic>? ?? [];
+          final recs = recsRaw
+              .whereType<Map<String, dynamic>>()
+              .map(StockingRecommendation.fromJson)
+              .toList();
+          if (recs.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No recommendations found in this history entry.')),
+            );
+            break;
+          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StockingReportScreen(
+                reports: recs,
+                tankSize: entry.resultData['tankSize'] as String?,
+                tankType: entry.resultData['tankType'] as String?,
+                userNotes: entry.resultData['userNotes'] as String?,
+              ),
+            ),
           );
           break;
       }
