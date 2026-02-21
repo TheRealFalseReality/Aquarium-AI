@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -9,12 +11,19 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// Firebase console contain rich context for debugging.
 ///
 /// All public methods are safe to call even when Firebase has not been
-/// initialized – any failure is silently swallowed so that Crashlytics
-/// instrumentation never causes the app itself to crash.
+/// initialized or on unsupported platforms – any failure is silently swallowed
+/// so that Crashlytics instrumentation never causes the app itself to crash.
+///
+/// Supported platforms: Android, iOS, macOS.
 ///
 /// Reference: https://firebase.google.com/docs/crashlytics/customize-crash-reports
 class CrashlyticsService {
   static final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
+
+  /// Returns true only on platforms that natively support Crashlytics
+  /// (Android, iOS, macOS). Web, Windows, and Linux are not supported.
+  static bool get _isSupported =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
 
   // ---------------------------------------------------------------------------
   // Core primitives
@@ -24,6 +33,7 @@ class CrashlyticsService {
   ///
   /// Supported value types: [String], [bool], [int], [double].
   static Future<void> setCustomKey(String key, Object value) async {
+    if (!_isSupported) return;
     try {
       if (value is bool) {
         await _crashlytics.setCustomKey(key, value);
@@ -45,6 +55,7 @@ class CrashlyticsService {
   /// reports. Messages are visible under the "Logs" tab in the Firebase
   /// console.
   static Future<void> log(String message) async {
+    if (!_isSupported) return;
     try {
       await _crashlytics.log(message);
       if (kDebugMode) {
@@ -61,6 +72,7 @@ class CrashlyticsService {
   /// crashes for a particular user. Pass an empty string to clear the
   /// identifier.
   static Future<void> setUserIdentifier(String identifier) async {
+    if (!_isSupported) return;
     try {
       await _crashlytics.setUserIdentifier(identifier);
     } catch (e) {
@@ -82,6 +94,7 @@ class CrashlyticsService {
     bool fatal = false,
     Iterable<Object> information = const [],
   }) async {
+    if (!_isSupported) return;
     try {
       if (kDebugMode) {
         debugPrint(

@@ -26,7 +26,6 @@ import './screens/species_tags_screen.dart';
 import './screens/analysis_history_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
 import './services/notification_service.dart';
@@ -168,13 +167,13 @@ void main() async {
     
     // Only record to Crashlytics if Firebase is initialized
     if (_firebaseInitialized) {
-      try {
-        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('Failed to record Flutter error to Crashlytics: $e');
-        }
-      }
+      CrashlyticsService.recordError(
+        errorDetails.exception,
+        errorDetails.stack,
+        reason: 'Flutter fatal error',
+        fatal: true,
+        information: errorDetails.informationCollector?.call() ?? [],
+      );
       
       // Also log to Analytics (non-blocking)
       AnalyticsService.logError(
@@ -199,13 +198,7 @@ void main() async {
     
     // Only record to Crashlytics if Firebase is initialized
     if (_firebaseInitialized) {
-      try {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('Failed to record platform error to Crashlytics: $e');
-        }
-      }
+      CrashlyticsService.recordError(error, stack, fatal: true);
       
       // Also log to Analytics (non-blocking)
       AnalyticsService.logError(
