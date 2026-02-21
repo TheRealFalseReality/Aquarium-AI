@@ -70,6 +70,41 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     }).toList();
   }
 
+  Future<void> _restoreDefaultTags(Map<String, List<dynamic>> rawFishData) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore Default Species'),
+        content: const Text(
+          'This will add back any missing default species tags. '
+          'Your custom species tags will not be removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(speciesTagsProvider.notifier).restoreDefaultTags(rawFishData);
+      if (mounted) {
+        context.showAccessibleMessage('Default species restored');
+      }
+
+      AnalyticsService.logFeatureUsed(
+        featureName: 'species_tags_restore_defaults',
+        parameters: {'category': _selectedCategory},
+      );
+    }
+  }
+
   void _addTag(String fishType, String tag) {
     if (tag.trim().isEmpty) return;
     
@@ -91,6 +126,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final fishDataAsync = ref.watch(fishDataProvider);
+    final rawFishDataAsync = ref.watch(rawFishDataProvider);
     ref.watch(speciesTagsProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -134,6 +170,14 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                           color: colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: rawFishDataAsync.valueOrNull == null
+                            ? null
+                            : () => _restoreDefaultTags(rawFishDataAsync.value!),
+                        icon: const Icon(Icons.restore, size: 18),
+                        label: const Text('Restore Default Species'),
                       ),
                     ],
                   ),

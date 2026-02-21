@@ -212,6 +212,15 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
     return state.defaultTags[fishType]?.contains(tag) ?? false;
   }
 
+  /// Restore default tags from fish data without overwriting user-added tags.
+  /// Any default tag that is currently missing will be re-added by merging
+  /// the default common names into the existing tag list. Existing tags
+  /// (both default and user-added) are preserved; only missing defaults are
+  /// re-inserted.
+  Future<void> restoreDefaultTags(Map<String, List<dynamic>> fishData) async {
+    await initializeDefaultTags(fishData);
+  }
+
   /// Export species tags for backup
   Map<String, List<String>> exportTags() {
     return Map<String, List<String>>.from(state.tags);

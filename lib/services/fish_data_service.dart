@@ -71,3 +71,9 @@ final fishDataProvider = FutureProvider<Map<String, List<Fish>>>((ref) async {
   return service.loadFishData();
 });
 
+/// Provider that loads the raw fish JSON data (with commonNames) using AsyncValue
+final rawFishDataProvider = FutureProvider<Map<String, List<dynamic>>>((ref) async {
+  final service = ref.watch(fishDataServiceProvider);
+  return service.loadRawFishData();
+});
+

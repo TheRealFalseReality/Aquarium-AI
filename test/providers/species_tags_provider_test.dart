@@ -183,6 +183,34 @@ void main() {
       expect(tags, contains('My Custom Tag'));
     });
 
+    test('restoreDefaultTags adds back missing default tags without removing user tags', () async {
+      final notifier = container.read(speciesTagsProvider.notifier);
+
+      // Set up initial fish data to establish defaults
+      final fishData = {
+        'freshwater': [
+          {
+            'name': 'Guppies',
+            'commonNames': ['Fancy Guppy', 'Endler Guppy'],
+          },
+        ],
+      };
+      await notifier.initializeDefaultTags(fishData);
+
+      // Simulate user adding a custom tag and removing a default (bypassing UI protection)
+      await notifier.setTagsForFishType('Guppies', ['My Custom Guppy']); // removes defaults
+
+      // Now restore defaults
+      await notifier.restoreDefaultTags(fishData);
+
+      final tags = notifier.getTagsForFishType('Guppies');
+      // Default tags should be restored
+      expect(tags, contains('Fancy Guppy'));
+      expect(tags, contains('Endler Guppy'));
+      // User-added tag should still be present
+      expect(tags, contains('My Custom Guppy'));
+    });
+
     test('clearAllTags removes all tags', () async {
       final notifier = container.read(speciesTagsProvider.notifier);
       await notifier.setTagsForFishType('Fish1', ['Tag1']);
