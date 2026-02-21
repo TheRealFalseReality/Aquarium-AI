@@ -27,6 +27,8 @@ class AquariumWidget : AppWidgetProvider() {
     }
 
     companion object {
+        private const val TANK_TYPE_FRESHWATER = "freshwater"
+
         fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
@@ -36,10 +38,10 @@ class AquariumWidget : AppWidgetProvider() {
 
             val tankName = widgetData.getString("widget_tank_name", null)
                 ?: context.getString(R.string.widget_default_tank_name)
-            val tankType = widgetData.getString("widget_tank_type", "") ?: ""
-            val tankSize = widgetData.getString("widget_tank_size", "") ?: ""
-            val inhabitantsCount = widgetData.getString("widget_inhabitants_count", "") ?: ""
-            val nextNotification = widgetData.getString("widget_next_notification", "") ?: ""
+            val tankType = widgetData.getString("widget_tank_type", "")
+            val tankSize = widgetData.getString("widget_tank_size", "")
+            val inhabitantsCount = widgetData.getString("widget_inhabitants_count", "")
+            val nextNotification = widgetData.getString("widget_next_notification", "")
 
             val views = RemoteViews(context.packageName, R.layout.aquarium_widget)
 
@@ -50,7 +52,7 @@ class AquariumWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_next_notification, nextNotification)
 
             // Set tank type icon
-            val iconRes = if (tankType.equals("freshwater", ignoreCase = true))
+            val iconRes = if (tankType.equals(TANK_TYPE_FRESHWATER, ignoreCase = true))
                 android.R.drawable.ic_menu_compass
             else
                 android.R.drawable.ic_menu_mapmode

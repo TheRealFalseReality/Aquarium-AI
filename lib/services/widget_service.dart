@@ -62,6 +62,12 @@ class WidgetService {
     ]);
   }
 
+  /// Formats the tank size as a short display string (e.g. "75 gal / 284 L").
+  ///
+  /// Returns an empty string if the tank has no size set.
+  ///
+  /// Note: This string is displayed natively in the Android widget via RemoteViews
+  /// and therefore cannot use Flutter's l10n system.
   static String _formatSize(Tank tank) {
     if (tank.sizeGallons != null && tank.sizeLiters != null) {
       return '${tank.sizeGallons!.toStringAsFixed(0)} gal / ${tank.sizeLiters!.toStringAsFixed(0)} L';
@@ -73,12 +79,26 @@ class WidgetService {
     return '';
   }
 
+  /// Formats the total inhabitants count as a short display string
+  /// (e.g. "12 inhabitants" or "1 inhabitant").
+  ///
+  /// Returns an empty string if the tank has no inhabitants.
+  ///
+  /// Note: This string is displayed natively in the Android widget via RemoteViews
+  /// and therefore cannot use Flutter's l10n system.
   static String _formatInhabitants(Tank tank) {
     final count = tank.inhabitants.fold<int>(0, (sum, i) => sum + i.quantity);
     if (count == 0) return '';
     return '$count inhabitant${count == 1 ? '' : 's'}';
   }
 
+  /// Formats the next upcoming enabled notification as a short countdown string
+  /// (e.g. "⏰ Feeding in 2d").
+  ///
+  /// Returns an empty string when there are no upcoming notifications.
+  ///
+  /// Note: This string is displayed natively in the Android widget via RemoteViews
+  /// and therefore cannot use Flutter's l10n system.
   static String _formatNextNotification(Tank tank) {
     if (tank.notifications.isEmpty) return '';
     final pending = tank.notifications
