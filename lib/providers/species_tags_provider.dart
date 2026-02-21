@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,18 @@ class SpeciesTagsState {
 
 /// Notifier for managing species tags
 class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
+  final _initializedCompleter = Completer<void>();
+
+  /// Resolves when default tags from fish data have been fully loaded.
+  Future<void> get initialized => _initializedCompleter.future;
+
+  /// Called by [_initializeDefaultTagsAsync] once initialization completes.
+  void _completeInitialization() {
+    if (!_initializedCompleter.isCompleted) {
+      _initializedCompleter.complete();
+    }
+  }
+
   SpeciesTagsNotifier()
       : super(SpeciesTagsState(
           tags: {},
@@ -150,8 +163,9 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
     await _saveTags();
   }
 
-  /// Initialize default tags from fish data common names
-  /// Only adds tags for fish types that don't already have tags
+  /// Initialize default tags from fish data common names.
+  /// Merges new default tags into existing tag lists so additions to
+  /// commonNames are always reflected without removing user-added tags.
   Future<void> initializeDefaultTags(Map<String, List<dynamic>> fishData) async {
     final newTags = Map<String, List<String>>.from(state.tags);
     final newDefaultTags = <String, List<String>>{};
@@ -169,10 +183,13 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
         if (commonNames != null && commonNames.isNotEmpty) {
           final defaultTagsList = commonNames.map((name) => name.toString()).toList();
           newDefaultTags[fishName] = defaultTagsList;
-          
-          // Only add default tags if this fish type has no tags yet
-          if (!newTags.containsKey(fishName) || newTags[fishName]!.isEmpty) {
-            newTags[fishName] = List.from(defaultTagsList);
+
+          // Merge any new default tags that are not yet in the user's tag list,
+          // preserving existing user-added custom tags.
+          final existingTags = newTags[fishName] ?? [];
+          final tagsToAdd = defaultTagsList.where((t) => !existingTags.contains(t)).toList();
+          if (tagsToAdd.isNotEmpty) {
+            newTags[fishName] = List.from(existingTags)..addAll(tagsToAdd);
             hasChanges = true;
           }
         }
@@ -215,7 +232,7 @@ final speciesTagsProvider =
     StateNotifierProvider<SpeciesTagsNotifier, SpeciesTagsState>(
   (ref) {
     final notifier = SpeciesTagsNotifier();
-    // Initialize default tags when provider is created
+    // Initialize default tags when provider is created.
     _initializeDefaultTagsAsync(ref, notifier);
     return notifier;
   },
@@ -234,6 +251,8 @@ Future<void> _initializeDefaultTagsAsync(
     await notifier.initializeDefaultTags(rawFishData);
   } catch (e) {
     // Silently fail - default tags are optional
+  } finally {
+    notifier._completeInitialization();
   }
 }
 

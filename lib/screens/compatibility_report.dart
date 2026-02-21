@@ -39,7 +39,7 @@ Widget _formatAIResponse(BuildContext context, String text) {
 void showReportDialog(BuildContext context, CompatibilityReport report,
     {bool fromHistory = false, String? fishType}) {
   final sections = {
-    'Selected Fish': _buildSelectedFishSection(context, report.selectedFish, fishType),
+    'Selected Fish': _buildSelectedFishSection(context, report.selectedFish, fishType, selectedSpecies: report.selectedSpecies),
     'Compatible Tank Mates': _buildTankMatesSection(context, report, fishType),
     // MODIFIED: Use the new formatter for these sections.
     'Detailed Summary': _formatAIResponse(context, report.detailedSummary),
@@ -262,9 +262,15 @@ Widget _buildCalculationBreakdown(
 }
 
 Widget _buildSelectedFishSection(
-    BuildContext context, List<Fish> selectedFish, String? fishType) {
+    BuildContext context, List<Fish> selectedFish, String? fishType,
+    {Map<String, List<String>> selectedSpecies = const {}}) {
   return Column(
     children: selectedFish.map((fish) {
+      // Show only the selected species for this fish type, or fall back to all commonNames.
+      final fishSpecies = selectedSpecies[fish.name];
+      final subtitleText = (fishSpecies?.isNotEmpty ?? false)
+          ? fishSpecies!.join(', ')
+          : fish.commonNames.join(', ');
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: InkWell(
@@ -312,7 +318,7 @@ Widget _buildSelectedFishSection(
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        fish.commonNames.join(', '),
+                        subtitleText,
                         style: Theme.of(context).textTheme.bodySmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

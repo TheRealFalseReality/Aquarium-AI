@@ -13,6 +13,8 @@ class CompatibilityReport {
   final String tankMatesSummary;
   // ADDED: New field for the calculation breakdown.
   final String calculationBreakdown;
+  // ADDED: Species selected by the user per fish type (e.g. {"Tetras": ["Black Skirt Tetra"]}).
+  final Map<String, List<String>> selectedSpecies;
 
   CompatibilityReport({
     required this.harmonyLabel,
@@ -27,6 +29,7 @@ class CompatibilityReport {
     required this.tankMatesSummary,
     // ADDED: Added the new field to the constructor.
     required this.calculationBreakdown,
+    this.selectedSpecies = const {},
   });
 
   Map<String, dynamic> toJson() => {
