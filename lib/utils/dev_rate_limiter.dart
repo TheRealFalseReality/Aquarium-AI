@@ -17,7 +17,8 @@ enum DevRateLimitResult {
 /// Enforces in-app rate limits for users on the developer Groq key.
 ///
 /// All methods are static. Call them only when
-/// [ModelState.usingDeveloperGroqKey] is true.
+/// [ModelState.usingDeveloperGroqKeyForText] or
+/// [ModelState.usingDeveloperGroqKeyForImage] is true.
 ///
 /// Limits are configured in [dev_limits.dart].
 class DevRateLimiter {

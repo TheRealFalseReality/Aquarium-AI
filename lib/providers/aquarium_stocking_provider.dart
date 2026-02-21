@@ -122,7 +122,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
 
     // Check dev rate limit before consuming the API
-    if (models.usingDeveloperGroqKey) {
+    if (models.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -256,7 +256,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       }
     } catch (e) {
       final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
-      if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+      if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
         await DevRateLimiter.undoLastRequest();
       }
       final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());
@@ -311,7 +311,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
 
     // Check dev rate limit before consuming the API
-    if (models.usingDeveloperGroqKey) {
+    if (models.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -481,7 +481,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       }
     } catch (e) {
       final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
-      if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+      if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
         await DevRateLimiter.undoLastRequest();
       }
       final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());

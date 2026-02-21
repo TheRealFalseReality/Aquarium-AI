@@ -99,15 +99,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// Returns the effective chat history limit.
   /// Users who supply their own API key for the active text provider use their
-  /// configured [ModelState.chatHistoryLimit]. Everyone else (free service tier
-  /// with no personal key) is hard-capped at [defaultChatHistoryLimit] (3).
+  /// configured [ModelState.chatHistoryLimit]. Everyone on the free dev tier
+  /// is hard-capped at [defaultChatHistoryLimit] (3).
   int get _historyLimit {
-    final hasOwnKey = switch (_modelState.activeTextProvider) {
-      AIProvider.gemini => _modelState.geminiApiKey.isNotEmpty,
-      AIProvider.openAI => _modelState.openAIApiKey.isNotEmpty,
-      AIProvider.groq => _modelState.groqApiKey.isNotEmpty,
+    final usingDevKey = switch (_modelState.activeTextProvider) {
+      AIProvider.gemini => false, // no dev key for Gemini
+      AIProvider.openAI => false, // no dev key for OpenAI
+      AIProvider.groq => _modelState.usingDeveloperGroqKeyForText,
     };
-    return hasOwnKey ? _modelState.chatHistoryLimit : defaultChatHistoryLimit;
+    return usingDevKey ? defaultChatHistoryLimit : _modelState.chatHistoryLimit;
   }
 
   void _initializeProvider() {
@@ -143,7 +143,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
-    if (_modelState.usingDeveloperGroqKey) {
+    if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -263,7 +263,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       }).toList();
 
       final responseText = await GroqHelper.sendChatMessages(
-        apiKey: _modelState.effectiveGroqApiKey,
+        apiKey: _modelState.effectiveGroqApiKeyForText,
         model: _modelState.groqModel,
         systemPrompt: systemPrompt,
         messages: messages,
@@ -284,7 +284,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _handleError(keyError, userMsg);
       return null;
     }
-    if (_modelState.usingDeveloperGroqKey) {
+    if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -348,7 +348,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _handleError(keyError, 'Generate an automation script.');
       return null;
     }
-    if (_modelState.usingDeveloperGroqKey) {
+    if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -401,7 +401,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _handleError(keyError, 'Look up fish info: $fishNames.');
       return null;
     }
-    if (_modelState.usingDeveloperGroqKey) {
+    if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -463,7 +463,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<PhotoAnalysisResult?> analyzePhoto({required Uint8List imageBytes, String? userNote, String mimeType = 'image/jpeg', bool isRegeneration = false}) async {
     // Check rate limits before showing the loading state, so the user sees the
     // error as a chat message rather than a silent failure.
-    if (_modelState.usingDeveloperGroqKey) {
+    if (_modelState.usingDeveloperGroqKeyForImage) {
       // Per-minute + per-day request limit checked first — no quota consumed if this fails.
       final reqResult = await DevRateLimiter.checkAndRecordRequest();
       if (reqResult == DevRateLimitResult.minuteLimitReached) {
@@ -561,7 +561,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         // Rollback rate limit slots since the AI call failed.
         // The daily photo counter is only incremented for new analyses (not
         // regenerations), so it is only rolled back in that case.
-        if (_modelState.usingDeveloperGroqKey) {
+        if (_modelState.usingDeveloperGroqKeyForImage) {
           await DevRateLimiter.undoLastRequest();
           if (!isRegeneration) await DevRateLimiter.undoPhotoAnalysis();
         }
@@ -620,7 +620,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
            final groq = GroqHelper.createClient(
-             apiKey: _modelState.effectiveGroqApiKey,
+             apiKey: _modelState.effectiveGroqApiKeyForText,
              model: _modelState.groqModel,
            );
            final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
@@ -663,10 +663,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
           final responseGroq = await GroqHelper.generateWithImage(
-            apiKey: _modelState.effectiveGroqApiKey,
+            apiKey: _modelState.effectiveGroqApiKeyForImage,
             model: _modelState.groqImageModel,
             prompt: prompt,
-            base64Image: base64Image,
             mimeType: mimeType,
           );
           _cancellable?.complete();
@@ -714,7 +713,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<void> _handleError(String error, String originalMessage, {bool isRateLimitError = false}) async {
     final apiKeyError = !isRateLimitError && ApiErrorHandler.isApiKeyError(error);
     // Rollback the rate-limit slot for real AI errors (not pre-flight limit checks).
-    if (!isRateLimitError && !apiKeyError && _modelState.usingDeveloperGroqKey) {
+    if (!isRateLimitError && !apiKeyError && _modelState.usingDeveloperGroqKeyForText) {
       await DevRateLimiter.undoLastRequest();
     }
     // Use the error as-is for already-formatted rate limit messages; otherwise run it

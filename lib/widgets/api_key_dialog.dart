@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/model_provider.dart';
 import '../utils/dev_limits.dart';
 
 class ApiKeyDialog extends ConsumerStatefulWidget {
@@ -114,6 +115,10 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   @override
   Widget build(BuildContext context) {
     final appSettings = ref.watch(appSettingsProvider);
+    final models = ref.watch(modelProvider);
+    // Show free dev key toggle only when a developer key is compiled in
+    final showFreeKeyToggle = developerGroqApiKey.isNotEmpty;
+    final freeKeyEnabled = models.useDevGroqKeyForText || models.useDevGroqKeyForImage;
     
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
@@ -259,8 +264,58 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               'Please go to the settings screen to add your API key and unlock these AI-powered benefits.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            const SizedBox(height: 24),
-            // AI Toggle Section
+            const SizedBox(height: 16),
+            // Free dev key opt-in toggle (only shown when a dev key is compiled in)
+            if (showFreeKeyToggle) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: freeKeyEnabled
+                      ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+                      : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: freeKeyEnabled
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.4)
+                        : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  ),
+                ),
+                child: SwitchListTile(
+                  secondary: Icon(
+                    Icons.auto_awesome,
+                    color: freeKeyEnabled
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  title: Text(
+                    'Try Free AI (No Key Needed)',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      freeKeyEnabled
+                          ? 'Free key active — up to $devMaxRequestsPerDay AI requests/day, '
+                            '$devMaxRequestsPerMinute/min, $devMaxPhotoAnalysesPerDay photos/day. '
+                            'Add your own key in Settings for higher limits.'
+                          : 'Use the app\'s built-in key for free Groq AI. '
+                            'We encourage adding your own key for the best experience.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  value: freeKeyEnabled,
+                  onChanged: (value) {
+                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                      forText: value,
+                      forImage: value,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            // AI enable/disable toggle
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),

@@ -39,10 +39,14 @@ class ModelState {
   /// Provider used for image/multimedia analysis operations
   final AIProvider activeImageProvider;
   final bool isLoading;
-  /// When true, the app's built-in developer Groq key is used even if the
-  /// user has stored their own key.  The user's key is preserved in storage
-  /// so they can re-enable it at any time.
-  final bool useDevGroqKey;
+  /// When true, the app's built-in developer Groq key is used for **text/chat**
+  /// operations even if the user has stored their own Groq key.
+  /// The user's key is preserved so they can re-enable it at any time.
+  final bool useDevGroqKeyForText;
+  /// When true, the app's built-in developer Groq key is used for **image/photo**
+  /// operations even if the user has stored their own Groq key.
+  /// The user's key is preserved so they can re-enable it at any time.
+  final bool useDevGroqKeyForImage;
 
   ModelState({
     required this.geminiModel,
@@ -58,31 +62,56 @@ class ModelState {
     required this.activeTextProvider,
     required this.activeImageProvider,
     this.isLoading = true,
-    this.useDevGroqKey = false,
+    this.useDevGroqKeyForText = false,
+    this.useDevGroqKeyForImage = false,
   });
 
   /// Convenience getter: returns the text provider (kept for backward compat)
   AIProvider get activeProvider => activeTextProvider;
 
-  /// The Groq API key to actually use.
-  /// When [useDevGroqKey] is enabled and the developer key is available, the
-  /// developer key is used unconditionally (the user's stored key is ignored but
-  /// NOT erased).  Otherwise the user's key takes priority and the developer key
-  /// serves as a fallback.
-  String get effectiveGroqApiKey {
-    if (useDevGroqKey && developerGroqApiKey.isNotEmpty) {
+  /// The Groq API key to use for **text/chat** operations.
+  /// Returns the dev key when [useDevGroqKeyForText] is set; otherwise returns
+  /// the user's key (with dev key as fallback when user key is empty).
+  String get effectiveGroqApiKeyForText {
+    if (useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
       return developerGroqApiKey;
     }
     return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
   }
 
-  /// Whether the app has any Groq key available (user-provided or developer fallback).
-  bool get hasGroqKey => effectiveGroqApiKey.isNotEmpty;
+  /// The Groq API key to use for **image/photo** operations.
+  /// Returns the dev key when [useDevGroqKeyForImage] is set; otherwise returns
+  /// the user's key (with dev key as fallback when user key is empty).
+  String get effectiveGroqApiKeyForImage {
+    if (useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
+      return developerGroqApiKey;
+    }
+    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+  }
 
-  /// Whether the current effective Groq key is the developer fallback (not user-provided).
-  /// True when [useDevGroqKey] is explicitly set, or when the user has no key stored.
-  bool get usingDeveloperGroqKey =>
-      developerGroqApiKey.isNotEmpty && (useDevGroqKey || groqApiKey.isEmpty);
+  /// Backwards-compat alias — returns [effectiveGroqApiKeyForText].
+  String get effectiveGroqApiKey => effectiveGroqApiKeyForText;
+
+  /// Whether the app has any Groq key available (user-provided or developer fallback).
+  bool get hasGroqKey => effectiveGroqApiKeyForText.isNotEmpty;
+
+  /// Whether text/chat operations are currently using the developer Groq key.
+  bool get usingDeveloperGroqKeyForText =>
+      developerGroqApiKey.isNotEmpty &&
+      (useDevGroqKeyForText || groqApiKey.isEmpty);
+
+  /// Whether image/photo operations are currently using the developer Groq key.
+  bool get usingDeveloperGroqKeyForImage =>
+      developerGroqApiKey.isNotEmpty &&
+      (useDevGroqKeyForImage || groqApiKey.isEmpty);
+
+  /// Whether either text OR image operations are using the developer Groq key.
+  /// Used for UI indicators on the main settings page.
+  bool get usingDeveloperGroqKeyForAny =>
+      usingDeveloperGroqKeyForText || usingDeveloperGroqKeyForImage;
+
+  /// Backwards-compat alias — true when any Groq operation uses the dev key.
+  bool get usingDeveloperGroqKey => usingDeveloperGroqKeyForAny;
 }
 
 // 2. Create the Notifier
@@ -100,7 +129,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
           groqApiKey: '',
           activeTextProvider: defaultAIProvider,
           activeImageProvider: defaultAIProvider,
-          useDevGroqKey: false,
+          useDevGroqKeyForText: false,
+          useDevGroqKeyForImage: false,
         )) {
     _loadModels();
   }
@@ -119,7 +149,10 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final groqImageModel =
         prefs.getString('groqImageModel') ?? defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
-    final useDevGroqKey = prefs.getBool('useDevGroqKey') ?? false;
+    // Migrate legacy single useDevGroqKey → per-operation flags
+    final legacyDevKey = prefs.getBool('useDevGroqKey') ?? false;
+    final useDevGroqKeyForText = prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey;
+    final useDevGroqKeyForImage = prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey;
     final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
         .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
@@ -142,7 +175,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: chatHistoryLimit,
       activeTextProvider: activeTextProvider,
       activeImageProvider: activeImageProvider,
-      useDevGroqKey: useDevGroqKey,
+      useDevGroqKeyForText: useDevGroqKeyForText,
+      useDevGroqKeyForImage: useDevGroqKeyForImage,
       isLoading: false,
     );
   }
@@ -160,7 +194,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     required AIProvider newActiveTextProvider,
     required AIProvider newActiveImageProvider,
     int newChatHistoryLimit = defaultChatHistoryLimit,
-    bool newUseDevGroqKey = false,
+    bool newUseDevGroqKeyForText = false,
+    bool newUseDevGroqKeyForImage = false,
   }) async {
     if (newGeminiModel.isEmpty ||
         newGeminiImageModel.isEmpty ||
@@ -184,7 +219,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setInt('chatHistoryLimit', newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit));
     await prefs.setInt('activeTextProvider', newActiveTextProvider.index);
     await prefs.setInt('activeImageProvider', newActiveImageProvider.index);
-    await prefs.setBool('useDevGroqKey', newUseDevGroqKey);
+    await prefs.setBool('useDevGroqKeyForText', newUseDevGroqKeyForText);
+    await prefs.setBool('useDevGroqKeyForImage', newUseDevGroqKeyForImage);
 
     state = ModelState(
       geminiModel: newGeminiModel,
@@ -199,7 +235,36 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
       activeTextProvider: newActiveTextProvider,
       activeImageProvider: newActiveImageProvider,
-      useDevGroqKey: newUseDevGroqKey,
+      useDevGroqKeyForText: newUseDevGroqKeyForText,
+      useDevGroqKeyForImage: newUseDevGroqKeyForImage,
+      isLoading: false,
+    );
+  }
+
+  /// Directly update the dev Groq key toggles without changing any other settings.
+  /// Useful for quick on/off from the API Key dialog.
+  Future<void> setDevGroqKeyToggles({
+    required bool forText,
+    required bool forImage,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('useDevGroqKeyForText', forText);
+    await prefs.setBool('useDevGroqKeyForImage', forImage);
+    state = ModelState(
+      geminiModel: state.geminiModel,
+      geminiImageModel: state.geminiImageModel,
+      geminiApiKey: state.geminiApiKey,
+      chatGPTModel: state.chatGPTModel,
+      chatGPTImageModel: state.chatGPTImageModel,
+      openAIApiKey: state.openAIApiKey,
+      groqModel: state.groqModel,
+      groqImageModel: state.groqImageModel,
+      groqApiKey: state.groqApiKey,
+      chatHistoryLimit: state.chatHistoryLimit,
+      activeTextProvider: state.activeTextProvider,
+      activeImageProvider: state.activeImageProvider,
+      useDevGroqKeyForText: forText,
+      useDevGroqKeyForImage: forImage,
       isLoading: false,
     );
   }
@@ -228,7 +293,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       chatHistoryLimit: state.chatHistoryLimit,
       activeTextProvider: state.activeTextProvider,
       activeImageProvider: state.activeImageProvider,
-      useDevGroqKey: state.useDevGroqKey,
+      useDevGroqKeyForText: state.useDevGroqKeyForText,
+      useDevGroqKeyForImage: state.useDevGroqKeyForImage,
       isLoading: false,
     );
   }

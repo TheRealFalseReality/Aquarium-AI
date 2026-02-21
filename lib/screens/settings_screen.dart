@@ -37,7 +37,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
-  bool _useDevGroqKey = false;
+  bool _useDevGroqKeyForText = false;
+  bool _useDevGroqKeyForImage = false;
   int _chatHistoryLimit = defaultChatHistoryLimit;
 
   @override
@@ -59,7 +60,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _selectedTextProvider = models.activeTextProvider;
     _selectedImageProvider = models.activeImageProvider;
     _chatHistoryLimit = models.chatHistoryLimit;
-    _useDevGroqKey = models.useDevGroqKey;
+    _useDevGroqKeyForText = models.useDevGroqKeyForText;
+    _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
   }
 
   @override
@@ -267,7 +269,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (_selectedTextProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty &&
-        !_useDevGroqKey &&
+        !_useDevGroqKeyForText &&
         developerGroqApiKey.isEmpty) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
@@ -286,7 +288,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (_selectedImageProvider == AIProvider.groq &&
           _groqApiKeyController.text.trim().isEmpty &&
-          !_useDevGroqKey &&
+          !_useDevGroqKeyForImage &&
           developerGroqApiKey.isEmpty) {
         context.showAccessibleMessage(l10n.enterGroqApiKey);
         return;
@@ -317,7 +319,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveTextProvider: _selectedTextProvider,
           newActiveImageProvider: _selectedImageProvider,
           newChatHistoryLimit: _chatHistoryLimit,
-          newUseDevGroqKey: _useDevGroqKey,
+          newUseDevGroqKeyForText: _useDevGroqKeyForText,
+          newUseDevGroqKeyForImage: _useDevGroqKeyForImage,
         );
 
     // Update Crashlytics custom keys so crash reports reflect current AI config.
@@ -393,9 +396,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (_groqApiKeyController.text != next.groqApiKey) {
         _groqApiKeyController.text = next.groqApiKey;
       }
-      if (_useDevGroqKey != next.useDevGroqKey) {
+      if (_useDevGroqKeyForText != next.useDevGroqKeyForText ||
+          _useDevGroqKeyForImage != next.useDevGroqKeyForImage) {
         setState(() {
-          _useDevGroqKey = next.useDevGroqKey;
+          _useDevGroqKeyForText = next.useDevGroqKeyForText;
+          _useDevGroqKeyForImage = next.useDevGroqKeyForImage;
         });
       }
       if (_selectedTextProvider != next.activeTextProvider) {
@@ -491,7 +496,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           enabled: appSettings.enableAI,
         ),
         // Indicator: show when the app is using the built-in dev API key
-        if (appSettings.enableAI && models.usingDeveloperGroqKey) ...[
+        if (appSettings.enableAI && models.usingDeveloperGroqKeyForAny) ...[
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -776,6 +781,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       }
                     },
                   ),
+                  // Free dev key toggle for text (only when Groq is selected & dev key available)
+                  if (_selectedTextProvider == AIProvider.groq && developerGroqApiKey.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _buildDevKeyToggle(
+                      label: 'Use Free Key',
+                      value: _useDevGroqKeyForText,
+                      onChanged: (v) {
+                        setState(() => _useDevGroqKeyForText = v);
+                        if (setDialogState != null) setDialogState(() => _useDevGroqKeyForText = v);
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   // Image provider selector
                   Row(
@@ -859,6 +876,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       }
                     },
                   ),
+                  // Free dev key toggle for image (only when Groq is selected & dev key available)
+                  if (_selectedImageProvider == AIProvider.groq && developerGroqApiKey.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _buildDevKeyToggle(
+                      label: 'Use Free Key',
+                      value: _useDevGroqKeyForImage,
+                      onChanged: (v) {
+                        setState(() => _useDevGroqKeyForImage = v);
+                        if (setDialogState != null) setDialogState(() => _useDevGroqKeyForImage = v);
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -893,9 +922,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   // Free-tier rate limit notice (shown only when the developer key is active for at least one provider)
                   Builder(builder: (context) {
                     final models = ref.watch(modelProvider);
-                    final devKeyInUse = models.usingDeveloperGroqKey &&
-                        (models.activeTextProvider == AIProvider.groq ||
-                            models.activeImageProvider == AIProvider.groq);
+                    final devKeyInUse = models.usingDeveloperGroqKeyForAny;
                     if (!devKeyInUse) return const SizedBox.shrink();
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
@@ -1532,12 +1559,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
-    // Determine if the user has provided their own key for the active text provider
-    final hasOwnKey = switch (_selectedTextProvider) {
-      AIProvider.gemini => _geminiApiKeyController.text.trim().isNotEmpty,
-      AIProvider.openAI => _openAIApiKeyController.text.trim().isNotEmpty,
-      AIProvider.groq => _groqApiKeyController.text.trim().isNotEmpty,
-    };
+    // Locked on free tier (dev key in use for text)
+    final onFreeTier = _selectedTextProvider == AIProvider.groq && _useDevGroqKeyForText;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1560,7 +1583,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              if (!hasOwnKey)
+              if (onFreeTier)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -1579,7 +1602,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            hasOwnKey
+            !onFreeTier
                 ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
                 : 'Without your own API key, the app uses our free service tier with a fixed limit of $defaultChatHistoryLimit past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -1587,7 +1610,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          if (hasOwnKey) ...[
+          if (!onFreeTier) ...[
             Row(
               children: [
                 Expanded(
@@ -2078,59 +2101,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        // Toggle: use the app's built-in developer Groq key
-        if (developerGroqApiKey.isNotEmpty) ...[
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-              ),
-            ),
-            child: SwitchListTile(
-              secondary: Icon(
-                Icons.lock_open_outlined,
-                color: _useDevGroqKey
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              title: const Text('Use App\'s Built-in Dev Key'),
-              subtitle: Text(
-                _useDevGroqKey
-                    ? 'Using the app\'s built-in Groq API key (free tier). '
-                      'Your saved key is preserved and can be re-enabled anytime.'
-                    : 'Switch on to use the app\'s built-in Groq key instead of your own.',
-              ),
-              value: _useDevGroqKey,
-              onChanged: (value) {
-                setState(() {
-                  _useDevGroqKey = value;
-                });
-                if (setDialogState != null) {
-                  setDialogState(() {
-                    _useDevGroqKey = value;
-                  });
-                }
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
         TextField(
           controller: _groqApiKeyController,
-          enabled: !_useDevGroqKey,
           obscureText: !_isGroqApiKeyVisible,
           decoration: InputDecoration(
             labelText: developerGroqApiKey.isNotEmpty
                 ? 'Groq API Key (Optional)'
                 : 'Groq API Key',
             border: const OutlineInputBorder(),
-            helperText: _useDevGroqKey
-                ? 'Disabled: using the app\'s built-in key. Toggle off above to use your own key.'
-                : developerGroqApiKey.isNotEmpty
-                    ? 'Add your own key for dedicated rate limits and better performance.'
-                    : null,
+            helperText: developerGroqApiKey.isNotEmpty
+                ? 'Add your own key for dedicated rate limits and better performance.'
+                : null,
             helperMaxLines: 2,
             suffixIcon: IconButton(
               icon: Icon(
@@ -2231,6 +2212,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  /// Compact chip-style toggle for the "Use Free Key" dev key option.
+  Widget _buildDevKeyToggle({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final color = value
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.outlineVariant;
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: value
+              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+              : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color, width: 1.2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              value ? Icons.lock_open_outlined : Icons.lock_outline,
+              size: 14,
+              color: color,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -165,7 +165,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes);
 
     // Check dev rate limit before consuming the API
-    if (models.usingDeveloperGroqKey) {
+    if (models.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest();
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
@@ -263,7 +263,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
         final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
         // Rollback the rate-limit slot for real AI errors.
-        if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+        if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
           await DevRateLimiter.undoLastRequest();
         }
         final userFriendlyError = _getFriendlyErrorMessage(e.toString());
