@@ -1561,7 +1561,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   onSelected: (value) {
                     setState(() {
                       if (value) {
-                        _selectedSpeciesTags.add(tag);
+                        _selectedSpeciesTags = [tag];
                       } else {
                         _selectedSpeciesTags.remove(tag);
                       }
