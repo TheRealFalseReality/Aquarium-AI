@@ -65,6 +65,16 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/aquarium_widget_info" />
         </receiver>
+
+        <!-- Configure activity launched when the widget is placed on the home screen -->
+        <activity
+            android:name=".TankWidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@style/WidgetConfigureTheme">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

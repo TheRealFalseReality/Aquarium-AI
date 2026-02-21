@@ -12,7 +12,8 @@ import es.antonborri.home_widget.HomeWidgetPlugin
  * AppWidgetProvider for the Aquarium AI home screen widget.
  *
  * Displays tank info (name, type, size, inhabitants count, and next notification)
- * for the tank selected by the user. Data is written from Flutter via [HomeWidgetPlugin].
+ * for the tank selected by the user via [TankWidgetConfigureActivity].
+ * Data is written into shared widget storage via [HomeWidgetPlugin].
  */
 class AquariumWidget : AppWidgetProvider() {
 
@@ -27,8 +28,6 @@ class AquariumWidget : AppWidgetProvider() {
     }
 
     companion object {
-        private const val TANK_TYPE_FRESHWATER = "freshwater"
-
         fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
@@ -50,13 +49,6 @@ class AquariumWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_tank_size, tankSize)
             views.setTextViewText(R.id.widget_inhabitants_count, inhabitantsCount)
             views.setTextViewText(R.id.widget_next_notification, nextNotification)
-
-            // Set tank type icon
-            val iconRes = if (tankType.equals(TANK_TYPE_FRESHWATER, ignoreCase = true))
-                android.R.drawable.ic_menu_compass
-            else
-                android.R.drawable.ic_menu_mapmode
-            views.setImageViewResource(R.id.widget_icon, iconRes)
 
             // Tap on widget opens the app
             val launchIntent = Intent(context, MainActivity::class.java).apply {

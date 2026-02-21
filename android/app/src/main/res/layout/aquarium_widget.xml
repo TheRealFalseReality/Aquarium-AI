@@ -20,7 +20,7 @@
             android:id="@+id/widget_icon"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@android:drawable/ic_menu_compass"
+            android:src="@drawable/widget_tank_icon"
             android:layout_marginEnd="8dp"
             android:contentDescription="@string/widget_tank_icon_desc" />
 
