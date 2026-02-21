@@ -751,7 +751,7 @@ class FishCompatibilityScreenState
                 child: ElevatedButton.icon(
                   onPressed: provider.isLoading
                       ? null
-                      : () {
+                      : () async {
                           // Log fish compatibility report generation analytics
                           AnalyticsService.logFeatureUsed(
                             featureName: 'fish_compatibility_report',
@@ -761,8 +761,24 @@ class FishCompatibilityScreenState
                               'has_fish_selected': provider.selectedFish.isNotEmpty ? 'true' : 'false',
                             },
                           );
-                          
-                          notifier.getCompatibilityReport(_selectedCategory);
+
+                          // Show species selection dialog if any fish have species tags
+                          final speciesSelections = await _showSpeciesSelectionDialog(provider.selectedFish);
+                          if (!mounted || speciesSelections == null) return;
+
+                          // Build additional notes from species selections
+                          String? additionalNotes;
+                          final selectedEntries = speciesSelections.entries
+                              .where((e) => e.value.isNotEmpty)
+                              .toList();
+                          if (selectedEntries.isNotEmpty) {
+                            final lines = selectedEntries
+                                .map((e) => '- ${e.key}: ${e.value.join(', ')}')
+                                .join('\n');
+                            additionalNotes = 'Specific species selected by user:\n$lines';
+                          }
+
+                          notifier.getCompatibilityReport(_selectedCategory, additionalNotes: additionalNotes);
                         },
                   icon: provider.isLoading
                       ? const SizedBox(
@@ -790,6 +806,104 @@ class FishCompatibilityScreenState
           ),
         ),
       ),
+    );
+  }
+
+  /// Shows a dialog for the user to select specific species for each selected fish.
+  /// Returns a map of fishType -> selected species, or null if the user cancelled.
+  Future<Map<String, List<String>>?> _showSpeciesSelectionDialog(List<Fish> selectedFish) async {
+    final speciesTagsState = ref.read(speciesTagsProvider);
+
+    // Only show dialog if any selected fish have species tags
+    final fishWithTags = selectedFish.where((fish) {
+      final tags = speciesTagsState.tags[fish.name] ?? [];
+      return tags.isNotEmpty;
+    }).toList();
+
+    if (fishWithTags.isEmpty) return {};
+
+    final Map<String, Set<String>> selectedSpecies = {};
+
+    return showDialog<Map<String, List<String>>>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Select Specific Species'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Optionally select specific species to refine the AI analysis.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 16),
+                    ...fishWithTags.map((fish) {
+                      final tags = speciesTagsState.tags[fish.name] ?? [];
+                      final selected = selectedSpecies[fish.name] ?? <String>{};
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              fish.name,
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              children: tags.map((tag) {
+                                final isSelected = selected.contains(tag);
+                                return FilterChip(
+                                  label: Text(tag, style: const TextStyle(fontSize: 12)),
+                                  selected: isSelected,
+                                  onSelected: (value) {
+                                    setDialogState(() {
+                                      final set = selectedSpecies.putIfAbsent(
+                                          fish.name, () => <String>{});
+                                      if (value) {
+                                        set.add(tag);
+                                      } else {
+                                        set.remove(tag);
+                                      }
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, {}),
+                  child: const Text('Skip'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final result = selectedSpecies.map(
+                      (key, value) => MapEntry(key, value.toList()),
+                    );
+                    Navigator.pop(context, result);
+                  },
+                  child: const Text('Get Report'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
