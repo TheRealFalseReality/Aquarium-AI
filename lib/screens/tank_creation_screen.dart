@@ -1285,6 +1285,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   DateTime? _dateAdded;
   bool _fishSelectorExpanded = false;
   bool _customNameUserModified = false;
+  bool _addSpeciesTagVisible = false;
   List<String> _selectedSpeciesTags = [];
 
   @override
@@ -1569,48 +1570,84 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               }).toList(),
             ),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _addSpeciesTagController,
-                  decoration: InputDecoration(
-                    hintText: 'Add species...',
-                    hintStyle: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+          if (_addSpeciesTagVisible)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _addSpeciesTagController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Add species...',
+                      hintStyle: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      isDense: true,
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    isDense: true,
+                    style: const TextStyle(fontSize: 12),
+                    textCapitalization: TextCapitalization.words,
+                    onSubmitted: (value) {
+                      if (value.trim().isNotEmpty && _selectedFishUnit != null) {
+                        ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
+                      }
+                      setState(() {
+                        _addSpeciesTagController.clear();
+                        _addSpeciesTagVisible = false;
+                      });
+                    },
                   ),
-                  style: const TextStyle(fontSize: 12),
-                  textCapitalization: TextCapitalization.words,
-                  onSubmitted: (value) {
+                ),
+                IconButton(
+                  onPressed: () {
+                    final value = _addSpeciesTagController.text;
                     if (value.trim().isNotEmpty && _selectedFishUnit != null) {
                       ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
-                      setState(() => _addSpeciesTagController.clear());
                     }
+                    setState(() {
+                      _addSpeciesTagController.clear();
+                      _addSpeciesTagVisible = false;
+                    });
                   },
+                  icon: const Icon(Icons.check, size: 18),
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  tooltip: 'Confirm',
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _addSpeciesTagController.clear();
+                      _addSpeciesTagVisible = false;
+                    });
+                  },
+                  icon: const Icon(Icons.close, size: 18),
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  tooltip: 'Cancel',
+                ),
+              ],
+            )
+          else
+            IconButton(
+              onPressed: () => setState(() => _addSpeciesTagVisible = true),
+              icon: const Icon(Icons.add, size: 18),
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              tooltip: 'Add species tag',
+              style: IconButton.styleFrom(
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  final value = _addSpeciesTagController.text;
-                  if (value.trim().isNotEmpty && _selectedFishUnit != null) {
-                    ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
-                    setState(() => _addSpeciesTagController.clear());
-                  }
-                },
-                icon: const Icon(Icons.add),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Add species tag',
-              ),
-            ],
-          ),
+            ),
         ],
 
         // Expanded: show search + full grid
@@ -1639,6 +1676,8 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                         // Clear species tags only when a different fish type is selected
                         if (_selectedFishUnit != fish.name) {
                           _selectedSpeciesTags = [];
+                          _addSpeciesTagVisible = false;
+                          _addSpeciesTagController.clear();
                         }
                         _selectedFishUnit = fish.name;
                         // Only auto-fill custom name if user hasn't modified it
