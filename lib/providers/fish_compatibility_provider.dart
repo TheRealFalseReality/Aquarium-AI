@@ -57,6 +57,7 @@ class FishCompatibilityState {
   final bool isLoading;
   final String? error;
   final bool isRetryable;
+  final bool isApiKeyError;
   final String? lastCategory;
 
   FishCompatibilityState({
@@ -67,6 +68,7 @@ class FishCompatibilityState {
     this.isLoading = false,
     this.error,
     this.isRetryable = false,
+    this.isApiKeyError = false,
     this.lastCategory,
   });
 
@@ -78,6 +80,7 @@ class FishCompatibilityState {
     bool? isLoading,
     String? error,
     bool? isRetryable,
+    bool? isApiKeyError,
     String? lastCategory,
     bool clearReport = false,
     bool clearLastReport = false,
@@ -90,7 +93,8 @@ class FishCompatibilityState {
       lastReport: clearLastReport ? null : lastReport ?? this.lastReport,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : error ?? this.error,
-      isRetryable: isRetryable ?? this.isRetryable,
+      isRetryable: clearError ? false : isRetryable ?? this.isRetryable,
+      isApiKeyError: clearError ? false : isApiKeyError ?? this.isApiKeyError,
       lastCategory: lastCategory ?? this.lastCategory,
     );
   }
@@ -124,7 +128,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   void clearError() {
-    state = state.copyWith(clearError: true, isRetryable: false);
+    state = state.copyWith(clearError: true, isRetryable: false, isApiKeyError: false);
   }
 
   void clearLastReport() {
@@ -251,11 +255,17 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       );
     } catch (e) {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
+        final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+        // Rollback the rate-limit slot for real AI errors.
+        if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+          await DevRateLimiter.undoLastRequest();
+        }
         final userFriendlyError = _getFriendlyErrorMessage(e.toString());
         state = state.copyWith(
           error: userFriendlyError,
           isLoading: false,
-          isRetryable: true,
+          isRetryable: !isApiKeyErr,
+          isApiKeyError: isApiKeyErr,
         );
       }
     }

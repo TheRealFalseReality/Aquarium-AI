@@ -25,6 +25,8 @@ class AquariumStockingState {
   final List<StockingRecommendation>? recommendations;
   final List<StockingRecommendation>? lastRecommendations;
   final String? error;
+  final bool isApiKeyError;
+  final bool isRetryable;
   final List<Fish> selectedFish;
 
   AquariumStockingState({
@@ -32,6 +34,8 @@ class AquariumStockingState {
     this.recommendations,
     this.lastRecommendations,
     this.error,
+    this.isApiKeyError = false,
+    this.isRetryable = false,
     this.selectedFish = const [],
   });
 
@@ -40,6 +44,8 @@ class AquariumStockingState {
     List<StockingRecommendation>? recommendations,
     List<StockingRecommendation>? lastRecommendations,
     String? error,
+    bool? isApiKeyError,
+    bool? isRetryable,
     List<Fish>? selectedFish,
     bool clearError = false,
     bool clearRecommendation = false,
@@ -50,6 +56,8 @@ class AquariumStockingState {
           clearRecommendation ? null : recommendations ?? this.recommendations,
       lastRecommendations: lastRecommendations ?? this.lastRecommendations,
       error: clearError ? null : error ?? this.error,
+      isApiKeyError: clearError ? false : isApiKeyError ?? this.isApiKeyError,
+      isRetryable: clearError ? false : isRetryable ?? this.isRetryable,
       selectedFish: selectedFish ?? this.selectedFish,
     );
   }
@@ -242,9 +250,15 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
+      final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+      if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+        await DevRateLimiter.undoLastRequest();
+      }
       final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());
       state = state.copyWith(
         error: errorMessage,
+        isApiKeyError: isApiKeyErr,
+        isRetryable: !isApiKeyErr,
         isLoading: false,
       );
     }
@@ -457,9 +471,15 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
+      final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+      if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+        await DevRateLimiter.undoLastRequest();
+      }
       final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(e.toString());
       state = state.copyWith(
         error: errorMessage,
+        isApiKeyError: isApiKeyErr,
+        isRetryable: !isApiKeyErr,
         isLoading: false,
       );
     }
