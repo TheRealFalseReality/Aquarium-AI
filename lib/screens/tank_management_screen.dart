@@ -54,7 +54,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
-  bool _includeCustomNames = false; // Track if custom names were included
   String _additionalNotes = ''; // Track additional notes
   Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
   bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
@@ -114,12 +113,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         
         if (tank != null && fish != null) {
           // Capture values before clearing to ensure they're available in the builder
-          final capturedIncludeCustomNames = _includeCustomNames;
           final capturedAdditionalNotes = _additionalNotes;
-          
-          // Debug: Print values being passed to report screen
-          debugPrint('Passing to report - includeCustomNames: $capturedIncludeCustomNames');
-          debugPrint('Passing to report - additionalNotes: "$capturedAdditionalNotes"');
           
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -127,7 +121,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 reports: next.recommendations!,
                 originalTank: tank,
                 existingFish: fish,
-                includeCustomNames: capturedIncludeCustomNames,
                 additionalNotes: capturedAdditionalNotes,
               ),
             ),
@@ -135,7 +128,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           // Clear the current tank reference and options
           _currentTankForRecommendations = null;
           _currentExistingFish = null;
-          _includeCustomNames = false;
           _additionalNotes = '';
         } else {
           context.showAccessibleMessage(
@@ -3005,12 +2997,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     
     // Store the options for the listener
-    _includeCustomNames = options.includeCustomNames;
     _additionalNotes = options.additionalNotes;
-    
-    // Debug: Print values to verify they're being stored
-    debugPrint('Storing options - includeCustomNames: $_includeCustomNames');
-    debugPrint('Storing options - additionalNotes: "$_additionalNotes"');
     
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
@@ -3089,7 +3076,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
-        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
         'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
       },
     );
@@ -3102,7 +3088,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Get recommendations for this tank
     ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
       tank: tank,
-      includeCustomNames: options.includeCustomNames,
       additionalNotes: options.additionalNotes,
     );
   }
@@ -3146,6 +3131,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final categoryFish = fishData[tank.type] ?? [];
     final tankFishList = <Fish>[];
     final addedSpecies = <String>{}; // Track species by their fishUnit to avoid duplicates
+    // Build species tags map from inhabitants for granular AI analysis
+    final Map<String, List<String>> selectedSpecies = {};
     
     for (final inhabitant in tank.inhabitants) {
       // Skip if we've already added this species
@@ -3153,53 +3140,43 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         continue;
       }
       
-      Fish fish;
+      // Use the database fish name
+      final fish = categoryFish.firstWhere(
+        (f) => f.name == inhabitant.fishUnit,
+        orElse: () => Fish(
+          name: inhabitant.fishUnit,
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        ),
+      );
       
-      // If custom names should be included and the inhabitant has a custom name, create a fish with both names
-      if (options.includeCustomNames && inhabitant.customName.isNotEmpty) {
-        // Try to find the fish by database name first
-        final databaseFish = categoryFish.firstWhere(
-          (f) => f.name == inhabitant.fishUnit,
-          orElse: () => Fish(
-            name: inhabitant.fishUnit,
-            commonNames: [],
-            imageURL: '',
-            compatible: [],
-            notRecommended: [],
-            notCompatible: [],
-            withCaution: [],
-          ),
-        );
-        
-        // Create a new fish with custom name included for the AI prompt
-        fish = Fish(
-          name: '${inhabitant.customName} (${inhabitant.fishUnit})',
-          commonNames: databaseFish.commonNames,
-          imageURL: databaseFish.imageURL,
-          compatible: databaseFish.compatible,
-          notRecommended: databaseFish.notRecommended,
-          notCompatible: databaseFish.notCompatible,
-          withCaution: databaseFish.withCaution,
-        );
-      } else {
-        // Just use the database fish name
-        fish = categoryFish.firstWhere(
-          (f) => f.name == inhabitant.fishUnit,
-          orElse: () => Fish(
-            name: inhabitant.fishUnit,
-            commonNames: [],
-            imageURL: '',
-            compatible: [],
-            notRecommended: [],
-            notCompatible: [],
-            withCaution: [],
-          ),
-        );
+      // Collect species tags for this inhabitant
+      if (inhabitant.speciesTags.isNotEmpty) {
+        selectedSpecies[inhabitant.fishUnit] = inhabitant.speciesTags;
       }
-      
+
       // Add the fish and mark this species as added
       tankFishList.add(fish);
       addedSpecies.add(inhabitant.fishUnit);
+    }
+
+    // Build additional notes from species tags and user notes
+    String? compatibilityNotes;
+    final speciesTagEntries = selectedSpecies.entries.toList();
+    if (speciesTagEntries.isNotEmpty) {
+      final lines = speciesTagEntries
+          .map((e) => '- ${e.key}: ${e.value.join(', ')}')
+          .join('\n');
+      final speciesNote = 'Specific species selected by user:\n$lines';
+      compatibilityNotes = options.additionalNotes.isNotEmpty
+          ? '$speciesNote\n${options.additionalNotes}'
+          : speciesNote;
+    } else if (options.additionalNotes.isNotEmpty) {
+      compatibilityNotes = options.additionalNotes;
     }
 
     // Show loading overlay
@@ -3252,7 +3229,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
         'existing_inhabitants_count': tank.inhabitants.length,
         'source': 'tank_management',
-        'include_custom_names': options.includeCustomNames ? 'true' : 'false',
         'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
       },
     );
@@ -3272,8 +3248,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ref.read(fishCompatibilityProvider.notifier).selectFish(fish);
     }
 
-    // Get the compatibility report
-    ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(tank.type, additionalNotes: options.additionalNotes);
+    // Get the compatibility report, passing species tags as selected species
+    ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(
+      tank.type,
+      additionalNotes: compatibilityNotes,
+      selectedSpecies: selectedSpecies.isNotEmpty ? selectedSpecies : null,
+    );
   }
 
 

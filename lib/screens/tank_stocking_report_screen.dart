@@ -21,7 +21,6 @@ class TankStockingReportScreen extends ConsumerStatefulWidget {
   final List<StockingRecommendation> reports;
   final Tank originalTank;
   final List<Fish> existingFish;
-  final bool includeCustomNames;
   final String additionalNotes;
 
   const TankStockingReportScreen({
@@ -29,7 +28,6 @@ class TankStockingReportScreen extends ConsumerStatefulWidget {
     required this.reports,
     required this.originalTank,
     required this.existingFish,
-    this.includeCustomNames = false,
     this.additionalNotes = '',
   });
 
@@ -114,7 +112,6 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
               reports: next.recommendations!,
               originalTank: widget.originalTank,
               existingFish: widget.existingFish,
-              includeCustomNames: widget.includeCustomNames,
               additionalNotes: widget.additionalNotes,
             ),
           ),
@@ -188,20 +185,14 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    // Debug: Print values before creating TabBarView
-                    debugPrint('TankStockingReportScreen build - includeCustomNames: ${widget.includeCustomNames}');
-                    debugPrint('TankStockingReportScreen build - additionalNotes: "${widget.additionalNotes}"');
-                    
                     return TabBarView(
                       controller: _tabController,
                       children: widget.reports.asMap().entries.map((entry) {
-                        debugPrint('Creating TabView child ${entry.key} - includeCustomNames: ${widget.includeCustomNames}, additionalNotes: "${widget.additionalNotes}"');
                         return _TankRecommendationTabView(
-                          key: ValueKey('tab_${entry.key}_${widget.includeCustomNames}_${widget.additionalNotes}'),
+                          key: ValueKey('tab_${entry.key}_${widget.additionalNotes}'),
                           report: entry.value,
                           originalTank: widget.originalTank,
                           existingFish: widget.existingFish,
-                          includeCustomNames: widget.includeCustomNames,
                           additionalNotes: widget.additionalNotes,
                         );
                       }).toList(),
@@ -300,7 +291,6 @@ class _TankRecommendationTabView extends StatelessWidget {
   final StockingRecommendation report;
   final Tank originalTank;
   final List<Fish> existingFish;
-  final bool includeCustomNames;
   final String additionalNotes;
 
   const _TankRecommendationTabView({
@@ -308,7 +298,6 @@ class _TankRecommendationTabView extends StatelessWidget {
     required this.report,
     required this.originalTank,
     required this.existingFish,
-    this.includeCustomNames = false,
     this.additionalNotes = '',
   });
 
@@ -317,11 +306,6 @@ class _TankRecommendationTabView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    
-    // Debug: Print values to help troubleshoot
-    debugPrint('TankRecommendationTabView - includeCustomNames: $includeCustomNames');
-    debugPrint('TankRecommendationTabView - additionalNotes: "$additionalNotes"');
-    debugPrint('TankRecommendationTabView - tank inhabitants: ${originalTank.inhabitants.map((i) => '${i.fishUnit}:${i.customName}').join(', ')}');
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -507,7 +491,6 @@ class _TankRecommendationTabView extends StatelessWidget {
           fishList: existingFish, 
           originalTank: originalTank, 
           isExisting: true,
-          includeCustomNames: includeCustomNames,
         ),
         
         const Divider(height: 32),
@@ -762,7 +745,6 @@ class _FishCardGrid extends StatelessWidget {
   final bool isAddition;
   final bool isExisting;
   final Tank originalTank;
-  final bool includeCustomNames;
   
   const _FishCardGrid({
     required this.fishList,
@@ -770,7 +752,6 @@ class _FishCardGrid extends StatelessWidget {
     this.isCore = false,
     this.isAddition = false,
     this.isExisting = false,
-    this.includeCustomNames = false,
   });
 
   // Group inhabitants by unique combination of fishUnit + customName + image
@@ -790,7 +771,8 @@ class _FishCardGrid extends StatelessWidget {
     for (final inhabitant in originalTank.inhabitants) {
       // Create a unique key based on fishUnit, customName, and custom image
       final customImage = inhabitant.customImageUrl ?? inhabitant.customImagePath;
-      final displayName = includeCustomNames && inhabitant.customName != inhabitant.fishUnit 
+      // Always show custom name if it differs from the fish unit name
+      final displayName = inhabitant.customName != inhabitant.fishUnit 
           ? inhabitant.customName 
           : null;
       
