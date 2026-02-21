@@ -392,6 +392,26 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 550),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                      title: const Text('Analysis History'),
+                      subtitle: const Text('View saved AI analysis reports'),
+                      onTap: () => navigate('/analysis-history'),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

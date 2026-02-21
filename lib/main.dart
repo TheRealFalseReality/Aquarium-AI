@@ -23,6 +23,7 @@ import './screens/fish_compatibility_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/tank_management_screen.dart';
 import './screens/species_tags_screen.dart';
+import './screens/analysis_history_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -530,6 +531,10 @@ class MyApp extends ConsumerWidget {
               case '/species-tags':
                 page = const SpeciesTagsScreen();
                 screenName = 'species_tags_screen';
+                break;
+              case '/analysis-history':
+                page = const AnalysisHistoryScreen();
+                screenName = 'analysis_history_screen';
                 break;
               default:
                 page = const WelcomeScreen();

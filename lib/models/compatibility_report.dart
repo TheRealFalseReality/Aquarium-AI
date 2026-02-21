@@ -28,4 +28,38 @@ class CompatibilityReport {
     // ADDED: Added the new field to the constructor.
     required this.calculationBreakdown,
   });
+
+  Map<String, dynamic> toJson() => {
+    'harmonyLabel': harmonyLabel,
+    'harmonySummary': harmonySummary,
+    'detailedSummary': detailedSummary,
+    'tankSize': tankSize,
+    'decorations': decorations,
+    'careGuide': careGuide,
+    'compatibleFish': compatibleFish,
+    'groupHarmonyScore': groupHarmonyScore,
+    'selectedFish': selectedFish.map((f) => f.toJson()).toList(),
+    'tankMatesSummary': tankMatesSummary,
+    'calculationBreakdown': calculationBreakdown,
+  };
+
+  factory CompatibilityReport.fromJson(Map<String, dynamic> json) {
+    return CompatibilityReport(
+      harmonyLabel: json['harmonyLabel'] as String? ?? '',
+      harmonySummary: json['harmonySummary'] as String? ?? '',
+      detailedSummary: json['detailedSummary'] as String? ?? '',
+      tankSize: json['tankSize'] as String? ?? '',
+      decorations: json['decorations'] as String? ?? '',
+      careGuide: json['careGuide'] as String? ?? '',
+      compatibleFish: List<String>.from(json['compatibleFish'] as List? ?? []),
+      groupHarmonyScore:
+          (json['groupHarmonyScore'] as num?)?.toDouble() ?? 0.0,
+      selectedFish: (json['selectedFish'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(Fish.fromJson)
+          .toList(),
+      tankMatesSummary: json['tankMatesSummary'] as String? ?? '',
+      calculationBreakdown: json['calculationBreakdown'] as String? ?? '',
+    );
+  }
 }

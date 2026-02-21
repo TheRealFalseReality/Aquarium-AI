@@ -7,9 +7,11 @@ import 'package:dart_openai/dart_openai.dart';
 import 'package:groq/groq.dart';
 
 import '../models/analysis_result.dart';
+import '../models/analysis_history_entry.dart';
 import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/fish_info_result.dart';
+import 'analysis_history_provider.dart';
 import 'model_provider.dart';
 import '../prompts/system_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
@@ -63,15 +65,16 @@ class ChatState {
 final chatProvider =
     StateNotifierProvider<ChatNotifier, ChatState>((ref) {
   final modelState = ref.watch(modelProvider);
-  return ChatNotifier(modelState: modelState);
+  return ChatNotifier(modelState: modelState, ref: ref);
 });
 
 // ====================== Utility (now imported from json_utils.dart) ======================
 
 // ====================== Chat Notifier ======================
 class ChatNotifier extends StateNotifier<ChatState> {
-  ChatNotifier({required ModelState modelState})
+  ChatNotifier({required ModelState modelState, required Ref ref})
       : _modelState = modelState,
+        _ref = ref,
         super(ChatState(messages: [])) {
     state = ChatState(messages: [
       ChatMessage(
@@ -85,6 +88,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   final ModelState _modelState;
+  final Ref _ref;
 
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
@@ -302,6 +306,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final decoded = json.decode(extractJson(responseText));
       final result = WaterAnalysisResult.fromJson(decoded);
       state = ChatState(messages: [...state.messages, ChatMessage(text: 'Here is your water analysis:', isUser: false, analysisResult: result)], isLoading: false);
+      // Save to analysis history
+      final tankType = params['tankType']!.isNotEmpty ? params['tankType']! : 'Tank';
+      _ref.read(analysisHistoryProvider.notifier).addEntry(
+        AnalysisHistoryEntry.create(
+          type: AnalysisType.waterParameters,
+          title: 'Water Analysis – $tankType',
+          resultData: result.toJson(),
+        ),
+      );
       return result;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
@@ -335,6 +348,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final decoded = json.decode(extractJson(responseText));
       final script = AutomationScript.fromJson(decoded);
       state = ChatState(messages: [...state.messages, ChatMessage(text: 'Here is your automation script:', isUser: false, automationScript: script)], isLoading: false);
+      // Save to analysis history
+      _ref.read(analysisHistoryProvider.notifier).addEntry(
+        AnalysisHistoryEntry.create(
+          type: AnalysisType.automationScript,
+          title: script.title.isNotEmpty ? script.title : 'Automation Script',
+          resultData: script.toJson(),
+        ),
+      );
       return script;
     } catch (e) {
       if (!(_cancellable?.isCancelled ?? false)) _handleError(e.toString(), userMsg);
@@ -387,6 +408,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
           ),
         ],
         isLoading: false,
+      );
+      // Save to analysis history
+      _ref.read(analysisHistoryProvider.notifier).addEntry(
+        AnalysisHistoryEntry.create(
+          type: AnalysisType.fishInfo,
+          title: 'Fish Info – $fishNames',
+          resultData: parsed.toJson(),
+        ),
       );
       return parsed;
     } catch (e) {
@@ -457,6 +486,21 @@ class ChatNotifier extends StateNotifier<ChatState> {
       state = ChatState(
         messages: [...state.messages, ChatMessage(text: isRegeneration ? '🖼️ Photo analysis regenerated.' : '🖼️ Photo analysis complete. Tap to view detailed results.', isUser: false, photoAnalysisResult: parsed, photoBytes: imageBytes)],
         isLoading: false,
+      );
+      // Save to analysis history
+      String? photoBase64;
+      try {
+        photoBase64 = base64Encode(imageBytes);
+      } catch (_) {}
+      _ref.read(analysisHistoryProvider.notifier).addEntry(
+        AnalysisHistoryEntry.create(
+          type: AnalysisType.photoAnalysis,
+          title: userNote != null && userNote.trim().isNotEmpty
+              ? 'Photo Analysis – ${userNote.trim()}'
+              : 'Photo Analysis',
+          resultData: parsed.raw,
+          photoBase64: photoBase64,
+        ),
       );
       return parsed;
     } catch (e) {
