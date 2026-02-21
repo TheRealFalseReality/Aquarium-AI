@@ -65,23 +65,6 @@ flutter:
     - assets/docs/HELP_WANTED.md
     - assets/docs/CHANGELOG.md
 
-flutter_launcher_icons:
-  android: true
-  ios: true
-  macos:
-    generate: true
-  windows:
-    generate: true
-  web:
-    generate: true
-  image_path: "assets/AquaAi Logo.png"
-
-flutter_native_splash:
-  image: assets/AquaAi Logo.png
-  color: "#d8f3ff"
-  color_dark: "#2D3748"
-
-
   fonts:
     - family: Poppins
       fonts:
@@ -104,3 +87,19 @@ flutter_native_splash:
         - asset: assets/fonts/NotoSans-Bold.ttf
         - asset: assets/fonts/NotoSans-BoldItalic.ttf
           weight: 700
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  macos:
+    generate: true
+  windows:
+    generate: true
+  web:
+    generate: true
+  image_path: "assets/AquaAi Logo.png"
+
+flutter_native_splash:
+  image: assets/AquaAi Logo.png
+  color: "#d8f3ff"
+  color_dark: "#2D3748"
