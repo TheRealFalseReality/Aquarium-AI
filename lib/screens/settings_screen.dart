@@ -418,32 +418,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
-        // Enable AI toggle – lives directly on the root settings page
-        Card(
-          clipBehavior: Clip.antiAlias,
-          elevation: 2,
-          child: SwitchListTile(
-            secondary: Icon(
-              Icons.smart_toy_outlined,
-              color: appSettings.enableAI
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            title: Text(l10n.enableAI),
-            subtitle: Text(l10n.enableAIDesc),
-            value: appSettings.enableAI,
-            onChanged: (value) {
-              AnalyticsService.logSettingsChange(
-                settingName: 'enable_ai',
-                newValue: value.toString(),
-                oldValue: appSettings.enableAI.toString(),
-              );
-              ref.read(appSettingsProvider.notifier).setEnableAI(value);
-              setState(() {});
-            },
+        // Enable AI — compact inline toggle above the AI Provider card
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Row(
+            children: [
+              Icon(
+                Icons.smart_toy_outlined,
+                size: 16,
+                color: appSettings.enableAI
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  l10n.enableAI,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+              Transform.scale(
+                scale: 0.80,
+                child: Switch(
+                  value: appSettings.enableAI,
+                  onChanged: (value) {
+                    AnalyticsService.logSettingsChange(
+                      settingName: 'enable_ai',
+                      newValue: value.toString(),
+                      oldValue: appSettings.enableAI.toString(),
+                    );
+                    ref.read(appSettingsProvider.notifier).setEnableAI(value);
+                    setState(() {});
+                  },
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 4),
         _buildMenuCard(
           context: context,
           title: l10n.aiProvider,
