@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Shows tank info on your home screen</string>
+    <string name="widget_default_tank_name">No tank selected</string>
+    <string name="widget_tank_icon_desc">Tank icon</string>
+</resources>

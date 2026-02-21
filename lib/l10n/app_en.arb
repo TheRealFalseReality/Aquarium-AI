@@ -2703,6 +2703,27 @@
   "addCustomSpecies": "Add Custom Species",
   "@addCustomSpecies": {
     "description": "Button label to add a custom species tag inline"
+  },
+
+  "addToWidget": "Add to Home Screen Widget",
+  "@addToWidget": {
+    "description": "Popup menu item to pin a tank to the Android home screen widget"
+  },
+
+  "widgetUpdated": "Widget updated with \"{tankName}\"",
+  "@widgetUpdated": {
+    "description": "Snackbar confirmation after a tank is pinned to the home screen widget",
+    "placeholders": {
+      "tankName": {
+        "type": "String",
+        "example": "My Reef Tank"
+      }
+    }
+  },
+
+  "widgetUpdateFailed": "Could not update the home screen widget",
+  "@widgetUpdateFailed": {
+    "description": "Error message when updating the home screen widget fails"
   }
 }
 

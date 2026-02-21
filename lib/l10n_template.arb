@@ -54,5 +54,9 @@
   "warning": "TRANSLATE: Warning",
   "info": "TRANSLATE: Info",
 
-  "addCustomSpecies": "TRANSLATE: Add Custom Species"
+  "addCustomSpecies": "TRANSLATE: Add Custom Species",
+
+  "addToWidget": "TRANSLATE: Add to Home Screen Widget",
+  "widgetUpdated": "TRANSLATE: Widget updated with \"{tankName}\"",
+  "widgetUpdateFailed": "TRANSLATE: Could not update the home screen widget"
 }

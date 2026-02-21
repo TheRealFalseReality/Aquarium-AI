@@ -505,7 +505,11 @@
   "changelogAllReleases": "Alle Versionen",
   "changelogGotIt": "Verstanden",
 
-  "addCustomSpecies": "Benutzerdefinierte Art hinzufügen"
+  "addCustomSpecies": "Benutzerdefinierte Art hinzufügen",
+
+  "addToWidget": "Zum Startbildschirm-Widget hinzufügen",
+  "widgetUpdated": "Widget mit \"{tankName}\" aktualisiert",
+  "widgetUpdateFailed": "Das Startbildschirm-Widget konnte nicht aktualisiert werden"
 }
 
 

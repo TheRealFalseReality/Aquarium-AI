@@ -22,6 +22,7 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/notification_reschedule_dialog.dart';
 import '../services/analytics_service.dart';
+import '../services/widget_service.dart';
 import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
 import 'tank_details_screen.dart';
@@ -1130,6 +1131,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           case 'duplicate':
                             _duplicateTank(context, ref, tank);
                             break;
+                          case 'add_widget':
+                            _addTankToWidget(context, tank);
+                            break;
                           case 'delete':
                             _confirmDelete(context, ref, tank);
                             break;
@@ -1252,6 +1256,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ],
                             ),
                           ),
+                          if (Platform.isAndroid)
+                            PopupMenuItem(
+                              value: 'add_widget',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.widgets_outlined, color: Colors.teal, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.addToWidget, style: const TextStyle(color: Colors.teal)),
+                                ],
+                              ),
+                            ),
                           PopupMenuItem(
                             value: 'delete',
                             child: Row(
@@ -2692,6 +2707,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     } catch (e) {
       if (context.mounted) {
         context.showAccessibleMessage('Failed to duplicate tank: $e');
+      }
+    }
+  }
+
+  void _addTankToWidget(BuildContext context, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await WidgetService.updateWidget(tank);
+      if (context.mounted) {
+        context.showAccessibleMessage(l10n.widgetUpdated(tank.name));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAccessibleMessage(l10n.widgetUpdateFailed);
       }
     }
   }

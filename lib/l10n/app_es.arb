@@ -505,7 +505,11 @@
   "changelogAllReleases": "Todas las versiones",
   "changelogGotIt": "Entendido",
 
-  "addCustomSpecies": "Agregar especie personalizada"
+  "addCustomSpecies": "Agregar especie personalizada",
+
+  "addToWidget": "Agregar al widget de pantalla de inicio",
+  "widgetUpdated": "Widget actualizado con \"{tankName}\"",
+  "widgetUpdateFailed": "No se pudo actualizar el widget de pantalla de inicio"
 }
 
 
