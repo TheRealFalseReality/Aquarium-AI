@@ -9,6 +9,7 @@ import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/crashlytics_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import 'changelog_screen.dart';
@@ -314,6 +315,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newChatHistoryLimit: _chatHistoryLimit,
         );
 
+    // Update Crashlytics custom keys so crash reports reflect current AI config.
+    CrashlyticsService.setAITextProvider(_selectedTextProvider.name);
+    CrashlyticsService.setAIImageProvider(_selectedImageProvider.name);
+    final textModel = switch (_selectedTextProvider) {
+      AIProvider.gemini => _geminiModelController.text,
+      AIProvider.openAI => _chatGPTModelController.text,
+      AIProvider.groq => _groqModelController.text,
+    };
+    final imageModel = switch (_selectedImageProvider) {
+      AIProvider.gemini => _geminiImageModelController.text,
+      AIProvider.openAI => _chatGPTImageModelController.text,
+      AIProvider.groq => _groqImageModelController.text,
+    };
+    CrashlyticsService.setAITextModel(textModel);
+    CrashlyticsService.setAIImageModel(imageModel);
+
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
@@ -438,6 +455,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 newValue: value.toString(),
                 oldValue: appSettings.enableAI.toString(),
               );
+              CrashlyticsService.setAIEnabled(value);
               ref.read(appSettingsProvider.notifier).setEnableAI(value);
               setState(() {});
             },
@@ -2163,6 +2181,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  void _applyLocaleChange(String? newLocale, String oldLocale, [StateSetter? parentSetDialogState]) {
+    ref.read(appSettingsProvider.notifier).setLocale(newLocale);
+    CrashlyticsService.setLocale(newLocale);
+    AnalyticsService.logSettingsChange(
+      settingName: 'language',
+      newValue: newLocale ?? 'system',
+      oldValue: oldLocale,
+    );
+    Navigator.of(context).pop();
+    if (parentSetDialogState != null) {
+      parentSetDialogState(() {});
+    }
+  }
+
   void _showLanguageDialog([StateSetter? parentSetDialogState]) {
     final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.read(appSettingsProvider);
@@ -2179,19 +2211,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: null,
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).setLocale(value);
-                
-                // Log settings change
-                AnalyticsService.logSettingsChange(
-                  settingName: 'language',
-                  newValue: 'system',
-                  oldValue: appSettings.localeCode ?? 'system',
-                );
-                
-                Navigator.of(context).pop();
-                if (parentSetDialogState != null) {
-                  parentSetDialogState(() {});
-                }
+                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
               },
             ),
             RadioListTile<String?>(
@@ -2199,19 +2219,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'en',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).setLocale(value);
-                
-                // Log settings change
-                AnalyticsService.logSettingsChange(
-                  settingName: 'language',
-                  newValue: value ?? 'system',
-                  oldValue: appSettings.localeCode ?? 'system',
-                );
-                
-                Navigator.of(context).pop();
-                if (parentSetDialogState != null) {
-                  parentSetDialogState(() {});
-                }
+                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
               },
             ),
             RadioListTile<String?>(
@@ -2219,19 +2227,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'es',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).setLocale(value);
-                
-                // Log settings change
-                AnalyticsService.logSettingsChange(
-                  settingName: 'language',
-                  newValue: value ?? 'system',
-                  oldValue: appSettings.localeCode ?? 'system',
-                );
-                
-                Navigator.of(context).pop();
-                if (parentSetDialogState != null) {
-                  parentSetDialogState(() {});
-                }
+                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
               },
             ),
             RadioListTile<String?>(
@@ -2239,19 +2235,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'fr',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).setLocale(value);
-                
-                // Log settings change
-                AnalyticsService.logSettingsChange(
-                  settingName: 'language',
-                  newValue: value ?? 'system',
-                  oldValue: appSettings.localeCode ?? 'system',
-                );
-                
-                Navigator.of(context).pop();
-                if (parentSetDialogState != null) {
-                  parentSetDialogState(() {});
-                }
+                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
               },
             ),
             RadioListTile<String?>(
@@ -2259,19 +2243,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'de',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).setLocale(value);
-                
-                // Log settings change
-                AnalyticsService.logSettingsChange(
-                  settingName: 'language',
-                  newValue: value ?? 'system',
-                  oldValue: appSettings.localeCode ?? 'system',
-                );
-                
-                Navigator.of(context).pop();
-                if (parentSetDialogState != null) {
-                  parentSetDialogState(() {});
-                }
+                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
               },
             ),
           ],

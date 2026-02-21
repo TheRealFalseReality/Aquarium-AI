@@ -28,6 +28,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import './services/analytics_service.dart';
+import './services/crashlytics_service.dart';
 import './services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 
@@ -116,24 +117,25 @@ void main() async {
   
   // Only initialize Firebase-dependent services if Firebase initialized successfully
   if (_firebaseInitialized) {
+    // Set app version and build info as Crashlytics custom keys (non-blocking)
+    CrashlyticsService.setAppInfo().catchError((error) {
+      if (kDebugMode) {
+        debugPrint('CrashlyticsService.setAppInfo error: $error');
+      }
+    });
+
     // Initialize notification service with navigator key (non-blocking)
     NotificationService().initialize(navigatorKey: navigatorKey).catchError((error) {
       if (kDebugMode) {
         debugPrint('Notification service initialization error: $error');
       }
       // Log to crash reporting if initialization fails
-      try {
-        FirebaseCrashlytics.instance.recordError(
-          error,
-          StackTrace.current,
-          reason: 'Notification service initialization failed',
-          fatal: false,
-        );
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('Failed to log notification error to Crashlytics: $e');
-        }
-      }
+      CrashlyticsService.recordError(
+        error,
+        StackTrace.current,
+        reason: 'Notification service initialization failed',
+        fatal: false,
+      );
     });
 
     // Initialize Analytics session tracking (non-blocking)
@@ -146,6 +148,7 @@ void main() async {
 
     // Set initial screen
     AnalyticsService.setCurrentScreen('welcome_screen');
+    CrashlyticsService.setCurrentScreen('welcome_screen');
   } else {
     if (kDebugMode) {
       debugPrint('Skipping Firebase-dependent services initialization');
@@ -548,6 +551,9 @@ class MyApp extends ConsumerWidget {
                   print('Analytics screen view error: $error');
                 }
               });
+              // Update Crashlytics current_screen key so crash reports include
+              // the screen the user was on at the time of the crash.
+              CrashlyticsService.setCurrentScreen(screenName);
             }
             
             return FadeSlideRoute(page: page);
