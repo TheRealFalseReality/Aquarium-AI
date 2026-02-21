@@ -252,7 +252,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
   Future<void> getTankStockingRecommendations({
     required Tank tank,
-    bool includeCustomNames = false,
     String additionalNotes = '',
   }) async {
     state = state.copyWith(
@@ -342,7 +341,6 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       allFish,
       existingFish,
       currentHarmonyScore,
-      includeCustomNames: includeCustomNames,
       additionalNotes: additionalNotes,
     );
 

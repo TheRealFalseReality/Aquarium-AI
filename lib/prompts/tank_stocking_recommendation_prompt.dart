@@ -7,7 +7,6 @@ String buildTankStockingRecommendationPrompt(
     List<Fish> allFish,
     List<Fish> existingFish,
     double currentHarmonyScore, {
-    bool includeCustomNames = false,
     String additionalNotes = '',
   }) {
   final availableFishNames = allFish.map((f) => f.name).toList();
@@ -16,22 +15,20 @@ String buildTankStockingRecommendationPrompt(
   final tankSizeText = _formatTankSize(tank);
   final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(1);
 
-  // Build custom names info if included
-  String customNamesInfo = '';
-  if (includeCustomNames) {
-    final customNamesMap = <String, String>{};
-    for (final inhabitant in tank.inhabitants) {
-      if (inhabitant.customName != inhabitant.fishUnit) {
-        customNamesMap[inhabitant.fishUnit] = inhabitant.customName;
-      }
+  // Build species tags info from inhabitants' selected species tags
+  String speciesTagsInfo = '';
+  final speciesTagsMap = <String, List<String>>{};
+  for (final inhabitant in tank.inhabitants) {
+    if (inhabitant.speciesTags.isNotEmpty) {
+      speciesTagsMap[inhabitant.fishUnit] = inhabitant.speciesTags;
     }
-    if (customNamesMap.isNotEmpty) {
-      customNamesInfo = '''
+  }
+  if (speciesTagsMap.isNotEmpty) {
+    speciesTagsInfo = '''
 
-    Custom Names (User-provided species information):
-    ${json.encode(customNamesMap)}
-    Note: These custom names may provide more specific species information. Consider them for more precise recommendations.''';
-    }
+    Species Tags (user-specified species for each fish type):
+    ${json.encode(speciesTagsMap)}
+    Note: These tags indicate the specific species or variants the user has. Consider them for more precise recommendations.''';
   }
 
   // Build additional notes section if provided
@@ -62,7 +59,7 @@ String buildTankStockingRecommendationPrompt(
     - Tank Type: "${tank.type}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage%
-    - Current Inhabitants: ${json.encode(existingFishNames)}$customNamesInfo$additionalNotesSection
+    - Current Inhabitants: ${json.encode(existingFishNames)}$speciesTagsInfo$additionalNotesSection
 
     Available Fish Database (choose recommendations only from this list):
     ${json.encode(availableFishNames)}

@@ -906,6 +906,28 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             inhabitant.fishUnit,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
+                          if (inhabitant.speciesTags.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3),
+                              child: Wrap(
+                                spacing: 4,
+                                runSpacing: 2,
+                                children: inhabitant.speciesTags.map((tag) => Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: cs.secondaryContainer.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontSize: 10,
+                                      color: cs.onSecondaryContainer,
+                                    ),
+                                  ),
+                                )).toList(),
+                              ),
+                            ),
                           if (inhabitant.dateAdded != null)
                             Text(
                               'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',

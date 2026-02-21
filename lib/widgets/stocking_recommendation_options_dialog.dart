@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 class StockingRecommendationOptions {
-  final bool includeCustomNames;
   final String additionalNotes;
 
   StockingRecommendationOptions({
-    required this.includeCustomNames,
     required this.additionalNotes,
   });
 }
@@ -23,7 +21,6 @@ class StockingRecommendationOptionsDialog extends StatefulWidget {
 }
 
 class _StockingRecommendationOptionsDialogState extends State<StockingRecommendationOptionsDialog> {
-  bool _includeCustomNames = false;
   final TextEditingController _notesController = TextEditingController();
 
   @override
@@ -67,65 +64,6 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
               ),
             ),
             const SizedBox(height: 20),
-            
-            // Custom names option
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _includeCustomNames = !_includeCustomNames;
-                });
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _includeCustomNames,
-                          onChanged: (value) {
-                            setState(() {
-                              _includeCustomNames = value ?? false;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                            'Include Custom Names',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, top: 4),
-                      child: Text(
-                        _includeCustomNames
-                            ? 'The AI will consider both the database fish names AND your custom names. This is useful when you\'ve set custom names to specific species (e.g., "Neon Tetra" instead of just "My Fish") for more precise, species-specific recommendations.'
-                            : 'The AI will only use the fish database names from our compatibility database. This ensures recommendations based on known compatibility data.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 16),
             
             // Additional notes field
             Text(
@@ -172,7 +110,6 @@ class _StockingRecommendationOptionsDialogState extends State<StockingRecommenda
           onPressed: () {
             Navigator.of(context).pop(
               StockingRecommendationOptions(
-                includeCustomNames: _includeCustomNames,
                 additionalNotes: _notesController.text.trim(),
               ),
             );

@@ -1109,7 +1109,35 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                     ],
                   ),
                   title: Text(inhabitant.customName),
-                  subtitle: Text('Fish Type: ${inhabitant.fishUnit}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Fish Type: ${inhabitant.fishUnit}'),
+                      if (inhabitant.speciesTags.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Wrap(
+                            spacing: 4,
+                            runSpacing: 2,
+                            children: inhabitant.speciesTags.map((tag) => Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                tag,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                ),
+                              ),
+                            )).toList(),
+                          ),
+                        ),
+                    ],
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1256,6 +1284,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   DateTime? _dateAdded;
   bool _fishSelectorExpanded = false;
   bool _customNameUserModified = false;
+  List<String> _selectedSpeciesTags = [];
 
   @override
   void initState() {
@@ -1270,6 +1299,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
       _customImagePath = widget.existingInhabitant!.customImagePath;
       _dateAdded = widget.existingInhabitant!.dateAdded;
       _urlController.text = _customImageUrl ?? '';
+      _selectedSpeciesTags = List<String>.from(widget.existingInhabitant!.speciesTags);
       // When editing, check if the name has been user-modified (not the default pattern)
       final defaultName = 'My ${widget.existingInhabitant!.fishUnit}';
       _customNameUserModified = widget.existingInhabitant!.customName != defaultName;
@@ -1403,6 +1433,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
         customImageUrl: _customImageUrl,
         customImagePath: _customImagePath,
         dateAdded: _dateAdded,
+        speciesTags: _selectedSpeciesTags,
       );
       
       widget.onAdd(inhabitant);
@@ -1417,6 +1448,11 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     final selectedFish = _selectedFishUnit != null
         ? widget.availableFish.where((f) => f.name == _selectedFishUnit).firstOrNull
         : null;
+
+    // Get available species tags for the selected fish type
+    final availableSpeciesTags = _selectedFishUnit != null
+        ? (ref.watch(speciesTagsProvider).tags[_selectedFishUnit] ?? [])
+        : <String>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1498,6 +1534,39 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             ),
           ),
 
+        // Species tags section (shown when a fish is selected and tags are available)
+        if (selectedFish != null && !_fishSelectorExpanded && availableSpeciesTags.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Species (Optional)',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: availableSpeciesTags.map((tag) {
+              final isSelected = _selectedSpeciesTags.contains(tag);
+              return FilterChip(
+                label: Text(tag, style: const TextStyle(fontSize: 12)),
+                selected: isSelected,
+                onSelected: (value) {
+                  setState(() {
+                    if (value) {
+                      _selectedSpeciesTags.add(tag);
+                    } else {
+                      _selectedSpeciesTags.remove(tag);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ],
+
         // Expanded: show search + full grid
         if (_fishSelectorExpanded) ...[
           TextField(
@@ -1521,6 +1590,10 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
+                        // Clear species tags when changing fish type
+                        if (_selectedFishUnit != fish.name) {
+                          _selectedSpeciesTags = [];
+                        }
                         _selectedFishUnit = fish.name;
                         // Only auto-fill custom name if user hasn't modified it
                         if (!_customNameUserModified) {
