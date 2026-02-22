@@ -406,7 +406,7 @@
     "description": "Enable AI Features setting title"
   },
 
-  "enableAIDesc": "Turn AI features on or off. When disabled, AI-related features (chatbot, compatibility analysis, stocking assistant) will be hidden. Non-AI features (calculators, tank management) remain available.",
+  "enableAIDesc": "Enable or disable AI-powered features. Calculators and tank management always remain available.",
   "@enableAIDesc": {
     "description": "Enable AI Features setting description"
   },

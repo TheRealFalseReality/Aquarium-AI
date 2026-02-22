@@ -769,6 +769,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   AIProvider.openAI => _buildOpenAISettings(setDialogState, true),
                   AIProvider.groq   => _buildGroqSettings(setDialogState, true),
                 },
+                // Chat History Limit — collapsible, defaults collapsed
+                const SizedBox(height: 8),
+                Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    leading: Icon(Icons.history,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(
+                      'Chat History Limit',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    initiallyExpanded: false,
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: const EdgeInsets.only(bottom: 8),
+                    children: [_buildChatHistoryLimitSection(setDialogState)],
+                  ),
+                ),
+                // Save button (hidden when using free key for this provider)
+                if (!(_selectedTextProvider == AIProvider.groq &&
+                    _useDevGroqKeyForText)) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -862,6 +895,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
+                // Save button (hidden when using free key for this provider)
+                if (!(_selectedImageProvider == AIProvider.groq &&
+                    _useDevGroqKeyForImage)) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -930,29 +976,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             );
           }),
         ],
-        // ─── Chat History Limit ───────────────────────────────────────────────
-        _buildChatHistoryLimitSection(setDialogState),
-        const SizedBox(height: 24),
-        // ─── Reset / Save ─────────────────────────────────────────────────────
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () {
-                ref.read(modelProvider.notifier).resetModelsToDefaults();
-                context.showAccessibleMessage(l10n.modelsResetDefault);
-              },
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.resetModels),
-            ),
-            const SizedBox(width: 16),
-            ElevatedButton.icon(
-              onPressed: () => _saveSettings(context),
-              icon: const Icon(Icons.save),
-              label: Text(l10n.save),
-            ),
-          ],
-        ),
+        // ─── Global Reset / Save (hidden when both free-key toggles are on) ───
+        if (!(_useDevGroqKeyForText && _useDevGroqKeyForImage &&
+            _selectedTextProvider == AIProvider.groq &&
+            _selectedImageProvider == AIProvider.groq)) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  ref.read(modelProvider.notifier).resetModelsToDefaults();
+                  context.showAccessibleMessage(l10n.modelsResetDefault);
+                },
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.resetModels),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: () => _saveSettings(context),
+                icon: const Icon(Icons.save),
+                label: Text(l10n.save),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(12),
