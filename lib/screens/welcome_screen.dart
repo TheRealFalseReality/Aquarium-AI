@@ -27,6 +27,7 @@ import '../widgets/app_promotion_dialog.dart';
 import '../widgets/aquapi_promotion_dialog.dart';
 import '../theme_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 
@@ -541,7 +542,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiEssentials.jpg',
+        imagePath: RemoteConfigService.aquapiEssentialImageUrl.isNotEmpty
+            ? RemoteConfigService.aquapiEssentialImageUrl
+            : 'assets/AquaPiEssentials.jpg',
       ),
     ];
 
@@ -1407,34 +1410,53 @@ class FeatureCard extends ConsumerWidget {
                 ],
                 if (imagePath != null) ...[
                   const SizedBox(height: 16),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SizedBox(
+                  Builder(builder: (context) {
+                    final path = imagePath!;
+                    final isNetworkImage =
+                        Uri.tryParse(path)?.hasAbsolutePath == true &&
+                        (path.startsWith('http://') ||
+                            path.startsWith('https://'));
+                    final errorPlaceholder = Container(
                       height: 300,
                       width: double.infinity,
-                      child: CachedNetworkImage(
-                        imageUrl: imagePath!,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: cs.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: cs.onSurfaceVariant,
-                            size: 48,
-                          ),
-                        ),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  ),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: cs.onSurfaceVariant,
+                        size: 48,
+                      ),
+                    );
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        height: 300,
+                        width: double.infinity,
+                        child: isNetworkImage
+                            ? CachedNetworkImage(
+                                imageUrl: path,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                                placeholder: (context, url) => const SizedBox(
+                                  height: 300,
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    errorPlaceholder,
+                              )
+                            : Image.asset(
+                                path,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    errorPlaceholder,
+                              ),
+                      ),
+                    );
+                  }),
                 ],
               ],
             ),

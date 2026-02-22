@@ -53,6 +53,14 @@ void main() {
           equals('meta-llama/llama-4-scout-17b-16e-instruct'),
         );
       });
+
+      test('aquapiOriginalImageUrl defaults to empty string (use local asset)', () {
+        expect(RemoteConfigService.aquapiOriginalImageUrl, equals(''));
+      });
+
+      test('aquapiEssentialImageUrl defaults to empty string (use local asset)', () {
+        expect(RemoteConfigService.aquapiEssentialImageUrl, equals(''));
+      });
     });
 
     group('RemoteConfigKeys', () {
@@ -78,6 +86,10 @@ void main() {
             equals('default_groq_model'));
         expect(RemoteConfigKeys.defaultGroqImageModel,
             equals('default_groq_image_model'));
+        expect(RemoteConfigKeys.aquapiOriginalImageUrl,
+            equals('aquapi_original_image_url'));
+        expect(RemoteConfigKeys.aquapiEssentialImageUrl,
+            equals('aquapi_essential_image_url'));
       });
     });
   });

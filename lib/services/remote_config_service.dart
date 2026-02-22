@@ -30,6 +30,14 @@ const String _defaultOpenAIImageModel = 'gpt-4-vision-preview';
 const String _defaultGroqModel = 'llama-3.1-8b-instant';
 const String _defaultGroqImageModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
 
+// AquaPi promotion images.
+// Empty string = use the bundled local asset as fallback.
+// Set a URL in Remote Config to override with a newer image without an app update.
+/// Fallback for the "original" AquaPi image (AquaPiMainSmaller.jpg).
+const String _defaultAquapiOriginalImageUrl = '';
+/// Fallback for the "essential" AquaPi image (AquaPiEssentials.jpg).
+const String _defaultAquapiEssentialImageUrl = '';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -72,6 +80,17 @@ class RemoteConfigKeys {
 
   /// String — default Groq image-analysis model name.
   static const String defaultGroqImageModel = 'default_groq_image_model';
+
+  // ── Promotion images ──────────────────────────────────────────────────────
+  /// String — URL for the "original" AquaPi promotion image
+  /// (`AquaPiMainSmaller.jpg`) shown in the AquaPi promotion dialog.
+  /// Empty string (default) means use the bundled `assets/AquaPiMainSmaller.jpg`.
+  static const String aquapiOriginalImageUrl = 'aquapi_original_image_url';
+
+  /// String — URL for the "essential" AquaPi promotion image
+  /// (`AquaPiEssentials.jpg`) shown on the welcome-screen feature card.
+  /// Empty string (default) means use the bundled `assets/AquaPiEssentials.jpg`.
+  static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -105,6 +124,8 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultOpenAIImageModel: _defaultOpenAIImageModel,
         RemoteConfigKeys.defaultGroqModel: _defaultGroqModel,
         RemoteConfigKeys.defaultGroqImageModel: _defaultGroqImageModel,
+        RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
+        RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -203,4 +224,18 @@ class RemoteConfigService {
   /// Default Groq image-analysis model name.
   static String get defaultGroqImageModel =>
       _modelString(RemoteConfigKeys.defaultGroqImageModel, _defaultGroqImageModel);
+
+  // ── Promotion images ────────────────────────────────────────────────────────
+
+  /// URL for the "original" AquaPi promotion image (shown in the dialog).
+  /// Returns an empty string when no URL is set in Remote Config,
+  /// signalling that the bundled `assets/AquaPiMainSmaller.jpg` should be used.
+  static String get aquapiOriginalImageUrl =>
+      _modelString(RemoteConfigKeys.aquapiOriginalImageUrl, _defaultAquapiOriginalImageUrl);
+
+  /// URL for the "essential" AquaPi promotion image (shown on the welcome screen).
+  /// Returns an empty string when no URL is set in Remote Config,
+  /// signalling that the bundled `assets/AquaPiEssentials.jpg` should be used.
+  static String get aquapiEssentialImageUrl =>
+      _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, _defaultAquapiEssentialImageUrl);
 }

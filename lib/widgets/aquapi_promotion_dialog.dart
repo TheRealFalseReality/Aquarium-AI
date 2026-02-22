@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
   const AquaPiPromotionDialog({super.key});
@@ -93,24 +94,48 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
+  /// Builds the AquaPi promotion image.
+  /// Uses the Remote Config URL when set; falls back to the bundled asset.
+  /// Accepts an optional [width] for the desktop (horizontal) layout.
+  Widget _buildPromoImage({double? width}) {
+    final imageUrl = RemoteConfigService.aquapiOriginalImageUrl;
+    final borderRadius = BorderRadius.circular(12);
+
+    if (imageUrl.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          width: width,
+          fit: BoxFit.contain,
+          placeholder: (context, url) => SizedBox(
+            width: width,
+            height: 80,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+          errorWidget: (context, url, error) => const SizedBox.shrink(),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Image.asset(
+        'assets/AquaPiMainSmaller.jpg',
+        width: width,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      ),
+    );
+  }
+
   Widget _buildVerticalLayout(BuildContext context, ColorScheme colorScheme) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Marketing image at top for mobile
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiMainSmaller.jpg',
-            fit: BoxFit.contain,
-            placeholder: (context, url) => const SizedBox(
-              height: 80,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => const SizedBox.shrink(),
-          ),
-        ),
+        _buildPromoImage(),
         const SizedBox(height: 16),
         Text(
           'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
@@ -193,19 +218,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Marketing image on the left
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiMainSmaller.jpg',
-            width: 180,
-            fit: BoxFit.contain,
-            placeholder: (context, url) => const SizedBox(
-              width: 180,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => const SizedBox.shrink(),
-          ),
-        ),
+        _buildPromoImage(width: 180),
         const SizedBox(width: 16),
         // Content on the right
         Expanded(
