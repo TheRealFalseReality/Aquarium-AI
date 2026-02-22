@@ -1,35 +1,56 @@
 import 'package:fish_ai/services/remote_config_service.dart';
-import 'package:fish_ai/utils/dev_limits.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('RemoteConfigService', () {
     group('defaults (no Firebase instance)', () {
       // Before any initialize() call the _instance is null, so all getters
-      // must return the in-app defaults from dev_limits.dart.
+      // must return the in-app fallback defaults.
 
       test('freeAiEnabled defaults to true', () {
         expect(RemoteConfigService.freeAiEnabled, isTrue);
       });
 
-      test('maxRequestsPerMinute defaults to devMaxRequestsPerMinute', () {
-        expect(
-          RemoteConfigService.maxRequestsPerMinute,
-          equals(devMaxRequestsPerMinute),
-        );
+      test('maxRequestsPerMinute defaults to 4', () {
+        expect(RemoteConfigService.maxRequestsPerMinute, equals(4));
       });
 
-      test('maxRequestsPerDay defaults to devMaxRequestsPerDay', () {
-        expect(
-          RemoteConfigService.maxRequestsPerDay,
-          equals(devMaxRequestsPerDay),
-        );
+      test('maxRequestsPerDay defaults to 50', () {
+        expect(RemoteConfigService.maxRequestsPerDay, equals(50));
       });
 
-      test('maxPhotoAnalysesPerDay defaults to devMaxPhotoAnalysesPerDay', () {
+      test('maxPhotoAnalysesPerDay defaults to 3', () {
+        expect(RemoteConfigService.maxPhotoAnalysesPerDay, equals(3));
+      });
+
+      test('freeTierChatHistoryLimit defaults to 3', () {
+        expect(RemoteConfigService.freeTierChatHistoryLimit, equals(3));
+      });
+
+      test('defaultGeminiModel defaults to gemini-flash-latest', () {
+        expect(RemoteConfigService.defaultGeminiModel, equals('gemini-flash-latest'));
+      });
+
+      test('defaultGeminiImageModel defaults to gemini-flash-latest', () {
+        expect(RemoteConfigService.defaultGeminiImageModel, equals('gemini-flash-latest'));
+      });
+
+      test('defaultOpenAIModel defaults to gpt-4o', () {
+        expect(RemoteConfigService.defaultOpenAIModel, equals('gpt-4o'));
+      });
+
+      test('defaultOpenAIImageModel defaults to gpt-4-vision-preview', () {
+        expect(RemoteConfigService.defaultOpenAIImageModel, equals('gpt-4-vision-preview'));
+      });
+
+      test('defaultGroqModel defaults to llama-3.1-8b-instant', () {
+        expect(RemoteConfigService.defaultGroqModel, equals('llama-3.1-8b-instant'));
+      });
+
+      test('defaultGroqImageModel defaults to llama-4-scout model', () {
         expect(
-          RemoteConfigService.maxPhotoAnalysesPerDay,
-          equals(devMaxPhotoAnalysesPerDay),
+          RemoteConfigService.defaultGroqImageModel,
+          equals('meta-llama/llama-4-scout-17b-16e-instruct'),
         );
       });
     });
@@ -43,6 +64,20 @@ void main() {
             equals('dev_max_requests_per_day'));
         expect(RemoteConfigKeys.devMaxPhotoAnalysesPerDay,
             equals('dev_max_photo_analyses_per_day'));
+        expect(RemoteConfigKeys.devDefaultChatHistoryLimit,
+            equals('dev_default_chat_history_limit'));
+        expect(RemoteConfigKeys.defaultGeminiModel,
+            equals('default_gemini_model'));
+        expect(RemoteConfigKeys.defaultGeminiImageModel,
+            equals('default_gemini_image_model'));
+        expect(RemoteConfigKeys.defaultOpenAIModel,
+            equals('default_openai_model'));
+        expect(RemoteConfigKeys.defaultOpenAIImageModel,
+            equals('default_openai_image_model'));
+        expect(RemoteConfigKeys.defaultGroqModel,
+            equals('default_groq_model'));
+        expect(RemoteConfigKeys.defaultGroqImageModel,
+            equals('default_groq_image_model'));
       });
     });
   });

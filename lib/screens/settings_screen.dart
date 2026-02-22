@@ -805,7 +805,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           '• ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute\n'
                           '• ${RemoteConfigService.maxRequestsPerDay} AI requests per day\n'
                           '• ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                          '• $defaultChatHistoryLimit-message chat history per request',
+                          '• ${RemoteConfigService.freeTierChatHistoryLimit}-message chat history per request',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.amber.shade900,
                               ),
@@ -944,11 +944,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: () {
                           switch (_selectedTextProvider) {
                             case AIProvider.gemini:
-                              _geminiModelController.text = defaultGeminiModel;
+                              _geminiModelController.text = RemoteConfigService.defaultGeminiModel;
                             case AIProvider.openAI:
-                              _chatGPTModelController.text = defaultChatGPTModel;
+                              _chatGPTModelController.text = RemoteConfigService.defaultOpenAIModel;
                             case AIProvider.groq:
-                              _groqModelController.text = defaultGroqModel;
+                              _groqModelController.text = RemoteConfigService.defaultGroqModel;
                           }
                           if (setDialogState != null) setDialogState(() {});
                           context.showAccessibleMessage(l10n.modelsResetDefault);
@@ -1069,11 +1069,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: () {
                           switch (_selectedImageProvider) {
                             case AIProvider.gemini:
-                              _geminiImageModelController.text = defaultGeminiImageModel;
+                              _geminiImageModelController.text = RemoteConfigService.defaultGeminiImageModel;
                             case AIProvider.openAI:
-                              _chatGPTImageModelController.text = defaultChatGPTImageModel;
+                              _chatGPTImageModelController.text = RemoteConfigService.defaultOpenAIImageModel;
                             case AIProvider.groq:
-                              _groqImageModelController.text = defaultGroqImageModel;
+                              _groqImageModelController.text = RemoteConfigService.defaultGroqImageModel;
                           }
                           if (setDialogState != null) setDialogState(() {});
                           context.showAccessibleMessage(l10n.modelsResetDefault);
@@ -1656,7 +1656,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Text(
             !onFreeTier
                 ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
-                : 'Without your own API key, the app uses our free service tier with a fixed limit of $defaultChatHistoryLimit past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
+                : 'Without your own API key, the app uses our free service tier with a fixed limit of ${RemoteConfigService.freeTierChatHistoryLimit} past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

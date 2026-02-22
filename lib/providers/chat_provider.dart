@@ -99,7 +99,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// Returns the effective chat history limit.
   /// Users who supply their own API key for the active text provider use their
   /// configured [ModelState.chatHistoryLimit]. Everyone on the free dev tier
-  /// is hard-capped at [defaultChatHistoryLimit] (3).
+  /// is capped at [RemoteConfigService.freeTierChatHistoryLimit].
   int get _historyLimit {
     final usingDevKey = switch (_modelState.activeTextProvider) {
       AIProvider.gemini => false, // no dev key for Gemini

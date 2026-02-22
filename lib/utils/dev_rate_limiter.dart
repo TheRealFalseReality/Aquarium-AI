@@ -21,7 +21,7 @@ enum DevRateLimitResult {
 /// [ModelState.usingDeveloperGroqKeyForImage] is true.
 ///
 /// Limits are fetched at runtime from [RemoteConfigService], with
-/// the in-app defaults from [dev_limits.dart] used as fallback.
+/// the in-app fallback defaults used when Firebase is unreachable.
 class DevRateLimiter {
   static const String _requestTimestampsKey = 'dev_rate_request_timestamps';
   static const String _requestDailyCountKey = 'dev_rate_request_daily_count';

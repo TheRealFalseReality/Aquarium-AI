@@ -22,6 +22,14 @@ const int _defaultMaxPhotoAnalysesPerDay = 3;
 /// this freely; free-tier users are capped at this value.
 const int _defaultFreeTierChatHistoryLimit = 3;
 
+// Model string fallbacks — these mirror what used to live in constants.dart.
+const String _defaultGeminiModel = 'gemini-flash-latest';
+const String _defaultGeminiImageModel = 'gemini-flash-latest';
+const String _defaultOpenAIModel = 'gpt-4o';
+const String _defaultOpenAIImageModel = 'gpt-4-vision-preview';
+const String _defaultGroqModel = 'llama-3.1-8b-instant';
+const String _defaultGroqImageModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -45,6 +53,25 @@ class RemoteConfigKeys {
   /// free-tier users. Users with their own API key can configure this freely.
   static const String devDefaultChatHistoryLimit =
       'dev_default_chat_history_limit';
+
+  // ── Model defaults ────────────────────────────────────────────────────────
+  /// String — default Gemini text/chat model name.
+  static const String defaultGeminiModel = 'default_gemini_model';
+
+  /// String — default Gemini image-analysis model name.
+  static const String defaultGeminiImageModel = 'default_gemini_image_model';
+
+  /// String — default OpenAI (ChatGPT) text/chat model name.
+  static const String defaultOpenAIModel = 'default_openai_model';
+
+  /// String — default OpenAI image-analysis model name.
+  static const String defaultOpenAIImageModel = 'default_openai_image_model';
+
+  /// String — default Groq text/chat model name.
+  static const String defaultGroqModel = 'default_groq_model';
+
+  /// String — default Groq image-analysis model name.
+  static const String defaultGroqImageModel = 'default_groq_image_model';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -72,6 +99,12 @@ class RemoteConfigService {
         RemoteConfigKeys.devMaxRequestsPerDay: _defaultMaxRequestsPerDay,
         RemoteConfigKeys.devMaxPhotoAnalysesPerDay: _defaultMaxPhotoAnalysesPerDay,
         RemoteConfigKeys.devDefaultChatHistoryLimit: _defaultFreeTierChatHistoryLimit,
+        RemoteConfigKeys.defaultGeminiModel: _defaultGeminiModel,
+        RemoteConfigKeys.defaultGeminiImageModel: _defaultGeminiImageModel,
+        RemoteConfigKeys.defaultOpenAIModel: _defaultOpenAIModel,
+        RemoteConfigKeys.defaultOpenAIImageModel: _defaultOpenAIImageModel,
+        RemoteConfigKeys.defaultGroqModel: _defaultGroqModel,
+        RemoteConfigKeys.defaultGroqImageModel: _defaultGroqImageModel,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -93,7 +126,9 @@ class RemoteConfigService {
           'maxReqPerMin=$maxRequestsPerMinute, '
           'maxReqPerDay=$maxRequestsPerDay, '
           'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '
-          'chatHistoryLimit=$freeTierChatHistoryLimit',
+          'chatHistoryLimit=$freeTierChatHistoryLimit, '
+          'geminiModel=$defaultGeminiModel, '
+          'groqModel=$defaultGroqModel',
         );
       }
     } catch (e) {
@@ -136,4 +171,36 @@ class RemoteConfigService {
   static int get freeTierChatHistoryLimit =>
       _instance?.getInt(RemoteConfigKeys.devDefaultChatHistoryLimit) ??
       _defaultFreeTierChatHistoryLimit;
+
+  // ── Model defaults ─────────────────────────────────────────────────────────
+
+  /// Returns the RC string for [key] when non-empty, otherwise [fallback].
+  static String _modelString(String key, String fallback) {
+    final value = _instance?.getString(key);
+    return (value != null && value.isNotEmpty) ? value : fallback;
+  }
+
+  /// Default Gemini text/chat model name.
+  static String get defaultGeminiModel =>
+      _modelString(RemoteConfigKeys.defaultGeminiModel, _defaultGeminiModel);
+
+  /// Default Gemini image-analysis model name.
+  static String get defaultGeminiImageModel =>
+      _modelString(RemoteConfigKeys.defaultGeminiImageModel, _defaultGeminiImageModel);
+
+  /// Default OpenAI (ChatGPT) text/chat model name.
+  static String get defaultOpenAIModel =>
+      _modelString(RemoteConfigKeys.defaultOpenAIModel, _defaultOpenAIModel);
+
+  /// Default OpenAI image-analysis model name.
+  static String get defaultOpenAIImageModel =>
+      _modelString(RemoteConfigKeys.defaultOpenAIImageModel, _defaultOpenAIImageModel);
+
+  /// Default Groq text/chat model name.
+  static String get defaultGroqModel =>
+      _modelString(RemoteConfigKeys.defaultGroqModel, _defaultGroqModel);
+
+  /// Default Groq image-analysis model name.
+  static String get defaultGroqImageModel =>
+      _modelString(RemoteConfigKeys.defaultGroqImageModel, _defaultGroqImageModel);
 }
