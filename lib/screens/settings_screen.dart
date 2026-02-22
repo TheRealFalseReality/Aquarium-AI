@@ -78,6 +78,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAIProviderDialog() {
+    // Reset local state to match the last-persisted provider state so that
+    // any unsaved changes from a previous (abandoned) dialog session are
+    // discarded before the dialog opens.
+    final models = ref.read(modelProvider);
+    setState(() {
+      _selectedTextProvider = models.activeTextProvider;
+      _selectedImageProvider = models.activeImageProvider;
+      _useDevGroqKeyForText = models.useDevGroqKeyForText;
+      _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
+      _groqModelController.text = models.groqModel;
+      _groqImageModelController.text = models.groqImageModel;
+      _groqApiKeyController.text = models.groqApiKey;
+      _geminiModelController.text = models.geminiModel;
+      _geminiImageModelController.text = models.geminiImageModel;
+      _geminiApiKeyController.text = models.geminiApiKey;
+      _chatGPTModelController.text = models.chatGPTModel;
+      _chatGPTImageModelController.text = models.chatGPTImageModel;
+      _openAIApiKeyController.text = models.openAIApiKey;
+      _chatHistoryLimit = models.chatHistoryLimit;
+    });
+
     final l10n = AppLocalizations.of(context)!;
     
     showDialog(
