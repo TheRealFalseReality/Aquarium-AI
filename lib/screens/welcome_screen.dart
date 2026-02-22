@@ -444,12 +444,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           next.groqApiKey.isEmpty &&
           ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
-        if (shouldShow && mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => const ApiKeyDialog(),
-          );
-        }
+        if (!shouldShow || !mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) => const ApiKeyDialog(),
+        );
       }
     });
 
