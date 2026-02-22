@@ -2172,7 +2172,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  /// Compact chip-style toggle
+  /// Compact chip-style toggle for the "Use Free Key" dev key option.
+  Widget _buildDevKeyToggle({
     required String label,
     required bool value,
     required ValueChanged<bool> onChanged,
