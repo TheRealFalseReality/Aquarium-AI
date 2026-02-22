@@ -709,6 +709,75 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
+        // ─── Free-tier notice (collapsible; only shown when at least one free key is active) ──
+        if (_useDevGroqKeyForText || _useDevGroqKeyForImage) ...[
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.amber.withOpacity(0.4)),
+              ),
+              child: ExpansionTile(
+                leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                title: Text(
+                  'Free-tier limits',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.amber.shade800,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                // Collapsed subtitle: just the key numbers
+                subtitle: Text(
+                  '$devMaxRequestsPerDay req/day  •  $devMaxRequestsPerMinute req/min  •  $devMaxPhotoAnalysesPerDay photo/day',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.amber.shade700,
+                      ),
+                ),
+                initiallyExpanded: false,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• $devMaxRequestsPerMinute AI requests per minute\n'
+                    '• $devMaxRequestsPerDay AI requests per day\n'
+                    '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                    '• $defaultChatHistoryLimit-message chat history per request',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
         Card(
           clipBehavior: Clip.antiAlias,
@@ -789,17 +858,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [_buildChatHistoryLimitSection(setDialogState)],
                   ),
                 ),
-                // Save button (hidden when using free key for this provider)
+                // Reset + Save (hidden when using free key for this provider)
                 if (!(_selectedTextProvider == AIProvider.groq &&
                     _useDevGroqKeyForText)) ...[
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _saveSettings(context),
-                      icon: const Icon(Icons.save, size: 18),
-                      label: Text(l10n.save),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          switch (_selectedTextProvider) {
+                            case AIProvider.gemini:
+                              _geminiModelController.text = defaultGeminiModel;
+                            case AIProvider.openAI:
+                              _chatGPTModelController.text = defaultChatGPTModel;
+                            case AIProvider.groq:
+                              _groqModelController.text = defaultGroqModel;
+                          }
+                          if (setDialogState != null) setDialogState(() {});
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: Text(l10n.resetModels),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _saveSettings(context),
+                        icon: const Icon(Icons.save, size: 18),
+                        label: Text(l10n.save),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -895,17 +983,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
-                // Save button (hidden when using free key for this provider)
+                // Reset + Save (hidden when using free key for this provider)
                 if (!(_selectedImageProvider == AIProvider.groq &&
                     _useDevGroqKeyForImage)) ...[
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _saveSettings(context),
-                      icon: const Icon(Icons.save, size: 18),
-                      label: Text(l10n.save),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          switch (_selectedImageProvider) {
+                            case AIProvider.gemini:
+                              _geminiImageModelController.text = defaultGeminiImageModel;
+                            case AIProvider.openAI:
+                              _chatGPTImageModelController.text = defaultChatGPTImageModel;
+                            case AIProvider.groq:
+                              _groqImageModelController.text = defaultGroqImageModel;
+                          }
+                          if (setDialogState != null) setDialogState(() {});
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: Text(l10n.resetModels),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _saveSettings(context),
+                        icon: const Icon(Icons.save, size: 18),
+                        label: Text(l10n.save),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -913,95 +1020,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        // ─── Free-tier notice (only when at least one free key is active) ────────
-        if (_useDevGroqKeyForText || _useDevGroqKeyForImage) ...[
-          Builder(builder: (context) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.withOpacity(0.4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    const Icon(Icons.speed, color: Colors.amber, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Free-tier limits',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.amber.shade800,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ]),
-                  const SizedBox(height: 6),
-                  Text(
-                    '• $devMaxRequestsPerMinute AI requests per minute\n'
-                    '• $devMaxRequestsPerDay AI requests per day\n'
-                    '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                    '• $defaultChatHistoryLimit-message chat history per request',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
-                        ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
-                        ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade800,
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade800,
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-        // ─── Global Reset / Save (hidden when both free-key toggles are on) ───
-        if (!(_useDevGroqKeyForText && _useDevGroqKeyForImage &&
-            _selectedTextProvider == AIProvider.groq &&
-            _selectedImageProvider == AIProvider.groq)) ...[
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () {
-                  ref.read(modelProvider.notifier).resetModelsToDefaults();
-                  context.showAccessibleMessage(l10n.modelsResetDefault);
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n.resetModels),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: () => _saveSettings(context),
-                icon: const Icon(Icons.save),
-                label: Text(l10n.save),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
+        // ─── Note: calculators work without an AI key ─────────────────────────
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
