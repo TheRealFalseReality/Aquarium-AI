@@ -293,7 +293,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
-    // Also validate API key for image provider if different from text provider
+    // Validate API key for image provider when different from text provider.
+    // Gemini/OpenAI share a single key so only re-check when the provider differs.
     if (_selectedImageProvider != _selectedTextProvider) {
       if (_selectedImageProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
@@ -305,12 +306,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context.showAccessibleMessage(l10n.enterOpenAIApiKey);
         return;
       }
-      if (_selectedImageProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty &&
-          !_useDevGroqKeyForImage) {
-        context.showAccessibleMessage(l10n.enterGroqApiKey);
-        return;
-      }
+    }
+    // Groq has independent per-use-case toggles, so always validate the image
+    // toggle regardless of whether the text provider is also Groq.
+    if (_selectedImageProvider == AIProvider.groq &&
+        _groqApiKeyController.text.trim().isEmpty &&
+        !_useDevGroqKeyForImage) {
+      context.showAccessibleMessage(l10n.enterGroqApiKey);
+      return;
     }
 
     // Log settings save
