@@ -1,16 +1,12 @@
 import 'package:fish_ai/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/remote_config_service.dart';
 
 export 'package:fish_ai/constants.dart' show developerGroqApiKey;
 
-// Define default values as constants for reusability
-const String defaultGeminiModel = geminiModelDefault;
-const String defaultGeminiImageModel = geminiImageModelDefault;
-const String defaultChatGPTModel = openAIModelDefault;
-const String defaultChatGPTImageModel = openAIImageModelDefault;
-const String defaultGroqModel = groqModelDefault;
-const String defaultGroqImageModel = groqImageModelDefault;
+// Provider default values — compile-time model names are now served by
+// RemoteConfigService so the developer can update them without an app release.
 const AIProvider defaultAIProvider = AIProvider.groq;
 
 const int defaultChatHistoryLimit = 3;
@@ -70,23 +66,31 @@ class ModelState {
   AIProvider get activeProvider => activeTextProvider;
 
   /// The Groq API key to use for **text/chat** operations.
-  /// Returns the dev key when [useDevGroqKeyForText] is set; otherwise returns
-  /// the user's key (with dev key as fallback when user key is empty).
+  /// Returns the dev key when [useDevGroqKeyForText] is set AND the free AI
+  /// tier is enabled via Remote Config; otherwise returns the user's key
+  /// (with dev key as fallback when user key is empty and free AI is enabled).
   String get effectiveGroqApiKeyForText {
-    if (useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
+    final freeAiEnabled = RemoteConfigService.freeAiEnabled;
+    if (freeAiEnabled && useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+    return groqApiKey.isNotEmpty
+        ? groqApiKey
+        : (freeAiEnabled ? developerGroqApiKey : '');
   }
 
   /// The Groq API key to use for **image/photo** operations.
-  /// Returns the dev key when [useDevGroqKeyForImage] is set; otherwise returns
-  /// the user's key (with dev key as fallback when user key is empty).
+  /// Returns the dev key when [useDevGroqKeyForImage] is set AND the free AI
+  /// tier is enabled via Remote Config; otherwise returns the user's key
+  /// (with dev key as fallback when user key is empty and free AI is enabled).
   String get effectiveGroqApiKeyForImage {
-    if (useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
+    final freeAiEnabled = RemoteConfigService.freeAiEnabled;
+    if (freeAiEnabled && useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+    return groqApiKey.isNotEmpty
+        ? groqApiKey
+        : (freeAiEnabled ? developerGroqApiKey : '');
   }
 
   /// Backwards-compat alias — returns [effectiveGroqApiKeyForText].
@@ -97,11 +101,13 @@ class ModelState {
 
   /// Whether text/chat operations are currently using the developer Groq key.
   bool get usingDeveloperGroqKeyForText =>
+      RemoteConfigService.freeAiEnabled &&
       developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForText || groqApiKey.isEmpty);
 
   /// Whether image/photo operations are currently using the developer Groq key.
   bool get usingDeveloperGroqKeyForImage =>
+      RemoteConfigService.freeAiEnabled &&
       developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForImage || groqApiKey.isEmpty);
 
@@ -118,14 +124,14 @@ class ModelState {
 class ModelNotifier extends StateNotifier<ModelState> {
   ModelNotifier()
       : super(ModelState(
-          geminiModel: defaultGeminiModel,
-          geminiImageModel: defaultGeminiImageModel,
+          geminiModel: RemoteConfigService.defaultGeminiModel,
+          geminiImageModel: RemoteConfigService.defaultGeminiImageModel,
           geminiApiKey: '',
-          chatGPTModel: defaultChatGPTModel,
-          chatGPTImageModel: defaultChatGPTImageModel,
+          chatGPTModel: RemoteConfigService.defaultOpenAIModel,
+          chatGPTImageModel: RemoteConfigService.defaultOpenAIImageModel,
           openAIApiKey: '',
-          groqModel: defaultGroqModel,
-          groqImageModel: defaultGroqImageModel,
+          groqModel: RemoteConfigService.defaultGroqModel,
+          groqImageModel: RemoteConfigService.defaultGroqImageModel,
           groqApiKey: '',
           activeTextProvider: defaultAIProvider,
           activeImageProvider: defaultAIProvider,
@@ -137,17 +143,17 @@ class ModelNotifier extends StateNotifier<ModelState> {
 
   Future<void> _loadModels() async {
     final prefs = await SharedPreferences.getInstance();
-    final geminiModel = prefs.getString('geminiModel') ?? defaultGeminiModel;
+    final geminiModel = prefs.getString('geminiModel') ?? RemoteConfigService.defaultGeminiModel;
     final geminiImageModel =
-        prefs.getString('geminiImageModel') ?? defaultGeminiImageModel;
+        prefs.getString('geminiImageModel') ?? RemoteConfigService.defaultGeminiImageModel;
     final geminiApiKey = prefs.getString('geminiApiKey') ?? '';
-    final chatGPTModel = prefs.getString('chatGPTModel') ?? defaultChatGPTModel;
+    final chatGPTModel = prefs.getString('chatGPTModel') ?? RemoteConfigService.defaultOpenAIModel;
     final chatGPTImageModel =
-        prefs.getString('chatGPTImageModel') ?? defaultChatGPTImageModel;
+        prefs.getString('chatGPTImageModel') ?? RemoteConfigService.defaultOpenAIImageModel;
     final openAIApiKey = prefs.getString('openAIApiKey') ?? '';
-    final groqModel = prefs.getString('groqModel') ?? defaultGroqModel;
+    final groqModel = prefs.getString('groqModel') ?? RemoteConfigService.defaultGroqModel;
     final groqImageModel =
-        prefs.getString('groqImageModel') ?? defaultGroqImageModel;
+        prefs.getString('groqImageModel') ?? RemoteConfigService.defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
     // Migrate legacy single useDevGroqKey → per-operation flags.
     // New users default to ON (true); existing users who had an explicit setting keep it.
@@ -282,14 +288,14 @@ class ModelNotifier extends StateNotifier<ModelState> {
 
     // Set the state back to the default models, but keep the existing API keys and providers
     state = ModelState(
-      geminiModel: defaultGeminiModel,
-      geminiImageModel: defaultGeminiImageModel,
+      geminiModel: RemoteConfigService.defaultGeminiModel,
+      geminiImageModel: RemoteConfigService.defaultGeminiImageModel,
       geminiApiKey: state.geminiApiKey,
-      chatGPTModel: defaultChatGPTModel,
-      chatGPTImageModel: defaultChatGPTImageModel,
+      chatGPTModel: RemoteConfigService.defaultOpenAIModel,
+      chatGPTImageModel: RemoteConfigService.defaultOpenAIImageModel,
       openAIApiKey: state.openAIApiKey,
-      groqModel: defaultGroqModel,
-      groqImageModel: defaultGroqImageModel,
+      groqModel: RemoteConfigService.defaultGroqModel,
+      groqImageModel: RemoteConfigService.defaultGroqImageModel,
       groqApiKey: state.groqApiKey,
       chatHistoryLimit: state.chatHistoryLimit,
       activeTextProvider: state.activeTextProvider,

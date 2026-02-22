@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
-import '../utils/dev_limits.dart';
+import '../services/remote_config_service.dart';
 
 class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
@@ -187,7 +187,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $devMaxRequestsPerMinute AI requests per minute, $devMaxRequestsPerDay AI requests per day, and $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
+                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute, ${RemoteConfigService.maxRequestsPerDay} AI requests per day, and ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onTertiaryContainer,
                       ),

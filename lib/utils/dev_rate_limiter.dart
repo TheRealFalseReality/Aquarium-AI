@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dev_limits.dart';
+import '../services/remote_config_service.dart';
 
 /// Result of a rate-limit check.
 enum DevRateLimitResult {
@@ -20,7 +20,8 @@ enum DevRateLimitResult {
 /// [ModelState.usingDeveloperGroqKeyForText] or
 /// [ModelState.usingDeveloperGroqKeyForImage] is true.
 ///
-/// Limits are configured in [dev_limits.dart].
+/// Limits are fetched at runtime from [RemoteConfigService], with
+/// the in-app fallback defaults used when Firebase is unreachable.
 class DevRateLimiter {
   static const String _requestTimestampsKey = 'dev_rate_request_timestamps';
   static const String _requestDailyCountKey = 'dev_rate_request_daily_count';
@@ -51,7 +52,7 @@ class DevRateLimiter {
     final dailyCount = storedDate == todayStr
         ? (prefs.getInt(_requestDailyCountKey) ?? 0)
         : 0;
-    if (dailyCount >= devMaxRequestsPerDay) {
+    if (dailyCount >= RemoteConfigService.maxRequestsPerDay) {
       return DevRateLimitResult.dailyLimitReached;
     }
 
@@ -64,7 +65,7 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    if (recent.length >= devMaxRequestsPerMinute) {
+    if (recent.length >= RemoteConfigService.maxRequestsPerMinute) {
       return DevRateLimitResult.minuteLimitReached;
     }
 
@@ -96,7 +97,7 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    if (recent.length < devMaxRequestsPerMinute) return 0;
+    if (recent.length < RemoteConfigService.maxRequestsPerMinute) return 0;
 
     recent.sort();
     final oldest = recent.first;
@@ -115,7 +116,7 @@ class DevRateLimiter {
         ? (prefs.getInt(_requestDailyCountKey) ?? 0)
         : 0;
 
-    final remaining = devMaxRequestsPerDay - count;
+    final remaining = RemoteConfigService.maxRequestsPerDay - count;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -136,7 +137,7 @@ class DevRateLimiter {
         ? (prefs.getInt(_photoDailyCountKey) ?? 0)
         : 0;
 
-    if (count >= devMaxPhotoAnalysesPerDay) {
+    if (count >= RemoteConfigService.maxPhotoAnalysesPerDay) {
       return false;
     }
 
@@ -155,7 +156,7 @@ class DevRateLimiter {
         ? (prefs.getInt(_photoDailyCountKey) ?? 0)
         : 0;
 
-    final remaining = devMaxPhotoAnalysesPerDay - count;
+    final remaining = RemoteConfigService.maxPhotoAnalysesPerDay - count;
     return remaining > 0 ? remaining : 0;
   }
 

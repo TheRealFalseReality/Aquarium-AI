@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/dev_limits.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
+import '../services/remote_config_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import 'changelog_screen.dart';
@@ -545,6 +545,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ],
+        // Warning: shown when the free AI tier is disabled server-side but the
+        // user has no own Groq key configured.
+        if (appSettings.enableAI &&
+            developerGroqApiKey.isNotEmpty &&
+            !RemoteConfigService.freeAiEnabled &&
+            !models.hasGroqKey) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.red.withOpacity(0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.block, color: Colors.red, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'The free AI tier is currently unavailable. '
+                    'Please add your own Groq API key in AI Provider settings to continue using AI features.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
@@ -736,65 +769,88 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
+                color: RemoteConfigService.freeAiEnabled
+                    ? Colors.amber.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.amber.withOpacity(0.4)),
-              ),
-              child: ExpansionTile(
-                leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
-                title: Text(
-                  'Free-tier limits',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.amber.shade800,
-                        fontWeight: FontWeight.bold,
-                      ),
+                border: Border.all(
+                  color: RemoteConfigService.freeAiEnabled
+                      ? Colors.amber.withOpacity(0.4)
+                      : Colors.red.withOpacity(0.4),
                 ),
-                // Collapsed subtitle: just the key numbers
-                subtitle: Text(
-                  '$devMaxRequestsPerDay req/day  •  $devMaxRequestsPerMinute req/min  •  $devMaxPhotoAnalysesPerDay photo/day',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.amber.shade700,
-                      ),
-                ),
-                initiallyExpanded: false,
-                tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• $devMaxRequestsPerMinute AI requests per minute\n'
-                    '• $devMaxRequestsPerDay AI requests per day\n'
-                    '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                    '• $defaultChatHistoryLimit-message chat history per request',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
-                        ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
-                        ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade800,
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade800,
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                ],
               ),
+              child: RemoteConfigService.freeAiEnabled
+                  ? ExpansionTile(
+                      leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                      title: Text(
+                        'Free-tier limits',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: Colors.amber.shade800,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      // Collapsed subtitle: just the key numbers (from Remote Config)
+                      subtitle: Text(
+                        '${RemoteConfigService.maxRequestsPerDay} req/day  •  ${RemoteConfigService.maxRequestsPerMinute} req/min  •  ${RemoteConfigService.maxPhotoAnalysesPerDay} photo/day',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.amber.shade700,
+                            ),
+                      ),
+                      initiallyExpanded: false,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute\n'
+                          '• ${RemoteConfigService.maxRequestsPerDay} AI requests per day\n'
+                          '• ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                          '• ${RemoteConfigService.freeTierChatHistoryLimit}-message chat history per request',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.amber.shade900,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.amber.shade900,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.amber.shade800,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.amber.shade800,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        ),
+                      ],
+                    )
+                  : ListTile(
+                      leading: const Icon(Icons.block, color: Colors.red, size: 20),
+                      title: Text(
+                        'Free AI tier currently unavailable',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      subtitle: Text(
+                        'The built-in free AI provider has been disabled by the developer. Please add your own API key below to continue using AI features.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.red.shade700,
+                            ),
+                      ),
+                    ),
             ),
           ),
         // ─── Text / Chat ─────────────────────────────────────────────────────
@@ -888,11 +944,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: () {
                           switch (_selectedTextProvider) {
                             case AIProvider.gemini:
-                              _geminiModelController.text = defaultGeminiModel;
+                              _geminiModelController.text = RemoteConfigService.defaultGeminiModel;
                             case AIProvider.openAI:
-                              _chatGPTModelController.text = defaultChatGPTModel;
+                              _chatGPTModelController.text = RemoteConfigService.defaultOpenAIModel;
                             case AIProvider.groq:
-                              _groqModelController.text = defaultGroqModel;
+                              _groqModelController.text = RemoteConfigService.defaultGroqModel;
                           }
                           if (setDialogState != null) setDialogState(() {});
                           context.showAccessibleMessage(l10n.modelsResetDefault);
@@ -1013,11 +1069,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: () {
                           switch (_selectedImageProvider) {
                             case AIProvider.gemini:
-                              _geminiImageModelController.text = defaultGeminiImageModel;
+                              _geminiImageModelController.text = RemoteConfigService.defaultGeminiImageModel;
                             case AIProvider.openAI:
-                              _chatGPTImageModelController.text = defaultChatGPTImageModel;
+                              _chatGPTImageModelController.text = RemoteConfigService.defaultOpenAIImageModel;
                             case AIProvider.groq:
-                              _groqImageModelController.text = defaultGroqImageModel;
+                              _groqImageModelController.text = RemoteConfigService.defaultGroqImageModel;
                           }
                           if (setDialogState != null) setDialogState(() {});
                           context.showAccessibleMessage(l10n.modelsResetDefault);
@@ -1600,7 +1656,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Text(
             !onFreeTier
                 ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
-                : 'Without your own API key, the app uses our free service tier with a fixed limit of $defaultChatHistoryLimit past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
+                : 'Without your own API key, the app uses our free service tier with a fixed limit of ${RemoteConfigService.freeTierChatHistoryLimit} past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

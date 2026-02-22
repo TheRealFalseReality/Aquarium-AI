@@ -16,7 +16,7 @@ import '../utils/openai_retry_helper.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
 import '../utils/dev_rate_limiter.dart';
-import '../utils/dev_limits.dart';
+import '../services/remote_config_service.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -170,13 +170,13 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         state = state.copyWith(
-          error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          error: '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         state = state.copyWith(
-          error: '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          error: '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
