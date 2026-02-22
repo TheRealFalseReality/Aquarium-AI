@@ -268,8 +268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (_selectedTextProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty &&
-        !_useDevGroqKeyForText &&
-        developerGroqApiKey.isEmpty) {
+        !_useDevGroqKeyForText) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
@@ -287,8 +286,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (_selectedImageProvider == AIProvider.groq &&
           _groqApiKeyController.text.trim().isEmpty &&
-          !_useDevGroqKeyForImage &&
-          developerGroqApiKey.isEmpty) {
+          !_useDevGroqKeyForImage) {
         context.showAccessibleMessage(l10n.enterGroqApiKey);
         return;
       }
@@ -708,9 +706,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // ─── Free-tier notice (collapsible; only shown when at least one free key is active) ──
-        if (_useDevGroqKeyForText || _useDevGroqKeyForImage) ...[
-          Theme(
+        // ─── Free-tier notice (collapsible; always shown when a dev key is available) ──
+        if (developerGroqApiKey.isNotEmpty) Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -776,7 +773,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-        ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
         Card(
           clipBehavior: Clip.antiAlias,
@@ -821,7 +817,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     developerGroqApiKey.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _buildDevKeyToggle(
-                    label: 'Use Free Key',
+                    label: 'Use Free Provider',
                     value: _useDevGroqKeyForText,
                     onChanged: (v) {
                       setState(() => _useDevGroqKeyForText = v);
@@ -857,7 +853,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [_buildChatHistoryLimitSection(setDialogState)],
                   ),
                 ),
-                // Reset + Save (hidden when using free key for this provider)
+                // Reset + Save (hidden when using free provider for this provider)
                 if (!(_selectedTextProvider == AIProvider.groq &&
                     _useDevGroqKeyForText)) ...[
                   const SizedBox(height: 12),
@@ -942,7 +938,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     developerGroqApiKey.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _buildDevKeyToggle(
-                    label: 'Use Free Key',
+                    label: 'Use Free Provider',
                     value: _useDevGroqKeyForImage,
                     onChanged: (v) {
                       setState(() => _useDevGroqKeyForImage = v);
@@ -982,7 +978,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
-                // Reset + Save (hidden when using free key for this provider)
+                // Reset + Save (hidden when using free provider for this provider)
                 if (!(_selectedImageProvider == AIProvider.groq &&
                     _useDevGroqKeyForImage)) ...[
                   const SizedBox(height: 12),
@@ -2099,13 +2095,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             controller: _groqApiKeyController,
             obscureText: !_isGroqApiKeyVisible,
             decoration: InputDecoration(
-              labelText: developerGroqApiKey.isNotEmpty
-                  ? 'Groq API Key (Optional)'
-                  : 'Groq API Key',
+              labelText: 'Groq API Key',
               border: const OutlineInputBorder(),
-              helperText: developerGroqApiKey.isNotEmpty
-                  ? 'Add your own key for dedicated rate limits and better performance.'
-                  : null,
+              helperText: null,
               helperMaxLines: 2,
               suffixIcon: IconButton(
                 icon: Icon(
@@ -2134,7 +2126,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             decoration: InputDecoration(
               labelText: 'Groq Text Model',
               border: const OutlineInputBorder(),
-              helperText: usingFreeKey ? 'Fixed when using the free key.' : null,
+              helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
             ),
           ),
           const SizedBox(height: 16),
@@ -2147,7 +2139,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               labelText: 'Groq Multimedia Model',
               border: const OutlineInputBorder(),
               helperText: usingFreeKey
-                  ? 'Fixed when using the free key.'
+                  ? 'Fixed when using the Free Provider.'
                   : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
               helperMaxLines: 2,
             ),
@@ -2221,7 +2213,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  /// Modern inline toggle tile for the "Use Free Key" dev key option.
+  /// Modern inline toggle tile for the "Use Free Provider" dev key option.
   Widget _buildDevKeyToggle({
     required String label,
     required bool value,
@@ -2258,7 +2250,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
         ),
         subtitle: Text(
-          value ? 'Using app\'s built-in key' : 'Provide your own key',
+          value ? 'Using Free Provider' : 'Use your own key',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: value
                     ? scheme.primary.withOpacity(0.8)
