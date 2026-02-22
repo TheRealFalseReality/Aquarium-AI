@@ -268,7 +268,7 @@ class FishInfoResultScreen extends StatelessWidget {
                       dense: true,
                       onTap: () async {
                         final url = Uri.parse(
-                            'https://www.google.com/search?q=${Uri.encodeComponent(mate + ' fish')}');
+                            'https://www.google.com/search?q=${Uri.encodeComponent('$mate fish')}');
                         if (await canLaunchUrl(url)) {
                           await launchUrl(url, mode: LaunchMode.externalApplication);
                         }

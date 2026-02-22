@@ -29,9 +29,6 @@ import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
-import './changelog_screen.dart';
-import './water_parameter_analysis_screen.dart';
-import './fish_info_screen.dart';
 
 class _ToolChipInfo {
   final String label;

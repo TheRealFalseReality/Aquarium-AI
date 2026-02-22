@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../constants.dart';
 import '../utils/dev_limits.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -656,7 +655,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     // ─── Segmented button style helpers ───────────────────────────────────────
-    SegmentedButton<AIProvider> _providerButton({
+    SegmentedButton<AIProvider> providerButton({
       required Set<AIProvider> selected,
       required ValueChanged<Set<AIProvider>> onChanged,
       Color? selectedBg,
@@ -733,7 +732,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ]),
                 const SizedBox(height: 12),
                 // Provider selector
-                _providerButton(
+                providerButton(
                   selected: {_selectedTextProvider},
                   onChanged: (s) {
                     final p = s.first;
@@ -831,7 +830,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ]),
                 const SizedBox(height: 12),
                 // Provider selector
-                _providerButton(
+                providerButton(
                   selected: {_selectedImageProvider},
                   selectedBg:
                       Theme.of(context).colorScheme.secondaryContainer,
@@ -1515,28 +1514,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  /// Builds provider settings sections for all providers in use (text and/or image).
-  /// Shows each provider's section at most once even if selected for both.
-  List<Widget> _buildProviderSettingsSections([StateSetter? setDialogState]) {
-    final selectedProviders = <AIProvider>{_selectedTextProvider, _selectedImageProvider};
-    final widgets = <Widget>[];
-    for (final provider in AIProvider.values) {
-      if (selectedProviders.contains(provider)) {
-        switch (provider) {
-          case AIProvider.gemini:
-            widgets.add(_buildGeminiSettings(setDialogState));
-            break;
-          case AIProvider.openAI:
-            widgets.add(_buildOpenAISettings(setDialogState));
-            break;
-          case AIProvider.groq:
-            widgets.add(_buildGroqSettings(setDialogState));
-            break;
-        }
-      }
-    }
-    return widgets;
-  }
 
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
     // Locked on free tier (dev key in use for text)
