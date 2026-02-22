@@ -165,12 +165,18 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes);
 
     // Check dev rate limit before consuming the API
-    if (models.usingDeveloperGroqKey) {
-      final allowed = await DevRateLimiter.checkAndRecordRequest();
-      if (!allowed) {
+    if (models.usingDeveloperGroqKeyForText) {
+      final result = await DevRateLimiter.checkAndRecordRequest();
+      if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot();
         state = state.copyWith(
           error: '⏱️ Free-tier limit reached ($devMaxRequestsPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          isLoading: false,
+        );
+        return;
+      } else if (result == DevRateLimitResult.dailyLimitReached) {
+        state = state.copyWith(
+          error: '📅 Daily free-tier limit reached ($devMaxRequestsPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
@@ -257,7 +263,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
         final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
         // Rollback the rate-limit slot for real AI errors.
-        if (!isApiKeyErr && models.usingDeveloperGroqKey) {
+        if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
           await DevRateLimiter.undoLastRequest();
         }
         final userFriendlyError = _getFriendlyErrorMessage(e.toString());

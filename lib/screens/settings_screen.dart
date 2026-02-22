@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../constants.dart';
 import '../utils/dev_limits.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -37,6 +36,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isGeminiApiKeyVisible = false;
   bool _isOpenAIApiKeyVisible = false;
   bool _isGroqApiKeyVisible = false;
+  bool _useDevGroqKeyForText = false;
+  bool _useDevGroqKeyForImage = false;
   int _chatHistoryLimit = defaultChatHistoryLimit;
 
   @override
@@ -58,6 +59,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _selectedTextProvider = models.activeTextProvider;
     _selectedImageProvider = models.activeImageProvider;
     _chatHistoryLimit = models.chatHistoryLimit;
+    _useDevGroqKeyForText = models.useDevGroqKeyForText;
+    _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
   }
 
   @override
@@ -75,6 +78,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showAIProviderDialog() {
+    // Reset local state to match the last-persisted provider state so that
+    // any unsaved changes from a previous (abandoned) dialog session are
+    // discarded before the dialog opens.
+    final models = ref.read(modelProvider);
+    setState(() {
+      _selectedTextProvider = models.activeTextProvider;
+      _selectedImageProvider = models.activeImageProvider;
+      _useDevGroqKeyForText = models.useDevGroqKeyForText;
+      _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
+      _groqModelController.text = models.groqModel;
+      _groqImageModelController.text = models.groqImageModel;
+      _groqApiKeyController.text = models.groqApiKey;
+      _geminiModelController.text = models.geminiModel;
+      _geminiImageModelController.text = models.geminiImageModel;
+      _geminiApiKeyController.text = models.geminiApiKey;
+      _chatGPTModelController.text = models.chatGPTModel;
+      _chatGPTImageModelController.text = models.chatGPTImageModel;
+      _openAIApiKeyController.text = models.openAIApiKey;
+      _chatHistoryLimit = models.chatHistoryLimit;
+    });
+
     final l10n = AppLocalizations.of(context)!;
     
     showDialog(
@@ -265,11 +289,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (_selectedTextProvider == AIProvider.groq &&
         _groqApiKeyController.text.trim().isEmpty &&
-        developerGroqApiKey.isEmpty) {
+        !_useDevGroqKeyForText) {
       context.showAccessibleMessage(l10n.enterGroqApiKey);
       return; // Stop the function
     }
-    // Also validate API key for image provider if different from text provider
+    // Validate API key for image provider when different from text provider.
+    // Gemini/OpenAI share a single key so only re-check when the provider differs.
     if (_selectedImageProvider != _selectedTextProvider) {
       if (_selectedImageProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
@@ -281,12 +306,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context.showAccessibleMessage(l10n.enterOpenAIApiKey);
         return;
       }
-      if (_selectedImageProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty &&
-          developerGroqApiKey.isEmpty) {
-        context.showAccessibleMessage(l10n.enterGroqApiKey);
-        return;
-      }
+    }
+    // Groq has independent per-use-case toggles, so always validate the image
+    // toggle regardless of whether the text provider is also Groq.
+    if (_selectedImageProvider == AIProvider.groq &&
+        _groqApiKeyController.text.trim().isEmpty &&
+        !_useDevGroqKeyForImage) {
+      context.showAccessibleMessage(l10n.enterGroqApiKey);
+      return;
     }
 
     // Log settings save
@@ -313,6 +340,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newActiveTextProvider: _selectedTextProvider,
           newActiveImageProvider: _selectedImageProvider,
           newChatHistoryLimit: _chatHistoryLimit,
+          newUseDevGroqKeyForText: _useDevGroqKeyForText,
+          newUseDevGroqKeyForImage: _useDevGroqKeyForImage,
         );
 
     // Update Crashlytics custom keys so crash reports reflect current AI config.
@@ -388,6 +417,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (_groqApiKeyController.text != next.groqApiKey) {
         _groqApiKeyController.text = next.groqApiKey;
       }
+      if (_useDevGroqKeyForText != next.useDevGroqKeyForText ||
+          _useDevGroqKeyForImage != next.useDevGroqKeyForImage) {
+        setState(() {
+          _useDevGroqKeyForText = next.useDevGroqKeyForText;
+          _useDevGroqKeyForImage = next.useDevGroqKeyForImage;
+        });
+      }
       if (_selectedTextProvider != next.activeTextProvider) {
         setState(() {
           _selectedTextProvider = next.activeTextProvider;
@@ -414,6 +450,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildMainMenu() {
     final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.watch(appSettingsProvider);
+    final models = ref.watch(modelProvider);
     
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -479,6 +516,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAIProviderDialog(),
           enabled: appSettings.enableAI,
         ),
+        // Indicator: show when the app is using the built-in dev API key
+        if (appSettings.enableAI && models.usingDeveloperGroqKeyForAny) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.amber.withOpacity(0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.amber, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Using App\'s Built-in Dev API Key (Groq free tier). '
+                    'Add your own Groq key in AI Provider settings for dedicated limits.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
@@ -609,372 +675,400 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAIProviderContent([StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
-    
+
+    // ─── Segmented button style helpers ───────────────────────────────────────
+    SegmentedButton<AIProvider> providerButton({
+      required Set<AIProvider> selected,
+      required ValueChanged<Set<AIProvider>> onChanged,
+      Color? selectedBg,
+      Color? selectedFg,
+    }) =>
+        SegmentedButton<AIProvider>(
+          showSelectedIcon: false,
+          style: SegmentedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            selectedBackgroundColor:
+                selectedBg ?? Theme.of(context).colorScheme.tertiaryContainer,
+            selectedForegroundColor:
+                selectedFg ?? Theme.of(context).colorScheme.onTertiaryContainer,
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+          segments: [
+            ButtonSegment(
+              value: AIProvider.gemini,
+              label: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.auto_awesome, size: 16),
+                const SizedBox(width: 4),
+                Text(l10n.gemini),
+              ]),
+            ),
+            ButtonSegment(
+              value: AIProvider.groq,
+              label: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.flash_on, size: 16),
+                const SizedBox(width: 4),
+                Text(l10n.groq),
+              ]),
+            ),
+            ButtonSegment(
+              value: AIProvider.openAI,
+              label: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.psychology, size: 16),
+                const SizedBox(width: 4),
+                Text(l10n.openAI),
+              ]),
+            ),
+          ],
+          selected: selected,
+          onSelectionChanged: onChanged,
+        );
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // AI Provider Settings Section
-        Card(
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        // ─── Free-tier notice (collapsible; always shown when a dev key is available) ──
+        if (developerGroqApiKey.isNotEmpty) Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.amber.withOpacity(0.4)),
+              ),
+              child: ExpansionTile(
+                leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                title: Text(
+                  'Free-tier limits',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.amber.shade800,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                // Collapsed subtitle: just the key numbers
+                subtitle: Text(
+                  '$devMaxRequestsPerDay req/day  •  $devMaxRequestsPerMinute req/min  •  $devMaxPhotoAnalysesPerDay photo/day',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.amber.shade700,
+                      ),
+                ),
+                initiallyExpanded: false,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.smart_toy,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 24,
+                  Text(
+                    '• $devMaxRequestsPerMinute AI requests per minute\n'
+                    '• $devMaxRequestsPerDay AI requests per day\n'
+                    '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                    '• $defaultChatHistoryLimit-message chat history per request',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.activeAIProvider,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                  const SizedBox(height: 16),
-                  // Text provider selector
-                  Row(
-                    children: [
-                      const Icon(Icons.chat_bubble_outline, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.textProvider,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(height: 6),
+                  Text(
+                    'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
                         ),
-                      ),
-                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
+                        ),
                   ),
                   const SizedBox(height: 8),
-                  SegmentedButton<AIProvider>(
-                    showSelectedIcon: false,
-                    style: SegmentedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      foregroundColor: Theme.of(context).colorScheme.onSurface,
-                      selectedBackgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-                      selectedForegroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-                        width: 1,
-                      ),
-                    ),
-                    segments: [
-                      ButtonSegment(
-                        value: AIProvider.gemini, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.auto_awesome, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.gemini),
-                          ],
+                  Text(
+                    '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
                         ),
-                      ),
-                      ButtonSegment(
-                        value: AIProvider.groq, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.flash_on, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.groq),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment(
-                        value: AIProvider.openAI, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.psychology, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.openAI),
-                          ],
-                        ),
-                      ),
-                    ],
-                    selected: {_selectedTextProvider},
-                    onSelectionChanged: (newSelection) {
-                      final oldProvider = _selectedTextProvider;
-                      final newProvider = newSelection.first;
-                      
-                      AnalyticsService.logSettingsChange(
-                        settingName: 'ai_text_provider',
-                        newValue: newProvider.toString(),
-                        oldValue: oldProvider.toString(),
-                      );
-                      
-                      setState(() {
-                        _selectedTextProvider = newProvider;
-                      });
-                      if (setDialogState != null) {
-                        setDialogState(() {
-                          _selectedTextProvider = newProvider;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // Image provider selector
-                  Row(
-                    children: [
-                      const Icon(Icons.image_outlined, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.imageProvider,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SegmentedButton<AIProvider>(
-                    showSelectedIcon: false,
-                    style: SegmentedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      foregroundColor: Theme.of(context).colorScheme.onSurface,
-                      selectedBackgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                      selectedForegroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-                        width: 1,
-                      ),
-                    ),
-                    segments: [
-                      ButtonSegment(
-                        value: AIProvider.gemini, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.auto_awesome, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.gemini),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment(
-                        value: AIProvider.groq, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.flash_on, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.groq),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment(
-                        value: AIProvider.openAI, 
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.psychology, size: 16),
-                            const SizedBox(width: 4),
-                            Text(l10n.openAI),
-                          ],
-                        ),
-                      ),
-                    ],
-                    selected: {_selectedImageProvider},
-                    onSelectionChanged: (newSelection) {
-                      final oldProvider = _selectedImageProvider;
-                      final newProvider = newSelection.first;
-                      
-                      AnalyticsService.logSettingsChange(
-                        settingName: 'ai_image_provider',
-                        newValue: newProvider.toString(),
-                        oldValue: oldProvider.toString(),
-                      );
-                      
-                      setState(() {
-                        _selectedImageProvider = newProvider;
-                      });
-                      if (setDialogState != null) {
-                        setDialogState(() {
-                          _selectedImageProvider = newProvider;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.green.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          color: Colors.green,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.geminiRecommended,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Free-tier rate limit notice (shown only when the developer key is active for at least one provider)
-                  Builder(builder: (context) {
-                    final models = ref.watch(modelProvider);
-                    final devKeyInUse = models.usingDeveloperGroqKey &&
-                        (models.activeTextProvider == AIProvider.groq ||
-                            models.activeImageProvider == AIProvider.groq);
-                    if (!devKeyInUse) return const SizedBox.shrink();
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.amber.withOpacity(0.4),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.speed, color: Colors.amber, size: 16),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Free-tier limits',
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: Colors.amber.shade800,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '• $devMaxRequestsPerMinute AI requests per minute\n'
-                            '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                            '• $defaultChatHistoryLimit-message chat history per request',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber.shade800,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  // Display settings for all providers that are in use
-                  ..._buildProviderSettingsSections(setDialogState),
-                  const SizedBox(height: 24),
-                  // Chat History Limit
-                  _buildChatHistoryLimitSection(setDialogState),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(modelProvider.notifier)
-                              .resetModelsToDefaults();
-                          context.showAccessibleMessage(l10n.modelsResetDefault);
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: Text(l10n.resetModels),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () => _saveSettings(context), // Call the save function.
-                        icon: const Icon(Icons.save),
-                        label: Text(l10n.save),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
             ),
           ),
-        ],
+        // ─── Text / Chat ─────────────────────────────────────────────────────
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Section header
+                Row(children: [
+                  Icon(Icons.chat_bubble_outline,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.textProvider,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ]),
+                const SizedBox(height: 12),
+                // Provider selector
+                providerButton(
+                  selected: {_selectedTextProvider},
+                  onChanged: (s) {
+                    final p = s.first;
+                    AnalyticsService.logSettingsChange(
+                      settingName: 'ai_text_provider',
+                      newValue: p.toString(),
+                      oldValue: _selectedTextProvider.toString(),
+                    );
+                    setState(() => _selectedTextProvider = p);
+                    if (setDialogState != null) {
+                      setDialogState(() => _selectedTextProvider = p);
+                    }
+                  },
+                ),
+                // Free key toggle (Groq only)
+                if (_selectedTextProvider == AIProvider.groq &&
+                    developerGroqApiKey.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildDevKeyToggle(
+                    label: 'Use Free Provider',
+                    value: _useDevGroqKeyForText,
+                    onChanged: (v) {
+                      setState(() => _useDevGroqKeyForText = v);
+                      if (setDialogState != null) {
+                        setDialogState(() => _useDevGroqKeyForText = v);
+                      }
+                    },
+                  ),
+                ],
+                // Provider-specific settings for text
+                switch (_selectedTextProvider) {
+                  AIProvider.gemini => _buildGeminiSettings(setDialogState, true),
+                  AIProvider.openAI => _buildOpenAISettings(setDialogState, true),
+                  AIProvider.groq   => _buildGroqSettings(setDialogState, true),
+                },
+                // Chat History Limit — collapsible, defaults collapsed
+                const SizedBox(height: 8),
+                Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    leading: Icon(Icons.history,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(
+                      'Chat History Limit',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    initiallyExpanded: false,
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: const EdgeInsets.only(bottom: 8),
+                    children: [_buildChatHistoryLimitSection(setDialogState)],
+                  ),
+                ),
+                // Reset (hidden when using free provider) + Save (always shown)
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!(_selectedTextProvider == AIProvider.groq &&
+                        _useDevGroqKeyForText)) ...[
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          switch (_selectedTextProvider) {
+                            case AIProvider.gemini:
+                              _geminiModelController.text = defaultGeminiModel;
+                            case AIProvider.openAI:
+                              _chatGPTModelController.text = defaultChatGPTModel;
+                            case AIProvider.groq:
+                              _groqModelController.text = defaultGroqModel;
+                          }
+                          if (setDialogState != null) setDialogState(() {});
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: Text(l10n.resetModels),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // ─── Image / Photo ────────────────────────────────────────────────────
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Section header
+                Row(children: [
+                  Icon(Icons.image_outlined,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.secondary),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.imageProvider,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                  ),
+                ]),
+                const SizedBox(height: 12),
+                // Provider selector
+                providerButton(
+                  selected: {_selectedImageProvider},
+                  selectedBg:
+                      Theme.of(context).colorScheme.secondaryContainer,
+                  selectedFg:
+                      Theme.of(context).colorScheme.onSecondaryContainer,
+                  onChanged: (s) {
+                    final p = s.first;
+                    AnalyticsService.logSettingsChange(
+                      settingName: 'ai_image_provider',
+                      newValue: p.toString(),
+                      oldValue: _selectedImageProvider.toString(),
+                    );
+                    setState(() => _selectedImageProvider = p);
+                    if (setDialogState != null) {
+                      setDialogState(() => _selectedImageProvider = p);
+                    }
+                  },
+                ),
+                // Free key toggle (Groq only)
+                if (_selectedImageProvider == AIProvider.groq &&
+                    developerGroqApiKey.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildDevKeyToggle(
+                    label: 'Use Free Provider',
+                    value: _useDevGroqKeyForImage,
+                    onChanged: (v) {
+                      setState(() => _useDevGroqKeyForImage = v);
+                      if (setDialogState != null) {
+                        setDialogState(() => _useDevGroqKeyForImage = v);
+                      }
+                    },
+                  ),
+                ],
+                // Provider-specific settings for image
+                switch (_selectedImageProvider) {
+                  AIProvider.gemini => _buildGeminiSettings(setDialogState, false),
+                  AIProvider.openAI => _buildOpenAISettings(setDialogState, false),
+                  AIProvider.groq   => _buildGroqSettings(setDialogState, false),
+                },
+                const SizedBox(height: 8),
+                // Gemini recommended hint
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.star, color: Colors.green, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.geminiRecommended,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Reset (hidden when using free provider) + Save (always shown)
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!(_selectedImageProvider == AIProvider.groq &&
+                        _useDevGroqKeyForImage)) ...[
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          switch (_selectedImageProvider) {
+                            case AIProvider.gemini:
+                              _geminiImageModelController.text = defaultGeminiImageModel;
+                            case AIProvider.openAI:
+                              _chatGPTImageModelController.text = defaultChatGPTImageModel;
+                            case AIProvider.groq:
+                              _groqImageModelController.text = defaultGroqImageModel;
+                          }
+                          if (setDialogState != null) setDialogState(() {});
+                          context.showAccessibleMessage(l10n.modelsResetDefault);
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: Text(l10n.resetModels),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // ─── Note: calculators work without an AI key ─────────────────────────
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -1459,36 +1553,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  /// Builds provider settings sections for all providers in use (text and/or image).
-  /// Shows each provider's section at most once even if selected for both.
-  List<Widget> _buildProviderSettingsSections([StateSetter? setDialogState]) {
-    final selectedProviders = <AIProvider>{_selectedTextProvider, _selectedImageProvider};
-    final widgets = <Widget>[];
-    for (final provider in AIProvider.values) {
-      if (selectedProviders.contains(provider)) {
-        switch (provider) {
-          case AIProvider.gemini:
-            widgets.add(_buildGeminiSettings(setDialogState));
-            break;
-          case AIProvider.openAI:
-            widgets.add(_buildOpenAISettings(setDialogState));
-            break;
-          case AIProvider.groq:
-            widgets.add(_buildGroqSettings(setDialogState));
-            break;
-        }
-      }
-    }
-    return widgets;
-  }
 
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
-    // Determine if the user has provided their own key for the active text provider
-    final hasOwnKey = switch (_selectedTextProvider) {
-      AIProvider.gemini => _geminiApiKeyController.text.trim().isNotEmpty,
-      AIProvider.openAI => _openAIApiKeyController.text.trim().isNotEmpty,
-      AIProvider.groq => _groqApiKeyController.text.trim().isNotEmpty,
-    };
+    // Locked on free tier (dev key in use for text)
+    final onFreeTier = _selectedTextProvider == AIProvider.groq && _useDevGroqKeyForText;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1511,7 +1579,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              if (!hasOwnKey)
+              if (onFreeTier)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -1530,7 +1598,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            hasOwnKey
+            !onFreeTier
                 ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
                 : 'Without your own API key, the app uses our free service tier with a fixed limit of $defaultChatHistoryLimit past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -1538,7 +1606,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          if (hasOwnKey) ...[
+          if (!onFreeTier) ...[
             Row(
               children: [
                 Expanded(
@@ -1621,13 +1689,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGeminiSettings([StateSetter? setDialogState]) {
+  /// [forTextUseCase]: null = show all fields (legacy combined view),
+  /// true = show text model only, false = show image model only.
+  Widget _buildGeminiSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(),
-        const SizedBox(height: 8),
+        if (forTextUseCase == null) const Divider(),
+        if (forTextUseCase == null) const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -1711,22 +1781,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        TextField(
-          controller: _geminiModelController,
-          decoration: const InputDecoration(
-            labelText: 'Gemini Text Model',
-            border: OutlineInputBorder(),
+        if (forTextUseCase != false) ...[
+          TextField(
+            controller: _geminiModelController,
+            decoration: const InputDecoration(
+              labelText: 'Gemini Text Model',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _geminiImageModelController,
-          decoration: const InputDecoration(
-            labelText: 'Gemini Multimedia Model',
-            border: OutlineInputBorder(),
+          const SizedBox(height: 16),
+        ],
+        if (forTextUseCase != true) ...[
+          TextField(
+            controller: _geminiImageModelController,
+            decoration: const InputDecoration(
+              labelText: 'Gemini Multimedia Model',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         _buildApiKeyGuide(
           title: 'How to get your Google AI API key:',
           children: [
@@ -1793,12 +1867,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildOpenAISettings([StateSetter? setDialogState]) {
+  Widget _buildOpenAISettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(),
+        if (forTextUseCase == null) const Divider(),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
@@ -1884,24 +1958,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        TextField(
-          controller: _chatGPTModelController,
-          enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'ChatGPT Text Model',
-            border: OutlineInputBorder(),
+        if (forTextUseCase != false) ...[
+          TextField(
+            controller: _chatGPTModelController,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'ChatGPT Text Model',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _chatGPTImageModelController,
-          enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'ChatGPT Multimedia Model',
-            border: OutlineInputBorder(),
+          const SizedBox(height: 16),
+        ],
+        if (forTextUseCase != true) ...[
+          TextField(
+            controller: _chatGPTImageModelController,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'ChatGPT Multimedia Model',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         _buildApiKeyGuide(
           title: 'How to get your OpenAI API key:',
           children: [
@@ -1966,12 +2044,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGroqSettings([StateSetter? setDialogState]) {
+  Widget _buildGroqSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
+    // When used in a sub-section, check the per-use-case free key toggle
+    final usingFreeKey = forTextUseCase == true
+        ? _useDevGroqKeyForText
+        : forTextUseCase == false
+            ? _useDevGroqKeyForImage
+            : false; // legacy combined view always shows API key field
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(),
+        if (forTextUseCase == null) const Divider(),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
@@ -2029,117 +2113,177 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _groqApiKeyController,
-          obscureText: !_isGroqApiKeyVisible,
-          decoration: InputDecoration(
-            labelText: developerGroqApiKey.isNotEmpty
-                ? 'Groq API Key (Optional)'
-                : 'Groq API Key',
-            border: const OutlineInputBorder(),
-            helperText: developerGroqApiKey.isNotEmpty
-                ? 'Add your own key for dedicated rate limits and better performance.'
-                : null,
-            helperMaxLines: 2,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () {
-                final newVisibility = !_isGroqApiKeyVisible;
-                setState(() {
-                  _isGroqApiKeyVisible = newVisibility;
-                });
-                if (setDialogState != null) {
-                  setDialogState(() {
+        // API key field — shown when not using the free dev key for this use-case
+        if (!usingFreeKey) ...[
+          TextField(
+            controller: _groqApiKeyController,
+            obscureText: !_isGroqApiKeyVisible,
+            decoration: InputDecoration(
+              labelText: 'Groq API Key',
+              border: const OutlineInputBorder(),
+              helperText: null,
+              helperMaxLines: 2,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  final newVisibility = !_isGroqApiKeyVisible;
+                  setState(() {
                     _isGroqApiKeyVisible = newVisibility;
                   });
-                }
-              },
+                  if (setDialogState != null) {
+                    setDialogState(() {
+                      _isGroqApiKeyVisible = newVisibility;
+                    });
+                  }
+                },
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        TextField(
-          controller: _groqModelController,
-          decoration: const InputDecoration(
-            labelText: 'Groq Text Model',
-            border: OutlineInputBorder(),
+          const SizedBox(height: 24),
+        ],
+        if (forTextUseCase != false) ...[
+          TextField(
+            controller: _groqModelController,
+            enabled: !usingFreeKey,
+            decoration: InputDecoration(
+              labelText: 'Groq Text Model',
+              border: const OutlineInputBorder(),
+              helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _groqImageModelController,
-          decoration: const InputDecoration(
-            labelText: 'Groq Multimedia Model',
-            border: OutlineInputBorder(),
-            helperText: 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
-            helperMaxLines: 2,
+          const SizedBox(height: 16),
+        ],
+        if (forTextUseCase != true) ...[
+          TextField(
+            controller: _groqImageModelController,
+            enabled: !usingFreeKey,
+            decoration: InputDecoration(
+              labelText: 'Groq Multimedia Model',
+              border: const OutlineInputBorder(),
+              helperText: usingFreeKey
+                  ? 'Fixed when using the Free Provider.'
+                  : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+              helperMaxLines: 2,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildApiKeyGuide(
-          title: 'How to get your Groq API key:',
-          children: [
-            Text(l10n.groqCloudStep1),
-            InkWell(
-              onTap: () =>
-                  launchUrl(Uri.parse('https://console.groq.com/keys')),
-              child: Text(
-                'https://console.groq.com/keys',
-                style: TextStyle(
+          const SizedBox(height: 16),
+        ],
+        if (!usingFreeKey) ...[
+          _buildApiKeyGuide(
+            title: 'How to get your Groq API key:',
+            children: [
+              Text(l10n.groqCloudStep1),
+              InkWell(
+                onTap: () =>
+                    launchUrl(Uri.parse('https://console.groq.com/keys')),
+                child: Text(
+                  'https://console.groq.com/keys',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.bold,
+                    ),
+                ),
+              ),
+              Text(l10n.groqCloudStep2),
+              Text(l10n.groqCloudStep3),
+              Text(l10n.groqCloudStep4),
+              InkWell(
+                onTap: () =>
+                    launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+                child: Text(
+                  'See Guide',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildApiKeyGuide(
+            title: 'Groq Models & Rate Limits:',
+            children: [
+              const Text('View available models and free-tier rate limits:'),
+              InkWell(
+                onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
+                child: Text(
+                  'console.groq.com/docs/models',
+                  style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
               ),
-            ),
-            Text(l10n.groqCloudStep2),
-            Text(l10n.groqCloudStep3),
-            Text(l10n.groqCloudStep4),
-            InkWell(
-              onTap: () =>
-                  launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
-              child: Text(
-                'See Guide',
-                style: TextStyle(
+              InkWell(
+                onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+                child: Text(
+                  'Rate Limits',
+                  style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        _buildApiKeyGuide(
-          title: 'Groq Models & Rate Limits:',
-          children: [
-            const Text('View available models and free-tier rate limits:'),
-            InkWell(
-              onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
-              child: Text(
-                'console.groq.com/docs/models',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
-              child: Text(
-                'Rate Limits',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ], // end if (!usingFreeKey)
       ],
+    );
+  }
+
+  /// Modern inline toggle tile for the "Use Free Provider" dev key option.
+  Widget _buildDevKeyToggle({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: value
+            ? scheme.primaryContainer.withOpacity(0.35)
+            : scheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: value
+              ? scheme.primary.withOpacity(0.5)
+              : scheme.outline.withOpacity(0.25),
+          width: 1,
+        ),
+      ),
+      child: SwitchListTile.adaptive(
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+        secondary: Icon(
+          value ? Icons.lock_open_outlined : Icons.lock_outline,
+          size: 18,
+          color: value ? scheme.primary : scheme.onSurfaceVariant,
+        ),
+        title: Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: value ? scheme.primary : scheme.onSurface,
+              ),
+        ),
+        subtitle: Text(
+          value ? 'Using Free Provider' : 'Use your own key',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: value
+                    ? scheme.primary.withOpacity(0.8)
+                    : scheme.onSurfaceVariant,
+              ),
+        ),
+        value: value,
+        onChanged: onChanged,
+      ),
     );
   }
 

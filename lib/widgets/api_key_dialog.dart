@@ -187,9 +187,36 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $devMaxRequestsPerMinute AI requests per minute and $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
+                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $devMaxRequestsPerMinute AI requests per minute, $devMaxRequestsPerDay AI requests per day, and $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.amber.withOpacity(0.35),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.warning_amber_outlined, size: 16, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.amber.shade900,
                       ),
                     ),
                   ),
@@ -232,8 +259,8 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               'Please go to the settings screen to add your API key and unlock these AI-powered benefits.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            const SizedBox(height: 24),
-            // AI Toggle Section
+            const SizedBox(height: 16),
+            // AI enable/disable toggle
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),

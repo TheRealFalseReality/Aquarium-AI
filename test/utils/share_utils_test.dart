@@ -12,7 +12,7 @@ String _buildWaterAnalysisText(WaterAnalysisResult result) {
   final buffer = StringBuffer();
   buffer.writeln('🐠 Aquarium AI – Water Parameter Analysis');
   buffer.writeln('Status: ${result.summary.status}');
-  buffer.writeln('${result.summary.title}');
+  buffer.writeln(result.summary.title);
   buffer.writeln();
   buffer.writeln(result.summary.message);
   buffer.writeln();
