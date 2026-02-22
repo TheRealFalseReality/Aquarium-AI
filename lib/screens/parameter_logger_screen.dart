@@ -931,7 +931,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -1212,7 +1212,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: () => _selectDate(context),
+                onTap: () => _selectDate(),
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Date & Time',

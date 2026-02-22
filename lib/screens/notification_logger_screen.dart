@@ -876,7 +876,7 @@ class _AddLogEntrySheet extends ConsumerStatefulWidget {
   });
 
   @override
-  _AddLogEntrySheetState createState() => _AddLogEntrySheetState();
+  ConsumerState<_AddLogEntrySheet> createState() => _AddLogEntrySheetState();
 }
 
 class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
@@ -910,7 +910,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -1254,7 +1254,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
               
               // Date selection
               InkWell(
-                onTap: () => _selectDate(context),
+                onTap: () => _selectDate(),
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: l10n.dateAndTime,
@@ -1317,7 +1317,7 @@ class _AddNoteSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  _AddNoteSheetState createState() => _AddNoteSheetState();
+  ConsumerState<_AddNoteSheet> createState() => _AddNoteSheetState();
 }
 
 class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
@@ -1342,7 +1342,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -1499,7 +1499,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
               
               // Date selection
               InkWell(
-                onTap: () => _selectDate(context),
+                onTap: () => _selectDate(),
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: l10n.dateAndTime,

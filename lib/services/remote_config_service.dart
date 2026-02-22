@@ -143,7 +143,7 @@ class RemoteConfigService {
       if (kDebugMode) {
         debugPrint(
           '[RemoteConfigService] Loaded — '
-          'freeAiEnabled=${freeAiEnabled}, '
+          'freeAiEnabled=$freeAiEnabled, '
           'maxReqPerMin=$maxRequestsPerMinute, '
           'maxReqPerDay=$maxRequestsPerDay, '
           'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '

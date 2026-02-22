@@ -531,7 +531,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -801,7 +801,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
               
               // Date selection
               InkWell(
-                onTap: () => _selectDate(context),
+                onTap: () => _selectDate(),
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Date & Time',
