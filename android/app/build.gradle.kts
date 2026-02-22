@@ -12,7 +12,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.firebase.crashlytics") version "3.0.6" apply false
+    id("com.google.firebase.crashlytics") version "3.0.6"
 }
 
 android {
