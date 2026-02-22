@@ -853,13 +853,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [_buildChatHistoryLimitSection(setDialogState)],
                   ),
                 ),
-                // Reset + Save (hidden when using free provider for this provider)
-                if (!(_selectedTextProvider == AIProvider.groq &&
-                    _useDevGroqKeyForText)) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                // Reset (hidden when using free provider) + Save (always shown)
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!(_selectedTextProvider == AIProvider.groq &&
+                        _useDevGroqKeyForText)) ...[
                       OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedTextProvider) {
@@ -877,14 +877,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         label: Text(l10n.resetModels),
                       ),
                       const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _saveSettings(context),
-                        icon: const Icon(Icons.save, size: 18),
-                        label: Text(l10n.save),
-                      ),
                     ],
-                  ),
-                ],
+                    ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -978,13 +978,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
-                // Reset + Save (hidden when using free provider for this provider)
-                if (!(_selectedImageProvider == AIProvider.groq &&
-                    _useDevGroqKeyForImage)) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                // Reset (hidden when using free provider) + Save (always shown)
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!(_selectedImageProvider == AIProvider.groq &&
+                        _useDevGroqKeyForImage)) ...[
                       OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedImageProvider) {
@@ -1002,14 +1002,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         label: Text(l10n.resetModels),
                       ),
                       const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _saveSettings(context),
-                        icon: const Icon(Icons.save, size: 18),
-                        label: Text(l10n.save),
-                      ),
                     ],
-                  ),
-                ],
+                    ElevatedButton.icon(
+                      onPressed: () => _saveSettings(context),
+                      icon: const Icon(Icons.save, size: 18),
+                      label: Text(l10n.save),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
