@@ -1,6 +1,7 @@
 import 'package:fish_ai/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/remote_config_service.dart';
 
 export 'package:fish_ai/constants.dart' show developerGroqApiKey;
 
@@ -70,23 +71,31 @@ class ModelState {
   AIProvider get activeProvider => activeTextProvider;
 
   /// The Groq API key to use for **text/chat** operations.
-  /// Returns the dev key when [useDevGroqKeyForText] is set; otherwise returns
-  /// the user's key (with dev key as fallback when user key is empty).
+  /// Returns the dev key when [useDevGroqKeyForText] is set AND the free AI
+  /// tier is enabled via Remote Config; otherwise returns the user's key
+  /// (with dev key as fallback when user key is empty and free AI is enabled).
   String get effectiveGroqApiKeyForText {
-    if (useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
+    final freeAiEnabled = RemoteConfigService.freeAiEnabled;
+    if (freeAiEnabled && useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+    return groqApiKey.isNotEmpty
+        ? groqApiKey
+        : (freeAiEnabled ? developerGroqApiKey : '');
   }
 
   /// The Groq API key to use for **image/photo** operations.
-  /// Returns the dev key when [useDevGroqKeyForImage] is set; otherwise returns
-  /// the user's key (with dev key as fallback when user key is empty).
+  /// Returns the dev key when [useDevGroqKeyForImage] is set AND the free AI
+  /// tier is enabled via Remote Config; otherwise returns the user's key
+  /// (with dev key as fallback when user key is empty and free AI is enabled).
   String get effectiveGroqApiKeyForImage {
-    if (useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
+    final freeAiEnabled = RemoteConfigService.freeAiEnabled;
+    if (freeAiEnabled && useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty ? groqApiKey : developerGroqApiKey;
+    return groqApiKey.isNotEmpty
+        ? groqApiKey
+        : (freeAiEnabled ? developerGroqApiKey : '');
   }
 
   /// Backwards-compat alias — returns [effectiveGroqApiKeyForText].
@@ -97,11 +106,13 @@ class ModelState {
 
   /// Whether text/chat operations are currently using the developer Groq key.
   bool get usingDeveloperGroqKeyForText =>
+      RemoteConfigService.freeAiEnabled &&
       developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForText || groqApiKey.isEmpty);
 
   /// Whether image/photo operations are currently using the developer Groq key.
   bool get usingDeveloperGroqKeyForImage =>
+      RemoteConfigService.freeAiEnabled &&
       developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForImage || groqApiKey.isEmpty);
 

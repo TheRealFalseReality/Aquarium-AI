@@ -29,6 +29,7 @@ import 'firebase_options.dart';
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
 import './services/notification_service.dart';
+import './services/remote_config_service.dart';
 import '../l10n/app_localizations.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
@@ -120,6 +121,14 @@ void main() async {
     CrashlyticsService.setAppInfo().catchError((error) {
       if (kDebugMode) {
         debugPrint('CrashlyticsService.setAppInfo error: $error');
+      }
+    });
+
+    // Initialize Remote Config to allow server-side control of the free AI
+    // tier (enable/disable + rate limits) without an app update.
+    RemoteConfigService.initialize().catchError((error) {
+      if (kDebugMode) {
+        debugPrint('RemoteConfigService initialization error: $error');
       }
     });
 
