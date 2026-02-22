@@ -453,7 +453,7 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
   });
 
   @override
-  _AddDosingEntrySheetState createState() => _AddDosingEntrySheetState();
+  ConsumerState<_AddDosingEntrySheet> createState() => _AddDosingEntrySheetState();
 }
 
 // Volume units for dosing entries

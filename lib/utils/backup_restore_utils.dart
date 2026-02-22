@@ -138,7 +138,8 @@ class BackupRestoreUtils {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('last_backup_time', DateTime.now().toIso8601String());
           await prefs.setInt('last_backup_tank_count', backupInfo['tankCount'] as int);
-          
+
+          if (!context.mounted) return;
           context.showAccessibleMessage(
             '${l10n.backupCreatedSuccess}\n${l10n.savedToFile(filePath.split('/').last)}',
             duration: const Duration(seconds: 4),
@@ -316,7 +317,8 @@ class BackupRestoreUtils {
           // Save restore timestamp
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('last_restore_time', DateTime.now().toIso8601String());
-          
+
+          if (!context.mounted) return;
           context.showAccessibleMessage(
             l10n.dataRestoredSuccess,
             duration: const Duration(seconds: 3),

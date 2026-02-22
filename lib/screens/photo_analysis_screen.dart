@@ -60,6 +60,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       setState(() => _error = l10n.failedToPickImage);
       

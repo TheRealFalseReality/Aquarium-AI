@@ -1261,7 +1261,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 
                                 await ref.read(appSettingsProvider.notifier).clearAllRememberedRescheduleOptions();
                                 
-                                if (context.mounted) {
+                                if (mounted) {
                                   context.showAccessibleMessage(l10n.reschedulePreferenceCleared);
                                 }
                                 

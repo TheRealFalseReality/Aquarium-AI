@@ -811,6 +811,8 @@ class FishCompatibilityScreenState
   Future<Map<String, List<String>>?> _showSpeciesSelectionDialog(List<Fish> selectedFish) async {
     // Wait for default tags to be fully initialized before reading
     await ref.read(speciesTagsProvider.notifier).initialized;
+
+    if (!mounted) return null;
     final speciesTagsState = ref.read(speciesTagsProvider);
 
     // Only show dialog if any selected fish have species tags
