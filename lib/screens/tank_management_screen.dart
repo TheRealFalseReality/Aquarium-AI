@@ -1124,10 +1124,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             _resetTankBackground(context, ref, tank);
                             break;
                           case 'recommendations':
-                            _getTankStockingRecommendations(context, ref, tank);
+                            _getTankStockingRecommendations(tank);
                             break;
                           case 'compatibility_analysis':
-                            _getTankCompatibilityAnalysis(context, ref, tank);
+                            _getTankCompatibilityAnalysis(tank);
                             break;
                           case 'duplicate':
                             _duplicateTank(context, ref, tank);
@@ -1503,7 +1503,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                           child: ElevatedButton.icon(
-                            onPressed: () => _getTankStockingRecommendations(context, ref, tank),
+                            onPressed: () => _getTankStockingRecommendations(tank),
                             icon: const Icon(Icons.auto_awesome, size: 16),
                             label: Text(
                               'Stocking Ideas',
@@ -1553,7 +1553,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ],
                           ),
                           child: ElevatedButton.icon(
-                            onPressed: () => _getTankCompatibilityAnalysis(context, ref, tank),
+                            onPressed: () => _getTankCompatibilityAnalysis(tank),
                             icon: const Icon(Icons.biotech, size: 16),
                             label: Text(
                               'Compatibility',
@@ -1851,7 +1851,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _quickLogFromCard(context, ref, tank, notification),
+        onTap: () => _quickLogFromCard(tank, notification),
         borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -1952,7 +1952,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  Future<void> _quickLogFromCard(BuildContext context, WidgetRef ref, Tank tank, TankNotification notification) async {
+  Future<void> _quickLogFromCard(Tank tank, TankNotification notification) async {
     // Get the latest tank state from the provider
     final currentTank = ref.read(tankProvider).tanks
         .firstWhere((t) => t.id == tank.id, orElse: () => tank);
@@ -1969,7 +1969,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     // Check if this notification has a repeat frequency (only repeating notifications need rescheduling dialog)
     RescheduleOption? rescheduleOption;
-    if (notification.repeatFrequency != RepeatFrequency.none && context.mounted) {
+    if (notification.repeatFrequency != RepeatFrequency.none && mounted) {
       // Ask user how they want to update the notification schedule BEFORE saving
       rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
       
@@ -1991,15 +1991,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
     
-    if (context.mounted) {
+    if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(l10n.activityLogged);
       
       // Handle the reschedule option if one was selected
       if (rescheduleOption != null && rescheduleOption != RescheduleOption.doNothing) {
         await _handleRescheduleOption(
-          context,
-          ref,
           currentTank,
           notification,
           log,
@@ -2025,8 +2023,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   /// Handle the reschedule option selected by the user
   Future<void> _handleRescheduleOption(
-    BuildContext context,
-    WidgetRef ref,
     Tank tank,
     TankNotification notification,
     NotificationLog log,
@@ -2069,7 +2065,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
         
-        if (context.mounted) {
+        if (mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
@@ -2102,7 +2098,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
         
-        if (context.mounted) {
+        if (mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
@@ -2963,7 +2959,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return widgets;
   }
 
-  Future<void> _getTankStockingRecommendations(BuildContext context, WidgetRef ref, Tank tank) async {
+  Future<void> _getTankStockingRecommendations(Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
@@ -2994,7 +2990,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // User cancelled the dialog
-    if (options == null || !context.mounted) {
+    if (options == null || !mounted) {
       return;
     }
     
@@ -3094,7 +3090,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Future<void> _getTankCompatibilityAnalysis(BuildContext context, WidgetRef ref, Tank tank) async {
+  Future<void> _getTankCompatibilityAnalysis(Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
@@ -3125,7 +3121,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // User cancelled the dialog
-    if (options == null || !context.mounted) {
+    if (options == null || !mounted) {
       return;
     }
     
