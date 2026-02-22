@@ -106,7 +106,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       AIProvider.openAI => false, // no dev key for OpenAI
       AIProvider.groq => _modelState.usingDeveloperGroqKeyForText,
     };
-    return usingDevKey ? defaultChatHistoryLimit : _modelState.chatHistoryLimit;
+    return usingDevKey ? RemoteConfigService.freeTierChatHistoryLimit : _modelState.chatHistoryLimit;
   }
 
   void _initializeProvider() {

@@ -1,6 +1,26 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
-import '../utils/dev_limits.dart';
+
+// ---------------------------------------------------------------------------
+// In-app fallback defaults
+// These are used when Firebase Remote Config is unreachable (offline / first
+// launch). Update these values when you change the defaults in the Firebase
+// Console so that a first-run experience is still sensible.
+// ---------------------------------------------------------------------------
+
+/// Default per-minute request cap for the free (developer-key) tier.
+const int _defaultMaxRequestsPerMinute = 4;
+
+/// Default per-day request cap for the free (developer-key) tier.
+const int _defaultMaxRequestsPerDay = 50;
+
+/// Default per-day photo-analysis cap for the free (developer-key) tier.
+const int _defaultMaxPhotoAnalysesPerDay = 3;
+
+/// Default chat-history window (number of past messages sent per request)
+/// applied to free-tier users. Users with their own API key can configure
+/// this freely; free-tier users are capped at this value.
+const int _defaultFreeTierChatHistoryLimit = 3;
 
 /// Key names used in Firebase Remote Config.
 ///
@@ -20,6 +40,11 @@ class RemoteConfigKeys {
   /// Integer — per-day photo-analysis cap for the free (developer-key) tier.
   static const String devMaxPhotoAnalysesPerDay =
       'dev_max_photo_analyses_per_day';
+
+  /// Integer — chat-history window (past messages per request) applied to
+  /// free-tier users. Users with their own API key can configure this freely.
+  static const String devDefaultChatHistoryLimit =
+      'dev_default_chat_history_limit';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -34,7 +59,7 @@ class RemoteConfigService {
   /// the latest values from the server.
   ///
   /// Errors are caught and logged; the service gracefully falls back to the
-  /// in-app defaults defined in [dev_limits.dart].
+  /// in-app defaults defined in this file.
   static Future<void> initialize() async {
     try {
       final remoteConfig = FirebaseRemoteConfig.instance;
@@ -43,9 +68,10 @@ class RemoteConfigService {
       // successful fetch or when offline.
       await remoteConfig.setDefaults({
         RemoteConfigKeys.freeAiEnabled: true,
-        RemoteConfigKeys.devMaxRequestsPerMinute: devMaxRequestsPerMinute,
-        RemoteConfigKeys.devMaxRequestsPerDay: devMaxRequestsPerDay,
-        RemoteConfigKeys.devMaxPhotoAnalysesPerDay: devMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.devMaxRequestsPerMinute: _defaultMaxRequestsPerMinute,
+        RemoteConfigKeys.devMaxRequestsPerDay: _defaultMaxRequestsPerDay,
+        RemoteConfigKeys.devMaxPhotoAnalysesPerDay: _defaultMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.devDefaultChatHistoryLimit: _defaultFreeTierChatHistoryLimit,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -66,7 +92,8 @@ class RemoteConfigService {
           'freeAiEnabled=${freeAiEnabled}, '
           'maxReqPerMin=$maxRequestsPerMinute, '
           'maxReqPerDay=$maxRequestsPerDay, '
-          'maxPhotosPerDay=$maxPhotoAnalysesPerDay',
+          'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '
+          'chatHistoryLimit=$freeTierChatHistoryLimit',
         );
       }
     } catch (e) {
@@ -91,15 +118,22 @@ class RemoteConfigService {
   /// Per-minute request limit for the free (developer-key) tier.
   static int get maxRequestsPerMinute =>
       _instance?.getInt(RemoteConfigKeys.devMaxRequestsPerMinute) ??
-      devMaxRequestsPerMinute;
+      _defaultMaxRequestsPerMinute;
 
   /// Per-day request limit for the free (developer-key) tier.
   static int get maxRequestsPerDay =>
       _instance?.getInt(RemoteConfigKeys.devMaxRequestsPerDay) ??
-      devMaxRequestsPerDay;
+      _defaultMaxRequestsPerDay;
 
   /// Per-day photo-analysis limit for the free (developer-key) tier.
   static int get maxPhotoAnalysesPerDay =>
       _instance?.getInt(RemoteConfigKeys.devMaxPhotoAnalysesPerDay) ??
-      devMaxPhotoAnalysesPerDay;
+      _defaultMaxPhotoAnalysesPerDay;
+
+  /// Chat-history window applied to free-tier users (number of past messages
+  /// sent to the AI per request). Users with their own API key can configure
+  /// this freely; free-tier users are capped at this value.
+  static int get freeTierChatHistoryLimit =>
+      _instance?.getInt(RemoteConfigKeys.devDefaultChatHistoryLimit) ??
+      _defaultFreeTierChatHistoryLimit;
 }
