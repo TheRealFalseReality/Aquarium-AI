@@ -867,69 +867,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        // ─── Free-tier notice ─────────────────────────────────────────────────
-        Builder(builder: (context) {
-          final models = ref.watch(modelProvider);
-          if (!models.usingDeveloperGroqKeyForAny) return const SizedBox.shrink();
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.withOpacity(0.4)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  const Icon(Icons.speed, color: Colors.amber, size: 16),
-                  const SizedBox(width: 6),
+        // ─── Free-tier notice (only when at least one free key is active) ────────
+        if (_useDevGroqKeyForText || _useDevGroqKeyForImage) ...[
+          Builder(builder: (context) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.withOpacity(0.4)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    const Icon(Icons.speed, color: Colors.amber, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Free-tier limits',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Colors.amber.shade800,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ]),
+                  const SizedBox(height: 6),
                   Text(
-                    'Free-tier limits',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Colors.amber.shade800,
-                          fontWeight: FontWeight.bold,
+                    '• $devMaxRequestsPerMinute AI requests per minute\n'
+                    '• $devMaxRequestsPerDay AI requests per day\n'
+                    '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
+                    '• $defaultChatHistoryLimit-message chat history per request',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
                         ),
                   ),
-                ]),
-                const SizedBox(height: 6),
-                Text(
-                  '• $devMaxRequestsPerMinute AI requests per minute\n'
-                  '• $devMaxRequestsPerDay AI requests per day\n'
-                  '• $devMaxPhotoAnalysesPerDay photo ${devMaxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                  '• $defaultChatHistoryLimit-message chat history per request',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.amber.shade900,
-                      ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.amber.shade900,
-                      ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.amber.shade800,
-                        fontStyle: FontStyle.italic,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.amber.shade800,
-                        fontStyle: FontStyle.italic,
-                      ),
-                ),
-              ],
-            ),
-          );
-        }),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade900,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade800,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
         // ─── Chat History Limit ───────────────────────────────────────────────
         _buildChatHistoryLimitSection(setDialogState),
         const SizedBox(height: 24),
@@ -2086,9 +2086,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (forTextUseCase != false) ...[
           TextField(
             controller: _groqModelController,
-            decoration: const InputDecoration(
+            enabled: !usingFreeKey,
+            decoration: InputDecoration(
               labelText: 'Groq Text Model',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              helperText: usingFreeKey ? 'Fixed when using the free key.' : null,
             ),
           ),
           const SizedBox(height: 16),
@@ -2096,10 +2098,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (forTextUseCase != true) ...[
           TextField(
             controller: _groqImageModelController,
-            decoration: const InputDecoration(
+            enabled: !usingFreeKey,
+            decoration: InputDecoration(
               labelText: 'Groq Multimedia Model',
-              border: OutlineInputBorder(),
-              helperText: 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+              border: const OutlineInputBorder(),
+              helperText: usingFreeKey
+                  ? 'Fixed when using the free key.'
+                  : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
               helperMaxLines: 2,
             ),
           ),
@@ -2172,51 +2177,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  /// Compact chip-style toggle for the "Use Free Key" dev key option.
+  /// Modern inline toggle tile for the "Use Free Key" dev key option.
   Widget _buildDevKeyToggle({
     required String label,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    final color = value
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.outlineVariant;
-    return GestureDetector(
-      onTap: () => onChanged(!value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
+    final scheme = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: value
+            ? scheme.primaryContainer.withOpacity(0.35)
+            : scheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
           color: value
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
-              : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color, width: 1.2),
+              ? scheme.primary.withOpacity(0.5)
+              : scheme.outline.withOpacity(0.25),
+          width: 1,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              value ? Icons.lock_open_outlined : Icons.lock_outline,
-              size: 14,
-              color: color,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
+      ),
+      child: SwitchListTile.adaptive(
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+        secondary: Icon(
+          value ? Icons.lock_open_outlined : Icons.lock_outline,
+          size: 18,
+          color: value ? scheme.primary : scheme.onSurfaceVariant,
+        ),
+        title: Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: value ? scheme.primary : scheme.onSurface,
               ),
-            ),
-            const SizedBox(width: 6),
-            Switch.adaptive(
-              value: value,
-              onChanged: onChanged,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ],
         ),
+        subtitle: Text(
+          value ? 'Using app\'s built-in key' : 'Provide your own key',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: value
+                    ? scheme.primary.withOpacity(0.8)
+                    : scheme.onSurfaceVariant,
+              ),
+        ),
+        value: value,
+        onChanged: onChanged,
       ),
     );
   }
