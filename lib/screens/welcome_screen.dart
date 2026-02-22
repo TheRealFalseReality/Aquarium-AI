@@ -31,12 +31,12 @@ import '../services/remote_config_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 
-class _ToolChipInfo {
+class ToolChipInfo {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
 
-  const _ToolChipInfo({
+  const ToolChipInfo({
     required this.label,
     required this.icon,
     required this.onTap,
@@ -52,7 +52,7 @@ class FeatureInfo {
   final bool openPhotoAnalyzer;
   final String? url;
   final String? imagePath;
-  final List<_ToolChipInfo>? toolChips;
+  final List<ToolChipInfo>? toolChips;
 
   FeatureInfo({
     required this.icon,
@@ -193,13 +193,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         source: 'welcome_screen_auto',
       );
       
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (context) => const AppPromotionDialog(),
-        );
-      }
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const AppPromotionDialog(),
+      );
     } catch (e) {
       debugPrint('Error showing promotion dialog: $e');
     }
@@ -254,13 +253,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         source: 'welcome_screen_auto',
       );
       
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (context) => const AquaPiPromotionDialog(),
-        );
-      }
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const AquaPiPromotionDialog(),
+      );
     } catch (e) {
       debugPrint('Error showing AquaPi promotion dialog: $e');
     }
@@ -485,7 +483,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           routeName: '/chatbot',
           delay: const Duration(milliseconds: 700),
           toolChips: [
-            _ToolChipInfo(
+            ToolChipInfo(
               label: l10n.waterAnalysis,
               icon: Icons.water_drop_outlined,
               onTap: () => Navigator.pushNamed(
@@ -494,7 +492,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 arguments: {'openWaterAnalysis': true},
               ),
             ),
-            _ToolChipInfo(
+            ToolChipInfo(
               label: l10n.fishInfo,
               icon: Icons.manage_search_outlined,
               onTap: () => Navigator.pushNamed(
@@ -1285,7 +1283,7 @@ class FeatureCard extends ConsumerWidget {
   final String description;
   final VoidCallback onTap;
   final String? imagePath;
-  final List<_ToolChipInfo>? toolChips;
+  final List<ToolChipInfo>? toolChips;
 
   const FeatureCard({
     super.key,
