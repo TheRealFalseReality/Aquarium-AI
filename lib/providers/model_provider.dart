@@ -129,8 +129,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
           groqApiKey: '',
           activeTextProvider: defaultAIProvider,
           activeImageProvider: defaultAIProvider,
-          useDevGroqKeyForText: false,
-          useDevGroqKeyForImage: false,
+          useDevGroqKeyForText: true,
+          useDevGroqKeyForImage: true,
         )) {
     _loadModels();
   }
@@ -149,10 +149,11 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final groqImageModel =
         prefs.getString('groqImageModel') ?? defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
-    // Migrate legacy single useDevGroqKey → per-operation flags
-    final legacyDevKey = prefs.getBool('useDevGroqKey') ?? false;
-    final useDevGroqKeyForText = prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey;
-    final useDevGroqKeyForImage = prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey;
+    // Migrate legacy single useDevGroqKey → per-operation flags.
+    // New users default to ON (true); existing users who had an explicit setting keep it.
+    final legacyDevKey = prefs.getBool('useDevGroqKey');
+    final useDevGroqKeyForText = prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey ?? true;
+    final useDevGroqKeyForImage = prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey ?? true;
     final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
         .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
