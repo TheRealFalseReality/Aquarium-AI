@@ -101,7 +101,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
-            'assets/AquaPiMainSmaller.png',
+            'assets/AquaPiMainSmaller.jpg',
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
               return const SizedBox.shrink();
@@ -193,7 +193,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
-            'assets/AquaPiMainSmaller.png',
+            'assets/AquaPiMainSmaller.jpg',
             width: 180,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {

@@ -541,7 +541,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: 'assets/AquaPiEssentials.png',
+        imagePath: 'assets/AquaPiEssentials.jpg',
       ),
     ];
 
