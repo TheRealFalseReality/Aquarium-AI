@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../services/analytics_service.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
@@ -100,12 +101,14 @@ class AquaPiPromotionDialog extends StatelessWidget {
         // Marketing image at top for mobile
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            'assets/AquaPiMainSmaller.jpg',
+          child: CachedNetworkImage(
+            imageUrl: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiMainSmaller.jpg',
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const SizedBox.shrink();
-            },
+            placeholder: (context, url) => const SizedBox(
+              height: 80,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (context, url, error) => const SizedBox.shrink(),
           ),
         ),
         const SizedBox(height: 16),
@@ -192,13 +195,15 @@ class AquaPiPromotionDialog extends StatelessWidget {
         // Marketing image on the left
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            'assets/AquaPiMainSmaller.jpg',
+          child: CachedNetworkImage(
+            imageUrl: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiMainSmaller.jpg',
             width: 180,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const SizedBox.shrink();
-            },
+            placeholder: (context, url) => const SizedBox(
+              width: 180,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (context, url, error) => const SizedBox.shrink(),
           ),
         ),
         const SizedBox(width: 16),

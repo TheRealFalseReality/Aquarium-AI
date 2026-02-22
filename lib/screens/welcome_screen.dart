@@ -541,7 +541,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: 'assets/AquaPiEssentials.jpg',
+        imagePath: 'https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/main/assets/AquaPiEssentials.jpg',
       ),
     ];
 
@@ -1412,25 +1412,26 @@ class FeatureCard extends ConsumerWidget {
                     child: SizedBox(
                       height: 300,
                       width: double.infinity,
-                      child: Image.asset(
-                        imagePath!,
+                      child: CachedNetworkImage(
+                        imageUrl: imagePath!,
                         fit: BoxFit.contain,
                         alignment: Alignment.center,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 120,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: cs.surfaceVariant,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color: cs.onSurfaceVariant,
-                              size: 48,
-                            ),
-                          );
-                        },
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          height: 120,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: cs.surfaceVariant,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: cs.onSurfaceVariant,
+                            size: 48,
+                          ),
+                        ),
                       ),
                     ),
                   ),
