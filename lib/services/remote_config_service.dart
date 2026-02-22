@@ -30,7 +30,7 @@ class RemoteConfigKeys {
 class RemoteConfigService {
   static FirebaseRemoteConfig? _instance;
 
-  /// Initialise Remote Config, apply in-app defaults, then fetch & activate
+  /// Initialize Remote Config, apply in-app defaults, then fetch & activate
   /// the latest values from the server.
   ///
   /// Errors are caught and logged; the service gracefully falls back to the
