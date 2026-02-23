@@ -2525,6 +2525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _geminiApiKeyController,
                     obscureText: !_isGeminiApiKeyVisible,
+                    // Rebuild dialog to update the ExpansionTile status subtitle.
                     onChanged: (_) => setDialogState?.call(() {}),
                     decoration: InputDecoration(
                       labelText: 'Google AI API Key',
@@ -2627,6 +2628,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _openAIApiKeyController,
                     obscureText: !_isOpenAIApiKeyVisible,
+                    // Rebuild dialog to update the ExpansionTile status subtitle.
                     onChanged: (_) => setDialogState?.call(() {}),
                     decoration: InputDecoration(
                       labelText: 'OpenAI API Key',
@@ -2714,20 +2716,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           fontWeight: FontWeight.bold,
                           color: Colors.orange,
                         )),
-                subtitle: Text(
-                  (_useDevGroqKeyForText || _useDevGroqKeyForImage)
-                      ? 'Using Free AI'
-                      : _groqApiKeyController.text.isNotEmpty
-                          ? '••••••••'
-                          : 'No key set',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: (_useDevGroqKeyForText || _useDevGroqKeyForImage)
-                            ? Colors.amber.shade700
-                            : _groqApiKeyController.text.isNotEmpty
-                                ? Colors.green.shade600
-                                : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
+subtitle: Builder(builder: (context) {
+                  final usingFreeAi = _useDevGroqKeyForText || _useDevGroqKeyForImage;
+                  final hasKey = _groqApiKeyController.text.isNotEmpty;
+                  final subtitleText = usingFreeAi ? 'Using Free AI' : (hasKey ? '••••••••' : 'No key set');
+                  final subtitleColor = usingFreeAi
+                      ? Colors.amber.shade700
+                      : hasKey
+                          ? Colors.green.shade600
+                          : Theme.of(context).colorScheme.onSurfaceVariant;
+                  return Text(
+                    subtitleText,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: subtitleColor),
+                  );
+                }),
                 initiallyExpanded: false,
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(bottom: 8),
@@ -2737,7 +2739,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     TextField(
                       controller: _groqApiKeyController,
                       obscureText: !_isGroqApiKeyVisible,
-                      onChanged: (_) => setDialogState?.call(() {}),
+                      // Rebuild dialog to update the ExpansionTile status subtitle.
+                    onChanged: (_) => setDialogState?.call(() {}),
                       decoration: InputDecoration(
                         labelText: 'Groq API Key',
                         border: const OutlineInputBorder(),
