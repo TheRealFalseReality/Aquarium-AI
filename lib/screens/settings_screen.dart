@@ -104,51 +104,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.9,
-            child: Column(
-              children: [
-                // Header with close button
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.smart_toy,
-                        color: Theme.of(context).colorScheme.primary,
+        builder: (dialogContext, setDialogState) => PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            _handleDialogClose(dialogContext, setDialogState);
+          },
+          child: Dialog(
+            insetPadding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: MediaQuery.of(dialogContext).size.width,
+              height: MediaQuery.of(dialogContext).size.height * 0.9,
+              child: Column(
+                children: [
+                  // Header with close button
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(dialogContext).colorScheme.primaryContainer.withOpacity(0.3),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(28),
+                        topRight: Radius.circular(28),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.aiProvider,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.smart_toy,
+                          color: Theme.of(dialogContext).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.aiProvider,
+                            style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(context).pop(),
-                        tooltip: l10n.close,
-                      ),
-                    ],
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => _handleDialogClose(dialogContext, setDialogState),
+                          tooltip: l10n.close,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // Content
-                Expanded(
-                  child: _buildAIProviderContent(setDialogState),
-                ),
-              ],
+                  // Content
+                  Expanded(
+                    child: _buildAIProviderContent(setDialogState),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -387,6 +394,109 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     CrashlyticsService.setAIImageModel(imageModel);
 
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
+  }
+
+  /// Saves all three API keys without validation (empty keys are valid).
+  void _saveApiKeys(BuildContext context, [StateSetter? setDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    ref.read(modelProvider.notifier).setModels(
+          newGeminiModel: _geminiModelController.text,
+          newGeminiImageModel: _geminiImageModelController.text,
+          newGeminiApiKey: _geminiApiKeyController.text,
+          newChatGPTModel: _chatGPTModelController.text,
+          newChatGPTImageModel: _chatGPTImageModelController.text,
+          newOpenAIApiKey: _openAIApiKeyController.text,
+          newGroqModel: _groqModelController.text,
+          newGroqImageModel: _groqImageModelController.text,
+          newGroqApiKey: _groqApiKeyController.text,
+          newActiveTextProvider: _selectedTextProvider,
+          newActiveImageProvider: _selectedImageProvider,
+          newChatHistoryLimit: _chatHistoryLimit,
+          newUseDevGroqKeyForText: _useDevGroqKeyForText,
+          newUseDevGroqKeyForImage: _useDevGroqKeyForImage,
+        );
+    context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
+    setDialogState?.call(() {});
+  }
+
+  /// Returns true if any field in the AI Provider dialog differs from saved state.
+  bool _hasUnsavedChanges() {
+    final saved = ref.read(modelProvider);
+    return _selectedTextProvider != saved.activeTextProvider ||
+        _selectedImageProvider != saved.activeImageProvider ||
+        _geminiModelController.text != saved.geminiModel ||
+        _geminiImageModelController.text != saved.geminiImageModel ||
+        _chatGPTModelController.text != saved.chatGPTModel ||
+        _chatGPTImageModelController.text != saved.chatGPTImageModel ||
+        _groqModelController.text != saved.groqModel ||
+        _groqImageModelController.text != saved.groqImageModel ||
+        _geminiApiKeyController.text != saved.geminiApiKey ||
+        _openAIApiKeyController.text != saved.openAIApiKey ||
+        _groqApiKeyController.text != saved.groqApiKey;
+  }
+
+  /// Shows an "Unsaved Changes" alert if there are pending changes, otherwise pops.
+  void _handleDialogClose(BuildContext dialogContext, [StateSetter? setDialogState]) {
+    if (!_hasUnsavedChanges()) {
+      Navigator.of(dialogContext).pop();
+      return;
+    }
+
+    final saved = ref.read(modelProvider);
+    final providerChanged = _selectedTextProvider != saved.activeTextProvider;
+    final imageProviderChanged = _selectedImageProvider != saved.activeImageProvider;
+    final textModelChanged = _geminiModelController.text != saved.geminiModel ||
+        _chatGPTModelController.text != saved.chatGPTModel ||
+        _groqModelController.text != saved.groqModel;
+    final imageModelChanged = _geminiImageModelController.text != saved.geminiImageModel ||
+        _chatGPTImageModelController.text != saved.chatGPTImageModel ||
+        _groqImageModelController.text != saved.groqImageModel;
+    final keysChanged = _geminiApiKeyController.text != saved.geminiApiKey ||
+        _openAIApiKeyController.text != saved.openAIApiKey ||
+        _groqApiKeyController.text != saved.groqApiKey;
+
+    showDialog<void>(
+      context: dialogContext,
+      builder: (alertContext) => AlertDialog(
+        title: const Text('Unsaved Changes'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (providerChanged) const Text('• Text provider changed'),
+            if (imageProviderChanged) const Text('• Image provider changed'),
+            if (textModelChanged) const Text('• Text model changed'),
+            if (imageModelChanged) const Text('• Image model changed'),
+            if (keysChanged) const Text('• API keys updated'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(alertContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Discard'),
+            onPressed: () {
+              Navigator.of(alertContext).pop();
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.save),
+            label: const Text('Save All & Close'),
+            onPressed: () {
+              _saveTextSettings(dialogContext);
+              _saveImageSettings(dialogContext);
+              _saveApiKeys(dialogContext, setDialogState);
+              Navigator.of(alertContext).pop();
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   // Helper method to handle stocking button toggle
@@ -2560,6 +2670,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if (_geminiApiKeyController.text != ref.read(modelProvider).geminiApiKey)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.save, size: 18),
+                        label: const Text('Save Key'),
+                        onPressed: () => _saveApiKeys(context, setDialogState),
+                      ),
+                    ),
                   _buildApiKeyGuide(
                     title: 'How to get your Google AI API key:',
                     children: [
@@ -2680,6 +2799,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    if (_groqApiKeyController.text != ref.read(modelProvider).groqApiKey)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text('Save Key'),
+                          onPressed: () => _saveApiKeys(context, setDialogState),
+                        ),
+                      ),
                   ],
                   _buildApiKeyGuide(
                     title: 'How to get your Groq API key:',
@@ -2792,6 +2920,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if (_openAIApiKeyController.text != ref.read(modelProvider).openAIApiKey)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.save, size: 18),
+                        label: const Text('Save Key'),
+                        onPressed: () => _saveApiKeys(context, setDialogState),
+                      ),
+                    ),
                   _buildApiKeyGuide(
                     title: 'How to get your OpenAI API key:',
                     children: [
