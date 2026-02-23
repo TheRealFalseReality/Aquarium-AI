@@ -487,8 +487,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: const Icon(Icons.save),
             label: const Text('Save All & Close'),
             onPressed: () {
-              _saveTextSettings(dialogContext);
-              _saveImageSettings(dialogContext);
+              // _saveApiKeys calls setModels with full state (provider, model, keys).
               _saveApiKeys(dialogContext, setDialogState);
               Navigator.of(alertContext).pop();
               Navigator.of(dialogContext).pop();
