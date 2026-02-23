@@ -315,7 +315,27 @@ class _PhotoAnalysisResultScreenState
                               f.notes,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                          ]
+                          ],
+                          if (f.careInfo.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            const Divider(height: 1),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Care Guide',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            MarkdownBody(
+                              data: f.careInfo,
+                              selectable: true,
+                              onTapLink: (text, href, title) {
+                                if (href != null) launchUrl(Uri.parse(href));
+                              },
+                            ),
+                          ],
                         ],
                       ),
                     );

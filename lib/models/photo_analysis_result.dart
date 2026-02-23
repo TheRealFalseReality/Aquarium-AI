@@ -7,12 +7,14 @@ class IdentifiedFish {
   final String scientificName;
   final double confidence;
   final String notes;
+  final String careInfo;
 
   IdentifiedFish({
     required this.commonName,
     required this.scientificName,
     required this.confidence,
     required this.notes,
+    this.careInfo = '',
   });
 
   factory IdentifiedFish.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class IdentifiedFish {
           ? (json['confidence'] as num).toDouble()
           : 0.0,
       notes: json['notes'] ?? '',
+      careInfo: json['careInfo'] ?? '',
     );
   }
 }
