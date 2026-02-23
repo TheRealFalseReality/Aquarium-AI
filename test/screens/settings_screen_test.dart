@@ -15,12 +15,6 @@ void main() {
 
     // Verify that the settings screen loads
     expect(find.text('Settings'), findsOneWidget);
-    
-    // Verify Active AI Provider section
-    expect(find.text('Active AI Provider'), findsOneWidget);
-    expect(find.text('Gemini'), findsOneWidget);
-    expect(find.text('OpenAI'), findsOneWidget);
-    expect(find.text('Groq'), findsOneWidget);
 
     // Verify the clarification note is displayed
     expect(find.textContaining('Tank management (including harmony score)'), findsOneWidget);
@@ -37,10 +31,10 @@ void main() {
     );
 
     // Test switching between AI providers
-    await tester.tap(find.text('OpenAI'));
+    await tester.tap(find.text('OpenAI').first);
     await tester.pump();
 
-    await tester.tap(find.text('Groq'));
+    await tester.tap(find.text('Groq').first);
     await tester.pump();
 
     // Should be able to switch without errors

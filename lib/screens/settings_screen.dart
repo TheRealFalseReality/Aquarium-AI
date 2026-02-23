@@ -852,6 +852,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
             ),
           ),
+        // ─── Consolidated API Keys ────────────────────────────────────────
+        _buildApiKeysSection(setDialogState),
+        const SizedBox(height: 16),
         // ─── Text / Chat ─────────────────────────────────────────────────────
         Card(
           clipBehavior: Clip.antiAlias,
@@ -891,22 +894,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
-                // Free key toggle (Groq only)
-                if (_selectedTextProvider == AIProvider.groq &&
-                    RemoteConfigService.freeAiEnabled) ...[
-                  const SizedBox(height: 8),
-                  _buildDevKeyToggle(
-                    label: 'Use Free Provider',
-                    value: _useDevGroqKeyForText,
-                    onChanged: (v) {
-                      setState(() => _useDevGroqKeyForText = v);
-                      if (setDialogState != null) {
-                        setDialogState(() => _useDevGroqKeyForText = v);
-                      }
-                    },
-                  ),
-                ],
-                // Provider-specific settings for text
+                // Provider-specific model settings for text
                 switch (_selectedTextProvider) {
                   AIProvider.gemini => _buildGeminiSettings(setDialogState, true),
                   AIProvider.openAI => _buildOpenAISettings(setDialogState, true),
@@ -1012,22 +1000,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
-                // Free key toggle (Groq only)
-                if (_selectedImageProvider == AIProvider.groq &&
-                    RemoteConfigService.freeAiEnabled) ...[
-                  const SizedBox(height: 8),
-                  _buildDevKeyToggle(
-                    label: 'Use Free Provider',
-                    value: _useDevGroqKeyForImage,
-                    onChanged: (v) {
-                      setState(() => _useDevGroqKeyForImage = v);
-                      if (setDialogState != null) {
-                        setDialogState(() => _useDevGroqKeyForImage = v);
-                      }
-                    },
-                  ),
-                ],
-                // Provider-specific settings for image
+                // Provider-specific model settings for image
                 switch (_selectedImageProvider) {
                   AIProvider.gemini => _buildGeminiSettings(setDialogState, false),
                   AIProvider.openAI => _buildOpenAISettings(setDialogState, false),
@@ -1748,11 +1721,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// true = show text model only, false = show image model only.
   Widget _buildGeminiSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
+
+    // When called from the text/image provider section, only show the model
+    // field. The API key is entered once in the consolidated API Keys section.
+    if (forTextUseCase != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (forTextUseCase != false) ...[
+            TextField(
+              controller: _geminiModelController,
+              decoration: const InputDecoration(
+                labelText: 'Gemini Text Model',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (forTextUseCase != true) ...[
+            TextField(
+              controller: _geminiImageModelController,
+              decoration: const InputDecoration(
+                labelText: 'Gemini Multimedia Model',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ],
+      );
+    }
+
+    // Legacy / combined view: show full settings including API key and guides.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (forTextUseCase == null) const Divider(),
-        if (forTextUseCase == null) const SizedBox(height: 8),
+        const Divider(),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -1836,26 +1841,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        if (forTextUseCase != false) ...[
-          TextField(
-            controller: _geminiModelController,
-            decoration: const InputDecoration(
-              labelText: 'Gemini Text Model',
-              border: OutlineInputBorder(),
-            ),
+        TextField(
+          controller: _geminiModelController,
+          decoration: const InputDecoration(
+            labelText: 'Gemini Text Model',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16),
-        ],
-        if (forTextUseCase != true) ...[
-          TextField(
-            controller: _geminiImageModelController,
-            decoration: const InputDecoration(
-              labelText: 'Gemini Multimedia Model',
-              border: OutlineInputBorder(),
-            ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _geminiImageModelController,
+          decoration: const InputDecoration(
+            labelText: 'Gemini Multimedia Model',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16),
-        ],
+        ),
+        const SizedBox(height: 16),
         _buildApiKeyGuide(
           title: 'How to get your Google AI API key:',
           children: [
@@ -1924,10 +1925,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildOpenAISettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
+
+    // When called from the text/image provider section, only show the model
+    // field. The API key is entered once in the consolidated API Keys section.
+    if (forTextUseCase != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (forTextUseCase != false) ...[
+            TextField(
+              controller: _chatGPTModelController,
+              enabled: true,
+              decoration: const InputDecoration(
+                labelText: 'ChatGPT Text Model',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (forTextUseCase != true) ...[
+            TextField(
+              controller: _chatGPTImageModelController,
+              enabled: true,
+              decoration: const InputDecoration(
+                labelText: 'ChatGPT Multimedia Model',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ],
+      );
+    }
+
+    // Legacy / combined view: show full settings including API key and guides.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (forTextUseCase == null) const Divider(),
+        const Divider(),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
@@ -2013,28 +2048,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        if (forTextUseCase != false) ...[
-          TextField(
-            controller: _chatGPTModelController,
-            enabled: true,
-            decoration: const InputDecoration(
-              labelText: 'ChatGPT Text Model',
-              border: OutlineInputBorder(),
-            ),
+        TextField(
+          controller: _chatGPTModelController,
+          enabled: true,
+          decoration: const InputDecoration(
+            labelText: 'ChatGPT Text Model',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16),
-        ],
-        if (forTextUseCase != true) ...[
-          TextField(
-            controller: _chatGPTImageModelController,
-            enabled: true,
-            decoration: const InputDecoration(
-              labelText: 'ChatGPT Multimedia Model',
-              border: OutlineInputBorder(),
-            ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _chatGPTImageModelController,
+          enabled: true,
+          decoration: const InputDecoration(
+            labelText: 'ChatGPT Multimedia Model',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16),
-        ],
+        ),
+        const SizedBox(height: 16),
         _buildApiKeyGuide(
           title: 'How to get your OpenAI API key:',
           children: [
@@ -2107,10 +2138,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         : forTextUseCase == false
             ? _useDevGroqKeyForImage
             : false; // legacy combined view always shows API key field
+
+    // When called from the text/image provider section, only show the model
+    // field. The API key is entered once in the consolidated API Keys section.
+    if (forTextUseCase != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (forTextUseCase != false) ...[
+            TextField(
+              controller: _groqModelController,
+              enabled: !usingFreeKey,
+              decoration: InputDecoration(
+                labelText: 'Groq Text Model',
+                border: const OutlineInputBorder(),
+                helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (forTextUseCase != true) ...[
+            TextField(
+              controller: _groqImageModelController,
+              enabled: !usingFreeKey,
+              decoration: InputDecoration(
+                labelText: 'Groq Multimedia Model',
+                border: const OutlineInputBorder(),
+                helperText: usingFreeKey
+                    ? 'Fixed when using the Free Provider.'
+                    : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+                helperMaxLines: 2,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ],
+      );
+    }
+
+    // Legacy / combined view: show full settings including API key and guides.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (forTextUseCase == null) const Divider(),
+        const Divider(),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
@@ -2198,33 +2268,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
         ],
-        if (forTextUseCase != false) ...[
-          TextField(
-            controller: _groqModelController,
-            enabled: !usingFreeKey,
-            decoration: InputDecoration(
-              labelText: 'Groq Text Model',
-              border: const OutlineInputBorder(),
-              helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
-            ),
+        TextField(
+          controller: _groqModelController,
+          enabled: !usingFreeKey,
+          decoration: InputDecoration(
+            labelText: 'Groq Text Model',
+            border: const OutlineInputBorder(),
+            helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
           ),
-          const SizedBox(height: 16),
-        ],
-        if (forTextUseCase != true) ...[
-          TextField(
-            controller: _groqImageModelController,
-            enabled: !usingFreeKey,
-            decoration: InputDecoration(
-              labelText: 'Groq Multimedia Model',
-              border: const OutlineInputBorder(),
-              helperText: usingFreeKey
-                  ? 'Fixed when using the Free Provider.'
-                  : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
-              helperMaxLines: 2,
-            ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _groqImageModelController,
+          enabled: !usingFreeKey,
+          decoration: InputDecoration(
+            labelText: 'Groq Multimedia Model',
+            border: const OutlineInputBorder(),
+            helperText: usingFreeKey
+                ? 'Fixed when using the Free Provider.'
+                : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+            helperMaxLines: 2,
           ),
-          const SizedBox(height: 16),
-        ],
+        ),
+        const SizedBox(height: 16),
         if (!usingFreeKey) ...[
           _buildApiKeyGuide(
             title: 'How to get your Groq API key:',
@@ -2288,6 +2354,316 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ], // end if (!usingFreeKey)
+      ],
+    );
+  }
+
+  /// Consolidated API Keys card — shows the API key for every provider in one
+  /// place so the user only needs to enter each key once, regardless of whether
+  /// the same provider is selected for both text and image.
+  Widget _buildApiKeysSection([StateSetter? setDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Section header
+            Row(children: [
+              Icon(Icons.key, size: 20, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'API Keys',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+            ]),
+            const SizedBox(height: 4),
+            Text(
+              'Enter your API key for each provider once. It will be used for both text and image features.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Google Gemini ──────────────────────────────────────────────
+            _buildProviderKeyHeader('Google Gemini', Colors.blue, Icons.auto_awesome,
+                'Google\'s most capable AI model'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _geminiApiKeyController,
+              obscureText: !_isGeminiApiKeyVisible,
+              decoration: InputDecoration(
+                labelText: 'Google AI API Key',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isGeminiApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    final v = !_isGeminiApiKeyVisible;
+                    setState(() => _isGeminiApiKeyVisible = v);
+                    setDialogState?.call(() => _isGeminiApiKeyVisible = v);
+                  },
+                ),
+              ),
+            ),
+            _buildApiKeyGuide(
+              title: 'How to get your Google AI API key:',
+              children: [
+                Text(l10n.googleAIStudioStep1),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
+                  child: Text('https://aistudio.google.com/app/apikey',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                Text(l10n.googleAIStudioStep2),
+                Text(l10n.googleAIStudioStep3),
+                Text(l10n.googleAIStudioStep4),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
+                  child: Text('See Guide',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            _buildApiKeyGuide(
+              title: 'Gemini Models & Rate Limits:',
+              children: [
+                const Text('View available models and free-tier rate limits:'),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
+                  child: Text('ai.google.dev/gemini-api/docs/models/gemini',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
+                  child: Text('Rate Limits',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+
+            const Divider(height: 24),
+
+            // ── OpenAI ────────────────────────────────────────────────────
+            _buildProviderKeyHeader('OpenAI', Colors.green, Icons.psychology,
+                'ChatGPT and GPT models by OpenAI'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _openAIApiKeyController,
+              obscureText: !_isOpenAIApiKeyVisible,
+              decoration: InputDecoration(
+                labelText: 'OpenAI API Key',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    final v = !_isOpenAIApiKeyVisible;
+                    setState(() => _isOpenAIApiKeyVisible = v);
+                    setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
+                  },
+                ),
+              ),
+            ),
+            _buildApiKeyGuide(
+              title: 'How to get your OpenAI API key:',
+              children: [
+                Text(l10n.openAIStep1),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
+                  child: Text('https://platform.openai.com/api-keys',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                Text(l10n.openAIStep2),
+                Text(l10n.openAIStep3),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse(
+                      'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+                  child: Text('See Guide',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            _buildApiKeyGuide(
+              title: 'OpenAI Models & Rate Limits:',
+              children: [
+                const Text('View available models and usage limits:'),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
+                  child: Text('platform.openai.com/docs/models',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
+                  child: Text('Rate Limits',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+
+            const Divider(height: 24),
+
+            // ── Groq ──────────────────────────────────────────────────────
+            _buildProviderKeyHeader('Groq', Colors.orange, Icons.flash_on,
+                'Lightning-fast LLM inference'),
+            const SizedBox(height: 8),
+            // Free-tier toggles (only visible when free AI is enabled)
+            if (RemoteConfigService.freeAiEnabled) ...[
+              _buildDevKeyToggle(
+                label: 'Use Free Provider for Text',
+                value: _useDevGroqKeyForText,
+                onChanged: (v) {
+                  setState(() => _useDevGroqKeyForText = v);
+                  setDialogState?.call(() => _useDevGroqKeyForText = v);
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildDevKeyToggle(
+                label: 'Use Free Provider for Image',
+                value: _useDevGroqKeyForImage,
+                onChanged: (v) {
+                  setState(() => _useDevGroqKeyForImage = v);
+                  setDialogState?.call(() => _useDevGroqKeyForImage = v);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Show the API key field when the user is not using the free
+            // provider for either text or image (i.e. they need their own key).
+            if (!(_useDevGroqKeyForText && _useDevGroqKeyForImage)) ...[
+              TextField(
+                controller: _groqApiKeyController,
+                obscureText: !_isGroqApiKeyVisible,
+                decoration: InputDecoration(
+                  labelText: 'Groq API Key',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      final v = !_isGroqApiKeyVisible;
+                      setState(() => _isGroqApiKeyVisible = v);
+                      setDialogState?.call(() => _isGroqApiKeyVisible = v);
+                    },
+                  ),
+                ),
+              ),
+            ],
+            _buildApiKeyGuide(
+              title: 'How to get your Groq API key:',
+              children: [
+                Text(l10n.groqCloudStep1),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/keys')),
+                  child: Text('https://console.groq.com/keys',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                Text(l10n.groqCloudStep2),
+                Text(l10n.groqCloudStep3),
+                Text(l10n.groqCloudStep4),
+                InkWell(
+                  onTap: () => launchUrl(
+                      Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+                  child: Text('See Guide',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            _buildApiKeyGuide(
+              title: 'Groq Models & Rate Limits:',
+              children: [
+                const Text('View available models and free-tier rate limits:'),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
+                  child: Text('console.groq.com/docs/models',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+                InkWell(
+                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+                  child: Text('Rate Limits',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Small provider branding row used inside the API Keys card.
+  Widget _buildProviderKeyHeader(
+      String name, Color color, IconData icon, String subtitle) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 18),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(name,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    )),
+            Text(subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    )),
+          ],
+        ),
       ],
     );
   }
