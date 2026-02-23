@@ -12,7 +12,20 @@
           "package_name": "com.cca.fishai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "209151214292-qt3id33amlf7vefnm34qbhuvvkpo7s6g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cca.fishai",
+            "certificate_hash": "c506473dda80c87881231dd857bf296a5f747939"
+          }
+        },
+        {
+          "client_id": "209151214292-8bkjlut2mrqht6i42jg506vg59v31pqs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAqmBqMJxOQV34fToX2B952kTEqIXxfNHY"
@@ -20,9 +33,22 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209151214292-8bkjlut2mrqht6i42jg506vg59v31pqs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "209151214292-j0duvoi6ph4jb4k6j1uvuk7dbv7712f3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cca.fishai"
+              }
+            }
+          ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-5701077439648731~1582287080"
     },
     {
       "client_info": {
@@ -31,7 +57,20 @@
           "package_name": "com.cca.fishai.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cca.fishai.dev",
+            "certificate_hash": "ba120acc444b0f01a489b8f85a43a699e4760eb3"
+          }
+        },
+        {
+          "client_id": "209151214292-8bkjlut2mrqht6i42jg506vg59v31pqs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAqmBqMJxOQV34fToX2B952kTEqIXxfNHY"
@@ -39,7 +78,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209151214292-8bkjlut2mrqht6i42jg506vg59v31pqs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "209151214292-j0duvoi6ph4jb4k6j1uvuk7dbv7712f3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cca.fishai"
+              }
+            }
+          ]
         }
       }
     }
