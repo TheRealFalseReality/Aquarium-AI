@@ -38,6 +38,12 @@ const String _defaultAquapiOriginalImageUrl = '';
 /// Fallback for the "essential" AquaPi image (AquaPiEssentials.jpg).
 const String _defaultAquapiEssentialImageUrl = '';
 
+// Fish compatibility data.
+// Empty string = use the bundled local assets/fishcompat.json as fallback.
+// Set a JSON string in Remote Config to override without an app update.
+/// Fallback fish compatibility JSON (empty = use bundled local asset).
+const String _defaultFishcompatJson = '';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -91,6 +97,11 @@ class RemoteConfigKeys {
   /// (`AquaPiEssentials.jpg`) shown on the welcome-screen feature card.
   /// Empty string (default) means use the bundled `assets/AquaPiEssentials.jpg`.
   static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
+
+  // ── Fish compatibility data ───────────────────────────────────────────────
+  /// String — full JSON content of the fish compatibility database.
+  /// Empty string (default) means use the bundled `assets/fishcompat.json`.
+  static const String fishcompatJson = 'fishcompat_json';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -126,6 +137,7 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultGroqImageModel: _defaultGroqImageModel,
         RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
+        RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -149,7 +161,8 @@ class RemoteConfigService {
           'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '
           'chatHistoryLimit=$freeTierChatHistoryLimit, '
           'geminiModel=$defaultGeminiModel, '
-          'groqModel=$defaultGroqModel',
+          'groqModel=$defaultGroqModel, '
+          'fishcompatJsonLoaded=${fishcompatJson.isNotEmpty}',
         );
       }
     } catch (e) {
@@ -238,4 +251,12 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/AquaPiEssentials.jpg` should be used.
   static String get aquapiEssentialImageUrl =>
       _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, _defaultAquapiEssentialImageUrl);
+
+  // ── Fish compatibility data ─────────────────────────────────────────────────
+
+  /// Full JSON string of the fish compatibility database from Remote Config.
+  /// Returns an empty string when not set in Remote Config,
+  /// signalling that the bundled `assets/fishcompat.json` should be used.
+  static String get fishcompatJson =>
+      _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
 }
