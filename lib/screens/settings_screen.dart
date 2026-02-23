@@ -2815,37 +2815,6 @@ subtitle: Builder(builder: (context) {
     );
   }
 
-  /// Small provider branding row used inside the API Keys card.
-  Widget _buildProviderKeyHeader(
-      String name, Color color, IconData icon, String subtitle) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 18),
-        ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(name,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    )),
-            Text(subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    )),
-          ],
-        ),
-      ],
-    );
-  }
 
   /// Modern inline toggle tile for the "Use Free Provider" dev key option.
   Widget _buildDevKeyToggle({
