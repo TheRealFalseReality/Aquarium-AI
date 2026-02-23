@@ -124,6 +124,12 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     }
 
     final response = await _service.queryRemoveAdsProduct();
+    if (response.error != null) {
+      PurchaseService.log(
+          'queryProductDetails error: code=${response.error!.code} '
+          'message=${response.error!.message} '
+          'details=${response.error!.details}');
+    }
     if (response.notFoundIDs.isNotEmpty) {
       PurchaseService.log('Product not found: ${response.notFoundIDs}');
     }
