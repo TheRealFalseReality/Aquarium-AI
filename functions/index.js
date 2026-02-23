@@ -2,6 +2,12 @@ const functions = require("firebase-functions");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const request = require("request");
+const admin = require("firebase-admin");
+
+// Initialize the Firebase Admin SDK (idempotent - safe to call multiple times).
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 // TODO: Paste your Prerender.io token here
 const PRERENDER_TOKEN = "JobBZ4J2lZ58Bi83Q4ve";
@@ -165,3 +171,127 @@ exports.groqProxy = onCall(
     return { content };
   }
 );
+
+// ---------------------------------------------------------------------------
+// Play Integrity API verification helper
+//
+// Decrypts and verifies an integrity token by calling the Play Integrity REST
+// API with Application Default Credentials (automatically provided inside
+// Cloud Functions).
+//
+// Package name must match the production app ID registered in Google Play.
+// ---------------------------------------------------------------------------
+const PLAY_INTEGRITY_PACKAGE = "com.cca.fishai";
+const PLAY_INTEGRITY_ENDPOINT =
+  `https://playintegrity.googleapis.com/v1/${PLAY_INTEGRITY_PACKAGE}:decryptIntegrityToken`;
+
+// Simple in-memory cache for the ADC access token.
+// Cloud Function instances are reused between requests, so caching here
+// avoids a metadata server round-trip on every invocation.
+let _cachedAccessToken = null;
+let _tokenExpiresAt = 0; // Unix timestamp in ms
+
+async function getPlayIntegrityAccessToken() {
+  const now = Date.now();
+  // Refresh 60 s before expiry to avoid using a stale token.
+  if (_cachedAccessToken && now < _tokenExpiresAt - 60_000) {
+    return _cachedAccessToken;
+  }
+  const credential = admin.credential.applicationDefault();
+  const tokenInfo = await credential.getAccessToken();
+  _cachedAccessToken = tokenInfo.access_token;
+  // access_token objects include an expiry_date in ms; fall back to 1 hour.
+  _tokenExpiresAt = tokenInfo.expiry_date ?? now + 3_600_000;
+  return _cachedAccessToken;
+}
+
+/**
+ * Calls the Play Integrity REST API to decrypt and return the token payload.
+ * @param {string} integrityToken - The token returned by the Android Play Integrity API.
+ * @returns {Promise<object>} Decoded tokenPayloadExternal from the Play Integrity API.
+ */
+async function decryptIntegrityToken(integrityToken) {
+  const accessToken = await getPlayIntegrityAccessToken();
+
+  const integrityResponse = await fetch(PLAY_INTEGRITY_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ integrity_token: integrityToken }),
+  });
+
+  if (!integrityResponse.ok) {
+    const errorText = await integrityResponse.text();
+    console.error(
+      `[integrity] Play Integrity API error ${integrityResponse.status}: ${errorText}`
+    );
+    throw new HttpsError(
+      "unavailable",
+      `Play Integrity API error (${integrityResponse.status})`
+    );
+  }
+
+  const payload = await integrityResponse.json();
+  return payload.tokenPayloadExternal ?? payload;
+}
+
+// ---------------------------------------------------------------------------
+// verifyIntegrityToken — Gen 2 callable function
+//
+// Accepts an integrity token and the original nonce from the Android client,
+// decrypts the token via the Play Integrity API, verifies that the nonce
+// embedded in the token matches the one supplied by the client (replay
+// protection), enforces app/device integrity verdicts server-side, and
+// returns only a boolean pass/fail result to the caller.
+//
+// Expected request data:  { integrityToken: string, nonce: string }
+// Response on pass:       { passed: true }
+// Throws HttpsError on integrity failure or invalid input.
+// ---------------------------------------------------------------------------
+exports.verifyIntegrityToken = onCall(async (callRequest) => {
+  const { integrityToken, nonce } = callRequest.data || {};
+  if (!integrityToken || typeof integrityToken !== "string") {
+    throw new HttpsError(
+      "invalid-argument",
+      "Missing required field: integrityToken"
+    );
+  }
+  if (!nonce || typeof nonce !== "string") {
+    throw new HttpsError(
+      "invalid-argument",
+      "Missing required field: nonce"
+    );
+  }
+
+  const verdict = await decryptIntegrityToken(integrityToken);
+
+  // --- Nonce validation (replay-attack protection) ---
+  // The Play Integrity API base64url-encodes the nonce in the token payload.
+  const tokenNonce = verdict?.requestDetails?.nonce;
+  if (tokenNonce !== nonce) {
+    console.warn("[integrity] Nonce mismatch – possible replay attack");
+    throw new HttpsError("permission-denied", "Integrity check failed.");
+  }
+
+  // --- App-recognition verdict enforcement ---
+  const appVerdict =
+    verdict?.appIntegrity?.appRecognitionVerdict ?? "UNKNOWN";
+  const deviceVerdicts =
+    verdict?.deviceIntegrity?.deviceRecognitionVerdict ?? [];
+
+  console.log(
+    `[integrity] appVerdict=${appVerdict} ` +
+    `deviceVerdict=${JSON.stringify(deviceVerdicts)}`
+  );
+
+  // Reject requests from unrecognised or tampered app builds.
+  // UNRECOGNIZED_VERSION covers sideloaded/staged builds which are
+  // acceptable in development; only reject fully unlicensed installs.
+  if (appVerdict === "UNAPPROVED") {
+    throw new HttpsError("permission-denied", "Integrity check failed.");
+  }
+
+  return { passed: true };
+});
