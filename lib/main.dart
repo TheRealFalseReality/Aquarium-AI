@@ -28,6 +28,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
+import './services/device_id_service.dart';
 import './services/notification_service.dart';
 import './services/remote_config_service.dart';
 import '../l10n/app_localizations.dart';
@@ -101,7 +102,15 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Pre-warm the device ID so the first rate-limit check can use the cached
+  // value without introducing extra async latency.
+  DeviceIdService.getDeviceId().catchError((error) {
+    if (kDebugMode) {
+      debugPrint('DeviceIdService initialization error: $error');
+    }
+  });
+
   // Configure system UI overlay for edge-to-edge display
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

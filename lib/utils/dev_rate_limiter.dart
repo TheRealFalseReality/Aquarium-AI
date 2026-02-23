@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/device_id_service.dart';
 import '../services/remote_config_service.dart';
 
 /// Result of a rate-limit check.
@@ -22,12 +23,19 @@ enum DevRateLimitResult {
 ///
 /// Limits are fetched at runtime from [RemoteConfigService], with
 /// the in-app fallback defaults used when Firebase is unreachable.
+///
+/// All [SharedPreferences] keys are prefixed with a per-device identifier
+/// provided by [DeviceIdService] so that limits are scoped to the device
+/// rather than to a global, easily-guessable key name.
 class DevRateLimiter {
-  static const String _requestTimestampsKey = 'dev_rate_request_timestamps';
-  static const String _requestDailyCountKey = 'dev_rate_request_daily_count';
-  static const String _requestDailyDateKey = 'dev_rate_request_daily_date';
-  static const String _photoDailyCountKey = 'dev_rate_photo_daily_count';
-  static const String _photoDailyDateKey = 'dev_rate_photo_daily_date';
+  static const String _requestTimestampsSuffix = 'dev_rate_request_timestamps';
+  static const String _requestDailyCountSuffix = 'dev_rate_request_daily_count';
+  static const String _requestDailyDateSuffix = 'dev_rate_request_daily_date';
+  static const String _photoDailyCountSuffix = 'dev_rate_photo_daily_count';
+  static const String _photoDailyDateSuffix = 'dev_rate_photo_daily_date';
+
+  /// Returns a SharedPreferences key scoped to [deviceId].
+  static String _key(String deviceId, String suffix) => '${deviceId}_$suffix';
 
   // ----------------------------------------------------------------
   // Per-minute + per-day request limit
@@ -44,13 +52,18 @@ class DevRateLimiter {
   /// returns [DevRateLimitResult.allowed].
   static Future<DevRateLimitResult> checkAndRecordRequest() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
     final todayStr = _todayString();
 
+    final requestTimestampsKey = _key(deviceId, _requestTimestampsSuffix);
+    final requestDailyCountKey = _key(deviceId, _requestDailyCountSuffix);
+    final requestDailyDateKey = _key(deviceId, _requestDailyDateSuffix);
+
     // --- per-day check ---
-    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    final storedDate = prefs.getString(requestDailyDateKey) ?? '';
     final dailyCount = storedDate == todayStr
-        ? (prefs.getInt(_requestDailyCountKey) ?? 0)
+        ? (prefs.getInt(requestDailyCountKey) ?? 0)
         : 0;
     if (dailyCount >= RemoteConfigService.maxRequestsPerDay) {
       return DevRateLimitResult.dailyLimitReached;
@@ -58,7 +71,7 @@ class DevRateLimiter {
 
     // --- per-minute check ---
     final windowStart = now.subtract(const Duration(minutes: 1));
-    final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
+    final raw = prefs.getStringList(requestTimestampsKey) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
         .whereType<DateTime>()
@@ -72,11 +85,11 @@ class DevRateLimiter {
     // --- record ---
     recent.add(now);
     await prefs.setStringList(
-      _requestTimestampsKey,
+      requestTimestampsKey,
       recent.map((d) => d.toIso8601String()).toList(),
     );
-    await prefs.setString(_requestDailyDateKey, todayStr);
-    await prefs.setInt(_requestDailyCountKey, dailyCount + 1);
+    await prefs.setString(requestDailyDateKey, todayStr);
+    await prefs.setInt(requestDailyCountKey, dailyCount + 1);
 
     return DevRateLimitResult.allowed;
   }
@@ -87,10 +100,11 @@ class DevRateLimiter {
   /// Returns 0 if a slot is already available.
   static Future<int> secondsUntilNextSlot() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
     final windowStart = now.subtract(const Duration(minutes: 1));
 
-    final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
+    final raw = prefs.getStringList(_key(deviceId, _requestTimestampsSuffix)) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
         .whereType<DateTime>()
@@ -109,11 +123,12 @@ class DevRateLimiter {
   /// Returns the number of AI requests remaining today.
   static Future<int> remainingRequestsToday() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    final storedDate = prefs.getString(_key(deviceId, _requestDailyDateSuffix)) ?? '';
     final count = storedDate == todayStr
-        ? (prefs.getInt(_requestDailyCountKey) ?? 0)
+        ? (prefs.getInt(_key(deviceId, _requestDailyCountSuffix)) ?? 0)
         : 0;
 
     final remaining = RemoteConfigService.maxRequestsPerDay - count;
@@ -130,30 +145,35 @@ class DevRateLimiter {
   /// Returns `false` (without incrementing) if the limit is exceeded.
   static Future<bool> checkAndRecordPhotoAnalysis() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_photoDailyDateKey) ?? '';
+    final photoDailyCountKey = _key(deviceId, _photoDailyCountSuffix);
+    final photoDailyDateKey = _key(deviceId, _photoDailyDateSuffix);
+
+    final storedDate = prefs.getString(photoDailyDateKey) ?? '';
     int count = storedDate == todayStr
-        ? (prefs.getInt(_photoDailyCountKey) ?? 0)
+        ? (prefs.getInt(photoDailyCountKey) ?? 0)
         : 0;
 
     if (count >= RemoteConfigService.maxPhotoAnalysesPerDay) {
       return false;
     }
 
-    await prefs.setString(_photoDailyDateKey, todayStr);
-    await prefs.setInt(_photoDailyCountKey, count + 1);
+    await prefs.setString(photoDailyDateKey, todayStr);
+    await prefs.setInt(photoDailyCountKey, count + 1);
     return true;
   }
 
   /// Returns the number of photo analyses remaining for today.
   static Future<int> remainingPhotoAnalysesToday() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_photoDailyDateKey) ?? '';
+    final storedDate = prefs.getString(_key(deviceId, _photoDailyDateSuffix)) ?? '';
     final count = storedDate == todayStr
-        ? (prefs.getInt(_photoDailyCountKey) ?? 0)
+        ? (prefs.getInt(_key(deviceId, _photoDailyCountSuffix)) ?? 0)
         : 0;
 
     final remaining = RemoteConfigService.maxPhotoAnalysesPerDay - count;
@@ -169,11 +189,16 @@ class DevRateLimiter {
   /// against the user's rate limits.
   static Future<void> undoLastRequest() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
     final windowStart = now.subtract(const Duration(minutes: 1));
 
+    final requestTimestampsKey = _key(deviceId, _requestTimestampsSuffix);
+    final requestDailyCountKey = _key(deviceId, _requestDailyCountSuffix);
+    final requestDailyDateKey = _key(deviceId, _requestDailyDateSuffix);
+
     // Undo per-minute slot
-    final raw = prefs.getStringList(_requestTimestampsKey) ?? [];
+    final raw = prefs.getStringList(requestTimestampsKey) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
         .whereType<DateTime>()
@@ -184,18 +209,18 @@ class DevRateLimiter {
       recent.sort();
       recent.removeLast();
       await prefs.setStringList(
-        _requestTimestampsKey,
+        requestTimestampsKey,
         recent.map((d) => d.toIso8601String()).toList(),
       );
     }
 
     // Undo daily count
     final todayStr = _todayString();
-    final storedDate = prefs.getString(_requestDailyDateKey) ?? '';
+    final storedDate = prefs.getString(requestDailyDateKey) ?? '';
     if (storedDate == todayStr) {
-      final count = prefs.getInt(_requestDailyCountKey) ?? 0;
+      final count = prefs.getInt(requestDailyCountKey) ?? 0;
       if (count > 0) {
-        await prefs.setInt(_requestDailyCountKey, count - 1);
+        await prefs.setInt(requestDailyCountKey, count - 1);
       }
     }
   }
@@ -204,15 +229,19 @@ class DevRateLimiter {
   /// analysis call does not count against the daily limit.
   static Future<void> undoPhotoAnalysis() async {
     final prefs = await SharedPreferences.getInstance();
+    final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_photoDailyDateKey) ?? '';
+    final photoDailyCountKey = _key(deviceId, _photoDailyCountSuffix);
+    final photoDailyDateKey = _key(deviceId, _photoDailyDateSuffix);
+
+    final storedDate = prefs.getString(photoDailyDateKey) ?? '';
     if (storedDate != todayStr) return;
 
-    final count = prefs.getInt(_photoDailyCountKey) ?? 0;
+    final count = prefs.getInt(photoDailyCountKey) ?? 0;
     if (count <= 0) return;
 
-    await prefs.setInt(_photoDailyCountKey, count - 1);
+    await prefs.setInt(photoDailyCountKey, count - 1);
   }
 
   // ----------------------------------------------------------------
