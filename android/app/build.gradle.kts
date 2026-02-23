@@ -95,4 +95,7 @@ dependencies {
     // Add the Crashlytics dependency
     implementation("com.google.firebase:firebase-crashlytics-ktx:18.5.1")
     implementation("com.google.firebase:firebase-analytics")
+
+    // Play Integrity API
+    implementation("com.google.android.play:integrity:1.4.0")
 }
