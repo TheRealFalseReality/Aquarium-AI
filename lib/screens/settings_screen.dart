@@ -2511,12 +2511,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.blue,
                         )),
                 subtitle: Text(
-                  _geminiApiKeyController.text.isNotEmpty ? '••••••••' : 'No key set',
+                  "Google's most capable AI model",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: _geminiApiKeyController.text.isNotEmpty
-                            ? Colors.green.shade600
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                ),
+                trailing: Icon(
+                  _geminiApiKeyController.text.isNotEmpty
+                      ? Icons.check_circle_outline
+                      : Icons.warning_amber_rounded,
+                  color: _geminiApiKeyController.text.isNotEmpty
+                      ? Colors.green.shade600
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 18,
                 ),
                 initiallyExpanded: false,
                 tilePadding: EdgeInsets.zero,
@@ -2525,7 +2532,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _geminiApiKeyController,
                     obscureText: !_isGeminiApiKeyVisible,
-                    // Rebuild dialog to update the ExpansionTile status subtitle.
+                    // Rebuild dialog to update the key-status trailing icon.
                     onChanged: (_) => setDialogState?.call(() {}),
                     decoration: InputDecoration(
                       labelText: 'Google AI API Key',
@@ -2596,109 +2603,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
             const Divider(height: 16),
 
-            // ── OpenAI ────────────────────────────────────────────────────
-            Theme(
-              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.psychology, color: Colors.green, size: 18),
-                ),
-                title: Text('OpenAI',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        )),
-                subtitle: Text(
-                  _openAIApiKeyController.text.isNotEmpty ? '••••••••' : 'No key set',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: _openAIApiKeyController.text.isNotEmpty
-                            ? Colors.green.shade600
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                initiallyExpanded: false,
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: 8),
-                children: [
-                  TextField(
-                    controller: _openAIApiKeyController,
-                    obscureText: !_isOpenAIApiKeyVisible,
-                    // Rebuild dialog to update the ExpansionTile status subtitle.
-                    onChanged: (_) => setDialogState?.call(() {}),
-                    decoration: InputDecoration(
-                      labelText: 'OpenAI API Key',
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          final v = !_isOpenAIApiKeyVisible;
-                          setState(() => _isOpenAIApiKeyVisible = v);
-                          setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildApiKeyGuide(
-                    title: 'How to get your OpenAI API key:',
-                    children: [
-                      Text(l10n.openAIStep1),
-                      InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
-                        child: Text('https://platform.openai.com/api-keys',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                      Text(l10n.openAIStep2),
-                      Text(l10n.openAIStep3),
-                      InkWell(
-                        onTap: () => launchUrl(Uri.parse(
-                            'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
-                        child: Text('See Guide',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                  _buildApiKeyGuide(
-                    title: 'OpenAI Models & Rate Limits:',
-                    children: [
-                      const Text('View available models and usage limits:'),
-                      InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
-                        child: Text('platform.openai.com/docs/models',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                      InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
-                        child: Text('Rate Limits',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 16),
-
             // ── Groq ──────────────────────────────────────────────────────
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -2716,18 +2620,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           fontWeight: FontWeight.bold,
                           color: Colors.orange,
                         )),
-subtitle: Builder(builder: (context) {
+                subtitle: Text(
+                  'Lightning-fast LLM inference',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                trailing: Builder(builder: (context) {
                   final usingFreeAi = _useDevGroqKeyForText || _useDevGroqKeyForImage;
                   final hasKey = _groqApiKeyController.text.isNotEmpty;
-                  final subtitleText = usingFreeAi ? 'Using Free AI' : (hasKey ? '••••••••' : 'No key set');
-                  final subtitleColor = usingFreeAi
-                      ? Colors.amber.shade700
-                      : hasKey
-                          ? Colors.green.shade600
-                          : Theme.of(context).colorScheme.onSurfaceVariant;
-                  return Text(
-                    subtitleText,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: subtitleColor),
+                  return Icon(
+                    usingFreeAi
+                        ? Icons.bolt
+                        : hasKey
+                            ? Icons.check_circle_outline
+                            : Icons.warning_amber_rounded,
+                    color: usingFreeAi
+                        ? Colors.amber.shade700
+                        : hasKey
+                            ? Colors.green.shade600
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 18,
                   );
                 }),
                 initiallyExpanded: false,
@@ -2739,8 +2652,8 @@ subtitle: Builder(builder: (context) {
                     TextField(
                       controller: _groqApiKeyController,
                       obscureText: !_isGroqApiKeyVisible,
-                      // Rebuild dialog to update the ExpansionTile status subtitle.
-                    onChanged: (_) => setDialogState?.call(() {}),
+                      // Rebuild dialog to update the key-status trailing icon.
+                      onChanged: (_) => setDialogState?.call(() {}),
                       decoration: InputDecoration(
                         labelText: 'Groq API Key',
                         border: const OutlineInputBorder(),
@@ -2798,6 +2711,116 @@ subtitle: Builder(builder: (context) {
                       ),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+                        child: Text('Rate Limits',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 16),
+
+            // ── OpenAI ────────────────────────────────────────────────────
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.psychology, color: Colors.green, size: 18),
+                ),
+                title: Text('OpenAI',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        )),
+                subtitle: Text(
+                  'ChatGPT and GPT models by OpenAI',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                trailing: Icon(
+                  _openAIApiKeyController.text.isNotEmpty
+                      ? Icons.check_circle_outline
+                      : Icons.warning_amber_rounded,
+                  color: _openAIApiKeyController.text.isNotEmpty
+                      ? Colors.green.shade600
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 18,
+                ),
+                initiallyExpanded: false,
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                children: [
+                  TextField(
+                    controller: _openAIApiKeyController,
+                    obscureText: !_isOpenAIApiKeyVisible,
+                    // Rebuild dialog to update the key-status trailing icon.
+                    onChanged: (_) => setDialogState?.call(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'OpenAI API Key',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          final v = !_isOpenAIApiKeyVisible;
+                          setState(() => _isOpenAIApiKeyVisible = v);
+                          setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildApiKeyGuide(
+                    title: 'How to get your OpenAI API key:',
+                    children: [
+                      Text(l10n.openAIStep1),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
+                        child: Text('https://platform.openai.com/api-keys',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      Text(l10n.openAIStep2),
+                      Text(l10n.openAIStep3),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse(
+                            'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+                        child: Text('See Guide',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  _buildApiKeyGuide(
+                    title: 'OpenAI Models & Rate Limits:',
+                    children: [
+                      const Text('View available models and usage limits:'),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
+                        child: Text('platform.openai.com/docs/models',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
                         child: Text('Rate Limits',
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
