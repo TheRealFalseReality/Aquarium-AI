@@ -1,5 +1,6 @@
 import 'package:fish_ai/services/fish_data_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -8,6 +9,7 @@ void main() {
     late FishDataService service;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       service = FishDataService();
     });
 
@@ -49,7 +51,7 @@ void main() {
       expect(marine, isNotEmpty);
     });
 
-    test('clearCache removes cached data', () async {
+    test('clearCache removes in-memory cached data', () async {
       // Load data first
       await service.loadFishData();
       expect(service.getCachedFishByCategory('freshwater'), isNotNull);
@@ -92,6 +94,39 @@ void main() {
       expect(firstMarineFish.commonNames, isList);
       expect(firstMarineFish.compatible, isList);
     });
+
+    test('loadFishData persists JSON and version to SharedPreferences', () async {
+      await service.loadFishData();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('fishcompat_cached_version'), isNotNull);
+      expect(prefs.getString('fishcompat_cached_json'), isNotNull);
+      expect(prefs.getString('fishcompat_cached_json'), isNotEmpty);
+    });
+
+    test('clearPersistentCache removes SharedPreferences entries', () async {
+      await service.loadFishData();
+
+      await service.clearPersistentCache();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('fishcompat_cached_version'), isNull);
+      expect(prefs.getString('fishcompat_cached_json'), isNull);
+      expect(service.getCachedFishByCategory('freshwater'), isNull);
+    });
+
+    test('loadFishData uses SharedPreferences cache on second service instance',
+        () async {
+      // Populate the persistent cache via the first service instance.
+      await service.loadFishData();
+
+      // A fresh service instance (simulating an app restart) should read from
+      // SharedPreferences and return valid fish data.
+      final service2 = FishDataService();
+      final data = await service2.loadFishData();
+
+      expect(data.containsKey('freshwater'), isTrue);
+      expect(data['freshwater'], isNotEmpty);
+    });
   });
 }
-
