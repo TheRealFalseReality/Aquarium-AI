@@ -1728,7 +1728,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (forTextUseCase != false) ...[
+          if (forTextUseCase == true) ...[
             TextField(
               controller: _geminiModelController,
               decoration: const InputDecoration(
@@ -1738,7 +1738,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          if (forTextUseCase != true) ...[
+          if (forTextUseCase == false) ...[
             TextField(
               controller: _geminiImageModelController,
               decoration: const InputDecoration(
@@ -1932,7 +1932,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (forTextUseCase != false) ...[
+          if (forTextUseCase == true) ...[
             TextField(
               controller: _chatGPTModelController,
               enabled: true,
@@ -1943,7 +1943,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          if (forTextUseCase != true) ...[
+          if (forTextUseCase == false) ...[
             TextField(
               controller: _chatGPTImageModelController,
               enabled: true,
@@ -2145,7 +2145,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (forTextUseCase != false) ...[
+          if (forTextUseCase == true) ...[
             TextField(
               controller: _groqModelController,
               enabled: !usingFreeKey,
@@ -2157,7 +2157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          if (forTextUseCase != true) ...[
+          if (forTextUseCase == false) ...[
             TextField(
               controller: _groqImageModelController,
               enabled: !usingFreeKey,
