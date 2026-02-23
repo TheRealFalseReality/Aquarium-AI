@@ -905,7 +905,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
         if (!_useDevGroqKeyForText) ...[
-          const SizedBox(height: 16),
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -1001,8 +1000,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ...[
-                      OutlinedButton.icon(
+                    OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedTextProvider) {
                             case AIProvider.gemini:
@@ -1018,8 +1016,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: const Icon(Icons.refresh, size: 18),
                         label: Text(l10n.resetModels),
                       ),
-                      const SizedBox(width: 8),
-                    ],
+                    const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: () => _saveSettings(context),
                       icon: const Icon(Icons.save, size: 18),
@@ -1034,7 +1031,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ], // end if (!_useDevGroqKeyForText)
         // ─── Image / Photo ────────────────────────────────────────────────────
         if (!_useDevGroqKeyForImage) ...[
-          const SizedBox(height: 16),
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -1114,8 +1110,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ...[
-                      OutlinedButton.icon(
+                    OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedImageProvider) {
                             case AIProvider.gemini:
@@ -1131,8 +1126,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: const Icon(Icons.refresh, size: 18),
                         label: Text(l10n.resetModels),
                       ),
-                      const SizedBox(width: 8),
-                    ],
+                    const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: () => _saveSettings(context),
                       icon: const Icon(Icons.save, size: 18),
