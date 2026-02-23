@@ -42,16 +42,16 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
       
       - name: Build Production AAB
-        run: flutter build appbundle --flavor production --release --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+        run: flutter build appbundle --flavor production --release
       
       - name: Build Production APK
-        run: flutter build apk --flavor production --release --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+        run: flutter build apk --flavor production --release
       
       - name: Build Staging AAB
-        run: flutter build appbundle --flavor staging --release --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+        run: flutter build appbundle --flavor staging --release
       
       - name: Build Staging APK
-        run: flutter build apk --flavor staging --release --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+        run: flutter build apk --flavor staging --release
       
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2

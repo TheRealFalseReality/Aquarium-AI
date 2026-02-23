@@ -436,12 +436,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     ref.listen<ModelState>(modelProvider, (previous, next) async {
       // Show the API key dialog once loading completes if:
       //   • no user-supplied key for any provider, AND
+      //   • the free AI proxy tier is also unavailable (freeAiEnabled = false), AND
       //   • AI features are enabled, AND
       //   • the user hasn't chosen "Never show again"
       if (previous!.isLoading && !next.isLoading &&
           next.geminiApiKey.isEmpty &&
           next.openAIApiKey.isEmpty &&
           next.groqApiKey.isEmpty &&
+          !RemoteConfigService.freeAiEnabled &&
           ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (!shouldShow || !mounted) return;

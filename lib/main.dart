@@ -109,6 +109,7 @@ void main() async {
     if (kDebugMode) {
       debugPrint('DeviceIdService initialization error: $error');
     }
+    return '';
   });
 
   // Configure system UI overlay for edge-to-edge display

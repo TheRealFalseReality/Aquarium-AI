@@ -548,7 +548,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // Warning: shown when the free AI tier is disabled server-side but the
         // user has no own Groq key configured.
         if (appSettings.enableAI &&
-            developerGroqApiKey.isNotEmpty &&
             !RemoteConfigService.freeAiEnabled &&
             !models.hasGroqKey) ...[
           const SizedBox(height: 8),
@@ -764,7 +763,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       padding: const EdgeInsets.all(16.0),
       children: [
         // ─── Free-tier notice (collapsible; always shown when a dev key is available) ──
-        if (developerGroqApiKey.isNotEmpty) Theme(
+        if (RemoteConfigService.freeAiEnabled) Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -894,7 +893,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 // Free key toggle (Groq only)
                 if (_selectedTextProvider == AIProvider.groq &&
-                    developerGroqApiKey.isNotEmpty) ...[
+                    RemoteConfigService.freeAiEnabled) ...[
                   const SizedBox(height: 8),
                   _buildDevKeyToggle(
                     label: 'Use Free Provider',
@@ -1015,7 +1014,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 // Free key toggle (Groq only)
                 if (_selectedImageProvider == AIProvider.groq &&
-                    developerGroqApiKey.isNotEmpty) ...[
+                    RemoteConfigService.freeAiEnabled) ...[
                   const SizedBox(height: 8),
                   _buildDevKeyToggle(
                     label: 'Use Free Provider',

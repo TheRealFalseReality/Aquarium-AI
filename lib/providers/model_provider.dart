@@ -96,22 +96,29 @@ class ModelState {
   /// Backwards-compat alias — returns [effectiveGroqApiKeyForText].
   String get effectiveGroqApiKey => effectiveGroqApiKeyForText;
 
-  /// Whether the app has any Groq key available (user-provided or developer fallback).
-  bool get hasGroqKey => effectiveGroqApiKeyForText.isNotEmpty;
+  /// Whether the app has any Groq key available (user-provided or via the
+  /// server-side developer proxy).
+  bool get hasGroqKey =>
+      effectiveGroqApiKeyForText.isNotEmpty || usingDeveloperGroqKeyForText;
 
-  /// Whether text/chat operations are currently using the developer Groq key.
+  /// Whether text/chat operations are currently routing through the server-side
+  /// developer Groq proxy (Firebase Cloud Function + Secret Manager).
+  ///
+  /// True when the free AI tier is enabled server-side AND the user has not
+  /// provided their own Groq key (or has explicitly chosen the free tier).
+  /// Note: [developerGroqApiKey] is intentionally empty in production builds;
+  /// the key lives in Firebase Secret Manager and is read by the Cloud Function.
   bool get usingDeveloperGroqKeyForText =>
       RemoteConfigService.freeAiEnabled &&
-      developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForText || groqApiKey.isEmpty);
 
-  /// Whether image/photo operations are currently using the developer Groq key.
+  /// Whether image/photo operations are currently routing through the
+  /// server-side developer Groq proxy.
   bool get usingDeveloperGroqKeyForImage =>
       RemoteConfigService.freeAiEnabled &&
-      developerGroqApiKey.isNotEmpty &&
       (useDevGroqKeyForImage || groqApiKey.isEmpty);
 
-  /// Whether either text OR image operations are using the developer Groq key.
+  /// Whether either text OR image operations are using the developer Groq proxy.
   /// Used for UI indicators on the main settings page.
   bool get usingDeveloperGroqKeyForAny =>
       usingDeveloperGroqKeyForText || usingDeveloperGroqKeyForImage;
