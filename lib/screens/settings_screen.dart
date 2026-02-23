@@ -396,8 +396,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
-  /// Saves all three API keys without validation (empty keys are valid).
-  void _saveApiKeys(BuildContext context, [StateSetter? setDialogState]) {
+  /// Returns a list of validation error messages for the current dialog state.
+  /// A key is required for a provider when its Free AI toggle is OFF and that
+  /// provider is currently selected for text or image use.
+  List<String> _getValidationErrors() {
+    final l10n = AppLocalizations.of(context)!;
+    final errors = <String>[];
+
+    // Gemini key required when selected (text or image) and Free AI is off
+    final geminiNeededForText =
+        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.gemini;
+    final geminiNeededForImage =
+        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.gemini;
+    if ((geminiNeededForText || geminiNeededForImage) &&
+        _geminiApiKeyController.text.trim().isEmpty) {
+      errors.add(l10n.enterGeminiApiKey);
+    }
+
+    // OpenAI key required when selected (text or image) and Free AI is off
+    final openAINeededForText =
+        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.openAI;
+    final openAINeededForImage =
+        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.openAI;
+    if ((openAINeededForText || openAINeededForImage) &&
+        _openAIApiKeyController.text.trim().isEmpty) {
+      errors.add(l10n.enterOpenAIApiKey);
+    }
+
+    // Groq key required when selected (text or image) and Free AI is off
+    final groqNeededForText =
+        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.groq;
+    final groqNeededForImage =
+        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.groq;
+    if ((groqNeededForText || groqNeededForImage) &&
+        _groqApiKeyController.text.trim().isEmpty) {
+      errors.add(l10n.enterGroqApiKey);
+    }
+
+    return errors;
+  }
+
+  /// Saves all three API keys (and full provider/model state).
+  /// Returns true on success, false if validation fails.
+  bool _saveApiKeys(BuildContext context, [StateSetter? setDialogState]) {
+    final errors = _getValidationErrors();
+    if (errors.isNotEmpty) {
+      context.showAccessibleMessage(errors.first);
+      return false;
+    }
     final l10n = AppLocalizations.of(context)!;
     ref.read(modelProvider.notifier).setModels(
           newGeminiModel: _geminiModelController.text,
@@ -417,6 +463,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
     setDialogState?.call(() {});
+    return true;
   }
 
   /// Returns true if any field in the AI Provider dialog differs from saved state.
@@ -454,6 +501,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final keysChanged = _geminiApiKeyController.text != saved.geminiApiKey ||
         _openAIApiKeyController.text != saved.openAIApiKey ||
         _groqApiKeyController.text != saved.groqApiKey;
+    final validationErrors = _getValidationErrors();
 
     showDialog<void>(
       context: dialogContext,
@@ -468,6 +516,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             if (textModelChanged) const Text('• Text model changed'),
             if (imageModelChanged) const Text('• Image model changed'),
             if (keysChanged) const Text('• API keys updated'),
+            if (validationErrors.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(children: [
+                Icon(Icons.warning_amber_rounded,
+                    color: Colors.amber.shade700, size: 16),
+                const SizedBox(width: 6),
+                Text('Cannot save — fix these first:',
+                    style: TextStyle(
+                        color: Colors.amber.shade800,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12)),
+              ]),
+              ...validationErrors.map((e) => Text('  • $e',
+                  style: TextStyle(color: Colors.amber.shade900, fontSize: 12))),
+            ],
           ],
         ),
         actions: [
@@ -483,16 +546,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(dialogContext).pop();
             },
           ),
-          FilledButton.icon(
-            icon: const Icon(Icons.save),
-            label: const Text('Save All & Close'),
-            onPressed: () {
-              // _saveApiKeys calls setModels with full state (provider, model, keys).
-              _saveApiKeys(dialogContext, setDialogState);
-              Navigator.of(alertContext).pop();
-              Navigator.of(dialogContext).pop();
-            },
-          ),
+          if (validationErrors.isEmpty)
+            FilledButton.icon(
+              icon: const Icon(Icons.save),
+              label: const Text('Save All & Close'),
+              onPressed: () {
+                final saved = _saveApiKeys(dialogContext, setDialogState);
+                Navigator.of(alertContext).pop();
+                if (saved) Navigator.of(dialogContext).pop();
+              },
+            ),
         ],
       ),
     );
