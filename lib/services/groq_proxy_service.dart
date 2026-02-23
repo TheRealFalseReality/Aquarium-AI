@@ -1,4 +1,5 @@
-import 'package:cloud_functions/cloud_functions.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 /// Client for the Firebase `groqProxy` Cloud Function.
 ///
@@ -6,16 +7,50 @@ import 'package:cloud_functions/cloud_functions.dart';
 /// requests are routed through this service instead of calling the Groq API
 /// directly. The actual API key lives in Firebase Secret Manager and is never
 /// sent to the client device.
+///
+/// Calls are made directly to the Firebase callable function HTTPS endpoint
+/// using the standard Firebase callable protocol (no additional SDK required).
 class GroqProxyService {
-  /// Default callable instance for chat and sendMessage calls (30 s timeout).
-  static final _callable =
-      FirebaseFunctions.instance.httpsCallable('groqProxy');
+  /// Firebase callable function endpoint for [groqProxy].
+  static const _endpoint =
+      'https://us-central1-fishai-31d40.cloudfunctions.net/groqProxy';
 
-  /// Callable instance with an extended timeout for vision requests.
-  static final _visionCallable = FirebaseFunctions.instance.httpsCallable(
-    'groqProxy',
-    options: HttpsCallableOptions(timeout: const Duration(seconds: 70)),
-  );
+  /// Internal helper: POST [data] to the callable function endpoint.
+  ///
+  /// Wraps the Firebase callable protocol (body `{"data": ...}`,
+  /// response `{"result": ...}`) and returns the `content` field from the
+  /// function's result map.  Throws an [Exception] on HTTP errors or
+  /// function-level errors returned in the `error` envelope.
+  static Future<String?> _call(
+    Map<String, dynamic> data, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final response = await http.post(
+      Uri.parse(_endpoint),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'data': data}),
+    ).timeout(timeout);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Groq proxy error (${response.statusCode}): ${response.body}');
+    }
+
+    final Map<String, dynamic> decoded;
+    try {
+      decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception(
+          'Groq proxy returned non-JSON response (${response.statusCode})');
+    }
+    if (decoded.containsKey('error')) {
+      final error = decoded['error'] as Map<String, dynamic>;
+      throw Exception('Groq proxy error: ${error['message']}');
+    }
+
+    final result = decoded['result'] as Map<String, dynamic>?;
+    return result?['content'] as String?;
+  }
 
   /// Sends a chat/text completion request via the server-side proxy.
   ///
@@ -23,20 +58,21 @@ class GroqProxyService {
   /// interchangeably at call sites.
   ///
   /// Returns the assistant reply text, or `null` if the model returned no content.
-  /// Throws a [FirebaseFunctionsException] on error.
   static Future<String?> sendChatMessages({
     required String model,
     required String systemPrompt,
     required List<Map<String, String>> messages,
-  }) async {
-    final result = await _callable.call<Map<dynamic, dynamic>>({
-      'type': 'chat',
-      'model': model,
-      'systemPrompt': systemPrompt,
-      'messages': messages,
-    });
-    return result.data['content'] as String?;
-  }
+    Duration timeout = const Duration(seconds: 30),
+  }) =>
+      _call(
+        {
+          'type': 'chat',
+          'model': model,
+          'systemPrompt': systemPrompt,
+          'messages': messages,
+        },
+        timeout: timeout,
+      );
 
   /// Sends a vision (image + text) completion request via the server-side proxy.
   ///
@@ -44,22 +80,23 @@ class GroqProxyService {
   /// interchangeably at call sites.
   ///
   /// Returns the model response text, or `null` if no content was returned.
-  /// Throws a [FirebaseFunctionsException] on error.
   static Future<String?> generateWithImage({
     required String model,
     required String prompt,
     required String base64Image,
     required String mimeType,
-  }) async {
-    final result = await _visionCallable.call<Map<dynamic, dynamic>>({
-      'type': 'vision',
-      'model': model,
-      'prompt': prompt,
-      'base64Image': base64Image,
-      'mimeType': mimeType,
-    });
-    return result.data['content'] as String?;
-  }
+    Duration timeout = const Duration(seconds: 70),
+  }) =>
+      _call(
+        {
+          'type': 'vision',
+          'model': model,
+          'prompt': prompt,
+          'base64Image': base64Image,
+          'mimeType': mimeType,
+        },
+        timeout: timeout,
+      );
 
   /// Sends a single prompt to the model via the server-side proxy.
   ///
@@ -67,18 +104,19 @@ class GroqProxyService {
   /// user message (e.g. aquarium stocking and fish compatibility providers).
   ///
   /// Returns the assistant reply text, or `null` if no content was returned.
-  /// Throws a [FirebaseFunctionsException] on error.
   static Future<String?> sendMessage({
     required String model,
     required String prompt,
-  }) async {
-    final result = await _callable.call<Map<dynamic, dynamic>>({
-      'type': 'chat',
-      'model': model,
-      'messages': [
-        {'role': 'user', 'content': prompt},
-      ],
-    });
-    return result.data['content'] as String?;
-  }
+    Duration timeout = const Duration(seconds: 30),
+  }) =>
+      _call(
+        {
+          'type': 'chat',
+          'model': model,
+          'messages': [
+            {'role': 'user', 'content': prompt},
+          ],
+        },
+        timeout: timeout,
+      );
 }

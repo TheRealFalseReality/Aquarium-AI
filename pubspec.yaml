@@ -28,7 +28,6 @@ dependencies:
   firebase_core: ^4.4.0 
   firebase_crashlytics: ^5.0.7
   firebase_remote_config: ^6.1.4
-  cloud_functions: ^5.2.0
   dart_openai: ^6.1.0
   groq: ^1.1.1 
   http: ^1.6.0
