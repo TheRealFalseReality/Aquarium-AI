@@ -273,11 +273,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   /// **Saves the settings after validation.**
-  void _saveSettings(BuildContext context) {
+  /// Saves Text/Chat provider settings independently (validates text key only).
+  void _saveTextSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
-    // Validation Check: Ensure the API key for the selected provider is not empty.
-    // Skip validation for a use-case when the Free AI toggle is ON for that use-case.
+
     if (!_useDevGroqKeyForText) {
       if (_selectedTextProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
@@ -295,6 +294,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
     }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'settings_save_text',
+      parameters: {
+        'text_provider': _selectedTextProvider.toString(),
+        'has_api_key': 'true',
+      },
+    );
+
+    ref.read(modelProvider.notifier).setModels(
+          newGeminiModel: _geminiModelController.text,
+          newGeminiImageModel: _geminiImageModelController.text,
+          newGeminiApiKey: _geminiApiKeyController.text,
+          newChatGPTModel: _chatGPTModelController.text,
+          newChatGPTImageModel: _chatGPTImageModelController.text,
+          newOpenAIApiKey: _openAIApiKeyController.text,
+          newGroqModel: _groqModelController.text,
+          newGroqImageModel: _groqImageModelController.text,
+          newGroqApiKey: _groqApiKeyController.text,
+          newActiveTextProvider: _selectedTextProvider,
+          newActiveImageProvider: _selectedImageProvider,
+          newChatHistoryLimit: _chatHistoryLimit,
+          newUseDevGroqKeyForText: _useDevGroqKeyForText,
+          newUseDevGroqKeyForImage: _useDevGroqKeyForImage,
+        );
+
+    CrashlyticsService.setAITextProvider(_selectedTextProvider.name);
+    final textModel = switch (_selectedTextProvider) {
+      AIProvider.gemini => _geminiModelController.text,
+      AIProvider.openAI => _chatGPTModelController.text,
+      AIProvider.groq => _groqModelController.text,
+    };
+    CrashlyticsService.setAITextModel(textModel);
+
+    context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
+  }
+
+  /// Saves Image/Multimedia provider settings independently (validates image key only).
+  void _saveImageSettings(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_useDevGroqKeyForImage) {
       if (_selectedImageProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
@@ -313,17 +353,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     }
 
-    // Log settings save
     AnalyticsService.logFeatureUsed(
-      featureName: 'settings_save',
+      featureName: 'settings_save_image',
       parameters: {
-        'text_provider': _selectedTextProvider.toString(),
         'image_provider': _selectedImageProvider.toString(),
-        'has_api_key': 'true', // We validated it exists above
+        'has_api_key': 'true',
       },
     );
 
-    // If validation passes, proceed to save the settings.
     ref.read(modelProvider.notifier).setModels(
           newGeminiModel: _geminiModelController.text,
           newGeminiImageModel: _geminiImageModelController.text,
@@ -341,20 +378,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           newUseDevGroqKeyForImage: _useDevGroqKeyForImage,
         );
 
-    // Update Crashlytics custom keys so crash reports reflect current AI config.
-    CrashlyticsService.setAITextProvider(_selectedTextProvider.name);
     CrashlyticsService.setAIImageProvider(_selectedImageProvider.name);
-    final textModel = switch (_selectedTextProvider) {
-      AIProvider.gemini => _geminiModelController.text,
-      AIProvider.openAI => _chatGPTModelController.text,
-      AIProvider.groq => _groqModelController.text,
-    };
     final imageModel = switch (_selectedImageProvider) {
       AIProvider.gemini => _geminiImageModelController.text,
       AIProvider.openAI => _chatGPTImageModelController.text,
       AIProvider.groq => _groqImageModelController.text,
     };
-    CrashlyticsService.setAITextModel(textModel);
     CrashlyticsService.setAIImageModel(imageModel);
 
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
@@ -1018,7 +1047,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      onPressed: () => _saveSettings(context),
+                      onPressed: () => _saveTextSettings(context),
                       icon: const Icon(Icons.save, size: 18),
                       label: Text(l10n.save),
                     ),
@@ -1128,7 +1157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      onPressed: () => _saveSettings(context),
+                      onPressed: () => _saveImageSettings(context),
                       icon: const Icon(Icons.save, size: 18),
                       label: Text(l10n.save),
                     ),
@@ -2465,222 +2494,317 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 16),
 
             // ── Google Gemini ──────────────────────────────────────────────
-            _buildProviderKeyHeader('Google Gemini', Colors.blue, Icons.auto_awesome,
-                'Google\'s most capable AI model'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _geminiApiKeyController,
-              obscureText: !_isGeminiApiKeyVisible,
-              decoration: InputDecoration(
-                labelText: 'Google AI API Key',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isGeminiApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onPressed: () {
-                    final v = !_isGeminiApiKeyVisible;
-                    setState(() => _isGeminiApiKeyVisible = v);
-                    setDialogState?.call(() => _isGeminiApiKeyVisible = v);
-                  },
+                  child: const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                 ),
+                title: Text('Google Gemini',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        )),
+                subtitle: Text(
+                  _geminiApiKeyController.text.isNotEmpty ? '••••••••' : 'No key set',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: _geminiApiKeyController.text.isNotEmpty
+                            ? Colors.green.shade600
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                initiallyExpanded: false,
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                children: [
+                  TextField(
+                    controller: _geminiApiKeyController,
+                    obscureText: !_isGeminiApiKeyVisible,
+                    onChanged: (_) => setDialogState?.call(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Google AI API Key',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isGeminiApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          final v = !_isGeminiApiKeyVisible;
+                          setState(() => _isGeminiApiKeyVisible = v);
+                          setDialogState?.call(() => _isGeminiApiKeyVisible = v);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildApiKeyGuide(
+                    title: 'How to get your Google AI API key:',
+                    children: [
+                      Text(l10n.googleAIStudioStep1),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
+                        child: Text('https://aistudio.google.com/app/apikey',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      Text(l10n.googleAIStudioStep2),
+                      Text(l10n.googleAIStudioStep3),
+                      Text(l10n.googleAIStudioStep4),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
+                        child: Text('See Guide',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  _buildApiKeyGuide(
+                    title: 'Gemini Models & Rate Limits:',
+                    children: [
+                      const Text('View available models and free-tier rate limits:'),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
+                        child: Text('ai.google.dev/gemini-api/docs/models/gemini',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
+                        child: Text('Rate Limits',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            _buildApiKeyGuide(
-              title: 'How to get your Google AI API key:',
-              children: [
-                Text(l10n.googleAIStudioStep1),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
-                  child: Text('https://aistudio.google.com/app/apikey',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                Text(l10n.googleAIStudioStep2),
-                Text(l10n.googleAIStudioStep3),
-                Text(l10n.googleAIStudioStep4),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
-                  child: Text('See Guide',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            _buildApiKeyGuide(
-              title: 'Gemini Models & Rate Limits:',
-              children: [
-                const Text('View available models and free-tier rate limits:'),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
-                  child: Text('ai.google.dev/gemini-api/docs/models/gemini',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
-                  child: Text('Rate Limits',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
 
-            const Divider(height: 24),
+            const Divider(height: 16),
 
             // ── OpenAI ────────────────────────────────────────────────────
-            _buildProviderKeyHeader('OpenAI', Colors.green, Icons.psychology,
-                'ChatGPT and GPT models by OpenAI'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _openAIApiKeyController,
-              obscureText: !_isOpenAIApiKeyVisible,
-              decoration: InputDecoration(
-                labelText: 'OpenAI API Key',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onPressed: () {
-                    final v = !_isOpenAIApiKeyVisible;
-                    setState(() => _isOpenAIApiKeyVisible = v);
-                    setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
-                  },
+                  child: const Icon(Icons.psychology, color: Colors.green, size: 18),
                 ),
+                title: Text('OpenAI',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        )),
+                subtitle: Text(
+                  _openAIApiKeyController.text.isNotEmpty ? '••••••••' : 'No key set',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: _openAIApiKeyController.text.isNotEmpty
+                            ? Colors.green.shade600
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                initiallyExpanded: false,
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                children: [
+                  TextField(
+                    controller: _openAIApiKeyController,
+                    obscureText: !_isOpenAIApiKeyVisible,
+                    onChanged: (_) => setDialogState?.call(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'OpenAI API Key',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          final v = !_isOpenAIApiKeyVisible;
+                          setState(() => _isOpenAIApiKeyVisible = v);
+                          setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildApiKeyGuide(
+                    title: 'How to get your OpenAI API key:',
+                    children: [
+                      Text(l10n.openAIStep1),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
+                        child: Text('https://platform.openai.com/api-keys',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      Text(l10n.openAIStep2),
+                      Text(l10n.openAIStep3),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse(
+                            'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+                        child: Text('See Guide',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  _buildApiKeyGuide(
+                    title: 'OpenAI Models & Rate Limits:',
+                    children: [
+                      const Text('View available models and usage limits:'),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
+                        child: Text('platform.openai.com/docs/models',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
+                        child: Text('Rate Limits',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            _buildApiKeyGuide(
-              title: 'How to get your OpenAI API key:',
-              children: [
-                Text(l10n.openAIStep1),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
-                  child: Text('https://platform.openai.com/api-keys',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                Text(l10n.openAIStep2),
-                Text(l10n.openAIStep3),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse(
-                      'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
-                  child: Text('See Guide',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            _buildApiKeyGuide(
-              title: 'OpenAI Models & Rate Limits:',
-              children: [
-                const Text('View available models and usage limits:'),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
-                  child: Text('platform.openai.com/docs/models',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
-                  child: Text('Rate Limits',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
 
-            const Divider(height: 24),
+            const Divider(height: 16),
 
             // ── Groq ──────────────────────────────────────────────────────
-            _buildProviderKeyHeader('Groq', Colors.orange, Icons.flash_on,
-                'Lightning-fast LLM inference'),
-            const SizedBox(height: 8),
-            // Show the API key field only when needed (at least one operation
-            // is not using the free tier, meaning a user-provided Groq key is required).
-            if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
-              TextField(
-                controller: _groqApiKeyController,
-                obscureText: !_isGroqApiKeyVisible,
-                decoration: InputDecoration(
-                  labelText: 'Groq API Key',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      final v = !_isGroqApiKeyVisible;
-                      setState(() => _isGroqApiKeyVisible = v);
-                      setDialogState?.call(() => _isGroqApiKeyVisible = v);
-                    },
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: const Icon(Icons.flash_on, color: Colors.orange, size: 18),
                 ),
+                title: Text('Groq',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        )),
+                subtitle: Text(
+                  (_useDevGroqKeyForText || _useDevGroqKeyForImage)
+                      ? 'Using Free AI'
+                      : _groqApiKeyController.text.isNotEmpty
+                          ? '••••••••'
+                          : 'No key set',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: (_useDevGroqKeyForText || _useDevGroqKeyForImage)
+                            ? Colors.amber.shade700
+                            : _groqApiKeyController.text.isNotEmpty
+                                ? Colors.green.shade600
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                initiallyExpanded: false,
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                children: [
+                  // Show the API key field only when at least one operation needs a user key
+                  if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
+                    TextField(
+                      controller: _groqApiKeyController,
+                      obscureText: !_isGroqApiKeyVisible,
+                      onChanged: (_) => setDialogState?.call(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Groq API Key',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            final v = !_isGroqApiKeyVisible;
+                            setState(() => _isGroqApiKeyVisible = v);
+                            setDialogState?.call(() => _isGroqApiKeyVisible = v);
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  _buildApiKeyGuide(
+                    title: 'How to get your Groq API key:',
+                    children: [
+                      Text(l10n.groqCloudStep1),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/keys')),
+                        child: Text('https://console.groq.com/keys',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      Text(l10n.groqCloudStep2),
+                      Text(l10n.groqCloudStep3),
+                      Text(l10n.groqCloudStep4),
+                      InkWell(
+                        onTap: () => launchUrl(
+                            Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+                        child: Text('See Guide',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  _buildApiKeyGuide(
+                    title: 'Groq Models & Rate Limits:',
+                    children: [
+                      const Text('View available models and free-tier rate limits:'),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
+                        child: Text('console.groq.com/docs/models',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      InkWell(
+                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+                        child: Text('Rate Limits',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-            _buildApiKeyGuide(
-              title: 'How to get your Groq API key:',
-              children: [
-                Text(l10n.groqCloudStep1),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/keys')),
-                  child: Text('https://console.groq.com/keys',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                Text(l10n.groqCloudStep2),
-                Text(l10n.groqCloudStep3),
-                Text(l10n.groqCloudStep4),
-                InkWell(
-                  onTap: () => launchUrl(
-                      Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
-                  child: Text('See Guide',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            _buildApiKeyGuide(
-              title: 'Groq Models & Rate Limits:',
-              children: [
-                const Text('View available models and free-tier rate limits:'),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
-                  child: Text('console.groq.com/docs/models',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-                InkWell(
-                  onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
-                  child: Text('Rate Limits',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ],
             ),
           ],
         ),
