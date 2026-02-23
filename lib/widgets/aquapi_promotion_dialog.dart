@@ -113,7 +113,13 @@ class AquaPiPromotionDialog extends StatelessWidget {
             height: 80,
             child: const Center(child: CircularProgressIndicator()),
           ),
-          errorWidget: (context, url, error) => const SizedBox.shrink(),
+          errorWidget: (context, url, error) => Image.asset(
+            'assets/AquaPiMainSmaller.jpg',
+            width: width,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const SizedBox.shrink(),
+          ),
         ),
       );
     }
