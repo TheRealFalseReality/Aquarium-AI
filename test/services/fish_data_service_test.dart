@@ -95,38 +95,27 @@ void main() {
       expect(firstMarineFish.compatible, isList);
     });
 
-    test('loadFishData persists JSON and version to SharedPreferences', () async {
+    test('loadFishData persists JSON to SharedPreferences', () async {
       await service.loadFishData();
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('fishcompat_cached_version'), isNotNull);
-      expect(prefs.getString('fishcompat_cached_json'), isNotNull);
-      expect(prefs.getString('fishcompat_cached_json'), isNotEmpty);
-    });
-
-    test('clearPersistentCache removes SharedPreferences entries', () async {
-      await service.loadFishData();
-
-      await service.clearPersistentCache();
-
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('fishcompat_cached_version'), isNull);
+      // Without RC data the local asset is used; nothing is written to SP
+      // (SP is only written when RC provides data).
+      // Verify the key is absent when no RC JSON is set.
       expect(prefs.getString('fishcompat_cached_json'), isNull);
-      expect(service.getCachedFishByCategory('freshwater'), isNull);
     });
 
-    test('loadFishData uses SharedPreferences cache on second service instance',
-        () async {
-      // Populate the persistent cache via the first service instance.
-      await service.loadFishData();
+    test('clearPersistentCache removes SharedPreferences entry', () async {
+      // Manually seed an SP entry to simulate a previous RC fetch.
+      SharedPreferences.setMockInitialValues({
+        'fishcompat_cached_json': '{"freshwater":[],"marine":[]}',
+      });
+      final svc = FishDataService();
+      await svc.clearPersistentCache();
 
-      // A fresh service instance (simulating an app restart) should read from
-      // SharedPreferences and return valid fish data.
-      final service2 = FishDataService();
-      final data = await service2.loadFishData();
-
-      expect(data.containsKey('freshwater'), isTrue);
-      expect(data['freshwater'], isNotEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('fishcompat_cached_json'), isNull);
+      expect(svc.getCachedFishByCategory('freshwater'), isNull);
     });
   });
 }

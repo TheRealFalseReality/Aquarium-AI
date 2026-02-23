@@ -5,27 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/fish.dart';
 import 'remote_config_service.dart';
 
-// SharedPreferences keys for the persistent fish-compat cache.
-const String _prefKeyVersion = 'fishcompat_cached_version';
+// SharedPreferences key for the persistent fish-compat cache.
 const String _prefKeyJson = 'fishcompat_cached_json';
 
 /// Centralized service for loading and caching fish data.
 ///
 /// Data is sourced in priority order:
-///   1. In-memory cache (fastest — cleared when [clearCache] is called or
-///      when the Remote Config version changes).
-///   2. SharedPreferences persistent cache (survives app restarts; invalidated
-///      automatically when the [RemoteConfigKeys.fishcompatVersion] token
-///      changes).
-///   3. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
-///      updating fish data without an app-store release).
+///   1. In-memory cache (fastest — cleared when [clearCache] is called).
+///   2. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
+///      updating fish data without an app-store release).  The loaded value is
+///      persisted to SharedPreferences so offline re-launches can use it.
+///   3. SharedPreferences persistent cache (the last value fetched from RC;
+///      used when RC is unavailable on the current launch).
 ///   4. Bundled local asset `assets/fishcompat.json` (always available offline).
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
-
-  /// The Remote Config version string that corresponds to [_cachedFishData].
-  /// Used to detect when the server has published a new fish-compat dataset.
-  String? _cachedVersion;
 
   // ---------------------------------------------------------------------------
   // Internal helpers
@@ -33,36 +27,28 @@ class FishDataService {
 
   /// Returns the raw JSON string for the fish-compat dataset.
   ///
-  /// Checks the SharedPreferences persistent cache first (keyed by the current
-  /// [RemoteConfigService.fishcompatVersion]).  When the version has changed —
-  /// or no cache exists — the data is fetched from Remote Config
-  /// ([RemoteConfigService.fishcompatJson]) and the bundled local asset is used
-  /// as the fallback.  The result is written back to SharedPreferences so that
-  /// future launches (including offline ones) can use the latest data.
+  /// Tries [RemoteConfigService.fishcompatJson] first.  When RC has data the
+  /// value is also written to SharedPreferences so future offline launches can
+  /// use it.  Falls back to the SP cache and finally to the bundled local asset.
   Future<String> _getJsonString() async {
-    final currentVersion = RemoteConfigService.fishcompatVersion;
-
-    final prefs = await SharedPreferences.getInstance();
-    final persistedVersion = prefs.getString(_prefKeyVersion);
-    final persistedJson = prefs.getString(_prefKeyJson);
-
-    if (persistedVersion == currentVersion &&
-        persistedJson != null &&
-        persistedJson.isNotEmpty) {
-      return persistedJson;
+    // RC takes priority when set.
+    final rcJson = RemoteConfigService.fishcompatJson;
+    if (rcJson.isNotEmpty) {
+      // Persist RC data for subsequent offline launches.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefKeyJson, rcJson);
+      return rcJson;
     }
 
-    // Cache miss or version mismatch: load from Remote Config or local asset.
-    final rcJson = RemoteConfigService.fishcompatJson;
-    final jsonString = rcJson.isNotEmpty
-        ? rcJson
-        : await rootBundle.loadString('assets/fishcompat.json');
+    // No RC data: try the persistent cache (from a previous RC fetch).
+    final prefs = await SharedPreferences.getInstance();
+    final cachedJson = prefs.getString(_prefKeyJson);
+    if (cachedJson != null && cachedJson.isNotEmpty) {
+      return cachedJson;
+    }
 
-    // Persist the freshly loaded data for subsequent launches.
-    await prefs.setString(_prefKeyVersion, currentVersion);
-    await prefs.setString(_prefKeyJson, jsonString);
-
-    return jsonString;
+    // Final fallback: bundled local asset.
+    return rootBundle.loadString('assets/fishcompat.json');
   }
 
   // ---------------------------------------------------------------------------
@@ -71,14 +57,11 @@ class FishDataService {
 
   /// Load fish data, returning typed [Fish] objects grouped by category.
   ///
-  /// Returns the in-memory cache immediately when the data is already loaded
-  /// and the Remote Config version has not changed.  Otherwise reloads from
-  /// the persistent cache, Remote Config, or the bundled local asset (in that
-  /// order).
+  /// Returns the in-memory cache when data is already loaded.  Otherwise loads
+  /// from Remote Config, the persistent SP cache, or the bundled local asset
+  /// (in that order).
   Future<Map<String, List<Fish>>> loadFishData() async {
-    final currentVersion = RemoteConfigService.fishcompatVersion;
-
-    if (_cachedFishData != null && _cachedVersion == currentVersion) {
+    if (_cachedFishData != null) {
       return _cachedFishData!;
     }
 
@@ -95,14 +78,13 @@ class FishDataService {
     }
 
     _cachedFishData = fishData;
-    _cachedVersion = currentVersion;
     return fishData;
   }
 
   /// Load raw fish data JSON for tag initialization.
   ///
   /// Returns the raw JSON data with common names intact.  Uses the same
-  /// version-aware JSON source as [loadFishData] (Remote Config → local asset).
+  /// source priority as [loadFishData] (Remote Config → SP cache → local asset).
   Future<Map<String, List<dynamic>>> loadRawFishData() async {
     final jsonString = await _getJsonString();
     final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
@@ -119,22 +101,20 @@ class FishDataService {
 
   /// Clear the in-memory cache.
   ///
-  /// The next call to [loadFishData] will reload from the persistent cache
-  /// (if the version still matches) or from Remote Config / local asset.
+  /// The next call to [loadFishData] will reload from Remote Config, the
+  /// persistent SP cache, or the local asset.
   /// Use [clearPersistentCache] as well when you need a full reset.
   void clearCache() {
     _cachedFishData = null;
-    _cachedVersion = null;
   }
 
   /// Clear both the in-memory cache and the SharedPreferences persistent cache.
   ///
-  /// The next call to [loadFishData] will always reload from Remote Config or
-  /// the local asset.  Intended for testing and manual refresh scenarios.
+  /// The next call to [loadFishData] will reload from Remote Config or the
+  /// local asset.  Intended for testing and manual refresh scenarios.
   Future<void> clearPersistentCache() async {
     clearCache();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefKeyVersion);
     await prefs.remove(_prefKeyJson);
   }
 

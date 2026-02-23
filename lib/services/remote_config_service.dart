@@ -41,8 +41,6 @@ const String _defaultAquapiEssentialImageUrl = '';
 // Fish compatibility data.
 // Empty string = use the bundled local assets/fishcompat.json as fallback.
 // Set a JSON string in Remote Config to override without an app update.
-/// Fallback version token for fishcompat data (increment when data changes).
-const String _defaultFishcompatVersion = '0';
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
 
@@ -101,11 +99,6 @@ class RemoteConfigKeys {
   static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
 
   // ── Fish compatibility data ───────────────────────────────────────────────
-  /// String — version token for the fish compatibility data.
-  /// Increment this value in Remote Config whenever `fishcompat_json` changes
-  /// so that cached data is automatically invalidated.  Defaults to `"0"`.
-  static const String fishcompatVersion = 'fishcompat_version';
-
   /// String — full JSON content of the fish compatibility database.
   /// Empty string (default) means use the bundled `assets/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
@@ -144,7 +137,6 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultGroqImageModel: _defaultGroqImageModel,
         RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
-        RemoteConfigKeys.fishcompatVersion: _defaultFishcompatVersion,
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
       });
 
@@ -170,7 +162,6 @@ class RemoteConfigService {
           'chatHistoryLimit=$freeTierChatHistoryLimit, '
           'geminiModel=$defaultGeminiModel, '
           'groqModel=$defaultGroqModel, '
-          'fishcompatVersion=$fishcompatVersion, '
           'fishcompatJsonLoaded=${fishcompatJson.isNotEmpty}',
         );
       }
@@ -262,12 +253,6 @@ class RemoteConfigService {
       _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, _defaultAquapiEssentialImageUrl);
 
   // ── Fish compatibility data ─────────────────────────────────────────────────
-
-  /// Version token for the fish compatibility data.
-  /// Returns the Remote Config value when available, otherwise `"0"`.
-  /// Consumers should reload fish data when this value changes.
-  static String get fishcompatVersion =>
-      _modelString(RemoteConfigKeys.fishcompatVersion, _defaultFishcompatVersion);
 
   /// Full JSON string of the fish compatibility database from Remote Config.
   /// Returns an empty string when not set in Remote Config,

@@ -62,10 +62,6 @@ void main() {
         expect(RemoteConfigService.aquapiEssentialImageUrl, equals(''));
       });
 
-      test('fishcompatVersion defaults to "0"', () {
-        expect(RemoteConfigService.fishcompatVersion, equals('0'));
-      });
-
       test('fishcompatJson defaults to empty string (use local asset)', () {
         expect(RemoteConfigService.fishcompatJson, equals(''));
       });
@@ -98,8 +94,6 @@ void main() {
             equals('aquapi_original_image_url'));
         expect(RemoteConfigKeys.aquapiEssentialImageUrl,
             equals('aquapi_essential_image_url'));
-        expect(RemoteConfigKeys.fishcompatVersion,
-            equals('fishcompat_version'));
         expect(RemoteConfigKeys.fishcompatJson,
             equals('fishcompat_json'));
       });
