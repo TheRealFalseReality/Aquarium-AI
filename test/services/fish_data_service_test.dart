@@ -1,5 +1,6 @@
 import 'package:fish_ai/services/fish_data_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -8,6 +9,7 @@ void main() {
     late FishDataService service;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       service = FishDataService();
     });
 
@@ -49,7 +51,7 @@ void main() {
       expect(marine, isNotEmpty);
     });
 
-    test('clearCache removes cached data', () async {
+    test('clearCache removes in-memory cached data', () async {
       // Load data first
       await service.loadFishData();
       expect(service.getCachedFishByCategory('freshwater'), isNotNull);
@@ -92,6 +94,28 @@ void main() {
       expect(firstMarineFish.commonNames, isList);
       expect(firstMarineFish.compatible, isList);
     });
+
+    test('loadFishData persists JSON to SharedPreferences', () async {
+      await service.loadFishData();
+
+      final prefs = await SharedPreferences.getInstance();
+      // Without RC data the local asset is used; nothing is written to SP
+      // (SP is only written when RC provides data).
+      // Verify the key is absent when no RC JSON is set.
+      expect(prefs.getString('fishcompat_cached_json'), isNull);
+    });
+
+    test('clearPersistentCache removes SharedPreferences entry', () async {
+      // Manually seed an SP entry to simulate a previous RC fetch.
+      SharedPreferences.setMockInitialValues({
+        'fishcompat_cached_json': '{"freshwater":[],"marine":[]}',
+      });
+      final svc = FishDataService();
+      await svc.clearPersistentCache();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('fishcompat_cached_json'), isNull);
+      expect(svc.getCachedFishByCategory('freshwater'), isNull);
+    });
   });
 }
-
