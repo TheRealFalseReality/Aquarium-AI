@@ -505,7 +505,10 @@
   "changelogAllReleases": "Alle Versionen",
   "changelogGotIt": "Verstanden",
 
-  "addCustomSpecies": "Benutzerdefinierte Art hinzufügen"
+  "addCustomSpecies": "Benutzerdefinierte Art hinzufügen",
+
+  "submitIssue": "Problem einreichen",
+  "submitIssueDesc": "Einen Fehler melden oder eine neue Funktion auf GitHub anfordern"
 }
 
 

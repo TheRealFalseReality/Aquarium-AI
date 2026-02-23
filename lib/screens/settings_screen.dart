@@ -831,6 +831,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.submitIssue,
+          subtitle: l10n.submitIssueDesc,
+          icon: Icons.bug_report,
+          gradient: LinearGradient(
+            colors: [
+              Colors.orange.withOpacity(0.25),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Colors.orange.shade700,
+          onTap: () => launchUrl(
+            Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/issues'),
+            mode: LaunchMode.externalApplication,
+          ),
+        ),
         const SizedBox(height: 24),
       ],
     );

@@ -54,5 +54,8 @@
   "warning": "TRANSLATE: Warning",
   "info": "TRANSLATE: Info",
 
-  "addCustomSpecies": "TRANSLATE: Add Custom Species"
+  "addCustomSpecies": "TRANSLATE: Add Custom Species",
+
+  "submitIssue": "TRANSLATE: Submit Issue",
+  "submitIssueDesc": "TRANSLATE: Report a bug or request a new feature on GitHub"
 }

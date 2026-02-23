@@ -505,7 +505,10 @@
   "changelogAllReleases": "Todas las versiones",
   "changelogGotIt": "Entendido",
 
-  "addCustomSpecies": "Agregar especie personalizada"
+  "addCustomSpecies": "Agregar especie personalizada",
+
+  "submitIssue": "Enviar un problema",
+  "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub"
 }
 
 
