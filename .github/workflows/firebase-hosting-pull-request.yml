@@ -17,7 +17,7 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build web --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+      - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

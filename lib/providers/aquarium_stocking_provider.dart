@@ -19,6 +19,7 @@ import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
 import '../utils/dev_rate_limiter.dart';
 import '../services/remote_config_service.dart';
+import '../services/groq_proxy_service.dart';
 
 class AquariumStockingState {
   final bool isLoading;
@@ -171,12 +172,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groq = GroqHelper.createClient(
-          apiKey: models.effectiveGroqApiKey,
-          model: models.groqModel,
-        );
-        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
-        responseText = response.choices.first.message.content;
+        if (models.usingDeveloperGroqKeyForText) {
+          responseText = await GroqProxyService.sendMessage(
+            model: models.groqModel,
+            prompt: prompt,
+          ).timeout(const Duration(seconds: 45));
+        } else {
+          final groq = GroqHelper.createClient(
+            apiKey: models.effectiveGroqApiKey,
+            model: models.groqModel,
+          );
+          final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
+          responseText = response.choices.first.message.content;
+        }
       }
 
       if (responseText == null) {
@@ -392,12 +400,19 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groq = GroqHelper.createClient(
-          apiKey: models.effectiveGroqApiKey,
-          model: models.groqModel,
-        );
-        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
-        responseText = response.choices.first.message.content;
+        if (models.usingDeveloperGroqKeyForText) {
+          responseText = await GroqProxyService.sendMessage(
+            model: models.groqModel,
+            prompt: prompt,
+          ).timeout(const Duration(seconds: 45));
+        } else {
+          final groq = GroqHelper.createClient(
+            apiKey: models.effectiveGroqApiKey,
+            model: models.groqModel,
+          );
+          final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 45));
+          responseText = response.choices.first.message.content;
+        }
       }
 
       if (responseText == null) {

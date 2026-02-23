@@ -17,6 +17,7 @@ import '../utils/api_error_handler.dart';
 import '../utils/groq_helper.dart';
 import '../utils/dev_rate_limiter.dart';
 import '../services/remote_config_service.dart';
+import '../services/groq_proxy_service.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -199,13 +200,21 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         if (!models.hasGroqKey) {
           throw Exception('Groq API Key not set. Please go to settings to add your API key.');
         }
-        final groq = GroqHelper.createClient(
-          apiKey: models.effectiveGroqApiKey,
-          model: models.groqModel,
-        );
-        final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
-        _cancellableCompleter?.complete(response);
-        responseText = response.choices.first.message.content;
+        if (models.usingDeveloperGroqKeyForText) {
+          responseText = await GroqProxyService.sendMessage(
+            model: models.groqModel,
+            prompt: prompt,
+          ).timeout(const Duration(seconds: 30));
+          _cancellableCompleter?.complete();
+        } else {
+          final groq = GroqHelper.createClient(
+            apiKey: models.effectiveGroqApiKey,
+            model: models.groqModel,
+          );
+          final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
+          _cancellableCompleter?.complete(response);
+          responseText = response.choices.first.message.content;
+        }
       } else {
         if (models.openAIApiKey.isEmpty) {
           throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');

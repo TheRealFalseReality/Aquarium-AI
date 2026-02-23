@@ -23,6 +23,7 @@ import '../utils/groq_helper.dart';
 import '../utils/dev_rate_limiter.dart';
 import '../utils/api_error_handler.dart';
 import '../services/remote_config_service.dart';
+import '../services/groq_proxy_service.dart';
 
 // ====================== Chat Message / State ======================
 class ChatMessage {
@@ -261,12 +262,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
         'content': m.text,
       }).toList();
 
-      final responseText = await GroqHelper.sendChatMessages(
-        apiKey: _modelState.effectiveGroqApiKeyForText,
-        model: _modelState.groqModel,
-        systemPrompt: systemPrompt,
-        messages: messages,
-      );
+      final responseText = _modelState.usingDeveloperGroqKeyForText
+          ? await GroqProxyService.sendChatMessages(
+              model: _modelState.groqModel,
+              systemPrompt: systemPrompt,
+              messages: messages,
+            ).timeout(const Duration(seconds: 30))
+          : await GroqHelper.sendChatMessages(
+              apiKey: _modelState.effectiveGroqApiKeyForText,
+              model: _modelState.groqModel,
+              systemPrompt: systemPrompt,
+              messages: messages,
+            );
       _cancellable?.complete(responseText);
       if (responseText == null) throw Exception('No response received from Groq');
       _processTextResponse(responseText);
@@ -618,13 +625,21 @@ class ChatNotifier extends StateNotifier<ChatState> {
           responseText = response.choices.first.message.content?.first.text;
           break;
         case AIProvider.groq:
-           final groq = GroqHelper.createClient(
-             apiKey: _modelState.effectiveGroqApiKeyForText,
-             model: _modelState.groqModel,
-           );
-           final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
-           _cancellable?.complete(response);
-           responseText = response.choices.first.message.content;
+           if (_modelState.usingDeveloperGroqKeyForText) {
+             responseText = await GroqProxyService.sendMessage(
+               model: _modelState.groqModel,
+               prompt: prompt,
+             ).timeout(const Duration(seconds: 30));
+             _cancellable?.complete();
+           } else {
+             final groq = GroqHelper.createClient(
+               apiKey: _modelState.effectiveGroqApiKeyForText,
+               model: _modelState.groqModel,
+             );
+             final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
+             _cancellable?.complete(response);
+             responseText = response.choices.first.message.content;
+           }
            break;
       }
       if (responseText == null) throw Exception('Received no response from the AI service.');
@@ -661,13 +676,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
           break;
         case AIProvider.groq:
           final base64Image = base64Encode(imageBytes);
-          final responseGroq = await GroqHelper.generateWithImage(
-            apiKey: _modelState.effectiveGroqApiKeyForImage,
-            model: _modelState.groqImageModel,
-            prompt: prompt,
-            base64Image: base64Image,
-            mimeType: mimeType,
-          );
+          final responseGroq = _modelState.usingDeveloperGroqKeyForImage
+              ? await GroqProxyService.generateWithImage(
+                  model: _modelState.groqImageModel,
+                  prompt: prompt,
+                  base64Image: base64Image,
+                  mimeType: mimeType,
+                )
+              : await GroqHelper.generateWithImage(
+                  apiKey: _modelState.effectiveGroqApiKeyForImage,
+                  model: _modelState.groqImageModel,
+                  prompt: prompt,
+                  base64Image: base64Image,
+                  mimeType: mimeType,
+                );
           _cancellable?.complete();
           responseText = responseGroq;
           break;
