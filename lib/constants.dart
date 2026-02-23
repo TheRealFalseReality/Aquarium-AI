@@ -23,3 +23,9 @@ const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
 // AdSense constants
 const String adSenseAppId = 'ca-pub-5701077439648731';
 const String adSenseAdUnitId = '9994371406';
+
+// In-app purchase product IDs
+/// Product ID for the "Remove Ads" one-time purchase as configured in
+/// Google Play Console (test product). Update to the production product ID
+/// before releasing to the store.
+const String removeAdsProductId = 'test_purchase';

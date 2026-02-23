@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/remote_config_service.dart';
@@ -595,6 +596,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAppSettingsDialog(),
         ),
         const SizedBox(height: 16),
+        _buildRemoveAdsCard(context),
+        const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
           title: l10n.dataManagement,
@@ -635,6 +638,200 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildRemoveAdsCard(BuildContext context) {
+    final purchaseState = ref.watch(purchaseProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (purchaseState.adsRemoved) {
+      // Show a "Ads removed" confirmation card.
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.green.withOpacity(0.2),
+                      colorScheme.surfaceContainer.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.block, color: Colors.green.shade600, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Remove Ads',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Ads have been removed. Thank you for your support!',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.green.shade600,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.check_circle, color: Colors.green.shade600, size: 24),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show the purchase card.
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      child: InkWell(
+        onTap: purchaseState.isPurchasing ? null : () => _showRemoveAdsDialog(),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.errorContainer.withOpacity(0.3),
+                      colorScheme.surfaceContainer.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: purchaseState.isPurchasing
+                    ? SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.error,
+                        ),
+                      )
+                    : Icon(Icons.block, color: colorScheme.error, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Remove Ads',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'One-time purchase to remove all ads',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showRemoveAdsDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final state = ref.watch(purchaseProvider);
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.block),
+                  SizedBox(width: 8),
+                  Text('Remove Ads'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Support Aquarium AI with a one-time purchase to remove all ads forever.',
+                  ),
+                  if (state.errorMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      state.errorMessage!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                  if (state.isPurchasing) ...[
+                    const SizedBox(height: 16),
+                    const Center(child: CircularProgressIndicator()),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: state.isPurchasing
+                      ? null
+                      : () {
+                          ref
+                              .read(purchaseProvider.notifier)
+                              .restorePurchases();
+                          Navigator.of(dialogContext).pop();
+                        },
+                  child: const Text('Restore Purchase'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: state.isPurchasing
+                      ? null
+                      : () {
+                          ref.read(purchaseProvider.notifier).buyRemoveAds();
+                          Navigator.of(dialogContext).pop();
+                        },
+                  child: const Text('Purchase'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

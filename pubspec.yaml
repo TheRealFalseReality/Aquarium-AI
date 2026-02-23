@@ -43,6 +43,7 @@ dependencies:
   share_plus: ^10.1.4
   web: ^1.1.1
   device_info_plus: ^10.1.0
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

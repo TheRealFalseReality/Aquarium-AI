@@ -1,16 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
 
-class AdBanner extends StatefulWidget {
+class AdBanner extends ConsumerStatefulWidget {
   const AdBanner({super.key});
 
   @override
-  State<AdBanner> createState() => _AdBannerState();
+  ConsumerState<AdBanner> createState() => _AdBannerState();
 }
 
-class _AdBannerState extends State<AdBanner> {
+class _AdBannerState extends ConsumerState<AdBanner> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
@@ -52,7 +54,8 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -66,14 +69,14 @@ class _AdBannerState extends State<AdBanner> {
   }
 }
 
-class NativeAdWidget extends StatefulWidget {
+class NativeAdWidget extends ConsumerStatefulWidget {
   const NativeAdWidget({super.key});
 
   @override
-  State<NativeAdWidget> createState() => _NativeAdWidgetState();
+  ConsumerState<NativeAdWidget> createState() => _NativeAdWidgetState();
 }
 
-class _NativeAdWidgetState extends State<NativeAdWidget> {
+class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
 
@@ -124,7 +127,8 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _nativeAd == null) {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (kIsWeb || adsRemoved || !_isAdLoaded || _nativeAd == null) {
       return const SizedBox.shrink();
     }
 
@@ -141,14 +145,14 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   }
 }
 
-class BannerAdWidget extends StatefulWidget {
+class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
 
   @override
-  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+  ConsumerState<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
+class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
@@ -190,7 +194,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !_isAdLoaded || _bannerAd == null) {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 
