@@ -66,31 +66,25 @@ class ModelState {
   AIProvider get activeProvider => activeTextProvider;
 
   /// The Groq API key to use for **text/chat** operations.
-  /// Returns the dev key when [useDevGroqKeyForText] is set AND the free AI
-  /// tier is enabled via Remote Config; otherwise returns the user's key
-  /// (with dev key as fallback when user key is empty and free AI is enabled).
+  /// Routes through the developer Cloud Function proxy when [useDevGroqKeyForText]
+  /// is explicitly ON; otherwise returns the user's own key (may be empty).
   String get effectiveGroqApiKeyForText {
     final freeAiEnabled = RemoteConfigService.freeAiEnabled;
-    if (freeAiEnabled && useDevGroqKeyForText && developerGroqApiKey.isNotEmpty) {
+    if (freeAiEnabled && useDevGroqKeyForText) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty
-        ? groqApiKey
-        : (freeAiEnabled ? developerGroqApiKey : '');
+    return groqApiKey;
   }
 
   /// The Groq API key to use for **image/photo** operations.
-  /// Returns the dev key when [useDevGroqKeyForImage] is set AND the free AI
-  /// tier is enabled via Remote Config; otherwise returns the user's key
-  /// (with dev key as fallback when user key is empty and free AI is enabled).
+  /// Routes through the developer Cloud Function proxy when [useDevGroqKeyForImage]
+  /// is explicitly ON; otherwise returns the user's own key (may be empty).
   String get effectiveGroqApiKeyForImage {
     final freeAiEnabled = RemoteConfigService.freeAiEnabled;
-    if (freeAiEnabled && useDevGroqKeyForImage && developerGroqApiKey.isNotEmpty) {
+    if (freeAiEnabled && useDevGroqKeyForImage) {
       return developerGroqApiKey;
     }
-    return groqApiKey.isNotEmpty
-        ? groqApiKey
-        : (freeAiEnabled ? developerGroqApiKey : '');
+    return groqApiKey;
   }
 
   /// Backwards-compat alias — returns [effectiveGroqApiKeyForText].
@@ -104,19 +98,18 @@ class ModelState {
   /// Whether text/chat operations are currently routing through the server-side
   /// developer Groq proxy (Firebase Cloud Function + Secret Manager).
   ///
-  /// True when the free AI tier is enabled server-side AND the user has not
-  /// provided their own Groq key (or has explicitly chosen the free tier).
+  /// True ONLY when the Free AI toggle is explicitly ON and the free AI tier is
+  /// enabled via Remote Config. Does NOT fall back to the proxy when the user
+  /// key is empty — an empty key with Free AI off will produce an API error.
   /// Note: [developerGroqApiKey] is intentionally empty in production builds;
   /// the key lives in Firebase Secret Manager and is read by the Cloud Function.
   bool get usingDeveloperGroqKeyForText =>
-      RemoteConfigService.freeAiEnabled &&
-      (useDevGroqKeyForText || groqApiKey.isEmpty);
+      RemoteConfigService.freeAiEnabled && useDevGroqKeyForText;
 
   /// Whether image/photo operations are currently routing through the
   /// server-side developer Groq proxy.
   bool get usingDeveloperGroqKeyForImage =>
-      RemoteConfigService.freeAiEnabled &&
-      (useDevGroqKeyForImage || groqApiKey.isEmpty);
+      RemoteConfigService.freeAiEnabled && useDevGroqKeyForImage;
 
   /// Whether either text OR image operations are using the developer Groq proxy.
   /// Used for UI indicators on the main settings page.
