@@ -8,15 +8,33 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
+  static const String _lastShownTimestampKey = 'api_key_dialog_last_shown_timestamp';
+  static const int _cooldownDays = 7;
 
   static Future<void> setNeverShowAgain() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_neverShowAgainKey, true);
   }
 
+  /// Records the current timestamp as the last time the dialog was shown.
+  /// Call this immediately before [showDialog] so the 1-week cooldown starts.
+  static Future<void> recordDialogShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+        _lastShownTimestampKey, DateTime.now().millisecondsSinceEpoch);
+  }
+
   static Future<bool> shouldShowDialog() async {
     final prefs = await SharedPreferences.getInstance();
-    return !(prefs.getBool(_neverShowAgainKey) ?? false);
+    // Permanently suppressed by user choice.
+    if (prefs.getBool(_neverShowAgainKey) ?? false) {
+      return false;
+    }
+    // Enforce a 1-week cooldown so the dialog does not appear on every launch.
+    final lastShown = prefs.getInt(_lastShownTimestampKey) ?? 0;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - lastShown;
+    const cooldownMs = _cooldownDays * 24 * 60 * 60 * 1000;
+    return elapsed >= cooldownMs;
   }
 
   @override
