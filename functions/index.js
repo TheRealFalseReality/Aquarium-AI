@@ -1,13 +1,5 @@
 const functions = require("firebase-functions");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { defineSecret } = require("firebase-functions/params");
 const request = require("request");
-
-// ---------------------------------------------------------------------------
-// Developer Groq API key — stored in Firebase Secret Manager.
-// Set via: firebase functions:secrets:set DEVELOPER_GROQ_API_KEY
-// ---------------------------------------------------------------------------
-const developerGroqApiKey = defineSecret("DEVELOPER_GROQ_API_KEY");
 
 // TODO: Paste your Prerender.io token here
 const PRERENDER_TOKEN = "JobBZ4J2lZ58Bi83Q4ve";
@@ -64,39 +56,45 @@ exports.render = functions.https.onRequest((req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Groq API proxy — routes AI requests through the server so the developer
-// API key (stored in Secret Manager) is never exposed to client devices.
+// Groq API proxy — Gen 1 callable function with Secret Manager binding.
+//
+// The developer Groq API key is stored in Firebase Secret Manager.
+// Set via: firebase functions:secrets:set DEVELOPER_GROQ_API_KEY
+//
+// URL after deployment:
+//   https://us-central1-fishai-31d40.cloudfunctions.net/groqProxy
 //
 // The function accepts a single payload with a `type` discriminator:
 //   • type = "chat"   → plain text / chat completions
 //   • type = "vision" → multimodal (image + text) completions
-//
-// Callable from Flutter via the `cloud_functions` package.
 // ---------------------------------------------------------------------------
 const GROQ_CHAT_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-exports.groqProxy = onCall(
-  { secrets: [developerGroqApiKey] },
-  async (callRequest) => {
-    const apiKey = developerGroqApiKey.value();
+exports.groqProxy = functions
+  .runWith({ secrets: ["DEVELOPER_GROQ_API_KEY"] })
+  .https.onCall(async (data) => {
+    const apiKey = process.env.DEVELOPER_GROQ_API_KEY;
     if (!apiKey) {
-      throw new HttpsError(
+      throw new functions.https.HttpsError(
         "unavailable",
         "Developer Groq API key is not configured."
       );
     }
 
     const { type, model, messages, systemPrompt, prompt, base64Image, mimeType } =
-      callRequest.data || {};
+      data || {};
 
     if (!model) {
-      throw new HttpsError("invalid-argument", "Missing required field: model");
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Missing required field: model"
+      );
     }
 
     let requestBody;
     if (type === "vision") {
       if (!prompt || !base64Image || !mimeType) {
-        throw new HttpsError(
+        throw new functions.https.HttpsError(
           "invalid-argument",
           "Vision requests require: prompt, base64Image, mimeType"
         );
@@ -120,7 +118,7 @@ exports.groqProxy = onCall(
     } else {
       // Default: chat completions
       if (!messages || !Array.isArray(messages)) {
-        throw new HttpsError(
+        throw new functions.https.HttpsError(
           "invalid-argument",
           "Chat requests require a messages array"
         );
@@ -144,24 +142,26 @@ exports.groqProxy = onCall(
         body: JSON.stringify(requestBody),
       });
     } catch (networkError) {
-      throw new HttpsError("unavailable", `Network error: ${networkError.message}`);
+      throw new functions.https.HttpsError(
+        "unavailable",
+        `Network error: ${networkError.message}`
+      );
     }
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[groqProxy] Groq API error ${response.status}: ${errorText}`);
-      throw new HttpsError(
+      throw new functions.https.HttpsError(
         "internal",
-        `Groq API error (${response.status}): ${errorText}`
+        `Groq API error (${response.status})`
       );
     }
 
-    const data = await response.json();
-    const choices = data.choices;
+    const responseData = await response.json();
+    const choices = responseData.choices;
     if (!choices || choices.length === 0) {
       return { content: null };
     }
     const content = choices[0]?.message?.content ?? null;
     return { content };
-  }
-);
+  });
