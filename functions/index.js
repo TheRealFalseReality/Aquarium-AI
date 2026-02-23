@@ -1,4 +1,6 @@
 const functions = require("firebase-functions");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
 const request = require("request");
 
 // TODO: Paste your Prerender.io token here
@@ -56,13 +58,10 @@ exports.render = functions.https.onRequest((req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Groq API proxy — Gen 1 callable function with Secret Manager binding.
+// Groq API proxy — Gen 2 callable function with Secret Manager binding.
 //
 // The developer Groq API key is stored in Firebase Secret Manager.
 // Set via: firebase functions:secrets:set DEVELOPER_GROQ_API_KEY
-//
-// URL after deployment:
-//   https://us-central1-fishai-31d40.cloudfunctions.net/groqProxy
 //
 // The function accepts a single payload with a `type` discriminator:
 //   • type = "chat"   → plain text / chat completions
@@ -70,31 +69,31 @@ exports.render = functions.https.onRequest((req, res) => {
 // ---------------------------------------------------------------------------
 const GROQ_CHAT_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-exports.groqProxy = functions
-  .runWith({ secrets: ["DEVELOPER_GROQ_API_KEY"] })
-  .https.onCall(async (data) => {
-    const apiKey = process.env.DEVELOPER_GROQ_API_KEY;
+// Declare the secret using the firebase-functions/params API (required for v6+).
+const developerGroqApiKey = defineSecret("DEVELOPER_GROQ_API_KEY");
+
+exports.groqProxy = onCall(
+  { secrets: [developerGroqApiKey] },
+  async (callRequest) => {
+    const apiKey = developerGroqApiKey.value();
     if (!apiKey) {
-      throw new functions.https.HttpsError(
+      throw new HttpsError(
         "unavailable",
         "Developer Groq API key is not configured."
       );
     }
 
     const { type, model, messages, systemPrompt, prompt, base64Image, mimeType } =
-      data || {};
+      callRequest.data || {};
 
     if (!model) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "Missing required field: model"
-      );
+      throw new HttpsError("invalid-argument", "Missing required field: model");
     }
 
     let requestBody;
     if (type === "vision") {
       if (!prompt || !base64Image || !mimeType) {
-        throw new functions.https.HttpsError(
+        throw new HttpsError(
           "invalid-argument",
           "Vision requests require: prompt, base64Image, mimeType"
         );
@@ -118,7 +117,7 @@ exports.groqProxy = functions
     } else {
       // Default: chat completions
       if (!messages || !Array.isArray(messages)) {
-        throw new functions.https.HttpsError(
+        throw new HttpsError(
           "invalid-argument",
           "Chat requests require a messages array"
         );
@@ -142,7 +141,7 @@ exports.groqProxy = functions
         body: JSON.stringify(requestBody),
       });
     } catch (networkError) {
-      throw new functions.https.HttpsError(
+      throw new HttpsError(
         "unavailable",
         `Network error: ${networkError.message}`
       );
@@ -151,7 +150,7 @@ exports.groqProxy = functions
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[groqProxy] Groq API error ${response.status}: ${errorText}`);
-      throw new functions.https.HttpsError(
+      throw new HttpsError(
         "internal",
         `Groq API error (${response.status})`
       );
@@ -164,4 +163,5 @@ exports.groqProxy = functions
     }
     const content = choices[0]?.message?.content ?? null;
     return { content };
-  });
+  }
+);
