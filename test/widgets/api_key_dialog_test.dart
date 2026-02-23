@@ -85,6 +85,45 @@ void main() {
     expect(shouldShow, isFalse);
   });
 
+  test('shouldShowDialog returns false within 1-week cooldown', () async {
+    // Simulate dialog shown just now.
+    await ApiKeyDialog.recordDialogShown();
+    final shouldShow = await ApiKeyDialog.shouldShowDialog();
+    expect(shouldShow, isFalse);
+  });
+
+  test('shouldShowDialog returns true when 1-week cooldown has elapsed', () async {
+    // Simulate dialog shown more than 7 days ago.
+    final moreThan7DaysAgo =
+        DateTime.now().millisecondsSinceEpoch - (8 * 24 * 60 * 60 * 1000);
+    SharedPreferences.setMockInitialValues({
+      'api_key_dialog_last_shown_timestamp': moreThan7DaysAgo,
+    });
+    final shouldShow = await ApiKeyDialog.shouldShowDialog();
+    expect(shouldShow, isTrue);
+  });
+
+  test('neverShowAgain overrides elapsed cooldown', () async {
+    // Even if the cooldown has elapsed, neverShowAgain should prevent showing.
+    final moreThan7DaysAgo =
+        DateTime.now().millisecondsSinceEpoch - (8 * 24 * 60 * 60 * 1000);
+    SharedPreferences.setMockInitialValues({
+      'api_key_dialog_last_shown_timestamp': moreThan7DaysAgo,
+    });
+    await ApiKeyDialog.setNeverShowAgain();
+    final shouldShow = await ApiKeyDialog.shouldShowDialog();
+    expect(shouldShow, isFalse);
+  });
+
+  test('recordDialogShown saves current timestamp', () async {
+    final before = DateTime.now().millisecondsSinceEpoch;
+    await ApiKeyDialog.recordDialogShown();
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt('api_key_dialog_last_shown_timestamp');
+    expect(saved, isNotNull);
+    expect(saved! >= before, isTrue);
+  });
+
   testWidgets('Never Show Again button sets preference', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

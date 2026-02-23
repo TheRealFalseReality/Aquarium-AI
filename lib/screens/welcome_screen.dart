@@ -435,15 +435,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) async {
       // Show the API key dialog once loading completes if:
-      //   • no user-supplied key for any provider, AND
-      //   • the free AI proxy tier is also unavailable (freeAiEnabled = false), AND
+      //   • the user has no own key for any provider, OR
+      //     the user is relying on the in-app developer Groq key (free tier)
+      //     for any provider, AND
       //   • AI features are enabled, AND
-      //   • the user hasn't chosen "Never show again"
-      if (previous!.isLoading && !next.isLoading &&
-          next.geminiApiKey.isEmpty &&
+      //   • the 1-week cooldown has elapsed (or the user hasn't seen it before)
+      final noOwnKey = next.geminiApiKey.isEmpty &&
           next.openAIApiKey.isEmpty &&
-          next.groqApiKey.isEmpty &&
-          !RemoteConfigService.freeAiEnabled &&
+          next.groqApiKey.isEmpty;
+      final usingDeveloperGroqKeyForAny = next.usingDeveloperGroqKeyForAny;
+      if (previous!.isLoading && !next.isLoading &&
+          (noOwnKey || usingDeveloperGroqKeyForAny) &&
           ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (!shouldShow || !mounted) return;
@@ -451,6 +453,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           context: context,
           builder: (context) => const ApiKeyDialog(),
         );
+        // Record after showDialog so the cooldown only starts when the dialog
+        // is actually presented to the user.
+        ApiKeyDialog.recordDialogShown();
       }
     });
 
