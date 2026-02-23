@@ -911,6 +911,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onChanged: (v) {
                     setState(() => _useDevGroqKeyForText = v);
                     setDialogState?.call(() => _useDevGroqKeyForText = v);
+                    // Auto-save immediately so root menu and providers reflect state.
+                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                          forText: v,
+                          forImage: _useDevGroqKeyForImage,
+                        );
                   },
                 ),
                 const SizedBox(height: 8),
@@ -920,6 +925,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onChanged: (v) {
                     setState(() => _useDevGroqKeyForImage = v);
                     setDialogState?.call(() => _useDevGroqKeyForImage = v);
+                    // Auto-save immediately so root menu and providers reflect state.
+                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                          forText: _useDevGroqKeyForText,
+                          forImage: v,
+                        );
                   },
                 ),
               ],
