@@ -169,7 +169,9 @@ class RemoteConfigService {
           'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '
           'chatHistoryLimit=$freeTierChatHistoryLimit, '
           'geminiModel=$defaultGeminiModel, '
-          'groqModel=$defaultGroqModel',
+          'groqModel=$defaultGroqModel, '
+          'fishcompatVersion=$fishcompatVersion, '
+          'fishcompatJsonLoaded=${fishcompatJson.isNotEmpty}',
         );
       }
     } catch (e) {
