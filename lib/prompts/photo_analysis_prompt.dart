@@ -4,17 +4,24 @@ String buildPhotoAnalysisPrompt(String userNote) {
 
     TASKS:
     1. Identify fish species (best guess if uncertain) with confidence 0–1.
-    2. Provide a concise summary (Markdown allowed; use **bold** sparingly).
-    3. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
-    4. Potential issues & recommended actions.
-    5. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
-    6. "howAquaPiHelps" explaining AquaPi benefits; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store).
+    2. For each confidently identified fish (confidence ≥ 0.5), provide a concise care summary covering: minimum tank size, ideal water parameters (temperature, pH), temperament, diet, and difficulty level.
+    3. Provide a concise summary of the photo (Markdown allowed; use **bold** sparingly).
+    4. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
+    5. Potential issues & recommended actions.
+    6. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
+    7. "howAquaPiHelps" explaining how AquaPi can help monitor or automate based on what is observed; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store). Only include this if the observations are relevant to parameters AquaPi monitors (temperature, pH, salinity, ORP, dissolved oxygen, water level).
 
     Return ONLY JSON:
     {
       "summary": "...",
       "identifiedFish": [
-        { "commonName": "...", "scientificName": "...", "confidence": 0.0, "notes": "..." }
+        {
+          "commonName": "...",
+          "scientificName": "...",
+          "confidence": 0.0,
+          "notes": "...",
+          "careInfo": "Markdown care summary: min tank size, temp & pH range, temperament, diet, difficulty. Empty string if confidence < 0.5."
+        }
       ],
       "tankHealth": {
         "observations": ["..."],
@@ -26,7 +33,7 @@ String buildPhotoAnalysisPrompt(String userNote) {
         "algaeLevel": "Low | Moderate | High | Heavy",
         "stockingAssessment": "Light | Moderate | Heavy (crowded)"
       },
-      "howAquaPiHelps": "Markdown..."
+      "howAquaPiHelps": "Markdown... or empty string if not relevant"
     }
 
     If no fish identified confidently: identifiedFish = [] and explain uncertainty in summary.

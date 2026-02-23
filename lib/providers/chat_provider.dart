@@ -13,6 +13,7 @@ import '../models/fish_info_result.dart';
 import 'analysis_history_provider.dart';
 import 'model_provider.dart';
 import '../prompts/system_prompt.dart';
+import '../prompts/aquapi_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
@@ -141,6 +142,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     return null;
   }
 
+  /// Returns the effective system prompt for [message].
+  /// Appends the AquaPi supplement when the message is AquaPi-related.
+  String _effectiveSystemPrompt(String message) => effectiveSystemPrompt(message);
+
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
     if (_modelState.usingDeveloperGroqKeyForText) {
@@ -198,7 +203,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final limit = _historyLimit;
       final recentHistory = priorMessages.length > limit ? priorMessages.sublist(priorMessages.length - limit) : priorMessages;
       final seedHistory = [
-        Content.model([TextPart(systemPrompt)]),
+        Content.model([TextPart(_effectiveSystemPrompt(message))]),
         ...recentHistory.map((m) => m.isUser
             ? Content.text(m.text)
             : Content.model([TextPart(m.text)])),
@@ -233,7 +238,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final response = await OpenAI.instance.chat.create(
         model: _modelState.chatGPTModel,
         messages: [
-          OpenAIChatCompletionChoiceMessageModel(content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(systemPrompt)], role: OpenAIChatMessageRole.system),
+          OpenAIChatCompletionChoiceMessageModel(content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(_effectiveSystemPrompt(message))], role: OpenAIChatMessageRole.system),
           ...history,
         ],
       ).timeout(const Duration(seconds: 30));
@@ -265,13 +270,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final responseText = _modelState.usingDeveloperGroqKeyForText
           ? await GroqProxyService.sendChatMessages(
               model: _modelState.groqModel,
-              systemPrompt: systemPrompt,
+              systemPrompt: _effectiveSystemPrompt(message),
               messages: messages,
             ).timeout(const Duration(seconds: 30))
           : await GroqHelper.sendChatMessages(
               apiKey: _modelState.effectiveGroqApiKeyForText,
               model: _modelState.groqModel,
-              systemPrompt: systemPrompt,
+              systemPrompt: _effectiveSystemPrompt(message),
               messages: messages,
             );
       _cancellable?.complete(responseText);
