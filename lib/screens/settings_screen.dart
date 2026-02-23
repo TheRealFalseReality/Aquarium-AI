@@ -276,26 +276,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _saveSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    // Validation Check: Ensure the API key for the selected text provider is not empty.
-    if (_selectedTextProvider == AIProvider.gemini &&
-        _geminiApiKeyController.text.trim().isEmpty) {
-      context.showAccessibleMessage(l10n.enterGeminiApiKey);
-      return; // Stop the function
+    // Validation Check: Ensure the API key for the selected provider is not empty.
+    // Skip validation for a use-case when the Free AI toggle is ON for that use-case.
+    if (!_useDevGroqKeyForText) {
+      if (_selectedTextProvider == AIProvider.gemini &&
+          _geminiApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterGeminiApiKey);
+        return;
+      }
+      if (_selectedTextProvider == AIProvider.openAI &&
+          _openAIApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterOpenAIApiKey);
+        return;
+      }
+      if (_selectedTextProvider == AIProvider.groq &&
+          _groqApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterGroqApiKey);
+        return;
+      }
     }
-    if (_selectedTextProvider == AIProvider.openAI &&
-        _openAIApiKeyController.text.trim().isEmpty) {
-      context.showAccessibleMessage(l10n.enterOpenAIApiKey);
-      return; // Stop the function
-    }
-    if (_selectedTextProvider == AIProvider.groq &&
-        _groqApiKeyController.text.trim().isEmpty &&
-        !_useDevGroqKeyForText) {
-      context.showAccessibleMessage(l10n.enterGroqApiKey);
-      return; // Stop the function
-    }
-    // Validate API key for image provider when different from text provider.
-    // Gemini/OpenAI share a single key so only re-check when the provider differs.
-    if (_selectedImageProvider != _selectedTextProvider) {
+    if (!_useDevGroqKeyForImage) {
       if (_selectedImageProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
         context.showAccessibleMessage(l10n.enterGeminiApiKey);
@@ -306,14 +306,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context.showAccessibleMessage(l10n.enterOpenAIApiKey);
         return;
       }
-    }
-    // Groq has independent per-use-case toggles, so always validate the image
-    // toggle regardless of whether the text provider is also Groq.
-    if (_selectedImageProvider == AIProvider.groq &&
-        _groqApiKeyController.text.trim().isEmpty &&
-        !_useDevGroqKeyForImage) {
-      context.showAccessibleMessage(l10n.enterGroqApiKey);
-      return;
+      if (_selectedImageProvider == AIProvider.groq &&
+          _groqApiKeyController.text.trim().isEmpty) {
+        context.showAccessibleMessage(l10n.enterGroqApiKey);
+        return;
+      }
     }
 
     // Log settings save
@@ -852,11 +849,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
             ),
           ),
-        // ─── Consolidated API Keys ────────────────────────────────────────
-        _buildApiKeysSection(setDialogState),
+        // ─── Free AI toggles (global) ─────────────────────────────────────
+        if (RemoteConfigService.freeAiEnabled) Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(children: [
+                  Icon(Icons.bolt, size: 20, color: Colors.amber.shade700),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Free AI',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade700,
+                        ),
+                  ),
+                ]),
+                const SizedBox(height: 4),
+                Text(
+                  'Use the built-in free AI service instead of your own API key.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                _buildDevKeyToggle(
+                  label: 'Use Free AI for Text / Chat',
+                  value: _useDevGroqKeyForText,
+                  onChanged: (v) {
+                    setState(() => _useDevGroqKeyForText = v);
+                    setDialogState?.call(() => _useDevGroqKeyForText = v);
+                  },
+                ),
+                const SizedBox(height: 8),
+                _buildDevKeyToggle(
+                  label: 'Use Free AI for Image / Photo',
+                  value: _useDevGroqKeyForImage,
+                  onChanged: (v) {
+                    setState(() => _useDevGroqKeyForImage = v);
+                    setDialogState?.call(() => _useDevGroqKeyForImage = v);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 16),
+        // ─── Consolidated API Keys ────────────────────────────────────────
+        if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
+          _buildApiKeysSection(setDialogState),
+          const SizedBox(height: 16),
+        ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
-        Card(
+        if (!_useDevGroqKeyForText) ...[
+          const SizedBox(height: 16),
+          Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -877,6 +927,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                   ),
                 ]),
+                const SizedBox(height: 8),
+                // Gemini recommended hint
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star, color: Colors.green, size: 14),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          l10n.geminiRecommended,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 // Provider selector
                 providerButton(
@@ -925,8 +1001,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (!(_selectedTextProvider == AIProvider.groq &&
-                        _useDevGroqKeyForText)) ...[
+                    ...[
                       OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedTextProvider) {
@@ -956,9 +1031,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        ], // end if (!_useDevGroqKeyForText)
         // ─── Image / Photo ────────────────────────────────────────────────────
-        Card(
+        if (!_useDevGroqKeyForImage) ...[
+          const SizedBox(height: 16),
+          Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -979,6 +1056,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                   ),
                 ]),
+                const SizedBox(height: 8),
+                // Gemini recommended hint
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star, color: Colors.green, size: 14),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          l10n.geminiRecommended,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 // Provider selector
                 providerButton(
@@ -1006,37 +1109,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   AIProvider.openAI => _buildOpenAISettings(setDialogState, false),
                   AIProvider.groq   => _buildGroqSettings(setDialogState, false),
                 },
-                const SizedBox(height: 8),
-                // Gemini recommended hint
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.star, color: Colors.green, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.geminiRecommended,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.green.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
                 // Reset (hidden when using free provider) + Save (always shown)
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (!(_selectedImageProvider == AIProvider.groq &&
-                        _useDevGroqKeyForImage)) ...[
+                    ...[
                       OutlinedButton.icon(
                         onPressed: () {
                           switch (_selectedImageProvider) {
@@ -1066,6 +1144,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        ], // end if (!_useDevGroqKeyForImage)
         const SizedBox(height: 16),
         // ─── Note: calculators work without an AI key ─────────────────────────
         Container(
@@ -1584,7 +1663,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
     // Locked on free tier (dev key in use for text)
-    final onFreeTier = _selectedTextProvider == AIProvider.groq && _useDevGroqKeyForText;
+    final onFreeTier = _useDevGroqKeyForText;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -2539,30 +2618,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildProviderKeyHeader('Groq', Colors.orange, Icons.flash_on,
                 'Lightning-fast LLM inference'),
             const SizedBox(height: 8),
-            // Free-tier toggles (only visible when free AI is enabled)
-            if (RemoteConfigService.freeAiEnabled) ...[
-              _buildDevKeyToggle(
-                label: 'Use Free Provider for Text',
-                value: _useDevGroqKeyForText,
-                onChanged: (v) {
-                  setState(() => _useDevGroqKeyForText = v);
-                  setDialogState?.call(() => _useDevGroqKeyForText = v);
-                },
-              ),
-              const SizedBox(height: 8),
-              _buildDevKeyToggle(
-                label: 'Use Free Provider for Image',
-                value: _useDevGroqKeyForImage,
-                onChanged: (v) {
-                  setState(() => _useDevGroqKeyForImage = v);
-                  setDialogState?.call(() => _useDevGroqKeyForImage = v);
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-            // Show the API key field when the user is not using the free
-            // provider for either text or image (i.e. they need their own key).
-            if (!(_useDevGroqKeyForText && _useDevGroqKeyForImage)) ...[
+            // Show the API key field only when needed (at least one operation
+            // is not using the free tier, meaning a user-provided Groq key is required).
+            if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
               TextField(
                 controller: _groqApiKeyController,
                 obscureText: !_isGroqApiKeyVisible,
