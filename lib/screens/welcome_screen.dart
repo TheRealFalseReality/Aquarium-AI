@@ -449,7 +449,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           (noOwnKey || usingDeveloperGroqKeyForAny) &&
           ref.read(appSettingsProvider).enableAI) {
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
-        if (!shouldShow || !mounted) return;
+        if (!shouldShow) return;
+        if (!mounted) return;
         showDialog(
           context: context,
           builder: (context) => const ApiKeyDialog(),
