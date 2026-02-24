@@ -290,29 +290,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   /// **Saves the settings after validation.**
-  /// Saves Text/Chat provider settings independently (validates text key only).
+  /// Saves Text/Chat provider settings independently.
   void _saveTextSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final effectiveFreeText = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
-
-    if (!effectiveFreeText) {
-      if (_selectedTextProvider == AIProvider.gemini &&
-          _geminiApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterGeminiApiKey);
-        return;
-      }
-      if (_selectedTextProvider == AIProvider.openAI &&
-          _openAIApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterOpenAIApiKey);
-        return;
-      }
-      if (_selectedTextProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterGroqApiKey);
-        return;
-      }
-    }
-
     AnalyticsService.logFeatureUsed(
       featureName: 'settings_save_text',
       parameters: {
@@ -349,29 +329,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
-  /// Saves Image/Multimedia provider settings independently (validates image key only).
+  /// Saves Image/Multimedia provider settings independently.
   void _saveImageSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final effectiveFreeImage = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
-
-    if (!effectiveFreeImage) {
-      if (_selectedImageProvider == AIProvider.gemini &&
-          _geminiApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterGeminiApiKey);
-        return;
-      }
-      if (_selectedImageProvider == AIProvider.openAI &&
-          _openAIApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterOpenAIApiKey);
-        return;
-      }
-      if (_selectedImageProvider == AIProvider.groq &&
-          _groqApiKeyController.text.trim().isEmpty) {
-        context.showAccessibleMessage(l10n.enterGroqApiKey);
-        return;
-      }
-    }
-
     AnalyticsService.logFeatureUsed(
       featureName: 'settings_save_image',
       parameters: {
@@ -408,57 +368,106 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
   }
 
-  /// Returns a list of validation error messages for the current dialog state.
-  /// A key is required for a provider when its Free AI toggle is OFF and that
-  /// provider is currently selected for text or image use.
-  /// When freeAiEnabled is false, Free AI is treated as OFF regardless of toggle state.
-  List<String> _getValidationErrors() {
-    final l10n = AppLocalizations.of(context)!;
-    final errors = <String>[];
+  /// Returns the display name for an [AIProvider].
+  String _providerName(AIProvider p) => switch (p) {
+        AIProvider.gemini => 'Gemini',
+        AIProvider.openAI => 'OpenAI',
+        AIProvider.groq => 'Groq',
+      };
+
+  /// Returns the current (unsaved) API key for [p] from the controller text.
+  String _keyForProvider(AIProvider p) => switch (p) {
+        AIProvider.gemini => _geminiApiKeyController.text.trim(),
+        AIProvider.openAI => _openAIApiKeyController.text.trim(),
+        AIProvider.groq => _groqApiKeyController.text.trim(),
+      };
+
+  /// Returns the best provider to default to based on currently entered keys
+  /// (in order: Gemini → OpenAI → Groq → default). Used when Free AI is
+  /// toggled OFF to immediately reflect the correct provider in the UI.
+  AIProvider _bestProviderFromControllers() {
+    if (_geminiApiKeyController.text.trim().isNotEmpty) return AIProvider.gemini;
+    if (_openAIApiKeyController.text.trim().isNotEmpty) return AIProvider.openAI;
+    if (_groqApiKeyController.text.trim().isNotEmpty) return AIProvider.groq;
+    return defaultAIProvider;
+  }
+
+  /// Returns informational warnings when a provider is active but has no key.
+  /// These warnings do NOT block saves; they are shown on dialog exit.
+  List<String> _getMismatchWarnings() {
+    final warnings = <String>[];
     final effectiveFreeText = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
     final effectiveFreeImage = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
 
-    // Gemini key required when selected (text or image) and Free AI is off
-    final geminiNeededForText =
-        !effectiveFreeText && _selectedTextProvider == AIProvider.gemini;
-    final geminiNeededForImage =
-        !effectiveFreeImage && _selectedImageProvider == AIProvider.gemini;
-    if ((geminiNeededForText || geminiNeededForImage) &&
-        _geminiApiKeyController.text.trim().isEmpty) {
-      errors.add(l10n.enterGeminiApiKey);
+    if (!effectiveFreeText && _keyForProvider(_selectedTextProvider).isEmpty) {
+      final name = _providerName(_selectedTextProvider);
+      warnings.add('$name is set as the Text provider, but no $name API key is provided.');
+    }
+    if (!effectiveFreeImage && _keyForProvider(_selectedImageProvider).isEmpty) {
+      final name = _providerName(_selectedImageProvider);
+      warnings.add('$name is set as the Image provider, but no $name API key is provided.');
     }
 
-    // OpenAI key required when selected (text or image) and Free AI is off
-    final openAINeededForText =
-        !effectiveFreeText && _selectedTextProvider == AIProvider.openAI;
-    final openAINeededForImage =
-        !effectiveFreeImage && _selectedImageProvider == AIProvider.openAI;
-    if ((openAINeededForText || openAINeededForImage) &&
-        _openAIApiKeyController.text.trim().isEmpty) {
-      errors.add(l10n.enterOpenAIApiKey);
-    }
+    return warnings;
+  }
 
-    // Groq key required when selected (text or image) and Free AI is off
-    final groqNeededForText =
-        !effectiveFreeText && _selectedTextProvider == AIProvider.groq;
-    final groqNeededForImage =
-        !effectiveFreeImage && _selectedImageProvider == AIProvider.groq;
-    if ((groqNeededForText || groqNeededForImage) &&
-        _groqApiKeyController.text.trim().isEmpty) {
-      errors.add(l10n.enterGroqApiKey);
-    }
-
-    return errors;
+  /// Shows a standalone mismatch-warning dialog when the user tries to close
+  /// the AI Provider dialog without unsaved changes but with a provider/key
+  /// mismatch.  Offers "Stay & Fix" (keep dialog open) or "Dismiss" (close).
+  void _showProviderMismatchDialog(
+    BuildContext dialogContext,
+    StateSetter? setDialogState,
+    List<String> warnings,
+  ) {
+    showDialog<void>(
+      context: dialogContext,
+      builder: (alertContext) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded,
+                color: Colors.amber.shade700, size: 22),
+            const SizedBox(width: 8),
+            const Text('Provider Mismatch'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+                'The following providers are selected but have no API key configured:'),
+            const SizedBox(height: 8),
+            ...warnings.map((w) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('  • $w',
+                      style: const TextStyle(fontSize: 13)),
+                )),
+            const SizedBox(height: 8),
+            const Text(
+                'AI features using these providers will not work until a key is entered or a different provider is selected.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(alertContext).pop(),
+            child: const Text('Stay & Fix'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(alertContext).pop();
+              Navigator.of(dialogContext).pop();
+            },
+            child: const Text('Dismiss'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Saves all three API keys (and full provider/model state).
-  /// Returns true on success, false if validation fails.
+  /// Validation is no longer blocking — saves always succeed.  Provider/key
+  /// mismatches are reported via [_getMismatchWarnings] when the dialog closes.
   bool _saveApiKeys(BuildContext context, [StateSetter? setDialogState]) {
-    final errors = _getValidationErrors();
-    if (errors.isNotEmpty) {
-      context.showAccessibleMessage(errors.first);
-      return false;
-    }
     final l10n = AppLocalizations.of(context)!;
     ref.read(modelProvider.notifier).setModels(
           newGeminiModel: _geminiModelController.text,
@@ -543,10 +552,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _groqApiKeyController.text != saved.groqApiKey;
   }
 
-  /// Shows an "Unsaved Changes" alert if there are pending changes, otherwise pops.
+  /// Shows an "Unsaved Changes" alert if there are pending changes, or a
+  /// provider-mismatch warning if there are no unsaved changes but the active
+  /// provider has no key configured.  Otherwise simply pops the dialog.
   void _handleDialogClose(BuildContext dialogContext, [StateSetter? setDialogState]) {
+    final mismatchWarnings = _getMismatchWarnings();
+
     if (!_hasUnsavedChanges()) {
-      Navigator.of(dialogContext).pop();
+      if (mismatchWarnings.isNotEmpty) {
+        _showProviderMismatchDialog(dialogContext, setDialogState, mismatchWarnings);
+      } else {
+        Navigator.of(dialogContext).pop();
+      }
       return;
     }
 
@@ -562,7 +579,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final keysChanged = _geminiApiKeyController.text != saved.geminiApiKey ||
         _openAIApiKeyController.text != saved.openAIApiKey ||
         _groqApiKeyController.text != saved.groqApiKey;
-    final validationErrors = _getValidationErrors();
 
     showDialog<void>(
       context: dialogContext,
@@ -577,19 +593,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             if (textModelChanged) const Text('• Text model changed'),
             if (imageModelChanged) const Text('• Image model changed'),
             if (keysChanged) const Text('• API keys updated'),
-            if (validationErrors.isNotEmpty) ...[
+            if (mismatchWarnings.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(children: [
                 Icon(Icons.warning_amber_rounded,
                     color: Colors.amber.shade700, size: 16),
                 const SizedBox(width: 6),
-                Text('Cannot save — fix these first:',
-                    style: TextStyle(
-                        color: Colors.amber.shade800,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12)),
+                Expanded(
+                  child: Text('Provider/key mismatch — AI will not work:',
+                      style: TextStyle(
+                          color: Colors.amber.shade800,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
+                ),
               ]),
-              ...validationErrors.map((e) => Text('  • $e',
+              ...mismatchWarnings.map((w) => Text('  • $w',
                   style: TextStyle(color: Colors.amber.shade900, fontSize: 12))),
             ],
           ],
@@ -607,16 +625,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(dialogContext).pop();
             },
           ),
-          if (validationErrors.isEmpty)
-            FilledButton.icon(
-              icon: const Icon(Icons.save),
-              label: const Text('Save All & Close'),
-              onPressed: () {
-                final saved = _saveApiKeys(dialogContext, setDialogState);
-                Navigator.of(alertContext).pop();
-                if (saved) Navigator.of(dialogContext).pop();
-              },
-            ),
+          FilledButton.icon(
+            icon: const Icon(Icons.save),
+            label: const Text('Save All & Close'),
+            onPressed: () {
+              _saveApiKeys(dialogContext, setDialogState);
+              Navigator.of(alertContext).pop();
+              Navigator.of(dialogContext).pop();
+            },
+          ),
         ],
       ),
     );
@@ -1244,14 +1261,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
+                          // When turning ON: force Groq. When turning OFF: switch
+                          // immediately to whichever provider has a key entered in
+                          // the controllers so the segmented button reflects the
+                          // correct selection without waiting for ref.listen.
+                          final best =
+                              v ? AIProvider.groq : _bestProviderFromControllers();
                           setState(() {
                             _useDevGroqKeyForText = v;
-                            // When Free AI is ON, force provider to Groq so free tier is used.
-                            if (v) _selectedTextProvider = AIProvider.groq;
+                            _selectedTextProvider = best;
                           });
                           setDialogState?.call(() {
                             _useDevGroqKeyForText = v;
-                            if (v) _selectedTextProvider = AIProvider.groq;
+                            _selectedTextProvider = best;
                           });
                           // Auto-save immediately so root menu and providers reflect state.
                           ref.read(modelProvider.notifier).setDevGroqKeyToggles(
@@ -1267,14 +1289,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
+                          final best =
+                              v ? AIProvider.groq : _bestProviderFromControllers();
                           setState(() {
                             _useDevGroqKeyForImage = v;
-                            // When Free AI is ON, force provider to Groq so free tier is used.
-                            if (v) _selectedImageProvider = AIProvider.groq;
+                            _selectedImageProvider = best;
                           });
                           setDialogState?.call(() {
                             _useDevGroqKeyForImage = v;
-                            if (v) _selectedImageProvider = AIProvider.groq;
+                            _selectedImageProvider = best;
                           });
                           // Auto-save immediately so root menu and providers reflect state.
                           ref.read(modelProvider.notifier).setDevGroqKeyToggles(
