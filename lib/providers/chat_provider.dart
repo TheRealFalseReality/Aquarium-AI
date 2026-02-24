@@ -12,7 +12,6 @@ import '../models/photo_analysis_result.dart';
 import '../models/fish_info_result.dart';
 import 'analysis_history_provider.dart';
 import 'model_provider.dart';
-import '../prompts/system_prompt.dart';
 import '../prompts/aquapi_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
