@@ -578,11 +578,31 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       
                       const SizedBox(height: 32),
                       
-                      // Feature Cards in Staggered Grid
-                      _buildFeatureGrid(context, features),
-
-                      // Native ad after feature grid (after AI stocking assistant)
-                      _buildWelcomeNativeAd(),
+                      // Feature Cards in Staggered Grid — split around the native ad.
+                      // AI feature cards (AI Stocking Assistant and earlier) come first,
+                      // then the native ad, then Calculators and the rest.
+                      Builder(builder: (context) {
+                        final splitIndex = features.indexWhere(
+                          (f) => f.routeName == '/calculators',
+                        );
+                        final topFeatures = splitIndex > 0
+                            ? features.sublist(0, splitIndex)
+                            : (splitIndex < 0 ? features : <FeatureInfo>[]);
+                        final bottomFeatures = splitIndex >= 0 ? features.sublist(splitIndex) : <FeatureInfo>[];
+                        return Column(
+                          children: [
+                            if (topFeatures.isNotEmpty) ...[
+                              _buildFeatureGrid(context, topFeatures),
+                            ],
+                            // Native ad between AI Stocking Assistant and Calculators
+                            _buildWelcomeNativeAd(),
+                            if (bottomFeatures.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              _buildFeatureGrid(context, bottomFeatures),
+                            ],
+                          ],
+                        );
+                      }),
                       
                       const SizedBox(height: 48),
                       Padding(
