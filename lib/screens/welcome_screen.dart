@@ -20,6 +20,7 @@ import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../widgets/remove_ads_dialog.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
@@ -1128,11 +1129,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(
-          context,
-          '/settings',
-          arguments: {'openRemoveAds': true},
-        ),
+        onTap: () => showRemoveAdsDialog(context, ref),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
