@@ -133,14 +133,51 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
     }
 
     // Use flexible constraints that work well in different contexts
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 300,
-        minHeight: 250,
-        maxWidth: 500,
-        maxHeight: 400,
-      ),
-      child: AdWidget(ad: _nativeAd!),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 300,
+            minHeight: 250,
+            maxWidth: 500,
+            maxHeight: 400,
+          ),
+          child: AdWidget(ad: _nativeAd!),
+        ),
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/settings',
+            arguments: {'openRemoveAds': true},
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.block,
+                size: 12,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurfaceVariant
+                    .withOpacity(0.55),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Remove Ads',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withOpacity(0.55),
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
