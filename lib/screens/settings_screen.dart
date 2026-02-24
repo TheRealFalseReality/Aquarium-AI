@@ -993,12 +993,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showRemoveAdsDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _RemoveAdsDialog(
         onBuy: () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
         onRestore: () => ref.read(purchaseProvider.notifier).restorePurchases(),
       ),
+    ).then((_) {
+      if (!mounted) return;
+      final outcome = ref.read(purchaseProvider).restoreOutcome;
+      ref.read(purchaseProvider.notifier).clearRestoreOutcome();
+      _showRestoreOutcomeDialog(outcome);
+    });
+  }
+
+  void _showRestoreOutcomeDialog(RestoreOutcome outcome) {
+    if (outcome == RestoreOutcome.none) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        if (outcome == RestoreOutcome.success) {
+          return AlertDialog(
+            icon: const Icon(Icons.favorite, color: Colors.green, size: 36),
+            title: const Text('Thank You! 🎉'),
+            content: const Text(
+              'Your Early Supporter purchase has been restored and ads have '
+              'been removed.\n\n'
+              'Thank you so much for your support — it means the world and '
+              'helps keep Aquarium AI growing!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        }
+        // RestoreOutcome.notFound
+        return AlertDialog(
+          icon: const Icon(Icons.search_off, size: 36),
+          title: const Text('No Purchase Found'),
+          content: const Text(
+            'No previous purchase was found on this account.\n\n'
+            'If you bought on a different store account, sign in with that '
+            'account and try again.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -3517,6 +3565,16 @@ class _RemoveAdsDialog extends ConsumerWidget {
         if (context.mounted) Navigator.of(context).pop();
       });
     }
+
+    // Auto-close when restore determines there is no previous purchase,
+    // so the outcome dialog can be shown by the parent.
+    ref.listen<PurchaseState>(purchaseProvider, (prev, next) {
+      if (next.restoreOutcome != RestoreOutcome.notFound) return;
+      if (prev?.restoreOutcome == RestoreOutcome.notFound) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) Navigator.of(context).pop();
+      });
+    });
 
     return AlertDialog(
       icon: const Icon(Icons.block, size: 36),
