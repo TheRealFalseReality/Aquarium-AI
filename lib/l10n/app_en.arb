@@ -2730,7 +2730,7 @@
     "description": "Subtitle shown on the Remove Ads entry in the app drawer"
   },
 
-  "earlySupporterPerkTitle": "Early Supporter Perk",
+  "earlySupporterPerkTitle": "Founders Supporter Perk",
   "@earlySupporterPerkTitle": {
     "description": "Title of the Early Supporter callout in the Remove Ads dialog"
   },
