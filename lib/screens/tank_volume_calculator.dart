@@ -265,7 +265,6 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const NativeAdWidget(),
           Text(
             'Tank Volume Calculator',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(

@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/remote_config_service.dart';
@@ -793,6 +794,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAppSettingsDialog(),
         ),
         const SizedBox(height: 16),
+        _buildRemoveAdsCard(context),
+        const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
           title: l10n.dataManagement,
@@ -853,6 +856,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildRemoveAdsCard(BuildContext context) {
+    final purchaseState = ref.watch(purchaseProvider);
+    if (purchaseState.adsRemoved) {
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.green.withOpacity(0.25),
+                      Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.block, color: Colors.green, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ads Removed',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Thank you for your support!',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return _buildMenuCard(
+      context: context,
+      title: 'Remove Ads',
+      subtitle: 'Support the app with a one-time purchase',
+      icon: Icons.block,
+      gradient: LinearGradient(
+        colors: [
+          Colors.green.withOpacity(0.25),
+          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      iconColor: Colors.green.shade700,
+      onTap: () => _showRemoveAdsDialog(),
+    );
+  }
+
+  void _showRemoveAdsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => _RemoveAdsDialog(
+        onBuy: () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
+        onRestore: () => ref.read(purchaseProvider.notifier).restorePurchases(),
+      ),
     );
   }
 
@@ -3233,4 +3320,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+}
+
+/// A clean dialog for the "Remove Ads" one-time purchase.
+class _RemoveAdsDialog extends ConsumerWidget {
+  final VoidCallback onBuy;
+  final VoidCallback onRestore;
+
+  const _RemoveAdsDialog({required this.onBuy, required this.onRestore});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final purchaseState = ref.watch(purchaseProvider);
+    final busy = purchaseState.isPurchasing;
+
+    // Auto-close when the purchase completes successfully.
+    if (purchaseState.adsRemoved) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) Navigator.of(context).pop();
+      });
+    }
+
+    return AlertDialog(
+      icon: const Icon(Icons.block, size: 36),
+      title: const Text('Remove Ads'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Support Aquarium AI with a one-time purchase to remove all ads permanently.',
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Your purchase is tied to your store account and can be restored on any device.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (purchaseState.errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              purchaseState.errorMessage!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 13,
+              ),
+            ),
+          ],
+          if (busy) ...[
+            const SizedBox(height: 16),
+            const Center(child: CircularProgressIndicator()),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: busy ? null : onRestore,
+          child: const Text('Restore'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: busy ? null : onBuy,
+          child: const Text('Remove Ads'),
+        ),
+      ],
+    );
+  }
 }

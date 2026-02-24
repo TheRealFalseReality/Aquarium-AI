@@ -311,7 +311,6 @@ class _RecommendationTabView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
-        const BannerAdWidget(),
         Text(
           report.title,
           style: theme.textTheme.headlineSmall?.copyWith(
