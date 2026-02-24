@@ -23,6 +23,5 @@ jobs:
           channelId: live
           projectId: fishai-31d40
           entryPoint: "./" # This should point to the root of your flutter project
-          firebaseToolsVersion: "13"
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
