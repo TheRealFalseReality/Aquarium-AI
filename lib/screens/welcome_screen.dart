@@ -338,46 +338,51 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final cs = Theme.of(context).colorScheme;
     return Material(
       color: cs.primaryContainer,
-      child: InkWell(
-        onTap: () {
-          _dismissChangelogBanner();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ChangelogScreen(),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              Icon(Icons.new_releases, color: cs.primary, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  '${l10n.changelog} · v$_changelogBannerVersion',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: cs.onPrimaryContainer,
-                        fontWeight: FontWeight.w500,
+      child: Row(
+        children: [
+          // Tappable area – opens ChangelogScreen
+          Expanded(
+            child: InkWell(
+              onTap: () {
+                _dismissChangelogBanner();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangelogScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(Icons.new_releases, color: cs.primary, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${l10n.changelog} · v$_changelogBannerVersion',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: cs.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
+                    ),
+                    Icon(Icons.arrow_forward_ios,
+                        color: cs.onPrimaryContainer.withOpacity(0.7), size: 14),
+                  ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios,
-                  color: cs.onPrimaryContainer.withOpacity(0.7), size: 14),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: Icon(Icons.close,
-                    color: cs.onPrimaryContainer.withOpacity(0.7), size: 18),
-                onPressed: _dismissChangelogBanner,
-                tooltip: l10n.close,
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
+            ),
           ),
-        ),
+          // Dismiss button – only closes the banner
+          IconButton(
+            icon: Icon(Icons.close,
+                color: cs.onPrimaryContainer.withOpacity(0.7), size: 18),
+            onPressed: _dismissChangelogBanner,
+            tooltip: l10n.close,
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
       ),
     );
   }
