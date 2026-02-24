@@ -1071,7 +1071,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         // ─── Free AI toggles (global) ─────────────────────────────────────
-        if (RemoteConfigService.freeAiEnabled) Card(
+        Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -1099,30 +1099,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 12),
                 _buildDevKeyToggle(
                   label: 'Use Free AI for Text / Chat',
-                  value: _useDevGroqKeyForText,
-                  onChanged: (v) {
-                    setState(() => _useDevGroqKeyForText = v);
-                    setDialogState?.call(() => _useDevGroqKeyForText = v);
-                    // Auto-save immediately so root menu and providers reflect state.
-                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
-                          forText: v,
-                          forImage: _useDevGroqKeyForImage,
-                        );
-                  },
+                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText,
+                  onChanged: RemoteConfigService.freeAiEnabled
+                      ? (v) {
+                          setState(() => _useDevGroqKeyForText = v);
+                          setDialogState?.call(() => _useDevGroqKeyForText = v);
+                          // Auto-save immediately so root menu and providers reflect state.
+                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                                forText: v,
+                                forImage: _useDevGroqKeyForImage,
+                              );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 _buildDevKeyToggle(
                   label: 'Use Free AI for Image / Photo',
-                  value: _useDevGroqKeyForImage,
-                  onChanged: (v) {
-                    setState(() => _useDevGroqKeyForImage = v);
-                    setDialogState?.call(() => _useDevGroqKeyForImage = v);
-                    // Auto-save immediately so root menu and providers reflect state.
-                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
-                          forText: _useDevGroqKeyForText,
-                          forImage: v,
-                        );
-                  },
+                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage,
+                  onChanged: RemoteConfigService.freeAiEnabled
+                      ? (v) {
+                          setState(() => _useDevGroqKeyForImage = v);
+                          setDialogState?.call(() => _useDevGroqKeyForImage = v);
+                          // Auto-save immediately so root menu and providers reflect state.
+                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                                forText: _useDevGroqKeyForText,
+                                forImage: v,
+                              );
+                        }
+                      : null,
                 ),
               ],
             ),
@@ -1130,12 +1134,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 16),
         // ─── Consolidated API Keys ────────────────────────────────────────
-        if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
+        if (!RemoteConfigService.freeAiEnabled || !_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
           _buildApiKeysSection(setDialogState),
           const SizedBox(height: 16),
         ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
-        if (!_useDevGroqKeyForText) ...[
+        if (!RemoteConfigService.freeAiEnabled || !_useDevGroqKeyForText) ...[
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -1261,7 +1265,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         ], // end if (!_useDevGroqKeyForText)
         // ─── Image / Photo ────────────────────────────────────────────────────
-        if (!_useDevGroqKeyForImage) ...[
+        if (!RemoteConfigService.freeAiEnabled || !_useDevGroqKeyForImage) ...[
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -3072,7 +3076,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDevKeyToggle({
     required String label,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    required ValueChanged<bool>? onChanged,
   }) {
     final scheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
