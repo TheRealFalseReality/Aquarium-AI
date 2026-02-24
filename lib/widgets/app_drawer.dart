@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
@@ -25,7 +26,51 @@ class AppDrawer extends ConsumerStatefulWidget {
 
 class _AppDrawerState extends ConsumerState<AppDrawer> {
   bool _isAppearanceExpanded = false;
+  bool _isSpringAnimation = false;
+  bool _isCollapsingSpring = false;
   int? _randomTankIndex;
+
+  static const Duration _expandDuration = Duration(milliseconds: 900);
+  static const Duration _collapseDuration = Duration(milliseconds: 750);
+  static const Duration _normalDuration = Duration(milliseconds: 300);
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunchAnimation();
+  }
+
+  Future<void> _checkFirstLaunchAnimation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasShownAnimation =
+        prefs.getBool('drawer_appearance_animation_shown') ?? false;
+    if (!hasShownAnimation) {
+      // Wait for the drawer to finish opening before starting the animation
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (!mounted) return;
+      // Mark animation as shown only once it actually starts
+      await prefs.setBool('drawer_appearance_animation_shown', true);
+      setState(() {
+        _isSpringAnimation = true;
+        _isCollapsingSpring = false;
+        _isAppearanceExpanded = true;
+      });
+      // Hold the section open so users can read it
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (!mounted) return;
+      setState(() {
+        _isCollapsingSpring = true;
+        _isAppearanceExpanded = false;
+      });
+      // Wait for the collapse animation to finish
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!mounted) return;
+      setState(() {
+        _isSpringAnimation = false;
+        _isCollapsingSpring = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -532,7 +577,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           },
           trailing: AnimatedRotation(
             turns: _isAppearanceExpanded ? 0.5 : 0.0,
-            duration: const Duration(milliseconds: 300),
+            duration: _isSpringAnimation
+                ? (_isCollapsingSpring ? _collapseDuration : _expandDuration)
+                : _normalDuration,
+            curve: _isSpringAnimation
+                ? (_isCollapsingSpring
+                    ? Curves.easeInOutCubic
+                    : Curves.easeOutCubic)
+                : Curves.easeInOut,
             child: Icon(
               Icons.expand_more,
               color: Theme.of(context).colorScheme.tertiary,
@@ -540,8 +592,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           ),
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+          duration: _isSpringAnimation
+              ? (_isCollapsingSpring ? _collapseDuration : _expandDuration)
+              : _normalDuration,
+          curve: _isSpringAnimation
+              ? (_isCollapsingSpring
+                  ? Curves.easeInOutCubic
+                  : Curves.easeOutCubic)
+              : Curves.easeInOut,
           child:
               _isAppearanceExpanded ? collapsibleContent : const SizedBox.shrink(),
         ),
