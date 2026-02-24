@@ -62,6 +62,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _chatHistoryLimit = models.chatHistoryLimit;
     _useDevGroqKeyForText = models.useDevGroqKeyForText;
     _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
+
+    // Auto-open the Remove Ads dialog if requested via route arguments.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['openRemoveAds'] == true) {
+        _showRemoveAdsDialog();
+      }
+    });
   }
 
   @override

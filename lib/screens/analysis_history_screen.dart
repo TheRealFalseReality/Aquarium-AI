@@ -16,6 +16,8 @@ import '../models/fish_info_result.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/stocking_recommendation.dart';
 import '../providers/analysis_history_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../widgets/ad_component.dart';
 import 'analysis_result_screen.dart';
 import 'automation_script_result_screen.dart';
 import 'compatibility_report.dart' show showReportDialog;
@@ -30,6 +32,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch for state changes to trigger rebuilds
     final allEntries = ref.watch(analysisHistoryProvider);
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
 
     // Sort: favorites first (by date), then regular (by date)
     final favorites = allEntries.where((e) => e.isFavorite).toList()
@@ -37,6 +40,16 @@ class AnalysisHistoryScreen extends ConsumerWidget {
     final regular = allEntries.where((e) => !e.isFavorite).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     final entries = [...favorites, ...regular];
+
+    // Build a mixed list: insert a native ad slot every 5 history entries.
+    const adEvery = 5;
+    final items = <_HistoryItem>[];
+    for (var i = 0; i < entries.length; i++) {
+      items.add(_HistoryItem.entry(entries[i]));
+      if (!adsRemoved && (i + 1) % adEvery == 0 && i + 1 < entries.length) {
+        items.add(_HistoryItem.ad());
+      }
+    }
 
     return MainLayout(
       title: 'Analysis History',
@@ -48,9 +61,18 @@ class AnalysisHistoryScreen extends ConsumerWidget {
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
-                    itemCount: entries.length,
+                    itemCount: items.length,
                     itemBuilder: (context, index) {
-                      return _HistoryEntryTile(entry: entries[index]);
+                      final item = items[index];
+                      if (item.isAd) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: NativeAdWidget(),
+                        );
+                      }
+                      final entry = item.entry;
+                      if (entry == null) return const SizedBox.shrink();
+                      return _HistoryEntryTile(entry: entry);
                     },
                   ),
                 ),
@@ -121,6 +143,19 @@ class AnalysisHistoryScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// A discriminated union for list items: either a history entry or an ad slot.
+class _HistoryItem {
+  final AnalysisHistoryEntry? entry;
+  final bool isAd;
+
+  const _HistoryItem._({this.entry, required this.isAd});
+
+  factory _HistoryItem.entry(AnalysisHistoryEntry e) =>
+      _HistoryItem._(entry: e, isAd: false);
+
+  factory _HistoryItem.ad() => const _HistoryItem._(isAd: true);
 }
 
 class _HistoryEntryTile extends ConsumerWidget {

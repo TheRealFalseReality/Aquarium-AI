@@ -19,6 +19,7 @@ import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
@@ -572,10 +573,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // Prominent My Tanks Section
                       _buildMyTanksSection(context, tankState, tankCount, fishData),
                       
+                      // Remove Ads hint below My Tanks
+                      _buildRemoveAdsHint(context),
+                      
                       const SizedBox(height: 32),
                       
                       // Feature Cards in Staggered Grid
                       _buildFeatureGrid(context, features),
+
+                      // Native ad after feature grid (after AI stocking assistant)
+                      _buildWelcomeNativeAd(),
                       
                       const SizedBox(height: 48),
                       Padding(
@@ -1093,6 +1100,49 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return grouped;
   }
   
+  Widget _buildRemoveAdsHint(BuildContext context) {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/settings',
+          arguments: {'openRemoveAds': true},
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.block,
+              size: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Remove Ads',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeNativeAd() {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+    return const Padding(
+      padding: EdgeInsets.only(top: 24),
+      child: NativeAdWidget(),
+    );
+  }
+
   Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
