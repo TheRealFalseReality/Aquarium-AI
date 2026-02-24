@@ -284,8 +284,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// Saves Text/Chat provider settings independently (validates text key only).
   void _saveTextSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final effectiveFreeText = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
 
-    if (!_useDevGroqKeyForText) {
+    if (!effectiveFreeText) {
       if (_selectedTextProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
         context.showAccessibleMessage(l10n.enterGeminiApiKey);
@@ -342,8 +343,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// Saves Image/Multimedia provider settings independently (validates image key only).
   void _saveImageSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final effectiveFreeImage = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
 
-    if (!_useDevGroqKeyForImage) {
+    if (!effectiveFreeImage) {
       if (_selectedImageProvider == AIProvider.gemini &&
           _geminiApiKeyController.text.trim().isEmpty) {
         context.showAccessibleMessage(l10n.enterGeminiApiKey);
@@ -400,15 +402,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// Returns a list of validation error messages for the current dialog state.
   /// A key is required for a provider when its Free AI toggle is OFF and that
   /// provider is currently selected for text or image use.
+  /// When freeAiEnabled is false, Free AI is treated as OFF regardless of toggle state.
   List<String> _getValidationErrors() {
     final l10n = AppLocalizations.of(context)!;
     final errors = <String>[];
+    final effectiveFreeText = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
+    final effectiveFreeImage = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
 
     // Gemini key required when selected (text or image) and Free AI is off
     final geminiNeededForText =
-        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.gemini;
+        !effectiveFreeText && _selectedTextProvider == AIProvider.gemini;
     final geminiNeededForImage =
-        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.gemini;
+        !effectiveFreeImage && _selectedImageProvider == AIProvider.gemini;
     if ((geminiNeededForText || geminiNeededForImage) &&
         _geminiApiKeyController.text.trim().isEmpty) {
       errors.add(l10n.enterGeminiApiKey);
@@ -416,9 +421,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     // OpenAI key required when selected (text or image) and Free AI is off
     final openAINeededForText =
-        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.openAI;
+        !effectiveFreeText && _selectedTextProvider == AIProvider.openAI;
     final openAINeededForImage =
-        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.openAI;
+        !effectiveFreeImage && _selectedImageProvider == AIProvider.openAI;
     if ((openAINeededForText || openAINeededForImage) &&
         _openAIApiKeyController.text.trim().isEmpty) {
       errors.add(l10n.enterOpenAIApiKey);
@@ -426,9 +431,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     // Groq key required when selected (text or image) and Free AI is off
     final groqNeededForText =
-        !_useDevGroqKeyForText && _selectedTextProvider == AIProvider.groq;
+        !effectiveFreeText && _selectedTextProvider == AIProvider.groq;
     final groqNeededForImage =
-        !_useDevGroqKeyForImage && _selectedImageProvider == AIProvider.groq;
+        !effectiveFreeImage && _selectedImageProvider == AIProvider.groq;
     if ((groqNeededForText || groqNeededForImage) &&
         _groqApiKeyController.text.trim().isEmpty) {
       errors.add(l10n.enterGroqApiKey);
@@ -465,6 +470,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     context.showAccessibleMessage(l10n.settingsUpdatedSuccess);
     setDialogState?.call(() {});
     return true;
+  }
+
+  /// Clears one API key after a confirmation dialog, bypassing validation.
+  /// [keyName] must be 'geminiApiKey', 'openAIApiKey', or 'groqApiKey'.
+  Future<void> _clearApiKey(
+    BuildContext context,
+    String keyName,
+    String label, [
+    StateSetter? setDialogState,
+  ]) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear API Key'),
+        content: Text('Are you sure you want to clear the $label? You will need to re-enter the key to use it again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    // Clear the controller and persist immediately (no validation).
+    switch (keyName) {
+      case 'geminiApiKey':
+        _geminiApiKeyController.clear();
+      case 'openAIApiKey':
+        _openAIApiKeyController.clear();
+      case 'groqApiKey':
+        _groqApiKeyController.clear();
+    }
+    setState(() {});
+    setDialogState?.call(() {});
+    await ref.read(modelProvider.notifier).clearApiKey(keyName);
+    if (context.mounted) {
+      context.showAccessibleMessage('$label cleared.');
+    }
   }
 
   /// Returns true if any field in the AI Provider dialog differs from saved state.
@@ -1158,7 +1209,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         // ─── Free AI toggles (global) ─────────────────────────────────────
-        if (RemoteConfigService.freeAiEnabled) Card(
+        Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -1186,30 +1237,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 12),
                 _buildDevKeyToggle(
                   label: 'Use Free AI for Text / Chat',
-                  value: _useDevGroqKeyForText,
-                  onChanged: (v) {
-                    setState(() => _useDevGroqKeyForText = v);
-                    setDialogState?.call(() => _useDevGroqKeyForText = v);
-                    // Auto-save immediately so root menu and providers reflect state.
-                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
-                          forText: v,
-                          forImage: _useDevGroqKeyForImage,
-                        );
-                  },
+                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText,
+                  onChanged: RemoteConfigService.freeAiEnabled
+                      ? (v) {
+                          setState(() {
+                            _useDevGroqKeyForText = v;
+                            // When Free AI is ON, force provider to Groq so free tier is used.
+                            if (v) _selectedTextProvider = AIProvider.groq;
+                          });
+                          setDialogState?.call(() {
+                            _useDevGroqKeyForText = v;
+                            if (v) _selectedTextProvider = AIProvider.groq;
+                          });
+                          // Auto-save immediately so root menu and providers reflect state.
+                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                                forText: v,
+                                forImage: _useDevGroqKeyForImage,
+                              );
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 _buildDevKeyToggle(
                   label: 'Use Free AI for Image / Photo',
-                  value: _useDevGroqKeyForImage,
-                  onChanged: (v) {
-                    setState(() => _useDevGroqKeyForImage = v);
-                    setDialogState?.call(() => _useDevGroqKeyForImage = v);
-                    // Auto-save immediately so root menu and providers reflect state.
-                    ref.read(modelProvider.notifier).setDevGroqKeyToggles(
-                          forText: _useDevGroqKeyForText,
-                          forImage: v,
-                        );
-                  },
+                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage,
+                  onChanged: RemoteConfigService.freeAiEnabled
+                      ? (v) {
+                          setState(() {
+                            _useDevGroqKeyForImage = v;
+                            // When Free AI is ON, force provider to Groq so free tier is used.
+                            if (v) _selectedImageProvider = AIProvider.groq;
+                          });
+                          setDialogState?.call(() {
+                            _useDevGroqKeyForImage = v;
+                            if (v) _selectedImageProvider = AIProvider.groq;
+                          });
+                          // Auto-save immediately so root menu and providers reflect state.
+                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                                forText: _useDevGroqKeyForText,
+                                forImage: v,
+                              );
+                        }
+                      : null,
                 ),
               ],
             ),
@@ -1217,12 +1286,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 16),
         // ─── Consolidated API Keys ────────────────────────────────────────
-        if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
+        if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
           _buildApiKeysSection(setDialogState),
           const SizedBox(height: 16),
         ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
-        if (!_useDevGroqKeyForText) ...[
+        if (!_useDevGroqKeyForText || !RemoteConfigService.freeAiEnabled) ...[
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -1348,7 +1417,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         ], // end if (!_useDevGroqKeyForText)
         // ─── Image / Photo ────────────────────────────────────────────────────
-        if (!_useDevGroqKeyForImage) ...[
+        if (!_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
           Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -1975,7 +2044,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
     // Locked on free tier (dev key in use for text)
-    final onFreeTier = _useDevGroqKeyForText;
+    final onFreeTier = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -2231,6 +2300,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        if (_geminiApiKeyController.text.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'geminiApiKey', 'Google AI API Key', setDialogState),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         TextField(
           controller: _geminiModelController,
@@ -2438,6 +2521,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        if (_openAIApiKeyController.text.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'openAIApiKey', 'OpenAI API Key', setDialogState),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         TextField(
           controller: _chatGPTModelController,
@@ -2523,12 +2620,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildGroqSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
     final l10n = AppLocalizations.of(context)!;
-    // When used in a sub-section, check the per-use-case free key toggle
-    final usingFreeKey = forTextUseCase == true
+    // When used in a sub-section, check the per-use-case free key toggle.
+    // When freeAiEnabled is false, treat free key as OFF.
+    final usingFreeKey = RemoteConfigService.freeAiEnabled && (forTextUseCase == true
         ? _useDevGroqKeyForText
         : forTextUseCase == false
             ? _useDevGroqKeyForImage
-            : false; // legacy combined view always shows API key field
+            : false); // legacy combined view always shows API key field
 
     // When called from the text/image provider section, only show the model
     // field. The API key is entered once in the consolidated API Keys section.
@@ -2657,8 +2755,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
         ],
+        if (_groqApiKeyController.text.isNotEmpty) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'groqApiKey', 'Groq API Key', setDialogState),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ] else if (!usingFreeKey)
+          const SizedBox(height: 16),
         TextField(
           controller: _groqModelController,
           enabled: !usingFreeKey,
@@ -2839,15 +2952,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (_geminiApiKeyController.text != ref.read(modelProvider).geminiApiKey)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.save, size: 18),
-                        label: const Text('Save Key'),
-                        onPressed: () => _saveApiKeys(context, setDialogState),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (_geminiApiKeyController.text.isNotEmpty)
+                        OutlinedButton.icon(
+                          icon: Icon(Icons.clear, size: 18,
+                              color: Theme.of(context).colorScheme.error),
+                          label: Text('Clear',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error)),
+                          onPressed: () => _clearApiKey(
+                              context, 'geminiApiKey', 'Google AI API Key',
+                              setDialogState),
+                        ),
+                      if (_geminiApiKeyController.text.isNotEmpty &&
+                          _geminiApiKeyController.text !=
+                              ref.read(modelProvider).geminiApiKey)
+                        const SizedBox(width: 8),
+                      if (_geminiApiKeyController.text !=
+                          ref.read(modelProvider).geminiApiKey)
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text('Save Key'),
+                          onPressed: () => _saveApiKeys(context, setDialogState),
+                        ),
+                    ],
+                  ),
                   _buildApiKeyGuide(
                     title: 'How to get your Google AI API key:',
                     children: [
@@ -2925,7 +3056,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                 ),
                 trailing: Builder(builder: (context) {
-                  final usingFreeAi = _useDevGroqKeyForText || _useDevGroqKeyForImage;
+                  final usingFreeAi = RemoteConfigService.freeAiEnabled && (_useDevGroqKeyForText || _useDevGroqKeyForImage);
                   final hasKey = _groqApiKeyController.text.isNotEmpty;
                   return Icon(
                     usingFreeAi
@@ -2946,7 +3077,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 children: [
                   // Show the API key field only when at least one operation needs a user key
-                  if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage) ...[
+                  if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
                     TextField(
                       controller: _groqApiKeyController,
                       obscureText: !_isGroqApiKeyVisible,
@@ -2968,15 +3099,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (_groqApiKeyController.text != ref.read(modelProvider).groqApiKey)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.save, size: 18),
-                          label: const Text('Save Key'),
-                          onPressed: () => _saveApiKeys(context, setDialogState),
-                        ),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (_groqApiKeyController.text.isNotEmpty)
+                          OutlinedButton.icon(
+                            icon: Icon(Icons.clear, size: 18,
+                                color: Theme.of(context).colorScheme.error),
+                            label: Text('Clear',
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error)),
+                            onPressed: () => _clearApiKey(
+                                context, 'groqApiKey', 'Groq API Key',
+                                setDialogState),
+                          ),
+                        if (_groqApiKeyController.text.isNotEmpty &&
+                            _groqApiKeyController.text !=
+                                ref.read(modelProvider).groqApiKey)
+                          const SizedBox(width: 8),
+                        if (_groqApiKeyController.text !=
+                            ref.read(modelProvider).groqApiKey)
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.save, size: 18),
+                            label: const Text('Save Key'),
+                            onPressed: () => _saveApiKeys(context, setDialogState),
+                          ),
+                      ],
+                    ),
                   ],
                   _buildApiKeyGuide(
                     title: 'How to get your Groq API key:',
@@ -3089,15 +3238,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (_openAIApiKeyController.text != ref.read(modelProvider).openAIApiKey)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.save, size: 18),
-                        label: const Text('Save Key'),
-                        onPressed: () => _saveApiKeys(context, setDialogState),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (_openAIApiKeyController.text.isNotEmpty)
+                        OutlinedButton.icon(
+                          icon: Icon(Icons.clear, size: 18,
+                              color: Theme.of(context).colorScheme.error),
+                          label: Text('Clear',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error)),
+                          onPressed: () => _clearApiKey(
+                              context, 'openAIApiKey', 'OpenAI API Key',
+                              setDialogState),
+                        ),
+                      if (_openAIApiKeyController.text.isNotEmpty &&
+                          _openAIApiKeyController.text !=
+                              ref.read(modelProvider).openAIApiKey)
+                        const SizedBox(width: 8),
+                      if (_openAIApiKeyController.text !=
+                          ref.read(modelProvider).openAIApiKey)
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text('Save Key'),
+                          onPressed: () => _saveApiKeys(context, setDialogState),
+                        ),
+                    ],
+                  ),
                   _buildApiKeyGuide(
                     title: 'How to get your OpenAI API key:',
                     children: [
@@ -3159,7 +3326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDevKeyToggle({
     required String label,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    required ValueChanged<bool>? onChanged,
   }) {
     final scheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
@@ -3192,7 +3359,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
         ),
         subtitle: Text(
-          value ? 'Using Free Provider' : 'Use your own key',
+          onChanged == null
+              ? 'Free AI unavailable'
+              : value ? 'Using Free Provider' : 'Use your own key',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: value
                     ? scheme.primary.withOpacity(0.8)

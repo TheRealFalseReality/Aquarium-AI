@@ -27,7 +27,6 @@ import '../widgets/app_promotion_dialog.dart';
 import '../widgets/aquapi_promotion_dialog.dart';
 import '../theme_provider.dart';
 import '../services/analytics_service.dart';
-import '../services/remote_config_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 
@@ -546,9 +545,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: RemoteConfigService.aquapiEssentialImageUrl.isNotEmpty
-            ? RemoteConfigService.aquapiEssentialImageUrl
-            : 'assets/AquaPiEssentials.jpg',
+        imagePath: 'assets/AquaPiEssentials.jpg',
       ),
     ];
 

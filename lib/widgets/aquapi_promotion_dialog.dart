@@ -2,9 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../services/analytics_service.dart';
-import '../services/remote_config_service.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
   const AquaPiPromotionDialog({super.key});
@@ -94,38 +92,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  /// Builds the AquaPi promotion image.
-  /// Uses the Remote Config URL when set; falls back to the bundled asset.
+  /// Builds the AquaPi promotion image using the bundled local asset.
   /// Accepts an optional [width] for the desktop (horizontal) layout.
   Widget _buildPromoImage({double? width}) {
-    final imageUrl = RemoteConfigService.aquapiOriginalImageUrl;
-    final borderRadius = BorderRadius.circular(12);
-
-    if (imageUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: borderRadius,
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          width: width,
-          fit: BoxFit.contain,
-          placeholder: (context, url) => SizedBox(
-            width: width,
-            height: 80,
-            child: const Center(child: CircularProgressIndicator()),
-          ),
-          errorWidget: (context, url, error) => Image.asset(
-            'assets/AquaPiMainSmaller.jpg',
-            width: width,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const SizedBox.shrink(),
-          ),
-        ),
-      );
-    }
-
     return ClipRRect(
-      borderRadius: borderRadius,
+      borderRadius: BorderRadius.circular(12),
       child: Image.asset(
         'assets/AquaPiMainSmaller.jpg',
         width: width,
