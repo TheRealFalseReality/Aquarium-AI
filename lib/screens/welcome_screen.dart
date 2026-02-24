@@ -343,14 +343,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           // Tappable area – opens ChangelogScreen
           Expanded(
             child: InkWell(
-              onTap: () {
-                _dismissChangelogBanner();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChangelogScreen(),
-                  ),
-                );
+              key: const Key('changelog_banner_tap_area'),
+              onTap: () async {
+                await _dismissChangelogBanner();
+                if (mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChangelogScreen(),
+                    ),
+                  );
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -376,6 +379,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           ),
           // Dismiss button – only closes the banner
           IconButton(
+            key: const Key('changelog_banner_dismiss'),
             icon: Icon(Icons.close,
                 color: cs.onPrimaryContainer.withOpacity(0.7), size: 18),
             onPressed: _dismissChangelogBanner,

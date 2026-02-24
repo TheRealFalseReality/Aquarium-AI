@@ -1,8 +1,10 @@
+import 'package:fish_ai/screens/changelog_screen.dart';
 import 'package:fish_ai/screens/fish_compatibility_screen.dart';
 import 'package:fish_ai/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -142,6 +144,123 @@ void main() {
       final testTimestamp = DateTime.now().millisecondsSinceEpoch;
       await WelcomeScreen.setPromotionDialogTimestamp(testTimestamp);
       await WelcomeScreen.checkPromotionDialogStatus();
+    });
+  });
+
+  group('Changelog Banner Tests', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      PackageInfo.setMockInitialValues(
+        appName: 'Aquarium AI',
+        packageName: 'com.test.app',
+        version: '2.0.0',
+        buildNumber: '2',
+        buildSignature: '',
+      );
+    });
+
+    testWidgets('Banner shows on new app version', (WidgetTester tester) async {
+      // No stored version → treat as new install / upgrade
+      SharedPreferences.setMockInitialValues({});
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsOneWidget);
+    });
+
+    testWidgets('Banner persists within 3-day window', (WidgetTester tester) async {
+      final oneDayAgo =
+          DateTime.now().millisecondsSinceEpoch - (1 * 24 * 60 * 60 * 1000);
+      SharedPreferences.setMockInitialValues({
+        'changelog_shown_version': '2.0.0',
+        'changelog_banner_shown_at': oneDayAgo,
+      });
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsOneWidget);
+    });
+
+    testWidgets('Banner auto-dismisses after 3 days', (WidgetTester tester) async {
+      final fourDaysAgo =
+          DateTime.now().millisecondsSinceEpoch - (4 * 24 * 60 * 60 * 1000);
+      SharedPreferences.setMockInitialValues({
+        'changelog_shown_version': '2.0.0',
+        'changelog_banner_shown_at': fourDaysAgo,
+      });
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsNothing);
+
+      // Timestamp key should be cleaned up
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.containsKey('changelog_banner_shown_at'), isFalse);
+    });
+
+    testWidgets('Banner dismisses via close button', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('changelog_banner_dismiss')));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsNothing);
+
+      // Timestamp key should be cleaned up
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.containsKey('changelog_banner_shown_at'), isFalse);
+    });
+
+    testWidgets('Banner tap navigates to ChangelogScreen', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.new_releases), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('changelog_banner_tap_area')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChangelogScreen), findsOneWidget);
     });
   });
 }
