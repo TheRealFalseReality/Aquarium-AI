@@ -17,6 +17,10 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
+      - name: Create firebase_options.dart from secret
+        env:
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_DART }}
+        run: echo "$FIREBASE_OPTIONS_DART" | base64 -d > lib/firebase_options.dart
       - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
