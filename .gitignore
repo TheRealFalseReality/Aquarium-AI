@@ -56,4 +56,3 @@ flutter.tar.xz
 flutter/
 /.vscode
 assets/service-account-google-play.json
-lib/firebase_options.dart
