@@ -12,6 +12,7 @@ import '../services/crashlytics_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
+import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -919,6 +920,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildRemoveAdsCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final purchaseState = ref.watch(purchaseProvider);
     if (purchaseState.adsRemoved) {
       return Card(
@@ -976,8 +978,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     return _buildMenuCard(
       context: context,
-      title: 'Remove Ads',
-      subtitle: 'Support the app with a one-time purchase',
+      title: l10n.removeAds,
+      subtitle: l10n.removeAdsSettingsSubtitle,
       icon: Icons.block,
       gradient: LinearGradient(
         colors: [
@@ -993,61 +995,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showRemoveAdsDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => _RemoveAdsDialog(
-        onBuy: () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
-        onRestore: () => ref.read(purchaseProvider.notifier).restorePurchases(),
-      ),
-    ).then((_) {
-      if (!mounted) return;
-      final outcome = ref.read(purchaseProvider).restoreOutcome;
-      ref.read(purchaseProvider.notifier).clearRestoreOutcome();
-      _showRestoreOutcomeDialog(outcome);
-    });
-  }
-
-  void _showRestoreOutcomeDialog(RestoreOutcome outcome) {
-    if (outcome == RestoreOutcome.none) return;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        if (outcome == RestoreOutcome.success) {
-          return AlertDialog(
-            icon: const Icon(Icons.favorite, color: Colors.green, size: 36),
-            title: const Text('Thank You! 🎉'),
-            content: const Text(
-              'Your Early Supporter purchase has been restored and ads have '
-              'been removed.\n\n'
-              'Thank you so much for your support — it means the world and '
-              'helps keep Aquarium AI growing!',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        }
-        // RestoreOutcome.notFound
-        return AlertDialog(
-          icon: const Icon(Icons.search_off, size: 36),
-          title: const Text('No Purchase Found'),
-          content: const Text(
-            'No previous purchase was found on this account.\n\n'
-            'If you bought on a different store account, sign in with that '
-            'account and try again.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    showRemoveAdsDialog(context, ref);
   }
 
   Widget _buildMenuCard({
@@ -3545,145 +3493,4 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-}
-
-/// A clean dialog for the "Remove Ads" one-time purchase.
-class _RemoveAdsDialog extends ConsumerWidget {
-  final VoidCallback onBuy;
-  final VoidCallback onRestore;
-
-  const _RemoveAdsDialog({required this.onBuy, required this.onRestore});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final purchaseState = ref.watch(purchaseProvider);
-    final busy = purchaseState.isPurchasing;
-
-    // Auto-close when the purchase completes successfully.
-    if (purchaseState.adsRemoved) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) Navigator.of(context).pop();
-      });
-    }
-
-    // Auto-close when restore determines there is no previous purchase,
-    // so the outcome dialog can be shown by the parent.
-    ref.listen<PurchaseState>(purchaseProvider, (prev, next) {
-      if (next.restoreOutcome != RestoreOutcome.notFound) return;
-      if (prev?.restoreOutcome == RestoreOutcome.notFound) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) Navigator.of(context).pop();
-      });
-    });
-
-    return AlertDialog(
-      icon: const Icon(Icons.block, size: 36),
-      title: const Text('Remove Ads'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('⭐', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Early Supporter Perk',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Remove ads forever with a single purchase and help fund the development of Aquarium AI. '
-                  'Your support keeps the app growing — and as a thank-you, early supporters may see '
-                  'increased AI usage limits when we\'re able to make that happen!',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    height: 1.45,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Support Aquarium AI with a one-time purchase to remove all ads permanently.',
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Your purchase is tied to your store account and can be restored on any device.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          if (purchaseState.errorMessage != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              purchaseState.errorMessage!,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontSize: 13,
-              ),
-            ),
-          ],
-          if (busy) ...[
-            const SizedBox(height: 16),
-            const Center(child: CircularProgressIndicator()),
-          ],
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: busy ? null : onRestore,
-          child: const Text('Restore'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        Builder(builder: (context) {
-          final price = RemoteConfigService.earlySupporterPrice;
-          if (price.isEmpty) {
-            return ElevatedButton(
-              onPressed: busy ? null : onBuy,
-              child: const Text('Remove Ads'),
-            );
-          }
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                price,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: busy ? null : onBuy,
-                child: const Text('Remove Ads'),
-              ),
-            ],
-          );
-        }),
-      ],
-    );
-  }
 }

@@ -17,6 +17,7 @@ import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
+import 'remove_ads_dialog.dart';
 
 class AppDrawer extends ConsumerStatefulWidget {
   const AppDrawer({super.key});
@@ -488,14 +489,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 child: ListTile(
                   leading: Icon(Icons.block, color: Colors.green.shade600, size: 22),
                   title: Text(
-                    'Remove Ads',
+                    l10n.removeAds,
                     style: TextStyle(
                       color: Colors.green.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: Text(
-                    'One-time purchase · Support the app',
+                    l10n.removeAdsDrawerSubtitle,
                     style: TextStyle(
                       color: Colors.green.shade600,
                       fontSize: 11,
@@ -505,11 +506,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     Navigator.pop(context); // close drawer
                     Future.delayed(const Duration(milliseconds: 250), () {
                       if (!mounted) return;
-                      Navigator.pushNamed(
-                        context,
-                        '/settings',
-                        arguments: {'openRemoveAds': true},
-                      );
+                      showRemoveAdsDialog(context, ref);
                     });
                   },
                 ),

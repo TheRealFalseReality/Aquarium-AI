@@ -1123,6 +1123,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget _buildRemoveAdsHint(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
     if (adsRemoved) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -1142,7 +1143,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             ),
             const SizedBox(width: 4),
             Text(
-              'Remove Ads',
+              l10n.removeAds,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 decoration: TextDecoration.underline,

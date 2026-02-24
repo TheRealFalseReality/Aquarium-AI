@@ -508,7 +508,19 @@
   "addCustomSpecies": "Agregar especie personalizada",
 
   "submitIssue": "Enviar un problema",
-  "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub"
+  "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub",
+
+  "removeAds": "Eliminar anuncios",
+  "removeAdsSettingsSubtitle": "Apoya al desarrollador con una compra única",
+  "removeAdsDrawerSubtitle": "Compra única · Apoya al desarrollador",
+  "earlySupporterPerkTitle": "Beneficio de Early Supporter",
+  "earlySupporterPerkBody": "Elimina los anuncios para siempre con una sola compra y ayuda a financiar el desarrollo de Aquarium AI. Tu apoyo mantiene la app creciendo — ¡y como agradecimiento, los early supporters podrían ver límites de uso de IA aumentados cuando podamos hacerlo posible!",
+  "removeAdsContentDesc": "Apoya Aquarium AI con una compra única para eliminar todos los anuncios de forma permanente.",
+  "removeAdsPurchaseTiedToAccount": "Tu compra está vinculada a tu cuenta de la tienda y se puede restaurar en cualquier dispositivo.",
+  "removeAdsThankyouTitle": "¡Gracias! 🎉",
+  "removeAdsThankyouBody": "Tu compra de Early Supporter ha sido restaurada y los anuncios han sido eliminados.\n\n¡Muchas gracias por tu apoyo — significa mucho y ayuda a que Aquarium AI siga creciendo!",
+  "removeAdsNoPurchaseTitle": "No se encontró ninguna compra",
+  "removeAdsNoPurchaseBody": "No se encontró ninguna compra anterior en esta cuenta.\n\nSi compraste con una cuenta de tienda diferente, inicia sesión con esa cuenta e inténtalo de nuevo."
 }
 
 

@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
+import 'remove_ads_dialog.dart';
 
 class AdBanner extends ConsumerStatefulWidget {
   const AdBanner({super.key});
@@ -147,11 +149,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
         ),
         const SizedBox(height: 4),
         GestureDetector(
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/settings',
-            arguments: {'openRemoveAds': true},
-          ),
+          onTap: () => showRemoveAdsDialog(context, ref),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -165,7 +163,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
               ),
               const SizedBox(width: 4),
               Text(
-                'Remove Ads',
+                AppLocalizations.of(context)!.removeAds,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context)
                           .colorScheme
