@@ -1,5 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 // ---------------------------------------------------------------------------
 // In-app fallback defaults
@@ -45,11 +46,11 @@ const String _defaultAquapiEssentialImageUrl = '';
 const String _defaultFishcompatJson = '';
 
 // Early Supporter lifetime purchase pricing.
-// Empty string = do not display a price label in the Remove Ads dialog.
-// Set a formatted price string (e.g. "$0.99") in Remote Config to show it
-// on the purchase button without shipping an app update.
-/// Fallback display price for the Early Supporter lifetime purchase.
-const String _defaultEarlySupporterPrice = '';
+// 0.0 = do not display a price label in the Remove Ads dialog.
+// Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
+// price on the purchase button without shipping an app update.
+/// Fallback USD price for the Early Supporter lifetime purchase (0 = hidden).
+const double _defaultEarlySupporterPrice = 0.0;
 
 /// Key names used in Firebase Remote Config.
 ///
@@ -111,9 +112,9 @@ class RemoteConfigKeys {
   static const String fishcompatJson = 'fishcompat_json';
 
   // ── In-app purchase pricing ───────────────────────────────────────────────
-  /// String — display price for the Early Supporter lifetime purchase shown
-  /// on the Remove Ads button (e.g. `"$0.99"`).
-  /// Empty string (default) means no price label is shown.
+  /// String — USD price for the Early Supporter lifetime purchase.
+  /// Store a positive number (e.g. `0.99`) in Remote Config.
+  /// `0` or unset means no price label is shown in the Remove Ads dialog.
   static const String earlySupporterPrice = 'early_supporter_price';
 }
 
@@ -276,9 +277,13 @@ class RemoteConfigService {
 
   // ── In-app purchase pricing ─────────────────────────────────────────────────
 
-  /// Display price for the Early Supporter lifetime purchase
-  /// (e.g. `"$0.99"`). Returns an empty string when not set in Remote Config,
-  /// meaning no price label should be shown in the Remove Ads dialog.
-  static String get earlySupporterPrice =>
-      _modelString(RemoteConfigKeys.earlySupporterPrice, _defaultEarlySupporterPrice);
+  /// Formatted USD price string for the Early Supporter lifetime purchase
+  /// (e.g. `"$0.99"`). Returns an empty string when the Remote Config value
+  /// is `0` or unset, meaning no price label should be shown.
+  static String get earlySupporterPrice {
+    final raw = _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice)
+        ?? _defaultEarlySupporterPrice;
+    if (raw <= 0) return '';
+    return NumberFormat.currency(locale: 'en_US', symbol: r'$').format(raw);
+  }
 }
