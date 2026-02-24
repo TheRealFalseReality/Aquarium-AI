@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
@@ -985,71 +986,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showRemoveAdsDialog() {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final state = ref.watch(purchaseProvider);
-            return AlertDialog(
-              title: const Row(
-                children: [
-                  Icon(Icons.block),
-                  SizedBox(width: 8),
-                  Text('Remove Ads'),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Support Aquarium AI with a one-time purchase to remove all ads forever.',
-                  ),
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      state.errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                  if (state.isPurchasing) ...[
-                    const SizedBox(height: 16),
-                    const Center(child: CircularProgressIndicator()),
-                  ],
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: state.isPurchasing
-                      ? null
-                      : () {
-                          ref
-                              .read(purchaseProvider.notifier)
-                              .restorePurchases();
-                          Navigator.of(dialogContext).pop();
-                        },
-                  child: const Text('Restore Purchase'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: state.isPurchasing
-                      ? null
-                      : () {
-                          ref.read(purchaseProvider.notifier).buyRemoveAds();
-                          Navigator.of(dialogContext).pop();
-                        },
-                  child: const Text('Purchase'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (dialogContext) => const _RemoveAdsDialogContent(),
     );
   }
 
@@ -3430,4 +3367,212 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+}
+
+// ---------------------------------------------------------------------------
+// Remove Ads dialog content – self-contained so the billing check runs exactly
+// once in initState and is not re-triggered by rebuilds.
+// ---------------------------------------------------------------------------
+
+class _RemoveAdsDialogContent extends ConsumerStatefulWidget {
+  const _RemoveAdsDialogContent();
+
+  @override
+  ConsumerState<_RemoveAdsDialogContent> createState() =>
+      _RemoveAdsDialogContentState();
+}
+
+class _RemoveAdsDialogContentState
+    extends ConsumerState<_RemoveAdsDialogContent> {
+  @override
+  void initState() {
+    super.initState();
+    // Run the billing check exactly once when the dialog first opens.
+    Future.microtask(
+      () => ref.read(billingDiagnosticsProvider.notifier).runCheck(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final purchaseState = ref.watch(purchaseProvider);
+    final diag = ref.watch(billingDiagnosticsProvider);
+
+    final bool productFound = diag.product != null;
+    final bool busy = diag.isLoading || purchaseState.isPurchasing;
+
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.block),
+          SizedBox(width: 8),
+          Text('Remove Ads'),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('One-time purchase to remove all ads forever.'),
+            const SizedBox(height: 16),
+
+            // ── Billing diagnostics panel ──────────────────────────────────
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outlineVariant
+                      .withOpacity(0.4),
+                ),
+              ),
+              child: diag.isLoading
+                  ? const Row(
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 10),
+                        Text('Checking billing connection…'),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (diag.billingAvailable != null)
+                          _diagRow(
+                            context,
+                            diag.billingAvailable!
+                                ? Icons.check_circle
+                                : Icons.cancel,
+                            diag.billingAvailable!
+                                ? 'Google Play Billing: available'
+                                : 'Google Play Billing: not available',
+                            diag.billingAvailable!
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        if (diag.billingAvailable == true) ...[
+                          const SizedBox(height: 6),
+                          _diagRow(
+                            context,
+                            productFound
+                                ? Icons.check_circle
+                                : Icons.warning_amber,
+                            productFound
+                                ? 'Product found: '
+                                    '${diag.product?.title}  '
+                                    '${diag.product?.price ?? ''}'
+                                : 'Product "$removeAdsProductId" not found',
+                            productFound ? Colors.green : Colors.orange,
+                          ),
+                        ],
+                        if (diag.errorMessage != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            diag.errorMessage!,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: productFound
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                          : Colors.orange.shade800,
+                                    ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: diag.isLoading
+                              ? null
+                              : () => ref
+                                  .read(billingDiagnosticsProvider.notifier)
+                                  .runCheck(),
+                          icon: const Icon(Icons.refresh, size: 16),
+                          label: const Text('Re-check'),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+
+            // Purchase error from the actual buy attempt
+            if (purchaseState.errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                purchaseState.errorMessage!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+            if (purchaseState.isPurchasing) ...[
+              const SizedBox(height: 16),
+              const Center(child: CircularProgressIndicator()),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: busy
+              ? null
+              : () {
+                  ref.read(purchaseProvider.notifier).restorePurchases();
+                  Navigator.of(context).pop();
+                },
+          child: const Text('Restore'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: (busy || !productFound)
+              ? null
+              : () {
+                  ref.read(purchaseProvider.notifier).buyRemoveAds();
+                  Navigator.of(context).pop();
+                },
+          child: Text(
+            productFound
+                ? 'Buy ${diag.product?.price ?? ''}'
+                : 'Purchase',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A single row in the billing diagnostics panel.
+Widget _diagRow(
+    BuildContext context, IconData icon, String text, Color color) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, size: 16, color: color),
+      const SizedBox(width: 6),
+      Expanded(
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+        ),
+      ),
+    ],
+  );
 }
