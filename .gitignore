@@ -55,3 +55,4 @@ flutter.tar.xz
 .firebase/
 flutter/
 /.vscode
+assets/service-account-google-play.json
