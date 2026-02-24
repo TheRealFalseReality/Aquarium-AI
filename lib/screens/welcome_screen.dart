@@ -3,10 +3,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,6 +16,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
+import 'changelog_screen.dart';
 import '../providers/model_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -120,7 +119,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _aquapiPromotionDialogTimestampKey = 'aquapi_promotion_dialog_timestamp';
   static const int _aquapiPromotionDialogCooldownHours = 72; // Show again after 72 hours have elapsed
   static const String _changelogShownVersionKey = 'changelog_shown_version';
-  
+  static const String _changelogBannerShownAtKey = 'changelog_banner_shown_at';
+  static const int _changelogBannerAutoDismissDays = 3;
+
+  bool _showChangelogBanner = false;
+  String _changelogBannerVersion = '';
+
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
   
@@ -281,143 +285,101 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final currentVersion = info.version;
       final prefs = await SharedPreferences.getInstance();
       final lastShownVersion = prefs.getString(_changelogShownVersionKey);
-      debugPrint('Changelog dialog check: current=$currentVersion, lastShown=$lastShownVersion');
-      if (lastShownVersion == currentVersion) return;
-      // Save immediately so restarts don't re-show the dialog even if the app
-      // is closed before the timer fires or the dialog is shown.
-      await prefs.setString(_changelogShownVersionKey, currentVersion);
-      // New version detected – show after a short delay so the screen settles
-      Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          _showChangelogDialog(currentVersion);
+      debugPrint('Changelog banner check: current=$currentVersion, lastShown=$lastShownVersion');
+
+      if (lastShownVersion == currentVersion) {
+        // Same version – show banner only if still within the 3-day auto-dismiss window
+        final shownAt = prefs.getInt(_changelogBannerShownAtKey);
+        if (shownAt == null) return; // Already dismissed by user
+        final daysSinceShown =
+            (DateTime.now().millisecondsSinceEpoch - shownAt) /
+                (1000 * 60 * 60 * 24);
+        if (daysSinceShown >= _changelogBannerAutoDismissDays) {
+          // Auto-dismiss: clean up the timestamp and don't show
+          await prefs.remove(_changelogBannerShownAtKey);
+          return;
         }
-      });
+        if (mounted) {
+          setState(() {
+            _showChangelogBanner = true;
+            _changelogBannerVersion = currentVersion;
+          });
+        }
+        return;
+      }
+
+      // New version detected – save version + timestamp and show the banner
+      await prefs.setString(_changelogShownVersionKey, currentVersion);
+      await prefs.setInt(
+          _changelogBannerShownAtKey, DateTime.now().millisecondsSinceEpoch);
+      if (mounted) {
+        setState(() {
+          _showChangelogBanner = true;
+          _changelogBannerVersion = currentVersion;
+        });
+      }
     } catch (e) {
-      debugPrint('Error checking changelog dialog: $e');
+      debugPrint('Error checking changelog banner: $e');
     }
   }
 
-  Future<void> _showChangelogDialog(String version) async {
+  Future<void> _dismissChangelogBanner() async {
+    setState(() => _showChangelogBanner = false);
     try {
-      final content = await rootBundle.loadString('assets/docs/CHANGELOG.md');
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (dialogContext) => Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(dialogContext).size.height * 0.75,
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_changelogBannerShownAtKey);
+    } catch (e) {
+      debugPrint('Error dismissing changelog banner: $e');
+    }
+  }
+
+  Widget _buildChangelogBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      color: cs.primaryContainer,
+      child: InkWell(
+        onTap: () {
+          _dismissChangelogBanner();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChangelogScreen(),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(dialogContext).colorScheme.primaryContainer.withOpacity(0.4),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.new_releases,
-                        color: Theme.of(dialogContext).colorScheme.primary,
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Icon(Icons.new_releases, color: cs.primary, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${l10n.changelog} · v$_changelogBannerVersion',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: cs.onPrimaryContainer,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.changelog,
-                          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(dialogContext).colorScheme.primary,
-                              ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        tooltip: l10n.close,
-                      ),
-                    ],
-                  ),
                 ),
-                // Scrollable markdown body
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: MarkdownBody(
-                      data: content,
-                      selectable: false,
-                      onTapLink: (text, href, title) async {
-                        if (href == null) return;
-                        try {
-                          await launchUrl(
-                            Uri.parse(href),
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } catch (_) {}
-                      },
-                      styleSheet: MarkdownStyleSheet(
-                        h2: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(dialogContext).colorScheme.primary,
-                            ),
-                        h3: Theme.of(dialogContext).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(dialogContext).colorScheme.secondary,
-                            ),
-                        p: Theme.of(dialogContext).textTheme.bodyMedium,
-                        a: TextStyle(
-                          color: Theme.of(dialogContext).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // Footer buttons
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: Text(l10n.changelogGotIt),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            launchUrl(
-                              Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/releases'),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                          icon: const Icon(Icons.list, size: 16),
-                          label: Text(l10n.changelogAllReleases),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Icon(Icons.arrow_forward_ios,
+                  color: cs.onPrimaryContainer.withOpacity(0.7), size: 14),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: Icon(Icons.close,
+                    color: cs.onPrimaryContainer.withOpacity(0.7), size: 18),
+                onPressed: _dismissChangelogBanner,
+                tooltip: l10n.close,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
           ),
         ),
-      );
-    } catch (e) {
-      debugPrint('Error showing changelog dialog: $e');
-    }
+      ),
+    );
   }
 
   Future<void> _launchURL(String url) async {
@@ -551,7 +513,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
     return MainLayout(
       title: l10n.welcomeTitle,
-      bottomNavigationBar: const AdBanner(),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_showChangelogBanner) _buildChangelogBanner(context),
+          const AdBanner(),
+        ],
+      ),
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
