@@ -171,10 +171,15 @@ class ModelNotifier extends StateNotifier<ModelState> {
         .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
     final legacyProviderIndex = prefs.getInt('activeProvider');
-    final activeTextProvider = AIProvider.values[
+    var activeTextProvider = AIProvider.values[
         prefs.getInt('activeTextProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
-    final activeImageProvider = AIProvider.values[
+    var activeImageProvider = AIProvider.values[
         prefs.getInt('activeImageProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
+
+    // When Free AI is ON, ensure the active provider is Groq so the free
+    // tier is actually used rather than the previously selected provider.
+    if (useDevGroqKeyForText) activeTextProvider = AIProvider.groq;
+    if (useDevGroqKeyForImage) activeImageProvider = AIProvider.groq;
 
     state = ModelState(
       geminiModel: geminiModel,
@@ -221,6 +226,11 @@ class ModelNotifier extends StateNotifier<ModelState> {
     }
 
     final prefs = await SharedPreferences.getInstance();
+    // When Free AI is ON, ensure the active provider is Groq.
+    final effectiveTextProvider =
+        newUseDevGroqKeyForText ? AIProvider.groq : newActiveTextProvider;
+    final effectiveImageProvider =
+        newUseDevGroqKeyForImage ? AIProvider.groq : newActiveImageProvider;
     await prefs.setString('geminiModel', newGeminiModel);
     await prefs.setString('geminiImageModel', newGeminiImageModel);
     await prefs.setString('geminiApiKey', newGeminiApiKey);
@@ -231,8 +241,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setString('groqImageModel', newGroqImageModel);
     await prefs.setString('groqApiKey', newGroqApiKey);
     await prefs.setInt('chatHistoryLimit', newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit));
-    await prefs.setInt('activeTextProvider', newActiveTextProvider.index);
-    await prefs.setInt('activeImageProvider', newActiveImageProvider.index);
+    await prefs.setInt('activeTextProvider', effectiveTextProvider.index);
+    await prefs.setInt('activeImageProvider', effectiveImageProvider.index);
     await prefs.setBool('useDevGroqKeyForText', newUseDevGroqKeyForText);
     await prefs.setBool('useDevGroqKeyForImage', newUseDevGroqKeyForImage);
 
@@ -247,8 +257,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqImageModel: newGroqImageModel,
       groqApiKey: newGroqApiKey,
       chatHistoryLimit: newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
-      activeTextProvider: newActiveTextProvider,
-      activeImageProvider: newActiveImageProvider,
+      activeTextProvider: effectiveTextProvider,
+      activeImageProvider: effectiveImageProvider,
       useDevGroqKeyForText: newUseDevGroqKeyForText,
       useDevGroqKeyForImage: newUseDevGroqKeyForImage,
       isLoading: false,
@@ -281,6 +291,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
 
   /// Directly update the dev Groq key toggles without changing any other settings.
   /// Useful for quick on/off from the API Key dialog.
+  ///
+  /// When a Free AI toggle is turned ON, the corresponding active provider is
+  /// automatically switched to Groq so the free tier is actually used.
   Future<void> setDevGroqKeyToggles({
     required bool forText,
     required bool forImage,
@@ -288,6 +301,14 @@ class ModelNotifier extends StateNotifier<ModelState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('useDevGroqKeyForText', forText);
     await prefs.setBool('useDevGroqKeyForImage', forImage);
+    // When Free AI is toggled ON, force active provider to Groq so the free
+    // tier is actually used instead of the previously selected provider.
+    final newTextProvider =
+        forText ? AIProvider.groq : state.activeTextProvider;
+    final newImageProvider =
+        forImage ? AIProvider.groq : state.activeImageProvider;
+    await prefs.setInt('activeTextProvider', newTextProvider.index);
+    await prefs.setInt('activeImageProvider', newImageProvider.index);
     state = ModelState(
       geminiModel: state.geminiModel,
       geminiImageModel: state.geminiImageModel,
@@ -299,8 +320,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqImageModel: state.groqImageModel,
       groqApiKey: state.groqApiKey,
       chatHistoryLimit: state.chatHistoryLimit,
-      activeTextProvider: state.activeTextProvider,
-      activeImageProvider: state.activeImageProvider,
+      activeTextProvider: newTextProvider,
+      activeImageProvider: newImageProvider,
       useDevGroqKeyForText: forText,
       useDevGroqKeyForImage: forImage,
       isLoading: false,

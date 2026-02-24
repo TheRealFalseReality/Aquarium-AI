@@ -1147,8 +1147,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Use Free AI for Text / Chat',
                   value: _useDevGroqKeyForText,
                   onChanged: (v) {
-                    setState(() => _useDevGroqKeyForText = v);
-                    setDialogState?.call(() => _useDevGroqKeyForText = v);
+                    setState(() {
+                      _useDevGroqKeyForText = v;
+                      // When Free AI is ON, force provider to Groq so free tier is used.
+                      if (v) _selectedTextProvider = AIProvider.groq;
+                    });
+                    setDialogState?.call(() {
+                      _useDevGroqKeyForText = v;
+                      if (v) _selectedTextProvider = AIProvider.groq;
+                    });
                     // Auto-save immediately so root menu and providers reflect state.
                     ref.read(modelProvider.notifier).setDevGroqKeyToggles(
                           forText: v,
@@ -1161,8 +1168,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Use Free AI for Image / Photo',
                   value: _useDevGroqKeyForImage,
                   onChanged: (v) {
-                    setState(() => _useDevGroqKeyForImage = v);
-                    setDialogState?.call(() => _useDevGroqKeyForImage = v);
+                    setState(() {
+                      _useDevGroqKeyForImage = v;
+                      // When Free AI is ON, force provider to Groq so free tier is used.
+                      if (v) _selectedImageProvider = AIProvider.groq;
+                    });
+                    setDialogState?.call(() {
+                      _useDevGroqKeyForImage = v;
+                      if (v) _selectedImageProvider = AIProvider.groq;
+                    });
                     // Auto-save immediately so root menu and providers reflect state.
                     ref.read(modelProvider.notifier).setDevGroqKeyToggles(
                           forText: _useDevGroqKeyForText,
