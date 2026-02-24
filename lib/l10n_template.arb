@@ -54,6 +54,14 @@
   "warning": "TRANSLATE: Warning",
   "info": "TRANSLATE: Info",
 
+  "enableAI": "TRANSLATE: Enable AI Features",
+  "enableAIDesc": "TRANSLATE: Enable or disable AI-powered features. Calculators and tank management always remain available.",
+  "compatibilityAnalysis": "TRANSLATE: Compatibility Analysis",
+  "analyzingTankCompatibility": "TRANSLATE: Analyzing Tank Compatibility...",
+  "mayTakeUpToSeconds": "TRANSLATE: This may take up to 60 seconds",
+  "tankMustHaveInhabitantsForCompatibility": "TRANSLATE: Tank must have existing inhabitants to run compatibility analysis.",
+  "fishDataNotAvailable": "TRANSLATE: Fish data is not available. Please try again later.",
+
   "addCustomSpecies": "TRANSLATE: Add Custom Species",
 
   "submitIssue": "TRANSLATE: Submit Issue",
