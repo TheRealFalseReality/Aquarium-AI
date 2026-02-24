@@ -181,3 +181,117 @@ final purchaseProvider =
     StateNotifierProvider<PurchaseNotifier, PurchaseState>(
   (ref) => PurchaseNotifier(),
 );
+
+// ---------------------------------------------------------------------------
+// Billing diagnostics – shows what the Play Billing API returns on-device.
+// ---------------------------------------------------------------------------
+
+/// Result from a billing connectivity check.
+class BillingDiagnosticsState {
+  /// `null` means the check hasn't run yet.
+  final bool? billingAvailable;
+  final bool isLoading;
+
+  /// The product returned by [InAppPurchase.queryProductDetails], or `null`
+  /// if not found / check hasn't run.
+  final ProductDetails? product;
+
+  /// IDs that were queried but not returned by the store.
+  final List<String> notFoundIds;
+
+  /// Human-readable error or hint text, or `null` when everything is OK.
+  final String? errorMessage;
+
+  const BillingDiagnosticsState({
+    this.billingAvailable,
+    this.isLoading = false,
+    this.product,
+    this.notFoundIds = const [],
+    this.errorMessage,
+  });
+}
+
+/// Hint shown when the product is not found in the Play Billing response.
+const String _productNotFoundHint =
+    'Product "$removeAdsProductId" was not returned by the store.\n\n'
+    'Common causes:\n'
+    '• Product is still in Draft — activate it in Play Console → '
+    'Monetize → In-app products.\n'
+    '• No APK/AAB has been uploaded to any track yet (Internal Testing '
+    'is enough).\n'
+    '• Your Google account is not a licensed tester — add it under '
+    'Play Console → Setup → License testing.\n'
+    '• Changes can take up to 30 minutes to propagate.';
+
+/// Runs a live billing connectivity check without touching the purchase flow.
+class BillingDiagnosticsNotifier
+    extends StateNotifier<BillingDiagnosticsState> {
+  final PurchaseService _service;
+
+  BillingDiagnosticsNotifier({PurchaseService? service})
+      : _service = service ?? const PurchaseService(),
+        super(const BillingDiagnosticsState());
+
+  /// Queries `isAvailable` and `queryProductDetails` and surfaces the full
+  /// raw response in state so it can be displayed in the UI.
+  Future<void> runCheck() async {
+    state = const BillingDiagnosticsState(isLoading: true);
+
+    try {
+      final available = await _service.isAvailable;
+      if (!available) {
+        state = const BillingDiagnosticsState(
+          billingAvailable: false,
+          errorMessage:
+              'Google Play Billing is not available on this device.\n'
+              'Make sure the Play Store app is installed and you are signed in.',
+        );
+        return;
+      }
+
+      final response = await _service.queryRemoveAdsProduct();
+
+      if (response.error != null) {
+        PurchaseService.log(
+            'Diagnostics query error: code=${response.error!.code} '
+            'message=${response.error!.message} '
+            'details=${response.error!.details}');
+        state = BillingDiagnosticsState(
+          billingAvailable: true,
+          notFoundIds: response.notFoundIDs,
+          errorMessage:
+              'Billing API error (code ${response.error!.code}): '
+              '${response.error!.message}',
+        );
+        return;
+      }
+
+      final ProductDetails? found =
+          response.productDetails.isNotEmpty
+              ? response.productDetails.first
+              : null;
+
+      final String? hint = found == null ? _productNotFoundHint : null;
+
+      state = BillingDiagnosticsState(
+        billingAvailable: true,
+        product: found,
+        notFoundIds: response.notFoundIDs,
+        errorMessage: hint,
+      );
+    } catch (e) {
+      PurchaseService.log('Diagnostics exception: $e');
+      state = BillingDiagnosticsState(
+        billingAvailable: false,
+        errorMessage: 'Exception during billing check: $e',
+      );
+    }
+  }
+}
+
+/// Auto-dispose provider so each time the dialog opens it starts fresh.
+final billingDiagnosticsProvider = StateNotifierProvider.autoDispose<
+    BillingDiagnosticsNotifier, BillingDiagnosticsState>(
+  (ref) => BillingDiagnosticsNotifier(),
+);
+
