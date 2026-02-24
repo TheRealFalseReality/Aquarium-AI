@@ -59,11 +59,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com",
+          "client_id": "209151214292-oklndh47b832k8c3523c8sdkn0edkf13.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.cca.fishai.dev",
-            "certificate_hash": "ba120acc444b0f01a489b8f85a43a699e4760eb3"
+            "certificate_hash": "e7ce77b23ebfef1f612130ef39ab888e8f2e255d"
           }
         },
         {
