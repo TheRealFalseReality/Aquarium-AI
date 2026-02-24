@@ -3525,6 +3525,45 @@ class _RemoveAdsDialog extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('⭐', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Early Supporter Perk',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Remove ads forever with a single purchase and help fund the development of Aquarium AI. '
+                  'Your support keeps the app growing — and as a thank-you, early supporters may see '
+                  'increased AI usage limits when we\'re able to make that happen!',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           const Text(
             'Support Aquarium AI with a one-time purchase to remove all ads permanently.',
           ),
