@@ -44,6 +44,13 @@ const String _defaultAquapiEssentialImageUrl = '';
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
 
+// Early Supporter lifetime purchase pricing.
+// Empty string = do not display a price label in the Remove Ads dialog.
+// Set a formatted price string (e.g. "$0.99") in Remote Config to show it
+// on the purchase button without shipping an app update.
+/// Fallback display price for the Early Supporter lifetime purchase.
+const String _defaultEarlySupporterPrice = '';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -102,6 +109,12 @@ class RemoteConfigKeys {
   /// String — full JSON content of the fish compatibility database.
   /// Empty string (default) means use the bundled `assets/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
+
+  // ── In-app purchase pricing ───────────────────────────────────────────────
+  /// String — display price for the Early Supporter lifetime purchase shown
+  /// on the Remove Ads button (e.g. `"$0.99"`).
+  /// Empty string (default) means no price label is shown.
+  static const String earlySupporterPrice = 'early_supporter_price';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -138,6 +151,7 @@ class RemoteConfigService {
         RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
+        RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -259,4 +273,12 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/fishcompat.json` should be used.
   static String get fishcompatJson =>
       _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
+
+  // ── In-app purchase pricing ─────────────────────────────────────────────────
+
+  /// Display price for the Early Supporter lifetime purchase
+  /// (e.g. `"$0.99"`). Returns an empty string when not set in Remote Config,
+  /// meaning no price label should be shown in the Remove Ads dialog.
+  static String get earlySupporterPrice =>
+      _modelString(RemoteConfigKeys.earlySupporterPrice, _defaultEarlySupporterPrice);
 }

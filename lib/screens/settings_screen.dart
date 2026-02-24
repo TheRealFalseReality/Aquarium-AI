@@ -3601,7 +3601,22 @@ class _RemoveAdsDialog extends ConsumerWidget {
         ),
         ElevatedButton(
           onPressed: busy ? null : onBuy,
-          child: const Text('Remove Ads'),
+          child: Builder(builder: (context) {
+            final price = RemoteConfigService.earlySupporterPrice;
+            if (price.isEmpty) return const Text('Remove Ads');
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Remove Ads'),
+                Text(
+                  price,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            );
+          }),
         ),
       ],
     );
