@@ -466,6 +466,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return true;
   }
 
+  /// Clears one API key after a confirmation dialog, bypassing validation.
+  /// [keyName] must be 'geminiApiKey', 'openAIApiKey', or 'groqApiKey'.
+  Future<void> _clearApiKey(
+    BuildContext context,
+    String keyName,
+    String label, [
+    StateSetter? setDialogState,
+  ]) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear API Key'),
+        content: Text('Are you sure you want to clear the $label? You will need to re-enter the key to use it again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    // Clear the controller and persist immediately (no validation).
+    switch (keyName) {
+      case 'geminiApiKey':
+        _geminiApiKeyController.clear();
+      case 'openAIApiKey':
+        _openAIApiKeyController.clear();
+      case 'groqApiKey':
+        _groqApiKeyController.clear();
+    }
+    setState(() {});
+    setDialogState?.call(() {});
+    await ref.read(modelProvider.notifier).clearApiKey(keyName);
+    if (context.mounted) {
+      context.showAccessibleMessage('$label cleared.');
+    }
+  }
+
   /// Returns true if any field in the AI Provider dialog differs from saved state.
   bool _hasUnsavedChanges() {
     final saved = ref.read(modelProvider);
@@ -2144,6 +2190,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        if (_geminiApiKeyController.text.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'geminiApiKey', 'Google AI API Key', setDialogState),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         TextField(
           controller: _geminiModelController,
@@ -2351,6 +2411,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        if (_openAIApiKeyController.text.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'openAIApiKey', 'OpenAI API Key', setDialogState),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         TextField(
           controller: _chatGPTModelController,
@@ -2570,8 +2644,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
         ],
+        if (_groqApiKeyController.text.isNotEmpty) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.clear, size: 18,
+                  color: Theme.of(context).colorScheme.error),
+              label: Text('Clear Key',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () => _clearApiKey(
+                  context, 'groqApiKey', 'Groq API Key', setDialogState),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ] else if (!usingFreeKey)
+          const SizedBox(height: 16),
         TextField(
           controller: _groqModelController,
           enabled: !usingFreeKey,
@@ -2752,15 +2841,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (_geminiApiKeyController.text != ref.read(modelProvider).geminiApiKey)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.save, size: 18),
-                        label: const Text('Save Key'),
-                        onPressed: () => _saveApiKeys(context, setDialogState),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (_geminiApiKeyController.text.isNotEmpty)
+                        OutlinedButton.icon(
+                          icon: Icon(Icons.clear, size: 18,
+                              color: Theme.of(context).colorScheme.error),
+                          label: Text('Clear',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error)),
+                          onPressed: () => _clearApiKey(
+                              context, 'geminiApiKey', 'Google AI API Key',
+                              setDialogState),
+                        ),
+                      if (_geminiApiKeyController.text.isNotEmpty &&
+                          _geminiApiKeyController.text !=
+                              ref.read(modelProvider).geminiApiKey)
+                        const SizedBox(width: 8),
+                      if (_geminiApiKeyController.text !=
+                          ref.read(modelProvider).geminiApiKey)
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text('Save Key'),
+                          onPressed: () => _saveApiKeys(context, setDialogState),
+                        ),
+                    ],
+                  ),
                   _buildApiKeyGuide(
                     title: 'How to get your Google AI API key:',
                     children: [
@@ -2881,15 +2988,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (_groqApiKeyController.text != ref.read(modelProvider).groqApiKey)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.save, size: 18),
-                          label: const Text('Save Key'),
-                          onPressed: () => _saveApiKeys(context, setDialogState),
-                        ),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (_groqApiKeyController.text.isNotEmpty)
+                          OutlinedButton.icon(
+                            icon: Icon(Icons.clear, size: 18,
+                                color: Theme.of(context).colorScheme.error),
+                            label: Text('Clear',
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error)),
+                            onPressed: () => _clearApiKey(
+                                context, 'groqApiKey', 'Groq API Key',
+                                setDialogState),
+                          ),
+                        if (_groqApiKeyController.text.isNotEmpty &&
+                            _groqApiKeyController.text !=
+                                ref.read(modelProvider).groqApiKey)
+                          const SizedBox(width: 8),
+                        if (_groqApiKeyController.text !=
+                            ref.read(modelProvider).groqApiKey)
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.save, size: 18),
+                            label: const Text('Save Key'),
+                            onPressed: () => _saveApiKeys(context, setDialogState),
+                          ),
+                      ],
+                    ),
                   ],
                   _buildApiKeyGuide(
                     title: 'How to get your Groq API key:',
@@ -3002,15 +3127,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (_openAIApiKeyController.text != ref.read(modelProvider).openAIApiKey)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.save, size: 18),
-                        label: const Text('Save Key'),
-                        onPressed: () => _saveApiKeys(context, setDialogState),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (_openAIApiKeyController.text.isNotEmpty)
+                        OutlinedButton.icon(
+                          icon: Icon(Icons.clear, size: 18,
+                              color: Theme.of(context).colorScheme.error),
+                          label: Text('Clear',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error)),
+                          onPressed: () => _clearApiKey(
+                              context, 'openAIApiKey', 'OpenAI API Key',
+                              setDialogState),
+                        ),
+                      if (_openAIApiKeyController.text.isNotEmpty &&
+                          _openAIApiKeyController.text !=
+                              ref.read(modelProvider).openAIApiKey)
+                        const SizedBox(width: 8),
+                      if (_openAIApiKeyController.text !=
+                          ref.read(modelProvider).openAIApiKey)
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text('Save Key'),
+                          onPressed: () => _saveApiKeys(context, setDialogState),
+                        ),
+                    ],
+                  ),
                   _buildApiKeyGuide(
                     title: 'How to get your OpenAI API key:',
                     children: [

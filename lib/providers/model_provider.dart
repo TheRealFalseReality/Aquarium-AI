@@ -156,10 +156,17 @@ class ModelNotifier extends StateNotifier<ModelState> {
         prefs.getString('groqImageModel') ?? RemoteConfigService.defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
     // Migrate legacy single useDevGroqKey → per-operation flags.
-    // New users default to ON (true); existing users who had an explicit setting keep it.
+    // New users (no stored keys) default to ON (true = free AI).
+    // Existing users who already have an API key stored default to OFF so their
+    // key continues to work after an app upgrade without interruption.
     final legacyDevKey = prefs.getBool('useDevGroqKey');
-    final useDevGroqKeyForText = prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey ?? true;
-    final useDevGroqKeyForImage = prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey ?? true;
+    final hasAnyStoredKey =
+        geminiApiKey.isNotEmpty || openAIApiKey.isNotEmpty || groqApiKey.isNotEmpty;
+    final freeAiDefault = !hasAnyStoredKey;
+    final useDevGroqKeyForText =
+        prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey ?? freeAiDefault;
+    final useDevGroqKeyForImage =
+        prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey ?? freeAiDefault;
     final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
         .clamp(minChatHistoryLimit, maxChatHistoryLimit);
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
@@ -244,6 +251,30 @@ class ModelNotifier extends StateNotifier<ModelState> {
       activeImageProvider: newActiveImageProvider,
       useDevGroqKeyForText: newUseDevGroqKeyForText,
       useDevGroqKeyForImage: newUseDevGroqKeyForImage,
+      isLoading: false,
+    );
+  }
+
+  /// Clear a single API key by name (geminiApiKey, openAIApiKey, or groqApiKey)
+  /// without any validation. Persists the empty value immediately.
+  Future<void> clearApiKey(String keyName) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(keyName, '');
+    state = ModelState(
+      geminiModel: state.geminiModel,
+      geminiImageModel: state.geminiImageModel,
+      geminiApiKey: keyName == 'geminiApiKey' ? '' : state.geminiApiKey,
+      chatGPTModel: state.chatGPTModel,
+      chatGPTImageModel: state.chatGPTImageModel,
+      openAIApiKey: keyName == 'openAIApiKey' ? '' : state.openAIApiKey,
+      groqModel: state.groqModel,
+      groqImageModel: state.groqImageModel,
+      groqApiKey: keyName == 'groqApiKey' ? '' : state.groqApiKey,
+      chatHistoryLimit: state.chatHistoryLimit,
+      activeTextProvider: state.activeTextProvider,
+      activeImageProvider: state.activeImageProvider,
+      useDevGroqKeyForText: state.useDevGroqKeyForText,
+      useDevGroqKeyForImage: state.useDevGroqKeyForImage,
       isLoading: false,
     );
   }
