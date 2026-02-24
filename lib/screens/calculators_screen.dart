@@ -63,7 +63,6 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const NativeAdWidget(),
               Text(
                 'Aquarium Calculators',
                 style: Theme.of(context)

@@ -2713,6 +2713,61 @@
   "submitIssueDesc": "Report a bug or request a new feature on GitHub",
   "@submitIssueDesc": {
     "description": "Subtitle for the submit issue/feedback menu item in settings"
+  },
+
+  "removeAds": "Remove Ads",
+  "@removeAds": {
+    "description": "Label for the Remove Ads action / entry point"
+  },
+
+  "removeAdsSettingsSubtitle": "Support the developer with a one-time purchase",
+  "@removeAdsSettingsSubtitle": {
+    "description": "Subtitle shown on the Remove Ads card in settings"
+  },
+
+  "removeAdsDrawerSubtitle": "One-time purchase · Support the developer",
+  "@removeAdsDrawerSubtitle": {
+    "description": "Subtitle shown on the Remove Ads entry in the app drawer"
+  },
+
+  "earlySupporterPerkTitle": "Founders Supporter Perk",
+  "@earlySupporterPerkTitle": {
+    "description": "Title of the Early Supporter callout in the Remove Ads dialog"
+  },
+
+  "earlySupporterPerkBody": "Remove ads forever with a single purchase and help fund the development of Aquarium AI. Your support keeps the app growing — and as a thank-you, early supporters may see increased AI usage limits when we're able to make that happen!",
+  "@earlySupporterPerkBody": {
+    "description": "Body text of the Early Supporter callout in the Remove Ads dialog"
+  },
+
+  "removeAdsContentDesc": "Support Aquarium AI with a one-time purchase to remove all ads permanently.",
+  "@removeAdsContentDesc": {
+    "description": "Main description text inside the Remove Ads purchase dialog"
+  },
+
+  "removeAdsPurchaseTiedToAccount": "Your purchase is tied to your store account and can be restored on any device.",
+  "@removeAdsPurchaseTiedToAccount": {
+    "description": "Fine-print note about purchase portability in the Remove Ads dialog"
+  },
+
+  "removeAdsThankyouTitle": "Thank You! 🎉",
+  "@removeAdsThankyouTitle": {
+    "description": "Title of the thank-you dialog shown after a successful restore"
+  },
+
+  "removeAdsThankyouBody": "Your Early Supporter purchase has been restored and ads have been removed.\n\nThank you so much for your support — it means the world and helps keep Aquarium AI growing!",
+  "@removeAdsThankyouBody": {
+    "description": "Body text of the thank-you dialog shown after a successful restore"
+  },
+
+  "removeAdsNoPurchaseTitle": "No Purchase Found",
+  "@removeAdsNoPurchaseTitle": {
+    "description": "Title of the dialog shown when no prior purchase is found on restore"
+  },
+
+  "removeAdsNoPurchaseBody": "No previous purchase was found on this account.\n\nIf you bought on a different store account, sign in with that account and try again.",
+  "@removeAdsNoPurchaseBody": {
+    "description": "Body text of the dialog shown when no prior purchase is found on restore"
   }
 }
 

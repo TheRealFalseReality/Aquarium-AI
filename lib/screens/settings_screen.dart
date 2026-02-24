@@ -6,11 +6,13 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
+import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -61,6 +63,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _chatHistoryLimit = models.chatHistoryLimit;
     _useDevGroqKeyForText = models.useDevGroqKeyForText;
     _useDevGroqKeyForImage = models.useDevGroqKeyForImage;
+
+    // Auto-open the Remove Ads dialog if requested via route arguments.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['openRemoveAds'] == true) {
+        _showRemoveAdsDialog();
+      }
+    });
   }
 
   @override
@@ -844,6 +854,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAppSettingsDialog(),
         ),
         const SizedBox(height: 16),
+        _buildRemoveAdsCard(context),
+        const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
           title: l10n.dataManagement,
@@ -905,6 +917,85 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 24),
       ],
     );
+  }
+
+  Widget _buildRemoveAdsCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final purchaseState = ref.watch(purchaseProvider);
+    if (purchaseState.adsRemoved) {
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.green.withOpacity(0.25),
+                      Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.block, color: Colors.green, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ads Removed',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Thank you for your support!',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return _buildMenuCard(
+      context: context,
+      title: l10n.removeAds,
+      subtitle: l10n.removeAdsSettingsSubtitle,
+      icon: Icons.block,
+      gradient: LinearGradient(
+        colors: [
+          Colors.green.withOpacity(0.25),
+          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      iconColor: Colors.green.shade700,
+      onTap: () => _showRemoveAdsDialog(),
+    );
+  }
+
+  void _showRemoveAdsDialog() {
+    showRemoveAdsDialog(context, ref);
   }
 
   Widget _buildMenuCard({

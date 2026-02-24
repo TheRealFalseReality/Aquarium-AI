@@ -1,5 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 // ---------------------------------------------------------------------------
 // In-app fallback defaults
@@ -43,6 +44,13 @@ const String _defaultAquapiEssentialImageUrl = '';
 // Set a JSON string in Remote Config to override without an app update.
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
+
+// Early Supporter lifetime purchase pricing.
+// 0.0 = do not display a price label in the Remove Ads dialog.
+// Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
+// price on the purchase button without shipping an app update.
+/// Fallback USD price for the Early Supporter lifetime purchase (0 = hidden).
+const double _defaultEarlySupporterPrice = 0.0;
 
 /// Key names used in Firebase Remote Config.
 ///
@@ -102,6 +110,12 @@ class RemoteConfigKeys {
   /// String — full JSON content of the fish compatibility database.
   /// Empty string (default) means use the bundled `assets/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
+
+  // ── In-app purchase pricing ───────────────────────────────────────────────
+  /// String — USD price for the Early Supporter lifetime purchase.
+  /// Store a positive number (e.g. `0.99`) in Remote Config.
+  /// `0` or unset means no price label is shown in the Remove Ads dialog.
+  static const String earlySupporterPrice = 'early_supporter_price';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -138,6 +152,7 @@ class RemoteConfigService {
         RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
+        RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -259,4 +274,16 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/fishcompat.json` should be used.
   static String get fishcompatJson =>
       _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
+
+  // ── In-app purchase pricing ─────────────────────────────────────────────────
+
+  /// Formatted USD price string for the Early Supporter lifetime purchase
+  /// (e.g. `"$0.99"`). Returns an empty string when the Remote Config value
+  /// is `0` or unset, meaning no price label should be shown.
+  static String get earlySupporterPrice {
+    final raw = _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice)
+        ?? _defaultEarlySupporterPrice;
+    if (raw <= 0) return '';
+    return NumberFormat.currency(locale: 'en_US', symbol: r'$').format(raw);
+  }
 }

@@ -19,6 +19,8 @@ import '../main_layout.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/ad_component.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../widgets/remove_ads_dialog.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
@@ -572,10 +574,36 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // Prominent My Tanks Section
                       _buildMyTanksSection(context, tankState, tankCount, fishData),
                       
+                      // Remove Ads hint below My Tanks
+                      _buildRemoveAdsHint(context),
+                      
                       const SizedBox(height: 32),
                       
-                      // Feature Cards in Staggered Grid
-                      _buildFeatureGrid(context, features),
+                      // Feature Cards in Staggered Grid — split around the native ad.
+                      // AI feature cards (AI Stocking Assistant and earlier) come first,
+                      // then the native ad, then Calculators and the rest.
+                      Builder(builder: (context) {
+                        final splitIndex = features.indexWhere(
+                          (f) => f.routeName == '/calculators',
+                        );
+                        final topFeatures = splitIndex > 0
+                            ? features.sublist(0, splitIndex)
+                            : (splitIndex < 0 ? features : <FeatureInfo>[]);
+                        final bottomFeatures = splitIndex >= 0 ? features.sublist(splitIndex) : <FeatureInfo>[];
+                        return Column(
+                          children: [
+                            if (topFeatures.isNotEmpty) ...[
+                              _buildFeatureGrid(context, topFeatures),
+                            ],
+                            // Native ad between AI Stocking Assistant and Calculators
+                            _buildWelcomeNativeAd(),
+                            if (bottomFeatures.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              _buildFeatureGrid(context, bottomFeatures),
+                            ],
+                          ],
+                        );
+                      }),
                       
                       const SizedBox(height: 48),
                       Padding(
@@ -1093,6 +1121,46 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return grouped;
   }
   
+  Widget _buildRemoveAdsHint(BuildContext context) {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: GestureDetector(
+        onTap: () => showRemoveAdsDialog(context, ref),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.block,
+              size: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l10n.removeAds,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeNativeAd() {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+    return const Padding(
+      padding: EdgeInsets.only(top: 24),
+      child: NativeAdWidget(),
+    );
+  }
+
   Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
