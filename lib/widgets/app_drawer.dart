@@ -11,11 +11,13 @@ import '../l10n/app_localizations.dart';
 import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
+import 'remove_ads_dialog.dart';
 
 class AppDrawer extends ConsumerStatefulWidget {
   const AppDrawer({super.key});
@@ -460,6 +462,57 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               ],
             ),
           ),
+          // Remove Ads entry (hidden when ads already removed)
+          if (!ref.watch(purchaseProvider).adsRemoved) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Divider(
+                color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+                thickness: 1,
+              ),
+            ),
+            AnimatedDrawerItem(
+              delay: const Duration(milliseconds: 540),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.green.withOpacity(0.08),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.block, color: Colors.green.shade600, size: 22),
+                  title: Text(
+                    l10n.removeAds,
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    l10n.removeAdsDrawerSubtitle,
+                    style: TextStyle(
+                      color: Colors.green.shade600,
+                      fontSize: 11,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // close drawer
+                    Future.delayed(const Duration(milliseconds: 250), () {
+                      if (!mounted) return;
+                      showRemoveAdsDialog(context, ref);
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Divider(

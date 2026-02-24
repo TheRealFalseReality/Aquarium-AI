@@ -23,3 +23,6 @@ const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
 // AdSense constants
 const String adSenseAppId = 'ca-pub-5701077439648731';
 const String adSenseAdUnitId = '9994371406';
+
+// In-app purchase product IDs
+const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';

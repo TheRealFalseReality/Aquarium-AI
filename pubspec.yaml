@@ -1,7 +1,7 @@
 name: fish_ai
 description: "AI tools for Aquarium!"
 publish_to: 'none'
-version: 3.0.00+3.0.00
+version: 3.0.01+3.0.01
 
 environment:
   sdk: ^3.9.2
@@ -13,6 +13,7 @@ dependencies:
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.4
+  in_app_purchase: ^3.2.0
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.7
   flutter_riverpod: ^2.5.1

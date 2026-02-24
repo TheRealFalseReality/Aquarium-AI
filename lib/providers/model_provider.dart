@@ -141,6 +141,40 @@ class ModelNotifier extends StateNotifier<ModelState> {
     _loadModels();
   }
 
+  /// Returns the best provider to switch to when the Free AI toggle is turned
+  /// OFF, given the available API keys.  Prefers the first provider that has a
+  /// key saved (Gemini → OpenAI → Groq) so the user is never left with an
+  /// active provider that has no key.  Falls back to [defaultAIProvider] when
+  /// no keys are present at all.
+  static AIProvider _bestProviderWithKey({
+    required String geminiApiKey,
+    required String openAIApiKey,
+    required String groqApiKey,
+  }) {
+    if (geminiApiKey.isNotEmpty) return AIProvider.gemini;
+    if (openAIApiKey.isNotEmpty) return AIProvider.openAI;
+    if (groqApiKey.isNotEmpty) return AIProvider.groq;
+    return defaultAIProvider;
+  }
+
+  /// Returns true when [provider]'s API key is empty (i.e. the user has not
+  /// configured a key for that provider yet).
+  static bool _providerKeyIsEmpty(
+    AIProvider provider,
+    String geminiApiKey,
+    String openAIApiKey,
+    String groqApiKey,
+  ) {
+    switch (provider) {
+      case AIProvider.gemini:
+        return geminiApiKey.isEmpty;
+      case AIProvider.openAI:
+        return openAIApiKey.isEmpty;
+      case AIProvider.groq:
+        return groqApiKey.isEmpty;
+    }
+  }
+
   Future<void> _loadModels() async {
     final prefs = await SharedPreferences.getInstance();
     final geminiModel = prefs.getString('geminiModel') ?? RemoteConfigService.defaultGeminiModel;
@@ -180,6 +214,22 @@ class ModelNotifier extends StateNotifier<ModelState> {
     // tier is actually used rather than the previously selected provider.
     if (useDevGroqKeyForText) activeTextProvider = AIProvider.groq;
     if (useDevGroqKeyForImage) activeImageProvider = AIProvider.groq;
+
+    // When Free AI is OFF but the stored provider has no key (e.g. due to the
+    // previous bug where toggling Free AI off left the provider as Groq even
+    // when the user had a Gemini/OpenAI key), automatically pick the provider
+    // that has a saved key so the user isn't stuck on a keyless provider.
+    final bestProvider = _bestProviderWithKey(
+      geminiApiKey: geminiApiKey,
+      openAIApiKey: openAIApiKey,
+      groqApiKey: groqApiKey,
+    );
+    if (!useDevGroqKeyForText && _providerKeyIsEmpty(activeTextProvider, geminiApiKey, openAIApiKey, groqApiKey)) {
+      activeTextProvider = bestProvider;
+    }
+    if (!useDevGroqKeyForImage && _providerKeyIsEmpty(activeImageProvider, geminiApiKey, openAIApiKey, groqApiKey)) {
+      activeImageProvider = bestProvider;
+    }
 
     state = ModelState(
       geminiModel: geminiModel,
@@ -294,6 +344,9 @@ class ModelNotifier extends StateNotifier<ModelState> {
   ///
   /// When a Free AI toggle is turned ON, the corresponding active provider is
   /// automatically switched to Groq so the free tier is actually used.
+  /// When a Free AI toggle is turned OFF, the active provider is switched to
+  /// whichever provider has a saved API key (Gemini → OpenAI → Groq) so the
+  /// user is not left on a provider with no key configured.
   Future<void> setDevGroqKeyToggles({
     required bool forText,
     required bool forImage,
@@ -303,10 +356,15 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setBool('useDevGroqKeyForImage', forImage);
     // When Free AI is toggled ON, force active provider to Groq so the free
     // tier is actually used instead of the previously selected provider.
-    final newTextProvider =
-        forText ? AIProvider.groq : state.activeTextProvider;
-    final newImageProvider =
-        forImage ? AIProvider.groq : state.activeImageProvider;
+    // When Free AI is toggled OFF, fall back to whichever provider has a key
+    // saved so the user is not left with a keyless Groq selection.
+    final bestProvider = _bestProviderWithKey(
+      geminiApiKey: state.geminiApiKey,
+      openAIApiKey: state.openAIApiKey,
+      groqApiKey: state.groqApiKey,
+    );
+    final newTextProvider = forText ? AIProvider.groq : bestProvider;
+    final newImageProvider = forImage ? AIProvider.groq : bestProvider;
     await prefs.setInt('activeTextProvider', newTextProvider.index);
     await prefs.setInt('activeImageProvider', newImageProvider.index);
     state = ModelState(
