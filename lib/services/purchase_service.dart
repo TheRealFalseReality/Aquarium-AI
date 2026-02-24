@@ -19,9 +19,9 @@ class PurchaseService {
   /// Returns `true` when the underlying billing client is available.
   Future<bool> get isAvailable => _iap.isAvailable();
 
-  /// Queries the store for the [removeAdsProductId] product details.
+  /// Queries the store for the [earlySupporterLifetimeProductId] product details.
   Future<ProductDetailsResponse> queryRemoveAdsProduct() {
-    return _iap.queryProductDetails({removeAdsProductId});
+    return _iap.queryProductDetails({earlySupporterLifetimeProductId});
   }
 
   /// Initiates a non-consumable purchase for [productDetails].
