@@ -45,6 +45,13 @@ const String _defaultAquapiEssentialImageUrl = '';
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
 
+// Early Supporter lifetime purchase product ID.
+// Set a string in Remote Config to swap the product ID without shipping an
+// app update (e.g. when creating a new product in the Play Store / App Store).
+/// Fallback product ID for the Early Supporter lifetime purchase.
+const String _defaultEarlySupporterProductId =
+    'remove_ads_early_supporter_lifetime';
+
 // Early Supporter lifetime purchase pricing.
 // 0.0 = do not display a price label in the Remove Ads dialog.
 // Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
@@ -111,6 +118,12 @@ class RemoteConfigKeys {
   /// Empty string (default) means use the bundled `assets/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
 
+  // ── In-app purchase product IDs ──────────────────────────────────────────
+  /// String — product ID for the Early Supporter lifetime (remove-ads) purchase.
+  /// Override in Remote Config to swap the product without an app update.
+  /// Defaults to `'remove_ads_early_supporter_lifetime'`.
+  static const String earlySupporterProductId = 'early_supporter_product_id';
+
   // ── In-app purchase pricing ───────────────────────────────────────────────
   /// String — USD price for the Early Supporter lifetime purchase.
   /// Store a positive number (e.g. `0.99`) in Remote Config.
@@ -152,6 +165,7 @@ class RemoteConfigService {
         RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
+        RemoteConfigKeys.earlySupporterProductId: _defaultEarlySupporterProductId,
         RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
       });
 
@@ -274,6 +288,15 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/fishcompat.json` should be used.
   static String get fishcompatJson =>
       _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
+
+  // ── In-app purchase product IDs ────────────────────────────────────────────
+
+  /// Product ID for the Early Supporter lifetime (remove-ads) purchase.
+  /// Can be overridden in Firebase Remote Config to swap the product without
+  /// shipping an app update.
+  static String get earlySupporterProductId =>
+      _modelString(RemoteConfigKeys.earlySupporterProductId,
+          _defaultEarlySupporterProductId);
 
   // ── In-app purchase pricing ─────────────────────────────────────────────────
 

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants.dart';
 import '../services/purchase_service.dart';
+import '../services/remote_config_service.dart';
 
 const String _adsRemovedKey = 'adsRemoved';
 
@@ -109,7 +109,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       PurchaseService.log(
           'Purchase update: ${details.productID} status=${details.status}');
 
-      if (details.productID == earlySupporterLifetimeProductId) {
+      if (details.productID == RemoteConfigService.earlySupporterProductId) {
         if (details.status == PurchaseStatus.purchased ||
             details.status == PurchaseStatus.restored) {
           // Persist and update state. For a restore, also record the outcome.

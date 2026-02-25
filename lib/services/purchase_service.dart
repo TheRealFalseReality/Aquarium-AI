@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:fish_ai/constants.dart';
+import 'package:fish_ai/services/remote_config_service.dart';
 
 /// Wraps the [InAppPurchase] plugin and exposes a thin API used by
 /// [PurchaseNotifier].
@@ -19,9 +19,12 @@ class PurchaseService {
   /// Returns `true` when the underlying billing client is available.
   Future<bool> get isAvailable => _iap.isAvailable();
 
-  /// Queries the store for the [earlySupporterLifetimeProductId] product details.
+  /// Queries the store for the early supporter lifetime product details.
+  /// The product ID is read from [RemoteConfigService.earlySupporterProductId]
+  /// so it can be updated via Firebase Remote Config without an app update.
   Future<ProductDetailsResponse> queryRemoveAdsProduct() {
-    return _iap.queryProductDetails({earlySupporterLifetimeProductId});
+    return _iap
+        .queryProductDetails({RemoteConfigService.earlySupporterProductId});
   }
 
   /// Initiates a non-consumable purchase for [productDetails].

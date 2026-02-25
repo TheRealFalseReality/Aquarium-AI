@@ -65,6 +65,11 @@ void main() {
       test('fishcompatJson defaults to empty string (use local asset)', () {
         expect(RemoteConfigService.fishcompatJson, equals(''));
       });
+
+      test('earlySupporterProductId defaults to remove_ads_early_supporter_lifetime', () {
+        expect(RemoteConfigService.earlySupporterProductId,
+            equals('remove_ads_early_supporter_lifetime'));
+      });
     });
 
     group('RemoteConfigKeys', () {
@@ -96,6 +101,8 @@ void main() {
             equals('aquapi_essential_image_url'));
         expect(RemoteConfigKeys.fishcompatJson,
             equals('fishcompat_json'));
+        expect(RemoteConfigKeys.earlySupporterProductId,
+            equals('early_supporter_product_id'));
       });
     });
   });
