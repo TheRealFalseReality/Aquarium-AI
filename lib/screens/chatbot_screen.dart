@@ -23,6 +23,7 @@ import '../widgets/ad_component.dart';
 import '../widgets/mini_ai_chip.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../services/analytics_service.dart';
+import '../utils/share_utils.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
@@ -990,6 +991,18 @@ class MessageBubble extends ConsumerWidget {
               ),
             ],
           ),
+          if (!isUser && !isError)
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0, left: 48.0),
+              child: IconButton(
+                icon: const Icon(Icons.share_outlined, size: 16),
+                onPressed: () => shareChatResponse(text),
+                tooltip: 'Share response',
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ),
           if (isError && isRetryable)
             _RetryButton(
               onTap: () {
