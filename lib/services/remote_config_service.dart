@@ -52,6 +52,9 @@ const String _defaultFishcompatJson = '';
 /// Fallback USD price for the Early Supporter lifetime purchase.
 const double _defaultEarlySupporterPrice = 0.99;
 
+/// Fallback Buy Me a Coffee URL.
+const String _defaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -116,6 +119,10 @@ class RemoteConfigKeys {
   /// Store a positive number (e.g. `0.99`) in Remote Config.
   /// `0` or unset means no price label is shown in the Remove Ads dialog.
   static const String earlySupporterPrice = 'early_supporter_price';
+
+  /// String — URL for the Buy Me a Coffee page.
+  /// Set in Remote Config to change without an app update.
+  static const String buyMeACoffeeUrl = 'buy_me_a_coffee';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -153,6 +160,7 @@ class RemoteConfigService {
         RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
+        RemoteConfigKeys.buyMeACoffeeUrl: _defaultBuyMeACoffeeUrl,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -294,4 +302,11 @@ class RemoteConfigService {
       symbol: r'$',
     ).format(raw);
   }
+
+  // ── Buy Me a Coffee ─────────────────────────────────────────────────────────
+
+  /// URL for the Buy Me a Coffee page. Returns the Remote Config value when
+  /// set, otherwise falls back to the in-app default.
+  static String get buyMeACoffeeUrl =>
+      _modelString(RemoteConfigKeys.buyMeACoffeeUrl, _defaultBuyMeACoffeeUrl);
 }

@@ -124,6 +124,16 @@ The generated files will be in `.dart_tool/flutter_gen/gen_l10n/` (not in Git, c
 
 See [LOCALIZATION_DEV_GUIDE.md](LOCALIZATION_DEV_GUIDE.md) for detailed developer documentation.
 
+## ☕ Support the Developer
+
+Enjoying Aquarium AI? You can support the developer and help keep the project growing by buying a coffee!
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-amber?style=for-the-badge)](https://buymeacoffee.com/capitalcityaquatics)
+
+👉 [**buymeacoffee.com/capitalcityaquatics**](https://buymeacoffee.com/capitalcityaquatics)
+
+You can also support directly from within the app via the **Buy Me a Coffee** option in Settings.
+
 ## 🤝 How to Contribute
 
 We welcome contributions from the community! Here are some ways you can help:

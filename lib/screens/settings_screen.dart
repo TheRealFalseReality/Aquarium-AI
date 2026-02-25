@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants.dart';
@@ -889,10 +890,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Colors.amber.shade700,
-          onTap: () => launchUrl(
-            Uri.parse(buyMeACoffeeUrl),
-            mode: LaunchMode.externalApplication,
-          ),
+          onTap: () => _showBuyMeACoffeeDialog(),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(
@@ -1036,6 +1034,76 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showRemoveAdsDialog() {
     showRemoveAdsDialog(context, ref);
+  }
+
+  void _showBuyMeACoffeeDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.coffee, size: 36, color: Colors.amber),
+        title: Text(l10n.buyMeACoffee),
+        content: Text(l10n.buyMeACoffeeDialogBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          if (!kIsWeb)
+            OutlinedButton.icon(
+              icon: const Icon(Icons.shopping_bag_outlined),
+              label: Text(l10n.buyMeACoffeeInApp),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                _buyMeACoffeeInApp();
+              },
+            ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.open_in_new),
+            label: Text(l10n.buyMeACoffeeWebsite),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              launchUrl(
+                Uri.parse(RemoteConfigService.buyMeACoffeeUrl),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _buyMeACoffeeInApp() async {
+    try {
+      final iap = InAppPurchase.instance;
+      final available = await iap.isAvailable();
+      if (!available) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Store not available on this device.')),
+          );
+        }
+        return;
+      }
+      final response = await iap.queryProductDetails({buyMeACoffeeProductId});
+      if (response.productDetails.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Product not found. Please try again later.')),
+          );
+        }
+        return;
+      }
+      final param = PurchaseParam(productDetails: response.productDetails.first);
+      await iap.buyConsumable(purchaseParam: param);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Purchase error: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildMenuCard({

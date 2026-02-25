@@ -522,7 +522,10 @@
   "removeAdsNoPurchaseTitle": "No se encontró ninguna compra",
   "removeAdsNoPurchaseBody": "No se encontró ninguna compra anterior en esta cuenta.\n\nSi compraste con una cuenta de tienda diferente, inicia sesión con esa cuenta e inténtalo de nuevo.",
   "buyMeACoffee": "Cómprame un café",
-  "buyMeACoffeeDesc": "Apoya al desarrollador con una pequeña donación"
+  "buyMeACoffeeDesc": "Apoya al desarrollador con una pequeña donación",
+  "buyMeACoffeeDialogBody": "¿Te gusta Aquarium AI? ¡Puedes apoyar al desarrollador comprando un café! Elige una opción:",
+  "buyMeACoffeeInApp": "Comprar en Google Play",
+  "buyMeACoffeeWebsite": "Comprar en buymeacoffee.com"
 }
 
 
