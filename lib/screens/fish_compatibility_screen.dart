@@ -874,17 +874,18 @@ class FishCompatibilityScreenState
                       final selected = selectedSpecies[fish.name] ?? <String>{};
                       final controller = addControllers[fish.name]!;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              fish.name,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: ExpansionTile(
+                          title: Text(
+                            fish.name,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 6),
+                          ),
+                          initiallyExpanded: false,
+                          tilePadding: EdgeInsets.zero,
+                          childrenPadding: const EdgeInsets.only(bottom: 8),
+                          children: [
                             if (tags.isNotEmpty)
                               Wrap(
                                 spacing: 8,
