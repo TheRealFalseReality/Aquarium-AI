@@ -5,6 +5,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
+import '../services/web_ads_stub.dart'
+    if (dart.library.html) '../services/web_ads_web.dart';
 import 'remove_ads_dialog.dart';
 
 class AdBanner extends ConsumerStatefulWidget {
@@ -239,5 +241,41 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
       height: _bannerAd!.size.height.toDouble(),
       child: AdWidget(ad: _bannerAd!),
     );
+  }
+}
+
+/// A zero-size widget that manages web overlay ads (defined in index.html).
+///
+/// Place this once in the widget tree (e.g. [MainLayout]) to synchronise the
+/// AdSense overlay ads with the user's "remove ads" purchase state.  On
+/// non-web platforms it is a no-op.
+class WebOverlayAdController extends ConsumerStatefulWidget {
+  const WebOverlayAdController({super.key});
+
+  @override
+  ConsumerState<WebOverlayAdController> createState() =>
+      _WebOverlayAdControllerState();
+}
+
+class _WebOverlayAdControllerState
+    extends ConsumerState<WebOverlayAdController> {
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) return;
+    // Apply the current purchase state as soon as the widget mounts.
+    final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+    adsRemoved ? hideOverlayAds() : showOverlayAds();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kIsWeb) return const SizedBox.shrink();
+
+    ref.listen<PurchaseState>(purchaseProvider, (_, next) {
+      next.adsRemoved ? hideOverlayAds() : showOverlayAds();
+    });
+
+    return const SizedBox.shrink();
   }
 }

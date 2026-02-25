@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/ad_component.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/gradient_text.dart';
 
@@ -50,7 +51,12 @@ class MainLayout extends StatelessWidget {
         // toolbarHeight: 60,
       ),
       drawer: AppDrawer(),
-      body: child,
+      body: Stack(
+        children: [
+          child,
+          const WebOverlayAdController(),
+        ],
+      ),
       bottomNavigationBar: bottomNavigationBar,
       floatingActionButton: floatingActionButton,
     );
