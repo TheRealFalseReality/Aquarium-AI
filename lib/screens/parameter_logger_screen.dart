@@ -11,8 +11,9 @@ import '../services/analytics_service.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
+  final bool openAddDialog;
 
-  const ParameterLoggerScreen({super.key, required this.tank});
+  const ParameterLoggerScreen({super.key, required this.tank, this.openAddDialog = false});
 
   @override
   ParameterLoggerScreenState createState() => ParameterLoggerScreenState();
@@ -20,6 +21,16 @@ class ParameterLoggerScreen extends ConsumerStatefulWidget {
 
 class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   String? _expandedParameter;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openAddDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _addParameter(context);
+      });
+    }
+  }
 
   Tank _getCurrentTank() {
     // Get the latest tank state from the provider
@@ -1253,5 +1264,15 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       ),
     );
   }
+}
+
+/// Shows the parameter add/edit bottom sheet.
+/// [existingParameter] – pass to edit an existing entry.
+void showParameterSheet(BuildContext context, Tank tank, {WaterParameter? existingParameter}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddParameterSheet(tank: tank, existingParameter: existingParameter),
+  );
 }
 

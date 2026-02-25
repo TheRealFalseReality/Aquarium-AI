@@ -14,8 +14,15 @@ import '../l10n/app_localizations.dart';
 
 class NotificationLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
+  final bool openAddDialog;
+  final int initialTabIndex;
 
-  const NotificationLoggerScreen({super.key, required this.tank});
+  const NotificationLoggerScreen({
+    super.key,
+    required this.tank,
+    this.openAddDialog = false,
+    this.initialTabIndex = 0,
+  });
 
   @override
   NotificationLoggerScreenState createState() => NotificationLoggerScreenState();
@@ -29,7 +36,18 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTabIndex);
+    if (widget.openAddDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          if (_tabController.index == 0) {
+            _addNote(context);
+          } else {
+            _addLogEntry(context);
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -1536,3 +1554,23 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
   }
 }
 
+
+/// Shows the activity log add/edit bottom sheet.
+/// [existingEntry] – pass to edit an existing log entry.
+void showLogEntrySheet(BuildContext context, Tank tank, {NotificationLog? existingEntry}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddLogEntrySheet(tank: tank, existingEntry: existingEntry),
+  );
+}
+
+/// Shows the note add/edit bottom sheet.
+/// [existingNote] – pass to edit an existing note.
+void showNoteSheet(BuildContext context, Tank tank, {TankNote? existingNote}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddNoteSheet(tank: tank, existingNote: existingNote),
+  );
+}

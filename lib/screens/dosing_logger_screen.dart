@@ -10,8 +10,9 @@ import '../services/analytics_service.dart';
 
 class DosingLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
+  final bool openAddDialog;
 
-  const DosingLoggerScreen({super.key, required this.tank});
+  const DosingLoggerScreen({super.key, required this.tank, this.openAddDialog = false});
 
   @override
   DosingLoggerScreenState createState() => DosingLoggerScreenState();
@@ -19,6 +20,16 @@ class DosingLoggerScreen extends ConsumerStatefulWidget {
 
 class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   String? _expandedTreatment;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openAddDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _addDosingEntry(context);
+      });
+    }
+  }
 
   Tank _getCurrentTank() {
     // Get the latest tank state from the provider
@@ -852,5 +863,15 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       ),
     );
   }
+}
+
+/// Shows the dosing add/edit bottom sheet.
+/// [existingEntry] – pass to edit an existing entry.
+void showDosingSheet(BuildContext context, Tank tank, {DosingEntry? existingEntry}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddDosingEntrySheet(tank: tank, existingEntry: existingEntry),
+  );
 }
 
