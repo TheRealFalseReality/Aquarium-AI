@@ -1100,6 +1100,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
   
   Widget _buildRemoveAdsHint(BuildContext context) {
+    if (kIsWeb) return const SizedBox.shrink();
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
     if (adsRemoved) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
