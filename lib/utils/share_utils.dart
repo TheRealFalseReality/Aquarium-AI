@@ -174,6 +174,20 @@ Future<void> shareStockingReport(StockingRecommendation report) async {
   );
 }
 
+/// Shares a plain-text AI chat response.
+Future<void> shareChatResponse(String text) async {
+  final buffer = StringBuffer();
+  buffer.writeln('🐠 Aquarium AI – Chat Response');
+  buffer.writeln();
+  buffer.write(text);
+  buffer.write(_appFooter);
+
+  await Share.share(
+    buffer.toString(),
+    subject: 'Aquarium AI – Chat Response',
+  );
+}
+
 /// Converts a [FishInfoResult] to a plain-text summary and shares it.
 Future<void> shareFishInfoResult(FishInfoResult result) async {
   final buffer = StringBuffer();
