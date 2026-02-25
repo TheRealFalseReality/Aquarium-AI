@@ -520,7 +520,9 @@
   "removeAdsThankyouTitle": "Merci ! 🎉",
   "removeAdsThankyouBody": "Votre achat Early Supporter a été restauré et les publicités ont été supprimées.\n\nMerci infiniment pour votre soutien — cela signifie beaucoup et aide Aquarium AI à continuer à grandir !",
   "removeAdsNoPurchaseTitle": "Aucun achat trouvé",
-  "removeAdsNoPurchaseBody": "Aucun achat précédent n'a été trouvé sur ce compte.\n\nSi vous avez acheté avec un autre compte de boutique, connectez-vous avec ce compte et réessayez."
+  "removeAdsNoPurchaseBody": "Aucun achat précédent n'a été trouvé sur ce compte.\n\nSi vous avez acheté avec un autre compte de boutique, connectez-vous avec ce compte et réessayez.",
+  "buyMeACoffee": "Offrez-moi un café",
+  "buyMeACoffeeDesc": "Soutenez le développeur avec un petit don"
 }
 
 

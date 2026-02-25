@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/model_provider.dart';
@@ -873,6 +874,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 16),
         _buildRemoveAdsCard(context),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.buyMeACoffee,
+          subtitle: l10n.buyMeACoffeeDesc,
+          icon: Icons.coffee,
+          gradient: LinearGradient(
+            colors: [
+              Colors.amber.withOpacity(0.25),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Colors.amber.shade700,
+          onTap: () => launchUrl(
+            Uri.parse(buyMeACoffeeUrl),
+            mode: LaunchMode.externalApplication,
+          ),
+        ),
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,

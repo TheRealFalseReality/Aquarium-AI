@@ -26,3 +26,6 @@ const String adSenseAdUnitId = '9994371406';
 
 // In-app purchase product IDs
 const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';
+
+// Buy Me a Coffee URL
+const String buyMeACoffeeUrl = 'https://buymeacoffee.com/therealf';
