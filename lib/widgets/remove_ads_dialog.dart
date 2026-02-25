@@ -167,7 +167,9 @@ class RemoveAdsDialog extends ConsumerWidget {
           child: Text(l10n.cancel),
         ),
         Builder(builder: (context) {
-          final price = RemoteConfigService.earlySupporterPrice;
+          final price = RemoteConfigService.getEarlySupporterPrice(
+                    locale: Localizations.localeOf(context).toString(),
+                  );
           if (price.isEmpty) {
             return ElevatedButton(
               onPressed: busy ? null : onBuy,

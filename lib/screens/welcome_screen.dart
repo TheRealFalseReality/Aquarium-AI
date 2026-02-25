@@ -338,57 +338,58 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget _buildChangelogBanner(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: cs.primaryContainer,
-      child: Row(
-        children: [
-          // Tappable area – opens ChangelogScreen
-          Expanded(
-            child: InkWell(
-              key: const Key('changelog_banner_tap_area'),
-              onTap: () async {
-                await _dismissChangelogBanner();
-                if (mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChangelogScreen(),
-                    ),
-                  );
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.new_releases, color: cs.primary, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${l10n.changelog} · v$_changelogBannerVersion',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: cs.onPrimaryContainer,
-                              fontWeight: FontWeight.w500,
-                            ),
+    return _ChangelogBannerSlide(
+      child: Material(
+        color: cs.primaryContainer,
+        child: Row(
+          children: [
+            // Tappable area – opens ChangelogScreen
+            Expanded(
+              child: InkWell(
+                key: const Key('changelog_banner_tap_area'),
+                onTap: () async {
+                  await _dismissChangelogBanner();
+                  if (mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangelogScreen(),
                       ),
-                    ),
-                    Icon(Icons.arrow_forward_ios,
-                        color: cs.onPrimaryContainer.withOpacity(0.7), size: 14),
-                  ],
+                    );
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  child: Row(
+                    children: [
+                      Icon(Icons.new_releases, color: cs.primary, size: 26),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          '${l10n.changelog} · v$_changelogBannerVersion',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: cs.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios,
+                          color: cs.onPrimaryContainer.withOpacity(0.7), size: 16),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Dismiss button – only closes the banner
-          IconButton(
-            key: const Key('changelog_banner_dismiss'),
-            icon: Icon(Icons.close,
-                color: cs.onPrimaryContainer.withOpacity(0.7), size: 18),
-            onPressed: _dismissChangelogBanner,
-            tooltip: l10n.close,
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
+            // Dismiss button – only closes the banner
+            IconButton(
+              key: const Key('changelog_banner_dismiss'),
+              icon: Icon(Icons.close,
+                  color: cs.onPrimaryContainer.withOpacity(0.7), size: 22),
+              onPressed: _dismissChangelogBanner,
+              tooltip: l10n.close,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -528,7 +529,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_showChangelogBanner) _buildChangelogBanner(context),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOut,
+            child: _showChangelogBanner
+                ? _buildChangelogBanner(context)
+                : const SizedBox.shrink(),
+          ),
           const AdBanner(),
         ],
       ),
@@ -1323,6 +1330,37 @@ class AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
         transform: Matrix4.translationValues(0, _isAnimated ? 0 : 20, 0),
         child: widget.child,
       ),
+    );
+  }
+}
+
+/// Wraps a changelog banner child and slides it up from below when first built.
+class _ChangelogBannerSlide extends StatefulWidget {
+  final Widget child;
+  const _ChangelogBannerSlide({required this.child});
+
+  @override
+  State<_ChangelogBannerSlide> createState() => _ChangelogBannerSlideState();
+}
+
+class _ChangelogBannerSlideState extends State<_ChangelogBannerSlide> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSlide(
+      offset: _visible ? Offset.zero : const Offset(0, 1),
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+      child: widget.child,
     );
   }
 }
