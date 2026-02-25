@@ -5,19 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-
-- Fish, equipment and plants specific details with images
-- Better & Modern parameter, Dosing UX/UI  
-- Add detailed metrics per tank with custom metrics (last water change, fish count, algae level?)
-- Stocking guides per tank  
-- Notifications & Events log in calendar view  
-- Expenses or P&L
-- Explore feed  
-- [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
-
 ## [3.0.03] - 2020-2-24
 
 ### Added
@@ -43,3 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Robust AI error handling: modern dialog, API key shortcuts, and rate-limit rollback on failure  
 
 **Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v2.1.04...v3.0.03>
+
+## [Unreleased]
+
+### Added (Soon)
+
+- Fish, equipment and plants specific details with images
+- Better & Modern parameter, Dosing UX/UI  
+- Add detailed metrics per tank with custom metrics (last water change, fish count, algae level?)
+- Stocking guides per tank  
+- Notifications & Events log in calendar view  
+- Expenses or P&L
+- Explore feed  
+- [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
