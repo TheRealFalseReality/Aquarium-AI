@@ -463,7 +463,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             ),
           ),
           // Remove Ads entry (hidden when ads already removed)
-          if (!ref.watch(purchaseProvider).adsRemoved) ...[
+          if (!kIsWeb && !ref.watch(purchaseProvider).adsRemoved) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Divider(

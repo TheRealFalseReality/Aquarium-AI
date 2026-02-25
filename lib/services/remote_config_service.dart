@@ -49,8 +49,8 @@ const String _defaultFishcompatJson = '';
 // 0.0 = do not display a price label in the Remove Ads dialog.
 // Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
 // price on the purchase button without shipping an app update.
-/// Fallback USD price for the Early Supporter lifetime purchase (0 = hidden).
-const double _defaultEarlySupporterPrice = 0.0;
+/// Fallback USD price for the Early Supporter lifetime purchase.
+const double _defaultEarlySupporterPrice = 0.99;
 
 /// Key names used in Firebase Remote Config.
 ///
@@ -280,10 +280,18 @@ class RemoteConfigService {
   /// Formatted USD price string for the Early Supporter lifetime purchase
   /// (e.g. `"$0.99"`). Returns an empty string when the Remote Config value
   /// is `0` or unset, meaning no price label should be shown.
-  static String get earlySupporterPrice {
+  ///
+  /// Pass [locale] (e.g. `Localizations.localeOf(context).toString()`) to
+  /// format the number according to the user's locale while keeping the USD
+  /// currency symbol.
+  static String getEarlySupporterPrice({String? locale}) {
     final raw = _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice)
         ?? _defaultEarlySupporterPrice;
     if (raw <= 0) return '';
-    return NumberFormat.currency(locale: 'en_US', symbol: r'$').format(raw);
+    return NumberFormat.currency(
+      locale: locale ?? 'en_US',
+      name: 'USD',
+      symbol: r'$',
+    ).format(raw);
   }
 }

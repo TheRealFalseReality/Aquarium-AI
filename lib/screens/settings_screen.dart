@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,7 +68,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Auto-open the Remove Ads dialog if requested via route arguments.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Map && args['openRemoveAds'] == true) {
+      if (args is Map && args['openRemoveAds'] == true && !kIsWeb) {
         _showRemoveAdsDialog();
       }
     });
@@ -937,6 +938,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildRemoveAdsCard(BuildContext context) {
+    if (kIsWeb) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     final purchaseState = ref.watch(purchaseProvider);
     if (purchaseState.adsRemoved) {
