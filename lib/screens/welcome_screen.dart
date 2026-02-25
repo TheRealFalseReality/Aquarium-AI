@@ -1115,7 +1115,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: GestureDetector(
-        onTap: () => showRemoveAdsDialog(context, ref),
+        onTap: () => showRemoveAdsDialog(context),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

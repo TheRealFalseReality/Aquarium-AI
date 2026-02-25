@@ -1014,7 +1014,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showRemoveAdsDialog() {
-    showRemoveAdsDialog(context, ref);
+    showRemoveAdsDialog(context);
   }
 
   Widget _buildMenuCard({
