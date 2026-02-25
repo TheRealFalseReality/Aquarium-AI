@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/aquarium_widget_background"
+    android:padding="12dp">
+
+    <!-- Header row -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Aquarium AI"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_tank_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 tanks"
+            android:textColor="#B2EBFF"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#40FFFFFF"
+        android:layout_marginBottom="6dp" />
+
+    <!-- Tank row 1 -->
+    <LinearLayout
+        android:id="@+id/tank_row_1"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tank_name_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tank_stats_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B2EBFF"
+            android:textSize="10sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- Tank row 2 -->
+    <LinearLayout
+        android:id="@+id/tank_row_2"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tank_name_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tank_stats_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B2EBFF"
+            android:textSize="10sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- Tank row 3 -->
+    <LinearLayout
+        android:id="@+id/tank_row_3"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tank_name_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tank_stats_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B2EBFF"
+            android:textSize="10sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- Overflow indicator when there are more than 3 tanks -->
+    <TextView
+        android:id="@+id/widget_more_tanks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#B2EBFF"
+        android:textSize="10sp"
+        android:visibility="gone" />
+
+    <!-- Empty state message -->
+    <TextView
+        android:id="@+id/widget_no_tanks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open the app to load tanks"
+        android:textColor="#B2EBFF"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</LinearLayout>

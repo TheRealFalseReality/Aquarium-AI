@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
+import '../services/widget_service.dart';
 import 'species_tags_provider.dart';
 import 'app_settings_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
@@ -72,6 +73,7 @@ class TankNotifier extends StateNotifier<TankState> {
       final prefs = await SharedPreferences.getInstance();
       final tanksJson = json.encode(state.tanks.map((tank) => tank.toJson()).toList());
       await prefs.setString(_tanksKey, tanksJson);
+      await WidgetService.updateWidget(state.tanks);
     } catch (e) {
       state = state.copyWith(error: 'Failed to save tanks: $e');
     }
