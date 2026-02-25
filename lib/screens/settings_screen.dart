@@ -10,6 +10,7 @@ import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
+import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
@@ -932,6 +933,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             mode: LaunchMode.externalApplication,
           ),
         ),
+        if (kDebugMode) ...[
+          const SizedBox(height: 16),
+          _buildMenuCard(
+            context: context,
+            title: 'Trigger In-App Review',
+            subtitle: 'Debug: immediately shows the in-app review prompt',
+            icon: Icons.rate_review_outlined,
+            gradient: LinearGradient(
+              colors: [
+                Colors.purple.withOpacity(0.25),
+                Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: Colors.purple,
+            onTap: () => InAppReviewService.forceRequestReview(),
+          ),
+        ],
         const SizedBox(height: 24),
       ],
     );

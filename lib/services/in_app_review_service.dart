@@ -85,4 +85,20 @@ class InAppReviewService {
     await prefs.remove(_firstLaunchTimestampKey);
     await prefs.remove(_reviewRequestedKey);
   }
+
+  /// Bypasses all guards and immediately requests a review.
+  /// For use in debug mode only.
+  static Future<void> forceRequestReview() async {
+    try {
+      final inAppReview = InAppReview.instance;
+      if (!await inAppReview.isAvailable()) {
+        debugPrint('InAppReviewService: in-app review not available');
+        return;
+      }
+      await inAppReview.requestReview();
+      debugPrint('InAppReviewService: review force-requested (debug)');
+    } catch (e) {
+      debugPrint('InAppReviewService.forceRequestReview error: $e');
+    }
+  }
 }
