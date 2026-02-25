@@ -265,11 +265,11 @@ Widget _buildSelectedFishSection(
     {Map<String, List<String>> selectedSpecies = const {}}) {
   return Column(
     children: selectedFish.map((fish) {
-      // Show only the selected species for this fish type, or fall back to all commonNames.
+      // Show selected species when chosen; otherwise show up to the first 3 from commonNames.
       final fishSpecies = selectedSpecies[fish.name];
       final subtitleText = (fishSpecies?.isNotEmpty ?? false)
           ? fishSpecies!.join(', ')
-          : fish.commonNames.join(', ');
+          : fish.commonNames.take(3).join(', ');
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: InkWell(
@@ -316,12 +316,13 @@ Widget _buildSelectedFishSection(
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        subtitleText,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      if (subtitleText.isNotEmpty)
+                        Text(
+                          subtitleText,
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
                 ),

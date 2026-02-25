@@ -837,6 +837,9 @@ class FishCompatibilityScreenState
     // Tracks whether the inline add-tag input is visible for each fish
     final Map<String, bool> addTagVisible = {};
 
+    // Tracks whether all species tags are shown (default: show only 3)
+    final Map<String, bool> showAllTags = {};
+
     final Map<String, Set<String>> selectedSpecies = {};
 
     Map<String, List<String>>? result;
@@ -874,39 +877,91 @@ class FishCompatibilityScreenState
                       final selected = selectedSpecies[fish.name] ?? <String>{};
                       final controller = addControllers[fish.name]!;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              fish.name,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: ExpansionTile(
+                          title: Text(
+                            fish.name,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 6),
+                          ),
+                          initiallyExpanded: false,
+                          tilePadding: EdgeInsets.zero,
+                          childrenPadding: const EdgeInsets.only(bottom: 8),
+                          children: [
                             if (tags.isNotEmpty)
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 4,
-                                children: tags.map((tag) {
-                                  final isSelected = selected.contains(tag);
-                                  return FilterChip(
-                                    label: Text(tag, style: const TextStyle(fontSize: 12)),
-                                    selected: isSelected,
-                                    onSelected: (value) {
-                                      setDialogState(() {
-                                        final set = selectedSpecies.putIfAbsent(
-                                            fish.name, () => <String>{});
-                                        if (value) {
-                                          set.add(tag);
-                                        } else {
-                                          set.remove(tag);
-                                        }
-                                      });
-                                    },
+                              Builder(
+                                builder: (context) {
+                                  const int defaultLimit = 3;
+                                  final showAll = showAllTags[fish.name] == true;
+                                  final visibleTags = showAll ? tags : tags.take(defaultLimit).toList();
+                                  final hiddenCount = tags.length > defaultLimit ? tags.length - defaultLimit : 0;
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 4,
+                                        children: visibleTags.map((tag) {
+                                          final isSelected = selected.contains(tag);
+                                          return FilterChip(
+                                            label: Text(tag, style: TextStyle(
+                                              fontSize: 12,
+                                              color: isSelected
+                                                  ? Theme.of(context).colorScheme.onPrimary
+                                                  : Theme.of(context).colorScheme.onSurface,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                            )),
+                                            selected: isSelected,
+                                            selectedColor: Theme.of(context).colorScheme.primary,
+                                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                            checkmarkColor: Theme.of(context).colorScheme.onPrimary,
+                                            side: BorderSide(
+                                              color: isSelected
+                                                  ? Theme.of(context).colorScheme.primary
+                                                  : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                                            ),
+                                            onSelected: (value) {
+                                              setDialogState(() {
+                                                final set = selectedSpecies.putIfAbsent(
+                                                    fish.name, () => <String>{});
+                                                if (value) {
+                                                  set.add(tag);
+                                                } else {
+                                                  set.remove(tag);
+                                                }
+                                              });
+                                            },
+                                          );
+                                        }).toList(),
+                                      ),
+                                      if (!showAll && hiddenCount > 0)
+                                        TextButton(
+                                          onPressed: () => setDialogState(() => showAllTags[fish.name] = true),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ),
+                                          child: Text(
+                                            'Show $hiddenCount more...',
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      if (showAll && tags.length > defaultLimit)
+                                        TextButton(
+                                          onPressed: () => setDialogState(() => showAllTags[fish.name] = false),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ),
+                                          child: const Text(
+                                            'Show less',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                    ],
                                   );
-                                }).toList(),
+                                },
                               ),
                             const SizedBox(height: 6),
                             if (addTagVisible[fish.name] == true)
