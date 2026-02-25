@@ -1554,3 +1554,23 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
   }
 }
 
+
+/// Shows the activity log add/edit bottom sheet.
+/// [existingEntry] – pass to edit an existing log entry.
+void showLogEntrySheet(BuildContext context, Tank tank, {NotificationLog? existingEntry}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddLogEntrySheet(tank: tank, existingEntry: existingEntry),
+  );
+}
+
+/// Shows the note add/edit bottom sheet.
+/// [existingNote] – pass to edit an existing note.
+void showNoteSheet(BuildContext context, Tank tank, {TankNote? existingNote}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddNoteSheet(tank: tank, existingNote: existingNote),
+  );
+}

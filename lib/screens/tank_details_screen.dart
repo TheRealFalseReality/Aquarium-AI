@@ -9,6 +9,9 @@ import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/fish.dart';
 import '../models/water_parameter.dart';
+import '../models/dosing_entry.dart';
+import '../models/notification_log.dart';
+import '../models/tank_note.dart';
 import '../providers/tank_provider.dart';
 import '../services/fish_data_service.dart';
 import '../services/analytics_service.dart';
@@ -266,6 +269,69 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 updatedAt: DateTime.now(),
               );
               ref.read(tankProvider.notifier).updateTank(updatedTank);
+            },
+            child: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Reusable edit/delete popup menu for list items
+  Widget _buildEditDeleteMenu({
+    required BuildContext context,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      onSelected: (value) {
+        if (value == 'edit') onEdit();
+        if (value == 'delete') onDelete();
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              const Icon(Icons.edit_outlined, size: 20),
+              const SizedBox(width: 8),
+              Text(l10n.edit),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, size: 20, color: Theme.of(context).colorScheme.error),
+              const SizedBox(width: 8),
+              Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Shows a generic delete confirmation dialog
+  void _confirmDelete(BuildContext context, {required VoidCallback onConfirm}) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: const Text('Are you sure you want to delete this entry?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
             },
             child: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
@@ -662,6 +728,20 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   ],
                 ],
               ),
+              trailing: _buildEditDeleteMenu(
+                context: context,
+                onEdit: () => showParameterSheet(context, tank, existingParameter: param),
+                onDelete: () => _confirmDelete(
+                  context,
+                  onConfirm: () {
+                    final updatedTank = tank.copyWith(
+                      waterParameters: tank.waterParameters.where((p) => p.id != param.id).toList(),
+                      updatedAt: DateTime.now(),
+                    );
+                    ref.read(tankProvider.notifier).updateTank(updatedTank);
+                  },
+                ),
+              ),
             ),
           );
         }),
@@ -723,9 +803,20 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   ),
                 ],
               ),
-              trailing: entry.notes != null && entry.notes!.isNotEmpty
-                  ? Icon(Icons.note, color: cs.onSurface.withOpacity(0.5))
-                  : null,
+              trailing: _buildEditDeleteMenu(
+                context: context,
+                onEdit: () => showDosingSheet(context, tank, existingEntry: entry),
+                onDelete: () => _confirmDelete(
+                  context,
+                  onConfirm: () {
+                    final updatedTank = tank.copyWith(
+                      dosingEntries: tank.dosingEntries.where((e) => e.id != entry.id).toList(),
+                      updatedAt: DateTime.now(),
+                    );
+                    ref.read(tankProvider.notifier).updateTank(updatedTank);
+                  },
+                ),
+              ),
             ),
           );
         }),
@@ -781,9 +872,20 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   color: cs.onSurface.withOpacity(0.6),
                 ),
               ),
-              trailing: log.notes != null && log.notes!.isNotEmpty
-                  ? Icon(Icons.note, color: cs.onSurface.withOpacity(0.5))
-                  : null,
+              trailing: _buildEditDeleteMenu(
+                context: context,
+                onEdit: () => showLogEntrySheet(context, tank, existingEntry: log),
+                onDelete: () => _confirmDelete(
+                  context,
+                  onConfirm: () {
+                    final updatedTank = tank.copyWith(
+                      notificationLogs: tank.notificationLogs.where((l) => l.id != log.id).toList(),
+                      updatedAt: DateTime.now(),
+                    );
+                    ref.read(tankProvider.notifier).updateTank(updatedTank);
+                  },
+                ),
+              ),
             ),
           );
         }),
@@ -857,21 +959,28 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           const SizedBox(height: 8),
           ...tank.tankNotes.reversed.map((note) {
             return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(note.content),
-                    const SizedBox(height: 8),
-                    Text(
-                      DateFormat.yMMMd().add_jm().format(note.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: cs.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
+              child: ListTile(
+                title: Text(note.content),
+                subtitle: Text(
+                  DateFormat.yMMMd().add_jm().format(note.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: cs.onSurface.withOpacity(0.6),
+                  ),
+                ),
+                trailing: _buildEditDeleteMenu(
+                  context: context,
+                  onEdit: () => showNoteSheet(context, tank, existingNote: note),
+                  onDelete: () => _confirmDelete(
+                    context,
+                    onConfirm: () {
+                      final updatedTank = tank.copyWith(
+                        tankNotes: tank.tankNotes.where((n) => n.id != note.id).toList(),
+                        updatedAt: DateTime.now(),
+                      );
+                      ref.read(tankProvider.notifier).updateTank(updatedTank);
+                    },
+                  ),
                 ),
               ),
             );

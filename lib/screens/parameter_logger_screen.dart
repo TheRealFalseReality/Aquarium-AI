@@ -1266,3 +1266,13 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   }
 }
 
+/// Shows the parameter add/edit bottom sheet.
+/// [existingParameter] – pass to edit an existing entry.
+void showParameterSheet(BuildContext context, Tank tank, {WaterParameter? existingParameter}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddParameterSheet(tank: tank, existingParameter: existingParameter),
+  );
+}
+

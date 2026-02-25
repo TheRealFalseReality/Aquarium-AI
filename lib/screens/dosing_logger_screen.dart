@@ -865,3 +865,13 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   }
 }
 
+/// Shows the dosing add/edit bottom sheet.
+/// [existingEntry] – pass to edit an existing entry.
+void showDosingSheet(BuildContext context, Tank tank, {DosingEntry? existingEntry}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _AddDosingEntrySheet(tank: tank, existingEntry: existingEntry),
+  );
+}
+
