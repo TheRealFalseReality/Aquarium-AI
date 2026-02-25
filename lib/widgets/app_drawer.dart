@@ -18,8 +18,6 @@ import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 import 'remove_ads_dialog.dart';
-import '../constants.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends ConsumerStatefulWidget {
   const AppDrawer({super.key});
@@ -515,47 +513,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               ),
             ),
           ],
-          AnimatedDrawerItem(
-            delay: const Duration(milliseconds: 545),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.amber.withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.coffee, color: Colors.amber.shade700, size: 22),
-                title: Text(
-                  l10n.buyMeACoffee,
-                  style: TextStyle(
-                    color: Colors.amber.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(
-                  l10n.buyMeACoffeeDesc,
-                  style: TextStyle(
-                    color: Colors.amber.shade600,
-                    fontSize: 11,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context); // close drawer
-                  launchUrl(
-                    Uri.parse(buyMeACoffeeUrl),
-                    mode: LaunchMode.externalApplication,
-                  );
-                },
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Divider(

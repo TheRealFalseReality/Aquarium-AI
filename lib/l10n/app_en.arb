@@ -2776,6 +2776,18 @@
   "buyMeACoffeeDesc": "Support the developer with a small donation",
   "@buyMeACoffeeDesc": {
     "description": "Subtitle for the Buy Me a Coffee menu item"
+  },
+  "buyMeACoffeeDialogBody": "Love Aquarium AI? You can support the developer by buying a coffee! Choose an option below:",
+  "@buyMeACoffeeDialogBody": {
+    "description": "Body text of the Buy Me a Coffee dialog"
+  },
+  "buyMeACoffeeInApp": "Buy via Google Play",
+  "@buyMeACoffeeInApp": {
+    "description": "Button label for buying coffee through in-app purchase"
+  },
+  "buyMeACoffeeWebsite": "Buy on buymeacoffee.com",
+  "@buyMeACoffeeWebsite": {
+    "description": "Button label for opening the Buy Me a Coffee website"
   }
 }
 
