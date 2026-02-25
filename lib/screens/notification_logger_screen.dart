@@ -14,8 +14,15 @@ import '../l10n/app_localizations.dart';
 
 class NotificationLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
+  final bool openAddDialog;
+  final int initialTabIndex;
 
-  const NotificationLoggerScreen({super.key, required this.tank});
+  const NotificationLoggerScreen({
+    super.key,
+    required this.tank,
+    this.openAddDialog = false,
+    this.initialTabIndex = 0,
+  });
 
   @override
   NotificationLoggerScreenState createState() => NotificationLoggerScreenState();
@@ -29,7 +36,18 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTabIndex);
+    if (widget.openAddDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          if (_tabController.index == 0) {
+            _addNote(context);
+          } else {
+            _addLogEntry(context);
+          }
+        }
+      });
+    }
   }
 
   @override

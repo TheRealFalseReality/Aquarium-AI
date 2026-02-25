@@ -13,6 +13,9 @@ import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
 import 'tank_creation_screen.dart';
 import 'notification_management_screen.dart';
+import 'parameter_logger_screen.dart';
+import 'dosing_logger_screen.dart';
+import 'notification_logger_screen.dart';
 
 /// Dedicated screen for displaying tank details with tabbed navigation
 /// 
@@ -197,9 +200,71 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               _buildNotesTab(context, tank),
             ],
           ),
+          floatingActionButton: _buildFab(context, tank),
         ),
       ),
     );
+  }
+
+  /// Floating action button - context-sensitive per tab
+  Widget? _buildFab(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (_tabController.index) {
+      case 2: // Parameters
+        return FloatingActionButton.extended(
+          heroTag: 'fab_parameters',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ParameterLoggerScreen(tank: tank, openAddDialog: true),
+            ),
+          ),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addParameter),
+        );
+      case 3: // Dosing
+        return FloatingActionButton.extended(
+          heroTag: 'fab_dosing',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => DosingLoggerScreen(tank: tank, openAddDialog: true),
+            ),
+          ),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addDose),
+        );
+      case 4: // Activity
+        return FloatingActionButton.extended(
+          heroTag: 'fab_activity',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => NotificationLoggerScreen(
+                tank: tank,
+                openAddDialog: true,
+                initialTabIndex: 1,
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addLogEntry),
+        );
+      case 5: // Notes
+        return FloatingActionButton.extended(
+          heroTag: 'fab_notes',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => NotificationLoggerScreen(
+                tank: tank,
+                openAddDialog: true,
+                initialTabIndex: 0,
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addNote),
+        );
+      default:
+        return null;
+    }
   }
 
   /// Overview tab - Tank info, harmony score, inhabitants, action buttons
