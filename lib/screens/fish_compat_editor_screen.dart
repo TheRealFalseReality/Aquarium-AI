@@ -51,6 +51,8 @@ class _FishEntry {
         'notCompatible': notCompatible,
         'withCaution': withCaution,
       };
+
+  _FishEntry copy() => _FishEntry.fromJson(toJson());
 }
 
 // ── validator ─────────────────────────────────────────────────────────────────
@@ -112,14 +114,20 @@ class FishCompatEditorScreen extends StatefulWidget {
 }
 
 class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
-  // Loaded data
+  // Working copy of loaded data
   Map<String, List<_FishEntry>> _data = {};
+  // Last explicitly-saved snapshot (used for dirty tracking and undo)
+  Map<String, List<_FishEntry>> _savedData = {};
   bool _isLoading = true;
   String? _loadError;
 
   // Validation
   List<String> _validationErrors = [];
   bool _validationRun = false;
+
+  // Search
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _searchQuery = '';
 
   // Download state
   bool _isDownloading = false;
@@ -128,6 +136,40 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _searchCtrl.addListener(
+      () => setState(() => _searchQuery = _searchCtrl.text.trim().toLowerCase()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  // ── deep copy / change tracking ───────────────────────────────────────────
+
+  Map<String, List<_FishEntry>> _deepCopy(Map<String, List<_FishEntry>> src) =>
+      src.map((cat, list) => MapEntry(cat, list.map((f) => f.copy()).toList()));
+
+  /// Computes dirty state in a single pass.
+  /// Returns the count of modified fish and a map of modified indices per category.
+  ({int count, Map<String, Set<int>> modifiedIndices}) _computeDirtyInfo() {
+    int count = 0;
+    final modifiedIndices = <String, Set<int>>{};
+    for (final cat in _data.keys) {
+      final current = _data[cat]!;
+      final saved = _savedData[cat];
+      if (saved == null) continue;
+      for (int i = 0; i < current.length && i < saved.length; i++) {
+        if (json.encode(current[i].toJson()) !=
+            json.encode(saved[i].toJson())) {
+          count++;
+          modifiedIndices.putIfAbsent(cat, () => {}).add(i);
+        }
+      }
+    }
+    return (count: count, modifiedIndices: modifiedIndices);
   }
 
   Future<void> _loadData() async {
@@ -145,6 +187,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       }
       setState(() {
         _data = result;
+        _savedData = _deepCopy(result);
         _isLoading = false;
       });
     } catch (e) {
@@ -153,6 +196,71 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _saveChanges() {
+    setState(() => _savedData = _deepCopy(_data));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Changes saved.'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  Future<void> _undoChanges() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Undo Changes'),
+        content: const Text(
+            'Revert all unsaved changes to the last saved state?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Undo'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      setState(() {
+        _data = _deepCopy(_savedData);
+        _validationRun = false;
+      });
+    }
+  }
+
+  /// Shows a dialog when the user tries to leave with unsaved changes.
+  /// Returns true if navigation should proceed (save or discard chosen).
+  Future<bool> _confirmDiscard() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Unsaved Changes'),
+        content: const Text(
+            'You have unsaved changes. Save or discard before leaving?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'discard'),
+            child: const Text('Discard'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'save'),
+            child: const Text('Save & Leave'),
+          ),
+        ],
+      ),
+    );
+    if (result == 'save') {
+      _saveChanges();
+      return true;
+    }
+    return result == 'discard';
   }
 
   void _runValidation() {
@@ -202,6 +310,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   }
 
   Future<void> _downloadJson() async {
+    // Auto-save (commit) before download
+    setState(() => _savedData = _deepCopy(_data));
     setState(() => _isDownloading = true);
     try {
       // Build output preserving category key order
@@ -315,6 +425,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final dirtyInfo = _computeDirtyInfo();
+    final changedCount = dirtyInfo.count;
+    final dirty = changedCount > 0;
 
     Widget body;
     if (_isLoading) {
@@ -330,52 +443,79 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         ),
       );
     } else {
-      body = _buildEditor(colorScheme);
+      body = _buildEditor(colorScheme, changedCount, dirtyInfo.modifiedIndices);
     }
 
-    return MainLayout(
-      title: 'Fish Compat Editor',
-      floatingActionButton: _isLoading || _loadError != null
-          ? null
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.extended(
-                  heroTag: 'validate',
-                  onPressed: _runValidation,
-                  icon: Icon(
-                    _validationRun && _validationErrors.isEmpty
-                        ? Icons.check_circle
-                        : Icons.rule,
+    return PopScope(
+      canPop: !dirty,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final canLeave = await _confirmDiscard();
+        if (canLeave && mounted) Navigator.of(context).pop();
+      },
+      child: MainLayout(
+        title: 'Fish Compat Editor',
+        floatingActionButton: _isLoading || _loadError != null
+            ? null
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FloatingActionButton.extended(
+                    heroTag: 'validate',
+                    onPressed: _runValidation,
+                    icon: Icon(
+                      _validationRun && _validationErrors.isEmpty
+                          ? Icons.check_circle
+                          : Icons.rule,
+                    ),
+                    label: const Text('Validate'),
+                    backgroundColor: _validationRun
+                        ? (_validationErrors.isEmpty
+                            ? Colors.green
+                            : colorScheme.error)
+                        : colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                   ),
-                  label: const Text('Validate'),
-                  backgroundColor: _validationRun
-                      ? (_validationErrors.isEmpty
-                          ? Colors.green
-                          : colorScheme.error)
-                      : colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                ),
-                const SizedBox(height: 12),
-                FloatingActionButton.extended(
-                  heroTag: 'download',
-                  onPressed: _isDownloading ? null : _downloadJson,
-                  icon: _isDownloading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.download),
-                  label: const Text('Download'),
-                ),
-              ],
-            ),
-      child: body,
+                  if (dirty) ...[
+                    const SizedBox(height: 8),
+                    FloatingActionButton.extended(
+                      heroTag: 'save',
+                      onPressed: _saveChanges,
+                      icon: const Icon(Icons.save),
+                      label: Text('Save ($changedCount)'),
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                    const SizedBox(height: 8),
+                    FloatingActionButton.extended(
+                      heroTag: 'undo',
+                      onPressed: _undoChanges,
+                      icon: const Icon(Icons.undo),
+                      label: const Text('Undo'),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  FloatingActionButton.extended(
+                    heroTag: 'download',
+                    onPressed: _isDownloading ? null : _downloadJson,
+                    icon: _isDownloading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.download),
+                    label: const Text('Download'),
+                  ),
+                ],
+              ),
+        child: body,
+      ),
     );
   }
 
-  Widget _buildEditor(ColorScheme colorScheme) {
+  Widget _buildEditor(ColorScheme colorScheme, int changedCount,
+      Map<String, Set<int>> modifiedIndices) {
     return DefaultTabController(
       length: _data.length,
       child: Column(
@@ -398,6 +538,24 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                       fontSize: 12),
                 ),
                 const Spacer(),
+                if (changedCount > 0) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade800,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$changedCount unsaved',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
                 if (_validationRun)
                   Icon(
                     _validationErrors.isEmpty
@@ -411,19 +569,48 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               ],
             ),
           ),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search fish…',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => _searchCtrl.clear(),
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
           TabBar(
             tabs: _data.keys
-                .map((cat) => Tab(
-                      text: cat.isNotEmpty
-                          ? '${cat[0].toUpperCase()}${cat.substring(1)} (${_data[cat]!.length})'
-                          : '(${_data[cat]!.length})',
-                    ))
+                .map((cat) {
+                  final filtered = _filteredFish(cat);
+                  final total = _data[cat]!.length;
+                  final label = cat.isNotEmpty
+                      ? '${cat[0].toUpperCase()}${cat.substring(1)}'
+                      : cat;
+                  return Tab(
+                    text: _searchQuery.isEmpty
+                        ? '$label ($total)'
+                        : '$label (${filtered.length}/$total)',
+                  );
+                })
                 .toList(),
           ),
           Expanded(
             child: TabBarView(
               children: _data.keys
-                  .map((cat) => _buildCategoryTab(cat, colorScheme))
+                  .map((cat) =>
+                      _buildCategoryTab(cat, colorScheme, modifiedIndices))
                   .toList(),
             ),
           ),
@@ -432,18 +619,37 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     );
   }
 
-  Widget _buildCategoryTab(String category, ColorScheme colorScheme) {
-    final fish = _data[category]!;
+  /// Returns (originalIndex, fish) pairs filtered by the current search query.
+  List<MapEntry<int, _FishEntry>> _filteredFish(String category) {
+    final entries = _data[category]!.asMap().entries;
+    if (_searchQuery.isEmpty) return entries.toList();
+    return entries
+        .where((e) =>
+            e.value.name.toLowerCase().contains(_searchQuery) ||
+            e.value.commonNames
+                .any((n) => n.toLowerCase().contains(_searchQuery)))
+        .toList();
+  }
+
+  Widget _buildCategoryTab(String category, ColorScheme colorScheme,
+      Map<String, Set<int>> modifiedIndices) {
+    final filtered = _filteredFish(category);
+    if (filtered.isEmpty) {
+      return const Center(child: Text('No fish match your search.'));
+    }
+    final categoryModified = modifiedIndices[category] ?? const {};
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
-      itemCount: fish.length,
+      itemCount: filtered.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) {
-        final f = fish[i];
+      itemBuilder: (_, listIdx) {
+        final dataIdx = filtered[listIdx].key;
+        final f = filtered[listIdx].value;
         // Determine if this fish has validation errors
         final hasError = _validationRun &&
             _validationErrors
                 .any((e) => e.startsWith('[$category] "${f.name}"'));
+        final isModified = categoryModified.contains(dataIdx);
         return Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -468,9 +674,20 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 ),
               ),
             ),
-            title: Text(
-              f.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    f.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (isModified)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: Icon(Icons.edit, color: Colors.orange, size: 14),
+                  ),
+              ],
             ),
             subtitle: Text(
               f.commonNames.join(', '),
@@ -486,7 +703,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
                   tooltip: 'Edit',
-                  onPressed: () => _editFish(category, i),
+                  onPressed: () => _editFish(category, dataIdx),
                 ),
               ],
             ),
