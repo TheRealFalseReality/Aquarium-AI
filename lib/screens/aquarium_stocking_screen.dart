@@ -309,6 +309,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                               ref.read(aquariumStockingProvider.notifier).selectFish(fish);
                             },
                             deleteIcon: const Icon(Icons.close, size: 18),
+                            backgroundColor: cs.secondaryContainer,
+                            side: BorderSide(color: cs.secondary.withOpacity(0.5)),
                           );
                         }).toList(),
                       ),
