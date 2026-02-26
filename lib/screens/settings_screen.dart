@@ -12,6 +12,7 @@ import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
+import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
@@ -934,9 +935,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: l10n.submitIssue,
-          subtitle: l10n.submitIssueDesc,
-          icon: Icons.bug_report,
+          title: 'Contact Us',
+          subtitle: 'Leave a review or submit an issue',
+          icon: Icons.chat_bubble_outline,
           gradient: LinearGradient(
             colors: [
               Colors.orange.withOpacity(0.25),
@@ -946,10 +947,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
           ),
           iconColor: Colors.orange.shade700,
-          onTap: () => launchUrl(
-            Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/issues'),
-            mode: LaunchMode.externalApplication,
-          ),
+          onTap: () => _showFeedbackDialog(),
         ),
         const SizedBox(height: 24),
       ],
@@ -3666,6 +3664,132 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Text(l10n.close),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showFeedbackDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.chat_bubble_outline, size: 36),
+        iconColor: Colors.orange.shade700,
+        title: const Text(
+          'Contact Us',
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'We\'d love to hear from you! Leave a quick review on the store '
+              'to share your experience, or open a GitHub issue to report a '
+              'bug or suggest a new feature.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            // Leave a review option
+            _buildFeedbackOption(
+              ctx: ctx,
+              icon: Icons.star_rate_outlined,
+              iconColor: Colors.amber.shade700,
+              title: 'Leave a Review',
+              subtitle: 'Rate the app on the store',
+              onTap: () {
+                Navigator.of(ctx).pop();
+                InAppReviewService.forceRequestReview();
+              },
+            ),
+            const SizedBox(height: 12),
+            // Submit issue option
+            _buildFeedbackOption(
+              ctx: ctx,
+              icon: Icons.bug_report_outlined,
+              iconColor: Colors.orange.shade700,
+              title: 'Submit an Issue',
+              subtitle: 'Report a bug or request a feature on GitHub',
+              onTap: () {
+                Navigator.of(ctx).pop();
+                launchUrl(
+                  Uri.parse(
+                      'https://github.com/TheRealFalseReality/Aquarium-AI/issues'),
+                  mode: LaunchMode.externalApplication,
+                ).catchError((e) {
+                  debugPrint('Could not open GitHub issues: $e');
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedbackOption({
+    required BuildContext ctx,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Theme.of(ctx).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
