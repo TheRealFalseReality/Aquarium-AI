@@ -53,7 +53,7 @@ class ModernSelectableChip extends ConsumerWidget {
       finalIconColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
     } else {
       finalBackgroundColor = isMaterialYou ? cs.surfaceVariant : cs.surfaceContainerHighest;
-      finalBorderColor = cs.outline.withOpacity(isMaterialYou ? 0.4 : 0.2);
+      finalBorderColor = cs.outline.withOpacity(isMaterialYou ? 0.4 : 0.5);
       finalLabelColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
       finalIconColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
     }
