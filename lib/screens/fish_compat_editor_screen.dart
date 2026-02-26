@@ -411,12 +411,130 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                           .toList()
                       : f.withCaution,
                 );
+                // Mirror name change in _savedData so propagated fish
+                // don't appear dirty — only the directly-renamed fish should.
+                final saved = _savedData[category];
+                if (saved != null && i < saved.length) {
+                  final sf = saved[i];
+                  saved[i] = _FishEntry(
+                    name: sf.name,
+                    imageURL: sf.imageURL,
+                    commonNames: sf.commonNames,
+                    compatible: inCompatible
+                        ? sf.compatible
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
+                        : sf.compatible,
+                    notRecommended: inNotRecommended
+                        ? sf.notRecommended
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
+                        : sf.notRecommended,
+                    notCompatible: inNotCompatible
+                        ? sf.notCompatible
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
+                        : sf.notCompatible,
+                    withCaution: inWithCaution
+                        ? sf.withCaution
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
+                        : sf.withCaution,
+                  );
+                }
               }
             }
             _validationRun = false; // reset validation badge
           });
         },
       ),
+    );
+  }
+
+  // ── compatibility edit helpers ────────────────────────────────────────────
+
+  Future<void> _editCompatibility(String category, int index) async {
+    final fish = _data[category]![index];
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _FishCompatibilityDialog(
+        fish: fish,
+        onSave: (updatedLists) {
+          setState(() {
+            final categoryFish = _data[category]!;
+            // Update the directly-edited fish
+            categoryFish[index] = _FishEntry(
+              name: fish.name,
+              imageURL: fish.imageURL,
+              commonNames: fish.commonNames,
+              compatible: updatedLists['compatible']!,
+              notRecommended: updatedLists['notRecommended']!,
+              notCompatible: updatedLists['notCompatible']!,
+              withCaution: updatedLists['withCaution']!,
+            );
+            // Bidirectional propagation: for each fish that moved to a new
+            // category in the edited fish's lists, update that fish's entry
+            // for fish.name symmetrically.
+            for (final catKey in _compatCategoryKeys) {
+              final newList = updatedLists[catKey]!;
+              final oldList = _compatListOf(catKey, fish);
+              // For each fish newly placed in this category (moved from
+              // another), propagate the change bidirectionally.
+              // _propagateCompatChange uses a "remove-from-all / add-to-one"
+              // pattern so any previous entry in the complementary fish is
+              // cleaned up automatically.
+              for (final addedFishName
+                  in newList.where((n) => !oldList.contains(n))) {
+                _propagateCompatChange(categoryFish, addedFishName, fish.name, catKey);
+              }
+            }
+            _validationRun = false;
+          });
+        },
+      ),
+    );
+  }
+
+  /// Returns the compatibility sub-list for [key] from [fish].
+  List<String> _compatListOf(String key, _FishEntry fish) {
+    switch (key) {
+      case 'compatible':
+        return fish.compatible;
+      case 'notRecommended':
+        return fish.notRecommended;
+      case 'notCompatible':
+        return fish.notCompatible;
+      case 'withCaution':
+        return fish.withCaution;
+      default:
+        return const [];
+    }
+  }
+
+  /// Updates [targetName]'s entry for [editedName] in [categoryFish] so that
+  /// [editedName] appears in [newKey] (and nowhere else).
+  void _propagateCompatChange(List<_FishEntry> categoryFish, String targetName,
+      String editedName, String newKey) {
+    final targetIndex = categoryFish.indexWhere((f) => f.name == targetName);
+    if (targetIndex == -1) return;
+    final f = categoryFish[targetIndex];
+    categoryFish[targetIndex] = _FishEntry(
+      name: f.name,
+      imageURL: f.imageURL,
+      commonNames: f.commonNames,
+      compatible: newKey == 'compatible'
+          ? [...f.compatible.where((n) => n != editedName), editedName]
+          : f.compatible.where((n) => n != editedName).toList(),
+      notRecommended: newKey == 'notRecommended'
+          ? [...f.notRecommended.where((n) => n != editedName), editedName]
+          : f.notRecommended.where((n) => n != editedName).toList(),
+      notCompatible: newKey == 'notCompatible'
+          ? [...f.notCompatible.where((n) => n != editedName), editedName]
+          : f.notCompatible.where((n) => n != editedName).toList(),
+      withCaution: newKey == 'withCaution'
+          ? [...f.withCaution.where((n) => n != editedName), editedName]
+          : f.withCaution.where((n) => n != editedName).toList(),
     );
   }
 
@@ -701,6 +819,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 if (hasError)
                   Icon(Icons.warning_amber, color: colorScheme.error, size: 18),
                 IconButton(
+                  icon: const Icon(Icons.compare_arrows),
+                  tooltip: 'Edit Compatibility',
+                  onPressed: () => _editCompatibility(category, dataIdx),
+                ),
+                IconButton(
                   icon: const Icon(Icons.edit_outlined),
                   tooltip: 'Edit',
                   onPressed: () => _editFish(category, dataIdx),
@@ -891,6 +1014,346 @@ class _FishEditDialogState extends State<_FishEditDialog> {
           child: const Text('Save'),
         ),
       ],
+    );
+  }
+}
+
+// ── compatibility category definitions ───────────────────────────────────────
+
+/// Ordered keys for all 4 compatibility sub-categories.
+const _compatCategoryKeys = [
+  'compatible',
+  'withCaution',
+  'notRecommended',
+  'notCompatible',
+];
+
+class _CompatCatDef {
+  final String key;
+  final String label;
+  final Color headerBg;
+  final Color chipBorder;
+
+  const _CompatCatDef({
+    required this.key,
+    required this.label,
+    required this.headerBg,
+    required this.chipBorder,
+  });
+}
+
+const _kCompatCats = <_CompatCatDef>[
+  _CompatCatDef(
+    key: 'compatible',
+    label: 'Compatible',
+    headerBg: Color(0xFFE8F5E9),
+    chipBorder: Color(0xFF4CAF50),
+  ),
+  _CompatCatDef(
+    key: 'withCaution',
+    label: 'With Caution',
+    headerBg: Color(0xFFFFF3E0),
+    chipBorder: Color(0xFFFF9800),
+  ),
+  _CompatCatDef(
+    key: 'notRecommended',
+    label: 'Not Recommended',
+    headerBg: Color(0xFFFBE9E7),
+    chipBorder: Color(0xFFFF5722),
+  ),
+  _CompatCatDef(
+    key: 'notCompatible',
+    label: 'Not Compatible',
+    headerBg: Color(0xFFFFEBEE),
+    chipBorder: Color(0xFFF44336),
+  ),
+];
+
+// ── compatibility editor dialog ───────────────────────────────────────────────
+
+class _FishCompatibilityDialog extends StatefulWidget {
+  final _FishEntry fish;
+  final void Function(Map<String, List<String>> updatedLists) onSave;
+
+  const _FishCompatibilityDialog({
+    required this.fish,
+    required this.onSave,
+  });
+
+  @override
+  State<_FishCompatibilityDialog> createState() =>
+      _FishCompatibilityDialogState();
+}
+
+class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
+  late Map<String, List<String>> _lists;
+
+  @override
+  void initState() {
+    super.initState();
+    final f = widget.fish;
+    _lists = {
+      'compatible': List<String>.from(f.compatible),
+      'withCaution': List<String>.from(f.withCaution),
+      'notRecommended': List<String>.from(f.notRecommended),
+      'notCompatible': List<String>.from(f.notCompatible),
+    };
+  }
+
+  void _moveTo(String name, String toKey) {
+    setState(() {
+      for (final list in _lists.values) {
+        list.remove(name);
+      }
+      _lists[toKey]!.add(name);
+    });
+  }
+
+  int get _totalFish =>
+      _lists.values.fold(0, (sum, list) => sum + list.length);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.all(16),
+      child: SizedBox(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height * 0.9,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── header ──────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Compatibility Editor',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Text(
+                          widget.fish.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '$_totalFish fish',
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 4),
+                  FilledButton.icon(
+                    onPressed: () {
+                      widget.onSave(_lists);
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.save, size: 16),
+                    label: const Text('Save'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  Icon(Icons.drag_indicator,
+                      size: 14, color: Colors.grey.shade500),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Drag chips between columns, or use the menu button (⋮) on each chip.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // ── 4 columns ───────────────────────────────────────────────────
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: _kCompatCats.asMap().entries.map((entry) {
+                  final isLast = entry.key == _kCompatCats.length - 1;
+                  return Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: isLast
+                              ? BorderSide.none
+                              : BorderSide(
+                                  color: Colors.grey.shade300, width: 1),
+                        ),
+                      ),
+                      child: _buildColumn(entry.value),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColumn(_CompatCatDef cat) {
+    final items = _lists[cat.key]!;
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (d) => !items.contains(d.data),
+      onAcceptWithDetails: (d) => _moveTo(d.data, cat.key),
+      builder: (context, candidateData, _) {
+        final hovered = candidateData.isNotEmpty;
+        return ColoredBox(
+          color: hovered ? cat.headerBg : Colors.transparent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Column header
+              ColoredBox(
+                color: cat.headerBg,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  child: Column(
+                    children: [
+                      Text(
+                        cat.label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: cat.chipBorder,
+                        ),
+                      ),
+                      Text(
+                        '${items.length}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 11, color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              // Fish chips
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(6),
+                  itemCount: items.length,
+                  itemBuilder: (_, i) => _buildChip(items[i], cat),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildChip(String name, _CompatCatDef cat) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Draggable<String>(
+        data: name,
+        feedback: Material(
+          borderRadius: BorderRadius.circular(6),
+          elevation: 6,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: cat.chipBorder,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              name,
+              style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+        childWhenDragging: Opacity(
+          opacity: 0.3,
+          child: _chipContent(name, cat),
+        ),
+        child: _chipContent(name, cat),
+      ),
+    );
+  }
+
+  Widget _chipContent(String name, _CompatCatDef cat) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+        side: BorderSide(color: cat.chipBorder),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 6, top: 2, bottom: 2, right: 2),
+        child: Row(
+          children: [
+            Icon(Icons.drag_indicator,
+                size: 14, color: Colors.grey.shade400),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(name,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis),
+            ),
+            PopupMenuButton<String>(
+              iconSize: 16,
+              splashRadius: 14,
+              padding: EdgeInsets.zero,
+              tooltip: 'Move to…',
+              itemBuilder: (_) => _kCompatCats
+                  .where((c) => c.key != cat.key)
+                  .map(
+                    (c) => PopupMenuItem<String>(
+                      value: c.key,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: c.chipBorder,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(c.label,
+                              style: const TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onSelected: (key) => _moveTo(name, key),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
