@@ -251,6 +251,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   Future<void> _editFish(String category, int index) async {
     final fish = _data[category]![index];
+    final oldName = fish.name;
     await showDialog<void>(
       context: context,
       builder: (_) => _FishEditDialog(
@@ -258,6 +259,50 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         onSave: (updated) {
           setState(() {
             _data[category]![index] = updated;
+            // Propagate name change to all other fish in the same category
+            if (oldName.isNotEmpty && oldName != updated.name) {
+              final categoryFish = _data[category]!;
+              for (int i = 0; i < categoryFish.length; i++) {
+                if (i == index) continue;
+                final f = categoryFish[i];
+                // Only rebuild if any compatibility list actually references oldName
+                final inCompatible = f.compatible.contains(oldName);
+                final inNotRecommended = f.notRecommended.contains(oldName);
+                final inNotCompatible = f.notCompatible.contains(oldName);
+                final inWithCaution = f.withCaution.contains(oldName);
+                if (!inCompatible &&
+                    !inNotRecommended &&
+                    !inNotCompatible &&
+                    !inWithCaution) {
+                  continue;
+                }
+                categoryFish[i] = _FishEntry(
+                  name: f.name,
+                  imageURL: f.imageURL,
+                  commonNames: f.commonNames,
+                  compatible: inCompatible
+                      ? f.compatible
+                          .map((n) => n == oldName ? updated.name : n)
+                          .toList()
+                      : f.compatible,
+                  notRecommended: inNotRecommended
+                      ? f.notRecommended
+                          .map((n) => n == oldName ? updated.name : n)
+                          .toList()
+                      : f.notRecommended,
+                  notCompatible: inNotCompatible
+                      ? f.notCompatible
+                          .map((n) => n == oldName ? updated.name : n)
+                          .toList()
+                      : f.notCompatible,
+                  withCaution: inWithCaution
+                      ? f.withCaution
+                          .map((n) => n == oldName ? updated.name : n)
+                          .toList()
+                      : f.withCaution,
+                );
+              }
+            }
             _validationRun = false; // reset validation badge
           });
         },
@@ -467,7 +512,7 @@ class _FishEditDialog extends StatefulWidget {
 class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _nameCtrl;
   late TextEditingController _urlCtrl;
-  late List<String> _commonNames;
+  late List<TextEditingController> _commonNameCtrls;
   final TextEditingController _newCommonNameCtrl = TextEditingController();
 
   @override
@@ -475,7 +520,9 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.fish.name);
     _urlCtrl = TextEditingController(text: widget.fish.imageURL);
-    _commonNames = List<String>.from(widget.fish.commonNames);
+    _commonNameCtrls = widget.fish.commonNames
+        .map((n) => TextEditingController(text: n))
+        .toList();
   }
 
   @override
@@ -483,29 +530,37 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _nameCtrl.dispose();
     _urlCtrl.dispose();
     _newCommonNameCtrl.dispose();
+    for (final ctrl in _commonNameCtrls) {
+      ctrl.dispose();
+    }
     super.dispose();
   }
 
   void _addCommonName() {
     final value = _newCommonNameCtrl.text.trim();
     if (value.isEmpty) return;
-    if (_commonNames.contains(value)) {
+    final existing = _commonNameCtrls.map((c) => c.text.trim()).toList();
+    if (existing.contains(value)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('That common name already exists.')),
       );
       return;
     }
     setState(() {
-      _commonNames.add(value);
+      _commonNameCtrls.add(TextEditingController(text: value));
       _newCommonNameCtrl.clear();
     });
   }
 
   void _save() {
+    final commonNames = _commonNameCtrls
+        .map((c) => c.text.trim())
+        .where((n) => n.isNotEmpty)
+        .toList();
     final updated = _FishEntry(
       name: _nameCtrl.text.trim(),
       imageURL: _urlCtrl.text.trim(),
-      commonNames: List<String>.from(_commonNames),
+      commonNames: commonNames,
       compatible: widget.fish.compatible,
       notRecommended: widget.fish.notRecommended,
       notCompatible: widget.fish.notCompatible,
@@ -549,27 +604,36 @@ class _FishEditDialogState extends State<_FishEditDialog> {
               Text('Common Names *',
                   style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 6),
-              if (_commonNames.isEmpty)
+              if (_commonNameCtrls.isEmpty)
                 Text(
                   'No common names – at least 1 required.',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                       fontSize: 12),
                 ),
-              ..._commonNames.asMap().entries.map((e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+              ..._commonNameCtrls.asMap().entries.map((e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(e.value,
-                              style: const TextStyle(fontSize: 13)),
+                          child: TextField(
+                            controller: e.value,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            style: const TextStyle(fontSize: 13),
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline,
                               size: 20),
                           tooltip: 'Remove',
-                          onPressed: () =>
-                              setState(() => _commonNames.removeAt(e.key)),
+                          onPressed: () {
+                            final ctrl = e.value;
+                            setState(() => _commonNameCtrls.removeAt(e.key));
+                            ctrl.dispose();
+                          },
                         ),
                       ],
                     ),
