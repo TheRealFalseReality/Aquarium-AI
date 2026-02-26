@@ -26,3 +26,4 @@ const String adSenseAdUnitId = '9994371406';
 
 // In-app purchase product IDs
 const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';
+const String buyMeACoffeeProductId = 'buy_me_a_coffee';

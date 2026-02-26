@@ -520,7 +520,12 @@
   "removeAdsThankyouTitle": "Danke! 🎉",
   "removeAdsThankyouBody": "Dein Early-Supporter-Kauf wurde wiederhergestellt und die Werbung wurde entfernt.\n\nVielen herzlichen Dank für deine Unterstützung — das bedeutet uns sehr viel und hilft dabei, Aquarium AI zu verbessern!",
   "removeAdsNoPurchaseTitle": "Kein Kauf gefunden",
-  "removeAdsNoPurchaseBody": "Auf diesem Konto wurde kein früherer Kauf gefunden.\n\nWenn du mit einem anderen Store-Konto gekauft hast, melde dich mit diesem Konto an und versuche es erneut."
+  "removeAdsNoPurchaseBody": "Auf diesem Konto wurde kein früherer Kauf gefunden.\n\nWenn du mit einem anderen Store-Konto gekauft hast, melde dich mit diesem Konto an und versuche es erneut.",
+  "buyMeACoffee": "Kauf mir einen Kaffee",
+  "buyMeACoffeeDesc": "Unterstütze den Entwickler mit einer kleinen Spende",
+  "buyMeACoffeeDialogBody": "Gefällt dir Aquarium AI? Du kannst den Entwickler unterstützen, indem du einen Kaffee spendierst! Wähle eine Option:",
+  "buyMeACoffeeInApp": "Über Google Play kaufen",
+  "buyMeACoffeeWebsite": "Auf buymeacoffee.com kaufen"
 }
 
 
