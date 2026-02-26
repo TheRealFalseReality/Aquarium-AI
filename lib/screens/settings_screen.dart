@@ -3720,6 +3720,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   mode: LaunchMode.externalApplication,
                 ).catchError((e) {
                   debugPrint('Could not open GitHub issues: $e');
+                  return false;
                 });
               },
             ),
