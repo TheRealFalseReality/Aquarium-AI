@@ -3566,7 +3566,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Uri.parse(
                       'https://github.com/TheRealFalseReality/Aquarium-AI/issues'),
                   mode: LaunchMode.externalApplication,
-                );
+                ).catchError((e) {
+                  debugPrint('Could not open GitHub issues: $e');
+                });
               },
             ),
           ],
