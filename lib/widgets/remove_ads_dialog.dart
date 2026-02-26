@@ -6,17 +6,15 @@ import '../services/remote_config_service.dart';
 
 /// Shows the Remove Ads purchase dialog and, after it closes, the
 /// restore-outcome dialog when applicable.
-Future<void> showRemoveAdsDialog(BuildContext context, WidgetRef ref) async {
+Future<void> showRemoveAdsDialog(BuildContext context) async {
   await showDialog<void>(
     context: context,
-    builder: (ctx) => RemoveAdsDialog(
-      onBuy: () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
-      onRestore: () => ref.read(purchaseProvider.notifier).restorePurchases(),
-    ),
+    builder: (ctx) => const RemoveAdsDialog(),
   );
   if (!context.mounted) return;
-  final outcome = ref.read(purchaseProvider).restoreOutcome;
-  ref.read(purchaseProvider.notifier).clearRestoreOutcome();
+  final container = ProviderScope.containerOf(context, listen: false);
+  final outcome = container.read(purchaseProvider).restoreOutcome;
+  container.read(purchaseProvider.notifier).clearRestoreOutcome();
   _showRestoreOutcomeDialog(context, outcome);
 }
 
@@ -57,14 +55,7 @@ void _showRestoreOutcomeDialog(BuildContext context, RestoreOutcome outcome) {
 
 /// A clean dialog for the "Remove Ads" one-time purchase.
 class RemoveAdsDialog extends ConsumerWidget {
-  final VoidCallback onBuy;
-  final VoidCallback onRestore;
-
-  const RemoveAdsDialog({
-    super.key,
-    required this.onBuy,
-    required this.onRestore,
-  });
+  const RemoveAdsDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -159,7 +150,7 @@ class RemoveAdsDialog extends ConsumerWidget {
       ),
       actions: [
         TextButton(
-          onPressed: busy ? null : onRestore,
+          onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).restorePurchases(),
           child: Text(l10n.restore),
         ),
         TextButton(
@@ -172,7 +163,7 @@ class RemoveAdsDialog extends ConsumerWidget {
                   );
           if (price.isEmpty) {
             return ElevatedButton(
-              onPressed: busy ? null : onBuy,
+              onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
               child: Text(l10n.removeAds),
             );
           }
@@ -188,7 +179,7 @@ class RemoveAdsDialog extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: busy ? null : onBuy,
+                onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
                 child: Text(l10n.removeAds),
               ),
             ],
