@@ -459,6 +459,29 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                // Debug-only: Fish Compat Editor
+                if (kDebugMode) ...[
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 600),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Colors.amber.withOpacity(0.6),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(Icons.bug_report, color: Colors.amber),
+                        title: const Text('Fish Compat Editor'),
+                        subtitle: const Text('Debug: edit & validate fishcompat.json'),
+                        onTap: () => navigate('/fishcompat-editor'),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
