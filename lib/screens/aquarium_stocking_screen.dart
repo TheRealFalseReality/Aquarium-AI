@@ -254,6 +254,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                            backgroundColor: cs.tertiaryContainer,
                 ),
               ),
               if (state.selectedFish.isNotEmpty) ...[
