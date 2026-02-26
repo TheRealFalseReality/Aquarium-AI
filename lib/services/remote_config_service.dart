@@ -122,7 +122,7 @@ class RemoteConfigKeys {
 
   /// String — URL for the Buy Me a Coffee page.
   /// Set in Remote Config to change without an app update.
-  static const String buyMeACoffeeUrl = 'buy_me_a_coffee';
+  static const String buyMeACoffeeUrl = 'buy_me_a_coffee_url';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side

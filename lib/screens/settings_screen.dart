@@ -1061,12 +1061,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ElevatedButton.icon(
             icon: const Icon(Icons.open_in_new),
             label: Text(l10n.buyMeACoffeeWebsite),
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              launchUrl(
-                Uri.parse(RemoteConfigService.buyMeACoffeeUrl),
+              final urlString = RemoteConfigService.buyMeACoffeeUrl;
+              final uri = Uri.tryParse(urlString);
+              if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Unable to open link at this time.'),
+                    ),
+                  );
+                }
+                return;
+              }
+              final launched = await launchUrl(
+                uri,
                 mode: LaunchMode.externalApplication,
               );
+              if (!launched && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Unable to open link at this time.'),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -1074,42 +1093,82 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-class _BuyMeACoffeePurchaseService {
-  Future<void> buyMeACoffee(BuildContext context) async {
+  Future<void> _buyMeACoffeeInApp() async {
     try {
       final iap = InAppPurchase.instance;
       final available = await iap.isAvailable();
       if (!available) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Store not available on this device.'),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Store not available on this device.'),
+            ),
+          );
+        }
         return;
       }
       final response = await iap.queryProductDetails({buyMeACoffeeProductId});
+      if (response.error != null) {
+        debugPrint('IAP query error for $buyMeACoffeeProductId: ${response.error}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Store error: ${response.error!.message}'),
+            ),
+          );
+        }
+        return;
+      }
+      if (response.notFoundIDs.isNotEmpty &&
+          response.notFoundIDs.contains(buyMeACoffeeProductId)) {
+        debugPrint('IAP product not found: $buyMeACoffeeProductId');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product not found. Please try again later.'),
+            ),
+          );
+        }
+        return;
+      }
       if (response.productDetails.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Product not found. Please try again later.'),
-          ),
+        debugPrint(
+          'IAP query returned no productDetails for $buyMeACoffeeProductId '
+          'and no explicit error/notFoundIDs.',
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product not found. Please try again later.'),
+            ),
+          );
+        }
         return;
       }
       final param = PurchaseParam(productDetails: response.productDetails.first);
-      await iap.buyConsumable(purchaseParam: param);
+      final purchaseStarted = await iap.buyConsumable(purchaseParam: param);
+      if (!purchaseStarted) {
+        debugPrint(
+          'buyConsumable failed to initiate for product $buyMeACoffeeProductId',
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to initiate purchase. Please try again later.'),
+            ),
+          );
+        }
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Purchase error: $e')),
-      );
+      debugPrint('Buy Me a Coffee purchase error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Purchase error: $e')),
+        );
+      }
     }
   }
-}
 
-  Future<void> _buyMeACoffeeInApp() {
-    // Delegate the purchase flow to the dedicated helper service.
-    return _buyMeACoffeePurchaseService.buyMeACoffee(context);
-  }
   Widget _buildMenuCard({
     required BuildContext context,
     required String title,
