@@ -1074,38 +1074,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _buyMeACoffeeInApp() async {
+class _BuyMeACoffeePurchaseService {
+  Future<void> buyMeACoffee(BuildContext context) async {
     try {
       final iap = InAppPurchase.instance;
       final available = await iap.isAvailable();
       if (!available) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Store not available on this device.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Store not available on this device.'),
+          ),
+        );
         return;
       }
       final response = await iap.queryProductDetails({buyMeACoffeeProductId});
       if (response.productDetails.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Product not found. Please try again later.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product not found. Please try again later.'),
+          ),
+        );
         return;
       }
       final param = PurchaseParam(productDetails: response.productDetails.first);
       await iap.buyConsumable(purchaseParam: param);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Purchase error: $e')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Purchase error: $e')),
+      );
     }
   }
+}
 
+  Future<void> _buyMeACoffeeInApp() {
+    // Delegate the purchase flow to the dedicated helper service.
+    return _buyMeACoffeePurchaseService.buyMeACoffee(context);
+  }
   Widget _buildMenuCard({
     required BuildContext context,
     required String title,
