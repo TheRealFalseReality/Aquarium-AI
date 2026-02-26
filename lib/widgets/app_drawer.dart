@@ -506,7 +506,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     Navigator.pop(context); // close drawer
                     Future.delayed(const Duration(milliseconds: 250), () {
                       if (!mounted) return;
-                      showRemoveAdsDialog(context, ref);
+                      showRemoveAdsDialog(context);
                     });
                   },
                 ),

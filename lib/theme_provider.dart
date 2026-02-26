@@ -25,6 +25,8 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       colorScheme: colorScheme,
       useMaterial3: true,
       fontFamily: 'NotoSans', // Use NotoSans as the default font
+      outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
+      chipTheme: _chipTheme(colorScheme),
     );
   }
 
@@ -38,6 +40,26 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       colorScheme: colorScheme,
       useMaterial3: true,
       fontFamily: 'NotoSans', // Use NotoSans as the default font
+      outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
+      chipTheme: _chipTheme(colorScheme),
+    );
+  }
+
+  static OutlinedButtonThemeData _outlinedButtonTheme(ColorScheme cs) {
+    return OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: cs.primary,
+        side: BorderSide(color: cs.primary, width: 1.5),
+      ),
+    );
+  }
+
+  static ChipThemeData _chipTheme(ColorScheme cs) {
+    return ChipThemeData(
+      backgroundColor: cs.surfaceContainerHighest,
+      selectedColor: cs.primaryContainer,
+      checkmarkColor: cs.onPrimaryContainer,
+      side: BorderSide(color: cs.outline.withOpacity(0.5)),
     );
   }
 
