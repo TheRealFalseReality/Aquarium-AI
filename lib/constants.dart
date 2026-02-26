@@ -24,10 +24,10 @@ const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
 const String adSenseAppId = 'ca-pub-5701077439648731';
 const String adSenseAdUnitId = '9994371406';
 
-/// AdSense Display ad unit ID for web overlay ads (bottom-anchor banner).
+/// AdSense Display ad unit ID for web (banner placements).
 const String adSenseDisplayAdUnitId = '1170950438';
 
-/// AdSense Multiplex ad unit ID for web overlay ads (matched-content grid).
+/// AdSense Multiplex ad unit ID for web (native/in-feed placements).
 const String adSenseMultiplexAdUnitId = '1989208084';
 
 // In-app purchase product IDs

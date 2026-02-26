@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
-import '../services/web_ads_stub.dart'
-    if (dart.library.html) '../services/web_ads_web.dart';
+import '../services/adsense_stub.dart'
+    if (dart.library.html) '../services/adsense_web.dart';
 import 'remove_ads_dialog.dart';
 
 class AdBanner extends ConsumerStatefulWidget {
@@ -19,11 +20,18 @@ class AdBanner extends ConsumerStatefulWidget {
 class _AdBannerState extends ConsumerState<AdBanner> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  String? _webViewType;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _webViewType = registerAdSenseFactory(
+        adSenseDisplayAdUnitId,
+        'horizontal',
+        responsive: true,
+      );
+    } else {
       _loadAd();
     }
   }
@@ -59,7 +67,23 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
+
+    if (adsRemoved) {
+      return const SafeArea(child: SizedBox(height: 0));
+    }
+
+    if (kIsWeb) {
+      if (_webViewType == null) return const SafeArea(child: SizedBox(height: 0));
+      return SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 90,
+          child: HtmlElementView(viewType: _webViewType!),
+        ),
+      );
+    }
+
+    if (!_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -83,11 +107,18 @@ class NativeAdWidget extends ConsumerStatefulWidget {
 class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
+  String? _webViewType;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _webViewType = registerAdSenseFactory(
+        adSenseMultiplexAdUnitId,
+        'autorelaxed',
+        responsive: false,
+      );
+    } else {
       _loadAd();
     }
   }
@@ -132,9 +163,52 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _nativeAd == null) {
-      return const SizedBox.shrink();
+
+    if (adsRemoved) return const SizedBox.shrink();
+
+    if (kIsWeb) {
+      if (_webViewType == null) return const SizedBox.shrink();
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 280,
+            child: HtmlElementView(viewType: _webViewType!),
+          ),
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: () => showRemoveAdsDialog(context, ref),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.block,
+                  size: 12,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.55),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  AppLocalizations.of(context)!.removeAds,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant
+                            .withOpacity(0.55),
+                        decoration: TextDecoration.underline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
     }
+
+    if (!_isAdLoaded || _nativeAd == null) return const SizedBox.shrink();
 
     // Use flexible constraints that work well in different contexts
     return Column(
@@ -192,11 +266,18 @@ class BannerAdWidget extends ConsumerStatefulWidget {
 class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  String? _webViewType;
 
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (kIsWeb) {
+      _webViewType = registerAdSenseFactory(
+        adSenseDisplayAdUnitId,
+        'auto',
+        responsive: true,
+      );
+    } else {
       _loadAd();
     }
   }
@@ -232,50 +313,24 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
-      return const SizedBox.shrink();
+
+    if (adsRemoved) return const SizedBox.shrink();
+
+    if (kIsWeb) {
+      if (_webViewType == null) return const SizedBox.shrink();
+      return SizedBox(
+        width: double.infinity,
+        height: 90,
+        child: HtmlElementView(viewType: _webViewType!),
+      );
     }
+
+    if (!_isAdLoaded || _bannerAd == null) return const SizedBox.shrink();
 
     return SizedBox(
       width: _bannerAd!.size.width.toDouble(),
       height: _bannerAd!.size.height.toDouble(),
       child: AdWidget(ad: _bannerAd!),
     );
-  }
-}
-
-/// A zero-size widget that manages web overlay ads (defined in index.html).
-///
-/// Place this once in the widget tree (e.g. [MainLayout]) to synchronise the
-/// AdSense overlay ads with the user's "remove ads" purchase state.  On
-/// non-web platforms it is a no-op.
-class WebOverlayAdController extends ConsumerStatefulWidget {
-  const WebOverlayAdController({super.key});
-
-  @override
-  ConsumerState<WebOverlayAdController> createState() =>
-      _WebOverlayAdControllerState();
-}
-
-class _WebOverlayAdControllerState
-    extends ConsumerState<WebOverlayAdController> {
-  @override
-  void initState() {
-    super.initState();
-    if (!kIsWeb) return;
-    // Apply the current purchase state as soon as the widget mounts.
-    final adsRemoved = ref.read(purchaseProvider).adsRemoved;
-    adsRemoved ? hideOverlayAds() : showOverlayAds();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!kIsWeb) return const SizedBox.shrink();
-
-    ref.listen<PurchaseState>(purchaseProvider, (_, next) {
-      next.adsRemoved ? hideOverlayAds() : showOverlayAds();
-    });
-
-    return const SizedBox.shrink();
   }
 }

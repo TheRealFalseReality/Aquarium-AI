@@ -29,32 +29,7 @@
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5701077439648731"
      crossorigin="anonymous"></script>
-
-  <style>
-    /* Overlay ad containers – rendered above the Flutter canvas */
-    #adsense-anchor {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 9999;
-      text-align: center;
-      background: transparent;
-      pointer-events: auto;
-    }
-    #adsense-multiplex {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 9998;
-      text-align: center;
-      background: transparent;
-      pointer-events: auto;
-      display: none;
-    }
-  </style>
-
+     
   <title>Aquarium AI</title>
   <link rel="manifest" href="manifest.json">
   <style id="splash-screen-style">
@@ -141,39 +116,6 @@
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
   <script src="flutter_bootstrap.js" async=""></script>
-
-  <!-- AdSense overlay ads – displayed above the Flutter canvas on web -->
-  <div id="adsense-anchor">
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:100%;max-width:728px;height:90px"
-         data-ad-client="ca-pub-5701077439648731"
-         data-ad-slot="1170950438"
-         data-full-width-responsive="true"></ins>
-  </div>
-  <div id="adsense-multiplex">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-5701077439648731"
-         data-ad-slot="1989208084"
-         data-ad-format="autorelaxed"></ins>
-  </div>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-    (adsbygoogle = window.adsbygoogle || []).push({});
-
-    /// Exposed to Flutter via dart:js so the app can hide ads when the user
-    /// has purchased the "remove ads" product.
-    window.hideOverlayAds = function() {
-      var anchor = document.getElementById('adsense-anchor');
-      var multiplex = document.getElementById('adsense-multiplex');
-      if (anchor) anchor.style.display = 'none';
-      if (multiplex) multiplex.style.display = 'none';
-    };
-    window.showOverlayAds = function() {
-      var anchor = document.getElementById('adsense-anchor');
-      if (anchor) anchor.style.display = 'block';
-    };
-  </script>
 
 
   <script type="module">
