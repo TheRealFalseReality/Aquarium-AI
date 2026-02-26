@@ -178,7 +178,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
           ),
           const SizedBox(height: 4),
           GestureDetector(
-            onTap: () => showRemoveAdsDialog(context, ref),
+            onTap: () => showRemoveAdsDialog(context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
