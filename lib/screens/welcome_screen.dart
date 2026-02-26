@@ -28,6 +28,7 @@ import '../widgets/app_promotion_dialog.dart';
 import '../widgets/aquapi_promotion_dialog.dart';
 import '../theme_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/in_app_review_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 
@@ -133,6 +134,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Record the first launch timestamp (no-op after the very first call)
+    InAppReviewService.recordFirstLaunch();
+    // Request an in-app review if conditions are met (≥3 days since first launch)
+    InAppReviewService.maybeRequestReview();
     // Check if we should show the app promotion dialog on web
     if (kIsWeb) {
       _checkShowPromotionDialog();
