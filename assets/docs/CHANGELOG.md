@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file.
 - Add in-app changelog to Settings and Information screens with one-time update dialog  
 - Add AI Analysis History: persistent log with favorites and full report replay  
 - Add granular species selection dialog to Compatibility Tool  
-- Add species tags to tank inhabitants; remove "Include Custom Names" from AI report dialogs  
+- Add species tags to tank inhabitants  
 
 ### Changed
 
@@ -25,6 +25,10 @@ All notable changes to this project will be documented in this file.
 - Reduce AI token consumption across all providers  
 - Fix unbounded token growth in all chat providers with configurable history limit  
 - Robust AI error handling: modern dialog, API key shortcuts, and rate-limit rollback on failure  
+
+### Removed
+
+- Remove "Include Custom Names" from AI report dialogs  
 
 ## [Unreleased]
 
