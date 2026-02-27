@@ -8,10 +8,77 @@ final themeProviderNotifierProvider =
   return ThemeProviderNotifier();
 });
 
+/// The available color themes for the app.
+enum AppColorTheme {
+  /// Default aquarium teal/blue scheme (original app theme).
+  defaultTheme,
+
+  /// Uses the phone's system accent color (Android 12+ / Material You).
+  materialYou,
+
+  /// Ocean blue – primary color #81B2E8.
+  oceanBlue,
+
+  /// Ice blue – primary color #D8F3FF.
+  iceBlue,
+
+  /// Gold – primary color #E19F20.
+  gold,
+
+  /// Mulberry – primary color #75344E.
+  mulberry,
+
+  /// Midnight – primary color #0F1623.
+  midnight,
+}
+
+extension AppColorThemeExt on AppColorTheme {
+  String get displayName {
+    switch (this) {
+      case AppColorTheme.defaultTheme:
+        return 'Default';
+      case AppColorTheme.materialYou:
+        return 'Material You';
+      case AppColorTheme.oceanBlue:
+        return 'Ocean Blue';
+      case AppColorTheme.iceBlue:
+        return 'Ice Blue';
+      case AppColorTheme.gold:
+        return 'Gold';
+      case AppColorTheme.mulberry:
+        return 'Mulberry';
+      case AppColorTheme.midnight:
+        return 'Midnight';
+    }
+  }
+
+  /// The primary seed color for non-Material-You themes.
+  Color get seedColor {
+    switch (this) {
+      case AppColorTheme.defaultTheme:
+        return const Color(0xFF005f73);
+      case AppColorTheme.materialYou:
+        return const Color(0xFF005f73); // fallback; overridden by dynamic color
+      case AppColorTheme.oceanBlue:
+        return const Color(0xFF81B2E8);
+      case AppColorTheme.iceBlue:
+        return const Color(0xFFD8F3FF);
+      case AppColorTheme.gold:
+        return const Color(0xFFE19F20);
+      case AppColorTheme.mulberry:
+        return const Color(0xFF75344E);
+      case AppColorTheme.midnight:
+        return const Color(0xFF0F1623);
+    }
+  }
+}
+
 class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
   ThemeProviderNotifier()
       : super(ThemeProviderState(
-            themeMode: ThemeMode.system, useMaterialYou: false)) {
+            themeMode: ThemeMode.system,
+            useMaterialYou: false,
+            colorTheme: AppColorTheme.defaultTheme)) {
     _loadTheme();
   }
 
@@ -24,7 +91,7 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
-      fontFamily: 'NotoSans', // Use NotoSans as the default font
+      fontFamily: 'NotoSans',
       outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
       chipTheme: _chipTheme(colorScheme),
     );
@@ -39,7 +106,7 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
-      fontFamily: 'NotoSans', // Use NotoSans as the default font
+      fontFamily: 'NotoSans',
       outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
       chipTheme: _chipTheme(colorScheme),
     );
@@ -67,17 +134,26 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final prefs = await SharedPreferences.getInstance();
     final themeIndex = prefs.getInt('themeMode') ?? 2; // Default to system
     final useMaterialYou = prefs.getBool('useMaterialYou') ?? false;
+    final colorThemeIndex =
+        prefs.getInt('colorTheme') ?? AppColorTheme.defaultTheme.index;
+    final colorTheme = colorThemeIndex < AppColorTheme.values.length
+        ? AppColorTheme.values[colorThemeIndex]
+        : AppColorTheme.defaultTheme;
     state = ThemeProviderState(
         themeMode: ThemeMode.values[themeIndex],
-        useMaterialYou: useMaterialYou);
+        useMaterialYou: useMaterialYou,
+        colorTheme: colorTheme);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     final oldMode = state.themeMode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('themeMode', mode.index);
-    state = ThemeProviderState(themeMode: mode, useMaterialYou: state.useMaterialYou);
-    
+    state = ThemeProviderState(
+        themeMode: mode,
+        useMaterialYou: state.useMaterialYou,
+        colorTheme: state.colorTheme);
+
     // Log theme change
     AnalyticsService.logSettingsChange(
       settingName: 'theme_mode',
@@ -90,8 +166,20 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final oldValue = state.useMaterialYou;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('useMaterialYou', value);
-    state = ThemeProviderState(themeMode: state.themeMode, useMaterialYou: value);
-    
+    // When enabling Material You, switch to the materialYou color theme;
+    // when disabling, fall back to defaultTheme if currently on materialYou.
+    AppColorTheme newColorTheme = state.colorTheme;
+    if (value) {
+      newColorTheme = AppColorTheme.materialYou;
+    } else if (state.colorTheme == AppColorTheme.materialYou) {
+      newColorTheme = AppColorTheme.defaultTheme;
+    }
+    await prefs.setInt('colorTheme', newColorTheme.index);
+    state = ThemeProviderState(
+        themeMode: state.themeMode,
+        useMaterialYou: value,
+        colorTheme: newColorTheme);
+
     // Log Material You toggle
     AnalyticsService.logSettingsChange(
       settingName: 'material_you',
@@ -99,11 +187,36 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       oldValue: oldValue.toString(),
     );
   }
+
+  /// Switch to a specific [AppColorTheme]. Automatically updates [useMaterialYou].
+  Future<void> setColorTheme(AppColorTheme theme) async {
+    final oldTheme = state.colorTheme;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('colorTheme', theme.index);
+    // Material You flag follows the materialYou theme selection.
+    final useMaterialYou = theme == AppColorTheme.materialYou;
+    await prefs.setBool('useMaterialYou', useMaterialYou);
+    state = ThemeProviderState(
+        themeMode: state.themeMode,
+        useMaterialYou: useMaterialYou,
+        colorTheme: theme);
+
+    AnalyticsService.logSettingsChange(
+      settingName: 'color_theme',
+      newValue: theme.name,
+      oldValue: oldTheme.name,
+    );
+  }
 }
 
 class ThemeProviderState {
   final ThemeMode themeMode;
   final bool useMaterialYou;
+  final AppColorTheme colorTheme;
 
-  ThemeProviderState({required this.themeMode, required this.useMaterialYou});
+  ThemeProviderState({
+    required this.themeMode,
+    required this.useMaterialYou,
+    required this.colorTheme,
+  });
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,6 +34,7 @@ import './services/notification_service.dart';
 import './services/remote_config_service.dart';
 import '../l10n/app_localizations.dart';
 import './screens/fish_compat_editor_screen.dart';
+import './screens/appearance_screen.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -260,13 +262,6 @@ class MyApp extends ConsumerWidget {
       return []; // Return empty list if analytics observer fails
     }
   }
-  
-  // Use locally bundled Poppins font
-  TextTheme _getLocalTextTheme(BuildContext context) {
-    final baseTheme = Theme.of(context).textTheme;
-    // Apply Poppins font family to all text styles
-    return baseTheme.apply(fontFamily: 'Poppins');
-  }
 
   // Helper method to update system UI overlay based on theme
   void _updateSystemUIOverlay(ThemeMode themeMode, ColorScheme lightColorScheme, ColorScheme darkColorScheme) {
@@ -283,180 +278,101 @@ class MyApp extends ConsumerWidget {
     );
   }
 
-  static final _defaultLightColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF005f73),
-    brightness: Brightness.light,
-    primary: const Color(0xFF0a9396),
-    secondary: const Color(0xFF94d2bd),
-    tertiary: const Color(0xFFe9d8a6),
-    surface: const Color(0xFFFFFFFF),
-    background: const Color(0xFFd8f3ff),
-    error: const Color(0xFFae2012),
-    onPrimary: Colors.white,
-    onSecondary: Colors.black,
-    onTertiary: Colors.black,
-    onSurface: Colors.black,
-    onBackground: Colors.black,
-  );
+  /// Build a FlexColorScheme-based [ThemeData] for the given [colorTheme].
+  ///
+  /// When [isDark] is true the dark variant is returned.
+  /// [dynamicScheme] is the platform dynamic color scheme and is only used
+  /// when [colorTheme] is [AppColorTheme.materialYou].
+  ThemeData _buildFlexTheme({
+    required AppColorTheme colorTheme,
+    required bool isDark,
+    ColorScheme? dynamicScheme,
+  }) {
+    // Material You: use the phone's dynamic color scheme when available.
+    if (colorTheme == AppColorTheme.materialYou && dynamicScheme != null) {
+      return ThemeData(
+        useMaterial3: true,
+        colorScheme: dynamicScheme,
+        fontFamily: 'Poppins',
+        chipTheme: ChipThemeData(
+          shape: StadiumBorder(
+            side: BorderSide(
+              color: dynamicScheme.outlineVariant.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+          showCheckmark: false,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: dynamicScheme.outlineVariant.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+        ),
+      );
+    }
 
-  static final _defaultDarkColorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF005f73),
-    brightness: Brightness.dark,
-    primary: const Color(0xFF94d2bd),
-    secondary: const Color(0xFF0a9396),
-    tertiary: const Color(0xFFe9d8a6),
-    surface: const Color(0xFF4A5568),
-    background: const Color(0xFF2d3748),
-    error: const Color(0xFFe57373),
-    onPrimary: Colors.black,
-    onSecondary: Colors.white,
-    onTertiary: Colors.black,
-    onSurface: Colors.white,
-    onBackground: Colors.white,
-  );
+    // For all other themes use FlexColorScheme.
+    final seed = colorTheme.seedColor;
+
+    if (isDark) {
+      return FlexThemeData.dark(
+        colors: FlexSchemeColor.from(primary: seed),
+        useMaterial3: true,
+        fontFamily: 'Poppins',
+        subThemesData: const FlexSubThemesData(
+          useM2StyleDividerInM3: false,
+          defaultRadius: 12,
+          cardRadius: 16,
+          chipSchemeColor: SchemeColor.primaryContainer,
+          chipSelectedSchemeColor: SchemeColor.primaryContainer,
+        ),
+      );
+    } else {
+      return FlexThemeData.light(
+        colors: FlexSchemeColor.from(primary: seed),
+        useMaterial3: true,
+        fontFamily: 'Poppins',
+        subThemesData: const FlexSubThemesData(
+          useM2StyleDividerInM3: false,
+          defaultRadius: 12,
+          cardRadius: 16,
+          chipSchemeColor: SchemeColor.primaryContainer,
+          chipSelectedSchemeColor: SchemeColor.primaryContainer,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
     final appSettings = ref.watch(appSettingsProvider);
-    final textTheme = _getLocalTextTheme(context);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        ColorScheme lightColorScheme;
-        ColorScheme darkColorScheme;
+        final colorTheme = themeProvider.colorTheme;
 
-        if (themeProvider.useMaterialYou &&
-            lightDynamic != null &&
-            darkDynamic != null) {
-          lightColorScheme = lightDynamic;
-          darkColorScheme = darkDynamic;
-        } else {
-          lightColorScheme = _defaultLightColorScheme;
-          darkColorScheme = _defaultDarkColorScheme;
-        }
-
-        final baseChipShape = StadiumBorder(
-          side: BorderSide(
-            color: lightColorScheme.outlineVariant.withOpacity(0.3),
-            width: 1,
-          ),
+        final lightTheme = _buildFlexTheme(
+          colorTheme: colorTheme,
+          isDark: false,
+          dynamicScheme: lightDynamic,
         );
-
-        final lightTheme = ThemeData(
-          useMaterial3: true,
-          scaffoldBackgroundColor: lightColorScheme.background,
-          colorScheme: lightColorScheme,
-          textTheme: textTheme.apply(
-            bodyColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF343a40),
-            displayColor: themeProvider.useMaterialYou ? lightColorScheme.onBackground : const Color(0xFF212529),
-          ),
-          chipTheme: ChipThemeData(
-            shape: baseChipShape,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-            showCheckmark: false,
-            side: BorderSide(
-              color: lightColorScheme.outlineVariant.withOpacity(0.25),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: lightColorScheme.primary,
-              foregroundColor: lightColorScheme.onPrimary,
-              elevation: themeProvider.useMaterialYou ? 3 : 1,
-              shadowColor: lightColorScheme.shadow.withOpacity(0.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: themeProvider.useMaterialYou 
-                  ? BorderSide(color: lightColorScheme.outline.withOpacity(0.3), width: 1)
-                  : BorderSide.none,
-              ),
-            ),
-          ),
-          appBarTheme: AppBarTheme(
-            backgroundColor: lightColorScheme.surface.withOpacity(0.95),
-            elevation: 0,
-            scrolledUnderElevation: 1,
-            shape: Border(
-              bottom: BorderSide(
-                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant : const Color(0xFFdee2e6),
-                width: 1,
-              ),
-            ),
-          ),
-          cardTheme: CardThemeData(
-            elevation: themeProvider.useMaterialYou ? 2 : 1,
-            shadowColor: lightColorScheme.shadow.withOpacity(0.2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: themeProvider.useMaterialYou ? lightColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFFdee2e6),
-                width: 1,
-              ),
-            ),
-            color: themeProvider.useMaterialYou ? lightColorScheme.surfaceVariant : Colors.white,
-          ),
-        );
-
-        final darkTheme = ThemeData(
-          useMaterial3: true,
-          scaffoldBackgroundColor: darkColorScheme.background,
-          colorScheme: darkColorScheme,
-          textTheme: textTheme.apply(
-            bodyColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFf8f9fa),
-            displayColor: themeProvider.useMaterialYou ? darkColorScheme.onBackground : const Color(0xFFe9ecef),
-          ),
-          chipTheme: ChipThemeData(
-            shape: baseChipShape,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-            showCheckmark: false,
-            side: BorderSide(
-              color: darkColorScheme.outlineVariant.withOpacity(0.3),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: darkColorScheme.primary,
-              foregroundColor: darkColorScheme.onPrimary,
-              elevation: themeProvider.useMaterialYou ? 3 : 1,
-              shadowColor: darkColorScheme.shadow.withOpacity(0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: themeProvider.useMaterialYou 
-                  ? BorderSide(color: darkColorScheme.outline.withOpacity(0.3), width: 1)
-                  : BorderSide.none,
-              ),
-            ),
-          ),
-          appBarTheme: AppBarTheme(
-            backgroundColor: darkColorScheme.surface.withOpacity(0.95),
-            elevation: 0,
-            scrolledUnderElevation: 1,
-            shape: Border(
-              bottom: BorderSide(
-                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant : const Color(0xFF495057),
-                width: 1,
-              ),
-            ),
-          ),
-          cardTheme: CardThemeData(
-            elevation: themeProvider.useMaterialYou ? 2 : 1,
-            shadowColor: darkColorScheme.shadow.withOpacity(0.3),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: themeProvider.useMaterialYou ? darkColorScheme.outlineVariant.withOpacity(0.5) : const Color(0xFF495057),
-                width: 1,
-              ),
-            ),
-            color: themeProvider.useMaterialYou ? darkColorScheme.surfaceVariant : const Color(0xFF4A5568),
-          ),
+        final darkTheme = _buildFlexTheme(
+          colorTheme: colorTheme,
+          isDark: true,
+          dynamicScheme: darkDynamic,
         );
 
         // Update system UI overlay based on current theme
-        _updateSystemUIOverlay(themeProvider.themeMode, lightColorScheme, darkColorScheme);
+        _updateSystemUIOverlay(
+            themeProvider.themeMode, lightTheme.colorScheme, darkTheme.colorScheme);
 
         return MaterialApp(
           navigatorKey: navigatorKey,
@@ -539,6 +455,10 @@ class MyApp extends ConsumerWidget {
               case '/settings':
                 page = const SettingsScreen();
                 screenName = 'settings_screen';
+                break;
+              case '/appearance':
+                page = const AppearanceScreen();
+                screenName = 'appearance_screen';
                 break;
               case '/tank-management':
                 page = const TankManagementScreen();

@@ -623,7 +623,26 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 themeNotifier.toggleMaterialYou(isSelected);
               },
             ),
-          ]
+          ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.pop(context); // close drawer
+                Future.delayed(const Duration(milliseconds: 250), () {
+                  if (!mounted) return;
+                  Navigator.pushNamed(context, '/appearance');
+                });
+              },
+              icon: const Icon(Icons.tune, size: 16),
+              label: const Text('More theme options'),
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              ),
+            ),
+          ),
         ],
       ),
     );
