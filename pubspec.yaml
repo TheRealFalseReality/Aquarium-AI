@@ -45,6 +45,7 @@ dependencies:
   web: ^1.1.1
   device_info_plus: ^10.1.0
   in_app_review: ^2.0.10
+  in_app_update: ^4.2.5
 
 dev_dependencies:
   flutter_test:
