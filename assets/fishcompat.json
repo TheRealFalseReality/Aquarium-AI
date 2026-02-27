@@ -3,7 +3,9 @@
     {
       "name": "Angelfish (Female) ♀",
       "commonNames": [
-        "Pterophyllum scalare"
+        "P. scalare",
+        "P. altum",
+        "P. leopoldi"
       ],
       "imageURL": "https://assets.petco.com/petco/image/upload/f_auto,q_auto/freshwater-angelfish-caresheet-hero-image",
       "compatible": [
@@ -46,7 +48,9 @@
     {
       "name": "Angelfish (Male) ♂",
       "commonNames": [
-        "Pterophyllum scalare"
+        "P. scalare",
+        "P. altum",
+        "P. leopoldi"
       ],
       "imageURL": "https://aquaticsunlimited.com/wp-content/uploads/2024/02/ANGELFISH-FW-BLUE-MARBLE-Pterophyllum-scalare.jpg",
       "compatible": [
@@ -1094,7 +1098,7 @@
       ]
     },
     {
-      "name": "Shrimp - Freshwater",
+      "name": "Shrimp",
       "commonNames": [
         "Cherry Shrimp",
         "Amano Shrimp"
@@ -1138,7 +1142,7 @@
       ]
     },
     {
-      "name": "Snails - Freshwater",
+      "name": "Snails",
       "commonNames": [
         "Nerite Snail",
         "Mystery Snail"
@@ -3051,7 +3055,7 @@
       ]
     },
     {
-      "name": "Shrimp - Saltwater",
+      "name": "Shrimp",
       "commonNames": [
         "Cleaner Shrimp",
         "Peppermint Shrimp"
@@ -3108,7 +3112,7 @@
       ]
     },
     {
-      "name": "Snails - Saltwater",
+      "name": "Snails",
       "commonNames": [
         "Astrea Snail",
         "Nassarius Snail"
