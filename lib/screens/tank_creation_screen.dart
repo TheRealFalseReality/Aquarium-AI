@@ -1453,9 +1453,15 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
         ? widget.availableFish.where((f) => f.name == _selectedFishUnit).firstOrNull
         : null;
 
-    // Get available species tags for the selected fish type
+    // Get available species tags for the selected fish type.
+    // Merge fish.commonNames with user-added species tags so that new
+    // commonNames entries in fish_data.json are always reflected here,
+    // just like they are in search and everywhere else in the app.
     final availableSpeciesTags = _selectedFishUnit != null
-        ? (ref.watch(speciesTagsProvider).tags[_selectedFishUnit] ?? [])
+        ? {
+            ...(selectedFish?.commonNames ?? []),
+            ...(ref.watch(speciesTagsProvider).tags[_selectedFishUnit] ?? [])
+          }.toList()
         : <String>[];
 
     return Column(

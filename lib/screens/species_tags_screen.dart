@@ -230,7 +230,11 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
   }
 
   Widget _buildFishCard(Fish fish, ColorScheme colorScheme) {
-    final tags = ref.read(speciesTagsProvider.notifier).getTagsForFishType(fish.name);
+    final speciesTags = ref.watch(speciesTagsProvider).tags[fish.name] ?? [];
+    // Merge fish.commonNames with user-added species tags so that new
+    // commonNames entries in fish_data.json / Remote Config are always
+    // reflected here immediately, just like in search and the other dialogs.
+    final tags = {...fish.commonNames, ...speciesTags}.toList();
     final controller = _getController(fish.name);
     
     return Card(
@@ -272,7 +276,10 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: tags.map((tag) => _buildTagChip(fish.name, tag, colorScheme)).toList(),
+                children: tags.map((tag) => _buildTagChip(
+                  fish.name, tag, colorScheme,
+                  isCommonName: fish.commonNames.contains(tag),
+                )).toList(),
               ),
             ],
             
@@ -313,8 +320,11 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     );
   }
 
-  Widget _buildTagChip(String fishType, String tag, ColorScheme colorScheme) {
-    final isDefault = ref.read(speciesTagsProvider.notifier).isDefaultTag(fishType, tag);
+  Widget _buildTagChip(String fishType, String tag, ColorScheme colorScheme, {bool isCommonName = false}) {
+    // A tag is considered a default (locked) if it comes from fish.commonNames
+    // directly, or if it was previously persisted as a default in the provider.
+    // Using isCommonName avoids a race condition with the async provider init.
+    final isDefault = isCommonName || ref.read(speciesTagsProvider.notifier).isDefaultTag(fishType, tag);
     
     // Color scheme for tags
     final Color chipColor;

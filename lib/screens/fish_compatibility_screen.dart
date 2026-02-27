@@ -815,18 +815,24 @@ class FishCompatibilityScreenState
     if (!mounted) return null;
     final speciesTagsState = ref.read(speciesTagsProvider);
 
-    // Only show dialog if any selected fish have species tags
+    // Only show dialog if any selected fish have commonNames or species tags
     final fishWithTags = selectedFish.where((fish) {
       final tags = speciesTagsState.tags[fish.name] ?? [];
-      return tags.isNotEmpty;
+      return tags.isNotEmpty || fish.commonNames.isNotEmpty;
     }).toList();
 
     if (fishWithTags.isEmpty) return {};
 
-    // Local mutable copy of tags for live updates within the dialog
+    // Local mutable copy of tags for live updates within the dialog.
+    // Merge fish.commonNames with user-added species tags so that new
+    // commonNames entries in fish_data.json are always reflected here,
+    // just like they are in search and everywhere else in the app.
     final Map<String, List<String>> localTags = {
       for (final fish in fishWithTags)
-        fish.name: List<String>.from(speciesTagsState.tags[fish.name] ?? [])
+        fish.name: {
+          ...fish.commonNames,
+          ...List<String>.from(speciesTagsState.tags[fish.name] ?? [])
+        }.toList()
     };
 
     // Controllers for quick-add inputs (one per fish shown in dialog)
@@ -852,6 +858,9 @@ class FishCompatibilityScreenState
             final hasAnySelection =
                 selectedSpecies.values.any((set) => set.isNotEmpty);
             return AlertDialog(
+              insetPadding: kIsWeb
+                  ? const EdgeInsets.symmetric(horizontal: 16, vertical: 24)
+                  : const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               title: Row(
                 children: [
                   const Expanded(child: Text('Select Specific Species')),
@@ -862,7 +871,13 @@ class FishCompatibilityScreenState
                   ),
                 ],
               ),
-              content: SingleChildScrollView(
+              content: ConstrainedBox(
+                constraints: BoxConstraints(
+                  // On web, enforce a minimum width so the dialog is
+                  // spacious enough to display species chips comfortably.
+                  minWidth: kIsWeb ? 500 : 0,
+                ),
+                child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1058,6 +1073,7 @@ class FishCompatibilityScreenState
                     }),
                   ],
                 ),
+              ),
               ),
               actions: [
                 if (hasAnySelection)
