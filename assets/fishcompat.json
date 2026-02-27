@@ -7,7 +7,7 @@
         "P. altum",
         "P. leopoldi"
       ],
-      "imageURL": "https://assets.petco.com/petco/image/upload/f_auto,q_auto/freshwater-angelfish-caresheet-hero-image",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_female_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) ♀",
         "Angelfish (Male) ♂",
@@ -52,7 +52,7 @@
         "P. altum",
         "P. leopoldi"
       ],
-      "imageURL": "https://aquaticsunlimited.com/wp-content/uploads/2024/02/ANGELFISH-FW-BLUE-MARBLE-Pterophyllum-scalare.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_male_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) ♀",
         "Cory Cats",
@@ -94,9 +94,11 @@
       "name": "Barbs",
       "commonNames": [
         "Tiger Barb",
-        "Rosy Barb"
+        "Rosy Barb",
+        "Cherry Barb",
+        "Denison (Red Line) Barb"
       ],
-      "imageURL": "https://cdn.shopify.com/s/files/1/0311/3149/files/tiger_barb_in_planted_aquarium.jpg?v=1629404268",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/barb.jpg",
       "compatible": [
         "Barbs",
         "Cory Cats",
@@ -137,9 +139,9 @@
     {
       "name": "Bettas (Female) ♀",
       "commonNames": [
-        "Siamese fighting fish"
+        "B. splendens (Siamese Fighting Fish)"
       ],
-      "imageURL": "https://thailandbettafish.com/cdn/shop/collections/Rare_Koi_Betta_Fish_1.png?v=1690009934",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/betta_female.jpg",
       "compatible": [
         "Cory Cats",
         "Hatchets",
@@ -180,9 +182,9 @@
     {
       "name": "Bettas (Male) ♂",
       "commonNames": [
-        "Siamese fighting fish"
+        "B. splendens (Siamese Fighting Fish)"
       ],
-      "imageURL": "https://m.media-amazon.com/images/I/71uEGoSsfiL._UF1000,1000_QL80_.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/betta_male.jpg",
       "compatible": [
         "Cory Cats",
         "Loaches",
