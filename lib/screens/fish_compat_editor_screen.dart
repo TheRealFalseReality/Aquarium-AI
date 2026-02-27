@@ -106,6 +106,10 @@ List<String> _validateData(Map<String, List<_FishEntry>> data) {
 
 // ── screen ────────────────────────────────────────────────────────────────────
 
+/// Capitalises the first character of [s]; safe for empty and single-char strings.
+String _capitalize(String s) =>
+    s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+
 class FishCompatEditorScreen extends StatefulWidget {
   const FishCompatEditorScreen({super.key});
 
@@ -168,7 +172,13 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       final current = _data[cat]!;
       final saved = _savedData[cat];
       if (saved == null) continue;
-      for (int i = 0; i < current.length && i < saved.length; i++) {
+      for (int i = 0; i < current.length; i++) {
+        if (i >= saved.length) {
+          // Newly added fish — no saved baseline yet
+          count++;
+          modifiedIndices.putIfAbsent(cat, () => {}).add(i);
+          continue;
+        }
         if (json.encode(current[i].toJson()) !=
             json.encode(saved[i].toJson())) {
           count++;
@@ -458,6 +468,81 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     );
   }
 
+  // ── add fish helper ──────────────────────────────────────────────────────
+
+  Future<void> _addFish() async {
+    // Pick the category to add the fish to
+    final category = await showDialog<String>(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: const Text('Add Fish To'),
+        children: _data.keys
+            .map(
+              (cat) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, cat),
+                child: Text(
+                  _capitalize(cat),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (category == null || !mounted) return;
+
+    // Open the edit dialog with a blank entry
+    final blank = _FishEntry(
+      name: '',
+      imageURL: '',
+      commonNames: [],
+      compatible: [],
+      notRecommended: [],
+      notCompatible: [],
+      withCaution: [],
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _FishEditDialog(
+        fish: blank,
+        dialogTitle: 'Add Fish to ${_capitalize(category)}',
+        onSave: (newFish) {
+          setState(() {
+            final categoryFish = _data[category]!;
+            // All existing fish names default to notCompatible with the new fish
+            final existingNames =
+                categoryFish.map((f) => f.name).toList();
+            final newEntry = _FishEntry(
+              name: newFish.name,
+              imageURL: newFish.imageURL,
+              commonNames: newFish.commonNames,
+              compatible: [],
+              notRecommended: [],
+              notCompatible: List<String>.from(existingNames),
+              withCaution: [],
+            );
+            categoryFish.add(newEntry);
+            // Add the new fish to every existing fish's notCompatible list
+            for (int i = 0; i < categoryFish.length - 1; i++) {
+              final f = categoryFish[i];
+              categoryFish[i] = _FishEntry(
+                name: f.name,
+                imageURL: f.imageURL,
+                commonNames: f.commonNames,
+                compatible: f.compatible,
+                notRecommended: f.notRecommended,
+                notCompatible: [...f.notCompatible, newEntry.name],
+                withCaution: f.withCaution,
+              );
+            }
+            _validationRun = false;
+          });
+        },
+      ),
+    );
+  }
+
   // ── compatibility edit helpers ────────────────────────────────────────────
 
   Future<void> _editCompatibility(String category, int index) async {
@@ -585,6 +670,13 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  FloatingActionButton.extended(
+                    heroTag: 'addFish',
+                    onPressed: _addFish,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Fish'),
+                  ),
+                  const SizedBox(height: 8),
                   FloatingActionButton.extended(
                     heroTag: 'validate',
                     onPressed: _runValidation,
@@ -742,9 +834,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 .map((cat) {
                   final filtered = _filteredFish(cat);
                   final total = _data[cat]!.length;
-                  final label = cat.isNotEmpty
-                      ? '${cat[0].toUpperCase()}${cat.substring(1)}'
-                      : cat;
+                  final label = _capitalize(cat);
                   return Tab(
                     text: _searchQuery.isEmpty
                         ? '$label ($total)'
@@ -876,8 +966,13 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 class _FishEditDialog extends StatefulWidget {
   final _FishEntry fish;
   final void Function(_FishEntry) onSave;
+  final String? dialogTitle;
 
-  const _FishEditDialog({required this.fish, required this.onSave});
+  const _FishEditDialog({
+    required this.fish,
+    required this.onSave,
+    this.dialogTitle,
+  });
 
   @override
   State<_FishEditDialog> createState() => _FishEditDialogState();
@@ -927,13 +1022,36 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   }
 
   void _save() {
+    final name = _nameCtrl.text.trim();
+    final imageURL = _urlCtrl.text.trim();
     final commonNames = _commonNameCtrls
         .map((c) => c.text.trim())
         .where((n) => n.isNotEmpty)
         .toList();
+
+    // Inline validation — catch the most critical field errors before saving
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name is required.')),
+      );
+      return;
+    }
+    if (imageURL.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Image URL is required.')),
+      );
+      return;
+    }
+    if (commonNames.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('At least one common name is required.')),
+      );
+      return;
+    }
+
     final updated = _FishEntry(
-      name: _nameCtrl.text.trim(),
-      imageURL: _urlCtrl.text.trim(),
+      name: name,
+      imageURL: imageURL,
       commonNames: commonNames,
       compatible: widget.fish.compatible,
       notRecommended: widget.fish.notRecommended,
@@ -947,7 +1065,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit: ${widget.fish.name}'),
+      title: Text(widget.dialogTitle ?? 'Edit: ${widget.fish.name}'),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
