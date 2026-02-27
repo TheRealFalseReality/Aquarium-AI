@@ -210,8 +210,9 @@ class _ThemeChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bool isLightSwatch =
-        theme == AppColorTheme.iceBlue || theme == AppColorTheme.midnight;
+    // Determine label text color based on the luminance of the primary swatch
+    // color so that text is always legible on the chip background.
+    final bool useDarkLabel = primary.computeLuminance() > 0.4;
 
     return GestureDetector(
       onTap: onTap,
@@ -265,9 +266,9 @@ class _ThemeChip extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: isDark || isLightSwatch
+                        color: isDark
                             ? Colors.white
-                            : Colors.black87,
+                            : (useDarkLabel ? Colors.black87 : Colors.white),
                       ),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,

@@ -134,11 +134,24 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final prefs = await SharedPreferences.getInstance();
     final themeIndex = prefs.getInt('themeMode') ?? 2; // Default to system
     final useMaterialYou = prefs.getBool('useMaterialYou') ?? false;
-    final colorThemeIndex =
-        prefs.getInt('colorTheme') ?? AppColorTheme.defaultTheme.index;
-    final colorTheme = colorThemeIndex < AppColorTheme.values.length
-        ? AppColorTheme.values[colorThemeIndex]
-        : AppColorTheme.defaultTheme;
+
+    // Prefer name-based storage (resilient to enum reordering); fall back to
+    // the legacy index-based key for backwards compatibility.
+    final colorThemeName = prefs.getString('colorThemeName');
+    AppColorTheme colorTheme;
+    if (colorThemeName != null) {
+      colorTheme = AppColorTheme.values.firstWhere(
+        (t) => t.name == colorThemeName,
+        orElse: () => AppColorTheme.defaultTheme,
+      );
+    } else {
+      final colorThemeIndex =
+          prefs.getInt('colorTheme') ?? AppColorTheme.defaultTheme.index;
+      colorTheme = colorThemeIndex < AppColorTheme.values.length
+          ? AppColorTheme.values[colorThemeIndex]
+          : AppColorTheme.defaultTheme;
+    }
+
     state = ThemeProviderState(
         themeMode: ThemeMode.values[themeIndex],
         useMaterialYou: useMaterialYou,
@@ -175,6 +188,7 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       newColorTheme = AppColorTheme.defaultTheme;
     }
     await prefs.setInt('colorTheme', newColorTheme.index);
+    await prefs.setString('colorThemeName', newColorTheme.name);
     state = ThemeProviderState(
         themeMode: state.themeMode,
         useMaterialYou: value,
@@ -193,6 +207,7 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final oldTheme = state.colorTheme;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('colorTheme', theme.index);
+    await prefs.setString('colorThemeName', theme.name);
     // Material You flag follows the materialYou theme selection.
     final useMaterialYou = theme == AppColorTheme.materialYou;
     await prefs.setBool('useMaterialYou', useMaterialYou);
