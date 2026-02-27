@@ -323,7 +323,8 @@ class MyApp extends ConsumerWidget {
 
     if (isDark) {
       return FlexThemeData.dark(
-        colorSchemeSeed: seed,
+        colors: FlexSchemeColor.from(primary: seed),
+        keyColors: const FlexKeyColors(useKeyColors: true),
         useMaterial3: true,
         fontFamily: 'Poppins',
         subThemesData: const FlexSubThemesData(
@@ -336,7 +337,8 @@ class MyApp extends ConsumerWidget {
       );
     } else {
       return FlexThemeData.light(
-        colorSchemeSeed: seed,
+        colors: FlexSchemeColor.from(primary: seed),
+        keyColors: const FlexKeyColors(useKeyColors: true),
         useMaterial3: true,
         fontFamily: 'Poppins',
         subThemesData: const FlexSubThemesData(
