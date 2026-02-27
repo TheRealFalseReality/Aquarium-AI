@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './services/analytics_service.dart';
+import './theme_colors.dart';
 
 final themeProviderNotifierProvider =
     StateNotifierProvider<ThemeProviderNotifier, ThemeProviderState>((ref) {
@@ -56,19 +57,19 @@ extension AppColorThemeExt on AppColorTheme {
   Color get seedColor {
     switch (this) {
       case AppColorTheme.defaultTheme:
-        return const Color(0xFF005f73);
+        return AquaThemeColors.defaultSeed;
       case AppColorTheme.materialYou:
-        return const Color(0xFF005f73); // fallback; overridden by dynamic color
+        return AquaThemeColors.defaultSeed; // fallback; overridden by dynamic color
       case AppColorTheme.oceanBlue:
-        return const Color(0xFF81B2E8);
+        return AquaThemeColors.oceanBlueSeed;
       case AppColorTheme.iceBlue:
-        return const Color(0xFFD8F3FF);
+        return AquaThemeColors.iceBlueSeed;
       case AppColorTheme.gold:
-        return const Color(0xFFE19F20);
+        return AquaThemeColors.goldSeed;
       case AppColorTheme.mulberry:
-        return const Color(0xFF75344E);
+        return AquaThemeColors.mulberrySeed;
       case AppColorTheme.midnight:
-        return const Color(0xFF0F1623);
+        return AquaThemeColors.midnightSeed;
     }
   }
 }
@@ -150,6 +151,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       colorTheme = colorThemeIndex < AppColorTheme.values.length
           ? AppColorTheme.values[colorThemeIndex]
           : AppColorTheme.defaultTheme;
+    }
+
+    // Migration: respect the legacy useMaterialYou flag when no colorTheme was
+    // stored (e.g. users who enabled Material You before the colorTheme enum
+    // was introduced).
+    if (colorTheme == AppColorTheme.defaultTheme && useMaterialYou) {
+      colorTheme = AppColorTheme.materialYou;
     }
 
     state = ThemeProviderState(

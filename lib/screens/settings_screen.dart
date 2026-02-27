@@ -1828,6 +1828,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     subtitle: const Text('Themes, brightness mode and colour palette'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
+                      Navigator.of(context).pop();
                       Navigator.pushNamed(context, '/appearance');
                     },
                   ),

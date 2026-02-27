@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
+import '../theme_colors.dart';
 import '../theme_provider.dart';
 
 /// A full-page screen that lets the user choose the app colour theme and
@@ -15,7 +15,8 @@ class AppearanceScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final themeState = ref.watch(themeProviderNotifierProvider);
     final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
-    final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid);
+    final isMaterialYouAvailable =
+        !kIsWeb && (defaultTargetPlatform == TargetPlatform.android);
 
     return MainLayout(
       title: 'Appearance',
@@ -184,23 +185,23 @@ class _ThemeChip extends StatelessWidget {
   final VoidCallback onTap;
 
   static const _swatch = {
-    AppColorTheme.defaultTheme: Color(0xFF0a9396),
+    AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchPrimary,
     AppColorTheme.materialYou: Colors.deepPurple,
-    AppColorTheme.oceanBlue: Color(0xFF81B2E8),
-    AppColorTheme.iceBlue: Color(0xFFD8F3FF),
-    AppColorTheme.gold: Color(0xFFE19F20),
-    AppColorTheme.mulberry: Color(0xFF75344E),
-    AppColorTheme.midnight: Color(0xFF0F1623),
+    AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchPrimary,
+    AppColorTheme.iceBlue: AquaThemeColors.iceBlueSwatchPrimary,
+    AppColorTheme.gold: AquaThemeColors.goldSwatchPrimary,
+    AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchPrimary,
+    AppColorTheme.midnight: AquaThemeColors.midnightSwatchPrimary,
   };
 
   static const _swatchDarker = {
-    AppColorTheme.defaultTheme: Color(0xFF005f73),
+    AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchSecondary,
     AppColorTheme.materialYou: Colors.purple,
-    AppColorTheme.oceanBlue: Color(0xFF4A85C4),
-    AppColorTheme.iceBlue: Color(0xFF90C9E8),
-    AppColorTheme.gold: Color(0xFFB07818),
-    AppColorTheme.mulberry: Color(0xFF52243A),
-    AppColorTheme.midnight: Color(0xFF0A0F18),
+    AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchSecondary,
+    AppColorTheme.iceBlue: AquaThemeColors.iceBlueSwatchSecondary,
+    AppColorTheme.gold: AquaThemeColors.goldSwatchSecondary,
+    AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchSecondary,
+    AppColorTheme.midnight: AquaThemeColors.midnightSwatchSecondary,
   };
 
   @override
@@ -210,9 +211,8 @@ class _ThemeChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Determine label text color based on the luminance of the primary swatch
-    // color so that text is always legible on the chip background.
-    final bool useDarkLabel = primary.computeLuminance() > 0.4;
+    // The label strip background is always white-ish (light) or dark, so
+    // text contrast should be based on that container, not the swatch color.
 
     return GestureDetector(
       onTap: onTap,
@@ -266,9 +266,8 @@ class _ThemeChip extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: isDark
-                            ? Colors.white
-                            : (useDarkLabel ? Colors.black87 : Colors.white),
+                        // Container is white-ish in light mode, dark in dark mode.
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
