@@ -72,6 +72,10 @@ void main() {
           equals('https://buymeacoffee.com/capitalcityaquatics'),
         );
       });
+
+      test('changelog defaults to empty string (use local asset)', () {
+        expect(RemoteConfigService.changelog, equals(''));
+      });
     });
 
     group('RemoteConfigKeys', () {
@@ -105,6 +109,8 @@ void main() {
             equals('fishcompat_json'));
         expect(RemoteConfigKeys.buyMeACoffeeUrl,
             equals('buy_me_a_coffee_url'));
+        expect(RemoteConfigKeys.changelog,
+            equals('changelog'));
       });
     });
   });
