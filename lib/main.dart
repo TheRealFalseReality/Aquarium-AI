@@ -32,6 +32,7 @@ import './services/device_id_service.dart';
 import './services/notification_service.dart';
 import './services/remote_config_service.dart';
 import '../l10n/app_localizations.dart';
+import './screens/fish_compat_editor_screen.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -550,6 +551,15 @@ class MyApp extends ConsumerWidget {
               case '/analysis-history':
                 page = const AnalysisHistoryScreen();
                 screenName = 'analysis_history_screen';
+                break;
+              case '/fishcompat-editor':
+                if (kDebugMode) {
+                  page = const FishCompatEditorScreen();
+                  screenName = 'fish_compat_editor_screen';
+                  break;
+                }
+                page = const WelcomeScreen();
+                screenName = 'welcome_screen';
                 break;
               default:
                 page = const WelcomeScreen();
