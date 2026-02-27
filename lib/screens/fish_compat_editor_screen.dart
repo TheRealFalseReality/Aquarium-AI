@@ -132,6 +132,13 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   // Download state
   bool _isDownloading = false;
 
+  // Grid column count (1–4)
+  int _columnCount = 2;
+
+  // Card aspect ratios for single vs. multi-column layouts
+  static const double _singleColumnAspectRatio = 4.5;
+  static const double _multiColumnAspectRatio = 3.0;
+
   @override
   void initState() {
     super.initState();
@@ -687,25 +694,47 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               ],
             ),
           ),
-          // Search bar
+          // Search bar + column picker
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: 'Search fish…',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => _searchCtrl.clear(),
-                      )
-                    : null,
-                border: const OutlineInputBorder(),
-                isDense: true,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10),
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'Search fish…',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () => _searchCtrl.clear(),
+                            )
+                          : null,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SegmentedButton<int>(
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  segments: const [
+                    ButtonSegment<int>(value: 1, label: Text('1')),
+                    ButtonSegment<int>(value: 2, label: Text('2')),
+                    ButtonSegment<int>(value: 3, label: Text('3')),
+                    ButtonSegment<int>(value: 4, label: Text('4')),
+                  ],
+                  selected: {_columnCount},
+                  onSelectionChanged: (s) =>
+                      setState(() => _columnCount = s.first),
+                ),
+              ],
             ),
           ),
           TabBar(
@@ -756,10 +785,15 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       return const Center(child: Text('No fish match your search.'));
     }
     final categoryModified = modifiedIndices[category] ?? const {};
-    return ListView.separated(
+    return GridView.builder(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _columnCount,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: _columnCount == 1 ? _singleColumnAspectRatio : _multiColumnAspectRatio,
+      ),
       itemCount: filtered.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, listIdx) {
         final dataIdx = filtered[listIdx].key;
         final f = filtered[listIdx].value;
