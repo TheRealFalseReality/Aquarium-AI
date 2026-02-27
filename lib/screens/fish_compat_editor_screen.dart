@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -138,10 +139,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   // Grid column count (1–4)
   int _columnCount = 2;
-
-  // Card aspect ratios for single vs. multi-column layouts
-  static const double _singleColumnAspectRatio = 4.5;
-  static const double _multiColumnAspectRatio = 3.0;
 
   @override
   void initState() {
@@ -875,18 +872,49 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       return const Center(child: Text('No fish match your search.'));
     }
     final categoryModified = modifiedIndices[category] ?? const {};
-    return GridView.builder(
+    final rowCount = (filtered.length / _columnCount).ceil();
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _columnCount,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: _columnCount == 1 ? _singleColumnAspectRatio : _multiColumnAspectRatio,
-      ),
-      itemCount: filtered.length,
-      itemBuilder: (_, listIdx) {
-        final dataIdx = filtered[listIdx].key;
-        final f = filtered[listIdx].value;
+      itemCount: rowCount,
+      itemBuilder: (_, rowIdx) {
+        final startIdx = rowIdx * _columnCount;
+        final endIdx = min(startIdx + _columnCount, filtered.length);
+        final itemsInRow = endIdx - startIdx;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (int col = 0; col < _columnCount; col++) ...[
+                  if (col > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: col < itemsInRow
+                        ? _buildFishCard(
+                            category,
+                            filtered[startIdx + col].key,
+                            filtered[startIdx + col].value,
+                            colorScheme,
+                            categoryModified,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFishCard(
+    String category,
+    int dataIdx,
+    _FishEntry f,
+    ColorScheme colorScheme,
+    Set<int> categoryModified,
+  ) {
         // Determine if this fish has validation errors
         final hasError = _validationRun &&
             _validationErrors
@@ -956,8 +984,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             ),
           ),
         );
-      },
-    );
   }
 }
 
