@@ -875,6 +875,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _showAppSettingsDialog(),
         ),
         const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'Appearance',
+          subtitle: 'Themes, brightness mode and colour palette',
+          icon: Icons.palette_outlined,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.tertiary,
+          onTap: () => Navigator.pushNamed(context, '/appearance'),
+        ),
+        const SizedBox(height: 16),
         _buildRemoveAdsCard(context),
         const SizedBox(height: 16),
         _buildMenuCard(
@@ -1798,6 +1815,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     subtitle: Text(_getLanguageDisplayName(appSettings.localeCode)),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () => _showLanguageDialog(setDialogState),
+                  ),
+                  const Divider(height: 24),
+                  
+                  // Appearance shortcut
+                  ListTile(
+                    leading: Icon(
+                      Icons.palette_outlined,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                    title: const Text('Appearance'),
+                    subtitle: const Text('Themes, brightness mode and colour palette'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushNamed(context, '/appearance');
+                    },
                   ),
                   const Divider(height: 24),
                   
