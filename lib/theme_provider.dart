@@ -9,6 +9,10 @@ final themeProviderNotifierProvider =
   return ThemeProviderNotifier();
 });
 
+/// Default display name used for the [AppColorTheme.custom] theme before the
+/// user assigns their own name.
+const String kDefaultCustomThemeName = 'Custom';
+
 /// The available color themes for the app.
 enum AppColorTheme {
   /// Default aquarium teal/blue scheme (original app theme).
@@ -52,6 +56,9 @@ enum AppColorTheme {
 
   /// Crimson – primary color #DC143C (merged from firebrick & crimson).
   crimson,
+
+  /// User-defined custom theme with a color-picker selected seed.
+  custom,
 }
 
 extension AppColorThemeExt on AppColorTheme {
@@ -85,6 +92,8 @@ extension AppColorThemeExt on AppColorTheme {
         return 'Hot Pink';
       case AppColorTheme.crimson:
         return 'Crimson';
+      case AppColorTheme.custom:
+        return kDefaultCustomThemeName;
     }
   }
 
@@ -119,6 +128,10 @@ extension AppColorThemeExt on AppColorTheme {
         return AquaThemeColors.hotPinkSeed;
       case AppColorTheme.crimson:
         return AquaThemeColors.crimsonSeed;
+      case AppColorTheme.custom:
+        // This value is never used at runtime; the actual seed is resolved
+        // in main.dart from ThemeProviderState.customSeedColor.
+        return AquaThemeColors.defaultSeed;
     }
   }
 }
@@ -131,7 +144,6 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
             colorTheme: AppColorTheme.defaultTheme)) {
     _loadTheme();
   }
-
   ThemeData getLightTheme(ColorScheme? lightDynamic) {
     final colorScheme = lightDynamic ??
         ColorScheme.fromSeed(
@@ -209,10 +221,20 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
       colorTheme = AppColorTheme.materialYou;
     }
 
+    // Load custom theme fields.
+    final customSeedColorInt = prefs.getInt('customSeedColor');
+    final customSeedColor = customSeedColorInt != null
+        ? Color(customSeedColorInt)
+        : AquaThemeColors.defaultSeed;
+    final customThemeName =
+        prefs.getString('customThemeName') ?? kDefaultCustomThemeName;
+
     state = ThemeProviderState(
         themeMode: ThemeMode.values[themeIndex],
         useMaterialYou: useMaterialYou,
-        colorTheme: colorTheme);
+        colorTheme: colorTheme,
+        customSeedColor: customSeedColor,
+        customThemeName: customThemeName);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -222,7 +244,9 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     state = ThemeProviderState(
         themeMode: mode,
         useMaterialYou: state.useMaterialYou,
-        colorTheme: state.colorTheme);
+        colorTheme: state.colorTheme,
+        customSeedColor: state.customSeedColor,
+        customThemeName: state.customThemeName);
 
     // Log theme change
     AnalyticsService.logSettingsChange(
@@ -249,7 +273,9 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     state = ThemeProviderState(
         themeMode: state.themeMode,
         useMaterialYou: value,
-        colorTheme: newColorTheme);
+        colorTheme: newColorTheme,
+        customSeedColor: state.customSeedColor,
+        customThemeName: state.customThemeName);
 
     // Log Material You toggle
     AnalyticsService.logSettingsChange(
@@ -271,11 +297,39 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     state = ThemeProviderState(
         themeMode: state.themeMode,
         useMaterialYou: useMaterialYou,
-        colorTheme: theme);
+        colorTheme: theme,
+        customSeedColor: state.customSeedColor,
+        customThemeName: state.customThemeName);
 
     AnalyticsService.logSettingsChange(
       settingName: 'color_theme',
       newValue: theme.name,
+      oldValue: oldTheme.name,
+    );
+  }
+
+  /// Save a user-defined custom seed colour and name, and switch to the
+  /// [AppColorTheme.custom] theme.
+  Future<void> setCustomTheme(Color seed, String name) async {
+    final oldTheme = state.colorTheme;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('colorTheme', AppColorTheme.custom.index);
+    await prefs.setString('colorThemeName', AppColorTheme.custom.name);
+    await prefs.setBool('useMaterialYou', false);
+    await prefs.setInt('customSeedColor', seed.value);
+    final trimmedName =
+        name.trim().isEmpty ? kDefaultCustomThemeName : name.trim();
+    await prefs.setString('customThemeName', trimmedName);
+    state = ThemeProviderState(
+        themeMode: state.themeMode,
+        useMaterialYou: false,
+        colorTheme: AppColorTheme.custom,
+        customSeedColor: seed,
+        customThemeName: trimmedName);
+
+    AnalyticsService.logSettingsChange(
+      settingName: 'color_theme',
+      newValue: 'custom:${seed.value}',
       oldValue: oldTheme.name,
     );
   }
@@ -286,9 +340,17 @@ class ThemeProviderState {
   final bool useMaterialYou;
   final AppColorTheme colorTheme;
 
+  /// The user-defined seed colour when [colorTheme] == [AppColorTheme.custom].
+  final Color customSeedColor;
+
+  /// The user-defined name when [colorTheme] == [AppColorTheme.custom].
+  final String customThemeName;
+
   ThemeProviderState({
     required this.themeMode,
     required this.useMaterialYou,
     required this.colorTheme,
+    this.customSeedColor = const Color(0xFF005F73),
+    this.customThemeName = kDefaultCustomThemeName,
   });
 }

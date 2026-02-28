@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
-
 /// A full-page screen that lets the user choose the app colour theme and
 /// light / dark / system mode.
 class AppearanceScreen extends ConsumerWidget {
@@ -105,7 +105,15 @@ class AppearanceScreen extends ConsumerWidget {
                   _ThemeGrid(
                     selected: themeState.colorTheme,
                     isMaterialYouAvailable: isMaterialYouAvailable,
+                    customSeedColor: themeState.customSeedColor,
+                    customThemeName: themeState.customThemeName,
                     onSelected: (theme) => themeNotifier.setColorTheme(theme),
+                    onCustomEdit: () => _showCustomThemePicker(
+                      context,
+                      themeState.customSeedColor,
+                      themeState.customThemeName,
+                      themeNotifier,
+                    ),
                   ),
                 ],
               ),
@@ -132,6 +140,23 @@ class AppearanceScreen extends ConsumerWidget {
       ],
     );
   }
+
+  /// Opens the custom colour picker dialog.
+  void _showCustomThemePicker(
+    BuildContext context,
+    Color initialColor,
+    String initialName,
+    ThemeProviderNotifier notifier,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _CustomThemeDialog(
+        initialColor: initialColor,
+        initialName: initialName,
+        onSave: (color, name) => notifier.setCustomTheme(color, name),
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -142,12 +167,18 @@ class _ThemeGrid extends StatelessWidget {
   const _ThemeGrid({
     required this.selected,
     required this.isMaterialYouAvailable,
+    required this.customSeedColor,
+    required this.customThemeName,
     required this.onSelected,
+    required this.onCustomEdit,
   });
 
   final AppColorTheme selected;
   final bool isMaterialYouAvailable;
+  final Color customSeedColor;
+  final String customThemeName;
   final ValueChanged<AppColorTheme> onSelected;
+  final VoidCallback onCustomEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +193,15 @@ class _ThemeGrid extends StatelessWidget {
           .map((t) => _ThemeChip(
                 theme: t,
                 isSelected: selected == t,
-                onTap: () => onSelected(t),
+                customSeedColor: customSeedColor,
+                customThemeName: customThemeName,
+                // Custom chip: open the picker; setCustomTheme handles selection.
+                // Other chips: directly select the theme.
+                onTap: t == AppColorTheme.custom
+                    ? onCustomEdit
+                    : () => onSelected(t),
+                onCustomEdit:
+                    t == AppColorTheme.custom ? onCustomEdit : null,
               ))
           .toList(),
     );
@@ -177,14 +216,20 @@ class _ThemeChip extends StatelessWidget {
   const _ThemeChip({
     required this.theme,
     required this.isSelected,
+    required this.customSeedColor,
+    required this.customThemeName,
     required this.onTap,
+    this.onCustomEdit,
   });
 
   final AppColorTheme theme;
   final bool isSelected;
+  final Color customSeedColor;
+  final String customThemeName;
   final VoidCallback onTap;
+  final VoidCallback? onCustomEdit;
 
-  static const _swatch = {
+  static const _swatchPrimary = {
     AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchPrimary,
     AppColorTheme.materialYou: Colors.deepPurple,
     AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchPrimary,
@@ -201,7 +246,7 @@ class _ThemeChip extends StatelessWidget {
     AppColorTheme.crimson: AquaThemeColors.crimsonSwatchPrimary,
   };
 
-  static const _swatchDarker = {
+  static const _swatchSecondary = {
     AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchSecondary,
     AppColorTheme.materialYou: Colors.purple,
     AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchSecondary,
@@ -220,13 +265,24 @@ class _ThemeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = _swatch[theme]!;
-    final secondary = _swatchDarker[theme]!;
+    final isCustom = theme == AppColorTheme.custom;
+
+    // Swatch colours: custom theme uses the user-defined seed colour.
+    final Color primary =
+        isCustom ? customSeedColor : (_swatchPrimary[theme] ?? Colors.grey);
+    final Color secondary;
+    if (isCustom) {
+      final hsl = HSLColor.fromColor(customSeedColor);
+      secondary =
+          hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+    } else {
+      secondary = _swatchSecondary[theme] ?? Colors.grey.shade700;
+    }
+
+    final String label = isCustom ? customThemeName : theme.displayName;
+
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // The label strip background is always white-ish (light) or dark, so
-    // text contrast should be based on that container, not the swatch color.
 
     return GestureDetector(
       onTap: onTap,
@@ -260,11 +316,30 @@ class _ThemeChip extends StatelessWidget {
           children: [
             if (theme == AppColorTheme.materialYou)
               const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+            // Custom theme always shows an edit/add icon
+            if (isCustom)
+              Positioned(
+                top: 6,
+                left: 6,
+                child: GestureDetector(
+                  onTap: onCustomEdit,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: Colors.black38,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.edit_outlined,
+                        color: Colors.white, size: 12),
+                  ),
+                ),
+              ),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.black.withOpacity(0.5)
@@ -275,12 +350,10 @@ class _ThemeChip extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  theme.displayName,
+                  label,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        // Container is white-ish in light mode, dark in dark mode.
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                   textAlign: TextAlign.center,
@@ -304,6 +377,92 @@ class _ThemeChip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Custom theme picker dialog
+// ---------------------------------------------------------------------------
+
+class _CustomThemeDialog extends StatefulWidget {
+  const _CustomThemeDialog({
+    required this.initialColor,
+    required this.initialName,
+    required this.onSave,
+  });
+
+  final Color initialColor;
+  final String initialName;
+  final void Function(Color color, String name) onSave;
+
+  @override
+  State<_CustomThemeDialog> createState() => _CustomThemeDialogState();
+}
+
+class _CustomThemeDialogState extends State<_CustomThemeDialog> {
+  late Color _pickedColor;
+  late TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pickedColor = widget.initialColor;
+    _nameController = TextEditingController(
+      text: widget.initialName == kDefaultCustomThemeName
+          ? ''
+          : widget.initialName,
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Custom theme'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ColorPicker(
+              pickerColor: _pickedColor,
+              onColorChanged: (c) => setState(() => _pickedColor = c),
+              enableAlpha: false,
+              labelTypes: const [],
+              pickerAreaHeightPercent: 0.7,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Theme name',
+                hintText: kDefaultCustomThemeName,
+                border: const OutlineInputBorder(),
+              ),
+              maxLength: 20,
+              textCapitalization: TextCapitalization.words,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            widget.onSave(_pickedColor, _nameController.text);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }

@@ -283,10 +283,13 @@ class MyApp extends ConsumerWidget {
   /// When [isDark] is true the dark variant is returned.
   /// [dynamicScheme] is the platform dynamic color scheme and is only used
   /// when [colorTheme] is [AppColorTheme.materialYou].
+  /// [customSeed] overrides the palette seed when [colorTheme] is
+  /// [AppColorTheme.custom].
   ThemeData _buildFlexTheme({
     required AppColorTheme colorTheme,
     required bool isDark,
     ColorScheme? dynamicScheme,
+    Color? customSeed,
   }) {
     // Material You: use the phone's dynamic color scheme when available.
     if (colorTheme == AppColorTheme.materialYou && dynamicScheme != null) {
@@ -318,13 +321,23 @@ class MyApp extends ConsumerWidget {
       );
     }
 
-    // For all other themes use FlexColorScheme.
-    final seed = colorTheme.seedColor;
+    // Resolve the seed colour – custom theme uses the user-picked colour.
+    // customSeed is always provided from ThemeProviderState.customSeedColor
+    // so the fallback to colorTheme.seedColor is a defensive safety net only.
+    final seed = colorTheme == AppColorTheme.custom
+        ? (customSeed ?? colorTheme.seedColor)
+        : colorTheme.seedColor;
+
+    // Default theme → pure white/black surfaces (no tint).
+    // All other themes → subtle seed-colour tint blended into surfaces.
+    final blendLevel = colorTheme == AppColorTheme.defaultTheme ? 0 : 7;
 
     if (isDark) {
       return FlexThemeData.dark(
         colors: FlexSchemeColor.from(primary: seed),
         keyColors: const FlexKeyColors(useKeyColors: true),
+        surfaceMode: FlexSurfaceMode.level,
+        blendLevel: blendLevel,
         useMaterial3: true,
         fontFamily: 'Poppins',
         subThemesData: const FlexSubThemesData(
@@ -339,6 +352,8 @@ class MyApp extends ConsumerWidget {
       return FlexThemeData.light(
         colors: FlexSchemeColor.from(primary: seed),
         keyColors: const FlexKeyColors(useKeyColors: true),
+        surfaceMode: FlexSurfaceMode.level,
+        blendLevel: blendLevel,
         useMaterial3: true,
         fontFamily: 'Poppins',
         subThemesData: const FlexSubThemesData(
@@ -365,11 +380,13 @@ class MyApp extends ConsumerWidget {
           colorTheme: colorTheme,
           isDark: false,
           dynamicScheme: lightDynamic,
+          customSeed: themeProvider.customSeedColor,
         );
         final darkTheme = _buildFlexTheme(
           colorTheme: colorTheme,
           isDark: true,
           dynamicScheme: darkDynamic,
+          customSeed: themeProvider.customSeedColor,
         );
 
         // Update system UI overlay based on current theme
