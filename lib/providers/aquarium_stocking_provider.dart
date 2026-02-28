@@ -87,6 +87,10 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(selectedFish: []);
   }
 
+  void clearRecommendations() {
+    state = state.copyWith(clearRecommendation: true);
+  }
+
 
   Future<void> getStockingRecommendations({
     required String tankSize,

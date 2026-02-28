@@ -64,7 +64,8 @@ void main() {
     );
 
     // Verify fish selection button exists
-    expect(find.text('Select Specific Fish (Optional)'), findsOneWidget);
+    expect(find.textContaining('Select Specific'), findsOneWidget);
+    expect(find.textContaining('Species (Optional)'), findsOneWidget);
     
     // Verify the button is an OutlinedButton with icon
     expect(find.byType(OutlinedButton), findsWidgets);

@@ -32,6 +32,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     super.dispose();
   }
 
+  String get _categoryDisplayName =>
+      _selectedCategory == 'marine' ? 'Saltwater' : 'Freshwater';
+
   void _getRecommendations() {
     if (_formKey.currentState!.validate()) {
       // Build tank size string with unit
@@ -110,11 +113,17 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         // Build tank size string with unit
         final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
-        
+        // Capture recommendations before clearing them from state so the
+        // report screen keeps a valid reference.
+        final reports = next.recommendations!;
+        // Clear recommendations immediately so that subsequent state changes
+        // (e.g. tapping a different fish-type chip) don't re-trigger navigation.
+        ref.read(aquariumStockingProvider.notifier).clearRecommendations();
+
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => StockingReportScreen(
-              reports: next.recommendations!,
+              reports: reports,
               tankSize: tankSizeWithUnit,
               tankType: _selectedCategory,
               userNotes: _notesController.text,
@@ -187,74 +196,24 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _tankSizeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Tank Size',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a tank size';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
-                      decoration: const InputDecoration(
-                        labelText: 'Unit',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        DropdownMenuItem(value: 'gallons', child: Text(l10n.gallons)),
-                        DropdownMenuItem(value: 'liters', child: Text(l10n.liters)),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _selectedUnit = value);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (e.g., "I want a peaceful community tank")',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              // Fish selection section
+              // Species selection – shown right after fish type so the user can
+              // optionally pick specific species from the chosen category before
+              // entering tank details.
               OutlinedButton.icon(
                 onPressed: _openFishSelectionDialog,
                 icon: const Icon(Icons.add_circle_outline),
                 label: Text(
-                  state.selectedFish.isEmpty 
-                    ? 'Select Specific Fish (Optional)' 
-                    : 'Selected Fish (${state.selectedFish.length})',
+                  state.selectedFish.isEmpty
+                    ? 'Select Specific $_categoryDisplayName Species (Optional)'
+                    : 'Selected Species (${state.selectedFish.length})',
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                            backgroundColor: cs.tertiaryContainer,
+                  backgroundColor: cs.tertiaryContainer,
                 ),
               ),
               if (state.selectedFish.isNotEmpty) ...[
@@ -319,6 +278,58 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                   ),
                 ),
               ],
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _tankSizeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tank Size',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a tank size';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedUnit,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        DropdownMenuItem(value: 'gallons', child: Text(l10n.gallons)),
+                        DropdownMenuItem(value: 'liters', child: Text(l10n.liters)),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedUnit = value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (e.g., "I want a peaceful community tank")',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(
