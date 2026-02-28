@@ -52,6 +52,7 @@ All notable changes to this project will be documented in this file.
 - Stocking guides per tank  
 - Notifications & Events log in calendar view  
 - Expenses or P&L
+- Share and import tanks with friends  
 - Explore feed  
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
