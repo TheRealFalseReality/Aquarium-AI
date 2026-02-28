@@ -293,6 +293,49 @@ class _HistoryEntryTile extends ConsumerWidget {
     final color = _typeColor(entry.type, cs);
     final dateStr = DateFormat('MMM d, y • h:mm a').format(entry.timestamp);
 
+    // For photo analyses, show a thumbnail when available.
+    Uint8List? photoBytes;
+    if (entry.type == AnalysisType.photoAnalysis &&
+        entry.photoBase64 != null &&
+        entry.photoBase64!.isNotEmpty) {
+      try {
+        photoBytes = base64Decode(entry.photoBase64!);
+      } catch (e) {
+        debugPrint('Failed to decode photo base64 for history entry ${entry.id}: $e');
+      }
+    }
+
+    Widget leadingWidget;
+    if (photoBytes != null) {
+      leadingWidget = ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.memory(
+          photoBytes,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(_typeIcon(entry.type), color: color, size: 22),
+          ),
+        ),
+      );
+    } else {
+      leadingWidget = Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(_typeIcon(entry.type), color: color, size: 22),
+      );
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
@@ -302,14 +345,7 @@ class _HistoryEntryTile extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(_typeIcon(entry.type), color: color, size: 22),
-              ),
+              leadingWidget,
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -332,6 +368,17 @@ class _HistoryEntryTile extends ConsumerWidget {
                             fontWeight: FontWeight.w500,
                           ),
                     ),
+                    if (entry.modelName != null && entry.modelName!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        entry.modelName!,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: cs.onSurface.withOpacity(0.5),
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     const SizedBox(height: 2),
                     Text(
                       dateStr,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/tank.dart';
@@ -189,8 +190,10 @@ class TankNotifier extends StateNotifier<TankState> {
 
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
+      final packageInfo = await PackageInfo.fromPlatform();
+      final appVersion = packageInfo.version;
       final backupData = {
-        'version': '1.0.0',
+        'version': appVersion,
         'appName': 'Aquarium AI',
         'exportDate': DateTime.now().toIso8601String(),
         'tankCount': state.tanks.length,
@@ -414,7 +417,6 @@ class TankNotifier extends StateNotifier<TankState> {
     return {
       'tankCount': state.tanks.length,
       'exportDate': DateTime.now().toIso8601String(),
-      'version': '1.0.0',
     };
   }
 }

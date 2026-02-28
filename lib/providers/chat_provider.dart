@@ -563,6 +563,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
               : 'Photo Analysis',
           resultData: parsed.raw,
           photoBase64: photoBase64,
+          modelName: switch (_modelState.activeImageProvider) {
+            AIProvider.gemini => _modelState.geminiImageModel,
+            AIProvider.openAI => _modelState.chatGPTImageModel,
+            AIProvider.groq => _modelState.groqImageModel,
+          },
         ),
       );
       return parsed;

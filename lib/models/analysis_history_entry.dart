@@ -48,6 +48,9 @@ class AnalysisHistoryEntry {
   /// Base64-encoded photo bytes for photo analyses (may be null).
   final String? photoBase64;
 
+  /// Name of the AI model used for this analysis (e.g. 'gemini-2.0-flash').
+  final String? modelName;
+
   AnalysisHistoryEntry({
     required this.id,
     required this.type,
@@ -56,6 +59,7 @@ class AnalysisHistoryEntry {
     this.isFavorite = false,
     required this.resultData,
     this.photoBase64,
+    this.modelName,
   });
 
   /// Creates a new entry with a generated UUID and the current time.
@@ -64,6 +68,7 @@ class AnalysisHistoryEntry {
     required String title,
     required Map<String, dynamic> resultData,
     String? photoBase64,
+    String? modelName,
   }) {
     return AnalysisHistoryEntry(
       id: const Uuid().v4(),
@@ -72,6 +77,7 @@ class AnalysisHistoryEntry {
       timestamp: DateTime.now(),
       resultData: resultData,
       photoBase64: photoBase64,
+      modelName: modelName,
     );
   }
 
@@ -86,6 +92,7 @@ class AnalysisHistoryEntry {
       isFavorite: isFavorite ?? this.isFavorite,
       resultData: resultData,
       photoBase64: photoBase64,
+      modelName: modelName,
     );
   }
 
@@ -97,6 +104,7 @@ class AnalysisHistoryEntry {
     'isFavorite': isFavorite,
     'resultData': resultData,
     'photoBase64': photoBase64,
+    'modelName': modelName,
   };
 
   factory AnalysisHistoryEntry.fromJson(Map<String, dynamic> json) {
@@ -108,6 +116,7 @@ class AnalysisHistoryEntry {
       isFavorite: json['isFavorite'] as bool? ?? false,
       resultData: (json['resultData'] as Map<String, dynamic>?) ?? {},
       photoBase64: json['photoBase64'] as String?,
+      modelName: json['modelName'] as String?,
     );
   }
 }

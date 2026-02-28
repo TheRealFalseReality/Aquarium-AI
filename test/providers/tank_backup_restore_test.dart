@@ -36,7 +36,6 @@ void main() {
       final backupInfo = tankNotifier.createBackupInfo();
       
       expect(backupInfo['tankCount'], equals(2));
-      expect(backupInfo['version'], equals('1.0.0'));
       expect(backupInfo['exportDate'], isA<String>());
       
       // Verify the export date is a valid ISO 8601 string
@@ -177,7 +176,6 @@ void main() {
       final backupInfo = tankNotifier.createBackupInfo();
       
       expect(backupInfo['tankCount'], equals(0));
-      expect(backupInfo['version'], equals('1.0.0'));
       expect(backupInfo['exportDate'], isA<String>());
     });
   });
