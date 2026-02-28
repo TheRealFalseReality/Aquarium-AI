@@ -594,8 +594,8 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                 icon: const Icon(Icons.add_circle_outline),
                 label: Text(
                   state.selectedFish.isEmpty
-                    ? 'Select Specific $_categoryDisplayName Species (Optional)'
-                    : 'Selected Species (${state.selectedFish.length})',
+                    ? l10n.selectFishTypes
+                    : '${l10n.selectFishTypes} (${state.selectedFish.length})',
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -624,26 +624,50 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Selected Fish',
+                            l10n.selectedFish,
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: cs.primary,
                             ),
                           ),
-                          TextButton.icon(
-                            onPressed: () {
-                              ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
-                              setState(() {
-                                _speciesSelections = null;
-                              });
-                            },
-                            icon: const Icon(Icons.clear, size: 16),
-                            label: const Text('Clear'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () async {
+                                  final currentFish = ref.read(aquariumStockingProvider).selectedFish;
+                                  if (currentFish.isEmpty) return;
+                                  final selections = await _showSpeciesSelectionDialog(currentFish);
+                                  if (mounted && selections != null) {
+                                    setState(() {
+                                      _speciesSelections = selections.isEmpty ? null : selections;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.tune, size: 16),
+                                label: Text(l10n.selectSpecies),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () {
+                                  ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+                                  setState(() {
+                                    _speciesSelections = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.clear, size: 16),
+                                label: Text(l10n.clear),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -652,11 +676,30 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                         spacing: 8,
                         runSpacing: 8,
                         children: state.selectedFish.map((fish) {
+                          final speciesForFish = _speciesSelections?[fish.name];
+                          final speciesLabel = (speciesForFish != null && speciesForFish.isNotEmpty)
+                              ? speciesForFish.join(', ')
+                              : null;
                           return Chip(
                             avatar: CircleAvatar(
                               backgroundImage: CachedNetworkImageProvider(fish.imageURL),
                             ),
-                            label: Text(fish.name),
+                            label: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(fish.name),
+                                if (speciesLabel != null)
+                                  Text(
+                                    speciesLabel,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: cs.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                              ],
+                            ),
                             onDeleted: () {
                               ref.read(aquariumStockingProvider.notifier).selectFish(fish);
                             },
