@@ -53,6 +53,11 @@ All notable changes to this project will be documented in this file.
 - Notifications & Events log in calendar view  
 - Expenses or P&L
 - Explore feed  
+- Make the parameter and dosing, well, all those screens better  
+- Customize welcome screen  
+- Allow user to edit prompts to further customize the app  
+- Backup Photos  
+- Let's Start a Community!
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
