@@ -1,28 +1,28 @@
 import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
-import 'package:fish_ai/models/selected_fish_entry.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<SelectedFishEntry>? selectedFish}) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish,
+    {List<Fish>? selectedFish, Map<String, List<String>>? speciesSelections}) {
   final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected
   String selectedFishContext = '';
   if (selectedFish != null && selectedFish.isNotEmpty) {
-    // Build a human-readable description: "Blue Ram (Cichlid)" when a common
-    // name is chosen, otherwise just the species name.
-    final selectedFishDetails = selectedFish.map((e) {
-      if (e.selectedCommonName != null) {
-        return '"${e.selectedCommonName}" (${e.fish.name})';
+    // Build a human-readable description including any specific species chosen
+    final selectedFishDetails = selectedFish.map((f) {
+      final species = speciesSelections?[f.name];
+      if (species != null && species.isNotEmpty) {
+        return '${f.name} (${species.join(', ')})';
       }
-      return e.fish.name;
+      return f.name;
     }).join(', ');
     selectedFishContext = '''
 
     IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
     $selectedFishDetails
     
-    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When a common name (variety/morph) is given in parentheses, tailor the recommendations specifically for that variety.
+    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When specific species/varieties are noted in parentheses, tailor the recommendations for those varieties.
     ''';
   }
 

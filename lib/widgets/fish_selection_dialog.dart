@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/fish.dart';
-import '../models/selected_fish_entry.dart';
 import '../widgets/fish_card.dart';
 import '../services/fish_data_service.dart';
 
 /// Dialog for selecting fish to include in stocking recommendations
 class FishSelectionDialog extends ConsumerStatefulWidget {
   final String category;
-  final List<SelectedFishEntry> initialSelectedFish;
+  final List<Fish> initialSelectedFish;
   
   const FishSelectionDialog({
     super.key,
@@ -21,7 +20,7 @@ class FishSelectionDialog extends ConsumerStatefulWidget {
 }
 
 class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
-  late List<SelectedFishEntry> _selectedFish;
+  late List<Fish> _selectedFish;
   List<Fish> _filteredFishList = [];
   final TextEditingController _searchController = TextEditingController();
 
@@ -58,113 +57,14 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
     });
   }
 
-  /// Returns the selected entry for [fish], or `null` if not selected.
-  SelectedFishEntry? _entryFor(Fish fish) {
-    try {
-      return _selectedFish.firstWhere((e) => e.fish.name == fish.name);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Handles tapping a fish card:
-  /// - If already selected → deselects it.
-  /// - If not selected and fish has common names → shows a variety picker,
-  ///   then adds the fish with the chosen (or no) common name.
-  /// - If not selected and no common names → adds it directly.
-  Future<void> _toggleFishSelection(Fish fish) async {
-    final existing = _entryFor(fish);
-    if (existing != null) {
-      // Deselect
-      setState(() {
-        _selectedFish.removeWhere((e) => e.fish.name == fish.name);
-      });
-      return;
-    }
-
-    // Select – optionally pick a variety first
-    if (fish.commonNames.isNotEmpty) {
-      final chosenName = await _showVarietyPicker(fish);
-      // null means the user cancelled the picker → do not add the fish
-      if (chosenName == null) return;
-      if (!mounted) return;
-      // empty string means "Any / no specific variety"
-      setState(() {
-        _selectedFish.add(SelectedFishEntry(
-          fish: fish,
-          selectedCommonName: chosenName.isNotEmpty ? chosenName : null,
-        ));
-      });
-    } else {
-      setState(() {
-        _selectedFish.add(SelectedFishEntry(fish: fish));
-      });
-    }
-  }
-
-  /// Shows an AlertDialog listing the fish's common names as selectable chips.
-  /// Returns the chosen common name, an empty string for "Any", or `null` if
-  /// the user dismissed by pressing Cancel.
-  Future<String?> _showVarietyPicker(Fish fish) {
-    // Pre-select "Any" so Add always returns a meaningful value.
-    String picked = '';
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        return StatefulBuilder(
-          builder: (ctx, setInner) {
-            return AlertDialog(
-              title: Text('Select a variety of ${fish.name}'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Choose a specific common name to send to the AI for more targeted recommendations, or leave unspecified.',
-                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      // "Any" chip – selected by default
-                      FilterChip(
-                        label: const Text('Any'),
-                        selected: picked == '',
-                        onSelected: (_) => setInner(() => picked = ''),
-                        selectedColor: cs.primaryContainer,
-                      ),
-                      ...fish.commonNames.map(
-                        (name) => FilterChip(
-                          label: Text(name),
-                          selected: picked == name,
-                          onSelected: (_) => setInner(() => picked = name),
-                          selectedColor: cs.primaryContainer,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(null),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(picked),
-                  child: const Text('Add'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+  void _toggleFishSelection(Fish fish) {
+    setState(() {
+      if (_selectedFish.contains(fish)) {
+        _selectedFish.remove(fish);
+      } else {
+        _selectedFish.add(fish);
+      }
+    });
   }
 
   @override
@@ -181,7 +81,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
       child: Container(
         constraints: BoxConstraints(
           maxWidth: 800, 
-          maxHeight: screenHeight * 0.85, // Use 85% of screen height
+          maxHeight: screenHeight * 0.85,
         ),
         child: Column(
           children: [
@@ -227,7 +127,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Select specific fish to include in your stocking recommendations. Tap a fish to optionally choose a specific variety.',
+                    'Select specific fish to include in your stocking recommendations',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -308,44 +208,12 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                     itemCount: _filteredFishList.length,
                     itemBuilder: (context, index) {
                       final fish = _filteredFishList[index];
-                      final entry = _entryFor(fish);
-                      final isSelected = entry != null;
-                      return Stack(
-                        children: [
-                          FishCard(
-                            fish: fish,
-                            isSelected: isSelected,
-                            category: widget.category,
-                            onTap: () => _toggleFishSelection(fish),
-                          ),
-                          // Show selected variety badge when a specific common
-                          // name was chosen
-                          if (isSelected && entry.selectedCommonName != null)
-                            Positioned(
-                              bottom: 8,
-                              left: 6,
-                              right: 6,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary
-                                      .withOpacity(0.85),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  entry.selectedCommonName!,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                        ],
+                      final isSelected = _selectedFish.contains(fish);
+                      return FishCard(
+                        fish: fish,
+                        isSelected: isSelected,
+                        category: widget.category,
+                        onTap: () => _toggleFishSelection(fish),
                       );
                     },
                   );

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fish_ai/models/fish.dart';
-import 'package:fish_ai/models/selected_fish_entry.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -29,7 +28,7 @@ class AquariumStockingState {
   final String? error;
   final bool isApiKeyError;
   final bool isRetryable;
-  final List<SelectedFishEntry> selectedFish;
+  final List<Fish> selectedFish;
 
   AquariumStockingState({
     this.isLoading = false,
@@ -48,7 +47,7 @@ class AquariumStockingState {
     String? error,
     bool? isApiKeyError,
     bool? isRetryable,
-    List<SelectedFishEntry>? selectedFish,
+    List<Fish>? selectedFish,
     bool clearError = false,
     bool clearRecommendation = false,
   }) {
@@ -74,14 +73,12 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(isLoading: false, clearError: true);
   }
 
-  void selectFish(SelectedFishEntry entry) {
-    final newSelectedFish = List<SelectedFishEntry>.from(state.selectedFish);
-    final existingIndex =
-        newSelectedFish.indexWhere((e) => e.fish.name == entry.fish.name);
-    if (existingIndex != -1) {
-      newSelectedFish.removeAt(existingIndex);
+  void selectFish(Fish fish) {
+    final newSelectedFish = List<Fish>.from(state.selectedFish);
+    if (newSelectedFish.contains(fish)) {
+      newSelectedFish.remove(fish);
     } else {
-      newSelectedFish.add(entry);
+      newSelectedFish.add(fish);
     }
     state = state.copyWith(selectedFish: newSelectedFish);
   }
@@ -99,6 +96,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     required String tankSize,
     required String tankType,
     required String userNotes,
+    Map<String, List<String>>? speciesSelections,
   }) async {
     state = state.copyWith(
         isLoading: true, clearError: true, clearRecommendation: true);
@@ -154,6 +152,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       userNotes, 
       allFish,
       selectedFish: state.selectedFish,
+      speciesSelections: speciesSelections,
     );
 
     try {
