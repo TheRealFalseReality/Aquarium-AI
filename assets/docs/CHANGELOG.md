@@ -2,13 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.0.10] - 2026-2-27
+## [3.0.10] - 2026-2-27 - Visual Updates, Stocking Tool Fixes
 
 ### Added
 
+- Add visual contrast to buttons and chips throughout the app  
+- Add FlexColorScheme themes, AppColorTheme palette picker, Appearance screen, and custom color picker  
 
+### Fixed  
 
-## [3.0.03] - 2026-2-24
+- Fix bug with species popup not reflecting common names  
+- Fix AI Stocking tool re-navigation bug, improve species selection UX, and make tank size optional
+
+## [3.0.03] - 2026-2-24  - Major Updates
 
 ### Added
 

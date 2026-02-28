@@ -198,6 +198,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   Future<void> _showPromotionDialog() async {
     try {
+      final ctx = context;
       final prefs = await SharedPreferences.getInstance();
       // Store the current timestamp when showing the dialog
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -210,9 +211,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         source: 'welcome_screen_auto',
       );
       
-      if (!mounted) return;
+      if (!ctx.mounted) return;
       showDialog(
-        context: context,
+        context: ctx,
         barrierDismissible: true,
         builder: (context) => const AppPromotionDialog(),
       );
@@ -258,6 +259,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   Future<void> _showAquaPiPromotionDialog() async {
     try {
+      final ctx = context;
       final prefs = await SharedPreferences.getInstance();
       // Store the current timestamp when showing the dialog
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -270,9 +272,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         source: 'welcome_screen_auto',
       );
       
-      if (!mounted) return;
+      if (!ctx.mounted) return;
       showDialog(
-        context: context,
+        context: ctx,
         barrierDismissible: true,
         builder: (context) => const AquaPiPromotionDialog(),
       );
@@ -351,10 +353,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _checkForUpdate() async {
     setState(() => _checkingUpdate = true);
     try {
+      final messenger = ScaffoldMessenger.of(context);
       final info = await InAppUpdateService.checkForUpdate();
       if (!mounted) return;
       if (info == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(content: Text('Unable to check for updates.')),
         );
         return;
@@ -362,7 +365,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         await InAppUpdateService.startFlexibleUpdate();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(content: Text("You're already on the latest version!")),
         );
       }
@@ -394,15 +397,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               child: InkWell(
                 key: const Key('changelog_banner_tap_area'),
                 onTap: () async {
+                  final ctx = context;
                   await _dismissChangelogBanner();
-                  if (mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChangelogScreen(),
-                      ),
-                    );
-                  }
+                  if (!ctx.mounted) return;
+                  Navigator.push(
+                    ctx,
+                    MaterialPageRoute(
+                      builder: (c) => const ChangelogScreen(),
+                    ),
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -466,11 +469,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       if (previous!.isLoading && !next.isLoading &&
           (noOwnKey || usingDeveloperGroqKeyForAny) &&
           ref.read(appSettingsProvider).enableAI) {
+        final ctx = context;
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (!shouldShow) return;
-        if (!mounted) return;
+        if (!ctx.mounted) return;
         showDialog(
-          context: context,
+          context: ctx,
           builder: (context) => const ApiKeyDialog(),
         );
         // Record after showDialog so the cooldown only starts when the dialog
