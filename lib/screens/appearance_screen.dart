@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
-/// A full-page screen that lets the user choose the app colour theme and
-/// light / dark / system mode.
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
 
@@ -76,6 +74,35 @@ class AppearanceScreen extends ConsumerWidget {
                         themeNotifier.setThemeMode(modes.first);
                       },
                     ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Font Selection ─────────────────────────────────────────────
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionHeader(context, Icons.font_download_outlined,
+                      'Font', cs.primary),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose the font used throughout the app.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FontSelector(
+                    selected: themeState.font,
+                    onSelected: (font) => themeNotifier.setFont(font),
                   ),
                 ],
               ),
@@ -155,6 +182,86 @@ class AppearanceScreen extends ConsumerWidget {
         initialName: initialName,
         onSave: (color, name) => notifier.setCustomTheme(color, name),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Font selector
+// ---------------------------------------------------------------------------
+
+class _FontSelector extends StatelessWidget {
+  const _FontSelector({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final AppFont selected;
+  final ValueChanged<AppFont> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: AppFont.values.map((font) {
+        final isSelected = selected == font;
+        final cs = Theme.of(context).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => onSelected(font),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      isSelected ? cs.primary : cs.outline.withOpacity(0.3),
+                  width: isSelected ? 2 : 1,
+                ),
+                color: isSelected
+                    ? cs.primaryContainer.withOpacity(0.3)
+                    : Colors.transparent,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          font.displayName,
+                          style: TextStyle(
+                            fontFamily: font.fontFamily,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? cs.primary
+                                : cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'The quick brown fox jumps over the lazy dog.',
+                          style: TextStyle(
+                            fontFamily: font.fontFamily,
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(Icons.check_circle, color: cs.primary, size: 20),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
