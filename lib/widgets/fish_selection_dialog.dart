@@ -255,7 +255,13 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                       Navigator.of(context).pop(_selectedFish);
                     },
                     icon: const Icon(Icons.check, size: 18),
-                    label: Text(_selectedFish.isEmpty ? 'Done' : 'Confirm (${_selectedFish.length})'),
+                    label: Text(() {
+                      if (_selectedFish.isEmpty) return 'Done';
+                      final hasSpecies = _selectedFish.any((f) => f.commonNames.isNotEmpty);
+                      return hasSpecies
+                          ? 'Confirm & Select Species (${_selectedFish.length})'
+                          : 'Confirm (${_selectedFish.length})';
+                    }()),
                   ),
                 ],
               ),

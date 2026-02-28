@@ -27,6 +27,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   final _notesController = TextEditingController();
   String _selectedCategory = 'freshwater';
   String _selectedUnit = 'gallons';
+  Map<String, List<String>>? _speciesSelections;
 
   @override
   void dispose() {
@@ -58,18 +59,11 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
         },
       );
 
-      // Show species selection dialog if any selected fish have commonNames or tags
-      Map<String, List<String>>? speciesSelections;
-      if (state.selectedFish.isNotEmpty) {
-        speciesSelections = await _showSpeciesSelectionDialog(state.selectedFish);
-        if (!mounted || speciesSelections == null) return;
-      }
-      
       ref.read(aquariumStockingProvider.notifier).getStockingRecommendations(
             tankSize: tankSizeWithUnit,
             tankType: _selectedCategory,
             userNotes: _notesController.text,
-            speciesSelections: speciesSelections,
+            speciesSelections: _speciesSelections,
           );
     }
   }
@@ -85,10 +79,20 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     );
     
     if (result != null && result is List) {
+      final fishList = result.cast<Fish>();
       // Clear and set selected fish
       ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
-      for (var fish in result.cast<Fish>()) {
+      for (var fish in fishList) {
         ref.read(aquariumStockingProvider.notifier).selectFish(fish);
+      }
+      // Show species selection popup immediately after confirming fish
+      if (mounted) {
+        final selections = await _showSpeciesSelectionDialog(fishList);
+        if (mounted) {
+          setState(() {
+            _speciesSelections = selections;
+          });
+        }
       }
     }
   }
@@ -448,7 +452,7 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                       );
                       Navigator.pop(context, result);
                     },
-                    child: const Text('Get Report'),
+                    child: const Text('Confirm'),
                   ),
                 ],
               );
@@ -627,6 +631,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                           TextButton.icon(
                             onPressed: () {
                               ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
+                              setState(() {
+                                _speciesSelections = null;
+                              });
                             },
                             icon: const Icon(Icons.clear, size: 16),
                             label: const Text('Clear'),
