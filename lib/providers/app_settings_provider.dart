@@ -16,6 +16,7 @@ class AppSettingsState {
   final String? localeCode; // null means system default
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
+  final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
 
   AppSettingsState({
     required this.showStockingButton,
@@ -23,6 +24,7 @@ class AppSettingsState {
     this.localeCode,
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
+    this.welcomeGridLayout = true, // Default to grid layout
   });
 }
 
@@ -32,6 +34,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       : super(AppSettingsState(
           showStockingButton: true, // Default to true (show button)
           enableAI: true, // Default to true (AI enabled)
+          welcomeGridLayout: true, // Default to grid layout
         )) {
     _loadSettings();
   }
@@ -42,6 +45,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
+    final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? true; // Default to grid
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -49,6 +53,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      welcomeGridLayout: welcomeGridLayout,
     );
   }
 
@@ -68,6 +73,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
     );
   }
 
@@ -81,6 +87,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
     );
   }
 
@@ -98,6 +105,21 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+    );
+  }
+
+  Future<void> setWelcomeGridLayout(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('welcomeGridLayout', value);
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: value,
     );
   }
 
@@ -119,6 +141,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: false,
+      welcomeGridLayout: state.welcomeGridLayout,
     );
   }
 
@@ -133,6 +156,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
     );
   }
 
@@ -181,6 +205,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
+      welcomeGridLayout: state.welcomeGridLayout,
     );
   }
 }

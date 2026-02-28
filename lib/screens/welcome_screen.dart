@@ -614,10 +614,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       
                       const SizedBox(height: 32),
                       
-                      // Feature Cards in Staggered Grid — split around the native ad.
-                      // AI feature cards (AI Stocking Assistant and earlier) come first,
-                      // then the native ad, then Calculators and the rest.
+                      // Feature Cards section header with layout toggle
                       Builder(builder: (context) {
+                        final useGrid = appSettings.welcomeGridLayout;
                         final splitIndex = features.indexWhere(
                           (f) => f.routeName == '/calculators',
                         );
@@ -627,14 +626,30 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         final bottomFeatures = splitIndex >= 0 ? features.sublist(splitIndex) : <FeatureInfo>[];
                         return Column(
                           children: [
+                            // Layout toggle row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    useGrid ? Icons.view_list : Icons.grid_view,
+                                    size: 20,
+                                  ),
+                                  tooltip: useGrid ? 'Switch to list view' : 'Switch to grid view',
+                                  onPressed: () {
+                                    ref.read(appSettingsProvider.notifier).setWelcomeGridLayout(!useGrid);
+                                  },
+                                ),
+                              ],
+                            ),
                             if (topFeatures.isNotEmpty) ...[
-                              _buildFeatureGrid(context, topFeatures),
+                              _buildFeatureGrid(context, topFeatures, useGrid: useGrid),
                             ],
                             // Native ad between AI Stocking Assistant and Calculators
                             _buildWelcomeNativeAd(),
                             if (bottomFeatures.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              _buildFeatureGrid(context, bottomFeatures),
+                              _buildFeatureGrid(context, bottomFeatures, useGrid: useGrid),
                             ],
                           ],
                         );
@@ -1219,13 +1234,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features) {
+  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features, {bool useGrid = true}) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
     final isMediumScreen = screenWidth > 800;
     
-    // Determine column count based on screen size
-    final crossAxisCount = isLargeScreen ? 3 : (isMediumScreen ? 2 : 1);
+    // Determine column count based on screen size and layout preference
+    final crossAxisCount = isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1));
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1246,6 +1261,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 description: feature.description,
                 imagePath: feature.imagePath,
                 toolChips: feature.toolChips,
+                compact: useGrid && !isMediumScreen,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
@@ -1444,6 +1460,7 @@ class FeatureCard extends ConsumerWidget {
   final VoidCallback onTap;
   final String? imagePath;
   final List<ToolChipInfo>? toolChips;
+  final bool compact;
 
   const FeatureCard({
     super.key,
@@ -1453,6 +1470,7 @@ class FeatureCard extends ConsumerWidget {
     required this.onTap,
     this.imagePath,
     this.toolChips,
+    this.compact = false,
   });
 
   @override
@@ -1538,6 +1556,8 @@ class FeatureCard extends ConsumerWidget {
                     color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
+                  maxLines: compact ? 3 : null,
+                  overflow: compact ? TextOverflow.ellipsis : null,
                 ),
                 if (toolChips != null && toolChips!.isNotEmpty) ...[
                   const SizedBox(height: 12),
