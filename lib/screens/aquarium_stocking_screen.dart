@@ -41,8 +41,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
 
   Future<void> _getRecommendations() async {
     if (_formKey.currentState!.validate()) {
-      // Build tank size string with unit
-      final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
+      // Build tank size string with unit (empty if not provided)
+      final rawTankSize = _tankSizeController.text.trim();
+      final tankSizeWithUnit = rawTankSize.isEmpty ? '' : '$rawTankSize $_selectedUnit';
       final state = ref.read(aquariumStockingProvider);
       
       // Log actual feature usage
@@ -498,8 +499,9 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
       }
 
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
-        // Build tank size string with unit
-        final tankSizeWithUnit = '${_tankSizeController.text} $_selectedUnit';
+        // Build tank size string with unit (empty if not provided)
+        final rawTankSize = _tankSizeController.text.trim();
+        final tankSizeWithUnit = rawTankSize.isEmpty ? '' : '$rawTankSize $_selectedUnit';
         // Capture recommendations before clearing them from state so the
         // report screen keeps a valid reference.
         final reports = next.recommendations!;
@@ -677,13 +679,15 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                     child: TextFormField(
                       controller: _tankSizeController,
                       decoration: const InputDecoration(
-                        labelText: 'Tank Size',
+                        labelText: 'Tank Size (Optional)',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a tank size';
+                        if ((value == null || value.trim().isEmpty) &&
+                            state.selectedFish.isEmpty &&
+                            _notesController.text.trim().isEmpty) {
+                          return 'Enter a tank size, select fish, or add notes';
                         }
                         return null;
                       },

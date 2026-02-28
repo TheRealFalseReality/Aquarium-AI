@@ -22,7 +22,7 @@ String buildStockingRecommendationPrompt(
     IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
     $selectedFishDetails
     
-    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When specific species/varieties are noted in parentheses, tailor the recommendations for those varieties.
+    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When specific species/varieties are noted in parentheses, tailor the recommendations for those varieties. If no specific variety is indicated in parentheses for a fish, provide recommendations for that fish type in general without assuming a specific variety.
     ''';
   }
 
@@ -33,7 +33,7 @@ String buildStockingRecommendationPrompt(
     Note: The app validates final compatibility scores independently, so provide diverse, well-reasoned options.
 
     User's Input:
-    - Tank Size: "$tankSize"
+    - Tank Size: "${tankSize.isEmpty ? 'Not specified' : tankSize}"
     - Tank Type: "$tankType"
     - Notes: "$userNotes"$selectedFishContext
 
