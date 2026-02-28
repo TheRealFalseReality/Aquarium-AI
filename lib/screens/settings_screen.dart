@@ -3587,24 +3587,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String modelsUrl,
     required String rateLimitsUrl,
   }) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final linkStyle = TextStyle(
-      color: primary,
-      decoration: TextDecoration.underline,
-      fontSize: 12,
+    final cs = Theme.of(context).colorScheme;
+    final buttonStyle = OutlinedButton.styleFrom(
+      foregroundColor: cs.primary,
+      side: BorderSide(color: cs.primary.withOpacity(0.5)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      minimumSize: Size.zero,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
-    return Wrap(
-      spacing: 12,
-      children: [
-        InkWell(
-          onTap: () => launchUrl(Uri.parse(modelsUrl)),
-          child: Text('Models & Rate Limits', style: linkStyle),
-        ),
-        InkWell(
-          onTap: () => launchUrl(Uri.parse(rateLimitsUrl)),
-          child: Text('Rate Limits', style: linkStyle),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          OutlinedButton.icon(
+            onPressed: () => launchUrl(Uri.parse(modelsUrl)),
+            icon: const Icon(Icons.auto_awesome_outlined, size: 14),
+            label: const Text('Models'),
+            style: buttonStyle,
+          ),
+          OutlinedButton.icon(
+            onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
+            icon: const Icon(Icons.speed_outlined, size: 14),
+            label: const Text('Rate Limits'),
+            style: buttonStyle,
+          ),
+        ],
+      ),
     );
   }
 
