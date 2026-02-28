@@ -231,26 +231,6 @@
     "description": "Groq provider name"
   },
   
-  "cancel": "Cancel",
-  "@cancel": {
-    "description": "Cancel button"
-  },
-  
-  "save": "Save",
-  "@save": {
-    "description": "Save button"
-  },
-  
-  "delete": "Delete",
-  "@delete": {
-    "description": "Delete button"
-  },
-  
-  "edit": "Edit",
-  "@edit": {
-    "description": "Edit button"
-  },
-  
   "add": "Add",
   "@add": {
     "description": "Add button"
@@ -560,12 +540,7 @@
   "@saltwaterTank": {
     "description": "Saltwater tank label"
   },
-
-  "editTank": "Edit",
-  "@editTank": {
-    "description": "Edit tank menu option"
-  },
-
+  
   "parameterLogger": "Parameter Logger",
   "@parameterLogger": {
     "description": "Parameter logger menu option"

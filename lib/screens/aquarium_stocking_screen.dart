@@ -36,8 +36,6 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     super.dispose();
   }
 
-  String get _categoryDisplayName =>
-      _selectedCategory == 'marine' ? 'Saltwater' : 'Freshwater';
 
   Future<void> _getRecommendations() async {
     if (_formKey.currentState!.validate()) {
