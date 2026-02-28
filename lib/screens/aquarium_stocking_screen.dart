@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
+import '../models/selected_fish_entry.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ai_error_dialog.dart';
@@ -74,10 +75,10 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
     );
     
     if (result != null && result is List) {
-      // Clear and set selected fish
+      // Clear and set selected fish entries
       ref.read(aquariumStockingProvider.notifier).clearSelectedFish();
-      for (var fish in result) {
-        ref.read(aquariumStockingProvider.notifier).selectFish(fish);
+      for (final entry in result.cast<SelectedFishEntry>()) {
+        ref.read(aquariumStockingProvider.notifier).selectFish(entry);
       }
     }
   }
@@ -259,14 +260,14 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: state.selectedFish.map((fish) {
+                        children: state.selectedFish.map((entry) {
                           return Chip(
                             avatar: CircleAvatar(
-                              backgroundImage: CachedNetworkImageProvider(fish.imageURL),
+                              backgroundImage: CachedNetworkImageProvider(entry.fish.imageURL),
                             ),
-                            label: Text(fish.name),
+                            label: Text(entry.displayName),
                             onDeleted: () {
-                              ref.read(aquariumStockingProvider.notifier).selectFish(fish);
+                              ref.read(aquariumStockingProvider.notifier).selectFish(entry);
                             },
                             deleteIcon: const Icon(Icons.close, size: 18),
                             backgroundColor: cs.secondaryContainer,

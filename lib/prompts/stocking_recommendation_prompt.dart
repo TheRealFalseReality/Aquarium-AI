@@ -1,20 +1,28 @@
 import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
+import 'package:fish_ai/models/selected_fish_entry.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<Fish>? selectedFish}) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<SelectedFishEntry>? selectedFish}) {
   final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected
   String selectedFishContext = '';
   if (selectedFish != null && selectedFish.isNotEmpty) {
-    final selectedFishNames = selectedFish.map((f) => f.name).join(', ');
+    // Build a human-readable description: "Blue Ram (Cichlid)" when a common
+    // name is chosen, otherwise just the species name.
+    final selectedFishDetails = selectedFish.map((e) {
+      if (e.selectedCommonName != null) {
+        return '"${e.selectedCommonName}" (${e.fish.name})';
+      }
+      return e.fish.name;
+    }).join(', ');
     selectedFishContext = '''
 
     IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
-    $selectedFishNames
+    $selectedFishDetails
     
-    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish.
+    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When a common name (variety/morph) is given in parentheses, tailor the recommendations specifically for that variety.
     ''';
   }
 
