@@ -192,6 +192,13 @@ class _ThemeChip extends StatelessWidget {
     AppColorTheme.gold: AquaThemeColors.goldSwatchPrimary,
     AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchPrimary,
     AppColorTheme.midnight: AquaThemeColors.midnightSwatchPrimary,
+    AppColorTheme.orange: AquaThemeColors.orangeSwatchPrimary,
+    AppColorTheme.green: AquaThemeColors.greenSwatchPrimary,
+    AppColorTheme.skyBlue: AquaThemeColors.skyBlueSwatchPrimary,
+    AppColorTheme.royalBlue: AquaThemeColors.royalBlueSwatchPrimary,
+    AppColorTheme.orchid: AquaThemeColors.orchidSwatchPrimary,
+    AppColorTheme.hotPink: AquaThemeColors.hotPinkSwatchPrimary,
+    AppColorTheme.crimson: AquaThemeColors.crimsonSwatchPrimary,
   };
 
   static const _swatchDarker = {
@@ -202,6 +209,13 @@ class _ThemeChip extends StatelessWidget {
     AppColorTheme.gold: AquaThemeColors.goldSwatchSecondary,
     AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchSecondary,
     AppColorTheme.midnight: AquaThemeColors.midnightSwatchSecondary,
+    AppColorTheme.orange: AquaThemeColors.orangeSwatchSecondary,
+    AppColorTheme.green: AquaThemeColors.greenSwatchSecondary,
+    AppColorTheme.skyBlue: AquaThemeColors.skyBlueSwatchSecondary,
+    AppColorTheme.royalBlue: AquaThemeColors.royalBlueSwatchSecondary,
+    AppColorTheme.orchid: AquaThemeColors.orchidSwatchSecondary,
+    AppColorTheme.hotPink: AquaThemeColors.hotPinkSwatchSecondary,
+    AppColorTheme.crimson: AquaThemeColors.crimsonSwatchSecondary,
   };
 
   @override

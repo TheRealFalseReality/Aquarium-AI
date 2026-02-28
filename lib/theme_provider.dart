@@ -31,6 +31,27 @@ enum AppColorTheme {
 
   /// Midnight – primary color #0F1623.
   midnight,
+
+  /// Orange – primary color #FF8C00.
+  orange,
+
+  /// Green – primary color #32CD32 (merged from lawn green & lime green).
+  green,
+
+  /// Sky blue – primary color #00BFFF.
+  skyBlue,
+
+  /// Royal blue – primary color #4169E1.
+  royalBlue,
+
+  /// Orchid – primary color #BA55D3.
+  orchid,
+
+  /// Hot pink – primary color #FF69B4.
+  hotPink,
+
+  /// Crimson – primary color #DC143C (merged from firebrick & crimson).
+  crimson,
 }
 
 extension AppColorThemeExt on AppColorTheme {
@@ -50,6 +71,20 @@ extension AppColorThemeExt on AppColorTheme {
         return 'Mulberry';
       case AppColorTheme.midnight:
         return 'Midnight';
+      case AppColorTheme.orange:
+        return 'Orange';
+      case AppColorTheme.green:
+        return 'Green';
+      case AppColorTheme.skyBlue:
+        return 'Sky Blue';
+      case AppColorTheme.royalBlue:
+        return 'Royal Blue';
+      case AppColorTheme.orchid:
+        return 'Orchid';
+      case AppColorTheme.hotPink:
+        return 'Hot Pink';
+      case AppColorTheme.crimson:
+        return 'Crimson';
     }
   }
 
@@ -70,6 +105,20 @@ extension AppColorThemeExt on AppColorTheme {
         return AquaThemeColors.mulberrySeed;
       case AppColorTheme.midnight:
         return AquaThemeColors.midnightSeed;
+      case AppColorTheme.orange:
+        return AquaThemeColors.orangeSeed;
+      case AppColorTheme.green:
+        return AquaThemeColors.greenSeed;
+      case AppColorTheme.skyBlue:
+        return AquaThemeColors.skyBlueSeed;
+      case AppColorTheme.royalBlue:
+        return AquaThemeColors.royalBlueSeed;
+      case AppColorTheme.orchid:
+        return AquaThemeColors.orchidSeed;
+      case AppColorTheme.hotPink:
+        return AquaThemeColors.hotPinkSeed;
+      case AppColorTheme.crimson:
+        return AquaThemeColors.crimsonSeed;
     }
   }
 }
