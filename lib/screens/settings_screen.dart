@@ -3588,32 +3588,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String rateLimitsUrl,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final buttonStyle = OutlinedButton.styleFrom(
-      foregroundColor: cs.primary,
-      side: BorderSide(color: cs.primary.withOpacity(0.5)),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      minimumSize: Size.zero,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
+      child: Row(
         children: [
-          OutlinedButton.icon(
-            onPressed: () => launchUrl(Uri.parse(modelsUrl)),
-            icon: const Icon(Icons.auto_awesome_outlined, size: 14),
-            label: const Text('Models'),
-            style: buttonStyle,
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () => launchUrl(Uri.parse(modelsUrl)),
+              icon: Icon(Icons.auto_awesome_outlined,
+                  size: 16, color: cs.onSecondaryContainer),
+              label: Text('Models',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSecondaryContainer)),
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.secondaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ),
-          OutlinedButton.icon(
-            onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
-            icon: const Icon(Icons.speed_outlined, size: 14),
-            label: const Text('Rate Limits'),
-            style: buttonStyle,
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
+              icon: Icon(Icons.speed_outlined,
+                  size: 16, color: cs.onTertiaryContainer),
+              label: Text('Rate Limits',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onTertiaryContainer)),
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.tertiaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ),
         ],
       ),
