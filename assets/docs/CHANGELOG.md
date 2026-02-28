@@ -54,6 +54,7 @@ All notable changes to this project will be documented in this file.
 - Expenses or P&L
 - Share and import tanks with friends  
 - Explore feed  
+- iOS ( in_app_update -> upgrader)
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
