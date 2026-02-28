@@ -2375,7 +2375,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2385,7 +2390,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -2594,7 +2604,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://platform.openai.com/docs/models',
+              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2605,7 +2620,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://platform.openai.com/docs/models',
+              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -2823,7 +2843,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://console.groq.com/docs/models',
+              rateLimitsUrl: 'https://console.groq.com/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2838,7 +2863,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 helperMaxLines: 2,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://console.groq.com/docs/models',
+              rateLimitsUrl: 'https://console.groq.com/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -3550,6 +3580,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         value: value,
         onChanged: onChanged,
       ),
+    );
+  }
+
+  Widget _buildModelRateLimitsLink({
+    required String modelsUrl,
+    required String rateLimitsUrl,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final linkStyle = TextStyle(
+      color: primary,
+      decoration: TextDecoration.underline,
+      fontSize: 12,
+    );
+    return Wrap(
+      spacing: 12,
+      children: [
+        InkWell(
+          onTap: () => launchUrl(Uri.parse(modelsUrl)),
+          child: Text('Models & Rate Limits', style: linkStyle),
+        ),
+        InkWell(
+          onTap: () => launchUrl(Uri.parse(rateLimitsUrl)),
+          child: Text('Rate Limits', style: linkStyle),
+        ),
+      ],
     );
   }
 
