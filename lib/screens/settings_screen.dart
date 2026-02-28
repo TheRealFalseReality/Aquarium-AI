@@ -2408,7 +2408,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2418,7 +2423,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -2627,7 +2637,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://platform.openai.com/docs/models',
+              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2638,7 +2653,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://platform.openai.com/docs/models',
+              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -2856,7 +2876,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://console.groq.com/docs/models',
+              rateLimitsUrl: 'https://console.groq.com/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
           if (forTextUseCase == false) ...[
             TextField(
@@ -2871,7 +2896,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 helperMaxLines: 2,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            _buildModelRateLimitsLink(
+              modelsUrl: 'https://console.groq.com/docs/models',
+              rateLimitsUrl: 'https://console.groq.com/docs/rate-limits',
+            ),
+            const SizedBox(height: 12),
           ],
         ],
       );
@@ -3582,6 +3612,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         value: value,
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildModelRateLimitsLink({
+    required String modelsUrl,
+    required String rateLimitsUrl,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () => launchUrl(Uri.parse(modelsUrl)),
+              icon: Icon(Icons.auto_awesome_outlined,
+                  size: 16, color: cs.onSecondaryContainer),
+              label: Text('Models',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSecondaryContainer)),
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.secondaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
+              icon: Icon(Icons.speed_outlined,
+                  size: 16, color: cs.onTertiaryContainer),
+              label: Text('Rate Limits',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onTertiaryContainer)),
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.tertiaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

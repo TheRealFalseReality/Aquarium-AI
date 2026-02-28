@@ -3,11 +3,13 @@ import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/in_app_update_service.dart';
 import '../widgets/ad_component.dart';
 
 class AboutScreen extends ConsumerStatefulWidget {
@@ -19,6 +21,7 @@ class AboutScreen extends ConsumerStatefulWidget {
 
 class AboutScreenState extends ConsumerState<AboutScreen> {
   String _version = '...';
+  bool _checkingUpdate = false;
 
   @override
   void initState() {
@@ -31,6 +34,30 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     setState(() {
       _version = info.version;
     });
+  }
+
+  Future<void> _checkForUpdate() async {
+    setState(() => _checkingUpdate = true);
+    try {
+      final info = await InAppUpdateService.checkForUpdate();
+      if (!mounted) return;
+      if (info == null) {
+        // Check failed (e.g. not distributed via Play or network error)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to check for updates.')),
+        );
+        return;
+      }
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        await InAppUpdateService.startFlexibleUpdate();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You're already on the latest version!")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
   }
 
   Future<void> _launchURL(String urlString) async {
@@ -342,6 +369,23 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+
+          // Check for Update button (Android only)
+          if (!kIsWeb && Platform.isAndroid)
+            Center(
+              child: OutlinedButton.icon(
+                icon: _checkingUpdate
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.system_update_outlined, size: 18),
+                label: const Text('Check for Update'),
+                onPressed: _checkingUpdate ? null : _checkForUpdate,
+              ),
+            ),
           const SizedBox(height: 16),
         ],
       ),

@@ -55,6 +55,9 @@ const double _defaultEarlySupporterPrice = 0.99;
 /// Fallback Buy Me a Coffee URL.
 const String _defaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
 
+/// Fallback changelog markdown content (empty = use bundled local asset).
+const String _defaultChangelog = '';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -123,6 +126,11 @@ class RemoteConfigKeys {
   /// String — URL for the Buy Me a Coffee page.
   /// Set in Remote Config to change without an app update.
   static const String buyMeACoffeeUrl = 'buy_me_a_coffee_url';
+
+// ── Changelog ─────────────────────────────────────────────────────────────
+  /// String — full markdown content of the changelog.
+  /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
+  static const String changelog = 'changelog';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -161,6 +169,7 @@ class RemoteConfigService {
         RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: _defaultBuyMeACoffeeUrl,
+        RemoteConfigKeys.changelog: _defaultChangelog,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -309,4 +318,12 @@ class RemoteConfigService {
   /// set, otherwise falls back to the in-app default.
   static String get buyMeACoffeeUrl =>
       _modelString(RemoteConfigKeys.buyMeACoffeeUrl, _defaultBuyMeACoffeeUrl);
+
+  // ── Changelog ───────────────────────────────────────────────────────────────
+
+  /// Full markdown content of the changelog from Remote Config.
+  /// Returns an empty string when not set in Remote Config,
+  /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
+  static String get changelog =>
+      _modelString(RemoteConfigKeys.changelog, _defaultChangelog);
 }

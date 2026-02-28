@@ -4,6 +4,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/remote_config_service.dart';
 import '../widgets/ad_component.dart';
 
 class ChangelogScreen extends StatefulWidget {
@@ -34,6 +35,15 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   }
 
   Future<void> _loadChangelog() async {
+    // Try Remote Config first; fall back to the bundled .md asset.
+    final remoteContent = RemoteConfigService.changelog;
+    if (remoteContent.isNotEmpty) {
+      setState(() {
+        _markdownContent = remoteContent;
+        _isLoading = false;
+      });
+      return;
+    }
     try {
       final content =
           await rootBundle.loadString('assets/docs/CHANGELOG.md');

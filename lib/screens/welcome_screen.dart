@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +30,7 @@ import '../widgets/aquapi_promotion_dialog.dart';
 import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/in_app_review_service.dart';
+import '../services/in_app_update_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 
@@ -128,12 +130,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
 
+  // Version info for footer
+  String _version = '';
+  bool _checkingUpdate = false;
+
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
   
   @override
   void initState() {
     super.initState();
+    _loadVersion();
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
@@ -327,6 +334,40 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
     } catch (e) {
       debugPrint('Error checking changelog banner: $e');
+    }
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) {
+        setState(() => _version = info.version);
+      }
+    } catch (e) {
+      debugPrint('Failed to load app version: $e');
+    }
+  }
+
+  Future<void> _checkForUpdate() async {
+    setState(() => _checkingUpdate = true);
+    try {
+      final info = await InAppUpdateService.checkForUpdate();
+      if (!mounted) return;
+      if (info == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to check for updates.')),
+        );
+        return;
+      }
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        await InAppUpdateService.startFlexibleUpdate();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You're already on the latest version!")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
     }
   }
 
@@ -613,6 +654,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               '${_getImageModelName(modelState)} (image)',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
+                            const SizedBox(height: 16),
+                            if (_version.isNotEmpty)
+                              Text(
+                                'Version $_version',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            if (!kIsWeb && Platform.isAndroid) ...[
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                icon: _checkingUpdate
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.system_update_outlined, size: 18),
+                                label: const Text('Check for Update'),
+                                onPressed: _checkingUpdate ? null : _checkForUpdate,
+                              ),
+                            ],
                           ],
                         ),
                       )

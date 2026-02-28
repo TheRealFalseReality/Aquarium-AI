@@ -2,19 +2,27 @@ import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish, {List<Fish>? selectedFish}) {
+    String tankSize, String tankType, String userNotes, List<Fish> allFish,
+    {List<Fish>? selectedFish, Map<String, List<String>>? speciesSelections}) {
   final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected
   String selectedFishContext = '';
   if (selectedFish != null && selectedFish.isNotEmpty) {
-    final selectedFishNames = selectedFish.map((f) => f.name).join(', ');
+    // Build a human-readable description including any specific species chosen
+    final selectedFishDetails = selectedFish.map((f) {
+      final species = speciesSelections?[f.name];
+      if (species != null && species.isNotEmpty) {
+        return '${f.name} (${species.join(', ')})';
+      }
+      return f.name;
+    }).join(', ');
     selectedFishContext = '''
 
     IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
-    $selectedFishNames
+    $selectedFishDetails
     
-    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish.
+    You MUST include these selected fish in the "coreFish" list of your recommendations. Build the stocking plans around these specific fish. When specific species/varieties are noted in parentheses, tailor the recommendations for those varieties. If no specific variety is indicated in parentheses for a fish, provide recommendations for that fish type in general without assuming a specific variety.
     ''';
   }
 
@@ -25,7 +33,7 @@ String buildStockingRecommendationPrompt(
     Note: The app validates final compatibility scores independently, so provide diverse, well-reasoned options.
 
     User's Input:
-    - Tank Size: "$tankSize"
+    - Tank Size: "${tankSize.isEmpty ? 'Not specified' : tankSize}"
     - Tank Type: "$tankType"
     - Notes: "$userNotes"$selectedFishContext
 
