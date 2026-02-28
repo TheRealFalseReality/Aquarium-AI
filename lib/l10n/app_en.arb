@@ -1913,6 +1913,21 @@
     "description": "Last report button label"
   },
 
+  "selectFishTypes": "Select Fish Types",
+  "@selectFishTypes": {
+    "description": "Button label to open the fish type selection dialog on the stocking screen"
+  },
+
+  "selectSpecies": "Select Species",
+  "@selectSpecies": {
+    "description": "Button label to open the specific species selection dialog on the stocking screen"
+  },
+
+  "selectedFish": "Selected Fish",
+  "@selectedFish": {
+    "description": "Header label for the selected fish chip panel on the stocking screen"
+  },
+
   "getRecommendations": "Get Recommendations",
   "@getRecommendations": {
     "description": "Get recommendations button label"

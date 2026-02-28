@@ -81,7 +81,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
       child: Container(
         constraints: BoxConstraints(
           maxWidth: 800, 
-          maxHeight: screenHeight * 0.85, // Use 85% of screen height
+          maxHeight: screenHeight * 0.85,
         ),
         child: Column(
           children: [

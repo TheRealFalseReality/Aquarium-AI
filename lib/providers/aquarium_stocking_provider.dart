@@ -87,11 +87,16 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     state = state.copyWith(selectedFish: []);
   }
 
+  void clearRecommendations() {
+    state = state.copyWith(clearRecommendation: true);
+  }
+
 
   Future<void> getStockingRecommendations({
     required String tankSize,
     required String tankType,
     required String userNotes,
+    Map<String, List<String>>? speciesSelections,
   }) async {
     state = state.copyWith(
         isLoading: true, clearError: true, clearRecommendation: true);
@@ -147,6 +152,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       userNotes, 
       allFish,
       selectedFish: state.selectedFish,
+      speciesSelections: speciesSelections,
     );
 
     try {
