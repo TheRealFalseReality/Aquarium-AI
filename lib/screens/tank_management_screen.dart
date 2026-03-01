@@ -377,11 +377,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final sortedTanks = _sortTanks(tanks);
     final screenWidth = MediaQuery.of(context).size.width;
     
-    // Use grid layout for larger screens (tablets and desktops)
-    final useGridLayout = screenWidth >= 900;
+    // Use grid layout for larger screens (tablets and desktops) OR when user enables grid on mobile
+    final useGridLayout = screenWidth >= 900 || appSettings.tankGridLayout;
     
     if (useGridLayout) {
-      // Use masonry grid for larger screens
+      // Column count: 3 for large screens, 2 otherwise
       final int columnCount = screenWidth >= 1400 ? 3 : 2;
       
       return CustomScrollView(
@@ -389,7 +389,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildHeader(context, sortedTanks.length),
+              child: _buildHeader(context, ref, sortedTanks.length, appSettings),
             ),
           ),
           // Masonry grid layout with native ads
@@ -522,7 +522,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     
     // Header is always at index 0
     if (index == 0) {
-      return _buildHeader(context, tanks.length);
+      return _buildHeader(context, ref, tanks.length, appSettings);
     }
     
     // Calculate actual tank index and whether this should be an ad
@@ -629,8 +629,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return sortedTanks;
   }
 
-  Widget _buildHeader(BuildContext context, int tankCount) {
+  Widget _buildHeader(BuildContext context, WidgetRef ref, int tankCount, AppSettingsState appSettings) {
     final l10n = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -649,6 +651,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 ),
               ),
+              
+              // Grid/List toggle (only visible on mobile)
+              if (isMobile)
+                IconButton(
+                  icon: Icon(
+                    appSettings.tankGridLayout ? Icons.view_list : Icons.grid_view,
+                    size: 20,
+                  ),
+                  tooltip: appSettings.tankGridLayout ? l10n.switchToListView : l10n.switchToGridView,
+                  onPressed: () {
+                    ref.read(appSettingsProvider.notifier).setTankGridLayout(!appSettings.tankGridLayout);
+                  },
+                ),
               
               // Sort menu
               OutlinedButton.icon(
@@ -892,7 +907,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ];
     
     return Container(
-      margin: isLargeScreen ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
+      margin: (isLargeScreen || appSettings.tankGridLayout) ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
         gradient: backgroundPhoto == null ? LinearGradient(
           colors: gradientColors,

@@ -635,7 +635,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                     useGrid ? Icons.view_list : Icons.grid_view,
                                     size: 20,
                                   ),
-                                  tooltip: useGrid ? 'Switch to list view' : 'Switch to grid view',
+                                  tooltip: useGrid ? l10n.switchToListView : l10n.switchToGridView,
                                   onPressed: () {
                                     ref.read(appSettingsProvider.notifier).setWelcomeGridLayout(!useGrid);
                                   },
@@ -1513,14 +1513,15 @@ class FeatureCard extends ConsumerWidget {
           onTap: onTap,
           splashColor: cs.primary.withOpacity(0.1),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(compact ? 14.0 : 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
+                if (compact) ...[
+                  // Compact (grid on mobile): icon centered, title below
+                  Center(
+                    child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: cs.primaryContainer.withOpacity(0.5),
@@ -1532,26 +1533,54 @@ class FeatureCard extends ConsumerWidget {
                       ),
                       child: Text(icon, style: const TextStyle(fontSize: 28)),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isMaterialYou ? cs.onSurface : cs.primary,
-                            ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isMaterialYou ? cs.onSurface : cs.primary,
+                        ),
+                  ),
+                ] else ...[
+                  // Default (list / large screen): icon + title in a row
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: cs.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(icon, style: const TextStyle(fontSize: 28)),
                       ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: cs.primary.withOpacity(0.7),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isMaterialYou ? cs.onSurface : cs.primary,
+                              ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: cs.primary.withOpacity(0.7),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Text(
                   description,
+                  textAlign: compact ? TextAlign.center : TextAlign.start,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     height: 1.4,

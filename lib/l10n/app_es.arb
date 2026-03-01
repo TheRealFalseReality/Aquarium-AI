@@ -23,6 +23,8 @@
   "aquaPiStore": "Tienda AquaPi",
   "aquaPiStoreDescription": "Descubre AquaPi, el controlador inteligente definitivo para acuarios. Monitorea y controla los parámetros de tu acuario con pruebas automatizadas, alertas en tiempo real e integración perfecta.",
   "myTanks": "Mis Acuarios",
+  "switchToListView": "Cambiar a vista de lista",
+  "switchToGridView": "Cambiar a vista de cuadrícula",
   "noTanksYet": "Aún no hay acuarios. ¡Toca para agregar uno!",
   "totalTanks": "Total: {count}",
   "createFirstTank": "Crea Tu Primer Acuario",

@@ -115,6 +115,16 @@
     "description": "Title for the my tanks section"
   },
   
+  "switchToListView": "Switch to list view",
+  "@switchToListView": {
+    "description": "Tooltip for the button that switches to list layout"
+  },
+  
+  "switchToGridView": "Switch to grid view",
+  "@switchToGridView": {
+    "description": "Tooltip for the button that switches to grid layout"
+  },
+  
   "noTanksYet": "No tanks yet. Tap to add one!",
   "@noTanksYet": {
     "description": "Message when user has no tanks"

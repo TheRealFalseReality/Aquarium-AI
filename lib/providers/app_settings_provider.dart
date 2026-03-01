@@ -17,6 +17,7 @@ class AppSettingsState {
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
   final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
+  final bool tankGridLayout; // Controls grid (true) vs list (false) on tank management screen
 
   AppSettingsState({
     required this.showStockingButton,
@@ -25,6 +26,7 @@ class AppSettingsState {
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
     this.welcomeGridLayout = true, // Default to grid layout
+    this.tankGridLayout = false, // Default to list layout for tanks
   });
 }
 
@@ -35,6 +37,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
           showStockingButton: true, // Default to true (show button)
           enableAI: true, // Default to true (AI enabled)
           welcomeGridLayout: true, // Default to grid layout
+          tankGridLayout: false, // Default to list layout for tanks
         )) {
     _loadSettings();
   }
@@ -46,6 +49,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
     final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? true; // Default to grid
+    final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -54,6 +58,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: welcomeGridLayout,
+      tankGridLayout: tankGridLayout,
     );
   }
 
@@ -74,6 +79,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 
@@ -88,6 +94,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 
@@ -106,6 +113,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 
@@ -120,6 +128,22 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: value,
+      tankGridLayout: state.tankGridLayout,
+    );
+  }
+
+  Future<void> setTankGridLayout(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankGridLayout', value);
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: value,
     );
   }
 
@@ -142,6 +166,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: false,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 
@@ -157,6 +182,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 
@@ -206,6 +232,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       isLoading: false,
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
       welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
     );
   }
 }
