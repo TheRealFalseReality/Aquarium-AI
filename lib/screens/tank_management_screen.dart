@@ -1572,8 +1572,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 );
               },
               child: Padding(
-                // In grid mode, use extra top padding to make room for the Positioned menu button overlay.
-                padding: isGridMode ? const EdgeInsets.fromLTRB(12, 42, 12, 12) : const EdgeInsets.all(18.0),
+                padding: isGridMode ? const EdgeInsets.all(12.0) : const EdgeInsets.all(18.0),
                 child: Column(
                   crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                   children: [
