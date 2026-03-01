@@ -459,6 +459,26 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 575),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.people, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(l10n.communityTitle),
+                      subtitle: Text(l10n.communityDrawerDescription),
+                      onTap: () => navigate('/community'),
+                    ),
+                  ),
+                ),
                 // Debug-only: Fish Compat Editor
                 if (kDebugMode) ...[
                   AnimatedDrawerItem(

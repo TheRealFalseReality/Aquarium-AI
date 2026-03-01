@@ -564,6 +564,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 900),
       ),
       FeatureInfo(
+        icon: '🌊',
+        title: l10n.communityTitle,
+        description: l10n.communityDrawerDescription,
+        routeName: '/community',
+        delay: const Duration(milliseconds: 925),
+      ),
+      FeatureInfo(
         icon: '🛒',
         title: l10n.aquaPiStore,
         description: l10n.aquaPiStoreDescription,
