@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - Fix bug with species popup not reflecting common names  
 - Fix AI Stocking tool re-navigation bug, improve species selection UX, and make tank size optional
 
-**Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.03...v3.0.10
+**Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.03...v3.0.10>
 
 ## [3.0.03] - 2026-2-24  - Major Updates
 
