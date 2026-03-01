@@ -43,8 +43,9 @@ class CommunityFeedState {
   }
 }
 
-class CommunityFeedNotifier extends StateNotifier<CommunityFeedState> {
-  CommunityFeedNotifier() : super(const CommunityFeedState());
+class CommunityFeedNotifier extends Notifier<CommunityFeedState> {
+  @override
+  CommunityFeedState build() => const CommunityFeedState();
 
   void setSelectedType(PostType? type) {
     state = state.copyWith(
@@ -55,9 +56,9 @@ class CommunityFeedNotifier extends StateNotifier<CommunityFeedState> {
 }
 
 final communityFeedProvider =
-    StateNotifierProvider<CommunityFeedNotifier, CommunityFeedState>((ref) {
-  return CommunityFeedNotifier();
-});
+    NotifierProvider<CommunityFeedNotifier, CommunityFeedState>(
+  CommunityFeedNotifier.new,
+);
 
 /// Live stream of all posts (most recent first).
 final communityPostsStreamProvider =
@@ -105,8 +106,9 @@ class CreatePostState {
   }
 }
 
-class CreatePostNotifier extends StateNotifier<CreatePostState> {
-  CreatePostNotifier() : super(const CreatePostState());
+class CreatePostNotifier extends Notifier<CreatePostState> {
+  @override
+  CreatePostState build() => const CreatePostState();
 
   Future<CommunityPost?> submitPost({
     required PostType type,
@@ -133,6 +135,6 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
 }
 
 final createPostProvider =
-    StateNotifierProvider.autoDispose<CreatePostNotifier, CreatePostState>((ref) {
-  return CreatePostNotifier();
-});
+    NotifierProvider.autoDispose<CreatePostNotifier, CreatePostState>(
+  CreatePostNotifier.new,
+);
