@@ -216,7 +216,6 @@
   "dataRestoredSuccess": "Données restaurées avec succès!",
   "notify": "Notifier",
   "dateTimeInPast": "Impossible de programmer une notification dans le passé",
-
   "updateNotificationTitle": "Mettre à jour la notification?",
   "updateNotificationMessage": "Vous avez une notification \"{notificationName}\" configurée. Souhaitez-vous mettre à jour quand la prochaine notification est programmée?",
   "rescheduleFromOriginal": "Garder le calendrier original",
@@ -232,14 +231,12 @@
   "cancelActivityLog": "Annuler",
   "cancelActivityLogDescription": "Ne pas enregistrer l'activité et ne pas reprogrammer",
   "notificationUpdated": "Calendrier de notification mis à jour",
-
   "scheduleNotificationTitle": "Programmer la Notification",
   "scheduleNotificationMessage": "Vous avez des journaux d'activité \"{activityType}\" existants. Comment souhaitez-vous programmer la prochaine notification?",
   "useSpecifiedTime": "Utiliser l'Heure Spécifiée",
   "useSpecifiedTimeDescription": "Programmer selon la date/heure que vous avez définie ci-dessus",
   "useLastActivity": "Depuis la Dernière Activité",
   "useLastActivityDescription": "Programmer selon votre journal d'activité le plus récent",
-
   "rescheduleFromOriginalDescriptionDetailed": "{interval} à partir de maintenant, à {time} (heure originale)",
   "rescheduleFromNowDescriptionDetailed": "{interval} à partir de maintenant, à {time} (heure actuelle)",
   "oneDay": "1 jour",
@@ -275,7 +272,6 @@
   "lastNote": "Dernière note",
   "noteRequired": "Veuillez entrer une note",
   "moreNotes": "+{count} notes supplémentaires",
-
   "rememberMyChoice": "Se souvenir de mon choix",
   "rememberChoiceSettingsHint": "Vous pouvez réinitialiser cette préférence dans Paramètres > Paramètres de l'application",
   "resetReschedulePreference": "Préférence de la boîte de dialogue de reprogrammation",
@@ -286,7 +282,6 @@
   "resetAll": "Tout réinitialiser",
   "reschedulePreferences": "Préférences de reprogrammation",
   "replaceAllReschedulePreferences": "Remplacer TOUTES les préférences de reprogrammation",
-
   "gallery": "Galerie",
   "camera": "Caméra",
   "addPhoto": "Ajouter une Photo",
@@ -375,7 +370,6 @@
   "dosingSum": "Résumé du Dosage",
   "totalDoses": "Doses Totales",
   "treatments": "Traitements",
-
   "automationScript": "Script d'Automatisation",
   "aiAutomationScriptGenerator": "Générateur de Scripts d'Automatisation IA",
   "automationDescription": "Décrivez l'automatisation que vous souhaitez créer pour Home Assistant ou ESPHome.",
@@ -401,7 +395,6 @@
   "viewScript": "Voir le Script",
   "viewPhotoAnalysis": "Voir l'Analyse Photo",
   "viewFishInfo": "Voir Info Poisson",
-
   "addNotesPlaceholder": "Ajouter des notes supplémentaires...",
   "addNotification": "Ajouter une Notification",
   "dateAndTime": "Date et Heure",
@@ -467,7 +460,6 @@
   "helpWantedContactEmail": "📧 **Email** : contactus@capitalcityaquatics.com",
   "helpWantedGitHub": "🔗 **GitHub** : Visitez le [dépôt Aquarium-AI](https://github.com/TheRealFalseReality/Aquarium-AI) pour explorer le code, ouvrir des issues ou soumettre des pull requests.",
   "helpWantedClosing": "Que vous soyez expérimenté ou débutant, vos contributions peuvent vraiment faire la différence ! Construisons quelque chose d'incroyable ensemble. 🐠",
-  
   "overview": "Aperçu",
   "photos": "Photos",
   "waterParameters": "Paramètres",
@@ -485,13 +477,10 @@
   "addPhotosHint": "Ajouter des photos dans l'écran d'édition",
   "timestamps": "Horodatages",
   "lastUpdated": "Dernière Mise à Jour",
-  
   "harmony": "Harmonie",
   "qty": "Qté",
-  
   "createdLabel": "Créé",
   "inhabitantsLabel": "Habitants",
-
   "fishInfo": "Info Poisson",
   "aiFishInfoLookup": "Recherche d'Info Poisson par IA",
   "fishInfoDescription": "Entrez le nom d'un ou plusieurs poissons pour obtenir des informations complètes, notamment le nom latin, l'origine, des faits, des anecdotes, les soins en aquarium et les colocataires compatibles.",
@@ -507,12 +496,9 @@
   "changelogLatestRelease": "Dernière version",
   "changelogAllReleases": "Toutes les versions",
   "changelogGotIt": "Compris",
-
   "addCustomSpecies": "Ajouter une espèce personnalisée",
-
   "submitIssue": "Soumettre un problème",
   "submitIssueDesc": "Signaler un bug ou demander une nouvelle fonctionnalité sur GitHub",
-
   "removeAds": "Supprimer les publicités",
   "removeAdsSettingsSubtitle": "Soutenez le développeur avec un achat unique",
   "removeAdsDrawerSubtitle": "Achat unique · Soutenir le développeur",
@@ -528,7 +514,17 @@
   "buyMeACoffeeDesc": "Soutenez le développeur avec un petit don",
   "buyMeACoffeeDialogBody": "Vous aimez Aquarium AI ? Vous pouvez soutenir le développeur en offrant un café ! Choisissez une option :",
   "buyMeACoffeeInApp": "Acheter via Google Play",
-  "buyMeACoffeeWebsite": "Acheter sur buymeacoffee.com"
+  "buyMeACoffeeWebsite": "Acheter sur buymeacoffee.com",
+  "appearanceSubtitle": "Personnalisez l’apparence de l’application.",
+  "brightnessMode": "Mode de luminosité",
+  "light": "Clair",
+  "system": "Système",
+  "dark": "Sombre",
+  "colourTheme": "Thème de couleur",
+  "chooseColourPalette": "Choisissez une palette de couleurs pour toute l’application.",
+  "font": "Police",
+  "chooseFontDesc": "Choisissez la police utilisée dans toute l’application.",
+  "fontPreviewText": "Portez ce vieux whisky au juge blond qui fume.",
+  "customTheme": "Thème personnalisé",
+  "themeName": "Nom du thème"
 }
-
-
