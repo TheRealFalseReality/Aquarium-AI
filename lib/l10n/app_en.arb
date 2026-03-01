@@ -3145,6 +3145,7 @@
   "communityPostError": "Failed to publish post. Please try again.",
   "@communityPostError": {
     "description": "Error snackbar when post submission fails"
+  },
   "sortFilterAndView": "Sort, Filter & View",
   "@sortFilterAndView": {
     "description": "Label for the sort, filter and view panel button in tank management"
