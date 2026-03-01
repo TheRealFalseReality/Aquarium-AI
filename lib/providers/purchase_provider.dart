@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants.dart';
 import '../services/purchase_service.dart';
 
 const String _adsRemovedKey = 'adsRemoved';

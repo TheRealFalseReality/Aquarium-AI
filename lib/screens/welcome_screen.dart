@@ -220,7 +220,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     return CheckboxListTile(
                       value: !isHidden,
                       title: Text(f.title),
-                      leading: Text(f.icon, style: const TextStyle(fontSize: 20)),
                       enabled: !isDisabled,
                       subtitle: isDisabled ? Text(l10n.purchaseToHideCard) : null,
                       onChanged: isDisabled ? null : (val) {
