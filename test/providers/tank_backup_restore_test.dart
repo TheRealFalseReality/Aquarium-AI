@@ -3,6 +3,7 @@ import 'package:fish_ai/models/tank.dart';
 import 'package:fish_ai/models/tank_notification.dart';
 import 'package:fish_ai/providers/tank_provider.dart';
 import 'package:fish_ai/providers/species_tags_provider.dart';
+import 'package:fish_ai/providers/tank_tags_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -605,6 +606,242 @@ void main() {
       expect(restoredNotif.notificationDateTime.day, equals(specificDateTime.day));
       expect(restoredNotif.notificationDateTime.hour, equals(specificDateTime.hour));
       expect(restoredNotif.notificationDateTime.minute, equals(specificDateTime.minute));
+    });
+  });
+
+  group('TankTag (user-created tank labels) Backup and Restore Tests', () {
+    test('tank toJson includes tags with name and color', () {
+      final tag1 = TankTag(name: 'Planted', color: 0xFF4CAF50);
+      final tag2 = TankTag(name: 'Quarantine'); // null color (theme default)
+      final tank = Tank.create(
+        name: 'Tagged Tank',
+        type: 'freshwater',
+        tags: [tag1, tag2],
+      );
+
+      final tankJson = tank.toJson();
+
+      expect(tankJson.containsKey('tags'), isTrue);
+      final tagsData = tankJson['tags'] as List;
+      expect(tagsData.length, equals(2));
+      expect(tagsData[0]['name'], equals('Planted'));
+      expect(tagsData[0]['color'], equals(0xFF4CAF50));
+      expect(tagsData[1]['name'], equals('Quarantine'));
+      expect(tagsData[1].containsKey('color'), isFalse); // null color omitted
+    });
+
+    test('tank fromJson restores tags with name and color', () {
+      const argbColor = 0xFF4CAF50;
+      final originalTank = Tank.create(
+        name: 'Tagged Tank',
+        type: 'freshwater',
+        tags: [
+          TankTag(name: 'Planted', color: argbColor),
+          TankTag(name: 'FOWLR'),
+        ],
+      );
+
+      final restoredTank = Tank.fromJson(originalTank.toJson());
+
+      expect(restoredTank.tags.length, equals(2));
+      expect(restoredTank.tags[0].name, equals('Planted'));
+      expect(restoredTank.tags[0].color, equals(argbColor));
+      expect(restoredTank.tags[1].name, equals('FOWLR'));
+      expect(restoredTank.tags[1].color, isNull);
+    });
+
+    test('tank tags survive JSON roundtrip in full backup format', () {
+      final tank = Tank.create(
+        name: 'Reef Tank',
+        type: 'marine',
+        tags: [
+          TankTag(name: 'SPS', color: 0xFF2196F3),
+          TankTag(name: 'Display'),
+        ],
+      );
+
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [tank.toJson(includeLocalPaths: false)],
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsed = json.decode(jsonString) as Map<String, dynamic>;
+      final tanksList = parsed['tanks'] as List;
+      final restoredTank = Tank.fromJson(tanksList[0]);
+
+      expect(restoredTank.tags.length, equals(2));
+      expect(restoredTank.tags[0].name, equals('SPS'));
+      expect(restoredTank.tags[0].color, equals(0xFF2196F3));
+      expect(restoredTank.tags[1].name, equals('Display'));
+      expect(restoredTank.tags[1].color, isNull);
+    });
+
+    test('backup without tags field restores to empty tag list (backwards compat)', () {
+      final tankJson = {
+        'id': 'tank-1',
+        'name': 'Old Tank',
+        'type': 'freshwater',
+        'inhabitants': [],
+        'sizeGallons': null,
+        'sizeLiters': null,
+        'notes': null,
+        'harmonyScore': null,
+        'calculationBreakdown': null,
+        'createdAt': '2024-01-01T00:00:00.000',
+        'updatedAt': '2024-01-01T00:00:00.000',
+        'photos': [],
+        'waterParameters': [],
+        'dosingEntries': [],
+        // 'tags' field absent (legacy backup)
+      };
+
+      final restoredTank = Tank.fromJson(tankJson);
+
+      expect(restoredTank.tags, isEmpty);
+    });
+
+    test('TankTagsNotifier exports and imports tags correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(tankTagsProvider.notifier);
+
+      // Seed some tags
+      await notifier.importTags([
+        TankTag(name: 'Planted', color: 0xFF4CAF50),
+        TankTag(name: 'FOWLR'),
+      ]);
+
+      final exported = notifier.exportTags();
+      expect(exported.length, equals(2));
+      expect(exported[0]['name'], equals('Planted'));
+      expect(exported[0]['color'], equals(0xFF4CAF50));
+      expect(exported[1]['name'], equals('FOWLR'));
+      expect(exported[1].containsKey('color'), isFalse);
+
+      // Restore via importTags
+      final restored = exported
+          .map((e) => TankTag.fromJson(e))
+          .toList();
+      final container2 = ProviderContainer();
+      addTearDown(container2.dispose);
+      final notifier2 = container2.read(tankTagsProvider.notifier);
+      await notifier2.importTags(restored);
+
+      final state = container2.read(tankTagsProvider);
+      expect(state.length, equals(2));
+      expect(state[0].name, equals('Planted'));
+      expect(state[0].color, equals(0xFF4CAF50));
+      expect(state[1].name, equals('FOWLR'));
+      expect(state[1].color, isNull);
+    });
+
+    test('TankTagsNotifier syncFromTanks merges tags from multiple tanks', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(tankTagsProvider.notifier);
+
+      final tanks = [
+        Tank.create(
+          name: 'Tank A',
+          type: 'freshwater',
+          tags: [TankTag(name: 'Planted', color: 0xFF4CAF50)],
+        ),
+        Tank.create(
+          name: 'Tank B',
+          type: 'marine',
+          tags: [
+            TankTag(name: 'FOWLR'),
+            TankTag(name: 'Display', color: 0xFF9C27B0),
+          ],
+        ),
+      ];
+
+      await notifier.syncFromTanks(tanks);
+
+      final state = container.read(tankTagsProvider);
+      expect(state.length, equals(3));
+      final names = state.map((t) => t.name).toSet();
+      expect(names, containsAll(['Planted', 'FOWLR', 'Display']));
+    });
+
+    test('TankTagsNotifier syncFromTanks preserves existing registry entries', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(tankTagsProvider.notifier);
+
+      // Pre-populate registry with a tag that has a specific color
+      await notifier.importTags([TankTag(name: 'Planted', color: 0xFF4CAF50)]);
+
+      // Sync from a tank that also has 'Planted' but with a different color
+      await notifier.syncFromTanks([
+        Tank.create(
+          name: 'Tank A',
+          type: 'freshwater',
+          tags: [TankTag(name: 'Planted', color: 0xFFFF0000)],
+        ),
+      ]);
+
+      // Registry colour should be preserved (registry wins)
+      final state = container.read(tankTagsProvider);
+      final planted = state.firstWhere((t) => t.name == 'Planted');
+      expect(planted.color, equals(0xFF4CAF50));
+    });
+
+    test('backup tankTags section round-trips correctly', () {
+      final tags = [
+        TankTag(name: 'Planted', color: 0xFF4CAF50),
+        TankTag(name: 'FOWLR'),
+        TankTag(name: 'Display', color: 0xFF9C27B0),
+      ];
+
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'tankTags': tags.map((t) => t.toJson()).toList(),
+      };
+
+      final jsonString = json.encode(backupData);
+      final parsed = json.decode(jsonString) as Map<String, dynamic>;
+
+      expect(parsed.containsKey('tankTags'), isTrue);
+      final restoredList =
+          (parsed['tankTags'] as List).map((e) => TankTag.fromJson(e)).toList();
+
+      expect(restoredList.length, equals(3));
+      expect(restoredList[0].name, equals('Planted'));
+      expect(restoredList[0].color, equals(0xFF4CAF50));
+      expect(restoredList[1].name, equals('FOWLR'));
+      expect(restoredList[1].color, isNull);
+      expect(restoredList[2].name, equals('Display'));
+      expect(restoredList[2].color, equals(0xFF9C27B0));
+    });
+
+    test('backup without tankTags section is still valid (backwards compat)', () {
+      final backupData = {
+        'version': '1.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+      };
+
+      expect(backupData.containsKey('tanks'), isTrue);
+      expect(backupData.containsKey('version'), isTrue);
+      // tankTags is optional — its absence must not break validation
+      expect(backupData.containsKey('tankTags'), isFalse);
     });
   });
 }
