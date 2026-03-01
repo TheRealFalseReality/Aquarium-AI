@@ -1335,9 +1335,12 @@
       "name": "Angelfish",
       "commonNames": [
         "Queen Angelfish",
-        "Emperor Angelfish"
+        "Emperor Angelfish",
+        "French Angelfish",
+        "Blueface Angelfish",
+        "Koran (Semicircle) Angelfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pez_%C3%A1ngel_emperador_%28Pomacanthus_imperator%29%2C_mar_Rojo%2C_Egipto%2C_2023-04-17%2C_DD_104.jpg/250px-Pez_%C3%A1ngel_emperador_%28Pomacanthus_imperator%29%2C_mar_Rojo%2C_Egipto%2C_2023-04-17%2C_DD_104.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_marine.jpg",
       "compatible": [
         "Blennies",
         "Eels",
@@ -1348,7 +1351,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons",
         "Wrasse - Fish Only"
@@ -1358,7 +1361,7 @@
         "Dragonets"
       ],
       "notCompatible": [
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
@@ -1366,7 +1369,7 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -1392,9 +1395,12 @@
       "name": "Angelfish - Dwarf",
       "commonNames": [
         "Flame Angelfish",
-        "Coral Beauty"
+        "Coral Beauty",
+        "Cherub (Pygmy) Angelfish",
+        "Bicolor Angelfish",
+        "Lemonpeel Angelfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Flame_angelfish_%28Centropyge_loricula%29.jpg/250px-Flame_angelfish_%28Centropyge_loricula%29.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_dwarf_marine.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -1419,7 +1425,7 @@
         "Batfish",
         "Groupers",
         "Lionfish / Scorpionfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Squirrelfish",
         "Triggerfish",
@@ -1432,7 +1438,7 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish",
         "Corals",
         "Dragonets",
@@ -1440,18 +1446,22 @@
         "Grunts / Sweetlips",
         "Parrotfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Snails - Marine",
         "Wrasse - Fish Only"
       ]
     },
     {
-      "name": "Anglers / Frogs",
+      "name": "Anglers / Frogfish",
       "commonNames": [
-        "Frogfish",
-        "Anglerfish"
+        "Wartskin Anglerfish",
+        "Painted Frogfish",
+        "Striated (Hairy) Frogfish",
+        "Giant Frogfish",
+        "Sargassum Fish",
+        "Psychedelic Frogfish"
       ],
-      "imageURL": "https://yourfishstore.com/cdn/shop/products/X1-Red-Angler-Frogfish-Lrg-4-6-Marine-Fish-Saltwater-Free-Shipping-marine-fish-packages.jpg?v=1740709075",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/frogfish.jpg",
       "compatible": [
         "Batfish",
         "Boxfish",
@@ -1464,8 +1474,8 @@
       ],
       "notRecommended": [
         "Eels",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1506,9 +1516,13 @@
       "name": "Anthias",
       "commonNames": [
         "Lyretail Anthias",
-        "Squarfin Anthias"
+        "Squarfin Anthias",
+        "Bartlett's Anthias",
+        "Dispar Anthias",
+        "Sunburst (Fathead) Anthias",
+        "Bimaculatus Anthias"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Anthias_anthias.jpg/250px-Anthias_anthias.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anthias.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1524,7 +1538,7 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1544,7 +1558,7 @@
       ],
       "withCaution": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Boxfish",
         "Cardinalfish",
         "Damselfish",
@@ -1554,7 +1568,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Triggerfish",
         "Wrasse - Fish Only"
       ]
@@ -1563,9 +1577,13 @@
       "name": "Basslets",
       "commonNames": [
         "Royal Gramma",
-        "Blackcap Basslet"
+        "Blackcap Basslet",
+        "Chalk Bass",
+        "Swissguard Basslet",
+        "Candy Basslet",
+        "Yellow Assessor"
       ],
-      "imageURL": "https://reefs.com/blog/wp-content/uploads/2006/10/Candy_Bass_1-64d8099e9cf06a7bbbfa957095876afe.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/basslets.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1576,7 +1594,7 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1593,7 +1611,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1612,19 +1630,20 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
-        "Puffers",
+        "Pufferfish",
         "Wrasse - Fish Only"
       ]
     },
     {
       "name": "Batfish",
       "commonNames": [
-        "Longfin Batfish",
-        "Pinnatus Batfish"
+        "Pinnate Batfish",
+        "Teira (Longfin) Batfish",
+        "Orbicular (Round) Batfish"
       ],
-      "imageURL": "https://www.thesmilingseahorse.com/uploads/1/0/1/8/10183628/dsc-2797_orig.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/batfish.jpg",
       "compatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Butterflyfish",
@@ -1633,7 +1652,7 @@
         "Grunts / Sweetlips",
         "Hawkfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons"
       ],
@@ -1650,7 +1669,7 @@
         "Gobies",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
       ],
@@ -1677,9 +1696,13 @@
       "name": "Blennies",
       "commonNames": [
         "Lawnmower Blenny",
-        "Bicolor Blenny"
+        "Bicolor Blenny",
+        "Starry Blenny",
+        "Midas Blenny",
+        "Tailspot Blenny",
+        "Fang Blennies"
       ],
-      "imageURL": "https://reefchasers.com/cdn/shop/collections/blenny-fish-721819.jpg?v=1682979037",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/blennies.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -1690,7 +1713,7 @@
         "Dartfish",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1710,7 +1733,7 @@
         "Sharks / Rays"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Blennies",
@@ -1725,7 +1748,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Wrasse - Fish Only"
       ]
@@ -1734,12 +1757,14 @@
       "name": "Boxfish",
       "commonNames": [
         "Longhorn Cowfish",
-        "Yellow Boxfish"
+        "Yellow Boxfish",
+        "Spotted Boxfish",
+        "Scrawled Cowfish"
       ],
-      "imageURL": "https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/assets/images/boxfish.jpg?raw=true",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/boxfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Blennies",
@@ -1778,8 +1803,8 @@
         "Groupers",
         "Hawkfish",
         "Lionfish / Scorpionfish",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1791,11 +1816,19 @@
       "name": "Butterflyfish",
       "commonNames": [
         "Copperband Butterflyfish",
-        "Heniochus Butterflyfish"
+        "Heniochus Butterflyfish",
+        "Auriga (Threadfin) Butterflyfish",
+        "Sunburst (Klein’s) Butterflyfish",
+        "Pearlscale Butterflyfish",
+        "Merten’s Butterflyfish",
+        "Pyramid Butterflyfish",
+        "Zoster Butterflyfish",
+        "Raccoon Butterflyfish",
+        "Yellow Longnose Butterflyfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Chelmon_rostratus_Luc_Viatour.jpg/250px-Chelmon_rostratus_Luc_Viatour.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/butterflyfish.jpg",
       "compatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -1825,7 +1858,7 @@
         "Lionfish / Scorpionfish",
         "Parrotfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons"
       ],
@@ -1836,7 +1869,7 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Triggerfish",
@@ -1848,9 +1881,12 @@
       "name": "Cardinalfish",
       "commonNames": [
         "Banggai Cardinalfish",
-        "Pajama Cardinalfish"
+        "Pajama Cardinalfish",
+        "Longspine (Glass) Cardinalfish",
+        "Flame (Red) Cardinalfish",
+        "Blue-Eyed Cardinalfish"
       ],
-      "imageURL": "https://shop.thebiotagroup.com/cdn/shop/files/Kaudern_s_1200x.jpg?v=1702911876",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cardinalfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Basslets",
@@ -1881,7 +1917,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1895,8 +1931,8 @@
         "Blennies",
         "Damselfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
       ]
@@ -1904,10 +1940,12 @@
     {
       "name": "Chromis",
       "commonNames": [
-        "Green Chromis",
-        "Blue Chromis"
+        "Blue-Green Reef Chromis",
+        "Vanderbilt’s Chromis",
+        "Barrier Reef Chromis",
+        "Black-Axil Chromis"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blue-green_Chromis%2C_Kiribati_imported_from_iNaturalist_photo_345755248.jpg/250px-Blue-green_Chromis%2C_Kiribati_imported_from_iNaturalist_photo_345755248.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/chromis.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1927,7 +1965,7 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1941,7 +1979,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1954,7 +1992,7 @@
         "Grunts / Sweetlips",
         "Hogfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Wrasse - Fish Only"
       ]
     },
@@ -1962,9 +2000,12 @@
       "name": "Clownfish (Female) ♀",
       "commonNames": [
         "Ocellaris Clownfish",
-        "Percula Clownfish"
+        "Percula Clownfish",
+        "Maroon Clownfish",
+        "Clarkii Clownfish",
+        "Tomato Clownfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_female.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1976,7 +2017,7 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -1994,7 +2035,7 @@
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Clownfish (Female) ♀",
         "Eels",
         "Groupers",
@@ -2012,16 +2053,19 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers"
+        "Pufferfish"
       ]
     },
     {
       "name": "Clownfish (Male) ♂",
       "commonNames": [
         "Ocellaris Clownfish",
-        "Percula Clownfish"
+        "Percula Clownfish",
+        "Maroon Clownfish",
+        "Clarkii Clownfish",
+        "Tomato Clownfish"
       ],
-      "imageURL": "https://media.istockphoto.com/id/1334812871/photo/clown-anemonefish-amphiprion-ocellaris.jpg?s=612x612&w=0&k=20&c=9jl_d9FrCrFZz4dPWI-s2pLDpIlqrEnoWqaE465T0gU=",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_male.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -2034,7 +2078,7 @@
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2052,7 +2096,7 @@
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2069,7 +2113,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers"
+        "Pufferfish"
       ]
     },
     {
@@ -2095,7 +2139,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2119,12 +2163,12 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Blennies",
         "Boxfish",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Puffers",
+        "Pufferfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Triggerfish"
@@ -2134,16 +2178,24 @@
       "name": "Damselfish",
       "commonNames": [
         "Blue Damsel",
-        "Yellowtail Damsel"
+        "Yellowtail Damsel",
+        "Azure Damselfish",
+        "Talbot’s Damselfish",
+        "Springer’s Damselfish",
+        "Three-Stripe & Four-Stripe Damsels",
+        "Domino Damselfish",
+        "Blue Devil Damselfish",
+        "Garibaldi Damselfish",
+        "Neon Velvet Damsel"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Caribbean_Cocoa_damselfish.jpg/250px-Caribbean_Cocoa_damselfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/damselfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Corals",
         "Foxface / Rabbitfish",
         "Hawkfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Snails - Marine",
         "Tangs / Surgeons",
         "Wrasse - Fish Only",
@@ -2162,7 +2214,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2182,7 +2234,7 @@
         "Dragonets",
         "Filefish",
         "Grunts / Sweetlips",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
       ]
@@ -2190,10 +2242,12 @@
     {
       "name": "Dartfish",
       "commonNames": [
-        "Firefish",
-        "Scissortail Goby"
+        "Firefish Goby",
+        "Scissortail Goby",
+        "Zebra Barred Dartfish",
+        "Blue Gudgeon Dartfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Nemateleotris_magnifica.jpg/250px-Nemateleotris_magnifica.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/dartfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Blennies",
@@ -2207,7 +2261,7 @@
         "Foxface / Rabbitfish",
         "Gobies",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2221,7 +2275,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2239,7 +2293,7 @@
         "Damselfish",
         "Filefish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Seahorse / Pipefish",
         "Wrasse - Fish Only"
       ]
@@ -2248,9 +2302,13 @@
       "name": "Dragonets",
       "commonNames": [
         "Mandarinfish",
-        "Spotted Mandarin"
+        "Spotted Mandarin",
+        "Green Mandarin",
+        "Ruby Red Dragonet",
+        "Red Scooter Dragonet",
+        "Scooter Blenny"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Synchiropus_splendidus_2_Luc_Viatour.jpg/250px-Synchiropus_splendidus_2_Luc_Viatour.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/dragonets.jpg",
       "compatible": [
         "Boxfish",
         "Butterflyfish",
@@ -2262,7 +2320,7 @@
         "Foxface / Rabbitfish",
         "Gobies",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Snails - Marine",
@@ -2276,7 +2334,7 @@
         "Wrasse - Reef Safe"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2295,7 +2353,7 @@
         "Damselfish",
         "Filefish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons",
         "Wrasse - Fish Only"
@@ -2305,9 +2363,14 @@
       "name": "Eels",
       "commonNames": [
         "Snowflake Moray",
-        "Zebra Moray"
+        "Zebra Moray",
+        "Giant Moray",
+        "American Eel",
+        "European Eel",
+        "Garden Eels",
+        "Electric Eels"
       ],
-      "imageURL": "https://www.pbs.org/wnet/nature/files/2021/09/david-clode-yBraeHiDXi8-unsplash-scaled-e1630589780218.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/eels.jpg",
       "compatible": [
         "Angelfish",
         "Grunts / Sweetlips",
@@ -2315,7 +2378,7 @@
         "Tangs / Surgeons"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Corals"
       ],
       "notCompatible": [
@@ -2334,7 +2397,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
@@ -2349,7 +2412,7 @@
         "Groupers",
         "Hogfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Snails - Marine",
         "Squirrelfish",
@@ -2362,12 +2425,16 @@
       "name": "Filefish",
       "commonNames": [
         "Aiptasia-Eating Filefish",
-        "Matted Filefish"
+        "Matted Filefish",
+        "Tasselled Filefish",
+        "Orange-Spotted Filefish",
+        "Mimic Filefish",
+        "Radiant (Red Tail) Filefish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Gallito_%28Stephanolepis_hispidus%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-06%2C_DD_16.jpg/250px-Gallito_%28Stephanolepis_hispidus%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-06%2C_DD_16.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/filefish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -2409,8 +2476,8 @@
         "Dragonets",
         "Hawkfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Squirrelfish",
         "Wrasse - Fish Only"
       ]
@@ -2418,14 +2485,17 @@
     {
       "name": "Foxface / Rabbitfish",
       "commonNames": [
-        "Foxface Rabbitfish",
-        "Magnificent Rabbitfish"
+        "Magnificent Rabbitfish",
+        "One Spot Foxface",
+        "Foxface Lo",
+        "Orange-Spotted Rabbitfish",
+        "Bicolor Foxface"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Siganus_vulpinus_2.jpg/1200px-Siganus_vulpinus_2.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/foxface.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -2446,7 +2516,7 @@
         "Hogfish",
         "Jawfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Wrasse - Reef Safe"
       ],
@@ -2462,7 +2532,7 @@
         "Corals",
         "Eels",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Sharks / Rays",
         "Shrimp - Marine",
         "Snails - Marine",
@@ -2475,10 +2545,13 @@
     {
       "name": "Gobies",
       "commonNames": [
-        "Yellow Watchman Goby",
-        "Clown Goby"
+        "Watchman Goby",
+        "Clown Goby",
+        "Diamond Watchman Goby",
+        "Neon Cleaner Goby",
+        "Engineer Goby"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Cryptocentrus_cinctus.JPG/1200px-Cryptocentrus_cinctus.JPG",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/gobies.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -2491,7 +2564,7 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2506,7 +2579,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2523,7 +2596,7 @@
         "Hawkfish",
         "Hogfish",
         "Jawfish",
-        "Puffers",
+        "Pufferfish",
         "Seahorse / Pipefish",
         "Squirrelfish",
         "Wrasse - Fish Only"
@@ -2533,9 +2606,11 @@
       "name": "Groupers",
       "commonNames": [
         "Panther Grouper",
-        "Miniatus Grouper"
+        "Miniatus Grouper",
+        "Polleni (Harlequin) Grouper",
+        "Blue Line Grouper"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Cromileptes_altivelis_skansen_2006.jpg/250px-Cromileptes_altivelis_skansen_2006.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/groupers.jpg",
       "compatible": [
         "Angelfish",
         "Lionfish / Scorpionfish"
@@ -2564,21 +2639,21 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Squirrelfish",
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Boxfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2590,12 +2665,14 @@
       "name": "Grunts / Sweetlips",
       "commonNames": [
         "Porkfish",
-        "Harlequin Sweetlips"
+        "Harlequin Sweetlips",
+        "Oriental Sweetlips",
+        "French Grunt"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Plectorhinchus_chaetodonoides.JPG/250px-Plectorhinchus_chaetodonoides.JPG",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/grunts.jpg",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Eels",
@@ -2603,7 +2680,7 @@
         "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons"
       ],
@@ -2625,7 +2702,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts",
@@ -2647,9 +2724,13 @@
       "name": "Hawkfish",
       "commonNames": [
         "Longnose Hawkfish",
-        "Flame Hawkfish"
+        "Flame Hawkfish",
+        "Falco (Dwarf) Hawkfish",
+        "Arc Eye Hawkfish",
+        "Freckled Hawkfish",
+        "Pixy (Spotted) Hawkfish"
       ],
-      "imageURL": "https://cdn11.bigcommerce.com/s-lsus8itpbr/images/stencil/1920x1280/uploaded_images/-appsheet-images-all-images-qm-fish-hawks-neocirrhites-armatus-1-edit.jpg?t=1589832243",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/hawkfish.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -2663,7 +2744,7 @@
         "Foxface / Rabbitfish",
         "Hogfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Tangs / Surgeons",
         "Wrasse - Fish Only"
       ],
@@ -2684,7 +2765,7 @@
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Blennies",
         "Boxfish",
@@ -2694,7 +2775,7 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Snails - Marine",
         "Triggerfish",
         "Wrasse - Reef Safe"
@@ -2704,9 +2785,12 @@
       "name": "Hogfish",
       "commonNames": [
         "Spanish Hogfish",
-        "Cuban Hogfish"
+        "Cuban (Spotfin) Hogfish",
+        "Coral (Eclipse) Hogfish",
+        "Peppermint (Candy) Hogfish",
+        "Diana’s Hogfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/A_hogfish_is_a_large_wrasse%2C_Lachnolaimus_maximus.jpg/250px-A_hogfish_is_a_large_wrasse%2C_Lachnolaimus_maximus.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/hogfish.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -2716,7 +2800,7 @@
         "Hawkfish",
         "Hogfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Tangs / Surgeons"
       ],
       "notRecommended": [
@@ -2735,13 +2819,13 @@
         "Pseudochromis"
       ],
       "notCompatible": [
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Batfish",
         "Chromis",
@@ -2761,9 +2845,11 @@
       "name": "Jawfish",
       "commonNames": [
         "Yellowhead Jawfish",
-        "Blue Spot Jawfish"
+        "Blue Spot Jawfish",
+        "Tiger Jawfish",
+        "Dusky Jawfish"
       ],
-      "imageURL": "https://www.ikelite.com/cdn/shop/articles/lindsey-dougherty-jawfish-header.jpg?v=1552757200&width=2048",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/jawfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -2776,7 +2862,7 @@
         "Dragonets",
         "Filefish",
         "Foxface / Rabbitfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -2791,7 +2877,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2808,7 +2894,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Seahorse / Pipefish",
         "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
@@ -2818,12 +2904,14 @@
       "name": "Lionfish / Scorpionfish",
       "commonNames": [
         "Lionfish",
-        "Scorpionfish"
+        "Leaf Scorpionfish",
+        "Weedy Scorpionfish",
+        "Bearded Scorpionfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Clearfin_lionfish_%28Pterois_radiata%29.JPG/250px-Clearfin_lionfish_%28Pterois_radiata%29.JPG",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/lionfish.jpg",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers"
       ],
@@ -2850,7 +2938,7 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts"
@@ -2863,7 +2951,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Snails - Marine",
         "Squirrelfish",
@@ -2875,9 +2963,13 @@
       "name": "Parrotfish",
       "commonNames": [
         "Bicolor Parrotfish",
-        "Queen Parrotfish"
+        "Queen Parrotfish",
+        "Green Humphead Parrotfish",
+        "Stoplight Parrotfish",
+        "Rainbow Parrotfish",
+        "Quoyi Parrotfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scarus_frenatus_by_Ewa_Barska.jpg/250px-Scarus_frenatus_by_Ewa_Barska.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/parrotfish.jpg",
       "compatible": [
         "Angelfish",
         "Batfish",
@@ -2886,7 +2978,7 @@
         "Grunts / Sweetlips",
         "Hogfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons"
       ],
@@ -2911,7 +3003,7 @@
       ],
       "notCompatible": [
         "Corals",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Snails - Marine",
@@ -2919,7 +3011,7 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2932,9 +3024,12 @@
       "name": "Pseudochromis",
       "commonNames": [
         "Orchid Dottyback",
-        "Magenta Dottyback"
+        "Purple (Magenta) Dottyback",
+        "Neon Dottyback",
+        "Sunrise Dottyback",
+        "Springer's Dottyback"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Pseudochromis_aldabraensis.JPG/1200px-Pseudochromis_aldabraensis.JPG",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/pseudochromis.jpg",
       "compatible": [
         "Boxfish",
         "Corals",
@@ -2953,7 +3048,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2977,8 +3072,8 @@
         "Foxface / Rabbitfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
         "Wrasse - Fish Only",
@@ -2986,12 +3081,16 @@
       ]
     },
     {
-      "name": "Puffers",
+      "name": "Pufferfish",
       "commonNames": [
         "Dogface Puffer",
-        "Porcupine Puffer"
+        "Porcupine Puffer",
+        "Valentini (Saddle) Puffer",
+        "Stars and Stripes Puffer",
+        "Blue Spot Puffer",
+        "Guineafowl Puffer"
       ],
-      "imageURL": "https://idsb.tmgrup.com.tr/ly/uploads/images/2022/12/11/245916.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/puffers.jpg",
       "compatible": [
         "Angelfish",
         "Batfish",
@@ -3006,11 +3105,11 @@
         "Tangs / Surgeons"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish"
       ],
       "notCompatible": [
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Shrimp - Marine",
@@ -3046,9 +3145,15 @@
       "name": "Seahorse / Pipefish",
       "commonNames": [
         "Lined Seahorse",
-        "Banded Pipefish"
+        "Banded (Janss's) Pipefish",
+        "Yellow/Common Seahorse",
+        "Longsnout Seahorse",
+        "Dwarf Seahorse",
+        "Dragonface Pipefish",
+        "Bluestripe Pipefish",
+        "Ghost Pipefish"
       ],
-      "imageURL": "https://images.squarespace-cdn.com/content/v1/5734f2a086db43e3f6fb1bbc/1551223084117-ZST8V2WNKNXGNTHHYNC7/Lars+Reichenbach+-+GuyLian+Seahorses+of+the+World+2018+-+1st+prize+category+photo.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/seahorse.jpg",
       "compatible": [
         "Dragonets",
         "Seahorse / Pipefish"
@@ -3057,7 +3162,7 @@
       "notCompatible": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3079,7 +3184,7 @@
         "Lionfish / Scorpionfish",
         "Parrotfish",
         "Pseudochromis",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Squirrelfish",
         "Tangs / Surgeons",
@@ -3092,7 +3197,7 @@
         "Dartfish",
         "Gobies",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Worms / Misc. Inverts"
@@ -3101,17 +3206,23 @@
     {
       "name": "Sharks / Rays",
       "commonNames": [
-        "Banded Cat Shark",
-        "Blue Spotted Stingray"
+        "Banded Catshark",
+        "Blue Spotted Stingray",
+        "Bamboo Shark",
+        "Epaulette Shark",
+        "Coral Catshark",
+        "Horn Shark",
+        "Atlantic Yellow Ray",
+        "California Stingray"
       ],
-      "imageURL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTke_Zqoj1Lr0GGefos709T4xaGpbBOZ4wZGA&s",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/rays.jpg",
       "compatible": [
         "Sharks / Rays"
       ],
       "notRecommended": [],
       "notCompatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3130,8 +3241,8 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Snails - Marine",
@@ -3157,10 +3268,15 @@
     {
       "name": "Shrimp - Marine",
       "commonNames": [
-        "Cleaner Shrimp",
-        "Peppermint Shrimp"
+        "Skunk Cleaner Shrimp",
+        "Peppermint Shrimp",
+        "Blood Red Fire Shrimp",
+        "Banded Coral Shrimp",
+        "Pistol (Snapping) Shrimp",
+        "Harlequin Shrimp",
+        "Sexy Shrimp"
       ],
-      "imageURL": "https://worldwidecorals.com/cdn/shop/articles/Blood-Shrimp-Reef-Aquarium-Cover.jpg?v=1716412148",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/shrimp_marine.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -3175,7 +3291,7 @@
         "Gobies",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -3183,7 +3299,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish"
       ],
       "notCompatible": [
@@ -3196,7 +3312,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Squirrelfish",
         "Triggerfish",
@@ -3215,9 +3331,12 @@
       "name": "Snails - Marine",
       "commonNames": [
         "Astrea Snail",
-        "Nassarius Snail"
+        "Nassarius Snail",
+        "Trochus Snail",
+        "Cerith Snail",
+        "Turbo Snail"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Reticunassa_silvardi_%28MNHN-IM-2000-20870%29.jpeg/250px-Reticunassa_silvardi_%28MNHN-IM-2000-20870%29.jpeg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/snails_marine.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -3233,20 +3352,20 @@
         "Gobies",
         "Jawfish",
         "Pseudochromis",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
         "Filefish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Triggerfish"
       ],
@@ -3272,18 +3391,22 @@
       "name": "Squirrelfish",
       "commonNames": [
         "Longspine Squirrelfish",
-        "Redcoat Squirrelfish"
+        "Redcoat Squirrelfish",
+        "Sabre Squirrelfish",
+        "Hawaiian Squirrelfish",
+        "Neon/Reef Squirrelfish",
+        "Ruby Blue-Lined Squirrelfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Holocentrus_rufus.jpg/250px-Holocentrus_rufus.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/squirrelfish.jpg",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Foxface / Rabbitfish",
         "Grunts / Sweetlips",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons"
       ],
@@ -3306,7 +3429,7 @@
       ],
       "notCompatible": [
         "Groupers",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts",
@@ -3329,9 +3452,13 @@
       "name": "Tangs / Surgeons",
       "commonNames": [
         "Yellow Tang",
-        "Blue Tang"
+        "Blue (Hippo/Palette) Tang",
+        "Kole (Yellow-Eye) Tang",
+        "Sailfin Tang",
+        "Naso (Lipstick) Tang",
+        "Powder Blue Tang"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Pez_cirujano_azul_cielo_%28Acanthurus_leucosternon%29%2C_Zanz%C3%ADbar%2C_Tanzania%2C_2024-05-30%2C_DD_80.jpg/250px-Pez_cirujano_azul_cielo_%28Acanthurus_leucosternon%29%2C_Zanz%C3%ADbar%2C_Tanzania%2C_2024-05-30%2C_DD_80.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/tangs.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -3354,8 +3481,8 @@
         "Hogfish",
         "Jawfish",
         "Parrotfish",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Squirrelfish",
@@ -3365,7 +3492,7 @@
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish",
         "Lionfish / Scorpionfish"
       ],
@@ -3386,9 +3513,12 @@
       "name": "Triggerfish",
       "commonNames": [
         "Clown Triggerfish",
-        "Picasso Triggerfish"
+        "Picasso (Lagoon) Triggerfish",
+        "Niger (Redtoothed) Triggerfish",
+        "Blue Throat Triggerfish",
+        "Pink Tail Triggerfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Picasso.triggerfish.arp.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/triggerfish.jpg",
       "compatible": [
         "Triggerfish"
       ],
@@ -3405,7 +3535,7 @@
         "Worms / Misc. Inverts"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Cardinalfish",
@@ -3431,8 +3561,8 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Squirrelfish",
         "Tangs / Surgeons",
         "Wrasse - Fish Only",
@@ -3442,10 +3572,13 @@
     {
       "name": "Wrasse - Fish Only",
       "commonNames": [
-        "Harlequin Tusk",
-        "Red Coris Wrasse"
+        "Harlequin Tusk Wrasse",
+        "Red Coris Wrasse",
+        "Bird Wrasse",
+        "Dragon (Rock Mover) Wrasse",
+        "Lunar (Moon) Wrasse"
       ],
-      "imageURL": "https://www.seadwelling.com/cdn/shop/products/HarlequinTuskFWRHA590AU.jpg?v=1655413349",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/wrasse_fish_only.jpg",
       "compatible": [
         "Angelfish",
         "Damselfish",
@@ -3466,7 +3599,7 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3489,8 +3622,8 @@
         "Lionfish / Scorpionfish",
         "Parrotfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Sharks / Rays",
         "Triggerfish",
         "Wrasse - Reef Safe"
@@ -3500,9 +3633,12 @@
       "name": "Wrasse - Reef Safe",
       "commonNames": [
         "Six Line Wrasse",
-        "Fairy Wrasse"
+        "Fairy Wrasse",
+        "Yellow Coris Wrasse",
+        "Melanurus Wrasse",
+        "Pink-Streaked Wrasse"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Six_Line_Wrasse_-_Pseudocheilinus_hexataenia_%28cropped%29.jpg/250px-Six_Line_Wrasse_-_Pseudocheilinus_hexataenia_%28cropped%29.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/wrasse_reef_safe.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -3536,7 +3672,7 @@
       ],
       "withCaution": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Cardinalfish",
         "Eels",
@@ -3544,8 +3680,8 @@
         "Hogfish",
         "Jawfish",
         "Pseudochromis",
-        "Puffers",
-        "Sea Star / Urchin",
+        "Pufferfish",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Triggerfish",
@@ -3554,12 +3690,15 @@
       ]
     },
     {
-      "name": "Sea Star / Urchin",
+      "name": "Sea Star - Reef Safe",
       "commonNames": [
-        "Chocolate Starfish",
-        "Pencil Urchin"
+        "Brittle & Serpent Star",
+        "Linckia Starfish",
+        "Fromia Starfish",
+        "Sand Sifting Starfish",
+        "Asterina Starfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Starfish_montage.png/1280px-Starfish_montage.png",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/sea_star_reef_safe.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -3580,7 +3719,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish"
       ],
       "notCompatible": [
@@ -3591,7 +3730,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Squirrelfish"
       ],
@@ -3613,10 +3752,14 @@
     {
       "name": "Worms / Misc. Inverts",
       "commonNames": [
-        "Anemone",
-        "Feather Duster"
+        "Feather Duster",
+        "Coco Worm",
+        "Christmas Tree Worm",
+        "Bristle Worms",
+        "Spaghetti Worms",
+        "Peanut Worms"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Feather_duster_worm.jpg/250px-Feather_duster_worm.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/worms.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -3630,7 +3773,7 @@
         "Dragonets",
         "Gobies",
         "Jawfish",
-        "Sea Star / Urchin",
+        "Sea Star - Reef Safe",
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
@@ -3638,7 +3781,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Filefish",
         "Triggerfish",
@@ -3653,7 +3796,7 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Puffers",
+        "Pufferfish",
         "Sharks / Rays",
         "Squirrelfish"
       ],

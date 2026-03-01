@@ -57,6 +57,8 @@ All notable changes to this project will be documented in this file.
 - Customize welcome screen  
 - Allow user to edit prompts to further customize the app  
 - Backup Photos  
+- Add details for fish types and possibly species
+- Reef Safe indicator
 - Let's Start a Community!
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
