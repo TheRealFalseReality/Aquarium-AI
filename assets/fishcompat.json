@@ -1354,11 +1354,15 @@
         "Pufferfish",
         "Squirrelfish",
         "Tangs / Surgeons",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Butterflyfish",
-        "Dragonets"
+        "Dragonets",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notCompatible": [
         "Sea Star - Reef Safe",
@@ -1419,7 +1423,8 @@
         "Hogfish",
         "Jawfish",
         "Tangs / Surgeons",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -1429,7 +1434,10 @@
         "Shrimp - Marine",
         "Squirrelfish",
         "Triggerfish",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
@@ -1495,7 +1503,9 @@
         "Pseudochromis",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -1509,7 +1519,9 @@
         "Hogfish",
         "Parrotfish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -1543,7 +1555,11 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -1599,7 +1615,10 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notRecommended": [
         "Basslets",
@@ -1631,7 +1650,8 @@
         "Hawkfish",
         "Jawfish",
         "Pufferfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -1677,7 +1697,8 @@
         "Groupers",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -1689,7 +1710,10 @@
         "Lionfish / Scorpionfish",
         "Snails - Marine",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ]
     },
     {
@@ -1718,12 +1742,14 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only"
       ],
       "notRecommended": [
         "Hogfish",
         "Parrotfish",
-        "Triggerfish"
+        "Triggerfish",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Eels",
@@ -1750,7 +1776,9 @@
         "Pseudochromis",
         "Pufferfish",
         "Squirrelfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -1791,7 +1819,9 @@
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe"
       ],
       "withCaution": [
         "Angelfish",
@@ -1809,7 +1839,9 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -1846,7 +1878,8 @@
         "Gobies",
         "Hawkfish",
         "Jawfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Angelfish",
@@ -1860,7 +1893,10 @@
         "Pseudochromis",
         "Pufferfish",
         "Squirrelfish",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notCompatible": [
         "Eels",
@@ -1907,7 +1943,11 @@
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -1970,7 +2010,11 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -2022,7 +2066,10 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -2053,7 +2100,8 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Pufferfish"
+        "Pufferfish",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2083,7 +2131,10 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -2113,7 +2164,8 @@
         "Hawkfish",
         "Jawfish",
         "Pseudochromis",
-        "Pufferfish"
+        "Pufferfish",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2144,7 +2196,8 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -2158,7 +2211,9 @@
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
-        "Parrotfish"
+        "Parrotfish",
+        "Sea Star - Fish Only",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -2171,7 +2226,8 @@
         "Pufferfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Anemone - Reef Safe"
       ]
     },
     {
@@ -2199,7 +2255,10 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Batfish",
@@ -2219,7 +2278,8 @@
         "Groupers",
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -2266,13 +2326,16 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notRecommended": [
         "Hawkfish",
         "Hogfish",
         "Parrotfish",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Anglers / Frogfish",
@@ -2281,7 +2344,8 @@
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Sea Star - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -2324,14 +2388,16 @@
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Snails - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only"
       ],
       "notRecommended": [
         "Angelfish",
         "Hawkfish",
         "Hogfish",
         "Parrotfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Anglers / Frogfish",
@@ -2340,7 +2406,9 @@
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2418,7 +2486,11 @@
         "Squirrelfish",
         "Triggerfish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -2457,7 +2529,10 @@
         "Hogfish",
         "Lionfish / Scorpionfish",
         "Parrotfish",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "notCompatible": [
         "Eels",
@@ -2479,7 +2554,8 @@
         "Pufferfish",
         "Sea Star - Reef Safe",
         "Squirrelfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -2518,7 +2594,8 @@
         "Parrotfish",
         "Pufferfish",
         "Squirrelfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Foxface / Rabbitfish",
@@ -2539,7 +2616,10 @@
         "Tangs / Surgeons",
         "Triggerfish",
         "Worms / Misc. Inverts",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2569,14 +2649,16 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only"
       ],
       "notRecommended": [
         "Batfish",
         "Damselfish",
         "Parrotfish",
         "Pseudochromis",
-        "Triggerfish"
+        "Triggerfish",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Anglers / Frogfish",
@@ -2599,7 +2681,9 @@
         "Pufferfish",
         "Seahorse / Pipefish",
         "Squirrelfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2658,7 +2742,11 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Triggerfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -2717,7 +2805,11 @@
         "Sharks / Rays",
         "Snails - Marine",
         "Triggerfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -2746,7 +2838,8 @@
         "Pseudochromis",
         "Pufferfish",
         "Tangs / Surgeons",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Dartfish",
@@ -2778,7 +2871,10 @@
         "Sea Star - Reef Safe",
         "Snails - Marine",
         "Triggerfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2801,7 +2897,8 @@
         "Hogfish",
         "Parrotfish",
         "Pufferfish",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Basslets",
@@ -2838,7 +2935,10 @@
         "Squirrelfish",
         "Triggerfish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2874,7 +2974,8 @@
         "Hogfish",
         "Parrotfish",
         "Squirrelfish",
-        "Triggerfish"
+        "Triggerfish",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Anglers / Frogfish",
@@ -2897,7 +2998,10 @@
         "Pufferfish",
         "Seahorse / Pipefish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -2913,7 +3017,8 @@
         "Angelfish",
         "Anglers / Frogfish",
         "Eels",
-        "Groupers"
+        "Groupers",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
@@ -2956,7 +3061,10 @@
         "Snails - Marine",
         "Squirrelfish",
         "Triggerfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -3007,7 +3115,9 @@
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Snails - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -3017,7 +3127,9 @@
         "Lionfish / Scorpionfish",
         "Sharks / Rays",
         "Triggerfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ]
     },
     {
@@ -3036,7 +3148,11 @@
         "Damselfish",
         "Hawkfish",
         "Shrimp - Marine",
-        "Snails - Marine"
+        "Snails - Marine",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Basslets",
@@ -3106,7 +3222,8 @@
       ],
       "notRecommended": [
         "Anglers / Frogfish",
-        "Butterflyfish"
+        "Butterflyfish",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Sea Star - Reef Safe",
@@ -3114,7 +3231,10 @@
         "Sharks / Rays",
         "Shrimp - Marine",
         "Snails - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -3190,7 +3310,11 @@
         "Tangs / Surgeons",
         "Triggerfish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "withCaution": [
         "Corals",
@@ -3248,7 +3372,8 @@
         "Snails - Marine",
         "Triggerfish",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -3262,7 +3387,10 @@
         "Parrotfish",
         "Squirrelfish",
         "Tangs / Surgeons",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -3300,7 +3428,8 @@
       "notRecommended": [
         "Angelfish - Dwarf",
         "Anglers / Frogfish",
-        "Batfish"
+        "Batfish",
+        "Sea Star - Fish Only"
       ],
       "notCompatible": [
         "Angelfish",
@@ -3316,7 +3445,8 @@
         "Sharks / Rays",
         "Squirrelfish",
         "Triggerfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Marine Betta"
       ],
       "withCaution": [
         "Boxfish",
@@ -3324,7 +3454,9 @@
         "Damselfish",
         "Foxface / Rabbitfish",
         "Seahorse / Pipefish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -3356,11 +3488,13 @@
         "Shrimp - Marine",
         "Snails",
         "Tangs / Surgeons",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Anglers / Frogfish",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only"
       ],
       "notCompatible": [
         "Filefish",
@@ -3384,7 +3518,9 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Squirrelfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -3445,7 +3581,11 @@
         "Lionfish / Scorpionfish",
         "Sharks / Rays",
         "Snails - Marine",
-        "Triggerfish"
+        "Triggerfish",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -3489,7 +3629,11 @@
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Anglers / Frogfish",
@@ -3532,7 +3676,8 @@
         "Damselfish",
         "Gobies",
         "Jawfish",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Marine Betta"
       ],
       "notCompatible": [
         "Anglers / Frogfish",
@@ -3546,7 +3691,10 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Shrimp - Marine",
-        "Snails - Marine"
+        "Snails - Marine",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
       ],
       "withCaution": [
         "Angelfish",
@@ -3626,7 +3774,11 @@
         "Sea Star - Reef Safe",
         "Sharks / Rays",
         "Triggerfish",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
       ]
     },
     {
@@ -3656,7 +3808,9 @@
         "Foxface / Rabbitfish",
         "Gobies",
         "Tangs / Surgeons",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Dragonets",
@@ -3686,7 +3840,9 @@
         "Snails - Marine",
         "Triggerfish",
         "Worms / Misc. Inverts",
-        "Wrasse - Fish Only"
+        "Wrasse - Fish Only",
+        "Sea Star - Fish Only",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -3715,12 +3871,15 @@
         "Shrimp - Marine",
         "Snails - Marine",
         "Tangs / Surgeons",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
         "Anglers / Frogfish",
-        "Batfish"
+        "Batfish",
+        "Sea Star - Fish Only",
+        "Anemone - Fish Only"
       ],
       "notCompatible": [
         "Angelfish",
@@ -3746,7 +3905,8 @@
         "Seahorse / Pipefish",
         "Triggerfish",
         "Wrasse - Fish Only",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe"
       ]
     },
     {
@@ -3798,7 +3958,8 @@
         "Parrotfish",
         "Pufferfish",
         "Sharks / Rays",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Sea Star - Fish Only"
       ],
       "withCaution": [
         "Boxfish",
@@ -3807,7 +3968,254 @@
         "Foxface / Rabbitfish",
         "Pseudochromis",
         "Seahorse / Pipefish",
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Marine Betta"
+      ]
+    },
+    {
+      "name": "Sea Star - Fish Only",
+      "commonNames": [
+        "Chocolate Chip Starfish",
+        "Red Knob (African) Sea Star"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/sea_star_fish_only.jpg",
+      "compatible": [
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Damselfish",
+        "Gobies",
+        "Dragonets",
+        "Pseudochromis",
+        "Tangs / Surgeons"
+      ],
+      "notRecommended": [
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Butterflyfish",
+        "Filefish",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Sea Star - Reef Safe",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only"
+      ],
+      "notCompatible": [
+        "Boxfish",
+        "Corals",
+        "Dartfish",
+        "Parrotfish",
+        "Pufferfish",
+        "Seahorse / Pipefish",
+        "Sharks / Rays",
+        "Triggerfish",
+        "Worms / Misc. Inverts"
+      ],
+      "withCaution": [
+        "Anglers / Frogfish",
+        "Batfish",
+        "Eels",
+        "Foxface / Rabbitfish",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Jawfish",
+        "Lionfish / Scorpionfish",
+        "Marine Betta",
+        "Squirrelfish",
+        "Wrasse - Fish Only",
         "Wrasse - Reef Safe"
+      ]
+    },
+    {
+      "name": "Anemone - Reef Safe",
+      "commonNames": [
+        "Bubble Tip Anemone",
+        "Rock Flower Anemone",
+        "Long Tentacle Anemone",
+        "Mini-Maxi Carpet Anemone"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anemone_reef_safe.jpg",
+      "compatible": [
+        "Anthias",
+        "Basslets",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Damselfish",
+        "Dartfish",
+        "Pseudochromis",
+        "Tangs / Surgeons",
+        "Wrasse - Reef Safe"
+      ],
+      "notRecommended": [
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Butterflyfish",
+        "Filefish",
+        "Sea Star - Fish Only"
+      ],
+      "notCompatible": [
+        "Anglers / Frogfish",
+        "Boxfish",
+        "Dragonets",
+        "Pufferfish",
+        "Seahorse / Pipefish",
+        "Triggerfish"
+      ],
+      "withCaution": [
+        "Batfish",
+        "Corals",
+        "Blennies",
+        "Gobies",
+        "Eels",
+        "Foxface / Rabbitfish",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Lionfish / Scorpionfish",
+        "Jawfish",
+        "Parrotfish",
+        "Sharks / Rays",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Squirrelfish",
+        "Wrasse - Fish Only",
+        "Sea Star - Reef Safe",
+        "Worms / Misc. Inverts",
+        "Marine Betta",
+        "Anemone - Fish Only"
+      ]
+    },
+    {
+      "name": "Anemone - Fish Only",
+      "commonNames": [
+        "Condy Anemone",
+        "Carpet Anemones",
+        "Tube Anemones",
+        "Aiptasia and Majano Anemones",
+        "Orange Ball Anemone"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anemone_fish_only.jpg",
+      "compatible": [
+        "Anthias",
+        "Basslets",
+        "Cardinalfish",
+        "Chromis",
+        "Dartfish",
+        "Pseudochromis",
+        "Tangs / Surgeons"
+      ],
+      "notRecommended": [
+        "Sea Star - Fish Only",
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Butterflyfish",
+        "Filefish",
+        "Sea Star - Reef Safe"
+      ],
+      "notCompatible": [
+        "Anglers / Frogfish",
+        "Batfish",
+        "Corals",
+        "Damselfish",
+        "Dragonets",
+        "Parrotfish",
+        "Pufferfish",
+        "Seahorse / Pipefish",
+        "Triggerfish"
+      ],
+      "withCaution": [
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Boxfish",
+        "Eels",
+        "Foxface / Rabbitfish",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Lionfish / Scorpionfish",
+        "Marine Betta",
+        "Sharks / Rays",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Squirrelfish",
+        "Wrasse - Fish Only",
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Worms / Misc. Inverts",
+        "Gobies",
+        "Jawfish",
+        "Blennies"
+      ]
+    },
+    {
+      "name": "Marine Betta",
+      "commonNames": [
+        "C. altivelis"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/marine_betta.jpg",
+      "compatible": [
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Anthias",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Damselfish",
+        "Foxface / Rabbitfish",
+        "Hawkfish",
+        "Hogfish",
+        "Lionfish / Scorpionfish",
+        "Pseudochromis",
+        "Tangs / Surgeons",
+        "Wrasse - Reef Safe",
+        "Snails - Marine",
+        "Chromis",
+        "Sea Star - Reef Safe"
+      ],
+      "notRecommended": [
+        "Blennies",
+        "Dartfish",
+        "Dragonets",
+        "Jawfish",
+        "Triggerfish",
+        "Pufferfish",
+        "Gobies"
+      ],
+      "notCompatible": [
+        "Seahorse / Pipefish",
+        "Shrimp - Marine"
+      ],
+      "withCaution": [
+        "Sea Star - Fish Only",
+        "Anemone - Reef Safe",
+        "Anemone - Fish Only",
+        "Anglers / Frogfish",
+        "Basslets",
+        "Batfish",
+        "Boxfish",
+        "Eels",
+        "Filefish",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Parrotfish",
+        "Sharks / Rays",
+        "Squirrelfish",
+        "Wrasse - Fish Only",
+        "Worms / Misc. Inverts"
       ]
     }
   ]
