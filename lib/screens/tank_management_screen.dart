@@ -61,11 +61,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   String? _filterByType; // Filter by tank type ('freshwater' or 'marine')
   bool _filterByReef = false; // Filter to reef tanks only (only applies when _filterByType == 'marine')
   Set<String> _filterByTags = {}; // Filter by selected tank tags
+  bool _showSortFilterAttention = false; // First-launch animation flag
+  static const String _sortFilterAttentionKey = 'tank_sort_filter_attention_shown';
 
   @override
   void initState() {
     super.initState();
     _loadSortPreference();
+    _checkSortFilterAttention();
   }
 
   Future<void> _loadSortPreference() async {
@@ -79,6 +82,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       }
     } catch (e) {
       // Handle error silently
+    }
+  }
+
+  Future<void> _checkSortFilterAttention() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final shown = prefs.getBool(_sortFilterAttentionKey) ?? false;
+      if (!shown) {
+        setState(() {
+          _showSortFilterAttention = true;
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _markSortFilterAttentionShown() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_sortFilterAttentionKey, true);
+      if (mounted) setState(() { _showSortFilterAttention = false; });
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -674,8 +701,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Widget _buildHeader(BuildContext context, WidgetRef ref, int tankCount, AppSettingsState appSettings) {
     final l10n = AppLocalizations.of(context)!;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 900;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -695,69 +720,107 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ),
               
-              // Grid/List toggle (only visible on mobile)
-              if (isMobile)
-                IconButton(
-                  icon: Icon(
-                    appSettings.tankGridLayout ? Icons.view_list : Icons.grid_view,
-                    size: 20,
-                  ),
-                  tooltip: appSettings.tankGridLayout ? l10n.switchToListView : l10n.switchToGridView,
-                  onPressed: () {
-                    ref.read(appSettingsProvider.notifier).setTankGridLayout(!appSettings.tankGridLayout);
-                  },
-                ),
-              
-              // Sort menu
-              // Sort & Filter menu
-              OutlinedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _isSortMenuExpanded = !_isSortMenuExpanded;
-                  });
-                },
-                icon: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(
-                      _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 18,
-                    ),
-                    if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
-                      Positioned(
-                        top: -4,
-                        right: -4,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.error,
-                            shape: BoxShape.circle,
-                          ),
+              // Sort & Filter & View menu (with optional first-launch pulse animation)
+              _showSortFilterAttention
+                  ? _PulseRingWidget(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isSortMenuExpanded = !_isSortMenuExpanded;
+                          });
+                          _markSortFilterAttentionShown();
+                        },
+                        icon: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                              size: 18,
+                            ),
+                            if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.error,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                            const SizedBox(width: 4),
+                            Text(_getSortOptionLabel(_currentSortOption)),
+                            const SizedBox(width: 4),
+                            Icon(
+                              _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                              ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                              : null,
                         ),
                       ),
-                  ],
-                ),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(_getSortOptionIcon(_currentSortOption), size: 16),
-                    const SizedBox(width: 4),
-                    Text(_getSortOptionLabel(_currentSortOption)),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                      size: 14,
+                    )
+                  : OutlinedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _isSortMenuExpanded = !_isSortMenuExpanded;
+                        });
+                      },
+                      icon: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                            size: 18,
+                          ),
+                          if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.error,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                          const SizedBox(width: 4),
+                          Text(_getSortOptionLabel(_currentSortOption)),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                            size: 14,
+                          ),
+                        ],
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                            : null,
+                      ),
                     ),
-                  ],
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
-                      ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
-                      : null,
-                ),
-              ),
               const SizedBox(width: 8),
               
               // 3-dot menu for backup/restore
@@ -1072,12 +1135,85 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       }).toList(),
                     ),
                   ],
+                  // View section
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.viewSection,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Builder(builder: (context) {
+                    final appSettings = ref.watch(appSettingsProvider);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SwitchListTile.adaptive(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            appSettings.tankGridLayout ? l10n.switchToListView : l10n.switchToGridView,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          secondary: Icon(
+                            appSettings.tankGridLayout ? Icons.view_list : Icons.grid_view,
+                            size: 20,
+                          ),
+                          value: appSettings.tankGridLayout,
+                          onChanged: (val) {
+                            ref.read(appSettingsProvider.notifier).setTankGridLayout(val);
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.cardContent,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            _buildVisibilityChip(context, Icons.image_outlined, l10n.tankIconLabel, appSettings.tankHideIcon, (v) => ref.read(appSettingsProvider.notifier).setTankHideIcon(v)),
+                            _buildVisibilityChip(context, Icons.bar_chart, l10n.metricsLabel, appSettings.tankHideMetrics, (v) => ref.read(appSettingsProvider.notifier).setTankHideMetrics(v)),
+                            _buildVisibilityChip(context, Icons.pets, l10n.inhabitantsLabel, appSettings.tankHideInhabitants, (v) => ref.read(appSettingsProvider.notifier).setTankHideInhabitants(v)),
+                            _buildVisibilityChip(context, Icons.note_outlined, l10n.notes, appSettings.tankHideNotes, (v) => ref.read(appSettingsProvider.notifier).setTankHideNotes(v)),
+                          ],
+                        ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildVisibilityChip(BuildContext context, IconData icon, String label, bool isHidden, void Function(bool) onToggle) {
+    final cs = Theme.of(context).colorScheme;
+    return FilterChip(
+      avatar: Icon(icon, size: 14, color: isHidden ? cs.onSurfaceVariant : cs.onPrimary),
+      label: Text(label, style: TextStyle(fontSize: 11, color: isHidden ? cs.onSurfaceVariant : cs.onPrimary)),
+      selected: !isHidden,
+      selectedColor: cs.primary,
+      backgroundColor: cs.surfaceVariant,
+      showCheckmark: false,
+      onSelected: (selected) => onToggle(!selected),
     );
   }
 
@@ -1444,8 +1580,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         alignment: Alignment.topRight,
                         child: menuButton,
                       ),
-                      Center(child: tankIconWidget),
-                      const SizedBox(height: 8),
+                      if (!appSettings.tankHideIcon) Center(child: tankIconWidget),
+                      if (!appSettings.tankHideIcon) const SizedBox(height: 8),
                       Builder(builder: (context) {
                         final l10n = AppLocalizations.of(context)!;
                         String typeLabel;
@@ -1496,8 +1632,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          tankIconWidget,
-                          const SizedBox(width: 12),
+                          if (!appSettings.tankHideIcon) tankIconWidget,
+                          if (!appSettings.tankHideIcon) const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1553,24 +1689,26 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const SizedBox(height: 14),
                 
                 // Tank stats row
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    if (tank.sizeGallons != null || tank.sizeLiters != null)
-                      _buildStatChip(
-                        context,
-                        Icons.straighten,
-                        _formatTankSize(tank),
-                      ),
-                    if (tank.inhabitants.isNotEmpty && fishData != null)
-                      _buildHarmonyScoreChip(tank),
-                  ],
-                ),
-                
-                const SizedBox(height: 14),
+                if (!appSettings.tankHideMetrics) ...[
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      if (tank.sizeGallons != null || tank.sizeLiters != null)
+                        _buildStatChip(
+                          context,
+                          Icons.straighten,
+                          _formatTankSize(tank),
+                        ),
+                      if (tank.inhabitants.isNotEmpty && fishData != null)
+                        _buildHarmonyScoreChip(tank),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 
                 // Inhabitants section with modern styling
+                if (!appSettings.tankHideInhabitants) ...[
                 if (tank.inhabitants.isEmpty)
                   Container(
                     padding: const EdgeInsets.all(14),
@@ -1590,12 +1728,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           size: 18,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          'No inhabitants yet',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Flexible(
+                          child: Builder(builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Text(
+                              l10n.noInhabitantsYet,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -1656,6 +1800,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ..._buildFishGroupDisplay(tank, fishData),
                     ],
                   ),
+                ], // end tankHideInhabitants
                 
                 const SizedBox(height: 14),
                 
@@ -1738,7 +1883,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ],
                 
                 // Tank notes section (if notes exist)
-                if (tank.notes != null && tank.notes!.isNotEmpty) ...[
+                if (!appSettings.tankHideNotes && tank.notes != null && tank.notes!.isNotEmpty) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -3619,4 +3764,66 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
 
 
+}
+
+class _PulseRingWidget extends StatefulWidget {
+  const _PulseRingWidget({required this.child});
+  final Widget child;
+  @override
+  State<_PulseRingWidget> createState() => _PulseRingWidgetState();
+}
+
+class _PulseRingWidgetState extends State<_PulseRingWidget> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))
+      ..repeat();
+    _scale = Tween<double>(begin: 1.0, end: 1.6).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+    _opacity = Tween<double>(begin: 0.7, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        AnimatedBuilder(
+          animation: _ctrl,
+          builder: (context, _) {
+            return Transform.scale(
+              scale: _scale.value,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: color.withOpacity(_opacity.value),
+                    width: 2,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        widget.child,
+      ],
+    );
+  }
 }

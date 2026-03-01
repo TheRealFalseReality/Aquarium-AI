@@ -50,6 +50,7 @@ class FeatureInfo {
   final String icon;
   final String title;
   final String description;
+  final String? shortDescription;
   final String routeName;
   final Duration delay;
   final bool openPhotoAnalyzer;
@@ -62,6 +63,7 @@ class FeatureInfo {
     required this.icon,
     required this.title,
     required this.description,
+    this.shortDescription,
     required this.routeName,
     required this.delay,
     this.openPhotoAnalyzer = false,
@@ -505,6 +507,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🐡',
           title: l10n.aiCompatibilityTool,
           description: l10n.aiCompatibilityDescription,
+          shortDescription: l10n.aiCompatibilityDrawerDescription,
           routeName: '/compat-ai',
           delay: const Duration(milliseconds: 650),
         ),
@@ -512,6 +515,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🤖',
           title: l10n.aiChatbot,
           description: l10n.aiChatbotDescription,
+          shortDescription: l10n.aiChatbotDrawerDescription,
           routeName: '/chatbot',
           delay: const Duration(milliseconds: 700),
           toolChips: [
@@ -539,6 +543,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '📷',
           title: l10n.photoAnalyzer,
           description: l10n.photoAnalyzerDescription,
+          shortDescription: l10n.photoAnalyzerDrawerDescription,
           routeName: '/chatbot',
           openPhotoAnalyzer: true,
           delay: const Duration(milliseconds: 750),
@@ -547,6 +552,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🦐',
           title: l10n.aiStockingAssistant,
           description: l10n.aiStockingDescription,
+          shortDescription: l10n.aiStockingDrawerDescription,
           routeName: '/stocking',
           delay: const Duration(milliseconds: 800),
         ),
@@ -555,6 +561,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         icon: '🧪',
         title: l10n.aquariumCalculators,
         description: l10n.aquariumCalculatorsDescription,
+        shortDescription: l10n.aquariumCalculatorsDrawerDescription,
         routeName: '/calculators',
         delay: const Duration(milliseconds: 850),
       ),
@@ -562,6 +569,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         icon: '📏',
         title: l10n.tankVolumeCalculator,
         description: l10n.tankVolumeDescription,
+        shortDescription: l10n.tankVolumeDrawerDescription,
         routeName: '/tank-volume',
         delay: const Duration(milliseconds: 900),
       ),
@@ -1281,6 +1289,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 icon: feature.icon,
                 title: feature.title,
                 description: feature.description,
+                shortDescription: feature.shortDescription,
                 imagePath: feature.imagePath,
                 toolChips: feature.toolChips,
                 compact: !forceSingleColumn && useGrid && !isMediumScreen,
@@ -1479,6 +1488,7 @@ class FeatureCard extends ConsumerWidget {
   final String icon;
   final String title;
   final String description;
+  final String? shortDescription;
   final VoidCallback onTap;
   final String? imagePath;
   final List<ToolChipInfo>? toolChips;
@@ -1489,6 +1499,7 @@ class FeatureCard extends ConsumerWidget {
     required this.icon,
     required this.title,
     required this.description,
+    this.shortDescription,
     required this.onTap,
     this.imagePath,
     this.toolChips,
@@ -1601,41 +1612,60 @@ class FeatureCard extends ConsumerWidget {
                 ],
                 const SizedBox(height: 12),
                 Text(
-                  description,
+                  compact ? (shortDescription ?? description) : description,
                   textAlign: compact ? TextAlign.center : TextAlign.start,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
-                  maxLines: compact ? 3 : null,
-                  overflow: compact ? TextOverflow.ellipsis : null,
                 ),
                 if (toolChips != null && toolChips!.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: toolChips!.map((chip) {
-                      return ActionChip(
-                        avatar: Icon(chip.icon, size: 16, color: cs.primary),
-                        label: Text(
-                          chip.label,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: cs.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                        backgroundColor: cs.primaryContainer.withOpacity(0.5),
-                        side: BorderSide(
-                          color: cs.primary.withOpacity(0.3),
-                          width: 1,
-                        ),
-                        onPressed: chip.onTap,
-                        visualDensity: VisualDensity.compact,
+                  if (compact)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: toolChips!.map((chip) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                      );
-                    }).toList(),
-                  ),
+                        child: InkWell(
+                          onTap: chip.onTap,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: cs.primary.withOpacity(0.3)),
+                            ),
+                            child: Icon(chip.icon, size: 16, color: cs.primary),
+                          ),
+                        ),
+                      )).toList(),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: toolChips!.map((chip) {
+                        return ActionChip(
+                          avatar: Icon(chip.icon, size: 16, color: cs.primary),
+                          label: Text(
+                            chip.label,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          backgroundColor: cs.primaryContainer.withOpacity(0.5),
+                          side: BorderSide(
+                            color: cs.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          onPressed: chip.onTap,
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        );
+                      }).toList(),
+                    ),
                 ],
                 if (imagePath != null) ...[
                   const SizedBox(height: 16),

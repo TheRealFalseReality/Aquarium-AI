@@ -553,5 +553,12 @@
   "chooseFontDesc": "Wählen Sie die Schriftart für die gesamte App.",
   "fontPreviewText": "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.",
   "customTheme": "Benutzerdefiniertes Design",
-  "themeName": "Designname"
+  "themeName": "Designname",
+  "sortFilterAndView": "Sortieren, Filtern & Ansicht",
+  "viewSection": "Ansicht",
+  "cardContent": "Karteninhalt",
+  "tankIconLabel": "Symbol",
+  "metricsLabel": "Metriken",
+  "inhabitantsLabel": "Bewohner",
+  "photoAnalyzerDrawerDescription": "Arten identifizieren, Gesundheitsprobleme erkennen und Tipps zur Verbesserung erhalten."
 }

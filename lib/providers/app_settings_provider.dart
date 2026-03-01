@@ -20,6 +20,10 @@ class AppSettingsState {
   final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
   final bool tankGridLayout; // Controls grid (true) vs list (false) on tank management screen
   final bool debugHideAds; // Debug-only: hides ads and references to removing them
+  final bool tankHideIcon;
+  final bool tankHideMetrics;
+  final bool tankHideInhabitants;
+  final bool tankHideNotes;
 
   AppSettingsState({
     required this.showStockingButton,
@@ -30,6 +34,10 @@ class AppSettingsState {
     this.welcomeGridLayout = true, // Default to grid layout
     this.tankGridLayout = false, // Default to list layout for tanks
     this.debugHideAds = false,
+    this.tankHideIcon = false,
+    this.tankHideMetrics = false,
+    this.tankHideInhabitants = false,
+    this.tankHideNotes = false,
   });
 }
 
@@ -54,6 +62,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? true; // Default to grid
     final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
     final debugHideAds = prefs.getBool('debugHideAds') ?? kDebugMode;
+    final tankHideIcon = prefs.getBool('tankHideIcon') ?? false;
+    final tankHideMetrics = prefs.getBool('tankHideMetrics') ?? false;
+    final tankHideInhabitants = prefs.getBool('tankHideInhabitants') ?? false;
+    final tankHideNotes = prefs.getBool('tankHideNotes') ?? false;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -64,6 +76,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: welcomeGridLayout,
       tankGridLayout: tankGridLayout,
       debugHideAds: debugHideAds,
+      tankHideIcon: tankHideIcon,
+      tankHideMetrics: tankHideMetrics,
+      tankHideInhabitants: tankHideInhabitants,
+      tankHideNotes: tankHideNotes,
     );
   }
 
@@ -86,6 +102,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -102,6 +122,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -122,6 +146,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -137,6 +165,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: value,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -154,6 +186,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: value,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -170,6 +206,86 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: value,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+    );
+  }
+
+  Future<void> setTankHideIcon(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideIcon', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: value,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+    );
+  }
+
+  Future<void> setTankHideMetrics(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideMetrics', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: value,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+    );
+  }
+
+  Future<void> setTankHideInhabitants(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideInhabitants', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: value,
+      tankHideNotes: state.tankHideNotes,
+    );
+  }
+
+  Future<void> setTankHideNotes(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideNotes', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: value,
     );
   }
 
@@ -194,6 +310,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -211,6 +331,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 
@@ -262,6 +386,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
     );
   }
 }

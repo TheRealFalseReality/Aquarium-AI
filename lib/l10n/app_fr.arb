@@ -553,5 +553,12 @@
   "chooseFontDesc": "Choisissez la police utilisée dans toute l’application.",
   "fontPreviewText": "Portez ce vieux whisky au juge blond qui fume.",
   "customTheme": "Thème personnalisé",
-  "themeName": "Nom du thème"
+  "themeName": "Nom du thème",
+  "sortFilterAndView": "Trier, Filtrer et Afficher",
+  "viewSection": "Afficher",
+  "cardContent": "Contenu de la Carte",
+  "tankIconLabel": "Icône",
+  "metricsLabel": "Métriques",
+  "inhabitantsLabel": "Habitants",
+  "photoAnalyzerDrawerDescription": "Identifiez les poissons, détectez les problèmes de santé et obtenez des conseils pour améliorer votre aquarium."
 }

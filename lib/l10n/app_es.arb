@@ -553,5 +553,12 @@
   "chooseFontDesc": "Elige la fuente utilizada en toda la app.",
   "fontPreviewText": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
   "customTheme": "Tema personalizado",
-  "themeName": "Nombre del tema"
+  "themeName": "Nombre del tema",
+  "sortFilterAndView": "Ordenar, Filtrar y Ver",
+  "viewSection": "Ver",
+  "cardContent": "Contenido de Tarjeta",
+  "tankIconLabel": "Icono",
+  "metricsLabel": "Métricas",
+  "inhabitantsLabel": "Habitantes",
+  "photoAnalyzerDrawerDescription": "Identifica peces, detecta problemas de salud y obtén consejos para mejorar tu acuario."
 }
