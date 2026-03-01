@@ -2,6 +2,7 @@ class Fish {
   final String name;
   final List<String> commonNames;
   final String imageURL;
+  final String? reefSafe;
   final List<String> compatible;
   final List<String> notRecommended;
   final List<String> notCompatible;
@@ -11,6 +12,7 @@ class Fish {
     required this.name,
     required this.commonNames,
     required this.imageURL,
+    this.reefSafe,
     required this.compatible,
     required this.notRecommended,
     required this.notCompatible,
@@ -32,6 +34,7 @@ class Fish {
       name: json['name'] as String,
       commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
+      reefSafe: json['reefSafe'] as String?,
       // Use the new helper function to parse each list
       compatible: parseStringList(json['compatible']),
       notRecommended: parseStringList(json['notRecommended']),
@@ -44,6 +47,7 @@ class Fish {
     'name': name,
     'commonNames': commonNames,
     'imageURL': imageURL,
+    if (reefSafe != null) 'reefSafe': reefSafe,
     'compatible': compatible,
     'notRecommended': notRecommended,
     'notCompatible': notCompatible,

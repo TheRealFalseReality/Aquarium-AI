@@ -23,6 +23,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
   late List<Fish> _selectedFish;
   List<Fish> _filteredFishList = [];
   final TextEditingController _searchController = TextEditingController();
+  String? _reefSafeFilter;
 
   @override
   void initState() {
@@ -44,16 +45,17 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
     final query = _searchController.text;
 
     setState(() {
-      if (query.isEmpty) {
-        _filteredFishList = allFish;
-      } else {
-        _filteredFishList = allFish.where((fish) {
-          final nameMatches = fish.name.toLowerCase().contains(query.toLowerCase());
-          final commonNamesMatch = fish.commonNames
-              .any((name) => name.toLowerCase().contains(query.toLowerCase()));
-          return nameMatches || commonNamesMatch;
-        }).toList();
-      }
+      _filteredFishList = allFish.where((fish) {
+        // Reef safe filter (only when fish has reefSafe field)
+        if (_reefSafeFilter != null && fish.reefSafe != null) {
+          if ((fish.reefSafe ?? 'Yes') != _reefSafeFilter) return false;
+        }
+        if (query.isEmpty) return true;
+        final nameMatches = fish.name.toLowerCase().contains(query.toLowerCase());
+        final commonNamesMatch = fish.commonNames
+            .any((name) => name.toLowerCase().contains(query.toLowerCase()));
+        return nameMatches || commonNamesMatch;
+      }).toList();
     });
   }
 
@@ -148,7 +150,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
             ),
             // Search bar
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -170,6 +172,60 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                 ),
               ),
             ),
+            // Reef safe filter (marine only)
+            fishDataAsync.maybeWhen(
+              data: (fishData) {
+                final hasMarine = (fishData[widget.category] ?? [])
+                    .any((f) => f.reefSafe != null);
+                if (!hasMarine) return const SizedBox.shrink();
+                const options = ['Yes', 'No', 'Caution'];
+                final colors = {
+                  'Yes': Colors.green,
+                  'No': Colors.red,
+                  'Caution': Colors.orange,
+                };
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Reef Safe:',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      ...options.map((opt) {
+                        final selected = _reefSafeFilter == opt;
+                        final color = colors[opt]!;
+                        return FilterChip(
+                          label: Text(opt),
+                          selected: selected,
+                          selectedColor: color.withOpacity(0.2),
+                          checkmarkColor: color,
+                          labelStyle: TextStyle(
+                            color: selected ? color : null,
+                            fontSize: 12,
+                            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          side: BorderSide(
+                            color: selected ? color : theme.colorScheme.outline,
+                          ),
+                          onSelected: (_) {
+                            setState(() => _reefSafeFilter = selected ? null : opt);
+                            _filterFishList();
+                          },
+                          visualDensity: VisualDensity.compact,
+                        );
+                      }),
+                    ],
+                  ),
+                );
+              },
+              orElse: () => const SizedBox.shrink(),
+            ),
             // Fish grid
             Expanded(
               child: fishDataAsync.when(
@@ -184,7 +240,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                   ),
                 ),
                 data: (fishData) {
-                  if (_filteredFishList.isEmpty && _searchController.text.isEmpty) {
+                  if (_filteredFishList.isEmpty && _searchController.text.isEmpty && _reefSafeFilter == null) {
                     _filteredFishList = fishData[widget.category] ?? [];
                   }
                   
