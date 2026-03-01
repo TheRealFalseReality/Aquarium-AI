@@ -2973,10 +2973,6 @@
   "@metricsLabel": {
     "description": "Label for tank metrics visibility toggle"
   },
-  "inhabitantsLabel": "Inhabitants",
-  "@inhabitantsLabel": {
-    "description": "Label for tank inhabitants visibility toggle"
-  },
   "photoAnalyzerDrawerDescription": "Identify fish, detect health issues, and get specific tips to improve your aquarium.",
   "@photoAnalyzerDrawerDescription": {
     "description": "Short description of the photo analyzer (app drawer / compact mode)"
