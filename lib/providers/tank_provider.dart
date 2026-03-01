@@ -466,7 +466,7 @@ class TankNotifier extends StateNotifier<TankState> {
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(bytes);
         final result = await Share.shareXFiles(
-          [XFile(tempFile.path, mimeType: 'application/json')],
+          [XFile(tempFile.path, mimeType: 'application/json', name: fileName)],
           subject: 'Aquarium AI – Tank Share: ${tank.name}',
         );
         AnalyticsService.logFeatureUsed(
