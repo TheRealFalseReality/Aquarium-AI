@@ -108,4 +108,105 @@ void main() {
     
     // Should handle empty compatibility lists without errors
   });
+
+  testWidgets('FishCard shows reef safe badge for marine fish with reefSafe=Yes', (WidgetTester tester) async {
+    final marineFish = Fish(
+      name: 'Clownfish',
+      commonNames: [],
+      imageURL: '',
+      reefSafe: 'Yes',
+      compatible: [],
+      notRecommended: [],
+      notCompatible: [],
+      withCaution: [],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: marineFish, isSelected: false, category: 'marine'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('🪸 Safe'), findsOneWidget);
+  });
+
+  testWidgets('FishCard shows reef unsafe badge for reefSafe=No', (WidgetTester tester) async {
+    final unsafeFish = Fish(
+      name: 'Lionfish',
+      commonNames: [],
+      imageURL: '',
+      reefSafe: 'No',
+      compatible: [],
+      notRecommended: [],
+      notCompatible: [],
+      withCaution: [],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: unsafeFish, isSelected: false, category: 'marine'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('✗ Unsafe'), findsOneWidget);
+  });
+
+  testWidgets('FishCard shows caution badge for reefSafe=Caution', (WidgetTester tester) async {
+    final cautionFish = Fish(
+      name: 'Hawkfish',
+      commonNames: [],
+      imageURL: '',
+      reefSafe: 'Caution',
+      compatible: [],
+      notRecommended: [],
+      notCompatible: [],
+      withCaution: [],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: cautionFish, isSelected: false, category: 'marine'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('⚠️ Caution'), findsOneWidget);
+  });
+
+  testWidgets('FishCard shows no reef safe badge for freshwater fish', (WidgetTester tester) async {
+    final freshwaterFish = Fish(
+      name: 'Betta',
+      commonNames: [],
+      imageURL: '',
+      compatible: [],
+      notRecommended: [],
+      notCompatible: [],
+      withCaution: [],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FishCard(fish: freshwaterFish, isSelected: false, category: 'freshwater'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('🪸 Safe'), findsNothing);
+    expect(find.text('✗ Unsafe'), findsNothing);
+    expect(find.text('⚠️ Caution'), findsNothing);
+  });
 }
