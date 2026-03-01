@@ -89,14 +89,14 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     imageUrl: widget.post.imageUrl!,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
+                    placeholder: (_, _) => Container(
                       height: 240,
                       color: Theme.of(context)
                           .colorScheme
                           .surfaceContainerHighest,
                       child: const Center(child: CircularProgressIndicator()),
                     ),
-                    errorWidget: (_, __, ___) => const SizedBox(),
+                    errorWidget: (_, _, _) => const SizedBox(),
                   ),
                 // Post content
                 Padding(
@@ -175,7 +175,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     padding: EdgeInsets.all(16),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (_, __) => Padding(
+                  error: (_, _) => Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(l10n.communityLoadError),
                   ),

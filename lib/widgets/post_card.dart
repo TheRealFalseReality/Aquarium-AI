@@ -76,7 +76,7 @@ class _PostCardState extends State<PostCard> {
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => Container(
+                errorWidget: (_, _, _) => Container(
                   height: 200,
                   color: theme.colorScheme.surfaceContainerHighest,
                   child: Icon(Icons.broken_image,
