@@ -23,6 +23,8 @@
   "aquaPiStore": "Tienda AquaPi",
   "aquaPiStoreDescription": "Descubre AquaPi, el controlador inteligente definitivo para acuarios. Monitorea y controla los parámetros de tu acuario con pruebas automatizadas, alertas en tiempo real e integración perfecta.",
   "myTanks": "Mis Acuarios",
+  "switchToListView": "Cambiar a vista de lista",
+  "switchToGridView": "Cambiar a vista de cuadrícula",
   "noTanksYet": "Aún no hay acuarios. ¡Toca para agregar uno!",
   "totalTanks": "Total: {count}",
   "createFirstTank": "Crea Tu Primer Acuario",
@@ -596,4 +598,15 @@
   "communityPostPublish": "Publicar",
   "communityPostCreated": "¡Publicación publicada con éxito!",
   "communityPostError": "No se pudo publicar la publicación. Por favor, inténtalo de nuevo."
+  "sortFilterAndView": "Ordenar, Filtrar y Ver",
+  "viewSection": "Ver",
+  "cardContent": "Contenido de Tarjeta",
+  "tankIconLabel": "Icono",
+  "metricsLabel": "Métricas",
+  "photoAnalyzerDrawerDescription": "Identifica peces, detecta problemas de salud y obtén consejos para mejorar tu acuario.",
+  "quickLogs": "Registros Rápidos",
+  "activityHistory": "Actividad",
+  "visibleCards": "Tarjetas Visibles",
+  "purchaseToHideCard": "Compra Eliminar Anuncios para ocultar",
+  "filterCards": "Filtrar Tarjetas"
 }
