@@ -121,12 +121,21 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 
   Future<void> setWelcomeGridLayout(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('welcomeGridLayout', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: value,
+      tankGridLayout: state.tankGridLayout,
       debugHideAds: state.debugHideAds,
     );
   }
@@ -142,8 +151,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
-      welcomeGridLayout: value,
+      welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: value,
     );
   }
 
@@ -159,7 +169,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: value,
-      debugHideAds: value,
+      debugHideAds: state.debugHideAds,
     );
   }
 
