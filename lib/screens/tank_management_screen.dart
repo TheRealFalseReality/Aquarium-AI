@@ -14,6 +14,7 @@ import '../providers/tank_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../services/fish_data_service.dart';
 import '../services/notification_service.dart';
 import '../utils/tank_harmony_calculator.dart';
@@ -376,6 +377,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
     final sortedTanks = _sortTanks(tanks);
     final screenWidth = MediaQuery.of(context).size.width;
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
     
     // Use grid layout for larger screens (tablets and desktops) OR when user enables grid on mobile
     final useGridLayout = screenWidth >= 900 || appSettings.tankGridLayout;
@@ -393,7 +395,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
           ),
           // Masonry grid layout with native ads
-          ..._buildTankGridWithAds(context, ref, sortedTanks, fishData, appSettings, columnCount),
+          ..._buildTankGridWithAds(context, ref, sortedTanks, fishData, appSettings, columnCount, adsRemoved: adsRemoved),
           const SliverToBoxAdapter(
             child: SizedBox(height: 16),
           ),
@@ -411,7 +413,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  List<Widget> _buildTankGridWithAds(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings, int columnCount) {
+  List<Widget> _buildTankGridWithAds(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings, int columnCount, {bool adsRemoved = false}) {
+    // If ads are removed, render all tanks in a single unbroken masonry grid
+    if (adsRemoved) {
+      return [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          sliver: SliverMasonryGrid.count(
+            crossAxisCount: columnCount,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childCount: tanks.length,
+            itemBuilder: (context, index) {
+              return _buildTankCard(context, ref, tanks[index], fishData, appSettings);
+            },
+          ),
+        ),
+      ];
+    }
+
     // Configuration for ad placement
     const int tanksBeforeFirstAd = 4; // Show ad after first 4 tanks
     const int tanksBetweenAds = 6; // Show ad every 6 tanks thereafter
@@ -880,6 +900,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
+    // Grid mode: mobile grid (not tablet/desktop which always uses the masonry grid)
+    final isGridMode = appSettings.tankGridLayout && !isLargeScreen;
     
     // Get custom background photo if set
     TankPhoto? backgroundPhoto;
@@ -905,6 +927,300 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Colors.purple.shade300.withOpacity(0.15),
             cs.secondaryContainer.withOpacity(0.5),
           ];
+
+    // Build the tank icon widget (reused in both list and grid headers)
+    final tankIconWidget = Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+            ? LinearGradient(
+                colors: tank.type == 'freshwater'
+                    ? [Colors.blue.shade300, Colors.cyan.shade400]
+                    : [Colors.indigo.shade300, Colors.purple.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+            ? Colors.grey.shade300
+            : null,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: (tank.type == 'freshwater' 
+                ? Colors.blue 
+                : Colors.purple).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: tank.customIconCodePoint != null
+          ? Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: tank.type == 'freshwater'
+                      ? [Colors.blue.shade300, Colors.cyan.shade400]
+                      : [Colors.indigo.shade300, Colors.purple.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                size: 24,
+                color: Colors.white,
+              ),
+            )
+          : (tank.customIconPhotoId != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: () {
+                    try {
+                      final photo = tank.photos.firstWhere(
+                        (p) => p.id == tank.customIconPhotoId,
+                      );
+                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                      return imageUrl != null
+                          ? (imageUrl.startsWith('http')
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl, 
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) => Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Image.file(File(imageUrl), fit: BoxFit.cover))
+                          : Icon(
+                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                              size: 24,
+                              color: Colors.white,
+                            );
+                    } catch (e) {
+                      return Icon(
+                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        size: 24,
+                        color: Colors.white,
+                      );
+                    }
+                  }(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                )),
+    );
+
+    // Build the 3-dot popup menu (shared between list/grid)
+    final menuButton = PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(Icons.more_vert, size: 18),
+      ),
+      onSelected: (value) {
+        switch (value) {
+          case 'edit':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => TankCreationScreen(existingTank: tank),
+              ),
+            );
+            break;
+          case 'parameters':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ParameterLoggerScreen(tank: tank),
+              ),
+            );
+            break;
+          case 'dosing':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DosingLoggerScreen(tank: tank),
+              ),
+            );
+            break;
+          case 'notifications':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NotificationManagementScreen(tank: tank),
+              ),
+            );
+            break;
+          case 'activity_log':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NotificationLoggerScreen(tank: tank),
+              ),
+            );
+            break;
+          case 'set_background':
+            _showSetBackgroundDialog(context, ref, tank);
+            break;
+          case 'set_icon':
+            _showSetIconDialog(context, ref, tank);
+            break;
+          case 'reset_background':
+            _resetTankBackground(context, ref, tank);
+            break;
+          case 'recommendations':
+            _getTankStockingRecommendations(tank);
+            break;
+          case 'compatibility_analysis':
+            _getTankCompatibilityAnalysis(tank);
+            break;
+          case 'duplicate':
+            _duplicateTank(context, ref, tank);
+            break;
+          case 'delete':
+            _confirmDelete(context, ref, tank);
+            break;
+        }
+      },
+      itemBuilder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return [
+          PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                const Icon(Icons.edit, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.editTank),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'parameters',
+            child: Row(
+              children: [
+                const Icon(Icons.science, color: Colors.teal, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'dosing',
+            child: Row(
+              children: [
+                const Icon(Icons.medication_liquid, color: Colors.purple, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.dosingDiary, style: const TextStyle(color: Colors.purple)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'notifications',
+            child: Row(
+              children: [
+                const Icon(Icons.notifications, color: Colors.orange, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'activity_log',
+            child: Row(
+              children: [
+                const Icon(Icons.history, color: Colors.green, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.activityLog, style: const TextStyle(color: Colors.green)),
+              ],
+            ),
+          ),
+          if (tank.photos.isNotEmpty)
+            PopupMenuItem(
+              value: 'set_background',
+              child: Row(
+                children: [
+                  const Icon(Icons.wallpaper, size: 18),
+                  const SizedBox(width: 8),
+                  Text(l10n.setCardBackground),
+                ],
+              ),
+            ),
+          PopupMenuItem(
+            value: 'set_icon',
+            child: Row(
+              children: [
+                const Icon(Icons.emoji_emotions_outlined, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.changeIcon),
+              ],
+            ),
+          ),
+          if (tank.customBackgroundPhotoId != null)
+            PopupMenuItem(
+              value: 'reset_background',
+              child: Row(
+                children: [
+                  const Icon(Icons.restore, size: 18),
+                  const SizedBox(width: 8),
+                  Text(l10n.resetBackground),
+                ],
+              ),
+            ),
+          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
+            PopupMenuItem(
+              value: 'recommendations',
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                  const SizedBox(width: 8),
+                  Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                ],
+              ),
+            ),
+          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
+            PopupMenuItem(
+              value: 'compatibility_analysis',
+              child: Row(
+                children: [
+                  const Icon(Icons.biotech, color: Colors.teal, size: 18),
+                  const SizedBox(width: 8),
+                  Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal)),
+                ],
+              ),
+            ),
+          PopupMenuItem(
+            value: 'duplicate',
+            child: Row(
+              children: [
+                const Icon(Icons.copy, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.duplicate),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                const Icon(Icons.delete, color: Colors.red, size: 18),
+                const SizedBox(width: 8),
+                Text(l10n.deleteTank, style: const TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+        ];
+      },
+    );
     
     return Container(
       margin: (isLargeScreen || appSettings.tankGridLayout) ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
@@ -955,335 +1271,83 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                   children: [
-                    // Header with tank name and menu
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    // Tank icon with gradient background or photo
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
-                            ? LinearGradient(
-                                colors: tank.type == 'freshwater'
-                                    ? [Colors.blue.shade300, Colors.cyan.shade400]
-                                    : [Colors.indigo.shade300, Colors.purple.shade400],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
-                        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
-                            ? Colors.grey.shade300
-                            : null,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (tank.type == 'freshwater' 
-                                ? Colors.blue 
-                                : Colors.purple).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                    // Header: grid mode = menu top-right + icon centered + name below;
+                    //         list mode = icon + name side-by-side + menu
+                    if (isGridMode) ...[
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: menuButton,
                       ),
-                      child: tank.customIconCodePoint != null
-                          ? Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: tank.type == 'freshwater'
-                                      ? [Colors.blue.shade300, Colors.cyan.shade400]
-                                      : [Colors.indigo.shade300, Colors.purple.shade400],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(14),
+                      Center(child: tankIconWidget),
+                      const SizedBox(height: 8),
+                      Builder(builder: (context) {
+                        final l10n = AppLocalizations.of(context)!;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              tank.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
                               ),
-                              child: Icon(
-                                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
-                                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
-                                size: 24,
-                                color: Colors.white,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w600,
                               ),
-                            )
-                          : (tank.customIconPhotoId != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: () {
-                                    try {
-                                      final photo = tank.photos.firstWhere(
-                                        (p) => p.id == tank.customIconPhotoId,
-                                      );
-                                      final imageUrl = photo.imageUrl ?? photo.imagePath;
-                                      return imageUrl != null
-                                          ? (imageUrl.startsWith('http')
-                                              ? CachedNetworkImage(
-                                                  imageUrl: imageUrl, 
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: (context, url, error) => Icon(
-                                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                                    size: 24,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : Image.file(File(imageUrl), fit: BoxFit.cover))
-                                          : Icon(
-                                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                              size: 24,
-                                              color: Colors.white,
-                                            );
-                                    } catch (e) {
-                                      return Icon(
-                                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                        size: 24,
-                                        color: Colors.white,
-                                      );
-                                    }
-                                  }(),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Icon(
-                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                    size: 24,
-                                    color: Colors.white,
-                                  ),
-                                )),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                            ),
+                          ],
+                        );
+                      }),
+                    ] else ...[
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            tank.name,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.5,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Builder(
-                            builder: (context) {
-                              final l10n = AppLocalizations.of(context)!;
-                              return Text(
-                                tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w600,
+                          tankIconWidget,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tank.name,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              );
-                            },
+                                const SizedBox(height: 2),
+                                Builder(
+                                  builder: (context) {
+                                    final l10n = AppLocalizations.of(context)!;
+                                    return Text(
+                                      tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: cs.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
+                          menuButton,
                         ],
                       ),
-                    ),
-                    PopupMenuButton<String>(
-                      icon: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHighest.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.more_vert, size: 18),
-                      ),
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => TankCreationScreen(existingTank: tank),
-                              ),
-                            );
-                            break;
-                          case 'parameters':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ParameterLoggerScreen(tank: tank),
-                              ),
-                            );
-                            break;
-                          case 'dosing':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DosingLoggerScreen(tank: tank),
-                              ),
-                            );
-                            break;
-                          case 'notifications':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => NotificationManagementScreen(tank: tank),
-                              ),
-                            );
-                            break;
-                          case 'activity_log':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => NotificationLoggerScreen(tank: tank),
-                              ),
-                            );
-                            break;
-                          case 'set_background':
-                            _showSetBackgroundDialog(context, ref, tank);
-                            break;
-                          case 'set_icon':
-                            _showSetIconDialog(context, ref, tank);
-                            break;
-                          case 'reset_background':
-                            _resetTankBackground(context, ref, tank);
-                            break;
-                          case 'recommendations':
-                            _getTankStockingRecommendations(tank);
-                            break;
-                          case 'compatibility_analysis':
-                            _getTankCompatibilityAnalysis(tank);
-                            break;
-                          case 'duplicate':
-                            _duplicateTank(context, ref, tank);
-                            break;
-                          case 'delete':
-                            _confirmDelete(context, ref, tank);
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) {
-                        final l10n = AppLocalizations.of(context)!;
-                        return [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.edit, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.editTank),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'parameters',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.science, color: Colors.teal, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'dosing',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.medication_liquid, color: Colors.purple, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.dosingDiary, style: const TextStyle(color: Colors.purple)),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'notifications',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.notifications, color: Colors.orange, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange)),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'activity_log',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.history, color: Colors.green, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.activityLog, style: const TextStyle(color: Colors.green)),
-                              ],
-                            ),
-                          ),
-                          if (tank.photos.isNotEmpty)
-                            PopupMenuItem(
-                              value: 'set_background',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.wallpaper, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.setCardBackground),
-                                ],
-                              ),
-                            ),
-                          PopupMenuItem(
-                            value: 'set_icon',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.emoji_emotions_outlined, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.changeIcon),
-                              ],
-                            ),
-                          ),
-                          if (tank.customBackgroundPhotoId != null)
-                            PopupMenuItem(
-                              value: 'reset_background',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.restore, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.resetBackground),
-                                ],
-                              ),
-                            ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
-                            PopupMenuItem(
-                              value: 'recommendations',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
-                                ],
-                              ),
-                            ),
-                          if (tank.inhabitants.isNotEmpty && appSettings.enableAI)
-                            PopupMenuItem(
-                              value: 'compatibility_analysis',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.biotech, color: Colors.teal, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal)),
-                                ],
-                              ),
-                            ),
-                          PopupMenuItem(
-                            value: 'duplicate',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.copy, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.duplicate),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.delete, color: Colors.red, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.deleteTank, style: const TextStyle(color: Colors.red)),
-                              ],
-                            ),
-                          ),
-                        ];
-                      },
-                    ),
-                  ],
-                ),
+                    ],
                 
                 const SizedBox(height: 14),
                 
@@ -1337,7 +1401,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   )
                 else
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -1354,13 +1418,36 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               color: cs.onPrimaryContainer,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: cs.onPrimaryContainer,
+                            if (isGridMode) ...[
+                              // 2-line layout in grid mode
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
+                            ] else ...[
+                              Text(
+                                '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -1488,110 +1575,110 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ],
                 
                 // Activity Log and Upcoming Notifications section
-                _buildActivitySection(context, ref, tank, cs),
+                _buildActivitySection(context, ref, tank, cs, inGridMode: isGridMode),
                 
-                // Action buttons area (space for future parameters/dosing)
-                Row(
-                  children: [
-                    // AI stocking button - conditionally shown based on app settings
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
-                      Expanded(
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.purple.shade400,
-                                Colors.blue.shade500,
-                                Colors.cyan.shade400,
+                // Action buttons - hidden in grid mode (accessible via 3-dot menu)
+                if (!isGridMode) ...[
+                  Row(
+                    children: [
+                      // AI stocking button - conditionally shown based on app settings
+                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                        Expanded(
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.purple.shade400,
+                                  Colors.blue.shade500,
+                                  Colors.cyan.shade400,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.purple.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
                               ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
                             ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.purple.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                            child: ElevatedButton.icon(
+                              onPressed: () => _getTankStockingRecommendations(tank),
+                              icon: const Icon(Icons.auto_awesome, size: 16),
+                              label: Text(
+                                'Stocking Ideas',
+                                style: TextStyle(
+                                  fontSize: isLargeScreen ? 13 : 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ],
-                          ),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _getTankStockingRecommendations(tank),
-                            icon: const Icon(Icons.auto_awesome, size: 16),
-                            label: Text(
-                              'Stocking Ideas',
-                              style: TextStyle(
-                                fontSize: isLargeScreen ? 13 : 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shadowColor: Colors.transparent,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    // Space between buttons
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
-                    
-                    // AI compatibility analysis button - conditionally shown based on app settings
-                    if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
-                      Expanded(
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.teal.shade400,
-                                Colors.green.shade500,
-                                Colors.cyan.shade300,
+                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
+                      // AI compatibility analysis button
+                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
+                        Expanded(
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.teal.shade400,
+                                  Colors.green.shade500,
+                                  Colors.cyan.shade300,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.teal.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
                               ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
                             ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.teal.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                            child: ElevatedButton.icon(
+                              onPressed: () => _getTankCompatibilityAnalysis(tank),
+                              icon: const Icon(Icons.biotech, size: 16),
+                              label: Text(
+                                'Compatibility',
+                                style: TextStyle(
+                                  fontSize: isLargeScreen ? 13 : 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ],
-                          ),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _getTankCompatibilityAnalysis(tank),
-                            icon: const Icon(Icons.biotech, size: 16),
-                            label: Text(
-                              'Compatibility',
-                              style: TextStyle(
-                                fontSize: isLargeScreen ? 13 : 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shadowColor: Colors.transparent,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
                 
                 const SizedBox(height: 10),
                 
@@ -1648,7 +1735,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   ///    - Shows time until next occurrence
   ///    - Highlights notifications within 12 hours
   ///    - Tapping logs the activity instantly
-  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs) {
+  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs, {bool inGridMode = false}) {
     final l10n = AppLocalizations.of(context)!;
     final List<Widget> recentActivityItems = [];
     final List<Widget> notificationItems = [];
@@ -1823,15 +1910,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         // Recent activity section
         ...recentActivityItems,
         
-        // Notifications section (2 per row using LayoutBuilder for responsive width)
+        // Notifications section (1 per row in grid mode, 2 per row otherwise)
         if (notificationItems.isNotEmpty) ...[
           if (recentActivityItems.isNotEmpty) const SizedBox(height: 10),
           // Use LayoutBuilder directly (avoid adding a flex child inside an
           // unbounded Column which causes RenderFlex assertions).
           LayoutBuilder(
             builder: (context, constraints) {
-              // Calculate item width for 2 per row with 8px spacing
-              final itemWidth = (constraints.maxWidth - 8) / 2;
+              // In grid mode use full width (1 per row), otherwise 2 per row
+              final itemWidth = inGridMode ? constraints.maxWidth : (constraints.maxWidth - 8) / 2;
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,

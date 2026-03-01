@@ -56,6 +56,7 @@ class FeatureInfo {
   final String? url;
   final String? imagePath;
   final List<ToolChipInfo>? toolChips;
+  final bool fullWidth;
 
   FeatureInfo({
     required this.icon,
@@ -67,6 +68,7 @@ class FeatureInfo {
     this.url,
     this.imagePath,
     this.toolChips,
+    this.fullWidth = false,
   });
 }
 
@@ -571,6 +573,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
         imagePath: 'assets/AquaPiEssentials.jpg',
+        fullWidth: true,
       ),
     ];
 
@@ -617,13 +620,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // Feature Cards section header with layout toggle
                       Builder(builder: (context) {
                         final useGrid = appSettings.welcomeGridLayout;
-                        final splitIndex = features.indexWhere(
+                        final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+
+                        // Separate full-width cards (e.g. AquaPi Store) from grid cards
+                        final gridFeatures = features.where((f) => !f.fullWidth).toList();
+                        final fullWidthFeatures = features.where((f) => f.fullWidth).toList();
+
+                        // Split point for the native ad (between AI tools and calculators)
+                        final splitIndex = gridFeatures.indexWhere(
                           (f) => f.routeName == '/calculators',
                         );
                         final topFeatures = splitIndex > 0
-                            ? features.sublist(0, splitIndex)
-                            : (splitIndex < 0 ? features : <FeatureInfo>[]);
-                        final bottomFeatures = splitIndex >= 0 ? features.sublist(splitIndex) : <FeatureInfo>[];
+                            ? gridFeatures.sublist(0, splitIndex)
+                            : (splitIndex < 0 ? gridFeatures : <FeatureInfo>[]);
+                        final bottomFeatures = splitIndex >= 0 ? gridFeatures.sublist(splitIndex) : <FeatureInfo>[];
+
                         return Column(
                           children: [
                             // Layout toggle row
@@ -642,14 +653,25 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 ),
                               ],
                             ),
-                            if (topFeatures.isNotEmpty) ...[
-                              _buildFeatureGrid(context, topFeatures, useGrid: useGrid),
+                            if (adsRemoved) ...[
+                              // No ad break — render all grid features as one continuous mosaic
+                              if (gridFeatures.isNotEmpty)
+                                _buildFeatureGrid(context, gridFeatures, useGrid: useGrid),
+                            ] else ...[
+                              // Show ad between top and bottom feature groups
+                              if (topFeatures.isNotEmpty) ...[
+                                _buildFeatureGrid(context, topFeatures, useGrid: useGrid),
+                              ],
+                              _buildWelcomeNativeAd(),
+                              if (bottomFeatures.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                _buildFeatureGrid(context, bottomFeatures, useGrid: useGrid),
+                              ],
                             ],
-                            // Native ad between AI Stocking Assistant and Calculators
-                            _buildWelcomeNativeAd(),
-                            if (bottomFeatures.isNotEmpty) ...[
+                            // Full-width cards (e.g. AquaPi Store) always rendered single-column
+                            if (fullWidthFeatures.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              _buildFeatureGrid(context, bottomFeatures, useGrid: useGrid),
+                              _buildFeatureGrid(context, fullWidthFeatures, useGrid: useGrid, forceSingleColumn: true),
                             ],
                           ],
                         );
@@ -1234,13 +1256,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features, {bool useGrid = true}) {
+  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features, {bool useGrid = true, bool forceSingleColumn = false}) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
     final isMediumScreen = screenWidth > 800;
     
     // Determine column count based on screen size and layout preference
-    final crossAxisCount = isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1));
+    final crossAxisCount = forceSingleColumn ? 1 : (isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1)));
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1261,7 +1283,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 description: feature.description,
                 imagePath: feature.imagePath,
                 toolChips: feature.toolChips,
-                compact: useGrid && !isMediumScreen,
+                compact: !forceSingleColumn && useGrid && !isMediumScreen,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
