@@ -2750,6 +2750,11 @@
     "description": "Section label for filtering tanks by user-created tags"
   },
 
+  "manageTags": "Manage Tags",
+  "@manageTags": {
+    "description": "Menu item label for managing tank tags from the per-tank popup menu"
+  },
+
   "submitIssue": "Submit Issue",
   "@submitIssue": {
     "description": "Label for the submit issue/feedback menu item in settings"

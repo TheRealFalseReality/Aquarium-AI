@@ -792,6 +792,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildFloatingSortMenu(BuildContext context, List<Tank> allTanks) {
+    final l10n = AppLocalizations.of(context)!;
     // Collect all unique tags from all tanks for the filter chips
     final allTags = <String>{};
     for (final tank in allTanks) {

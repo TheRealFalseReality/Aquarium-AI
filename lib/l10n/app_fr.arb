@@ -521,6 +521,7 @@
   "sortBy": "Trier par",
   "filterByType": "Filtrer par type",
   "filterByTag": "Filtrer par étiquette",
+  "manageTags": "Gérer les étiquettes",
 
   "submitIssue": "Soumettre un problème",
   "submitIssueDesc": "Signaler un bug ou demander une nouvelle fonctionnalité sur GitHub",
