@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
