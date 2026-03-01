@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,7 +45,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
-    final debugHideAds = prefs.getBool('debugHideAds') ?? false;
+    final debugHideAds = prefs.getBool('debugHideAds') ?? kDebugMode;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,

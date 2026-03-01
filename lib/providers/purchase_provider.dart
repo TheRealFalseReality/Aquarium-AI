@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,7 +87,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   Future<void> _init() async {
     // Load persisted "ads removed" state immediately.
     final prefs = await SharedPreferences.getInstance();
-    final adsRemoved = prefs.getBool(_adsRemovedKey) ?? false;
+    final adsRemoved = prefs.getBool(_adsRemovedKey) ?? kDebugMode;
 
     state = state.copyWith(adsRemoved: adsRemoved, isLoading: false);
 
