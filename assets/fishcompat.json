@@ -1335,9 +1335,12 @@
       "name": "Angelfish",
       "commonNames": [
         "Queen Angelfish",
-        "Emperor Angelfish"
+        "Emperor Angelfish",
+        "French Angelfish",
+        "Blueface Angelfish",
+        "Koran (Semicircle) Angelfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pez_%C3%A1ngel_emperador_%28Pomacanthus_imperator%29%2C_mar_Rojo%2C_Egipto%2C_2023-04-17%2C_DD_104.jpg/250px-Pez_%C3%A1ngel_emperador_%28Pomacanthus_imperator%29%2C_mar_Rojo%2C_Egipto%2C_2023-04-17%2C_DD_104.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_marine.jpg",
       "compatible": [
         "Blennies",
         "Eels",
@@ -1366,7 +1369,7 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -1392,9 +1395,12 @@
       "name": "Angelfish - Dwarf",
       "commonNames": [
         "Flame Angelfish",
-        "Coral Beauty"
+        "Coral Beauty",
+        "Cherub (Pygmy) Angelfish",
+        "Bicolor Angelfish",
+        "Lemonpeel Angelfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Flame_angelfish_%28Centropyge_loricula%29.jpg/250px-Flame_angelfish_%28Centropyge_loricula%29.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_dwarf_marine.jpg",
       "compatible": [
         "Anthias",
         "Basslets",
@@ -1432,7 +1438,7 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish",
         "Corals",
         "Dragonets",
@@ -1446,12 +1452,16 @@
       ]
     },
     {
-      "name": "Anglers / Frogs",
+      "name": "Anglers / Frogfish",
       "commonNames": [
-        "Frogfish",
-        "Anglerfish"
+        "Wartskin Anglerfish",
+        "Painted Frogfish",
+        "Striated (Hairy) Frogfish",
+        "Giant Frogfish",
+        "Sargassum Fish",
+        "Psychedelic Frogfish"
       ],
-      "imageURL": "https://yourfishstore.com/cdn/shop/products/X1-Red-Angler-Frogfish-Lrg-4-6-Marine-Fish-Saltwater-Free-Shipping-marine-fish-packages.jpg?v=1740709075",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/frogfish.jpg",
       "compatible": [
         "Batfish",
         "Boxfish",
@@ -1506,9 +1516,13 @@
       "name": "Anthias",
       "commonNames": [
         "Lyretail Anthias",
-        "Squarfin Anthias"
+        "Squarfin Anthias",
+        "Bartlett's Anthias",
+        "Dispar Anthias",
+        "Sunburst (Fathead) Anthias",
+        "Bimaculatus Anthias"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Anthias_anthias.jpg/250px-Anthias_anthias.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anthias.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1544,7 +1558,7 @@
       ],
       "withCaution": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Boxfish",
         "Cardinalfish",
         "Damselfish",
@@ -1563,9 +1577,13 @@
       "name": "Basslets",
       "commonNames": [
         "Royal Gramma",
-        "Blackcap Basslet"
+        "Blackcap Basslet",
+        "Chalk Bass",
+        "Swissguard Basslet",
+        "Candy Basslet",
+        "Yellow Assessor"
       ],
-      "imageURL": "https://reefs.com/blog/wp-content/uploads/2006/10/Candy_Bass_1-64d8099e9cf06a7bbbfa957095876afe.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/basslets.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1593,7 +1611,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1619,12 +1637,13 @@
     {
       "name": "Batfish",
       "commonNames": [
-        "Longfin Batfish",
-        "Pinnatus Batfish"
+        "Pinnate Batfish",
+        "Teira (Longfin) Batfish",
+        "Orbicular (Round) Batfish"
       ],
-      "imageURL": "https://www.thesmilingseahorse.com/uploads/1/0/1/8/10183628/dsc-2797_orig.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/batfish.jpg",
       "compatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Butterflyfish",
@@ -1677,9 +1696,13 @@
       "name": "Blennies",
       "commonNames": [
         "Lawnmower Blenny",
-        "Bicolor Blenny"
+        "Bicolor Blenny",
+        "Starry Blenny",
+        "Midas Blenny",
+        "Tailspot Blenny",
+        "Fang Blennies"
       ],
-      "imageURL": "https://reefchasers.com/cdn/shop/collections/blenny-fish-721819.jpg?v=1682979037",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/blennies.jpg",
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
@@ -1710,7 +1733,7 @@
         "Sharks / Rays"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Blennies",
@@ -1734,12 +1757,14 @@
       "name": "Boxfish",
       "commonNames": [
         "Longhorn Cowfish",
-        "Yellow Boxfish"
+        "Yellow Boxfish",
+        "Spotted Boxfish",
+        "Scrawled Cowfish"
       ],
-      "imageURL": "https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/assets/images/boxfish.jpg?raw=true",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/boxfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Blennies",
@@ -1791,11 +1816,19 @@
       "name": "Butterflyfish",
       "commonNames": [
         "Copperband Butterflyfish",
-        "Heniochus Butterflyfish"
+        "Heniochus Butterflyfish",
+        "Auriga (Threadfin) Butterflyfish",
+        "Sunburst (Klein’s) Butterflyfish",
+        "Pearlscale Butterflyfish",
+        "Merten’s Butterflyfish",
+        "Pyramid Butterflyfish",
+        "Zoster Butterflyfish",
+        "Raccoon Butterflyfish",
+        "Yellow Longnose Butterflyfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Chelmon_rostratus_Luc_Viatour.jpg/250px-Chelmon_rostratus_Luc_Viatour.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/butterflyfish.jpg",
       "compatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -1848,9 +1881,12 @@
       "name": "Cardinalfish",
       "commonNames": [
         "Banggai Cardinalfish",
-        "Pajama Cardinalfish"
+        "Pajama Cardinalfish",
+        "Longspine (Glass) Cardinalfish",
+        "Flame (Red) Cardinalfish",
+        "Blue-Eyed Cardinalfish"
       ],
-      "imageURL": "https://shop.thebiotagroup.com/cdn/shop/files/Kaudern_s_1200x.jpg?v=1702911876",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cardinalfish.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Basslets",
@@ -1881,7 +1917,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1904,10 +1940,12 @@
     {
       "name": "Chromis",
       "commonNames": [
-        "Green Chromis",
-        "Blue Chromis"
+        "Blue-Green Reef Chromis",
+        "Vanderbilt’s Chromis",
+        "Barrier Reef Chromis",
+        "Black-Axil Chromis"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blue-green_Chromis%2C_Kiribati_imported_from_iNaturalist_photo_345755248.jpg/250px-Blue-green_Chromis%2C_Kiribati_imported_from_iNaturalist_photo_345755248.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/chromis.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1941,7 +1979,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -1962,9 +2000,12 @@
       "name": "Clownfish (Female) ♀",
       "commonNames": [
         "Ocellaris Clownfish",
-        "Percula Clownfish"
+        "Percula Clownfish",
+        "Maroon Clownfish",
+        "Clarkii Clownfish",
+        "Tomato Clownfish"
       ],
-      "imageURL": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_female.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -1994,7 +2035,7 @@
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Clownfish (Female) ♀",
         "Eels",
         "Groupers",
@@ -2019,9 +2060,12 @@
       "name": "Clownfish (Male) ♂",
       "commonNames": [
         "Ocellaris Clownfish",
-        "Percula Clownfish"
+        "Percula Clownfish",
+        "Maroon Clownfish",
+        "Clarkii Clownfish",
+        "Tomato Clownfish"
       ],
-      "imageURL": "https://media.istockphoto.com/id/1334812871/photo/clown-anemonefish-amphiprion-ocellaris.jpg?s=612x612&w=0&k=20&c=9jl_d9FrCrFZz4dPWI-s2pLDpIlqrEnoWqaE465T0gU=",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_male.jpg",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -2052,7 +2096,7 @@
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2119,7 +2163,7 @@
       "withCaution": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Blennies",
         "Boxfish",
         "Filefish",
@@ -2162,7 +2206,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2221,7 +2265,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2276,7 +2320,7 @@
         "Wrasse - Reef Safe"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2315,7 +2359,7 @@
         "Tangs / Surgeons"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Corals"
       ],
       "notCompatible": [
@@ -2367,7 +2411,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Gallito_%28Stephanolepis_hispidus%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-06%2C_DD_16.jpg/250px-Gallito_%28Stephanolepis_hispidus%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-06%2C_DD_16.jpg",
       "compatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -2425,7 +2469,7 @@
       "compatible": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -2506,7 +2550,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2571,7 +2615,7 @@
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Boxfish",
         "Eels",
         "Groupers",
@@ -2595,7 +2639,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Plectorhinchus_chaetodonoides.JPG/250px-Plectorhinchus_chaetodonoides.JPG",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Eels",
@@ -2684,7 +2728,7 @@
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Blennies",
         "Boxfish",
@@ -2741,7 +2785,7 @@
         "Worms / Misc. Inverts"
       ],
       "withCaution": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Batfish",
         "Chromis",
@@ -2791,7 +2835,7 @@
         "Triggerfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -2823,7 +2867,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Clearfin_lionfish_%28Pterois_radiata%29.JPG/250px-Clearfin_lionfish_%28Pterois_radiata%29.JPG",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers"
       ],
@@ -2919,7 +2963,7 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
@@ -2953,7 +2997,7 @@
         "Squirrelfish"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Eels",
         "Groupers",
         "Grunts / Sweetlips",
@@ -3006,7 +3050,7 @@
         "Tangs / Surgeons"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish"
       ],
       "notCompatible": [
@@ -3057,7 +3101,7 @@
       "notCompatible": [
         "Angelfish",
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3111,7 +3155,7 @@
       "notRecommended": [],
       "notCompatible": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3183,7 +3227,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish"
       ],
       "notCompatible": [
@@ -3240,7 +3284,7 @@
         "Worms / Misc. Inverts"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Wrasse - Fish Only"
       ],
       "notCompatible": [
@@ -3277,7 +3321,7 @@
       "imageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Holocentrus_rufus.jpg/250px-Holocentrus_rufus.jpg",
       "compatible": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Boxfish",
         "Foxface / Rabbitfish",
@@ -3365,7 +3409,7 @@
         "Wrasse - Reef Safe"
       ],
       "notRecommended": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Butterflyfish",
         "Lionfish / Scorpionfish"
       ],
@@ -3405,7 +3449,7 @@
         "Worms / Misc. Inverts"
       ],
       "notCompatible": [
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Basslets",
         "Batfish",
         "Cardinalfish",
@@ -3466,7 +3510,7 @@
       ],
       "withCaution": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Anthias",
         "Basslets",
         "Batfish",
@@ -3536,7 +3580,7 @@
       ],
       "withCaution": [
         "Angelfish",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Cardinalfish",
         "Eels",
@@ -3580,7 +3624,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish"
       ],
       "notCompatible": [
@@ -3638,7 +3682,7 @@
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
-        "Anglers / Frogs",
+        "Anglers / Frogfish",
         "Batfish",
         "Filefish",
         "Triggerfish",
