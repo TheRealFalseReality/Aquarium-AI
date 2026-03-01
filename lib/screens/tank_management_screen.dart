@@ -1205,11 +1205,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   Widget _buildVisibilityChip(BuildContext context, IconData icon, String label, bool isHidden, void Function(bool) onToggle) {
+    final isVisible = !isHidden;
     final cs = Theme.of(context).colorScheme;
     return FilterChip(
-      avatar: Icon(icon, size: 14, color: isHidden ? cs.onSurfaceVariant : cs.onPrimary),
-      label: Text(label, style: TextStyle(fontSize: 11, color: isHidden ? cs.onSurfaceVariant : cs.onPrimary)),
-      selected: !isHidden,
+      avatar: Icon(icon, size: 14, color: isVisible ? cs.onPrimary : cs.onSurfaceVariant),
+      label: Text(label, style: TextStyle(fontSize: 11, color: isVisible ? cs.onPrimary : cs.onSurfaceVariant)),
+      selected: isVisible,
       selectedColor: cs.primary,
       backgroundColor: cs.surfaceVariant,
       showCheckmark: false,
