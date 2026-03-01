@@ -50,24 +50,32 @@ class FeatureInfo {
   final String icon;
   final String title;
   final String description;
+  final String? shortDescription;
   final String routeName;
   final Duration delay;
   final bool openPhotoAnalyzer;
   final String? url;
   final String? imagePath;
   final List<ToolChipInfo>? toolChips;
+  final bool fullWidth;
 
   FeatureInfo({
     required this.icon,
     required this.title,
     required this.description,
+    this.shortDescription,
     required this.routeName,
     required this.delay,
     this.openPhotoAnalyzer = false,
     this.url,
     this.imagePath,
     this.toolChips,
+    this.fullWidth = false,
   });
+
+  /// Unique identifier for this feature card. Uses routeName for most cards,
+  /// or 'aquapi_store' for the full-width AquaPi Store card (which has an empty routeName).
+  String get id => fullWidth ? 'aquapi_store' : routeName;
 }
 
 // Converted to ConsumerStatefulWidget to use initState
@@ -126,6 +134,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _changelogShownVersionKey = 'changelog_shown_version';
   static const String _changelogBannerShownAtKey = 'changelog_banner_shown_at';
   static const int _changelogBannerAutoDismissDays = 3;
+  static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
 
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
@@ -136,11 +145,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
+
+  // Hidden feature card IDs
+  Set<String> _hiddenFeatures = {};
   
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadHiddenFeatures();
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
@@ -160,6 +173,75 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     super.didChangeDependencies();
     // Reset selected tank index when navigating back to this screen
     // This will be null on first build, causing a new random selection
+  }
+
+  Future<void> _loadHiddenFeatures() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_hiddenFeaturesKey) ?? '';
+      if (stored.isNotEmpty) {
+        setState(() {
+          _hiddenFeatures = stored.split(',').where((s) => s.isNotEmpty).toSet();
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _saveHiddenFeatures() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_hiddenFeaturesKey, _hiddenFeatures.join(','));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  void _showCardFilterSheet(BuildContext context, List<FeatureInfo> allFeatures, bool adsRemoved) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.visibleCards, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ...allFeatures.map((f) {
+                    final isAquaPiStore = f.fullWidth;
+                    final isDisabled = isAquaPiStore && !adsRemoved;
+                    final isHidden = _hiddenFeatures.contains(f.id);
+                    return CheckboxListTile(
+                      value: !isHidden,
+                      title: Text(f.title),
+                      enabled: !isDisabled,
+                      subtitle: isDisabled ? Text(l10n.purchaseToHideCard) : null,
+                      onChanged: isDisabled ? null : (val) {
+                        setState(() {
+                          if (val == true) {
+                            _hiddenFeatures = {..._hiddenFeatures}..remove(f.id);
+                          } else {
+                            _hiddenFeatures = {..._hiddenFeatures, f.id};
+                          }
+                        });
+                        setSheetState(() {});
+                        _saveHiddenFeatures();
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _checkShowPromotionDialog() async {
@@ -503,6 +585,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🐡',
           title: l10n.aiCompatibilityTool,
           description: l10n.aiCompatibilityDescription,
+          shortDescription: l10n.aiCompatibilityDrawerDescription,
           routeName: '/compat-ai',
           delay: const Duration(milliseconds: 650),
         ),
@@ -510,6 +593,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🤖',
           title: l10n.aiChatbot,
           description: l10n.aiChatbotDescription,
+          shortDescription: l10n.aiChatbotDrawerDescription,
           routeName: '/chatbot',
           delay: const Duration(milliseconds: 700),
           toolChips: [
@@ -537,6 +621,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '📷',
           title: l10n.photoAnalyzer,
           description: l10n.photoAnalyzerDescription,
+          shortDescription: l10n.photoAnalyzerDrawerDescription,
           routeName: '/chatbot',
           openPhotoAnalyzer: true,
           delay: const Duration(milliseconds: 750),
@@ -545,6 +630,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           icon: '🦐',
           title: l10n.aiStockingAssistant,
           description: l10n.aiStockingDescription,
+          shortDescription: l10n.aiStockingDrawerDescription,
           routeName: '/stocking',
           delay: const Duration(milliseconds: 800),
         ),
@@ -553,6 +639,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         icon: '🧪',
         title: l10n.aquariumCalculators,
         description: l10n.aquariumCalculatorsDescription,
+        shortDescription: l10n.aquariumCalculatorsDrawerDescription,
         routeName: '/calculators',
         delay: const Duration(milliseconds: 850),
       ),
@@ -560,6 +647,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         icon: '📏',
         title: l10n.tankVolumeCalculator,
         description: l10n.tankVolumeDescription,
+        shortDescription: l10n.tankVolumeDrawerDescription,
         routeName: '/tank-volume',
         delay: const Duration(milliseconds: 900),
       ),
@@ -571,6 +659,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
         imagePath: 'assets/AquaPiEssentials.jpg',
+        fullWidth: true,
       ),
     ];
 
@@ -612,29 +701,71 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // Remove Ads hint below My Tanks
                       _buildRemoveAdsHint(context),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                       
-                      // Feature Cards in Staggered Grid — split around the native ad.
-                      // AI feature cards (AI Stocking Assistant and earlier) come first,
-                      // then the native ad, then Calculators and the rest.
+                      // Feature Cards section header with layout toggle
                       Builder(builder: (context) {
-                        final splitIndex = features.indexWhere(
+                        final useGrid = appSettings.welcomeGridLayout;
+                        final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+
+                        // Apply hidden features filter
+                        final visibleFeatures = features.where((f) => !_hiddenFeatures.contains(f.id)).toList();
+
+                        // Separate full-width cards (e.g. AquaPi Store) from grid cards
+                        final gridFeatures = visibleFeatures.where((f) => !f.fullWidth).toList();
+                        final fullWidthFeatures = visibleFeatures.where((f) => f.fullWidth).toList();
+
+                        // Split point for the native ad (between AI tools and calculators)
+                        final splitIndex = gridFeatures.indexWhere(
                           (f) => f.routeName == '/calculators',
                         );
                         final topFeatures = splitIndex > 0
-                            ? features.sublist(0, splitIndex)
-                            : (splitIndex < 0 ? features : <FeatureInfo>[]);
-                        final bottomFeatures = splitIndex >= 0 ? features.sublist(splitIndex) : <FeatureInfo>[];
+                            ? gridFeatures.sublist(0, splitIndex)
+                            : (splitIndex < 0 ? gridFeatures : <FeatureInfo>[]);
+                        final bottomFeatures = splitIndex >= 0 ? gridFeatures.sublist(splitIndex) : <FeatureInfo>[];
+
                         return Column(
                           children: [
-                            if (topFeatures.isNotEmpty) ...[
-                              _buildFeatureGrid(context, topFeatures),
+                            // Layout toggle row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.tune, size: 20),
+                                  tooltip: l10n.filterCards,
+                                  onPressed: () => _showCardFilterSheet(context, features, adsRemoved),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    useGrid ? Icons.view_list : Icons.grid_view,
+                                    size: 20,
+                                  ),
+                                  tooltip: useGrid ? l10n.switchToListView : l10n.switchToGridView,
+                                  onPressed: () {
+                                    ref.read(appSettingsProvider.notifier).setWelcomeGridLayout(!useGrid);
+                                  },
+                                ),
+                              ],
+                            ),
+                            if (adsRemoved) ...[
+                              // No ad break — render all grid features as one continuous mosaic
+                              if (gridFeatures.isNotEmpty)
+                                _buildFeatureGrid(context, gridFeatures, useGrid: useGrid),
+                            ] else ...[
+                              // Show ad between top and bottom feature groups
+                              if (topFeatures.isNotEmpty) ...[
+                                _buildFeatureGrid(context, topFeatures, useGrid: useGrid),
+                              ],
+                              _buildWelcomeNativeAd(),
+                              if (bottomFeatures.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                _buildFeatureGrid(context, bottomFeatures, useGrid: useGrid),
+                              ],
                             ],
-                            // Native ad between AI Stocking Assistant and Calculators
-                            _buildWelcomeNativeAd(),
-                            if (bottomFeatures.isNotEmpty) ...[
+                            // Full-width cards (e.g. AquaPi Store) always rendered single-column
+                            if (fullWidthFeatures.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              _buildFeatureGrid(context, bottomFeatures),
+                              _buildFeatureGrid(context, fullWidthFeatures, useGrid: useGrid, forceSingleColumn: true),
                             ],
                           ],
                         );
@@ -1219,13 +1350,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features) {
+  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features, {bool useGrid = true, bool forceSingleColumn = false}) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
     final isMediumScreen = screenWidth > 800;
     
-    // Determine column count based on screen size
-    final crossAxisCount = isLargeScreen ? 3 : (isMediumScreen ? 2 : 1);
+    // Determine column count based on screen size and layout preference
+    final crossAxisCount = forceSingleColumn ? 1 : (isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1)));
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1244,8 +1375,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 icon: feature.icon,
                 title: feature.title,
                 description: feature.description,
+                shortDescription: feature.shortDescription,
                 imagePath: feature.imagePath,
                 toolChips: feature.toolChips,
+                compact: !forceSingleColumn && useGrid && !isMediumScreen,
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
@@ -1441,18 +1574,22 @@ class FeatureCard extends ConsumerWidget {
   final String icon;
   final String title;
   final String description;
+  final String? shortDescription;
   final VoidCallback onTap;
   final String? imagePath;
   final List<ToolChipInfo>? toolChips;
+  final bool compact;
 
   const FeatureCard({
     super.key,
     required this.icon,
     required this.title,
     required this.description,
+    this.shortDescription,
     required this.onTap,
     this.imagePath,
     this.toolChips,
+    this.compact = false,
   });
 
   @override
@@ -1495,14 +1632,15 @@ class FeatureCard extends ConsumerWidget {
           onTap: onTap,
           splashColor: cs.primary.withOpacity(0.1),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(compact ? 14.0 : 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
+                if (compact) ...[
+                  // Compact (grid on mobile): icon centered, title below
+                  Center(
+                    child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: cs.primaryContainer.withOpacity(0.5),
@@ -1514,26 +1652,54 @@ class FeatureCard extends ConsumerWidget {
                       ),
                       child: Text(icon, style: const TextStyle(fontSize: 28)),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isMaterialYou ? cs.onSurface : cs.primary,
-                            ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isMaterialYou ? cs.onSurface : cs.primary,
+                        ),
+                  ),
+                ] else ...[
+                  // Default (list / large screen): icon + title in a row
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: cs.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(icon, style: const TextStyle(fontSize: 28)),
                       ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: cs.primary.withOpacity(0.7),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isMaterialYou ? cs.onSurface : cs.primary,
+                              ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: cs.primary.withOpacity(0.7),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Text(
-                  description,
+                  compact ? (shortDescription ?? description) : description,
+                  textAlign: compact ? TextAlign.center : TextAlign.start,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     height: 1.4,
@@ -1541,30 +1707,51 @@ class FeatureCard extends ConsumerWidget {
                 ),
                 if (toolChips != null && toolChips!.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: toolChips!.map((chip) {
-                      return ActionChip(
-                        avatar: Icon(chip.icon, size: 16, color: cs.primary),
-                        label: Text(
-                          chip.label,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: cs.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                        backgroundColor: cs.primaryContainer.withOpacity(0.5),
-                        side: BorderSide(
-                          color: cs.primary.withOpacity(0.3),
-                          width: 1,
-                        ),
-                        onPressed: chip.onTap,
-                        visualDensity: VisualDensity.compact,
+                  if (compact)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: toolChips!.map((chip) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                      );
-                    }).toList(),
-                  ),
+                        child: InkWell(
+                          onTap: chip.onTap,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: cs.primary.withOpacity(0.3)),
+                            ),
+                            child: Icon(chip.icon, size: 16, color: cs.primary),
+                          ),
+                        ),
+                      )).toList(),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: toolChips!.map((chip) {
+                        return ActionChip(
+                          avatar: Icon(chip.icon, size: 16, color: cs.primary),
+                          label: Text(
+                            chip.label,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          backgroundColor: cs.primaryContainer.withOpacity(0.5),
+                          side: BorderSide(
+                            color: cs.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          onPressed: chip.onTap,
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        );
+                      }).toList(),
+                    ),
                 ],
                 if (imagePath != null) ...[
                   const SizedBox(height: 16),

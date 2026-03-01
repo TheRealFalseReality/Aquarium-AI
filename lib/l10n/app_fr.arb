@@ -23,6 +23,8 @@
   "aquaPiStore": "Boutique AquaPi",
   "aquaPiStoreDescription": "Découvrez AquaPi, le contrôleur d'aquarium intelligent ultime. Surveillez et contrôlez les paramètres de votre aquarium avec des tests automatisés, des alertes en temps réel et une intégration transparente.",
   "myTanks": "Mes Aquariums",
+  "switchToListView": "Passer à la vue en liste",
+  "switchToGridView": "Passer à la vue en grille",
   "noTanksYet": "Pas encore d'aquariums. Touchez pour en ajouter un!",
   "totalTanks": "Total: {count}",
   "createFirstTank": "Créez Votre Premier Aquarium",
@@ -563,5 +565,16 @@
   "chooseFontDesc": "Choisissez la police utilisée dans toute l’application.",
   "fontPreviewText": "Portez ce vieux whisky au juge blond qui fume.",
   "customTheme": "Thème personnalisé",
-  "themeName": "Nom du thème"
+  "themeName": "Nom du thème",
+  "sortFilterAndView": "Trier, Filtrer et Afficher",
+  "viewSection": "Afficher",
+  "cardContent": "Contenu de la Carte",
+  "tankIconLabel": "Icône",
+  "metricsLabel": "Métriques",
+  "photoAnalyzerDrawerDescription": "Identifiez les poissons, détectez les problèmes de santé et obtenez des conseils pour améliorer votre aquarium.",
+  "quickLogs": "Journaux Rapides",
+  "activityHistory": "Activité",
+  "visibleCards": "Cartes Visibles",
+  "purchaseToHideCard": "Achetez Supprimer les annonces pour masquer",
+  "filterCards": "Filtrer les cartes"
 }

@@ -115,6 +115,16 @@
     "description": "Title for the my tanks section"
   },
   
+  "switchToListView": "Switch to list view",
+  "@switchToListView": {
+    "description": "Tooltip for the button that switches to list layout"
+  },
+  
+  "switchToGridView": "Switch to grid view",
+  "@switchToGridView": {
+    "description": "Tooltip for the button that switches to grid layout"
+  },
+  
   "noTanksYet": "No tanks yet. Tap to add one!",
   "@noTanksYet": {
     "description": "Message when user has no tanks"
@@ -3007,5 +3017,49 @@
   "themeName": "Theme name",
   "@themeName": {
     "description": "Label for the theme name text field in the custom theme dialog"
+  },
+  "sortFilterAndView": "Sort, Filter & View",
+  "@sortFilterAndView": {
+    "description": "Label for the sort, filter and view panel button in tank management"
+  },
+  "viewSection": "View",
+  "@viewSection": {
+    "description": "Section header for view options in sort/filter/view panel"
+  },
+  "cardContent": "Card Content",
+  "@cardContent": {
+    "description": "Section header for card content visibility toggles"
+  },
+  "tankIconLabel": "Icon",
+  "@tankIconLabel": {
+    "description": "Label for tank icon visibility toggle"
+  },
+  "metricsLabel": "Metrics",
+  "@metricsLabel": {
+    "description": "Label for tank metrics visibility toggle"
+  },
+  "photoAnalyzerDrawerDescription": "Identify fish, detect health issues, and get specific tips to improve your aquarium.",
+  "@photoAnalyzerDrawerDescription": {
+    "description": "Short description of the photo analyzer (app drawer / compact mode)"
+  },
+  "quickLogs": "Quick Logs",
+  "@quickLogs": {
+    "description": "Label for the quick log buttons section on tank cards"
+  },
+  "activityHistory": "Activity",
+  "@activityHistory": {
+    "description": "Label for the activity history section on tank cards"
+  },
+  "visibleCards": "Visible Cards",
+  "@visibleCards": {
+    "description": "Title of the filter sheet for showing/hiding welcome screen feature cards"
+  },
+  "purchaseToHideCard": "Purchase Remove Ads to hide",
+  "@purchaseToHideCard": {
+    "description": "Subtitle shown on the AquaPi Store card filter option when the user hasn't purchased Remove Ads"
+  },
+  "filterCards": "Filter Cards",
+  "@filterCards": {
+    "description": "Tooltip for the filter button on the welcome screen"
   }
 }
