@@ -510,6 +510,18 @@
 
   "addCustomSpecies": "Benutzerdefinierte Art hinzufügen",
 
+  "speciesOptional": "Art (Optional)",
+  "addSpeciesHint": "Art hinzufügen...",
+  "tagsOptional": "Schlagwörter (Optional)",
+  "addTagHint": "Schlagwort hinzufügen...",
+  "addTag": "Schlagwort hinzufügen",
+  "confirm": "Bestätigen",
+  "sortAndFilter": "Sortieren & filtern",
+  "clearFilters": "Filter löschen",
+  "sortBy": "Sortieren nach",
+  "filterByType": "Nach Typ filtern",
+  "filterByTag": "Nach Schlagwort filtern",
+
   "submitIssue": "Problem einreichen",
   "submitIssueDesc": "Einen Fehler melden oder eine neue Funktion auf GitHub anfordern",
 

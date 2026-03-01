@@ -510,6 +510,18 @@
 
   "addCustomSpecies": "Ajouter une espèce personnalisée",
 
+  "speciesOptional": "Espèce (Facultatif)",
+  "addSpeciesHint": "Ajouter une espèce...",
+  "tagsOptional": "Étiquettes (Facultatif)",
+  "addTagHint": "Ajouter une étiquette...",
+  "addTag": "Ajouter une étiquette",
+  "confirm": "Confirmer",
+  "sortAndFilter": "Trier et filtrer",
+  "clearFilters": "Effacer les filtres",
+  "sortBy": "Trier par",
+  "filterByType": "Filtrer par type",
+  "filterByTag": "Filtrer par étiquette",
+
   "submitIssue": "Soumettre un problème",
   "submitIssueDesc": "Signaler un bug ou demander une nouvelle fonctionnalité sur GitHub",
 

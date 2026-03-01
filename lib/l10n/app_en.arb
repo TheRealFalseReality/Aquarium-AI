@@ -2695,6 +2695,61 @@
     "description": "Button label to add a custom species tag inline"
   },
 
+  "speciesOptional": "Species (Optional)",
+  "@speciesOptional": {
+    "description": "Label for the collapsed species section in the inhabitant dialog"
+  },
+
+  "addSpeciesHint": "Add species...",
+  "@addSpeciesHint": {
+    "description": "Hint text for the add species input field"
+  },
+
+  "tagsOptional": "Tags (Optional)",
+  "@tagsOptional": {
+    "description": "Label for the tags section in the tank creation/edit screen"
+  },
+
+  "addTagHint": "Add tag...",
+  "@addTagHint": {
+    "description": "Hint text for the add tag input field"
+  },
+
+  "addTag": "Add Tag",
+  "@addTag": {
+    "description": "Button label to show the add tag input field"
+  },
+
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Tooltip for the confirm/check button"
+  },
+
+  "sortAndFilter": "Sort & Filter",
+  "@sortAndFilter": {
+    "description": "Title of the sort and filter popup panel"
+  },
+
+  "clearFilters": "Clear filters",
+  "@clearFilters": {
+    "description": "Button label to clear all active filters"
+  },
+
+  "sortBy": "Sort by",
+  "@sortBy": {
+    "description": "Section label for sort options in the sort and filter panel"
+  },
+
+  "filterByType": "Filter by type",
+  "@filterByType": {
+    "description": "Section label for filtering tanks by type"
+  },
+
+  "filterByTag": "Filter by tag",
+  "@filterByTag": {
+    "description": "Section label for filtering tanks by user-created tags"
+  },
+
   "submitIssue": "Submit Issue",
   "@submitIssue": {
     "description": "Label for the submit issue/feedback menu item in settings"
