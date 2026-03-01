@@ -57,6 +57,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
   bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
   String? _filterByType; // Filter by tank type ('freshwater' or 'marine')
+  bool _filterByReef = false; // Filter to reef tanks only (only applies when _filterByType == 'marine')
   Set<String> _filterByTags = {}; // Filter by selected tank tags
 
   @override
@@ -592,6 +593,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       if (_filterByType != null && tank.type != _filterByType) {
         return false;
       }
+      // Filter by reef (only applicable when filtering by marine)
+      if (_filterByReef && !tank.isReef) {
+        return false;
+      }
       // Filter by tags (tank must have ANY of the selected tag names)
       if (_filterByTags.isNotEmpty &&
           !_filterByTags.any((name) => tank.tags.any((t) => t.name == name))) {
@@ -681,7 +686,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
                       size: 18,
                     ),
-                    if (_filterByType != null || _filterByTags.isNotEmpty)
+                    if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
                       Positioned(
                         top: -4,
                         right: -4,
@@ -711,7 +716,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  side: (_filterByType != null || _filterByTags.isNotEmpty)
+                  side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
                       ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
                       : null,
                 ),
@@ -802,7 +807,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     final sortedAllTags = tagsByName.values.toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    final hasActiveFilters = _filterByType != null || _filterByTags.isNotEmpty;
+    final hasActiveFilters = _filterByType != null || _filterByReef || _filterByTags.isNotEmpty;
 
     return Positioned(
       top: 100, // Position below the header
@@ -859,6 +864,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               onPressed: () {
                                 setState(() {
                                   _filterByType = null;
+                                  _filterByReef = false;
                                   _filterByTags = {};
                                 });
                               },
@@ -954,6 +960,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         onSelected: (selected) {
                           setState(() {
                             _filterByType = selected ? 'freshwater' : null;
+                            _filterByReef = false;
                           });
                         },
                       ),
@@ -964,9 +971,21 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         onSelected: (selected) {
                           setState(() {
                             _filterByType = selected ? 'marine' : null;
+                            _filterByReef = false;
                           });
                         },
                       ),
+                      if (_filterByType == 'marine')
+                        FilterChip(
+                          avatar: const Text('🪸', style: TextStyle(fontSize: 14)),
+                          label: Text(l10n.filterByReef),
+                          selected: _filterByReef,
+                          onSelected: (selected) {
+                            setState(() {
+                              _filterByReef = selected;
+                            });
+                          },
+                        ),
                     ],
                   ),
                   // Filter by tags (only shown if any tanks have tags)
@@ -1220,12 +1239,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           Builder(
                             builder: (context) {
                               final l10n = AppLocalizations.of(context)!;
-                              return Text(
-                                tank.type == 'freshwater' ? l10n.freshwater : l10n.saltwater,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              String typeLabel;
+                              if (tank.type == 'freshwater') {
+                                typeLabel = l10n.freshwater;
+                              } else if (tank.isReef) {
+                                typeLabel = l10n.reefTank;
+                              } else {
+                                typeLabel = l10n.saltwater;
+                              }
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (tank.type == 'marine' && tank.isReef)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text('🪸', style: TextStyle(fontSize: 12)),
+                                    ),
+                                  Text(
+                                    typeLabel,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),

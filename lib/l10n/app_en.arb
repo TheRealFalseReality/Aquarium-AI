@@ -531,6 +531,21 @@
     "description": "Saltwater tank type"
   },
 
+  "reef": "Reef",
+  "@reef": {
+    "description": "Reef tank sub-type label"
+  },
+
+  "reefTank": "Reef Tank",
+  "@reefTank": {
+    "description": "Reef tank label shown on tank cards and details"
+  },
+
+  "markAsReef": "Reef Tank",
+  "@markAsReef": {
+    "description": "Toggle label to mark a saltwater tank as a reef tank"
+  },
+
   "freshwaterTank": "Freshwater Tank",
   "@freshwaterTank": {
     "description": "Freshwater tank label"
@@ -2748,6 +2763,11 @@
   "filterByTag": "Filter by tag",
   "@filterByTag": {
     "description": "Section label for filtering tanks by user-created tags"
+  },
+
+  "filterByReef": "Reef only",
+  "@filterByReef": {
+    "description": "Filter chip label to show only reef tanks"
   },
 
   "manageTags": "Manage Tags",
