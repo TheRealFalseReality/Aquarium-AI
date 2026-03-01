@@ -148,6 +148,7 @@ class Tank {
   final List<TankNotification> notifications; // Task notifications
   final List<NotificationLog> notificationLogs; // Notification action logs
   final List<TankNote> tankNotes; // User notes for the tank
+  final List<String> tags; // User-created tags for this tank
 
   Tank({
     required this.id,
@@ -170,12 +171,14 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
+    List<String>? tags,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
        dosingEntries = dosingEntries ?? [],
        notifications = notifications ?? [],
        notificationLogs = notificationLogs ?? [],
-       tankNotes = tankNotes ?? [];
+       tankNotes = tankNotes ?? [],
+       tags = tags ?? [];
 
   factory Tank.create({
     required String name,
@@ -196,6 +199,7 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
+    List<String>? tags,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -219,6 +223,7 @@ class Tank {
       notifications: notifications,
       notificationLogs: notificationLogs,
       tankNotes: tankNotes,
+      tags: tags,
     );
   }
 
@@ -244,6 +249,7 @@ class Tank {
       'notifications': notifications.map((n) => n.toJson()).toList(),
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
       'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
+      'tags': tags,
     };
   }
 
@@ -283,6 +289,9 @@ class Tank {
       tankNotes: (json['tankNotes'] as List?)
           ?.map((tn) => TankNote.fromJson(tn))
           .toList() ?? [],
+      tags: (json['tags'] as List?)
+          ?.map((t) => t.toString())
+          .toList() ?? [],
     );
   }
 
@@ -307,6 +316,7 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
+    List<String>? tags,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,
@@ -332,6 +342,7 @@ class Tank {
       notifications: notifications ?? this.notifications,
       notificationLogs: notificationLogs ?? this.notificationLogs,
       tankNotes: tankNotes ?? this.tankNotes,
+      tags: tags ?? this.tags,
     );
   }
 }

@@ -57,6 +57,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   String _additionalNotes = ''; // Track additional notes
   Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
   bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
+  String? _filterByType; // Filter by tank type ('freshwater' or 'marine')
+  Set<String> _filterByTags = {}; // Filter by selected tank tags
 
   @override
   void initState() {
@@ -368,13 +370,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               height: double.infinity,
             ),
           ),
-        if (_isSortMenuExpanded) _buildFloatingSortMenu(context),
+        if (_isSortMenuExpanded) _buildFloatingSortMenu(context, tanks),
       ],
     );
   }
 
   Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
-    final sortedTanks = _sortTanks(tanks);
+    final filteredTanks = _filterTanks(tanks);
+    final sortedTanks = _sortTanks(filteredTanks);
     final screenWidth = MediaQuery.of(context).size.width;
     
     // Use grid layout for larger screens (tablets and desktops)
@@ -584,6 +587,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
+  List<Tank> _filterTanks(List<Tank> tanks) {
+    return tanks.where((tank) {
+      // Filter by type
+      if (_filterByType != null && tank.type != _filterByType) {
+        return false;
+      }
+      // Filter by tags (tank must have ALL selected tags)
+      if (_filterByTags.isNotEmpty && !_filterByTags.any((tag) => tank.tags.contains(tag))) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
   List<Tank> _sortTanks(List<Tank> tanks) {
     final sortedTanks = List<Tank>.from(tanks);
     
@@ -650,16 +667,34 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ),
               
-              // Sort menu
+              // Sort & Filter menu
               OutlinedButton.icon(
                 onPressed: () {
                   setState(() {
                     _isSortMenuExpanded = !_isSortMenuExpanded;
                   });
                 },
-                icon: Icon(
-                  _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
-                  size: 18,
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 18,
+                    ),
+                    if (_filterByType != null || _filterByTags.isNotEmpty)
+                      Positioned(
+                        top: -4,
+                        right: -4,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.error,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 label: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -676,6 +711,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  side: (_filterByType != null || _filterByTags.isNotEmpty)
+                      ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                      : null,
                 ),
               ),
               const SizedBox(width: 8),
@@ -753,7 +791,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  Widget _buildFloatingSortMenu(BuildContext context) {
+  Widget _buildFloatingSortMenu(BuildContext context, List<Tank> allTanks) {
+    // Collect all unique tags from all tanks for the filter chips
+    final allTags = <String>{};
+    for (final tank in allTanks) {
+      allTags.addAll(tank.tags);
+    }
+    final sortedAllTags = allTags.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final hasActiveFilters = _filterByType != null || _filterByTags.isNotEmpty;
+
     return Positioned(
       top: 100, // Position below the header
       left: 16,
@@ -787,73 +833,173 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Sort & Filter',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (hasActiveFilters)
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _filterByType = null;
+                                  _filterByTags = {};
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text('Clear filters', style: TextStyle(fontSize: 12)),
+                            ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _isSortMenuExpanded = false;
+                              });
+                            },
+                            icon: const Icon(Icons.close),
+                            iconSize: 20,
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Sort section
+                  Text(
+                    'Sort by',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: TankSortOption.values.map((option) {
+                      final isSelected = _currentSortOption == option;
+                      return ActionChip(
+                        avatar: Icon(
+                          _getSortOptionIcon(option),
+                          size: 16,
+                          color: isSelected 
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        label: Text(_getSortOptionLabel(option)),
+                        backgroundColor: isSelected 
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.surfaceVariant,
+                        labelStyle: TextStyle(
+                          color: isSelected 
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            // If selecting the same option, toggle ascending/descending
+                            if (_currentSortOption == option) {
+                              _isSortAscending = !_isSortAscending;
+                            } else {
+                              _currentSortOption = option;
+                              _isSortAscending = true; // Reset to ascending for new option
+                            }
+                            _isSortMenuExpanded = false;
+                          });
+                          _saveSortPreference(option);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                  // Filter by tank type
+                  Text(
+                    'Filter by type',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilterChip(
+                        avatar: const Text('🐟', style: TextStyle(fontSize: 14)),
+                        label: const Text('Freshwater'),
+                        selected: _filterByType == 'freshwater',
+                        onSelected: (selected) {
+                          setState(() {
+                            _filterByType = selected ? 'freshwater' : null;
+                          });
+                        },
+                      ),
+                      FilterChip(
+                        avatar: const Text('🪼', style: TextStyle(fontSize: 14)),
+                        label: const Text('Saltwater'),
+                        selected: _filterByType == 'marine',
+                        onSelected: (selected) {
+                          setState(() {
+                            _filterByType = selected ? 'marine' : null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  // Filter by tags (only shown if any tanks have tags)
+                  if (sortedAllTags.isNotEmpty) ...[
+                    const SizedBox(height: 16),
                     Text(
-                      'Sort Options',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      'Filter by tag',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSortMenuExpanded = false;
-                        });
-                      },
-                      icon: const Icon(Icons.close),
-                      iconSize: 20,
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: sortedAllTags.map((tag) {
+                        final isSelected = _filterByTags.contains(tag);
+                        return FilterChip(
+                          label: Text(tag),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _filterByTags = {..._filterByTags, tag};
+                              } else {
+                                _filterByTags = _filterByTags.where((t) => t != tag).toSet();
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
                   ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: TankSortOption.values.map((option) {
-                    final isSelected = _currentSortOption == option;
-                    return ActionChip(
-                      avatar: Icon(
-                        _getSortOptionIcon(option),
-                        size: 16,
-                        color: isSelected 
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      label: Text(_getSortOptionLabel(option)),
-                      backgroundColor: isSelected 
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.surfaceVariant,
-                      labelStyle: TextStyle(
-                        color: isSelected 
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          // If selecting the same option, toggle ascending/descending
-                          if (_currentSortOption == option) {
-                            _isSortAscending = !_isSortAscending;
-                          } else {
-                            _currentSortOption = option;
-                            _isSortAscending = true; // Reset to ascending for new option
-                          }
-                          _isSortMenuExpanded = false;
-                        });
-                        _saveSortPreference(option);
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -1468,6 +1614,44 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                
+                // Tank tags section (if tags exist)
+                if (tank.tags.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: tank.tags.map((tag) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: cs.secondaryContainer.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: cs.secondary.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.label_outline,
+                            size: 12,
+                            color: cs.onSecondaryContainer,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            tag,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: cs.onSecondaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
                   ),
                   const SizedBox(height: 14),
                 ],
@@ -2680,6 +2864,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         notes: tank.notes,
         harmonyScore: tank.harmonyScore,
         calculationBreakdown: tank.calculationBreakdown,
+        tags: List.from(tank.tags),
       );
       
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);
