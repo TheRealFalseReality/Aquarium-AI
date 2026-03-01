@@ -104,7 +104,7 @@ class _PostCardState extends State<PostCard> {
                               ),
                             ),
                             Text(
-                              _formatDate(widget.post.createdAt),
+                              _formatDate(widget.post.createdAt, l10n),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -250,13 +250,21 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) {
+      return diff.inMinutes == 1
+          ? l10n.oneMinuteAgo
+          : l10n.xMinutesAgo(diff.inMinutes);
+    }
+    if (diff.inHours < 24) {
+      return diff.inHours == 1
+          ? l10n.oneHourAgo
+          : l10n.xHoursAgo(diff.inHours);
+    }
+    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
 }

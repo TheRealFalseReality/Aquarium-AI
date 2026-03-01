@@ -126,8 +126,7 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
     if (post != null) {
       state = state.copyWith(isSubmitting: false, success: true);
     } else {
-      state = state.copyWith(
-          isSubmitting: false, error: 'Failed to create post. Please try again.');
+      state = state.copyWith(isSubmitting: false, error: 'post_creation_failed');
     }
     return post;
   }
