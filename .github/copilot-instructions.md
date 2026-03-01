@@ -1,0 +1,251 @@
+# Copilot Instructions for Aquarium AI
+
+## Project Overview
+
+**Aquarium AI** (`fish_ai`) is a Flutter application (package name `fish_ai`) targeting Android, iOS, Web, macOS, Windows, and Linux. It provides AI-powered tools for aquarium hobbyists: fish compatibility checker, AI chatbot, photo analyzer, stocking assistant, aquarium calculators, tank management, parameter logging, and dosing logger.
+
+Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| UI framework | Flutter (Material 3, `flex_color_scheme`) |
+| State management | Riverpod (`flutter_riverpod`, `riverpod_annotation`) |
+| AI providers | Google Gemini (`google_generative_ai`), OpenAI (`dart_openai`), Groq (`groq`) |
+| Backend | Firebase (Analytics, Crashlytics, Remote Config, Hosting) |
+| Ads | Google Mobile Ads |
+| Persistence | `shared_preferences` |
+| Localization | Flutter `intl` / ARB files (`flutter_localizations`, `flutter gen-l10n`) |
+| Notifications | `flutter_local_notifications` |
+| Charts | `fl_chart` |
+| Theming | `flex_color_scheme` v8 + `dynamic_color` (Material You) |
+
+---
+
+## Repository Layout
+
+```
+lib/
+  main.dart               # App entry point; Firebase init with retry, route definitions
+  main_layout.dart        # Shared Scaffold wrapper (AppBar + drawer + body)
+  constants.dart          # AdMob IDs, product IDs, developer Groq key (--dart-define)
+  theme_provider.dart     # AppColorTheme enum (15 values), AppFont enum, ThemeProviderNotifier
+  theme_colors.dart       # AquaThemeColors – all seed colour constants
+  firebase_options.dart   # Auto-generated Firebase config
+  l10n_template.arb       # Template for new translation files
+  l10n/                   # ARB localisation files (app_en.arb is the source of truth)
+    app_en.arb            # English strings (source of truth)
+    app_de.arb            # German
+    app_es.arb            # Spanish
+    app_fr.arb            # French
+  models/                 # Plain Dart data classes (Tank, Fish, WaterParameter, etc.)
+  providers/              # Riverpod providers for app state
+  screens/                # Full-page widgets (one file per screen)
+  services/               # Platform/external service wrappers
+  widgets/                # Reusable widget components
+  prompts/                # AI prompt builder classes
+  mixins/                 # Dart mixins shared across screens
+  utils/                  # Utility/helper functions
+  examples/               # Example data files
+assets/                   # Images, fonts, JSON data, documentation markdown files
+scripts/
+  validate_translations.sh  # Bash script; checks ARB key completeness and placeholder parity
+test/                     # Flutter unit/widget tests (run with `flutter test`)
+.github/
+  workflows/
+    android-release-build.yml      # Triggered on release; builds signed AAB/APK
+    firebase-hosting-merge.yml     # Deploys web build to Firebase Hosting on push to main
+    firebase-hosting-pull-request.yml  # Preview deploy for PRs
+    validate-translations.yml      # Validates ARB JSON syntax + key completeness on PR/push
+```
+
+---
+
+## Development Commands
+
+```bash
+# Install dependencies
+flutter pub get
+
+# Generate localization files (run after editing any .arb file)
+flutter gen-l10n
+
+# Run static analysis (linter)
+flutter analyze
+
+# Run tests
+flutter test
+
+# Run app (web)
+flutter run -d chrome
+
+# Run app with developer Groq key
+flutter run --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+
+# Build web (production)
+flutter build web --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+
+# Build Android AAB (production flavour)
+flutter build appbundle --flavor production --release \
+  --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+
+# Validate translation files
+chmod +x scripts/validate_translations.sh
+./scripts/validate_translations.sh
+```
+
+> **Note:** The generated localization files live in `.dart_tool/flutter_gen/gen_l10n/` and are **not** committed to Git. Always run `flutter gen-l10n` after editing any `.arb` file.
+
+---
+
+## Key Architecture Patterns
+
+### State Management (Riverpod)
+- All global state lives in `lib/providers/`. Every provider is a `StateNotifier` or `AsyncNotifier`.
+- `themeProviderNotifierProvider` (in `theme_provider.dart`) controls theme mode, color theme, and font family. It persists state via `SharedPreferences`.
+- Use `ref.watch()` in `ConsumerWidget`s and `ref.read()` for one-shot mutations.
+
+### Theming
+- **`AppColorTheme`** enum has 15 values:
+  `defaultTheme`, `materialYou`, `oceanBlue`, `iceBlue`, `gold`, `mulberry`, `midnight`,
+  `orange`, `green`, `skyBlue`, `royalBlue`, `orchid`, `hotPink`, `crimson`, `custom`.
+- Seed colours are defined in `lib/theme_colors.dart` (`AquaThemeColors` class).
+- `lib/main.dart` builds `FlexThemeData.light/dark()` using `FlexSchemeColor.from(primary: seedColor)` for non-Material-You themes, and `ThemeData` with a dynamic `ColorScheme` for Material You.
+- When adding a new theme, you must update: `AppColorTheme` enum, `AppColorThemeExt.seedColor`, `AppColorThemeExt.displayName`, `AquaThemeColors`, the swatch maps in `appearance_screen.dart`, and `_buildFlexTheme` in `main.dart`.
+- The `custom` theme uses a user-picked seed colour stored as `customSeedColor` in `ThemeProviderState`.
+- Persist theme by **name** (`colorThemeName` SharedPreferences key) not index, to survive enum reordering.
+
+### Fonts
+- **`AppFont`** enum: `poppins`, `karla`, `notoSans`. Persisted via `appFont` SharedPreferences key.
+- Font families must match names in `pubspec.yaml` fonts section.
+
+### Localization (i18n)
+- **All user-visible strings must be localized.** Never use bare string literals in widget trees.
+- Template: `lib/l10n/app_en.arb` (source of truth). When adding a new string:
+  1. Add the key/value + `@key` metadata to `app_en.arb`.
+  2. Add translated versions to `app_de.arb`, `app_es.arb`, `app_fr.arb` (translate to best ability).
+  3. Run `flutter gen-l10n` to regenerate `AppLocalizations`.
+  4. Use `AppLocalizations.of(context)!.yourNewKey` in widgets (or `l10n.yourNewKey` if `l10n` alias is set up in the screen).
+- Placeholders use `{paramName}` syntax in ARB files. Ensure all translations carry the same placeholders as the English template.
+- The `validate-translations.yml` workflow checks JSON validity and key completeness for every PR touching `lib/l10n/**.arb`. Warnings (missing keys) do **not** fail the build, but errors (invalid JSON) do.
+- The `l10n_template.arb` file at the repo root is a copy-and-translate starting point for new languages.
+
+### Models
+- Plain Dart classes in `lib/models/`. Most implement `toJson()` / `fromJson()`.
+- `TankTag` supports both the new `{name, color}` map format **and** the legacy plain-string format in `fromJson()` for backwards compatibility. `color` is a nullable ARGB `int`; `null` means "use theme secondary colour at render time".
+- Use `uuid` package for ID generation (`const Uuid().v4()`).
+
+### Services
+- `lib/services/` wraps external services (Firebase, ads, in-app purchases, notifications, etc.).
+- `InAppUpdateService` no-ops gracefully on non-Android/web platforms; call its methods without platform guards.
+- `RemoteConfigService` gates feature flags and fish data updates.
+- `AnalyticsService` and `CrashlyticsService` are safe to call unconditionally (they guard internally when Firebase is not initialized).
+
+### Screens
+- Each screen in `lib/screens/` is typically a `ConsumerStatefulWidget` or `ConsumerWidget`.
+- Use `MainLayout` wrapper (`lib/main_layout.dart`) for full-page screens to get the shared AppBar and drawer.
+- To avoid Flutter `ListTile`/`ExpansionTile` layout assertion errors, always give `leading` widgets explicit size constraints (e.g., `SizedBox(width: 48, height: 48, …)` or `Container(width: 40, height: 40, …)`).
+
+### Firebase Initialization
+- Firebase is initialized in `main.dart` with an exponential-backoff retry loop (up to 3 attempts) to handle intermittent `HandshakeException` / `SocketException` errors in CI or restricted network environments.
+- A global `_firebaseInitialized` flag is checked before using Firebase services.
+
+---
+
+## Localization Conventions (Important for Every PR)
+
+When any PR adds or modifies user-visible strings:
+
+1. **Add to `app_en.arb`** with an `@key` metadata block:
+   ```json
+   "myNewKey": "My new string with {param}",
+   "@myNewKey": {
+     "description": "Description of where this string appears",
+     "placeholders": {
+       "param": {"type": "String"}
+     }
+   }
+   ```
+2. **Add to all other `.arb` files** (`app_de.arb`, `app_es.arb`, `app_fr.arb`) with your best translation. Use the same placeholder names.
+3. **Run `flutter gen-l10n`** to verify generation succeeds without errors.
+4. **Use `AppLocalizations.of(context)!.myNewKey`** in the widget.
+
+---
+
+## CI / Workflows
+
+| Workflow | Trigger | What it does |
+|----------|---------|-------------|
+| `validate-translations.yml` | PR / push to `main` (paths: `lib/l10n/**`) | Validates JSON syntax + key completeness of all `.arb` files |
+| `firebase-hosting-pull-request.yml` | Pull request | Builds web app and deploys preview to Firebase Hosting |
+| `firebase-hosting-merge.yml` | Push to `main` | Deploys web app to production Firebase Hosting |
+| `android-release-build.yml` | Release event | Builds signed production + staging AAB/APK and uploads to release assets |
+
+The Firebase Hosting PR workflow requires the `FIREBASE_SERVICE_ACCOUNT_FISH_AI_CE60C` secret (not available in forks). If this is `action_required`, that's expected for external contributors and does not indicate a code bug.
+
+The Android release workflow requires `KEY_PROPERTIES`, `KEYSTORE_BASE64`, and `DEVELOPER_GROQ_API_KEY` secrets.
+
+---
+
+## Known Errors and Workarounds
+
+### Firebase HandshakeException / SocketException in CI
+- **Symptom:** Firebase initialization fails with TLS or network errors during `flutter test` or web builds in CI.
+- **Workaround:** `main.dart` already handles this with a 3-attempt exponential-backoff retry and degrades gracefully (app runs without Firebase features). No additional action required.
+
+### Flutter ListTile/ExpansionTile Leading Widget Layout Assert
+- **Symptom:** `BoxConstraints forces an infinite width/height` or `RenderBox was not laid out` assertions when using image/icon widgets as `leading`.
+- **Workaround:** Wrap the leading widget in a `SizedBox(width: 48, height: 48, child: …)` or `Container(width: 40, height: 40, child: …)`.
+
+### Localization Code Generation Errors
+- **Symptom:** `flutter gen-l10n` fails because a key exists in a translation `.arb` file but not in `app_en.arb`, or a placeholder name differs.
+- **Workaround:** Ensure `app_en.arb` is the source of truth. All keys and placeholder names in non-English ARB files must exactly match those in `app_en.arb`.
+
+### `colorSchemeSeed` vs `FlexSchemeColor.from()`
+- **Symptom:** Build error or unexpected theme colours when using `colorSchemeSeed:` parameter on `FlexThemeData`.
+- **Workaround:** Use `colors: FlexSchemeColor.from(primary: seedColor)` (not `colorSchemeSeed`) with `flex_color_scheme` v8.
+
+### Firebase Hosting Preview Workflow Requires Approval
+- **Symptom:** The `firebase-hosting-pull-request.yml` workflow shows `action_required` for PRs from bots/forks.
+- **Workaround:** This is a Firebase Hosting security gate. A repository owner must manually approve the deployment. It does not reflect a code issue.
+
+---
+
+## Adding a New Theme
+
+1. Add a new value to `AppColorTheme` enum in `lib/theme_provider.dart`.
+2. Add its seed colour constant to `AquaThemeColors` in `lib/theme_colors.dart`.
+3. Add a `case` in `AppColorThemeExt.seedColor` and `AppColorThemeExt.displayName`.
+4. Add entries to the swatch maps in `lib/screens/appearance_screen.dart`.
+5. Add a `case` in `_buildFlexTheme` in `lib/main.dart` if the theme needs special handling.
+
+---
+
+## Adding a New Screen
+
+1. Create `lib/screens/my_screen.dart` as a `ConsumerStatefulWidget` (or `ConsumerWidget`).
+2. Wrap content with `MainLayout(title: l10n.myScreenTitle, child: …)`.
+3. Register a named route in `lib/main.dart` (the `routes:` map in `MaterialApp`).
+4. Add a navigation entry to `lib/widgets/app_drawer.dart` if it should appear in the side drawer.
+5. Add any new user-visible strings to all `.arb` files (see Localization section).
+
+---
+
+## Developer Groq API Key
+
+The app supports a developer-provided Groq API key as a free fallback for users who haven't entered their own key. It is injected at build time:
+
+```bash
+flutter run --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
+```
+
+- **Never commit the key to the repository.** It lives only in GitHub Secrets (`DEVELOPER_GROQ_API_KEY`) and local build environments.
+- The constant is declared in `lib/constants.dart`:
+  ```dart
+  const String developerGroqApiKey =
+      String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
+  ```
+- If empty, the app simply requires users to supply their own API key.
