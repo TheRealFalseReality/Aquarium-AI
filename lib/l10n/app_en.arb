@@ -2976,5 +2976,25 @@
   "photoAnalyzerDrawerDescription": "Identify fish, detect health issues, and get specific tips to improve your aquarium.",
   "@photoAnalyzerDrawerDescription": {
     "description": "Short description of the photo analyzer (app drawer / compact mode)"
+  },
+  "quickLogs": "Quick Logs",
+  "@quickLogs": {
+    "description": "Label for the quick log buttons section on tank cards"
+  },
+  "activityHistory": "Activity",
+  "@activityHistory": {
+    "description": "Label for the activity history section on tank cards"
+  },
+  "visibleCards": "Visible Cards",
+  "@visibleCards": {
+    "description": "Title of the filter sheet for showing/hiding welcome screen feature cards"
+  },
+  "purchaseToHideCard": "Purchase Remove Ads to hide",
+  "@purchaseToHideCard": {
+    "description": "Subtitle shown on the AquaPi Store card filter option when the user hasn't purchased Remove Ads"
+  },
+  "filterCards": "Filter Cards",
+  "@filterCards": {
+    "description": "Tooltip for the filter button on the welcome screen"
   }
 }

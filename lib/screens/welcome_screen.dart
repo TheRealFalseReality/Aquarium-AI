@@ -72,6 +72,10 @@ class FeatureInfo {
     this.toolChips,
     this.fullWidth = false,
   });
+
+  /// Unique identifier for this feature card. Uses routeName for most cards,
+  /// or 'aquapi_store' for the full-width AquaPi Store card (which has an empty routeName).
+  String get id => fullWidth ? 'aquapi_store' : routeName;
 }
 
 // Converted to ConsumerStatefulWidget to use initState
@@ -130,6 +134,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _changelogShownVersionKey = 'changelog_shown_version';
   static const String _changelogBannerShownAtKey = 'changelog_banner_shown_at';
   static const int _changelogBannerAutoDismissDays = 3;
+  static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
 
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
@@ -140,11 +145,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   // Store the random tank index to persist across rebuilds (e.g., theme changes)
   int? _selectedTankIndex;
+
+  // Hidden feature card IDs
+  Set<String> _hiddenFeatures = {};
   
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadHiddenFeatures();
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
@@ -164,6 +173,77 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     super.didChangeDependencies();
     // Reset selected tank index when navigating back to this screen
     // This will be null on first build, causing a new random selection
+  }
+
+  Future<void> _loadHiddenFeatures() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_hiddenFeaturesKey) ?? '';
+      if (stored.isNotEmpty) {
+        setState(() {
+          _hiddenFeatures = stored.split(',').toSet();
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _saveHiddenFeatures() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_hiddenFeaturesKey, _hiddenFeatures.join(','));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  void _showCardFilterSheet(BuildContext context, List<FeatureInfo> allFeatures, bool adsRemoved) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.visibleCards, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ...allFeatures.map((f) {
+                    final isAquaPiStore = f.fullWidth;
+                    final isDisabled = isAquaPiStore && !adsRemoved;
+                    final isHidden = _hiddenFeatures.contains(f.id);
+                    return CheckboxListTile(
+                      value: !isHidden,
+                      title: Text(f.title),
+                      leading: Text(f.icon, style: const TextStyle(fontSize: 20)),
+                      enabled: !isDisabled,
+                      subtitle: isDisabled ? Text(l10n.purchaseToHideCard) : null,
+                      onChanged: isDisabled ? null : (val) {
+                        setSheetState(() {
+                          setState(() {
+                            if (val == true) {
+                              _hiddenFeatures = {..._hiddenFeatures}..remove(f.id);
+                            } else {
+                              _hiddenFeatures = {..._hiddenFeatures, f.id};
+                            }
+                          });
+                        });
+                        _saveHiddenFeatures();
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _checkShowPromotionDialog() async {
@@ -623,16 +703,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // Remove Ads hint below My Tanks
                       _buildRemoveAdsHint(context),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                       
                       // Feature Cards section header with layout toggle
                       Builder(builder: (context) {
                         final useGrid = appSettings.welcomeGridLayout;
                         final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
 
+                        // Apply hidden features filter
+                        final visibleFeatures = features.where((f) => !_hiddenFeatures.contains(f.id)).toList();
+
                         // Separate full-width cards (e.g. AquaPi Store) from grid cards
-                        final gridFeatures = features.where((f) => !f.fullWidth).toList();
-                        final fullWidthFeatures = features.where((f) => f.fullWidth).toList();
+                        final gridFeatures = visibleFeatures.where((f) => !f.fullWidth).toList();
+                        final fullWidthFeatures = visibleFeatures.where((f) => f.fullWidth).toList();
 
                         // Split point for the native ad (between AI tools and calculators)
                         final splitIndex = gridFeatures.indexWhere(
@@ -649,6 +732,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                IconButton(
+                                  icon: const Icon(Icons.tune, size: 20),
+                                  tooltip: l10n.filterCards,
+                                  onPressed: () => _showCardFilterSheet(context, features, adsRemoved),
+                                ),
                                 IconButton(
                                   icon: Icon(
                                     useGrid ? Icons.view_list : Icons.grid_view,

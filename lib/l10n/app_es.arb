@@ -559,5 +559,10 @@
   "cardContent": "Contenido de Tarjeta",
   "tankIconLabel": "Icono",
   "metricsLabel": "Métricas",
-  "photoAnalyzerDrawerDescription": "Identifica peces, detecta problemas de salud y obtén consejos para mejorar tu acuario."
+  "photoAnalyzerDrawerDescription": "Identifica peces, detecta problemas de salud y obtén consejos para mejorar tu acuario.",
+  "quickLogs": "Registros Rápidos",
+  "activityHistory": "Actividad",
+  "visibleCards": "Tarjetas Visibles",
+  "purchaseToHideCard": "Compra Eliminar Anuncios para ocultar",
+  "filterCards": "Filtrar Tarjetas"
 }

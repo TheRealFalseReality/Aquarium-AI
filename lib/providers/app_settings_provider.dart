@@ -24,6 +24,8 @@ class AppSettingsState {
   final bool tankHideMetrics;
   final bool tankHideInhabitants;
   final bool tankHideNotes;
+  final bool tankHideQuickLogs;
+  final bool tankHideActivity;
 
   AppSettingsState({
     required this.showStockingButton,
@@ -31,13 +33,15 @@ class AppSettingsState {
     this.localeCode,
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
-    this.welcomeGridLayout = true, // Default to grid layout
+    this.welcomeGridLayout = false, // Default to list layout
     this.tankGridLayout = false, // Default to list layout for tanks
     this.debugHideAds = false,
     this.tankHideIcon = false,
     this.tankHideMetrics = false,
     this.tankHideInhabitants = false,
     this.tankHideNotes = false,
+    this.tankHideQuickLogs = false,
+    this.tankHideActivity = false,
   });
 }
 
@@ -47,7 +51,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       : super(AppSettingsState(
           showStockingButton: true, // Default to true (show button)
           enableAI: true, // Default to true (AI enabled)
-          welcomeGridLayout: true, // Default to grid layout
+          welcomeGridLayout: false, // Default to list layout
           tankGridLayout: false, // Default to list layout for tanks
         )) {
     _loadSettings();
@@ -59,13 +63,15 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
-    final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? true; // Default to grid
+    final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? false; // Default to list
     final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
     final debugHideAds = prefs.getBool('debugHideAds') ?? kDebugMode;
     final tankHideIcon = prefs.getBool('tankHideIcon') ?? false;
     final tankHideMetrics = prefs.getBool('tankHideMetrics') ?? false;
     final tankHideInhabitants = prefs.getBool('tankHideInhabitants') ?? false;
     final tankHideNotes = prefs.getBool('tankHideNotes') ?? false;
+    final tankHideQuickLogs = prefs.getBool('tankHideQuickLogs') ?? false;
+    final tankHideActivity = prefs.getBool('tankHideActivity') ?? false;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -80,6 +86,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: tankHideMetrics,
       tankHideInhabitants: tankHideInhabitants,
       tankHideNotes: tankHideNotes,
+      tankHideQuickLogs: tankHideQuickLogs,
+      tankHideActivity: tankHideActivity,
     );
   }
 
@@ -106,6 +114,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -126,6 +136,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -150,6 +162,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -169,6 +183,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -190,6 +206,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -210,6 +228,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -229,6 +249,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -248,6 +270,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: value,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -267,6 +291,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: value,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -286,6 +312,50 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: value,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+    );
+  }
+
+  Future<void> setTankHideQuickLogs(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideQuickLogs', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: value,
+      tankHideActivity: state.tankHideActivity,
+    );
+  }
+
+  Future<void> setTankHideActivity(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideActivity', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: value,
     );
   }
 
@@ -314,6 +384,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -335,6 +407,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 
@@ -390,6 +464,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideMetrics: state.tankHideMetrics,
       tankHideInhabitants: state.tankHideInhabitants,
       tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
     );
   }
 }

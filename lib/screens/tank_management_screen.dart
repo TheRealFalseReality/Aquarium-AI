@@ -1190,6 +1190,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             _buildVisibilityChip(context, Icons.bar_chart, l10n.metricsLabel, appSettings.tankHideMetrics, (v) => ref.read(appSettingsProvider.notifier).setTankHideMetrics(v)),
                             _buildVisibilityChip(context, Icons.pets, l10n.inhabitantsLabel, appSettings.tankHideInhabitants, (v) => ref.read(appSettingsProvider.notifier).setTankHideInhabitants(v)),
                             _buildVisibilityChip(context, Icons.note_outlined, l10n.notes, appSettings.tankHideNotes, (v) => ref.read(appSettingsProvider.notifier).setTankHideNotes(v)),
+                            _buildVisibilityChip(context, Icons.bolt_outlined, l10n.quickLogs, appSettings.tankHideQuickLogs, (v) => ref.read(appSettingsProvider.notifier).setTankHideQuickLogs(v)),
+                            _buildVisibilityChip(context, Icons.history, l10n.activityHistory, appSettings.tankHideActivity, (v) => ref.read(appSettingsProvider.notifier).setTankHideActivity(v)),
                           ],
                         ),
                       ],
@@ -1570,17 +1572,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.all(18.0),
+                // In grid mode, use extra top padding to make room for the Positioned menu button overlay.
+                padding: isGridMode ? const EdgeInsets.fromLTRB(12, 42, 12, 12) : const EdgeInsets.all(18.0),
                 child: Column(
                   crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                   children: [
-                    // Header: grid mode = menu top-right + icon centered + name below;
+                    // Header: grid mode = icon centered + name below;
                     //         list mode = icon + name side-by-side + menu
                     if (isGridMode) ...[
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: menuButton,
-                      ),
                       if (!appSettings.tankHideIcon) Center(child: tankIconWidget),
                       if (!appSettings.tankHideIcon) const SizedBox(height: 8),
                       Builder(builder: (context) {
@@ -1961,7 +1960,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ],
                 
                 // Activity Log and Upcoming Notifications section
-                _buildActivitySection(context, ref, tank, cs, inGridMode: isGridMode),
+                _buildActivitySection(context, ref, tank, cs, inGridMode: isGridMode, hideActivity: appSettings.tankHideActivity, hideQuickLogs: appSettings.tankHideQuickLogs),
                 
                 // Action buttons - hidden in grid mode (accessible via 3-dot menu)
                 if (!isGridMode) ...[
@@ -2080,6 +2079,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             ),
           ),
             ),
+            if (isGridMode) Positioned(top: 4, right: 4, child: menuButton),
           ],
         ),
       ),
@@ -2121,13 +2121,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   ///    - Shows time until next occurrence
   ///    - Highlights notifications within 12 hours
   ///    - Tapping logs the activity instantly
-  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs, {bool inGridMode = false}) {
+  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs, {bool inGridMode = false, bool hideActivity = false, bool hideQuickLogs = false}) {
     final l10n = AppLocalizations.of(context)!;
     final List<Widget> recentActivityItems = [];
     final List<Widget> notificationItems = [];
     
     // Get most recent activity log
-    if (tank.notificationLogs.isNotEmpty) {
+    if (!hideActivity && tank.notificationLogs.isNotEmpty) {
       final sortedLogs = List.from(tank.notificationLogs)
         ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
       final recentLog = sortedLogs.first;
@@ -2207,8 +2207,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Quick log cards are shown regardless of whether the notification is enabled
     // because activity logging is separate from receiving device notifications
     final now = DateTime.now();
-    
+
     for (final notification in tank.notifications) {
+      if (hideQuickLogs) continue;
       // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {

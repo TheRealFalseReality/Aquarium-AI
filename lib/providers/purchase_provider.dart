@@ -110,7 +110,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       PurchaseService.log(
           'Purchase update: ${details.productID} status=${details.status}');
 
-      if (details.productID == earlySupporterLifetimeProductId) {
+      if (details.productID.contains('remove_ads')) {
         if (details.status == PurchaseStatus.purchased ||
             details.status == PurchaseStatus.restored) {
           // Persist and update state. For a restore, also record the outcome.

@@ -559,5 +559,10 @@
   "cardContent": "Karteninhalt",
   "tankIconLabel": "Symbol",
   "metricsLabel": "Metriken",
-  "photoAnalyzerDrawerDescription": "Arten identifizieren, Gesundheitsprobleme erkennen und Tipps zur Verbesserung erhalten."
+  "photoAnalyzerDrawerDescription": "Arten identifizieren, Gesundheitsprobleme erkennen und Tipps zur Verbesserung erhalten.",
+  "quickLogs": "Schnellprotokolle",
+  "activityHistory": "Aktivität",
+  "visibleCards": "Sichtbare Karten",
+  "purchaseToHideCard": "Werbung entfernen kaufen, um auszublenden",
+  "filterCards": "Karten filtern"
 }

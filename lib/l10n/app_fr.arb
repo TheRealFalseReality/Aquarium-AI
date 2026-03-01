@@ -559,5 +559,10 @@
   "cardContent": "Contenu de la Carte",
   "tankIconLabel": "Icône",
   "metricsLabel": "Métriques",
-  "photoAnalyzerDrawerDescription": "Identifiez les poissons, détectez les problèmes de santé et obtenez des conseils pour améliorer votre aquarium."
+  "photoAnalyzerDrawerDescription": "Identifiez les poissons, détectez les problèmes de santé et obtenez des conseils pour améliorer votre aquarium.",
+  "quickLogs": "Journaux Rapides",
+  "activityHistory": "Activité",
+  "visibleCards": "Cartes Visibles",
+  "purchaseToHideCard": "Achetez Supprimer les annonces pour masquer",
+  "filterCards": "Filtrer les cartes"
 }
