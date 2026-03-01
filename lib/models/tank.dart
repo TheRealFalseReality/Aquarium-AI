@@ -175,6 +175,7 @@ class Tank {
   final String id;
   final String name;
   final String type; // 'freshwater' or 'marine'
+  final bool isReef; // Only relevant when type == 'marine'
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
   final double? sizeLiters;  // Tank size in liters
@@ -198,6 +199,7 @@ class Tank {
     required this.id,
     required this.name,
     required this.type,
+    this.isReef = false,
     required this.inhabitants,
     this.sizeGallons,
     this.sizeLiters,
@@ -227,6 +229,7 @@ class Tank {
   factory Tank.create({
     required String name,
     required String type,
+    bool isReef = false,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
@@ -250,6 +253,7 @@ class Tank {
       id: const Uuid().v4(),
       name: name,
       type: type,
+      isReef: isReef,
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
       sizeLiters: sizeLiters,
@@ -276,6 +280,7 @@ class Tank {
       'id': id,
       'name': name,
       'type': type,
+      'isReef': isReef,
       'inhabitants': inhabitants.map((i) => i.toJson(includeLocalPaths: includeLocalPaths)).toList(),
       'sizeGallons': sizeGallons,
       'sizeLiters': sizeLiters,
@@ -302,6 +307,7 @@ class Tank {
       id: json['id'] as String,
       name: json['name'] as String,
       type: json['type'] as String,
+      isReef: json['isReef'] as bool? ?? false,
       inhabitants: (json['inhabitants'] as List)
           .map((i) => TankInhabitant.fromJson(i))
           .toList(),
@@ -343,6 +349,7 @@ class Tank {
     String? id,
     String? name,
     String? type,
+    bool? isReef,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
@@ -369,6 +376,7 @@ class Tank {
       id: id ?? this.id,
       name: name ?? this.name,
       type: type ?? this.type,
+      isReef: isReef ?? this.isReef,
       inhabitants: inhabitants ?? this.inhabitants,
       sizeGallons: sizeGallons ?? this.sizeGallons,
       sizeLiters: sizeLiters ?? this.sizeLiters,

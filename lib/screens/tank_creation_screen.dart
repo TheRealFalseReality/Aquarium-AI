@@ -33,6 +33,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   final _notesController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
+  bool _isReef = false;
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
@@ -57,6 +58,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     if (widget.existingTank != null) {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
+      _isReef = widget.existingTank!.isReef;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
       _creationDate = widget.existingTank!.createdAt;
       _tankPhotos = List.from(widget.existingTank!.photos);
@@ -166,6 +168,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     setState(() {
       _selectedCategory = category;
       _inhabitants.clear(); // Clear inhabitants when changing category
+      if (category != 'marine') _isReef = false;
     });
     _loadFishData();
   }
@@ -430,10 +433,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
           calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
         }
 
+        final isReef = _selectedCategory == 'marine' ? _isReef : false;
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
+                isReef: isReef,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -447,6 +452,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
             : Tank.create(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
+                isReef: isReef,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -804,6 +810,32 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                   onTap: () => _onCategoryChanged('marine'),
                 ),
               ],
+            ),
+            // Reef toggle – only visible for saltwater tanks
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: _selectedCategory == 'marine'
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return ModernSelectableChip(
+                                label: l10n.markAsReef,
+                                emoji: '🪸',
+                                selected: _isReef,
+                                onTap: () => setState(() => _isReef = !_isReef),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
             
