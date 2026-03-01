@@ -1192,6 +1192,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             _buildVisibilityChip(context, Icons.note_outlined, l10n.notes, appSettings.tankHideNotes, (v) => ref.read(appSettingsProvider.notifier).setTankHideNotes(v)),
                             _buildVisibilityChip(context, Icons.bolt_outlined, l10n.quickLogs, appSettings.tankHideQuickLogs, (v) => ref.read(appSettingsProvider.notifier).setTankHideQuickLogs(v)),
                             _buildVisibilityChip(context, Icons.history, l10n.activityHistory, appSettings.tankHideActivity, (v) => ref.read(appSettingsProvider.notifier).setTankHideActivity(v)),
+                            _buildVisibilityChip(context, Icons.photo_library_outlined, l10n.photos, appSettings.tankHidePhotos, (v) => ref.read(appSettingsProvider.notifier).setTankHidePhotos(v)),
                           ],
                         ),
                       ],
@@ -1804,7 +1805,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const SizedBox(height: 14),
                 
                 // Tank photos section (if photos exist)
-                if (tank.photos.isNotEmpty) ...[
+                if (!appSettings.tankHidePhotos && tank.photos.isNotEmpty) ...[
                   Row(
                     children: [
                       Icon(
