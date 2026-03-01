@@ -601,6 +601,8 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
               children: [
                 ListTile(
                   leading: Container(
+                    width: 40,
+                    height: 40,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: _getCategoryColor(firstLog.type).withOpacity(0.2),
@@ -813,6 +815,8 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
+        width: 40,
+        height: 40,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: _getCategoryColor(entry.type).withOpacity(0.2),
