@@ -16,6 +16,7 @@ class AppSettingsState {
   final String? localeCode; // null means system default
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
+  final bool debugHideAds; // Debug-only: hides ads and references to removing them
 
   AppSettingsState({
     required this.showStockingButton,
@@ -23,6 +24,7 @@ class AppSettingsState {
     this.localeCode,
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
+    this.debugHideAds = false,
   });
 }
 
@@ -42,6 +44,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
     final localeCode = prefs.getString('localeCode'); // null means system default
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
+    final debugHideAds = prefs.getBool('debugHideAds') ?? false;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -49,6 +52,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      debugHideAds: debugHideAds,
     );
   }
 
@@ -68,6 +72,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -81,6 +86,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -98,6 +104,22 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      debugHideAds: state.debugHideAds,
+    );
+  }
+
+  /// Sets the debug hide-ads flag (only meaningful in debug builds).
+  Future<void> setDebugHideAds(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('debugHideAds', value);
+
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      debugHideAds: value,
     );
   }
 
@@ -119,6 +141,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: false,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -133,6 +156,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -181,6 +205,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       localeCode: state.localeCode,
       isLoading: false,
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
+      debugHideAds: state.debugHideAds,
     );
   }
 }

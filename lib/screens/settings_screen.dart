@@ -966,6 +966,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           iconColor: Colors.orange.shade700,
           onTap: () => _showFeedbackDialog(),
         ),
+        if (kDebugMode) ...[
+          const SizedBox(height: 16),
+          _buildMenuCard(
+            context: context,
+            title: 'Debug Menu',
+            subtitle: 'Developer tools (debug builds only)',
+            icon: Icons.bug_report,
+            gradient: LinearGradient(
+              colors: [
+                Colors.red.withOpacity(0.15),
+                Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: Colors.red.shade700,
+            onTap: () => _showDebugMenuDialog(),
+          ),
+        ],
         const SizedBox(height: 24),
       ],
     );
@@ -973,6 +992,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildRemoveAdsCard(BuildContext context) {
     if (kIsWeb) return const SizedBox.shrink();
+    // In debug mode, hide ads and references to removing them when debug flag is set
+    if (kDebugMode && ref.watch(appSettingsProvider).debugHideAds) {
+      return const SizedBox.shrink();
+    }
     final l10n = AppLocalizations.of(context)!;
     final purchaseState = ref.watch(purchaseProvider);
     if (purchaseState.adsRemoved) {
@@ -1049,6 +1072,115 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showRemoveAdsDialog() {
     showRemoveAdsDialog(context);
+  }
+
+  void _showDebugMenuDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final appSettings = ref.read(appSettingsProvider);
+          final purchaseState = ref.read(purchaseProvider);
+          return AlertDialog(
+            icon: Icon(Icons.bug_report, color: Colors.red.shade700, size: 36),
+            title: const Text('Debug Menu'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'These tools are only available in debug builds and are not visible in release.',
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                // Hide Ads toggle
+                SwitchListTile(
+                  secondary: Icon(Icons.block, color: Colors.red.shade700),
+                  title: const Text('Hide Ads'),
+                  subtitle: const Text('Hide all ads and references to removing them'),
+                  value: appSettings.debugHideAds,
+                  onChanged: (value) {
+                    ref.read(appSettingsProvider.notifier).setDebugHideAds(value);
+                    setDialogState(() {});
+                  },
+                ),
+                const Divider(),
+                // Simulate Ads Removed (toggle purchase state for testing)
+                ListTile(
+                  leading: const Icon(Icons.shopping_bag_outlined),
+                  title: const Text('Simulate Ads Removed'),
+                  subtitle: Text(
+                    purchaseState.adsRemoved
+                        ? 'Currently: Ads removed'
+                        : 'Currently: Ads active',
+                  ),
+                  trailing: Switch(
+                    value: purchaseState.adsRemoved,
+                    onChanged: (value) async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('adsRemoved', value);
+                      // Re-init the purchase provider to pick up the change
+                      ref.invalidate(purchaseProvider);
+                      setDialogState(() {});
+                    },
+                  ),
+                ),
+                const Divider(),
+                // Clear all SharedPreferences
+                ListTile(
+                  leading: const Icon(Icons.delete_sweep_outlined, color: Colors.orange),
+                  title: const Text('Clear All Preferences'),
+                  subtitle: const Text('Wipe all SharedPreferences (restart required)'),
+                  onTap: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: ctx,
+                      builder: (c) => AlertDialog(
+                        title: const Text('Clear All Preferences?'),
+                        content: const Text(
+                          'This will wipe all saved settings and preferences. '
+                          'The app will need to be restarted.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(c).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(c).pop(true),
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+                      if (ctx.mounted) {
+                        Navigator.of(ctx).pop();
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(
+                            content: Text('All preferences cleared. Please restart the app.'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   void _showBuyMeACoffeeDialog() {
