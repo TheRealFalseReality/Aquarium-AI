@@ -1061,8 +1061,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
-                  leading: Stack(
-                    children: [
+                  leading: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Stack(
+                      children: [
                       CircleAvatar(
                         radius: 24,
                         backgroundImage: _getFishImageUrl(inhabitant) != null
@@ -1107,6 +1110,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                           ),
                         ),
                     ],
+                    ),
                   ),
                   title: Text(inhabitant.customName),
                   subtitle: Column(
