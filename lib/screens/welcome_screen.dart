@@ -181,7 +181,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final stored = prefs.getString(_hiddenFeaturesKey) ?? '';
       if (stored.isNotEmpty) {
         setState(() {
-          _hiddenFeatures = stored.split(',').toSet();
+          _hiddenFeatures = stored.split(',').where((s) => s.isNotEmpty).toSet();
         });
       }
     } catch (e) {
@@ -224,15 +224,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       enabled: !isDisabled,
                       subtitle: isDisabled ? Text(l10n.purchaseToHideCard) : null,
                       onChanged: isDisabled ? null : (val) {
-                        setSheetState(() {
-                          setState(() {
-                            if (val == true) {
-                              _hiddenFeatures = {..._hiddenFeatures}..remove(f.id);
-                            } else {
-                              _hiddenFeatures = {..._hiddenFeatures, f.id};
-                            }
-                          });
+                        setState(() {
+                          if (val == true) {
+                            _hiddenFeatures = {..._hiddenFeatures}..remove(f.id);
+                          } else {
+                            _hiddenFeatures = {..._hiddenFeatures, f.id};
+                          }
                         });
+                        setSheetState(() {});
                         _saveHiddenFeatures();
                       },
                     );
