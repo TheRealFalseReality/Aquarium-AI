@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 - Fix bug with species popup not reflecting common names  
 - Fix AI Stocking tool re-navigation bug, improve species selection UX, and make tank size optional
 
+**Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.03...v3.0.10>
+
 ## [3.0.03] - 2026-2-24  - Major Updates
 
 ### Added
@@ -42,6 +44,8 @@ All notable changes to this project will be documented in this file.
 
 - Remove "Include Custom Names" from AI report dialogs  
 
+**Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v2.1.04...v3.0.03>
+
 ## [Unreleased]
 
 ### Added (Soon)
@@ -52,10 +56,18 @@ All notable changes to this project will be documented in this file.
 - Stocking guides per tank  
 - Notifications & Events log in calendar view  
 - Expenses or P&L
+- Share and import tanks with friends  
 - Explore feed  
+- iOS ( in_app_update -> upgrader)
+- Make the parameter and dosing, well, all those screens better  
+- Customize welcome screen  
+- Allow user to edit prompts to further customize the app  
+- Backup Photos  
+- Add Sorting or global filters to fish types/species
+- Add details for fish types and possibly species
+- Reef Safe indicator
+- Let's Start a Community!
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-**Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v2.1.04...v3.0.03>

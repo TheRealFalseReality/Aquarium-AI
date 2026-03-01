@@ -463,7 +463,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                           Text(
                             tank.type == 'freshwater' 
                                 ? l10n.freshwaterTank
-                                : l10n.saltwaterTank,
+                                : (tank.isReef ? l10n.reefTank : l10n.saltwaterTank),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: cs.primary,
                               fontWeight: FontWeight.w600,

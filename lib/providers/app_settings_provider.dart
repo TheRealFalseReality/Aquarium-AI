@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +19,7 @@ class AppSettingsState {
   final bool hasRememberedRescheduleOptions;
   final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
   final bool tankGridLayout; // Controls grid (true) vs list (false) on tank management screen
+  final bool debugHideAds; // Debug-only: hides ads and references to removing them
 
   AppSettingsState({
     required this.showStockingButton,
@@ -27,6 +29,7 @@ class AppSettingsState {
     this.hasRememberedRescheduleOptions = false,
     this.welcomeGridLayout = true, // Default to grid layout
     this.tankGridLayout = false, // Default to list layout for tanks
+    this.debugHideAds = false,
   });
 }
 
@@ -50,6 +53,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
     final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? true; // Default to grid
     final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
+    final debugHideAds = prefs.getBool('debugHideAds') ?? kDebugMode;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -59,6 +63,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: welcomeGridLayout,
       tankGridLayout: tankGridLayout,
+      debugHideAds: debugHideAds,
     );
   }
 
@@ -80,6 +85,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -95,6 +101,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -120,6 +127,14 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   Future<void> setWelcomeGridLayout(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('welcomeGridLayout', value);
+      debugHideAds: state.debugHideAds,
+    );
+  }
+
+  /// Sets the debug hide-ads flag (only meaningful in debug builds).
+  Future<void> setDebugHideAds(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('debugHideAds', value);
 
     state = AppSettingsState(
       showStockingButton: state.showStockingButton,
@@ -144,6 +159,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: value,
+      debugHideAds: value,
     );
   }
 
@@ -167,6 +183,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: false,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -183,6 +200,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 
@@ -233,6 +251,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
       welcomeGridLayout: state.welcomeGridLayout,
       tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
     );
   }
 }

@@ -64,6 +64,26 @@
 
   "addCustomSpecies": "TRANSLATE: Add Custom Species",
 
+  "speciesOptional": "TRANSLATE: Species (Optional)",
+  "addSpeciesHint": "TRANSLATE: Add species...",
+  "tagsOptional": "TRANSLATE: Tags (Optional)",
+  "addTagHint": "TRANSLATE: Add tag...",
+  "addTag": "TRANSLATE: Add Tag",
+  "confirm": "TRANSLATE: Confirm",
+  "sortAndFilter": "TRANSLATE: Sort & Filter",
+  "clearFilters": "TRANSLATE: Clear filters",
+  "sortBy": "TRANSLATE: Sort by",
+  "filterByType": "TRANSLATE: Filter by type",
+  "filterByTag": "TRANSLATE: Filter by tag",
+  "manageTags": "TRANSLATE: Manage Tags",
+  "currentTags": "TRANSLATE: Current tags",
+  "existingTags": "TRANSLATE: Existing tags",
+  "customColor": "TRANSLATE: Custom colour",
+  "colorPrimary": "TRANSLATE: Primary",
+  "colorSecondary": "TRANSLATE: Secondary",
+  "colorTertiary": "TRANSLATE: Tertiary",
+  "colorCustom": "TRANSLATE: Custom",
+
   "submitIssue": "TRANSLATE: Submit Issue",
   "submitIssueDesc": "TRANSLATE: Report a bug or request a new feature on GitHub"
 }

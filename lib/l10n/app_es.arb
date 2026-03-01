@@ -110,6 +110,9 @@
   "sortOptions": "Opciones de Ordenación",
   "freshwater": "Agua Dulce",
   "saltwater": "Agua Salada",
+  "reef": "Arrecife",
+  "reefTank": "Acuario de Arrecife",
+  "markAsReef": "Acuario de Arrecife",
   "freshwaterTank": "Acuario de Agua Dulce",
   "saltwaterTank": "Acuario de Agua Salada",
   "editTank": "Editar Acuario",
@@ -231,7 +234,6 @@
   "justNow": "Ahora mismo",
   "notify": "Notificar",
   "dateTimeInPast": "No se puede programar una notificación en el pasado",
-
   "updateNotificationTitle": "¿Actualizar Notificación?",
   "updateNotificationMessage": "Tienes una notificación de \"{notificationName}\" configurada. ¿Te gustaría actualizar cuándo se programa la próxima notificación?",
   "rescheduleFromOriginal": "Mantener Horario Original",
@@ -247,14 +249,12 @@
   "cancelActivityLog": "Cancelar",
   "cancelActivityLogDescription": "No registrar actividad y no reprogramar",
   "notificationUpdated": "Horario de notificación actualizado",
-
   "scheduleNotificationTitle": "Programar Notificación",
   "scheduleNotificationMessage": "Tienes registros de actividad de \"{activityType}\" existentes. ¿Cómo te gustaría programar la próxima notificación?",
   "useSpecifiedTime": "Usar Hora Especificada",
   "useSpecifiedTimeDescription": "Programar basado en la fecha/hora que configuraste arriba",
   "useLastActivity": "Desde Última Actividad",
   "useLastActivityDescription": "Programar basado en tu registro de actividad más reciente",
-
   "rescheduleFromOriginalDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora original)",
   "rescheduleFromNowDescriptionDetailed": "{interval} a partir de ahora, a las {time} (hora actual)",
   "oneDay": "1 día",
@@ -290,7 +290,6 @@
   "lastNote": "Última nota",
   "noteRequired": "Por favor ingresa una nota",
   "moreNotes": "+{count} más notas",
-
   "rememberMyChoice": "Recordar mi elección",
   "rememberChoiceSettingsHint": "Puedes restablecer esta preferencia en Configuración > Ajustes de la aplicación",
   "resetReschedulePreference": "Preferencia del diálogo de reprogramación",
@@ -301,7 +300,6 @@
   "resetAll": "Restablecer todo",
   "reschedulePreferences": "Preferencias de reprogramación",
   "replaceAllReschedulePreferences": "Reemplazar TODAS las preferencias de reprogramación",
-
   "gallery": "Galería",
   "camera": "Cámara",
   "addPhoto": "Agregar Foto",
@@ -390,7 +388,6 @@
   "dosingSum": "Resumen de Dosificación",
   "totalDoses": "Dosis Totales",
   "treatments": "Tratamientos",
-
   "automationScript": "Script de Automatización",
   "aiAutomationScriptGenerator": "Generador de Scripts de Automatización con IA",
   "automationDescription": "Describe la automatización que deseas crear para Home Assistant o ESPHome.",
@@ -416,7 +413,6 @@
   "viewScript": "Ver Script",
   "viewPhotoAnalysis": "Ver Análisis de Foto",
   "viewFishInfo": "Ver Info del Pez",
-
   "addNotesPlaceholder": "Agregar notas adicionales...",
   "addNotification": "Agregar Notificación",
   "dateAndTime": "Fecha y Hora",
@@ -469,7 +465,6 @@
   "helpWantedContactEmail": "📧 **Correo**: contactus@capitalcityaquatics.com",
   "helpWantedGitHub": "🔗 **GitHub**: Visita el [repositorio de Aquarium-AI](https://github.com/TheRealFalseReality/Aquarium-AI) para explorar el código, abrir issues o enviar pull requests.",
   "helpWantedClosing": "¡Ya seas experimentado o recién estés comenzando, tus contribuciones pueden marcar la diferencia! Construyamos algo increíble juntos. 🐠",
-  
   "overview": "Resumen",
   "photos": "Fotos",
   "waterParameters": "Parámetros",
@@ -487,13 +482,10 @@
   "addPhotosHint": "Agregar fotos en la pantalla de edición",
   "timestamps": "Marcas de Tiempo",
   "lastUpdated": "Última Actualización",
-  
   "harmony": "Armonía",
   "qty": "Cant",
-  
   "createdLabel": "Creado",
   "inhabitantsLabel": "Habitantes",
-
   "fishInfo": "Info del Pez",
   "aiFishInfoLookup": "Búsqueda de Info de Peces con IA",
   "fishInfoDescription": "Ingresa el nombre de un pez o varios peces para obtener información completa, incluyendo nombre latino, origen, datos curiosos, cuidados en el acuario y compañeros compatibles.",
@@ -509,12 +501,31 @@
   "changelogLatestRelease": "Última versión",
   "changelogAllReleases": "Todas las versiones",
   "changelogGotIt": "Entendido",
-
   "addCustomSpecies": "Agregar especie personalizada",
+
+  "speciesOptional": "Especie (Opcional)",
+  "addSpeciesHint": "Agregar especie...",
+  "tagsOptional": "Etiquetas (Opcional)",
+  "addTagHint": "Agregar etiqueta...",
+  "addTag": "Agregar etiqueta",
+  "confirm": "Confirmar",
+  "sortAndFilter": "Ordenar y filtrar",
+  "clearFilters": "Borrar filtros",
+  "sortBy": "Ordenar por",
+  "filterByType": "Filtrar por tipo",
+  "filterByTag": "Filtrar por etiqueta",
+  "filterByReef": "Solo arrecife",
+  "manageTags": "Gestionar etiquetas",
+  "currentTags": "Etiquetas actuales",
+  "existingTags": "Etiquetas existentes",
+  "customColor": "Color personalizado",
+  "colorPrimary": "Primario",
+  "colorSecondary": "Secundario",
+  "colorTertiary": "Terciario",
+  "colorCustom": "Personalizado",
 
   "submitIssue": "Enviar un problema",
   "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub",
-
   "removeAds": "Eliminar anuncios",
   "removeAdsSettingsSubtitle": "Apoya al desarrollador con una compra única",
   "removeAdsDrawerSubtitle": "Compra única · Apoya al desarrollador",
@@ -530,7 +541,17 @@
   "buyMeACoffeeDesc": "Apoya al desarrollador con una pequeña donación",
   "buyMeACoffeeDialogBody": "¿Te gusta Aquarium AI? ¡Puedes apoyar al desarrollador comprando un café! Elige una opción:",
   "buyMeACoffeeInApp": "Comprar en Google Play",
-  "buyMeACoffeeWebsite": "Comprar en buymeacoffee.com"
+  "buyMeACoffeeWebsite": "Comprar en buymeacoffee.com",
+  "appearanceSubtitle": "Personaliza el aspecto de la app.",
+  "brightnessMode": "Modo de brillo",
+  "light": "Claro",
+  "system": "Sistema",
+  "dark": "Oscuro",
+  "colourTheme": "Tema de color",
+  "chooseColourPalette": "Elige una paleta de colores para toda la app.",
+  "font": "Fuente",
+  "chooseFontDesc": "Elige la fuente utilizada en toda la app.",
+  "fontPreviewText": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+  "customTheme": "Tema personalizado",
+  "themeName": "Nombre del tema"
 }
-
-

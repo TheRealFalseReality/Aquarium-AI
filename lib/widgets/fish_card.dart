@@ -156,6 +156,43 @@ class FishCard extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      if (fish.reefSafe != null) ...[
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: (fish.reefSafe == 'Yes'
+                                          ? Colors.green
+                                          : fish.reefSafe == 'Caution'
+                                              ? Colors.orange
+                                              : Colors.red)
+                                      .withOpacity(0.75),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  fish.reefSafe == 'Yes'
+                                      ? '🪸 Safe'
+                                      : fish.reefSafe == 'Caution'
+                                          ? '⚠️ Caution'
+                                          : '✗ Unsafe',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -71,9 +71,11 @@ class FishDataService {
     final fishData = <String, List<Fish>>{};
     for (final category in ['freshwater', 'marine']) {
       if (jsonResponse.containsKey(category)) {
-        fishData[category] = (jsonResponse[category] as List)
+        final list = (jsonResponse[category] as List)
             .map((f) => Fish.fromJson(f))
             .toList();
+        list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        fishData[category] = list;
       }
     }
 

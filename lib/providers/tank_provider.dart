@@ -9,6 +9,7 @@ import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'species_tags_provider.dart';
 import 'app_settings_provider.dart';
+import 'tank_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 final tankProvider = StateNotifierProvider<TankNotifier, TankState>((ref) {
@@ -73,6 +74,8 @@ class TankNotifier extends StateNotifier<TankState> {
       final prefs = await SharedPreferences.getInstance();
       final tanksJson = json.encode(state.tanks.map((tank) => tank.toJson()).toList());
       await prefs.setString(_tanksKey, tanksJson);
+      // Keep the global TankTag registry in sync with the current tanks.
+      await _ref.read(tankTagsProvider.notifier).syncFromTanks(state.tanks);
     } catch (e) {
       state = state.copyWith(error: 'Failed to save tanks: $e');
     }
@@ -184,6 +187,10 @@ class TankNotifier extends StateNotifier<TankState> {
       final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
       final speciesTags = speciesTagsNotifier.exportTags();
 
+      // Get tank tags (global tag library) for backup
+      final tankTagsNotifier = _ref.read(tankTagsProvider.notifier);
+      final tankTags = tankTagsNotifier.exportTags();
+
       // Get reschedule preferences for backup
       final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
       final reschedulePreferences = await appSettingsNotifier.exportReschedulePreferences();
@@ -199,6 +206,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'tankCount': state.tanks.length,
         'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
         'speciesTags': speciesTags,
+        'tankTags': tankTags,
         'reschedulePreferences': reschedulePreferences,
       };
 
@@ -353,6 +361,15 @@ class TankNotifier extends StateNotifier<TankState> {
         );
         final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
         await speciesTagsNotifier.importTags(speciesTagsMap);
+      }
+
+      // Restore global tank tag library if present in backup
+      if (backupData.containsKey('tankTags')) {
+        final tankTagsList = backupData['tankTags'] as List;
+        final restoredTankTags =
+            tankTagsList.map((e) => TankTag.fromJson(e)).toList();
+        final tankTagsNotifier = _ref.read(tankTagsProvider.notifier);
+        await tankTagsNotifier.importTags(restoredTankTags);
       }
 
       // Restore reschedule preferences if present in backup

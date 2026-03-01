@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
 import 'remove_ads_dialog.dart';
@@ -57,7 +58,8 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
+    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -130,7 +132,8 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _nativeAd == null) {
+    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _nativeAd == null) {
       return const SizedBox.shrink();
     }
 
@@ -230,7 +233,8 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    if (kIsWeb || adsRemoved || !_isAdLoaded || _bannerAd == null) {
+    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 

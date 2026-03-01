@@ -13,6 +13,8 @@ import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
+import '../widgets/tag_picker_dialog.dart';
+import '../providers/tank_tags_provider.dart';
 import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
@@ -32,10 +34,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   final _notesController = TextEditingController();
   
   String _selectedCategory = 'freshwater';
+  bool _isReef = false;
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
   List<TankPhoto> _tankPhotos = [];
+  List<TankTag> _tankTags = [];
   
   late TabController _tabController;
 
@@ -55,9 +59,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     if (widget.existingTank != null) {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
+      _isReef = widget.existingTank!.isReef;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
       _creationDate = widget.existingTank!.createdAt;
       _tankPhotos = List.from(widget.existingTank!.photos);
+      _tankTags = List.from(widget.existingTank!.tags);
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!.toString();
       }
@@ -81,6 +87,25 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     _sizeLitersController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openTagPicker(BuildContext context) async {
+    final allExistingTags = mergeTagSuggestions(
+      globalTags: ref.read(tankTagsProvider),
+      tanks: ref.read(tankProvider).tanks,
+    );
+
+    if (!mounted) return;
+    final result = await showDialog<List<TankTag>>(
+      context: context,
+      builder: (_) => TagPickerDialog(
+        allExistingTags: allExistingTags,
+        currentTags: List.from(_tankTags),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() => _tankTags = result);
+    }
   }
 
   Future<void> _loadFishData() async {
@@ -140,6 +165,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     setState(() {
       _selectedCategory = category;
       _inhabitants.clear(); // Clear inhabitants when changing category
+      if (category != 'marine') _isReef = false;
     });
     _loadFishData();
   }
@@ -404,10 +430,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
           calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
         }
 
+        final isReef = _selectedCategory == 'marine' ? _isReef : false;
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
+                isReef: isReef,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -416,10 +444,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
                 photos: _tankPhotos,
+                tags: _tankTags,
               )
             : Tank.create(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
+                isReef: isReef,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -428,6 +458,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
                 photos: _tankPhotos,
+                tags: _tankTags,
               );
 
         if (widget.existingTank != null) {
@@ -777,6 +808,32 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                 ),
               ],
             ),
+            // Reef toggle – only visible for saltwater tanks
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: _selectedCategory == 'marine'
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return ModernSelectableChip(
+                                label: l10n.markAsReef,
+                                emoji: '🪸',
+                                selected: _isReef,
+                                onTap: () => setState(() => _isReef = !_isReef),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             const SizedBox(height: 24),
             
             // Tank Size Section
@@ -916,6 +973,80 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
               maxLines: 3,
               maxLength: 500,
               textAlign: TextAlign.start,
+            ),
+            const SizedBox(height: 24),
+            
+            // Tank Tags Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.label_outline,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tags (Optional)',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_tankTags.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: _tankTags.map((tag) {
+                  final tagColor = tag.color != null
+                      ? Color(tag.color!)
+                      : Theme.of(context).colorScheme.secondary;
+                  final onTagColor = tagColor.computeLuminance() > 0.4
+                      ? Colors.black87
+                      : Colors.white;
+                  return Chip(
+                    label: Text(tag.name,
+                        style: TextStyle(fontSize: 12, color: onTagColor)),
+                    backgroundColor: tagColor.withOpacity(0.85),
+                    side: BorderSide(color: tagColor, width: 1),
+                    deleteIconColor: onTagColor.withOpacity(0.7),
+                    onDeleted: () {
+                      setState(() {
+                        _tankTags.remove(tag);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            const SizedBox(height: 6),
+            TextButton.icon(
+              onPressed: () => _openTagPicker(context),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(
+                _tankTags.isEmpty
+                    ? AppLocalizations.of(context)!.addTag
+                    : AppLocalizations.of(context)!.manageTags,
+                style: const TextStyle(fontSize: 12),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             
@@ -1061,8 +1192,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
-                  leading: Stack(
-                    children: [
+                  leading: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Stack(
+                      children: [
                       CircleAvatar(
                         radius: 24,
                         backgroundImage: _getFishImageUrl(inhabitant) != null
@@ -1107,6 +1241,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                           ),
                         ),
                     ],
+                    ),
                   ),
                   title: Text(inhabitant.customName),
                   subtitle: Column(
@@ -1287,6 +1422,8 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   bool _customNameUserModified = false;
   bool _addSpeciesTagVisible = false;
   List<String> _selectedSpeciesTags = [];
+  bool _speciesSectionExpanded = false;
+  String? _reefSafeFilter;
 
   @override
   void initState() {
@@ -1343,6 +1480,11 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredFish = widget.availableFish.where((fish) {
+        // Reef safe filter (only for fish that have reefSafe field)
+        if (_reefSafeFilter != null && fish.reefSafe != null) {
+          if (fish.reefSafe != _reefSafeFilter) return false;
+        }
+        if (query.isEmpty) return true;
         // Check fish name and common names
         final nameMatches = fish.name.toLowerCase().contains(query) ||
                fish.commonNames.any((name) => name.toLowerCase().contains(query));
@@ -1547,114 +1689,136 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
         // Species tags section (shown when a fish is selected)
         if (selectedFish != null && !_fishSelectorExpanded) ...[
           const SizedBox(height: 12),
-          Text(
-            'Species (Optional)',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 6),
-          if (availableSpeciesTags.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: availableSpeciesTags.map((tag) {
-                final isSelected = _selectedSpeciesTags.contains(tag);
-                return FilterChip(
-                  label: Text(tag, style: const TextStyle(fontSize: 12)),
-                  selected: isSelected,
-                  onSelected: (value) {
-                    setState(() {
-                      if (value) {
-                        _selectedSpeciesTags = [tag];
-                      } else {
-                        _selectedSpeciesTags.remove(tag);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          const SizedBox(height: 6),
-          if (_addSpeciesTagVisible)
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _addSpeciesTagController,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: 'Add species...',
-                      hintStyle: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      isDense: true,
-                    ),
-                    style: const TextStyle(fontSize: 12),
-                    textCapitalization: TextCapitalization.words,
-                    onSubmitted: (value) {
-                      if (value.trim().isNotEmpty && _selectedFishUnit != null) {
-                        ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
-                      }
-                      setState(() {
-                        _addSpeciesTagController.clear();
-                        _addSpeciesTagVisible = false;
-                      });
-                    },
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    final value = _addSpeciesTagController.text;
-                    if (value.trim().isNotEmpty && _selectedFishUnit != null) {
-                      ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
-                    }
-                    setState(() {
-                      _addSpeciesTagController.clear();
-                      _addSpeciesTagVisible = false;
-                    });
-                  },
-                  icon: const Icon(Icons.check, size: 18),
-                  padding: const EdgeInsets.all(4),
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                  tooltip: 'Confirm',
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _addSpeciesTagController.clear();
-                      _addSpeciesTagVisible = false;
-                    });
-                  },
-                  icon: const Icon(Icons.close, size: 18),
-                  padding: const EdgeInsets.all(4),
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                  tooltip: 'Cancel',
-                ),
-              ],
-            )
-          else
-            TextButton.icon(
-              onPressed: () => setState(() => _addSpeciesTagVisible = true),
-              icon: const Icon(Icons.add, size: 16),
-              label: Text(l10n.addCustomSpecies, style: const TextStyle(fontSize: 12)),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              initiallyExpanded: _speciesSectionExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() {
+                  _speciesSectionExpanded = expanded;
+                  if (!expanded) {
+                    _addSpeciesTagVisible = false;
+                  }
+                });
+              },
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(top: 6),
+              title: Text(
+                'Species (Optional)',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+              trailing: Icon(
+                _speciesSectionExpanded ? Icons.expand_less : Icons.expand_more,
+                size: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              children: [
+                if (availableSpeciesTags.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: availableSpeciesTags.map((tag) {
+                      final isSelected = _selectedSpeciesTags.contains(tag);
+                      return FilterChip(
+                        label: Text(tag, style: const TextStyle(fontSize: 12)),
+                        selected: isSelected,
+                        onSelected: (value) {
+                          setState(() {
+                            if (value) {
+                              _selectedSpeciesTags = [tag];
+                            } else {
+                              _selectedSpeciesTags.remove(tag);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                const SizedBox(height: 6),
+                if (_addSpeciesTagVisible)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _addSpeciesTagController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: 'Add species...',
+                            hintStyle: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            isDense: true,
+                          ),
+                          style: const TextStyle(fontSize: 12),
+                          textCapitalization: TextCapitalization.words,
+                          onSubmitted: (value) {
+                            if (value.trim().isNotEmpty && _selectedFishUnit != null) {
+                              ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
+                            }
+                            setState(() {
+                              _addSpeciesTagController.clear();
+                              _addSpeciesTagVisible = false;
+                            });
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          final value = _addSpeciesTagController.text;
+                          if (value.trim().isNotEmpty && _selectedFishUnit != null) {
+                            ref.read(speciesTagsProvider.notifier).addTag(_selectedFishUnit!, value.trim());
+                          }
+                          setState(() {
+                            _addSpeciesTagController.clear();
+                            _addSpeciesTagVisible = false;
+                          });
+                        },
+                        icon: const Icon(Icons.check, size: 18),
+                        padding: const EdgeInsets.all(4),
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                        tooltip: 'Confirm',
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _addSpeciesTagController.clear();
+                            _addSpeciesTagVisible = false;
+                          });
+                        },
+                        icon: const Icon(Icons.close, size: 18),
+                        padding: const EdgeInsets.all(4),
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                        tooltip: 'Cancel',
+                      ),
+                    ],
+                  )
+                else
+                  TextButton.icon(
+                    onPressed: () => setState(() => _addSpeciesTagVisible = true),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: Text(l10n.addCustomSpecies, style: const TextStyle(fontSize: 12)),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
 
         // Expanded: show search + full grid
@@ -1668,6 +1832,10 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               prefixIcon: Icon(Icons.search),
             ),
           ),
+          if (widget.availableFish.any((f) => f.reefSafe != null)) ...[
+            const SizedBox(height: 8),
+            _buildReefSafeFilter(context),
+          ],
           const SizedBox(height: 12),
           Container(
             constraints: const BoxConstraints(maxHeight: 380),
@@ -1756,6 +1924,51 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildReefSafeFilter(BuildContext context) {
+    const options = ['Yes', 'No', 'Caution'];
+    final colors = {
+      'Yes': Colors.green,
+      'No': Colors.red,
+      'Caution': Colors.orange,
+    };
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          'Reef Safe:',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        ...options.map((opt) {
+          final selected = _reefSafeFilter == opt;
+          final color = colors[opt]!;
+          return FilterChip(
+            label: Text(opt),
+            selected: selected,
+            selectedColor: color.withOpacity(0.2),
+            checkmarkColor: color,
+            labelStyle: TextStyle(
+              color: selected ? color : null,
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(
+              color: selected ? color : Theme.of(context).colorScheme.outline,
+            ),
+            onSelected: (_) {
+              setState(() => _reefSafeFilter = selected ? null : opt);
+              _filterFish();
+            },
+            visualDensity: VisualDensity.compact,
+          );
+        }),
       ],
     );
   }
