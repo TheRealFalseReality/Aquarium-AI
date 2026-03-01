@@ -48,7 +48,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
       _filteredFishList = allFish.where((fish) {
         // Reef safe filter (only when fish has reefSafe field)
         if (_reefSafeFilter != null && fish.reefSafe != null) {
-          if ((fish.reefSafe ?? 'Yes') != _reefSafeFilter) return false;
+          if (fish.reefSafe != _reefSafeFilter) return false;
         }
         if (query.isEmpty) return true;
         final nameMatches = fish.name.toLowerCase().contains(query.toLowerCase());

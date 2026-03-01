@@ -1346,7 +1346,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
       _filteredFish = widget.availableFish.where((fish) {
         // Reef safe filter (only for fish that have reefSafe field)
         if (_reefSafeFilter != null && fish.reefSafe != null) {
-          if ((fish.reefSafe ?? 'Yes') != _reefSafeFilter) return false;
+          if (fish.reefSafe != _reefSafeFilter) return false;
         }
         if (query.isEmpty) return true;
         // Check fish name and common names

@@ -60,7 +60,7 @@ class FishCompatibilityScreenState
       var list = allFish.where((fish) {
         // Reef safe filter (marine only)
         if (_selectedCategory == 'marine' && _reefSafeFilter != null) {
-          if ((fish.reefSafe ?? 'Yes') != _reefSafeFilter) return false;
+          if (fish.reefSafe != _reefSafeFilter) return false;
         }
         if (query.isEmpty) return true;
         final nameMatches =
