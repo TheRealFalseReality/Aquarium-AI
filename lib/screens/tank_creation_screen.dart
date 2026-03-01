@@ -1394,6 +1394,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   bool _addSpeciesTagVisible = false;
   List<String> _selectedSpeciesTags = [];
   bool _speciesSectionExpanded = false;
+  String? _reefSafeFilter;
 
   @override
   void initState() {
@@ -1450,6 +1451,11 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredFish = widget.availableFish.where((fish) {
+        // Reef safe filter (only for fish that have reefSafe field)
+        if (_reefSafeFilter != null && fish.reefSafe != null) {
+          if (fish.reefSafe != _reefSafeFilter) return false;
+        }
+        if (query.isEmpty) return true;
         // Check fish name and common names
         final nameMatches = fish.name.toLowerCase().contains(query) ||
                fish.commonNames.any((name) => name.toLowerCase().contains(query));
@@ -1797,6 +1803,10 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               prefixIcon: Icon(Icons.search),
             ),
           ),
+          if (widget.availableFish.any((f) => f.reefSafe != null)) ...[
+            const SizedBox(height: 8),
+            _buildReefSafeFilter(context),
+          ],
           const SizedBox(height: 12),
           Container(
             constraints: const BoxConstraints(maxHeight: 380),
@@ -1885,6 +1895,51 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildReefSafeFilter(BuildContext context) {
+    const options = ['Yes', 'No', 'Caution'];
+    final colors = {
+      'Yes': Colors.green,
+      'No': Colors.red,
+      'Caution': Colors.orange,
+    };
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          'Reef Safe:',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        ...options.map((opt) {
+          final selected = _reefSafeFilter == opt;
+          final color = colors[opt]!;
+          return FilterChip(
+            label: Text(opt),
+            selected: selected,
+            selectedColor: color.withOpacity(0.2),
+            checkmarkColor: color,
+            labelStyle: TextStyle(
+              color: selected ? color : null,
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(
+              color: selected ? color : Theme.of(context).colorScheme.outline,
+            ),
+            onSelected: (_) {
+              setState(() => _reefSafeFilter = selected ? null : opt);
+              _filterFish();
+            },
+            visualDensity: VisualDensity.compact,
+          );
+        }),
       ],
     );
   }

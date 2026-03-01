@@ -30,6 +30,7 @@ class FishCompatibilityScreenState
   List<Fish> _filteredFishList = [];
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
+  String? _reefSafeFilter; // null = no filter, 'Yes'/'No'/'Caution' = filtered
 
   @override
   void initState() {
@@ -56,22 +57,22 @@ class FishCompatibilityScreenState
     final query = _searchController.text;
 
     setState(() {
-      if (query.isEmpty) {
-        _filteredFishList = allFish;
-      } else {
-        _filteredFishList = allFish.where((fish) {
-          final nameMatches =
-              fish.name.toLowerCase().contains(query.toLowerCase());
-          final commonNamesMatch = fish.commonNames
-              .any((name) => name.toLowerCase().contains(query.toLowerCase()));
-          
-          // Check species tags
-          final tags = ref.read(speciesTagsProvider).tags[fish.name] ?? [];
-          final tagsMatch = tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
-          
-          return nameMatches || commonNamesMatch || tagsMatch;
-        }).toList();
-      }
+      var list = allFish.where((fish) {
+        // Reef safe filter (marine only)
+        if (_selectedCategory == 'marine' && _reefSafeFilter != null) {
+          if (fish.reefSafe != _reefSafeFilter) return false;
+        }
+        if (query.isEmpty) return true;
+        final nameMatches =
+            fish.name.toLowerCase().contains(query.toLowerCase());
+        final commonNamesMatch = fish.commonNames
+            .any((name) => name.toLowerCase().contains(query.toLowerCase()));
+        // Check species tags
+        final tags = ref.read(speciesTagsProvider).tags[fish.name] ?? [];
+        final tagsMatch = tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
+        return nameMatches || commonNamesMatch || tagsMatch;
+      }).toList();
+      _filteredFishList = list;
     });
   }
 
@@ -409,7 +410,7 @@ class FishCompatibilityScreenState
               ),
             ),
             data: (fishData) {
-              if (_filteredFishList.isEmpty && _searchController.text.isEmpty) {
+              if (_filteredFishList.isEmpty && _searchController.text.isEmpty && _reefSafeFilter == null) {
                 _filteredFishList = fishData[_selectedCategory] ?? [];
               }
               return CustomScrollView(
@@ -623,35 +624,93 @@ class FishCompatibilityScreenState
   Widget _buildCategorySelector(FishCompatibilityNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
+      child: Column(
         children: [
-          ModernSelectableChip(
-            label: 'Freshwater',
-            emoji: '🐟',
-            selected: _selectedCategory == 'freshwater',
-            onTap: () {
-              setState(() => _selectedCategory = 'freshwater');
-              notifier.clearSelection();
-              _searchController.clear();
-              _updateAndFilterFishList(); // Bug fix is here
-            },
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              ModernSelectableChip(
+                label: 'Freshwater',
+                emoji: '🐟',
+                selected: _selectedCategory == 'freshwater',
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = 'freshwater';
+                    _reefSafeFilter = null;
+                  });
+                  notifier.clearSelection();
+                  _searchController.clear();
+                  _updateAndFilterFishList();
+                },
+              ),
+              ModernSelectableChip(
+                label: 'Saltwater',
+                emoji: '🪼',
+                selected: _selectedCategory == 'marine',
+                onTap: () {
+                  setState(() => _selectedCategory = 'marine');
+                  notifier.clearSelection();
+                  _searchController.clear();
+                  _updateAndFilterFishList();
+                },
+              ),
+            ],
           ),
-          ModernSelectableChip(
-            label: 'Saltwater',
-            emoji: '🪼',
-            selected: _selectedCategory == 'marine',
-            onTap: () {
-              setState(() => _selectedCategory = 'marine');
-              notifier.clearSelection();
-              _searchController.clear();
-              _updateAndFilterFishList(); // And also here
-            },
-          ),
+          if (_selectedCategory == 'marine') ...[
+            const SizedBox(height: 8),
+            _buildReefSafeFilter(),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildReefSafeFilter() {
+    const options = ['Yes', 'No', 'Caution'];
+    final colors = {
+      'Yes': Colors.green,
+      'No': Colors.red,
+      'Caution': Colors.orange,
+    };
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      alignment: WrapAlignment.center,
+      children: [
+        Text(
+          'Reef Safe:',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        ...options.map((opt) {
+          final selected = _reefSafeFilter == opt;
+          final color = colors[opt]!;
+          return FilterChip(
+            label: Text(opt),
+            selected: selected,
+            selectedColor: color.withOpacity(0.2),
+            checkmarkColor: color,
+            labelStyle: TextStyle(
+              color: selected ? color : null,
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(
+              color: selected ? color : Theme.of(context).colorScheme.outline,
+            ),
+            onSelected: (_) {
+              setState(() {
+                _reefSafeFilter = selected ? null : opt;
+              });
+              _updateAndFilterFishList();
+            },
+            visualDensity: VisualDensity.compact,
+          );
+        }),
+      ],
     );
   }
 

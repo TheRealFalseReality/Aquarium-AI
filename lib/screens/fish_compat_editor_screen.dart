@@ -17,6 +17,7 @@ class _FishEntry {
   String name;
   String imageURL;
   List<String> commonNames;
+  String? reefSafe;
   List<String> compatible;
   List<String> notRecommended;
   List<String> notCompatible;
@@ -26,6 +27,7 @@ class _FishEntry {
     required this.name,
     required this.imageURL,
     required this.commonNames,
+    this.reefSafe,
     required this.compatible,
     required this.notRecommended,
     required this.notCompatible,
@@ -36,6 +38,7 @@ class _FishEntry {
         name: j['name'] as String? ?? '',
         imageURL: j['imageURL'] as String? ?? '',
         commonNames: List<String>.from(j['commonNames'] ?? []),
+        reefSafe: j['reefSafe'] as String?,
         compatible: List<String>.from(j['compatible'] ?? []),
         notRecommended: List<String>.from(j['notRecommended'] ?? []),
         notCompatible: List<String>.from(j['notCompatible'] ?? []),
@@ -46,6 +49,7 @@ class _FishEntry {
         'name': name,
         'commonNames': commonNames,
         'imageURL': imageURL,
+        if (reefSafe != null) 'reefSafe': reefSafe,
         'compatible': compatible,
         'notRecommended': notRecommended,
         'notCompatible': notCompatible,
@@ -193,9 +197,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       final result = <String, List<_FishEntry>>{};
       for (final category in ['freshwater', 'marine']) {
         if (raw.containsKey(category)) {
-          result[category] = (raw[category] as List)
+          final list = (raw[category] as List)
               .map((e) => _FishEntry.fromJson(e as Map<String, dynamic>))
               .toList();
+          list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          result[category] = list;
         }
       }
       setState(() {
@@ -379,6 +385,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       context: context,
       builder: (_) => _FishEditDialog(
         fish: fish,
+        category: category,
         onSave: (updated) {
           setState(() {
             _data[category]![index] = updated;
@@ -403,6 +410,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   name: f.name,
                   imageURL: f.imageURL,
                   commonNames: f.commonNames,
+                  reefSafe: f.reefSafe,
                   compatible: inCompatible
                       ? f.compatible
                           .map((n) => n == oldName ? updated.name : n)
@@ -433,6 +441,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     name: sf.name,
                     imageURL: sf.imageURL,
                     commonNames: sf.commonNames,
+                    reefSafe: sf.reefSafe,
                     compatible: inCompatible
                         ? sf.compatible
                             .map((n) => n == oldName ? updated.name : n)
@@ -492,6 +501,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       name: '',
       imageURL: '',
       commonNames: [],
+      reefSafe: category == 'marine' ? 'Yes' : null,
       compatible: [],
       notRecommended: [],
       notCompatible: [],
@@ -502,6 +512,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       context: context,
       builder: (_) => _FishEditDialog(
         fish: blank,
+        category: category,
         dialogTitle: 'Add Fish to ${_capitalize(category)}',
         onSave: (newFish) {
           setState(() {
@@ -513,6 +524,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               name: newFish.name,
               imageURL: newFish.imageURL,
               commonNames: newFish.commonNames,
+              reefSafe: newFish.reefSafe,
               compatible: [],
               notRecommended: [],
               notCompatible: List<String>.from(existingNames),
@@ -526,6 +538,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 name: f.name,
                 imageURL: f.imageURL,
                 commonNames: f.commonNames,
+                reefSafe: f.reefSafe,
                 compatible: f.compatible,
                 notRecommended: f.notRecommended,
                 notCompatible: [...f.notCompatible, newEntry.name],
@@ -556,6 +569,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               name: fish.name,
               imageURL: fish.imageURL,
               commonNames: fish.commonNames,
+              reefSafe: fish.reefSafe,
               compatible: updatedLists['compatible']!,
               notRecommended: updatedLists['notRecommended']!,
               notCompatible: updatedLists['notCompatible']!,
@@ -611,6 +625,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       name: f.name,
       imageURL: f.imageURL,
       commonNames: f.commonNames,
+      reefSafe: f.reefSafe,
       compatible: newKey == 'compatible'
           ? [...f.compatible.where((n) => n != editedName), editedName]
           : f.compatible.where((n) => n != editedName).toList(),
@@ -958,11 +973,30 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   ),
               ],
             ),
-            subtitle: Text(
-              f.commonNames.join(', '),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  f.commonNames.join(', '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                if (f.reefSafe != null)
+                  Text(
+                    'Reef Safe: ${f.reefSafe}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: f.reefSafe == 'Yes'
+                          ? Colors.green.shade700
+                          : f.reefSafe == 'Caution'
+                              ? Colors.orange.shade700
+                              : Colors.red.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+              ],
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -988,15 +1022,19 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
 // ── edit dialog ───────────────────────────────────────────────────────────────
 
+const _kReefSafeOptions = ['Yes', 'No', 'Caution'];
+
 class _FishEditDialog extends StatefulWidget {
   final _FishEntry fish;
   final void Function(_FishEntry) onSave;
   final String? dialogTitle;
+  final String? category;
 
   const _FishEditDialog({
     required this.fish,
     required this.onSave,
     this.dialogTitle,
+    this.category,
   });
 
   @override
@@ -1008,6 +1046,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _urlCtrl;
   late List<TextEditingController> _commonNameCtrls;
   final TextEditingController _newCommonNameCtrl = TextEditingController();
+  late String? _reefSafe;
 
   @override
   void initState() {
@@ -1017,6 +1056,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _commonNameCtrls = widget.fish.commonNames
         .map((n) => TextEditingController(text: n))
         .toList();
+    _reefSafe = widget.fish.reefSafe;
   }
 
   @override
@@ -1078,6 +1118,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       name: name,
       imageURL: imageURL,
       commonNames: commonNames,
+      reefSafe: _reefSafe,
       compatible: widget.fish.compatible,
       notRecommended: widget.fish.notRecommended,
       notCompatible: widget.fish.notCompatible,
@@ -1089,6 +1130,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isMarine = widget.category == 'marine';
     return AlertDialog(
       title: Text(widget.dialogTitle ?? 'Edit: ${widget.fish.name}'),
       content: SizedBox(
@@ -1116,7 +1158,27 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                 ),
                 keyboardType: TextInputType.url,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              // Reef Safe (marine only)
+              if (isMarine) ...[
+                Text('Reef Safe',
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  value: _kReefSafeOptions.contains(_reefSafe)
+                      ? _reefSafe
+                      : 'Yes',
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: _kReefSafeOptions
+                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _reefSafe = v),
+                ),
+                const SizedBox(height: 12),
+              ],
               // Common Names
               Text('Common Names *',
                   style: Theme.of(context).textTheme.titleSmall),
