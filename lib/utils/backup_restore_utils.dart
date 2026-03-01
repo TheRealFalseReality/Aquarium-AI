@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/tank.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/accessible_feedback.dart';
@@ -330,6 +331,214 @@ class BackupRestoreUtils {
             parameters: {
               'source': source ?? 'unknown',
             },
+          );
+        } else {
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            context.showAccessibleMessage(
+              error,
+              duration: const Duration(seconds: 4),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  /// Share / export a single [tank] so another user can import it.
+  ///
+  /// Shows a brief confirmation dialog, then hands off to
+  /// [TankNotifier.exportSingleTank].
+  static Future<void> shareTank(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final shouldShare = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.share, color: Colors.teal),
+            const SizedBox(width: 8),
+            Text(l10n.shareTankDialogTitle),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.shareTankDialogContent),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.water_drop, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tank.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.allFishAndConfigurations),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.waterParameters),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.tankNotes),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.shareTankFileNote,
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.share),
+            label: Text(l10n.shareTankButton),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldShare == true && context.mounted) {
+      final success =
+          await ref.read(tankProvider.notifier).exportSingleTank(tank);
+
+      if (context.mounted) {
+        if (!success) {
+          final error = ref.read(tankProvider).error;
+          if (error != null) {
+            context.showAccessibleMessage(
+              error,
+              duration: const Duration(seconds: 4),
+            );
+          }
+        }
+        // On mobile the OS share sheet handles feedback; on web/desktop the
+        // file download is immediate, so show a brief confirmation.
+        else {
+          context.showAccessibleMessage(
+            l10n.tankSharedSuccess,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      }
+    }
+  }
+
+  /// Import a single tank from a tank-share file.
+  ///
+  /// Shows a warning/info dialog, picks a file, then adds the imported tank
+  /// to the existing tank list (does NOT replace existing tanks).
+  static Future<void> importTankShare(
+    BuildContext context,
+    WidgetRef ref, {
+    String? source,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final shouldImport = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.download, color: Colors.teal),
+            const SizedBox(width: 8),
+            Text(l10n.importTankDialogTitle),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.importTankDialogContent),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(l10n.importTankAddsToExisting)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(l10n.importTankNewId)),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.file_open),
+            label: Text(l10n.chooseFileButton),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldImport == true && context.mounted) {
+      final importedTank =
+          await ref.read(tankProvider.notifier).importSingleTankFromFile();
+
+      if (context.mounted) {
+        if (importedTank != null) {
+          context.showAccessibleMessage(
+            l10n.tankImportedSuccess(importedTank.name),
+            duration: const Duration(seconds: 3),
+          );
+
+          AnalyticsService.logFeatureUsed(
+            featureName: 'import_tank_share',
+            parameters: {'source': source ?? 'unknown'},
           );
         } else {
           final error = ref.read(tankProvider).error;

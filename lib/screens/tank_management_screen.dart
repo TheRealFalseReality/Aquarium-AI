@@ -374,6 +374,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management_empty'),
+                  icon: const Icon(Icons.download, size: 18),
+                  label: Text(l10n.importTank),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    side: const BorderSide(color: Colors.teal),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -823,7 +837,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
               const SizedBox(width: 8),
               
-              // 3-dot menu for backup/restore
+              // 3-dot menu for backup/restore/import
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
@@ -833,6 +847,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       break;
                     case 'restore':
                       BackupRestoreUtils.importData(context, ref, source: 'tank_management');
+                      break;
+                    case 'import_tank':
+                      BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management');
                       break;
                   }
                 },
@@ -854,6 +871,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         const Icon(Icons.restore, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(l10n.restore),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'import_tank',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.download, color: Colors.teal),
+                        const SizedBox(width: 8),
+                        Text(l10n.importTank),
                       ],
                     ),
                   ),
@@ -1583,6 +1610,212 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       if (!appSettings.tankHideIcon) Center(child: tankIconWidget),
                       if (!appSettings.tankHideIcon) const SizedBox(height: 8),
                       Builder(builder: (context) {
+                    // Header with tank name and menu
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    // Tank icon with gradient background or photo
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+                            ? LinearGradient(
+                                colors: tank.type == 'freshwater'
+                                    ? [Colors.blue.shade300, Colors.cyan.shade400]
+                                    : [Colors.indigo.shade300, Colors.purple.shade400],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+                            ? Colors.grey.shade300
+                            : null,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (tank.type == 'freshwater' 
+                                ? Colors.blue 
+                                : Colors.purple).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: tank.customIconCodePoint != null
+                          ? Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: tank.type == 'freshwater'
+                                      ? [Colors.blue.shade300, Colors.cyan.shade400]
+                                      : [Colors.indigo.shade300, Colors.purple.shade400],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
+                                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                                size: 24,
+                                color: Colors.white,
+                              ),
+                            )
+                          : (tank.customIconPhotoId != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: () {
+                                    try {
+                                      final photo = tank.photos.firstWhere(
+                                        (p) => p.id == tank.customIconPhotoId,
+                                      );
+                                      final imageUrl = photo.imageUrl ?? photo.imagePath;
+                                      return imageUrl != null
+                                          ? (imageUrl.startsWith('http')
+                                              ? CachedNetworkImage(
+                                                  imageUrl: imageUrl, 
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: (context, url, error) => Icon(
+                                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                                    size: 24,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              : Image.file(File(imageUrl), fit: BoxFit.cover))
+                                          : Icon(
+                                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                              size: 24,
+                                              color: Colors.white,
+                                            );
+                                    } catch (e) {
+                                      return Icon(
+                                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                        size: 24,
+                                        color: Colors.white,
+                                      );
+                                    }
+                                  }(),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(
+                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                )),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tank.name,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              String typeLabel;
+                              if (tank.type == 'freshwater') {
+                                typeLabel = l10n.freshwater;
+                              } else if (tank.isReef) {
+                                typeLabel = l10n.reefTank;
+                              } else {
+                                typeLabel = l10n.saltwater;
+                              }
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (tank.type == 'marine' && tank.isReef)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text('🪸', style: TextStyle(fontSize: 12)),
+                                    ),
+                                  Text(
+                                    typeLabel,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.more_vert, size: 18),
+                      ),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TankCreationScreen(existingTank: tank),
+                              ),
+                            );
+                            break;
+                          case 'manage_tags':
+                            _showManageTagsDialog(context, ref, tank);
+                            break;
+                          case 'notifications':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => NotificationManagementScreen(tank: tank),
+                              ),
+                            );
+                            break;
+                          case 'activity_log':
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => NotificationLoggerScreen(tank: tank),
+                              ),
+                            );
+                            break;
+                          case 'set_background':
+                            _showSetBackgroundDialog(context, ref, tank);
+                            break;
+                          case 'set_icon':
+                            _showSetIconDialog(context, ref, tank);
+                            break;
+                          case 'reset_background':
+                            _resetTankBackground(context, ref, tank);
+                            break;
+                          case 'recommendations':
+                            _getTankStockingRecommendations(tank);
+                            break;
+                          case 'compatibility_analysis':
+                            _getTankCompatibilityAnalysis(tank);
+                            break;
+                          case 'duplicate':
+                            _duplicateTank(context, ref, tank);
+                            break;
+                          case 'share_tank':
+                            BackupRestoreUtils.shareTank(context, ref, tank);
+                            break;
+                          case 'delete':
+                            _confirmDelete(context, ref, tank);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
                         final l10n = AppLocalizations.of(context)!;
                         String typeLabel;
                         if (tank.type == 'freshwater') {
@@ -1637,6 +1870,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                          PopupMenuItem(
+                            value: 'share_tank',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.share, color: Colors.teal, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.shareTank, style: const TextStyle(color: Colors.teal)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
                               children: [
                                 Text(
                                   tank.name,

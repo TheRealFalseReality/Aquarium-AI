@@ -13,6 +13,7 @@ import '../providers/tank_provider.dart';
 import '../services/fish_data_service.dart';
 import '../services/analytics_service.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import 'tank_creation_screen.dart';
 import 'notification_management_screen.dart';
@@ -166,6 +167,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ],
             ),
             actions: [
+              // Share button
+              IconButton(
+                icon: const Icon(Icons.share),
+                tooltip: l10n.shareTank,
+                onPressed: () {
+                  BackupRestoreUtils.shareTank(context, ref, tank);
+                },
+              ),
               // Edit button
               IconButton(
                 icon: const Icon(Icons.edit),
