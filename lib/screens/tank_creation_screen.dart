@@ -13,6 +13,7 @@ import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
+import '../widgets/tag_picker_dialog.dart';
 import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
@@ -36,9 +37,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
   List<TankPhoto> _tankPhotos = [];
-  List<String> _tankTags = [];
-  final _addTagController = TextEditingController();
-  bool _addTagVisible = false;
+  List<TankTag> _tankTags = [];
   
   late TabController _tabController;
 
@@ -84,8 +83,30 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
     _notesController.dispose();
-    _addTagController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openTagPicker(BuildContext context) async {
+    final allTanks = ref.read(tankProvider).tanks;
+    final allExistingTags = allTanks
+        .expand((t) => t.tags)
+        .fold<List<TankTag>>([], (acc, tag) {
+      if (acc.every((t) => t.name != tag.name)) acc.add(tag);
+      return acc;
+    })
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    if (!mounted) return;
+    final result = await showDialog<List<TankTag>>(
+      context: context,
+      builder: (_) => TagPickerDialog(
+        allExistingTags: allExistingTags,
+        currentTags: List.from(_tankTags),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() => _tankTags = result);
+    }
   }
 
   Future<void> _loadFishData() async {
@@ -957,9 +978,18 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                 spacing: 8,
                 runSpacing: 4,
                 children: _tankTags.map((tag) {
+                  final tagColor = tag.color != null
+                      ? Color(tag.color!)
+                      : Theme.of(context).colorScheme.secondary;
+                  final onTagColor = tagColor.computeLuminance() > 0.4
+                      ? Colors.black87
+                      : Colors.white;
                   return Chip(
-                    label: Text(tag, style: const TextStyle(fontSize: 12)),
-                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text(tag.name,
+                        style: TextStyle(fontSize: 12, color: onTagColor)),
+                    backgroundColor: tagColor.withOpacity(0.85),
+                    side: BorderSide(color: tagColor, width: 1),
+                    deleteIconColor: onTagColor.withOpacity(0.7),
                     onDeleted: () {
                       setState(() {
                         _tankTags.remove(tag);
@@ -969,89 +999,26 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
                 }).toList(),
               ),
             const SizedBox(height: 6),
-            if (_addTagVisible)
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _addTagController,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        hintText: 'Add tag...',
-                        hintStyle: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        isDense: true,
-                      ),
-                      style: const TextStyle(fontSize: 12),
-                      textCapitalization: TextCapitalization.words,
-                      onSubmitted: (value) {
-                        final trimmed = value.trim();
-                        if (trimmed.isNotEmpty && !_tankTags.contains(trimmed)) {
-                          setState(() {
-                            _tankTags.add(trimmed);
-                          });
-                        }
-                        setState(() {
-                          _addTagController.clear();
-                          _addTagVisible = false;
-                        });
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      final trimmed = _addTagController.text.trim();
-                      if (trimmed.isNotEmpty && !_tankTags.contains(trimmed)) {
-                        setState(() {
-                          _tankTags.add(trimmed);
-                        });
-                      }
-                      setState(() {
-                        _addTagController.clear();
-                        _addTagVisible = false;
-                      });
-                    },
-                    icon: const Icon(Icons.check, size: 18),
-                    padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    tooltip: 'Confirm',
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _addTagController.clear();
-                        _addTagVisible = false;
-                      });
-                    },
-                    icon: const Icon(Icons.close, size: 18),
-                    padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    tooltip: 'Cancel',
-                  ),
-                ],
-              )
-            else
-              TextButton.icon(
-                onPressed: () => setState(() => _addTagVisible = true),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Tag', style: TextStyle(fontSize: 12)),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+            TextButton.icon(
+              onPressed: () => _openTagPicker(context),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(
+                _tankTags.isEmpty
+                    ? AppLocalizations.of(context)!.addTag
+                    : AppLocalizations.of(context)!.manageTags,
+                style: const TextStyle(fontSize: 12),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
+            ),
             const SizedBox(height: 24),
             
             // Creation Date Selection

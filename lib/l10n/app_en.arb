@@ -2755,6 +2755,41 @@
     "description": "Menu item label for managing tank tags from the per-tank popup menu"
   },
 
+  "currentTags": "Current tags",
+  "@currentTags": {
+    "description": "Section header in tag picker dialog showing tags already applied to a tank"
+  },
+
+  "existingTags": "Existing tags",
+  "@existingTags": {
+    "description": "Section header in tag picker dialog showing tags used on other tanks as suggestions"
+  },
+
+  "customColor": "Custom colour",
+  "@customColor": {
+    "description": "Label for the custom colour picker option in the tag colour selector"
+  },
+
+  "colorPrimary": "Primary",
+  "@colorPrimary": {
+    "description": "Tooltip for the primary theme colour swatch in the tag colour picker"
+  },
+
+  "colorSecondary": "Secondary",
+  "@colorSecondary": {
+    "description": "Tooltip for the secondary theme colour swatch in the tag colour picker"
+  },
+
+  "colorTertiary": "Tertiary",
+  "@colorTertiary": {
+    "description": "Tooltip for the tertiary theme colour swatch in the tag colour picker"
+  },
+
+  "colorCustom": "Custom",
+  "@colorCustom": {
+    "description": "Tooltip for the custom colour swatch in the tag colour picker"
+  },
+
   "submitIssue": "Submit Issue",
   "@submitIssue": {
     "description": "Label for the submit issue/feedback menu item in settings"

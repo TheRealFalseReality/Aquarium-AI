@@ -76,6 +76,13 @@
   "filterByType": "TRANSLATE: Filter by type",
   "filterByTag": "TRANSLATE: Filter by tag",
   "manageTags": "TRANSLATE: Manage Tags",
+  "currentTags": "TRANSLATE: Current tags",
+  "existingTags": "TRANSLATE: Existing tags",
+  "customColor": "TRANSLATE: Custom colour",
+  "colorPrimary": "TRANSLATE: Primary",
+  "colorSecondary": "TRANSLATE: Secondary",
+  "colorTertiary": "TRANSLATE: Tertiary",
+  "colorCustom": "TRANSLATE: Custom",
 
   "submitIssue": "TRANSLATE: Submit Issue",
   "submitIssueDesc": "TRANSLATE: Report a bug or request a new feature on GitHub"

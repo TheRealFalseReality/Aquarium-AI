@@ -5,6 +5,50 @@ import 'tank_notification.dart';
 import 'notification_log.dart';
 import 'tank_note.dart';
 
+/// A user-created label for a tank.
+///
+/// [color] is an ARGB integer (e.g. `0xFF4CAF50`). When null the UI falls back
+/// to the current theme's secondary colour so that tags created before this
+/// field existed continue to look correct.
+class TankTag {
+  final String name;
+  final int? color; // ARGB, nullable = use theme secondary
+
+  const TankTag({required this.name, this.color});
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        if (color != null) 'color': color,
+      };
+
+  /// Accepts both the new object format `{"name":"…","color":…}` and the
+  /// legacy plain-string format that was used before this class existed.
+  factory TankTag.fromJson(dynamic json) {
+    if (json is String) {
+      return TankTag(name: json);
+    }
+    final map = json as Map<String, dynamic>;
+    return TankTag(
+      name: map['name'] as String,
+      color: map['color'] as int?,
+    );
+  }
+
+  TankTag copyWith({String? name, int? color, bool clearColor = false}) {
+    return TankTag(
+      name: name ?? this.name,
+      color: clearColor ? null : (color ?? this.color),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is TankTag && other.name == name && other.color == color;
+
+  @override
+  int get hashCode => Object.hash(name, color);
+}
+
 class TankPhoto {
   final String id;
   final String? imageUrl; // User-provided image URL
@@ -148,7 +192,7 @@ class Tank {
   final List<TankNotification> notifications; // Task notifications
   final List<NotificationLog> notificationLogs; // Notification action logs
   final List<TankNote> tankNotes; // User notes for the tank
-  final List<String> tags; // User-created tags for this tank
+  final List<TankTag> tags; // User-created tags for this tank
 
   Tank({
     required this.id,
@@ -171,7 +215,7 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
-    List<String>? tags,
+    List<TankTag>? tags,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
        dosingEntries = dosingEntries ?? [],
@@ -199,7 +243,7 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
-    List<String>? tags,
+    List<TankTag>? tags,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -249,7 +293,7 @@ class Tank {
       'notifications': notifications.map((n) => n.toJson()).toList(),
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
       'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
-      'tags': tags,
+      'tags': tags.map((t) => t.toJson()).toList(),
     };
   }
 
@@ -290,7 +334,7 @@ class Tank {
           ?.map((tn) => TankNote.fromJson(tn))
           .toList() ?? [],
       tags: (json['tags'] as List?)
-          ?.map((t) => t.toString())
+          ?.map((t) => TankTag.fromJson(t))
           .toList() ?? [],
     );
   }
@@ -316,7 +360,7 @@ class Tank {
     List<TankNotification>? notifications,
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
-    List<String>? tags,
+    List<TankTag>? tags,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearCustomIconCodePoint = false,

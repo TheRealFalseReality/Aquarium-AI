@@ -522,6 +522,13 @@
   "filterByType": "Filtrar por tipo",
   "filterByTag": "Filtrar por etiqueta",
   "manageTags": "Gestionar etiquetas",
+  "currentTags": "Etiquetas actuales",
+  "existingTags": "Etiquetas existentes",
+  "customColor": "Color personalizado",
+  "colorPrimary": "Primario",
+  "colorSecondary": "Secundario",
+  "colorTertiary": "Terciario",
+  "colorCustom": "Personalizado",
 
   "submitIssue": "Enviar un problema",
   "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub",

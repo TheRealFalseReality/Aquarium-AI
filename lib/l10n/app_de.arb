@@ -522,6 +522,13 @@
   "filterByType": "Nach Typ filtern",
   "filterByTag": "Nach Schlagwort filtern",
   "manageTags": "Schlagwörter verwalten",
+  "currentTags": "Aktuelle Schlagwörter",
+  "existingTags": "Vorhandene Schlagwörter",
+  "customColor": "Benutzerdefinierte Farbe",
+  "colorPrimary": "Primär",
+  "colorSecondary": "Sekundär",
+  "colorTertiary": "Tertiär",
+  "colorCustom": "Benutzerdefiniert",
 
   "submitIssue": "Problem einreichen",
   "submitIssueDesc": "Einen Fehler melden oder eine neue Funktion auf GitHub anfordern",

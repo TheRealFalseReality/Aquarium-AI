@@ -27,12 +27,11 @@ import 'tank_creation_screen.dart';
 import 'tank_details_screen.dart';
 import 'tank_stocking_report_screen.dart';
 import 'photo_analysis_screen.dart';
-import 'parameter_logger_screen.dart';
-import 'dosing_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'notification_logger_screen.dart';
 import 'compatibility_report.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
+import '../widgets/tag_picker_dialog.dart';
 
 enum TankSortOption {
   name,
@@ -593,8 +592,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       if (_filterByType != null && tank.type != _filterByType) {
         return false;
       }
-      // Filter by tags (tank must have ALL selected tags)
-      if (_filterByTags.isNotEmpty && !_filterByTags.any((tag) => tank.tags.contains(tag))) {
+      // Filter by tags (tank must have ANY of the selected tag names)
+      if (_filterByTags.isNotEmpty &&
+          !_filterByTags.any((name) => tank.tags.any((t) => t.name == name))) {
         return false;
       }
       return true;
@@ -793,12 +793,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Widget _buildFloatingSortMenu(BuildContext context, List<Tank> allTanks) {
     final l10n = AppLocalizations.of(context)!;
-    // Collect all unique tags from all tanks for the filter chips
-    final allTags = <String>{};
+    // Collect unique TankTag objects (by name) across all tanks for filter chips.
+    final tagsByName = <String, TankTag>{};
     for (final tank in allTanks) {
-      allTags.addAll(tank.tags);
+      for (final tag in tank.tags) {
+        tagsByName.putIfAbsent(tag.name, () => tag);
+      }
     }
-    final sortedAllTags = allTags.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final sortedAllTags = tagsByName.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     final hasActiveFilters = _filterByType != null || _filterByTags.isNotEmpty;
 
     return Positioned(
@@ -843,7 +846,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Sort & Filter',
+                        l10n.sortAndFilter,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -863,7 +866,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 8),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text('Clear filters', style: TextStyle(fontSize: 12)),
+                              child: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
                             ),
                           IconButton(
                             onPressed: () {
@@ -883,7 +886,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   const SizedBox(height: 12),
                   // Sort section
                   Text(
-                    'Sort by',
+                    l10n.sortBy,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -899,28 +902,27 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         avatar: Icon(
                           _getSortOptionIcon(option),
                           size: 16,
-                          color: isSelected 
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         label: Text(_getSortOptionLabel(option)),
-                        backgroundColor: isSelected 
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surfaceVariant,
+                        backgroundColor: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.surfaceVariant,
                         labelStyle: TextStyle(
-                          color: isSelected 
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                         ),
                         onPressed: () {
                           setState(() {
-                            // If selecting the same option, toggle ascending/descending
                             if (_currentSortOption == option) {
                               _isSortAscending = !_isSortAscending;
                             } else {
                               _currentSortOption = option;
-                              _isSortAscending = true; // Reset to ascending for new option
+                              _isSortAscending = true;
                             }
                             _isSortMenuExpanded = false;
                           });
@@ -934,7 +936,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   const SizedBox(height: 16),
                   // Filter by tank type
                   Text(
-                    'Filter by type',
+                    l10n.filterByType,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -947,7 +949,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     children: [
                       FilterChip(
                         avatar: const Text('🐟', style: TextStyle(fontSize: 14)),
-                        label: const Text('Freshwater'),
+                        label: Text(l10n.freshwater),
                         selected: _filterByType == 'freshwater',
                         onSelected: (selected) {
                           setState(() {
@@ -957,7 +959,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ),
                       FilterChip(
                         avatar: const Text('🪼', style: TextStyle(fontSize: 14)),
-                        label: const Text('Saltwater'),
+                        label: Text(l10n.saltwater),
                         selected: _filterByType == 'marine',
                         onSelected: (selected) {
                           setState(() {
@@ -971,7 +973,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   if (sortedAllTags.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
-                      'Filter by tag',
+                      l10n.filterByTag,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -982,16 +984,31 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       spacing: 8,
                       runSpacing: 8,
                       children: sortedAllTags.map((tag) {
-                        final isSelected = _filterByTags.contains(tag);
+                        final isSelected = _filterByTags.contains(tag.name);
+                        final tagColor = tag.color != null
+                            ? Color(tag.color!)
+                            : Theme.of(context).colorScheme.secondary;
+                        final onTagColor = tagColor.computeLuminance() > 0.4
+                            ? Colors.black87
+                            : Colors.white;
                         return FilterChip(
-                          label: Text(tag),
+                          label: Text(tag.name,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isSelected ? onTagColor : null)),
                           selected: isSelected,
+                          selectedColor: tagColor.withOpacity(0.85),
+                          checkmarkColor: onTagColor,
+                          side: isSelected
+                              ? BorderSide(color: tagColor, width: 1.5)
+                              : null,
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
-                                _filterByTags = {..._filterByTags, tag};
+                                _filterByTags = {..._filterByTags, tag.name};
                               } else {
-                                _filterByTags = _filterByTags.where((t) => t != tag).toSet();
+                                _filterByTags =
+                                    _filterByTags.where((n) => n != tag.name).toSet();
                               }
                             });
                           },
@@ -1233,19 +1250,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             );
                             break;
-                          case 'parameters':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ParameterLoggerScreen(tank: tank),
-                              ),
-                            );
-                            break;
-                          case 'dosing':
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DosingLoggerScreen(tank: tank),
-                              ),
-                            );
+                          case 'manage_tags':
+                            _showManageTagsDialog(context, ref, tank);
                             break;
                           case 'notifications':
                             Navigator.of(context).push(
@@ -1298,22 +1304,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ),
                           ),
                           PopupMenuItem(
-                            value: 'parameters',
+                            value: 'manage_tags',
                             child: Row(
                               children: [
-                                const Icon(Icons.science, color: Colors.teal, size: 18),
+                                const Icon(Icons.label_outline, size: 18),
                                 const SizedBox(width: 8),
-                                Text(l10n.parameterLogger, style: const TextStyle(color: Colors.teal)),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'dosing',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.medication_liquid, color: Colors.purple, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.dosingDiary, style: const TextStyle(color: Colors.purple)),
+                                Text(l10n.manageTags),
                               ],
                             ),
                           ),
@@ -1624,35 +1620,36 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: tank.tags.map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: cs.secondaryContainer.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: cs.secondary.withOpacity(0.3),
-                          width: 1,
+                    children: tank.tags.map((tag) {
+                      final tagColor = tag.color != null
+                          ? Color(tag.color!)
+                          : cs.secondary;
+                      final onTagColor = tagColor.computeLuminance() > 0.4
+                          ? Colors.black87
+                          : Colors.white;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: tagColor.withOpacity(0.85),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: tagColor, width: 1),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.label_outline,
-                            size: 12,
-                            color: cs.onSecondaryContainer,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            tag,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: cs.onSecondaryContainer,
-                              fontWeight: FontWeight.w500,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.label_outline, size: 12, color: onTagColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              tag.name,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: onTagColor,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )).toList(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                   const SizedBox(height: 14),
                 ],
@@ -2536,6 +2533,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       ),
     );
+  }
+
+  void _showManageTagsDialog(BuildContext context, WidgetRef ref, Tank tank) async {
+    final allTanks = ref.read(tankProvider).tanks;
+    final allExistingTags = allTanks
+        .expand((t) => t.tags)
+        .fold<List<TankTag>>([], (acc, tag) {
+      if (acc.every((t) => t.name != tag.name)) acc.add(tag);
+      return acc;
+    })
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    if (!context.mounted) return;
+    final result = await showDialog<List<TankTag>>(
+      context: context,
+      builder: (_) => TagPickerDialog(
+        allExistingTags: allExistingTags,
+        currentTags: List.from(tank.tags),
+      ),
+    );
+    if (result != null && context.mounted) {
+      final updated = tank.copyWith(tags: result);
+      await ref.read(tankProvider.notifier).updateTank(updated);
+    }
   }
 
   void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
