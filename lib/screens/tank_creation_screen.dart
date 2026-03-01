@@ -14,6 +14,7 @@ import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/tag_picker_dialog.dart';
+import '../providers/tank_tags_provider.dart';
 import '../services/analytics_service.dart';
 
 class TankCreationScreen extends ConsumerStatefulWidget {
@@ -87,14 +88,10 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen> with Sin
   }
 
   Future<void> _openTagPicker(BuildContext context) async {
-    final allTanks = ref.read(tankProvider).tanks;
-    final allExistingTags = allTanks
-        .expand((t) => t.tags)
-        .fold<List<TankTag>>([], (acc, tag) {
-      if (acc.every((t) => t.name != tag.name)) acc.add(tag);
-      return acc;
-    })
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final allExistingTags = mergeTagSuggestions(
+      globalTags: ref.read(tankTagsProvider),
+      tanks: ref.read(tankProvider).tanks,
+    );
 
     if (!mounted) return;
     final result = await showDialog<List<TankTag>>(

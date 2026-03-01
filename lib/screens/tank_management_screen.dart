@@ -32,6 +32,7 @@ import 'notification_logger_screen.dart';
 import 'compatibility_report.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 import '../widgets/tag_picker_dialog.dart';
+import '../providers/tank_tags_provider.dart';
 
 enum TankSortOption {
   name,
@@ -2536,14 +2537,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   }
 
   void _showManageTagsDialog(BuildContext context, WidgetRef ref, Tank tank) async {
-    final allTanks = ref.read(tankProvider).tanks;
-    final allExistingTags = allTanks
-        .expand((t) => t.tags)
-        .fold<List<TankTag>>([], (acc, tag) {
-      if (acc.every((t) => t.name != tag.name)) acc.add(tag);
-      return acc;
-    })
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final allExistingTags = mergeTagSuggestions(
+      globalTags: ref.read(tankTagsProvider),
+      tanks: ref.read(tankProvider).tanks,
+    );
 
     if (!context.mounted) return;
     final result = await showDialog<List<TankTag>>(
