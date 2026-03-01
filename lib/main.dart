@@ -290,13 +290,14 @@ class MyApp extends ConsumerWidget {
     required bool isDark,
     ColorScheme? dynamicScheme,
     Color? customSeed,
+    String fontFamily = 'Poppins',
   }) {
     // Material You: use the phone's dynamic color scheme when available.
     if (colorTheme == AppColorTheme.materialYou && dynamicScheme != null) {
       return ThemeData(
         useMaterial3: true,
         colorScheme: dynamicScheme,
-        fontFamily: 'Poppins',
+        fontFamily: fontFamily,
         chipTheme: ChipThemeData(
           shape: StadiumBorder(
             side: BorderSide(
@@ -339,7 +340,7 @@ class MyApp extends ConsumerWidget {
         surfaceMode: FlexSurfaceMode.level,
         blendLevel: blendLevel,
         useMaterial3: true,
-        fontFamily: 'Poppins',
+        fontFamily: fontFamily,
         subThemesData: const FlexSubThemesData(
           useM2StyleDividerInM3: false,
           defaultRadius: 12,
@@ -355,7 +356,7 @@ class MyApp extends ConsumerWidget {
         surfaceMode: FlexSurfaceMode.level,
         blendLevel: blendLevel,
         useMaterial3: true,
-        fontFamily: 'Poppins',
+        fontFamily: fontFamily,
         subThemesData: const FlexSubThemesData(
           useM2StyleDividerInM3: false,
           defaultRadius: 12,
@@ -381,12 +382,14 @@ class MyApp extends ConsumerWidget {
           isDark: false,
           dynamicScheme: lightDynamic,
           customSeed: themeProvider.customSeedColor,
+          fontFamily: themeProvider.font.fontFamily,
         );
         final darkTheme = _buildFlexTheme(
           colorTheme: colorTheme,
           isDark: true,
           dynamicScheme: darkDynamic,
           customSeed: themeProvider.customSeedColor,
+          fontFamily: themeProvider.font.fontFamily,
         );
 
         // Update system UI overlay based on current theme

@@ -2,29 +2,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
-/// A full-page screen that lets the user choose the app colour theme and
-/// light / dark / system mode.
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final themeState = ref.watch(themeProviderNotifierProvider);
     final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
     final isMaterialYouAvailable =
         !kIsWeb && (defaultTargetPlatform == TargetPlatform.android);
 
     return MainLayout(
-      title: 'Appearance',
+      title: l10n.appearance,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Appearance',
+            l10n.appearance,
             style: Theme.of(context)
                 .textTheme
                 .headlineLarge
@@ -33,7 +33,7 @@ class AppearanceScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Customise the look of the app.',
+            l10n.appearanceSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -50,25 +50,25 @@ class AppearanceScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _sectionHeader(context, Icons.brightness_6_outlined,
-                      'Brightness mode', cs.primary),
+                      l10n.brightnessMode, cs.primary),
                   const SizedBox(height: 12),
                   Center(
                     child: SegmentedButton<ThemeMode>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: ThemeMode.light,
-                          icon: Icon(Icons.light_mode_outlined),
-                          label: Text('Light'),
+                          icon: const Icon(Icons.light_mode_outlined),
+                          label: Text(l10n.light),
                         ),
                         ButtonSegment(
                           value: ThemeMode.system,
-                          icon: Icon(Icons.brightness_auto_outlined),
-                          label: Text('System'),
+                          icon: const Icon(Icons.brightness_auto_outlined),
+                          label: Text(l10n.system),
                         ),
                         ButtonSegment(
                           value: ThemeMode.dark,
-                          icon: Icon(Icons.dark_mode_outlined),
-                          label: Text('Dark'),
+                          icon: const Icon(Icons.dark_mode_outlined),
+                          label: Text(l10n.dark),
                         ),
                       ],
                       selected: {themeState.themeMode},
@@ -93,10 +93,10 @@ class AppearanceScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _sectionHeader(context, Icons.palette_outlined,
-                      'Colour theme', cs.primary),
+                      l10n.colourTheme, cs.primary),
                   const SizedBox(height: 4),
                   Text(
-                    'Choose a colour palette for the entire app.',
+                    l10n.chooseColourPalette,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -119,6 +119,36 @@ class AppearanceScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // ── Font Selection ─────────────────────────────────────────────
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionHeader(context, Icons.font_download_outlined,
+                      l10n.font, cs.primary),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.chooseFontDesc,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FontSelector(
+                    selected: themeState.font,
+                    onSelected: (font) => themeNotifier.setFont(font),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
         ],
       ),
     );
@@ -155,6 +185,87 @@ class AppearanceScreen extends ConsumerWidget {
         initialName: initialName,
         onSave: (color, name) => notifier.setCustomTheme(color, name),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Font selector
+// ---------------------------------------------------------------------------
+
+class _FontSelector extends StatelessWidget {
+  const _FontSelector({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final AppFont selected;
+  final ValueChanged<AppFont> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: AppFont.values.map((font) {
+        final isSelected = selected == font;
+        final cs = Theme.of(context).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => onSelected(font),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      isSelected ? cs.primary : cs.outline.withOpacity(0.3),
+                  width: isSelected ? 2 : 1,
+                ),
+                color: isSelected
+                    ? cs.primaryContainer.withOpacity(0.3)
+                    : Colors.transparent,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          font.displayName,
+                          style: TextStyle(
+                            fontFamily: font.fontFamily,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? cs.primary
+                                : cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.fontPreviewText,
+                          style: TextStyle(
+                            fontFamily: font.fontFamily,
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(Icons.check_circle, color: cs.primary, size: 20),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -423,8 +534,9 @@ class _CustomThemeDialogState extends State<_CustomThemeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Custom theme'),
+      title: Text(l10n.customTheme),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -440,7 +552,7 @@ class _CustomThemeDialogState extends State<_CustomThemeDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Theme name',
+                labelText: l10n.themeName,
                 hintText: kDefaultCustomThemeName,
                 border: const OutlineInputBorder(),
               ),
@@ -453,14 +565,14 @@ class _CustomThemeDialogState extends State<_CustomThemeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
             widget.onSave(_pickedColor, _nameController.text);
             Navigator.of(context).pop();
           },
-          child: const Text('Save'),
+          child: Text(l10n.save),
         ),
       ],
     );
