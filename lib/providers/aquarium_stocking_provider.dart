@@ -110,7 +110,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',
@@ -120,6 +120,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
     final models = ref.read(modelProvider);
     final allFish = fishData[tankType] ?? [];
+
     if (allFish.isEmpty) {
       state = state.copyWith(
         error: 'No fish data available for the selected tank type.',
@@ -307,7 +308,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',

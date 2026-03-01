@@ -41,7 +41,7 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
 
   void _filterFishList() {
     final fishDataAsync = ref.read(fishDataProvider);
-    final allFish = fishDataAsync.valueOrNull?[widget.category] ?? [];
+    final allFish = fishDataAsync.asData?.value?[widget.category] ?? [];
     final query = _searchController.text;
 
     setState(() {
