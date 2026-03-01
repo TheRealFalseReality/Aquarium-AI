@@ -82,35 +82,6 @@ class AppearanceScreen extends ConsumerWidget {
 
           const SizedBox(height: 16),
 
-          // ── Font Selection ─────────────────────────────────────────────
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _sectionHeader(context, Icons.font_download_outlined,
-                      'Font', cs.primary),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Choose the font used throughout the app.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  _FontSelector(
-                    selected: themeState.font,
-                    onSelected: (font) => themeNotifier.setFont(font),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
           // ── Colour Themes ──────────────────────────────────────────────
           Card(
             clipBehavior: Clip.antiAlias,
@@ -146,6 +117,36 @@ class AppearanceScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // ── Font Selection ─────────────────────────────────────────────
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionHeader(context, Icons.font_download_outlined,
+                      'Font', cs.primary),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose the font used throughout the app.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FontSelector(
+                    selected: themeState.font,
+                    onSelected: (font) => themeNotifier.setFont(font),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
         ],
       ),
     );
