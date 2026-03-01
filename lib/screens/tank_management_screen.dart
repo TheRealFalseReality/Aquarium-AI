@@ -345,6 +345,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management_empty'),
+                  icon: const Icon(Icons.download, size: 18),
+                  label: Text(l10n.importTank),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    side: const BorderSide(color: Colors.teal),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -723,7 +737,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ),
               const SizedBox(width: 8),
               
-              // 3-dot menu for backup/restore
+              // 3-dot menu for backup/restore/import
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
@@ -733,6 +747,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       break;
                     case 'restore':
                       BackupRestoreUtils.importData(context, ref, source: 'tank_management');
+                      break;
+                    case 'import_tank':
+                      BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management');
                       break;
                   }
                 },
@@ -754,6 +771,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         const Icon(Icons.restore, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(l10n.restore),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'import_tank',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.download, color: Colors.teal),
+                        const SizedBox(width: 8),
+                        Text(l10n.importTank),
                       ],
                     ),
                   ),
@@ -1322,6 +1349,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           case 'duplicate':
                             _duplicateTank(context, ref, tank);
                             break;
+                          case 'share_tank':
+                            BackupRestoreUtils.shareTank(context, ref, tank);
+                            break;
                           case 'delete':
                             _confirmDelete(context, ref, tank);
                             break;
@@ -1431,6 +1461,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 const Icon(Icons.copy, size: 18),
                                 const SizedBox(width: 8),
                                 Text(l10n.duplicate),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'share_tank',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.share, color: Colors.teal, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.shareTank, style: const TextStyle(color: Colors.teal)),
                               ],
                             ),
                           ),
