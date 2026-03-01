@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'species_tags_provider.dart';
@@ -435,5 +438,183 @@ class TankNotifier extends StateNotifier<TankState> {
       'tankCount': state.tanks.length,
       'exportDate': DateTime.now().toIso8601String(),
     };
+  }
+
+  /// Export a single tank as a shareable file.
+  ///
+  /// On mobile this uses the system share sheet so the user can send the file
+  /// via any app. On web the file is downloaded directly. On desktop a save
+  /// dialog is shown.
+  ///
+  /// Returns `true` when the share/save succeeded (or was handed off to the OS
+  /// share sheet), `false` when the user cancelled.
+  Future<bool> exportSingleTank(Tank tank) async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      final packageInfo = await PackageInfo.fromPlatform();
+      final shareData = {
+        'version': packageInfo.version,
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'type': 'tank_share',
+        'tank': tank.toJson(includeLocalPaths: false),
+      };
+
+      final jsonString = const JsonEncoder.withIndent('  ').convert(shareData);
+      final bytes = Uint8List.fromList(utf8.encode(jsonString));
+      final safeName = tank.name.replaceAll(RegExp(r'[^\w\s-]'), '_');
+      final fileName = 'tank_share_$safeName.json';
+
+      state = state.copyWith(isLoading: false);
+
+      if (kIsWeb) {
+        downloadFile(bytes, fileName);
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_share_export',
+          parameters: {'platform': 'web'},
+        );
+        return true;
+      }
+
+      // Mobile: use share sheet so the user can send via any app.
+      if (Platform.isAndroid || Platform.isIOS) {
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/$fileName');
+        await tempFile.writeAsBytes(bytes);
+        final result = await Share.shareXFiles(
+          [XFile(tempFile.path, mimeType: 'application/json', name: fileName)],
+          subject: 'Aquarium AI – Tank Share: ${tank.name}',
+        );
+        AnalyticsService.logFeatureUsed(
+          featureName: 'tank_share_export',
+          parameters: {'platform': 'mobile', 'status': result.status.name},
+        );
+        return result.status != ShareResultStatus.unavailable;
+      }
+
+      // Desktop: save-file dialog.
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Tank Share File',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: bytes,
+      );
+
+      AnalyticsService.logFeatureUsed(
+        featureName: 'tank_share_export',
+        parameters: {
+          'platform': 'desktop',
+          'cancelled': (outputPath == null).toString(),
+        },
+      );
+      return outputPath != null;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to share tank: $e',
+      );
+      AnalyticsService.logError(
+        errorType: 'tank_share_export_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      return false;
+    }
+  }
+
+  /// Import a single tank from a tank-share file.
+  ///
+  /// Accepts files created by [exportSingleTank] (`type == 'tank_share'`) as
+  /// well as full backup files (picks the first tank in the list).
+  ///
+  /// The imported tank is assigned a brand-new UUID so it never collides with
+  /// tanks already in the app.  It is *added* to the existing tank list rather
+  /// than replacing it.
+  ///
+  /// Returns the imported [Tank] on success, or `null` when the user cancels
+  /// or the file is invalid.
+  Future<Tank?> importSingleTankFromFile() async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        return null;
+      }
+
+      final platformFile = result.files.single;
+      String jsonString;
+
+      if (kIsWeb) {
+        final fileBytes = platformFile.bytes;
+        if (fileBytes == null) {
+          throw Exception('Could not read file content on web platform');
+        }
+        jsonString = utf8.decode(fileBytes);
+      } else {
+        final filePath = platformFile.path;
+        if (filePath == null) {
+          throw Exception('Could not access selected file');
+        }
+        jsonString = await File(filePath).readAsString();
+      }
+
+      final data = json.decode(jsonString) as Map<String, dynamic>;
+
+      Tank importedTank;
+
+      if (data['type'] == 'tank_share' && data.containsKey('tank')) {
+        // Single-tank share format.
+        importedTank = Tank.fromJson(data['tank'] as Map<String, dynamic>);
+      } else if (data.containsKey('tanks')) {
+        // Full backup: take the first tank.
+        final tanks = data['tanks'] as List;
+        if (tanks.isEmpty) {
+          throw const FormatException('Backup file contains no tanks');
+        }
+        importedTank = Tank.fromJson(tanks.first as Map<String, dynamic>);
+      } else {
+        throw const FormatException('Invalid tank share file format');
+      }
+
+      // Assign a new ID so it never conflicts with an existing tank.
+      final now = DateTime.now();
+      importedTank = importedTank.copyWith(
+        id: const Uuid().v4(),
+        updatedAt: now,
+      );
+
+      final updatedTanks = [...state.tanks, importedTank];
+      state = state.copyWith(tanks: updatedTanks, isLoading: false);
+      await _saveTanks();
+
+      AnalyticsService.logFeatureUsed(
+        featureName: 'tank_share_import',
+        parameters: {
+          'platform': kIsWeb ? 'web' : 'mobile',
+          'tank_type': importedTank.type,
+        },
+      );
+
+      return importedTank;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to import tank: $e',
+      );
+      AnalyticsService.logError(
+        errorType: 'tank_share_import_error',
+        errorMessage: e.toString(),
+        screen: 'tank_management',
+      );
+      return null;
+    }
   }
 }

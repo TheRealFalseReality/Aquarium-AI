@@ -1394,6 +1394,71 @@
     "description": "Data restored success message"
   },
 
+  "shareTankDialogTitle": "Share Tank",
+  "@shareTankDialogTitle": {
+    "description": "Title for the share tank dialog"
+  },
+
+  "shareTankDialogContent": "Share this tank configuration with another Aquarium AI user. The following will be included:",
+  "@shareTankDialogContent": {
+    "description": "Content description for the share tank dialog"
+  },
+
+  "shareTankFileNote": "The recipient can import this file into their Aquarium AI app.",
+  "@shareTankFileNote": {
+    "description": "Note about the share tank file"
+  },
+
+  "shareTankButton": "Share Tank",
+  "@shareTankButton": {
+    "description": "Share tank button label"
+  },
+
+  "tankSharedSuccess": "Tank shared successfully!",
+  "@tankSharedSuccess": {
+    "description": "Tank shared success message"
+  },
+
+  "importTankDialogTitle": "Import Tank",
+  "@importTankDialogTitle": {
+    "description": "Title for the import tank dialog"
+  },
+
+  "importTankDialogContent": "Choose a tank share file (.json) received from another Aquarium AI user.",
+  "@importTankDialogContent": {
+    "description": "Content description for the import tank dialog"
+  },
+
+  "importTankAddsToExisting": "The tank will be added to your existing tanks",
+  "@importTankAddsToExisting": {
+    "description": "Info that import adds to existing tanks"
+  },
+
+  "importTankNewId": "A new ID is assigned to avoid conflicts",
+  "@importTankNewId": {
+    "description": "Info that a new ID is assigned on import"
+  },
+
+  "tankImportedSuccess": "Tank \"{name}\" imported successfully!",
+  "@tankImportedSuccess": {
+    "description": "Tank imported success message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "importTank": "Import Tank",
+  "@importTank": {
+    "description": "Import tank menu item label"
+  },
+
+  "shareTank": "Share Tank",
+  "@shareTank": {
+    "description": "Share tank menu item label"
+  },
+
   "today": "Today",
   "@today": {
     "description": "Today label"
