@@ -166,6 +166,8 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                         children: [
                           ListTile(
                             leading: Container(
+                              width: 40,
+                              height: 40,
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: _getTreatmentColor().withOpacity(0.2),
@@ -384,6 +386,8 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
+        width: 56,
+        height: 40,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: _getTreatmentColor().withOpacity(0.2),
@@ -395,6 +399,8 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
             fontWeight: FontWeight.bold,
             color: _getTreatmentColor(),
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       title: Text(

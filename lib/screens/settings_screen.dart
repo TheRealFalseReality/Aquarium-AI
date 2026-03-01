@@ -2122,6 +2122,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 16),
                     ListTile(
                       leading: Container(
+                        width: 40,
+                        height: 40,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Colors.blue.withOpacity(0.1),
@@ -2144,6 +2146,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const Divider(height: 16),
                     ListTile(
                       leading: Container(
+                        width: 40,
+                        height: 40,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Colors.green.withOpacity(0.1),
@@ -3142,6 +3146,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
+                  width: 30,
+                  height: 30,
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.15),
@@ -3279,6 +3285,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
+                  width: 30,
+                  height: 30,
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.15),
@@ -3428,6 +3436,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
+                  width: 30,
+                  height: 30,
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.15),

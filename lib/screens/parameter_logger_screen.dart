@@ -679,6 +679,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                         children: [
                           ListTile(
                             leading: Container(
+                              width: 40,
+                              height: 40,
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: color.withOpacity(0.2),
@@ -796,6 +798,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
+        width: 56,
+        height: 40,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: thresholdColor.withOpacity(0.2),
@@ -807,6 +811,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             fontWeight: FontWeight.bold,
             color: thresholdColor,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       title: Text(

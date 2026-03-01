@@ -229,7 +229,6 @@
   "justNow": "Gerade eben",
   "notify": "Benachrichtigen",
   "dateTimeInPast": "Benachrichtigung kann nicht in der Vergangenheit geplant werden",
-
   "updateNotificationTitle": "Benachrichtigung aktualisieren?",
   "updateNotificationMessage": "Sie haben eine \"{notificationName}\" Benachrichtigung konfiguriert. Möchten Sie den Zeitpunkt der nächsten Benachrichtigung aktualisieren?",
   "rescheduleFromOriginal": "Ursprünglichen Zeitplan beibehalten",
@@ -245,14 +244,12 @@
   "cancelActivityLog": "Abbrechen",
   "cancelActivityLogDescription": "Aktivität nicht protokollieren und nicht neu planen",
   "notificationUpdated": "Benachrichtigungsplan aktualisiert",
-
   "scheduleNotificationTitle": "Benachrichtigung Planen",
   "scheduleNotificationMessage": "Sie haben bestehende \"{activityType}\" Aktivitätsprotokolle. Wie möchten Sie die nächste Benachrichtigung planen?",
   "useSpecifiedTime": "Angegebene Zeit Verwenden",
   "useSpecifiedTimeDescription": "Planen basierend auf dem oben eingestellten Datum/Uhrzeit",
   "useLastActivity": "Von Letzter Aktivität",
   "useLastActivityDescription": "Planen basierend auf Ihrem letzten Aktivitätsprotokoll",
-
   "rescheduleFromOriginalDescriptionDetailed": "{interval} ab jetzt, um {time} (ursprüngliche Zeit)",
   "rescheduleFromNowDescriptionDetailed": "{interval} ab jetzt, um {time} (aktuelle Zeit)",
   "oneDay": "1 Tag",
@@ -288,7 +285,6 @@
   "lastNote": "Letzte Notiz",
   "noteRequired": "Bitte geben Sie eine Notiz ein",
   "moreNotes": "+{count} weitere Notizen",
-
   "rememberMyChoice": "Meine Auswahl merken",
   "rememberChoiceSettingsHint": "Sie können diese Einstellung unter Einstellungen > App-Einstellungen zurücksetzen",
   "resetReschedulePreference": "Neuplanungsdialog-Einstellung",
@@ -299,7 +295,6 @@
   "resetAll": "Alle zurücksetzen",
   "reschedulePreferences": "Neuplanungseinstellungen",
   "replaceAllReschedulePreferences": "ALLE Neuplanungseinstellungen ersetzen",
-
   "gallery": "Galerie",
   "camera": "Kamera",
   "addPhoto": "Foto Hinzufügen",
@@ -388,7 +383,6 @@
   "dosingSum": "Dosierungszusammenfassung",
   "totalDoses": "Gesamtdosen",
   "treatments": "Behandlungen",
-
   "automationScript": "Automatisierungsskript",
   "aiAutomationScriptGenerator": "KI-Automatisierungsskript-Generator",
   "automationDescription": "Beschreiben Sie die Automatisierung, die Sie für Home Assistant oder ESPHome erstellen möchten.",
@@ -414,7 +408,6 @@
   "viewScript": "Skript Anzeigen",
   "viewPhotoAnalysis": "Fotoanalyse Anzeigen",
   "viewFishInfo": "Fischinfo Anzeigen",
-
   "addNotesPlaceholder": "Fügen Sie zusätzliche Notizen hinzu...",
   "addNotification": "Benachrichtigung Hinzufügen",
   "dateAndTime": "Datum & Uhrzeit",
@@ -467,7 +460,6 @@
   "helpWantedContactEmail": "📧 **E-Mail**: contactus@capitalcityaquatics.com",
   "helpWantedGitHub": "🔗 **GitHub**: Besuchen Sie das [Aquarium-AI-Repository](https://github.com/TheRealFalseReality/Aquarium-AI), um den Code zu erkunden, Issues zu öffnen oder Pull Requests einzureichen.",
   "helpWantedClosing": "Egal ob Sie erfahren sind oder gerade erst anfangen, Ihre Beiträge können einen echten Unterschied machen! Lassen Sie uns gemeinsam etwas Großartiges aufbauen. 🐠",
-  
   "overview": "Übersicht",
   "photos": "Fotos",
   "waterParameters": "Parameter",
@@ -485,13 +477,10 @@
   "addPhotosHint": "Fotos im Bearbeitungsbildschirm hinzufügen",
   "timestamps": "Zeitstempel",
   "lastUpdated": "Zuletzt Aktualisiert",
-  
   "harmony": "Harmonie",
   "qty": "Anz",
-  
   "createdLabel": "Erstellt",
   "inhabitantsLabel": "Bewohner",
-
   "fishInfo": "Fischinfo",
   "aiFishInfoLookup": "KI-Fischinformationen",
   "fishInfoDescription": "Geben Sie einen oder mehrere Fischnamen ein, um umfassende Informationen zu erhalten, einschließlich lateinischem Namen, Herkunft, Fakten, Spaßfakten, Pflege im Aquarium und kompatiblen Tankgenossen.",
@@ -507,7 +496,6 @@
   "changelogLatestRelease": "Neueste Version",
   "changelogAllReleases": "Alle Versionen",
   "changelogGotIt": "Verstanden",
-
   "addCustomSpecies": "Benutzerdefinierte Art hinzufügen",
 
   "speciesOptional": "Art (Optional)",
@@ -532,7 +520,6 @@
 
   "submitIssue": "Problem einreichen",
   "submitIssueDesc": "Einen Fehler melden oder eine neue Funktion auf GitHub anfordern",
-
   "removeAds": "Werbung entfernen",
   "removeAdsSettingsSubtitle": "Unterstütze den Entwickler mit einem einmaligen Kauf",
   "removeAdsDrawerSubtitle": "Einmaliger Kauf · Unterstütze den Entwickler",
@@ -548,7 +535,17 @@
   "buyMeACoffeeDesc": "Unterstütze den Entwickler mit einer kleinen Spende",
   "buyMeACoffeeDialogBody": "Gefällt dir Aquarium AI? Du kannst den Entwickler unterstützen, indem du einen Kaffee spendierst! Wähle eine Option:",
   "buyMeACoffeeInApp": "Über Google Play kaufen",
-  "buyMeACoffeeWebsite": "Auf buymeacoffee.com kaufen"
+  "buyMeACoffeeWebsite": "Auf buymeacoffee.com kaufen",
+  "appearanceSubtitle": "Passen Sie das Aussehen der App an.",
+  "brightnessMode": "Helligkeit",
+  "light": "Hell",
+  "system": "System",
+  "dark": "Dunkel",
+  "colourTheme": "Farbthema",
+  "chooseColourPalette": "Wählen Sie eine Farbpalette für die gesamte App.",
+  "font": "Schriftart",
+  "chooseFontDesc": "Wählen Sie die Schriftart für die gesamte App.",
+  "fontPreviewText": "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.",
+  "customTheme": "Benutzerdefiniertes Design",
+  "themeName": "Designname"
 }
-
-

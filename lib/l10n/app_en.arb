@@ -2874,6 +2874,53 @@
   "@buyMeACoffeeWebsite": {
     "description": "Button label for opening the Buy Me a Coffee website"
   }
+,
+  "appearanceSubtitle": "Customise the look of the app.",
+  "@appearanceSubtitle": {
+    "description": "Subtitle on the Appearance screen"
+  },
+  "brightnessMode": "Brightness mode",
+  "@brightnessMode": {
+    "description": "Section header for brightness/theme mode selection"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light mode option label"
+  },
+  "system": "System",
+  "@system": {
+    "description": "System (auto) mode option label"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark mode option label"
+  },
+  "colourTheme": "Colour theme",
+  "@colourTheme": {
+    "description": "Section header for colour theme selection"
+  },
+  "chooseColourPalette": "Choose a colour palette for the entire app.",
+  "@chooseColourPalette": {
+    "description": "Description under the colour theme section header"
+  },
+  "font": "Font",
+  "@font": {
+    "description": "Section header for font selection on Appearance screen"
+  },
+  "chooseFontDesc": "Choose the font used throughout the app.",
+  "@chooseFontDesc": {
+    "description": "Description under the font section header"
+  },
+  "fontPreviewText": "The quick brown fox jumps over the lazy dog.",
+  "@fontPreviewText": {
+    "description": "Pangram used to preview font styles"
+  },
+  "customTheme": "Custom theme",
+  "@customTheme": {
+    "description": "Title of the custom theme picker dialog"
+  },
+  "themeName": "Theme name",
+  "@themeName": {
+    "description": "Label for the theme name text field in the custom theme dialog"
+  }
 }
-
-
