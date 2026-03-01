@@ -95,6 +95,44 @@ void main() {
       expect(firstMarineFish.compatible, isList);
     });
 
+    test('loadFishData returns fish sorted alphabetically', () async {
+      final data = await service.loadFishData();
+
+      for (final category in ['freshwater', 'marine']) {
+        final fishList = data[category]!;
+        final names = fishList.map((f) => f.name.toLowerCase()).toList();
+        final sortedNames = List<String>.from(names)..sort();
+        expect(names, equals(sortedNames),
+            reason: '$category fish should be sorted alphabetically');
+      }
+    });
+
+    test('marine fish have reefSafe field set', () async {
+      final data = await service.loadFishData();
+
+      final marineFish = data['marine']!;
+      expect(marineFish, isNotEmpty);
+      for (final fish in marineFish) {
+        expect(fish.reefSafe, isNotNull,
+            reason: 'Marine fish "${fish.name}" should have a reefSafe value');
+        expect(['Yes', 'No', 'Caution'], contains(fish.reefSafe),
+            reason:
+                'reefSafe for "${fish.name}" should be Yes, No, or Caution');
+      }
+    });
+
+    test('freshwater fish do not have reefSafe field', () async {
+      final data = await service.loadFishData();
+
+      final freshwaterFish = data['freshwater']!;
+      expect(freshwaterFish, isNotEmpty);
+      for (final fish in freshwaterFish) {
+        expect(fish.reefSafe, isNull,
+            reason:
+                'Freshwater fish "${fish.name}" should not have a reefSafe value');
+      }
+    });
+
     test('loadFishData persists JSON to SharedPreferences', () async {
       await service.loadFishData();
 

@@ -44,5 +44,119 @@ void main() {
       expect(fish.notCompatible, isEmpty);
       expect(fish.withCaution, isEmpty);
     });
+
+    test('reefSafe is null by default (freshwater fish)', () {
+      final fish = Fish(
+        name: 'Neon Tetra',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.reefSafe, isNull);
+    });
+
+    test('reefSafe can be set to Yes for safe marine fish', () {
+      final fish = Fish(
+        name: 'Clownfish',
+        commonNames: [],
+        imageURL: '',
+        reefSafe: 'Yes',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.reefSafe, equals('Yes'));
+    });
+
+    test('reefSafe can be set to No for unsafe marine fish', () {
+      final fish = Fish(
+        name: 'Lionfish',
+        commonNames: [],
+        imageURL: '',
+        reefSafe: 'No',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.reefSafe, equals('No'));
+    });
+
+    test('reefSafe can be set to Caution for conditionally safe fish', () {
+      final fish = Fish(
+        name: 'Hawkfish',
+        commonNames: [],
+        imageURL: '',
+        reefSafe: 'Caution',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.reefSafe, equals('Caution'));
+    });
+
+    test('Fish.fromJson parses reefSafe field correctly', () {
+      final json = {
+        'name': 'Triggerfish',
+        'commonNames': [],
+        'imageURL': '',
+        'reefSafe': 'No',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.reefSafe, equals('No'));
+    });
+
+    test('Fish.fromJson handles missing reefSafe as null', () {
+      final json = {
+        'name': 'Betta',
+        'commonNames': [],
+        'imageURL': '',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.reefSafe, isNull);
+    });
+
+    test('Fish.toJson omits reefSafe when null', () {
+      final fish = Fish(
+        name: 'Betta',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json.containsKey('reefSafe'), isFalse);
+    });
+
+    test('Fish.toJson includes reefSafe when set', () {
+      final fish = Fish(
+        name: 'Clownfish',
+        commonNames: [],
+        imageURL: '',
+        reefSafe: 'Yes',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json.containsKey('reefSafe'), isTrue);
+      expect(json['reefSafe'], equals('Yes'));
+    });
   });
 }
