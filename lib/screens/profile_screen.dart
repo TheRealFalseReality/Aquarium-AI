@@ -211,10 +211,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authAsync = ref.watch(authStateProvider);
     final currentUser = authAsync.asData?.value;
 
-    final profile = profileAsync.asData?.value;
-    final isOwner = _isOwnProfile ||
-        (profile != null && currentUser?.uid == profile.uid);
-
     return MainLayout(
       title: l10n.profileTitle,
       child: profileAsync.when(
