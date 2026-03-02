@@ -58,6 +58,12 @@ const String _defaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaqua
 /// Fallback changelog markdown content (empty = use bundled local asset).
 const String _defaultChangelog = '';
 
+/// Fallback URL for fetching the changelog markdown (empty = use bundled local asset).
+const String _defaultChangelogUrl = '';
+
+/// Fallback URL for fetching the fish compatibility JSON (empty = use bundled local asset).
+const String _defaultFishcompatJsonUrl = '';
+
 /// Key names used in Firebase Remote Config.
 ///
 /// Set these keys in the Firebase Console → Remote Config to override the
@@ -131,6 +137,19 @@ class RemoteConfigKeys {
   /// String — full markdown content of the changelog.
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
   static const String changelog = 'changelog';
+
+  /// String — URL from which to fetch the changelog markdown at runtime.
+  /// When set, the app fetches content from this URL instead of using the
+  /// bundled asset or the [changelog] full-content key.
+  /// Empty string (default) means fall back to [changelog] or bundled asset.
+  static const String changelogUrl = 'changelog_url';
+
+  // ── Fish compatibility data URL ───────────────────────────────────────────
+  /// String — URL from which to fetch the fish compatibility JSON at runtime.
+  /// When set, the app fetches content from this URL instead of using the
+  /// bundled asset or the [fishcompatJson] full-content key.
+  /// Empty string (default) means fall back to [fishcompatJson] or bundled asset.
+  static const String fishcompatJsonUrl = 'fishcompat_json_url';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -170,6 +189,8 @@ class RemoteConfigService {
         RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: _defaultBuyMeACoffeeUrl,
         RemoteConfigKeys.changelog: _defaultChangelog,
+        RemoteConfigKeys.changelogUrl: _defaultChangelogUrl,
+        RemoteConfigKeys.fishcompatJsonUrl: _defaultFishcompatJsonUrl,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -326,4 +347,16 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
   static String get changelog =>
       _modelString(RemoteConfigKeys.changelog, _defaultChangelog);
+
+  /// URL from which to fetch the changelog markdown at runtime.
+  /// Returns an empty string when not set, signalling that [changelog] or
+  /// the bundled asset should be used.
+  static String get changelogUrl =>
+      _modelString(RemoteConfigKeys.changelogUrl, _defaultChangelogUrl);
+
+  /// URL from which to fetch the fish compatibility JSON at runtime.
+  /// Returns an empty string when not set, signalling that [fishcompatJson] or
+  /// the bundled asset should be used.
+  static String get fishcompatJsonUrl =>
+      _modelString(RemoteConfigKeys.fishcompatJsonUrl, _defaultFishcompatJsonUrl);
 }

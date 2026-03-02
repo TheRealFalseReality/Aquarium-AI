@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -35,7 +37,29 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   }
 
   Future<void> _loadChangelog() async {
-    // Try Remote Config first; fall back to the bundled .md asset.
+    // 1. Remote Config URL — fetch content from the URL when set.
+    final remoteUrl = RemoteConfigService.changelogUrl;
+    if (remoteUrl.isNotEmpty) {
+      try {
+        final response = await http
+            .get(Uri.parse(remoteUrl))
+            .timeout(const Duration(seconds: 10));
+        if (response.statusCode == 200) {
+          setState(() {
+            _markdownContent = response.body;
+            _isLoading = false;
+          });
+          return;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('[ChangelogScreen] Failed to fetch from URL $remoteUrl: $e');
+        }
+        // Fall through to next source on network error.
+      }
+    }
+
+    // 2. Remote Config full-content string (legacy).
     final remoteContent = RemoteConfigService.changelog;
     if (remoteContent.isNotEmpty) {
       setState(() {
@@ -44,6 +68,8 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       });
       return;
     }
+
+    // 3. Bundled local asset.
     try {
       final content =
           await rootBundle.loadString('assets/docs/CHANGELOG.md');

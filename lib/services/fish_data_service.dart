@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/fish.dart';
 import 'remote_config_service.dart';
@@ -12,12 +14,15 @@ const String _prefKeyJson = 'fishcompat_cached_json';
 ///
 /// Data is sourced in priority order:
 ///   1. In-memory cache (fastest — cleared when [clearCache] is called).
-///   2. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
+///   2. Remote Config URL [RemoteConfigKeys.fishcompatJsonUrl] (fetches JSON
+///      from the given URL at runtime; the result is persisted to
+///      SharedPreferences for offline re-launches).
+///   3. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
 ///      updating fish data without an app-store release).  The loaded value is
 ///      persisted to SharedPreferences so offline re-launches can use it.
-///   3. SharedPreferences persistent cache (the last value fetched from RC;
-///      used when RC is unavailable on the current launch).
-///   4. Bundled local asset `assets/fishcompat.json` (always available offline).
+///   4. SharedPreferences persistent cache (the last value fetched from RC or
+///      a URL; used when both are unavailable on the current launch).
+///   5. Bundled local asset `assets/fishcompat.json` (always available offline).
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
 
@@ -27,11 +32,36 @@ class FishDataService {
 
   /// Returns the raw JSON string for the fish-compat dataset.
   ///
-  /// Tries [RemoteConfigService.fishcompatJson] first.  When RC has data the
-  /// value is also written to SharedPreferences so future offline launches can
-  /// use it.  Falls back to the SP cache and finally to the bundled local asset.
+  /// Tries sources in priority order:
+  ///   1. Remote Config URL ([RemoteConfigKeys.fishcompatJsonUrl]) — fetches
+  ///      JSON from the given URL and caches it in SharedPreferences.
+  ///   2. Remote Config full-content string ([RemoteConfigKeys.fishcompatJson])
+  ///      — uses the JSON string directly and caches it.
+  ///   3. SharedPreferences persistent cache (from a previous fetch).
+  ///   4. Bundled local asset `assets/fishcompat.json`.
   Future<String> _getJsonString() async {
-    // RC takes priority when set.
+    // 1. RC URL takes highest priority when set.
+    final rcUrl = RemoteConfigService.fishcompatJsonUrl;
+    if (rcUrl.isNotEmpty) {
+      try {
+        final response = await http
+            .get(Uri.parse(rcUrl))
+            .timeout(const Duration(seconds: 10));
+        if (response.statusCode == 200) {
+          final urlJson = response.body;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_prefKeyJson, urlJson);
+          return urlJson;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('[FishDataService] Failed to fetch from URL $rcUrl: $e');
+        }
+        // Fall through to next source on network error.
+      }
+    }
+
+    // 2. RC full-content string takes priority when set.
     final rcJson = RemoteConfigService.fishcompatJson;
     if (rcJson.isNotEmpty) {
       // Persist RC data for subsequent offline launches.
@@ -40,14 +70,14 @@ class FishDataService {
       return rcJson;
     }
 
-    // No RC data: try the persistent cache (from a previous RC fetch).
+    // 3. No RC data: try the persistent cache (from a previous fetch).
     final prefs = await SharedPreferences.getInstance();
     final cachedJson = prefs.getString(_prefKeyJson);
     if (cachedJson != null && cachedJson.isNotEmpty) {
       return cachedJson;
     }
 
-    // Final fallback: bundled local asset.
+    // 4. Final fallback: bundled local asset.
     return rootBundle.loadString('assets/fishcompat.json');
   }
 
