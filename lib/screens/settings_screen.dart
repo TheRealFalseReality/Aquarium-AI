@@ -431,15 +431,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Icon(Icons.warning_amber_rounded,
                 color: Colors.amber.shade700, size: 22),
             const SizedBox(width: 8),
-            const Text('Provider Mismatch'),
+            Text(l10n.providerMismatch),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-                'The following providers are selected but have no API key configured:'),
+            Text(l10n.providerMismatchDetails),
             const SizedBox(height: 8),
             ...warnings.map((w) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -447,21 +446,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       style: const TextStyle(fontSize: 13)),
                 )),
             const SizedBox(height: 8),
-            const Text(
-                'AI features using these providers will not work until a key is entered or a different provider is selected.'),
+            Text(l10n.providerMismatchConsequence),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(alertContext).pop(),
-            child: const Text('Stay & Fix'),
+            child: Text(l10n.stayAndFix),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(alertContext).pop();
               Navigator.of(dialogContext).pop();
             },
-            child: const Text('Dismiss'),
+            child: Text(l10n.dismiss),
           ),
         ],
       ),
@@ -505,19 +503,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear API Key'),
-        content: Text('Are you sure you want to clear the $label? You will need to re-enter the key to use it again.'),
+        title: Text(l10n.clearApiKey),
+        content: Text(l10n.clearApiKeyConfirm(label)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(ctx).colorScheme.error,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Clear'),
+            child: Text(l10n.clear),
           ),
         ],
       ),
@@ -536,7 +534,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setDialogState?.call(() {});
     await ref.read(modelProvider.notifier).clearApiKey(keyName);
     if (context.mounted) {
-      context.showAccessibleMessage('$label cleared.');
+      context.showAccessibleMessage(l10n.keyCleared(label));
     }
   }
 
@@ -587,16 +585,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog<void>(
       context: dialogContext,
       builder: (alertContext) => AlertDialog(
-        title: const Text('Unsaved Changes'),
+        title: Text(l10n.unsavedChanges),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (providerChanged) const Text('• Text provider changed'),
-            if (imageProviderChanged) const Text('• Image provider changed'),
-            if (textModelChanged) const Text('• Text model changed'),
-            if (imageModelChanged) const Text('• Image model changed'),
-            if (keysChanged) const Text('• API keys updated'),
+            if (providerChanged) Text(l10n.textProviderChanged),
+            if (imageProviderChanged) Text(l10n.imageProviderChanged),
+            if (textModelChanged) Text(l10n.textModelChanged),
+            if (imageModelChanged) Text(l10n.imageModelChanged),
+            if (keysChanged) Text(l10n.apiKeysUpdated),
             if (mismatchWarnings.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(children: [
@@ -604,7 +602,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Colors.amber.shade700, size: 16),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text('Provider/key mismatch — AI will not work:',
+                  child: Text(l10n.providerKeyMismatchWarning,
                       style: TextStyle(
                           color: Colors.amber.shade800,
                           fontWeight: FontWeight.bold,
@@ -619,11 +617,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(alertContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton.icon(
             icon: const Icon(Icons.delete_outline),
-            label: const Text('Discard'),
+            label: Text(l10n.discard),
             onPressed: () {
               Navigator.of(alertContext).pop();
               Navigator.of(dialogContext).pop();
@@ -631,7 +629,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           FilledButton.icon(
             icon: const Icon(Icons.save),
-            label: const Text('Save All & Close'),
+            label: Text(l10n.saveAllAndClose),
             onPressed: () {
               _saveApiKeys(dialogContext, setDialogState);
               Navigator.of(alertContext).pop();
@@ -814,8 +812,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Using App\'s Built-in Dev API Key (Groq free tier). '
-                    'Add your own Groq key in AI Provider settings for dedicated limits.',
+                    l10n.usingDevApiKeyInfo,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.amber.shade900,
                     ),
@@ -846,8 +843,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'The free AI tier is currently unavailable. '
-                    'Please add your own Groq API key in AI Provider settings to continue using AI features.',
+                    l10n.freeAITierWarning,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.red.shade700,
                     ),
@@ -1461,7 +1457,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? ExpansionTile(
                       leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
                       title: Text(
-                        'Free-tier limits',
+                        l10n.freeTierLimits,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: Colors.amber.shade800,
                               fontWeight: FontWeight.bold,
@@ -1480,24 +1476,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '• ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute\n'
-                          '• ${RemoteConfigService.maxRequestsPerDay} AI requests per day\n'
-                          '• ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day\n'
-                          '• ${RemoteConfigService.freeTierChatHistoryLimit}-message chat history per request',
+                          l10n.freeTierLimitsBody(
+                            RemoteConfigService.maxRequestsPerMinute,
+                            RemoteConfigService.maxRequestsPerDay,
+                            RemoteConfigService.maxPhotoAnalysesPerDay,
+                            RemoteConfigService.freeTierChatHistoryLimit,
+                          ),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.amber.shade900,
                               ),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.',
+                          l10n.freeTierModelNote,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.amber.shade900,
                               ),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).',
+                          l10n.freeTierBestResultsNote,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.amber.shade800,
                                 fontStyle: FontStyle.italic,
@@ -1505,7 +1503,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                          l10n.freeTierDisclaimer,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.amber.shade800,
                                 fontStyle: FontStyle.italic,
@@ -1516,14 +1514,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   : ListTile(
                       leading: const Icon(Icons.block, color: Colors.red, size: 20),
                       title: Text(
-                        'Free AI tier currently unavailable',
+                        l10n.freeAITierUnavailableTitle,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: Colors.red.shade700,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
                       subtitle: Text(
-                        'The built-in free AI provider has been disabled by the developer. Please add your own API key below to continue using AI features.',
+                        l10n.freeAITierUnavailableBody,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.red.shade700,
                             ),
@@ -1543,7 +1541,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Icon(Icons.bolt, size: 20, color: Colors.amber.shade700),
                   const SizedBox(width: 8),
                   Text(
-                    'Free AI',
+                    l10n.freeAI,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.amber.shade700,
@@ -1552,14 +1550,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ]),
                 const SizedBox(height: 4),
                 Text(
-                  'Use the built-in free AI service instead of your own API key.',
+                  l10n.freeAIDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 12),
                 _buildDevKeyToggle(
-                  label: 'Use Free AI for Text / Chat',
+                  label: l10n.useFreeAIForText,
                   value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
@@ -1587,7 +1585,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: 8),
                 _buildDevKeyToggle(
-                  label: 'Use Free AI for Image / Photo',
+                  label: l10n.useFreeAIForImage,
                   value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
@@ -1700,7 +1698,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         size: 20,
                         color: Theme.of(context).colorScheme.primary),
                     title: Text(
-                      'Chat History Limit',
+                      l10n.chatHistoryLimit,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -1875,7 +1873,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
+                  l10n.aboutNoApiKeyNote,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -2414,7 +2412,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Icon(Icons.history, color: Theme.of(context).colorScheme.primary, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Chat History Limit',
+                l10n.chatHistoryLimit,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
@@ -2426,7 +2424,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Free Tier',
+                    l10n.freeTier,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onTertiaryContainer,
                       fontWeight: FontWeight.bold,
@@ -2438,8 +2436,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           Text(
             !onFreeTier
-                ? 'Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.'
-                : 'Without your own API key, the app uses our free service tier with a fixed limit of ${RemoteConfigService.freeTierChatHistoryLimit} past messages per request. Add your own API key above to unlock a configurable limit (up to $maxChatHistoryLimit messages).',
+                ? l10n.chatHistoryLimitDescription
+                : l10n.chatHistoryFreeTierDescription(RemoteConfigService.freeTierChatHistoryLimit, maxChatHistoryLimit),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -2542,9 +2540,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (forTextUseCase == true) ...[
             TextField(
               controller: _geminiModelController,
-              decoration: const InputDecoration(
-                labelText: 'Gemini Text Model',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.geminiTextModel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 4),
@@ -2557,9 +2555,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (forTextUseCase == false) ...[
             TextField(
               controller: _geminiImageModelController,
-              decoration: const InputDecoration(
-                labelText: 'Gemini Multimedia Model',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.geminiMultimediaModel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 4),
@@ -2623,7 +2621,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      'Google\'s most capable AI model',
+                      l10n.googleGeminiDescription,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -2639,7 +2637,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           controller: _geminiApiKeyController,
           obscureText: !_isGeminiApiKeyVisible,
           decoration: InputDecoration(
-            labelText: 'Google AI API Key',
+            labelText: l10n.googleAIApiKey,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: Icon(
@@ -2668,7 +2666,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: OutlinedButton.icon(
               icon: Icon(Icons.clear, size: 18,
                   color: Theme.of(context).colorScheme.error),
-              label: Text('Clear Key',
+              label: Text(l10n.clearKey,
                   style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onPressed: () => _clearApiKey(
                   context, 'geminiApiKey', 'Google AI API Key', setDialogState),
@@ -2678,22 +2676,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 24),
         TextField(
           controller: _geminiModelController,
-          decoration: const InputDecoration(
-            labelText: 'Gemini Text Model',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.geminiTextModel,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _geminiImageModelController,
-          decoration: const InputDecoration(
-            labelText: 'Gemini Multimedia Model',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.geminiMultimediaModel,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
         _buildApiKeyGuide(
-          title: 'How to get your Google AI API key:',
+          title: l10n.howToGetGoogleAIKey,
           children: [
             Text(l10n.googleAIStudioStep1),
             InkWell(
@@ -2715,7 +2713,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () =>
                   launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
               child: Text(
-                'See Guide',
+                l10n.seeGuide,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
@@ -2727,9 +2725,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 8),
         _buildApiKeyGuide(
-          title: 'Gemini Models & Rate Limits:',
+          title: l10n.geminiModelsRateLimits,
           children: [
-            const Text('View available models and free-tier rate limits:'),
+            Text(l10n.viewAvailableModelsFreeTier),
             InkWell(
               onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
               child: Text(
@@ -2771,9 +2769,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             TextField(
               controller: _chatGPTModelController,
               enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'ChatGPT Text Model',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.chatGPTTextModel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 4),
@@ -2787,9 +2785,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             TextField(
               controller: _chatGPTImageModelController,
               enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'ChatGPT Multimedia Model',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.chatGPTMultimediaModel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 4),
@@ -2853,7 +2851,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      'ChatGPT and GPT models by OpenAI',
+                      l10n.openAIDescription,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -2870,7 +2868,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           enabled: true,
           obscureText: !_isOpenAIApiKeyVisible,
           decoration: InputDecoration(
-            labelText: 'OpenAI API Key',
+            labelText: l10n.openAIApiKey,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: Icon(
@@ -2899,7 +2897,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: OutlinedButton.icon(
               icon: Icon(Icons.clear, size: 18,
                   color: Theme.of(context).colorScheme.error),
-              label: Text('Clear Key',
+              label: Text(l10n.clearKey,
                   style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onPressed: () => _clearApiKey(
                   context, 'openAIApiKey', 'OpenAI API Key', setDialogState),
@@ -2910,23 +2908,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         TextField(
           controller: _chatGPTModelController,
           enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'ChatGPT Text Model',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.chatGPTTextModel,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _chatGPTImageModelController,
           enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'ChatGPT Multimedia Model',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.chatGPTMultimediaModel,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
         _buildApiKeyGuide(
-          title: 'How to get your OpenAI API key:',
+          title: l10n.howToGetOpenAIKey,
           children: [
             Text(l10n.openAIStep1),
             InkWell(
@@ -2947,7 +2945,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () =>
                   launchUrl(Uri.parse('https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
               child: Text(
-                'See Guide',
+                l10n.seeGuide,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
@@ -2958,9 +2956,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 8),
         _buildApiKeyGuide(
-          title: 'OpenAI Models & Rate Limits:',
+          title: l10n.openAIModelsRateLimits,
           children: [
-            const Text('View available models and usage limits:'),
+            Text(l10n.viewAvailableModelsUsage),
             InkWell(
               onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
               child: Text(
@@ -3010,9 +3008,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               controller: _groqModelController,
               enabled: !usingFreeKey,
               decoration: InputDecoration(
-                labelText: 'Groq Text Model',
+                labelText: l10n.groqTextModel,
                 border: const OutlineInputBorder(),
-                helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
+                helperText: usingFreeKey ? l10n.fixedWhenUsingFreeProvider : null,
               ),
             ),
             const SizedBox(height: 4),
@@ -3027,11 +3025,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               controller: _groqImageModelController,
               enabled: !usingFreeKey,
               decoration: InputDecoration(
-                labelText: 'Groq Multimedia Model',
+                labelText: l10n.groqMultimediaModel,
                 border: const OutlineInputBorder(),
                 helperText: usingFreeKey
-                    ? 'Fixed when using the Free Provider.'
-                    : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+                    ? l10n.fixedWhenUsingFreeProvider
+                    : l10n.groqVisionModelHelper,
                 helperMaxLines: 2,
               ),
             ),
@@ -3096,7 +3094,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      'Lightning-fast LLM inference',
+                      l10n.groqDescription,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -3114,7 +3112,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             controller: _groqApiKeyController,
             obscureText: !_isGroqApiKeyVisible,
             decoration: InputDecoration(
-              labelText: 'Groq API Key',
+              labelText: l10n.groqApiKey,
               border: const OutlineInputBorder(),
               helperText: null,
               helperMaxLines: 2,
@@ -3144,7 +3142,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: OutlinedButton.icon(
               icon: Icon(Icons.clear, size: 18,
                   color: Theme.of(context).colorScheme.error),
-              label: Text('Clear Key',
+              label: Text(l10n.clearKey,
                   style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onPressed: () => _clearApiKey(
                   context, 'groqApiKey', 'Groq API Key', setDialogState),
@@ -3157,9 +3155,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           controller: _groqModelController,
           enabled: !usingFreeKey,
           decoration: InputDecoration(
-            labelText: 'Groq Text Model',
+            labelText: l10n.groqTextModel,
             border: const OutlineInputBorder(),
-            helperText: usingFreeKey ? 'Fixed when using the Free Provider.' : null,
+            helperText: usingFreeKey ? l10n.fixedWhenUsingFreeProvider : null,
           ),
         ),
         const SizedBox(height: 16),
@@ -3167,18 +3165,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           controller: _groqImageModelController,
           enabled: !usingFreeKey,
           decoration: InputDecoration(
-            labelText: 'Groq Multimedia Model',
+            labelText: l10n.groqMultimediaModel,
             border: const OutlineInputBorder(),
             helperText: usingFreeKey
-                ? 'Fixed when using the Free Provider.'
-                : 'Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)',
+                ? l10n.fixedWhenUsingFreeProvider
+                : l10n.groqVisionModelHelper,
             helperMaxLines: 2,
           ),
         ),
         const SizedBox(height: 16),
         if (!usingFreeKey) ...[
           _buildApiKeyGuide(
-            title: 'How to get your Groq API key:',
+            title: l10n.howToGetGroqKey,
             children: [
               Text(l10n.groqCloudStep1),
               InkWell(
@@ -3200,7 +3198,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: () =>
                     launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
                 child: Text(
-                  'See Guide',
+                  l10n.seeGuide,
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       decoration: TextDecoration.underline,
@@ -3211,9 +3209,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           _buildApiKeyGuide(
-            title: 'Groq Models & Rate Limits:',
+            title: l10n.groqModelsRateLimits,
             children: [
-              const Text('View available models and free-tier rate limits:'),
+              Text(l10n.viewAvailableModelsFreeTier),
               InkWell(
                 onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
                 child: Text(
@@ -3260,7 +3258,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Icon(Icons.key, size: 20, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                'API Keys',
+                l10n.apiKeys,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
@@ -3269,7 +3267,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ]),
             const SizedBox(height: 4),
             Text(
-              'Enter your API key for each provider once. It will be used for both text and image features.',
+              l10n.apiKeysDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -3290,13 +3288,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   child: const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                 ),
-                title: Text('Google Gemini',
+                title: Text('Google Gemini', // brand name
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.blue,
                         )),
                 subtitle: Text(
-                  "Google's most capable AI model",
+                  l10n.googleGeminiDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -3320,7 +3318,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     // Rebuild dialog to update the key-status trailing icon.
                     onChanged: (_) => setDialogState?.call(() {}),
                     decoration: InputDecoration(
-                      labelText: 'Google AI API Key',
+                      labelText: l10n.googleAIApiKey,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -3342,7 +3340,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: Icon(Icons.clear, size: 18,
                               color: Theme.of(context).colorScheme.error),
-                          label: Text('Clear',
+                          label: Text(l10n.clear,
                               style: TextStyle(
                                   color: Theme.of(context).colorScheme.error)),
                           onPressed: () => _clearApiKey(
@@ -3357,13 +3355,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref.read(modelProvider).geminiApiKey)
                         OutlinedButton.icon(
                           icon: const Icon(Icons.save, size: 18),
-                          label: const Text('Save Key'),
+                          label: Text(l10n.saveKey),
                           onPressed: () => _saveApiKeys(context, setDialogState),
                         ),
                     ],
                   ),
                   _buildApiKeyGuide(
-                    title: 'How to get your Google AI API key:',
+                    title: l10n.howToGetGoogleAIKey,
                     children: [
                       Text(l10n.googleAIStudioStep1),
                       InkWell(
@@ -3379,7 +3377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Text(l10n.googleAIStudioStep4),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
-                        child: Text('See Guide',
+                        child: Text(l10n.seeGuide,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3388,9 +3386,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                   _buildApiKeyGuide(
-                    title: 'Gemini Models & Rate Limits:',
+                    title: l10n.geminiModelsRateLimits,
                     children: [
-                      const Text('View available models and free-tier rate limits:'),
+                      Text(l10n.viewAvailableModelsFreeTier),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
                         child: Text('ai.google.dev/gemini-api/docs/models/gemini',
@@ -3401,7 +3399,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
-                        child: Text('Rate Limits',
+                        child: Text(l10n.rateLimits,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3435,7 +3433,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.orange,
                         )),
                 subtitle: Text(
-                  'Lightning-fast LLM inference',
+                  l10n.groqDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -3469,7 +3467,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       // Rebuild dialog to update the key-status trailing icon.
                       onChanged: (_) => setDialogState?.call(() {}),
                       decoration: InputDecoration(
-                        labelText: 'Groq API Key',
+                        labelText: l10n.groqApiKey,
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -3491,7 +3489,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           OutlinedButton.icon(
                             icon: Icon(Icons.clear, size: 18,
                                 color: Theme.of(context).colorScheme.error),
-                            label: Text('Clear',
+                            label: Text(l10n.clear,
                                 style: TextStyle(
                                     color: Theme.of(context).colorScheme.error)),
                             onPressed: () => _clearApiKey(
@@ -3506,14 +3504,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ref.read(modelProvider).groqApiKey)
                           OutlinedButton.icon(
                             icon: const Icon(Icons.save, size: 18),
-                            label: const Text('Save Key'),
+                            label: Text(l10n.saveKey),
                             onPressed: () => _saveApiKeys(context, setDialogState),
                           ),
                       ],
                     ),
                   ],
                   _buildApiKeyGuide(
-                    title: 'How to get your Groq API key:',
+                    title: l10n.howToGetGroqKey,
                     children: [
                       Text(l10n.groqCloudStep1),
                       InkWell(
@@ -3530,7 +3528,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       InkWell(
                         onTap: () => launchUrl(
                             Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
-                        child: Text('See Guide',
+                        child: Text(l10n.seeGuide,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3539,9 +3537,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                   _buildApiKeyGuide(
-                    title: 'Groq Models & Rate Limits:',
+                    title: l10n.groqModelsRateLimits,
                     children: [
-                      const Text('View available models and free-tier rate limits:'),
+                      Text(l10n.viewAvailableModelsFreeTier),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
                         child: Text('console.groq.com/docs/models',
@@ -3552,7 +3550,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
-                        child: Text('Rate Limits',
+                        child: Text(l10n.rateLimits,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3586,7 +3584,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.green,
                         )),
                 subtitle: Text(
-                  'ChatGPT and GPT models by OpenAI',
+                  l10n.openAIDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -3610,7 +3608,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     // Rebuild dialog to update the key-status trailing icon.
                     onChanged: (_) => setDialogState?.call(() {}),
                     decoration: InputDecoration(
-                      labelText: 'OpenAI API Key',
+                      labelText: l10n.openAIApiKey,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -3632,7 +3630,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: Icon(Icons.clear, size: 18,
                               color: Theme.of(context).colorScheme.error),
-                          label: Text('Clear',
+                          label: Text(l10n.clear,
                               style: TextStyle(
                                   color: Theme.of(context).colorScheme.error)),
                           onPressed: () => _clearApiKey(
@@ -3647,13 +3645,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref.read(modelProvider).openAIApiKey)
                         OutlinedButton.icon(
                           icon: const Icon(Icons.save, size: 18),
-                          label: const Text('Save Key'),
+                          label: Text(l10n.saveKey),
                           onPressed: () => _saveApiKeys(context, setDialogState),
                         ),
                     ],
                   ),
                   _buildApiKeyGuide(
-                    title: 'How to get your OpenAI API key:',
+                    title: l10n.howToGetOpenAIKey,
                     children: [
                       Text(l10n.openAIStep1),
                       InkWell(
@@ -3669,7 +3667,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       InkWell(
                         onTap: () => launchUrl(Uri.parse(
                             'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
-                        child: Text('See Guide',
+                        child: Text(l10n.seeGuide,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3678,9 +3676,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                   _buildApiKeyGuide(
-                    title: 'OpenAI Models & Rate Limits:',
+                    title: l10n.openAIModelsRateLimits,
                     children: [
-                      const Text('View available models and usage limits:'),
+                      Text(l10n.viewAvailableModelsUsage),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
                         child: Text('platform.openai.com/docs/models',
@@ -3691,7 +3689,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       InkWell(
                         onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
-                        child: Text('Rate Limits',
+                        child: Text(l10n.rateLimits,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 decoration: TextDecoration.underline,
@@ -3747,8 +3745,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         subtitle: Text(
           onChanged == null
-              ? 'Free AI unavailable'
-              : value ? 'Using Free Provider' : 'Use your own key',
+              ? l10n.freeAIUnavailable
+              : value ? l10n.usingFreeProvider : l10n.useYourOwnKey,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: value
                     ? scheme.primary.withOpacity(0.8)
@@ -3775,7 +3773,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onPressed: () => launchUrl(Uri.parse(modelsUrl)),
               icon: Icon(Icons.auto_awesome_outlined,
                   size: 16, color: cs.onSecondaryContainer),
-              label: Text('Models',
+              label: Text(l10n.models,
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -3794,7 +3792,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
               icon: Icon(Icons.speed_outlined,
                   size: 16, color: cs.onTertiaryContainer),
-              label: Text('Rate Limits',
+              label: Text(l10n.rateLimits,
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
