@@ -222,7 +222,7 @@ class FishInfoResultScreen extends StatelessWidget {
                 MarkdownBody(
                   data: fish.care.waterParameters,
                   selectable: true,
-                  onTapLink: (_, href, __) {
+                  onTapLink: (_, href, _) {
                     if (href != null) launchUrl(Uri.parse(href));
                   },
                 ),
@@ -238,7 +238,7 @@ class FishInfoResultScreen extends StatelessWidget {
                 MarkdownBody(
                   data: fish.care.tankSetup,
                   selectable: true,
-                  onTapLink: (_, href, __) {
+                  onTapLink: (_, href, _) {
                     if (href != null) launchUrl(Uri.parse(href));
                   },
                 ),

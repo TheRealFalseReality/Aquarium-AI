@@ -12,6 +12,8 @@ import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/community_provider.dart';
+import '../providers/profile_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
@@ -32,6 +34,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   bool _isCollapsingSpring = false;
   int? _randomTankIndex;
 
+  /// Controls the profile section first-launch animation in the drawer header.
+  /// Starts as false so there is no flash before SharedPreferences is read.
+  bool _profileHeaderVisible = false;
+
   static const Duration _expandDuration = Duration(milliseconds: 900);
   static const Duration _collapseDuration = Duration(milliseconds: 750);
   static const Duration _normalDuration = Duration(milliseconds: 300);
@@ -40,6 +46,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   void initState() {
     super.initState();
     _checkFirstLaunchAnimation();
+    _checkProfileHeaderAnimation();
   }
 
   Future<void> _checkFirstLaunchAnimation() async {
@@ -71,6 +78,23 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         _isSpringAnimation = false;
         _isCollapsingSpring = false;
       });
+    }
+  }
+
+  /// On first launch, the profile section in the drawer header slides in after
+  /// the drawer opens to draw the user's attention to it.
+  Future<void> _checkProfileHeaderAnimation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasShown = prefs.getBool('profile_header_in_drawer_shown') ?? false;
+    if (hasShown) {
+      // Already shown before — display immediately without animation
+      if (mounted) setState(() => _profileHeaderVisible = true);
+    } else {
+      // First launch: slide in after the drawer settles
+      await Future.delayed(const Duration(milliseconds: 700));
+      if (!mounted) return;
+      await prefs.setBool('profile_header_in_drawer_shown', true);
+      setState(() => _profileHeaderVisible = true);
     }
   }
 
@@ -260,30 +284,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 if (appSettings.enableAI) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 3,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'AI Tools',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _sectionHeader(context, 'AI Tools', Theme.of(context).colorScheme.primary),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 250),
                     child: Container(
@@ -345,6 +346,27 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                     ),
                   ),
+                  // History under AI Tools
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 380),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                        title: const Text('Analysis History'),
+                        subtitle: const Text('View saved AI analysis reports'),
+                        onTap: () => navigate('/analysis-history'),
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Divider(
@@ -353,30 +375,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ],
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 3,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Tools & Resources',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _sectionHeader(context, 'Tools & Resources', Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: Container(
@@ -419,26 +418,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 500),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
-                      title: Text(l10n.information),
-                      subtitle: Text(l10n.informationDescription),
-                      onTap: () => navigate('/information'),
-                    ),
+                // ── Community & Profile ───────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                    thickness: 1,
                   ),
                 ),
+                _sectionHeader(context, '${l10n.communityTitle} & ${l10n.profileTitle}', Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 550),
                   child: Container(
@@ -452,10 +440,54 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-                      title: const Text('Analysis History'),
-                      subtitle: const Text('View saved AI analysis reports'),
-                      onTap: () => navigate('/analysis-history'),
+                      leading: Icon(Icons.people, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(l10n.communityTitle),
+                      subtitle: Text(l10n.communityDrawerDescription),
+                      onTap: () => navigate('/community'),
+                    ),
+                  ),
+                ),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 575),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: _buildProfileTile(context, l10n, navigate),
+                  ),
+                ),
+                // ── Guides & Docs ─────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, 'Guides & Docs', Theme.of(context).colorScheme.tertiary),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 600),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
+                      title: Text(l10n.information),
+                      subtitle: Text(l10n.informationDescription),
+                      onTap: () => navigate('/information'),
                     ),
                   ),
                 ),
@@ -550,6 +582,78 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           _buildDrawerFooter(context, navigate),
         ],
       ),
+    );
+  }
+
+  /// Compact section header with a colored left accent bar.
+  Widget _sectionHeader(BuildContext context, String label, Color color) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 16,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileTile(BuildContext context, AppLocalizations l10n,
+      void Function(String) navigate) {
+    final authAsync = ref.watch(authStateProvider);
+    final user = authAsync.asData?.value;
+
+    if (user == null) {
+      return ListTile(
+        leading: Icon(Icons.account_circle_outlined,
+            color: Theme.of(context).colorScheme.tertiary),
+        title: Text(l10n.authSignIn),
+        subtitle: Text(l10n.profileDrawerDescription),
+        onTap: () => navigate('/auth'),
+      );
+    }
+
+    final isAnon = user.isAnonymous;
+    final displayName = user.displayName?.isNotEmpty == true
+        ? user.displayName!
+        : (isAnon
+            ? l10n.profileAnonymous
+            : user.email ?? l10n.profileAnonymous);
+
+    return ListTile(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: CircleAvatar(
+          backgroundColor:
+              Theme.of(context).colorScheme.tertiaryContainer,
+          child: Icon(
+            isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
+            color: Theme.of(context).colorScheme.tertiary,
+            size: 22,
+          ),
+        ),
+      ),
+      title: Text(displayName,
+          overflow: TextOverflow.ellipsis, maxLines: 1),
+      subtitle: Text(l10n.profileDrawerDescription,
+          overflow: TextOverflow.ellipsis, maxLines: 1),
+      onTap: () => navigate('/profile'),
     );
   }
 
@@ -705,56 +809,208 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   Widget _buildDrawerHeader(
       BuildContext context, bool isDarkMode, VoidCallback onTap) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Observe auth + profile for the profile chip
+    final user = ref.watch(authStateProvider).asData?.value;
+    final profile = ref.watch(currentUserProfileProvider).asData?.value;
+
+    String? displayName;
+    IconData avatarIcon = Icons.account_circle;
+    String? avatarUrl;
+    if (user != null) {
+      displayName = profile?.displayName ??
+          (user.displayName?.isNotEmpty == true
+              ? user.displayName
+              : (user.isAnonymous ? l10n.profileAnonymous : user.email));
+      // Avatar: prefer selected icon, then provider photo, then default
+      if (profile?.avatarIconCodePoint != null) {
+        avatarIcon = _profileIconList.firstWhere(
+          (i) => i.codePoint == profile!.avatarIconCodePoint,
+          orElse: () => Icons.person,
+        );
+        avatarUrl = null;
+      } else {
+        avatarUrl = profile?.avatarUrl ?? user.photoURL;
+        avatarIcon = user.isAnonymous
+            ? Icons.no_accounts_outlined
+            : Icons.account_circle;
+      }
+    }
 
     return DrawerHeader(
       padding: EdgeInsets.zero,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDarkMode
-                  ? [colorScheme.surfaceContainerHighest, colorScheme.primary]
-                  : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDarkMode
+                ? [colorScheme.surfaceContainerHighest, colorScheme.primary]
+                : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/system/AquaAi Logo.png', height: 100),
-                const SizedBox(width: 12),
-                GradientText(
-                  'Aquarium\nAI',
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black26,
-                        offset: Offset(2.0, 2.0),
-                      ),
-                    ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ── App logo + name (taps to home) ──────────────────────────────
+            GestureDetector(
+              onTap: onTap,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/AquaAi Logo.png', height: 72),
+                  const SizedBox(width: 10),
+                  GradientText(
+                    'Aquarium\nAI',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10.0,
+                          color: Colors.black26,
+                          offset: Offset(2.0, 2.0),
+                        ),
+                      ],
+                    ),
+                    gradient: LinearGradient(
+                      colors: isDarkMode
+                          ? [Colors.white, const Color.fromARGB(255, 220, 230, 255)]
+                          : [colorScheme.primary, colorScheme.secondary],
+                    ),
                   ),
-                  gradient: LinearGradient(
-                    colors: isDarkMode
-                        ? [
-                            Colors.white,
-                            const Color.fromARGB(255, 220, 230, 255),
-                          ]
-                        : [
-                            colorScheme.primary,
-                            colorScheme.secondary,
-                          ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // ── Profile chip (first-launch slide-in animation) ──────────────
+            if (user != null)
+              AnimatedOpacity(
+                opacity: _profileHeaderVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOut,
+                child: AnimatedSlide(
+                  offset: _profileHeaderVisible
+                      ? Offset.zero
+                      : const Offset(0, 0.4),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOut,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Future.delayed(const Duration(milliseconds: 250), () {
+                        if (!mounted) return;
+                        Navigator.pushNamed(context, '/profile');
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colorScheme.onSurface.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Avatar
+                          SizedBox(
+                            width: 26,
+                            height: 26,
+                            child: CircleAvatar(
+                              backgroundColor:
+                                  colorScheme.primary.withOpacity(0.3),
+                              backgroundImage: avatarUrl != null
+                                  ? CachedNetworkImageProvider(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null
+                                  ? Icon(avatarIcon,
+                                      size: 16, color: colorScheme.onSurface)
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Name
+                          Flexible(
+                            child: Text(
+                              displayName ?? l10n.profileAnonymous,
+                              style: TextStyle(
+                                color: colorScheme.onSurface,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 10,
+                              color: colorScheme.onSurface.withOpacity(0.6)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
+              )
+            else
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 250), () {
+                    if (!mounted) return;
+                    Navigator.pushNamed(context, '/auth');
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: colorScheme.onSurface.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 26,
+                        height: 26,
+                        child: CircleAvatar(
+                          backgroundColor: colorScheme.primary.withOpacity(0.3),
+                          child: Icon(Icons.login,
+                              size: 16, color: colorScheme.onSurface),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.authSignIn,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios,
+                          size: 10,
+                          color: colorScheme.onSurface.withOpacity(0.6)),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -823,6 +1079,36 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     Icons.shower,
     Icons.opacity,
     Icons.water_damage,
+    Icons.pets,
+    Icons.set_meal,
+    Icons.spa,
+    Icons.emoji_nature,
+    Icons.grass,
+    Icons.eco,
+    Icons.forest,
+    Icons.park,
+  ];
+
+  /// All icons available for profile avatar selection (person + aquarium icons).
+  /// Aquarium icons are a subset of [_tankIcons] chosen to work well as avatars
+  /// (shower/water_damage omitted as they are less recognisably aquarium-themed).
+  static const List<IconData> _profileIconList = [
+    // Person icons
+    Icons.person,
+    Icons.face,
+    Icons.person_2,
+    Icons.person_3,
+    Icons.account_circle,
+    Icons.emoji_people,
+    Icons.sentiment_satisfied_alt,
+    Icons.manage_accounts,
+    // Aquarium / fish icons
+    Icons.water_drop,
+    Icons.waves,
+    Icons.pool,
+    Icons.bubble_chart,
+    Icons.water,
+    Icons.opacity,
     Icons.pets,
     Icons.set_meal,
     Icons.spa,

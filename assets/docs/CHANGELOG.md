@@ -66,6 +66,7 @@ All notable changes to this project will be documented in this file.
 - Add Sorting or global filters to fish types/species
 - Add details for fish types and possibly species
 - Reef Safe indicator
+- User rearrange features
 - Let's Start a Community!
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 

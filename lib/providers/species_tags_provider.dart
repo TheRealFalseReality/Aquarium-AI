@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/fish_data_service.dart';
 
@@ -240,7 +241,7 @@ final speciesTagsProvider =
 
 /// Helper function to initialize default tags asynchronously
 Future<void> _initializeDefaultTagsAsync(
-    StateNotifierProviderRef<SpeciesTagsNotifier, SpeciesTagsState> ref,
+    Ref ref,
     SpeciesTagsNotifier notifier) async {
   try {
     // Wait a bit for the notifier to load existing tags first

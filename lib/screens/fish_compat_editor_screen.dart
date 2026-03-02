@@ -305,7 +305,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: _validationErrors.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, i) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Text(
@@ -950,7 +950,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 width: 56,
                 height: 56,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   width: 56,
                   height: 56,
                   color: colorScheme.surfaceVariant,

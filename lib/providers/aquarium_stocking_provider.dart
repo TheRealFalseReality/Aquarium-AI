@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
@@ -109,7 +110,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',
@@ -119,6 +120,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     }
     final models = ref.read(modelProvider);
     final allFish = fishData[tankType] ?? [];
+
     if (allFish.isEmpty) {
       state = state.copyWith(
         error: 'No fish data available for the selected tank type.',
@@ -306,7 +308,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
         return;
     }
-    final fishData = fishDataAsync.valueOrNull;
+    final fishData = fishDataAsync.asData?.value;
     if (fishData == null) {
         state = state.copyWith(
             error: 'Fish data is unavailable. Cannot generate recommendations.',

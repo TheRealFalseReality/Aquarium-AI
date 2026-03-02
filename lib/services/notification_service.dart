@@ -47,7 +47,7 @@ class NotificationService {
     );
 
     await _notifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
@@ -165,14 +165,12 @@ class NotificationService {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
       
       await _notifications.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        scheduledDate,
-        details,
+        id: notificationId,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: '${tankId}_${notification.id}',
       );
     }
@@ -184,7 +182,7 @@ class NotificationService {
   /// Cancel a scheduled notification
   Future<void> cancelNotification(TankNotification notification) async {
     final int notificationId = notification.id.hashCode;
-    await _notifications.cancel(notificationId);
+    await _notifications.cancel(id: notificationId);
   }
 
   /// Cancel all notifications for a tank
@@ -372,10 +370,10 @@ class NotificationService {
 
     // Show notification immediately
     await _notifications.show(
-      testNotificationId,
-      title,
-      body,
-      details,
+      id: testNotificationId,
+      title: title,
+      body: body,
+      notificationDetails: details,
       payload: 'test_notification',
     );
   }
