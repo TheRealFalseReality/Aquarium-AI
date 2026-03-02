@@ -3602,5 +3602,185 @@
   "profileSignatureShowMemberSince": "Member Since",
   "@profileSignatureShowMemberSince": {
     "description": "Switch label to show/hide member-since date in post signature"
+  },
+
+  "appearanceDesc": "Themes, brightness mode and colour palette",
+  "@appearanceDesc": {
+    "description": "Subtitle for the Appearance menu card in settings"
+  },
+
+  "contactUsSubtitle": "Leave a review or submit an issue",
+  "@contactUsSubtitle": {
+    "description": "Subtitle for the Contact Us menu card in settings"
+  },
+
+  "contactUsMessage": "We'd love to hear from you! Leave a quick review on the store to share your experience, or open a GitHub issue to report a bug or suggest a new feature.",
+  "@contactUsMessage": {
+    "description": "Body text in the Contact Us dialog"
+  },
+
+  "leaveAReview": "Leave a Review",
+  "@leaveAReview": {
+    "description": "Option title in the Contact Us dialog"
+  },
+
+  "leaveAReviewDesc": "Rate the app on the store",
+  "@leaveAReviewDesc": {
+    "description": "Option subtitle in the Contact Us dialog"
+  },
+
+  "submitAnIssue": "Submit an Issue",
+  "@submitAnIssue": {
+    "description": "Option title in the Contact Us dialog"
+  },
+
+  "submitAnIssueDesc": "Report a bug or request a feature on GitHub",
+  "@submitAnIssueDesc": {
+    "description": "Option subtitle in the Contact Us dialog"
+  },
+
+  "debugMenu": "Debug Menu",
+  "@debugMenu": {
+    "description": "Title for the Debug Menu card and dialog"
+  },
+
+  "debugMenuSubtitle": "Developer tools (debug builds only)",
+  "@debugMenuSubtitle": {
+    "description": "Subtitle for the Debug Menu card in settings"
+  },
+
+  "debugMenuDescription": "These tools are only available in debug builds and are not visible in release.",
+  "@debugMenuDescription": {
+    "description": "Explanatory text inside the Debug Menu dialog"
+  },
+
+  "debugHideAds": "Hide Ads",
+  "@debugHideAds": {
+    "description": "Label for the Hide Ads toggle in the Debug Menu"
+  },
+
+  "debugHideAdsDesc": "Hide all ads and references to removing them",
+  "@debugHideAdsDesc": {
+    "description": "Subtitle for the Hide Ads toggle in the Debug Menu"
+  },
+
+  "analysisHistory": "Analysis History",
+  "@analysisHistory": {
+    "description": "Title for the Analysis History list tile in settings and the app drawer"
+  },
+
+  "analysisHistoryDesc": "View saved AI analysis reports",
+  "@analysisHistoryDesc": {
+    "description": "Subtitle for the Analysis History list tile"
+  },
+
+  "toolsAndResources": "Tools & Resources",
+  "@toolsAndResources": {
+    "description": "Section header in the app drawer for tools and resources"
+  },
+
+  "guidesAndDocs": "Guides & Docs",
+  "@guidesAndDocs": {
+    "description": "Section header in the app drawer for guides and documentation"
+  },
+
+  "currentlyUsingModels": "Currently using the following models:",
+  "@currentlyUsingModels": {
+    "description": "Label shown above the active AI model names on the welcome screen"
+  },
+
+  "versionNumber": "Version {version}",
+  "@versionNumber": {
+    "description": "App version display label on the welcome screen",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+
+  "checkForUpdate": "Check for Update",
+  "@checkForUpdate": {
+    "description": "Button label to check for an app update on the welcome screen"
+  },
+
+  "alreadyLatestVersion": "You're already on the latest version!",
+  "@alreadyLatestVersion": {
+    "description": "Snackbar message shown when no app update is available"
+  },
+
+  "unableToCheckUpdates": "Unable to check for updates.",
+  "@unableToCheckUpdates": {
+    "description": "Snackbar message shown when the update check fails"
+  },
+
+  "meetAquaPi": "Meet AquaPi!",
+  "@meetAquaPi": {
+    "description": "Title of the AquaPi promotion dialog"
+  },
+
+  "aquaPiPromoDescription": "Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!",
+  "@aquaPiPromoDescription": {
+    "description": "Main marketing description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureSmartMonitoring": "Smart Monitoring",
+  "@aquaPiFeatureSmartMonitoring": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureSmartMonitoringDesc": "Real-time monitoring of temperature, pH, water level, and more",
+  "@aquaPiFeatureSmartMonitoringDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureHomeAssistant": "Home Assistant Integration",
+  "@aquaPiFeatureHomeAssistant": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureHomeAssistantDesc": "Seamlessly integrates with your smart home ecosystem",
+  "@aquaPiFeatureHomeAssistantDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureCustomizable": "Fully Customizable",
+  "@aquaPiFeatureCustomizable": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureCustomizableDesc": "Open-source design lets you add unlimited sensors and automations",
+  "@aquaPiFeatureCustomizableDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureAlerts": "Automated Alerts",
+  "@aquaPiFeatureAlerts": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureAlertsDesc": "Get notified instantly about critical changes in your aquarium",
+  "@aquaPiFeatureAlertsDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiPerfectFor": "Perfect for DIY enthusiasts and tech-savvy aquarists!",
+  "@aquaPiPerfectFor": {
+    "description": "Tagline in the AquaPi promotion dialog"
+  },
+
+  "learnMore": "Learn More",
+  "@learnMore": {
+    "description": "Button label to learn more about AquaPi"
+  },
+
+  "neverShow": "Never Show",
+  "@neverShow": {
+    "description": "Button label to never show the AquaPi promotion dialog again (compact, for mobile)"
+  },
+
+  "neverShowAgain": "Never Show Again",
+  "@neverShowAgain": {
+    "description": "Button label to never show the AquaPi promotion dialog again (full label, for desktop)"
   }
 }

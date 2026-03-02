@@ -284,7 +284,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 if (appSettings.enableAI) ...[
-                  _sectionHeader(context, 'AI Tools', Theme.of(context).colorScheme.primary),
+                  _sectionHeader(context, l10n.aiTools, Theme.of(context).colorScheme.primary),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 250),
                     child: Container(
@@ -361,8 +361,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                       child: ListTile(
                         leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-                        title: const Text('Analysis History'),
-                        subtitle: const Text('View saved AI analysis reports'),
+                        title: Text(l10n.analysisHistory),
+                        subtitle: Text(l10n.analysisHistoryDesc),
                         onTap: () => navigate('/analysis-history'),
                       ),
                     ),
@@ -375,7 +375,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ],
-                _sectionHeader(context, 'Tools & Resources', Theme.of(context).colorScheme.secondary),
+                _sectionHeader(context, l10n.toolsAndResources, Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: Container(
@@ -470,7 +470,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     thickness: 1,
                   ),
                 ),
-                _sectionHeader(context, 'Guides & Docs', Theme.of(context).colorScheme.tertiary),
+                _sectionHeader(context, l10n.guidesAndDocs, Theme.of(context).colorScheme.tertiary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 600),
                   child: Container(
@@ -651,8 +651,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       ),
       title: Text(displayName,
           overflow: TextOverflow.ellipsis, maxLines: 1),
-      subtitle: Text(l10n.profileDrawerDescription,
-          overflow: TextOverflow.ellipsis, maxLines: 1),
+      subtitle: Text(l10n.profileDrawerDescription),
       onTap: () => navigate('/profile'),
     );
   }
@@ -662,6 +661,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
     final themeModes = [ThemeMode.light, ThemeMode.system, ThemeMode.dark];
     final isMaterialYouAvailable = !kIsWeb && (Platform.isAndroid);
+    final l10n = AppLocalizations.of(context)!;
 
     final collapsibleContent = Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -763,7 +763,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             size: 20,
           ),
           title: Text(
-            'Appearance',
+            l10n.appearance,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,

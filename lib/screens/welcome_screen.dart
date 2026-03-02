@@ -468,11 +468,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     setState(() => _checkingUpdate = true);
     try {
       final messenger = ScaffoldMessenger.of(context);
+      final l10n = AppLocalizations.of(context)!;
       final info = await InAppUpdateService.checkForUpdate();
       if (!mounted) return;
       if (info == null) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Unable to check for updates.')),
+          SnackBar(content: Text(l10n.unableToCheckUpdates)),
         );
         return;
       }
@@ -480,7 +481,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         await InAppUpdateService.startFlexibleUpdate();
       } else {
         messenger.showSnackBar(
-          const SnackBar(content: Text("You're already on the latest version!")),
+          SnackBar(content: Text(l10n.alreadyLatestVersion)),
         );
       }
     } finally {
@@ -823,7 +824,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         child: Column(
                           children: [
                             Text(
-                              'Currently using the following models:',
+                              l10n.currentlyUsingModels,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),
@@ -838,7 +839,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             const SizedBox(height: 16),
                             if (_version.isNotEmpty)
                               Text(
-                                'Version $_version',
+                                l10n.versionNumber(version: _version),
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -853,7 +854,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                         child: CircularProgressIndicator(strokeWidth: 2),
                                       )
                                     : const Icon(Icons.system_update_outlined, size: 18),
-                                label: const Text('Check for Update'),
+                                label: Text(l10n.checkForUpdate),
                                 onPressed: _checkingUpdate ? null : _checkForUpdate,
                               ),
                             ],

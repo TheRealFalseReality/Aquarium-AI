@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/analytics_service.dart';
+import '../l10n/app_localizations.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
   const AquaPiPromotionDialog({super.key});
@@ -38,6 +39,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
@@ -71,7 +73,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Meet AquaPi!',
+              l10n.meetAquaPi,
               style: TextStyle(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -83,12 +85,12 @@ class AquaPiPromotionDialog extends StatelessWidget {
       ),
       content: SingleChildScrollView(
         child: isSmallScreen
-            ? _buildVerticalLayout(context, colorScheme)
-            : _buildHorizontalLayout(context, colorScheme),
+            ? _buildVerticalLayout(context, colorScheme, l10n)
+            : _buildHorizontalLayout(context, colorScheme, l10n),
       ),
       actions: isSmallScreen
-          ? _buildMobileActions(context, colorScheme)
-          : _buildDesktopActions(context, colorScheme),
+          ? _buildMobileActions(context, colorScheme, l10n)
+          : _buildDesktopActions(context, colorScheme, l10n),
     );
   }
 
@@ -106,7 +108,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalLayout(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildVerticalLayout(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +117,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
         _buildPromoImage(),
         const SizedBox(height: 16),
         Text(
-          'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
+          l10n.aquaPiPromoDescription,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
           ),
@@ -124,29 +126,29 @@ class AquaPiPromotionDialog extends StatelessWidget {
         _buildFeatureItem(
           context,
           Icons.hub,
-          'Smart Monitoring',
-          'Real-time monitoring of temperature, pH, water level, and more',
+          l10n.aquaPiFeatureSmartMonitoring,
+          l10n.aquaPiFeatureSmartMonitoringDesc,
         ),
         const SizedBox(height: 10),
         _buildFeatureItem(
           context,
           Icons.home_outlined,
-          'Home Assistant Integration',
-          'Seamlessly integrates with your smart home ecosystem',
+          l10n.aquaPiFeatureHomeAssistant,
+          l10n.aquaPiFeatureHomeAssistantDesc,
         ),
         const SizedBox(height: 10),
         _buildFeatureItem(
           context,
           Icons.tune,
-          'Fully Customizable',
-          'Open-source design lets you add unlimited sensors and automations',
+          l10n.aquaPiFeatureCustomizable,
+          l10n.aquaPiFeatureCustomizableDesc,
         ),
         const SizedBox(height: 10),
         _buildFeatureItem(
           context,
           Icons.notifications_active,
-          'Automated Alerts',
-          'Get notified instantly about critical changes in your aquarium',
+          l10n.aquaPiFeatureAlerts,
+          l10n.aquaPiFeatureAlertsDesc,
         ),
         const SizedBox(height: 12),
         Container(
@@ -175,7 +177,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Perfect for DIY enthusiasts and tech-savvy aquarists!',
+                  l10n.aquaPiPerfectFor,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -190,7 +192,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontalLayout(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildHorizontalLayout(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,7 +206,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!',
+                l10n.aquaPiPromoDescription,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -213,29 +215,29 @@ class AquaPiPromotionDialog extends StatelessWidget {
               _buildFeatureItem(
                 context,
                 Icons.hub,
-                'Smart Monitoring',
-                'Real-time monitoring of temperature, pH, water level, and more',
+                l10n.aquaPiFeatureSmartMonitoring,
+                l10n.aquaPiFeatureSmartMonitoringDesc,
               ),
               const SizedBox(height: 12),
               _buildFeatureItem(
                 context,
                 Icons.home_outlined,
-                'Home Assistant Integration',
-                'Seamlessly integrates with your smart home ecosystem',
+                l10n.aquaPiFeatureHomeAssistant,
+                l10n.aquaPiFeatureHomeAssistantDesc,
               ),
               const SizedBox(height: 12),
               _buildFeatureItem(
                 context,
                 Icons.tune,
-                'Fully Customizable',
-                'Open-source design lets you add unlimited sensors and automations',
+                l10n.aquaPiFeatureCustomizable,
+                l10n.aquaPiFeatureCustomizableDesc,
               ),
               const SizedBox(height: 12),
               _buildFeatureItem(
                 context,
                 Icons.notifications_active,
-                'Automated Alerts',
-                'Get notified instantly about critical changes in your aquarium',
+                l10n.aquaPiFeatureAlerts,
+                l10n.aquaPiFeatureAlertsDesc,
               ),
               const SizedBox(height: 16),
               Container(
@@ -264,7 +266,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Perfect for DIY enthusiasts and tech-savvy aquarists!',
+                        l10n.aquaPiPerfectFor,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onSurface,
@@ -282,7 +284,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMobileActions(BuildContext context, ColorScheme colorScheme) {
+  List<Widget> _buildMobileActions(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
     return [
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -296,7 +298,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
             ),
-            child: const Text('Learn More'),
+            child: Text(l10n.learnMore),
           ),
           const SizedBox(height: 8),
           Row(
@@ -311,7 +313,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 child: Text(
-                  'Maybe Later',
+                  l10n.maybeLater,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ),
@@ -327,7 +329,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
                   }
                 },
                 child: Text(
-                  'Never Show',
+                  l10n.neverShow,
                   style: TextStyle(color: colorScheme.error),
                 ),
               ),
@@ -338,7 +340,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
     ];
   }
 
-  List<Widget> _buildDesktopActions(BuildContext context, ColorScheme colorScheme) {
+  List<Widget> _buildDesktopActions(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
     return [
       TextButton(
         onPressed: () {
@@ -349,7 +351,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
           Navigator.of(context).pop();
         },
         child: Text(
-          'Maybe Later',
+          l10n.maybeLater,
           style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
       ),
@@ -365,7 +367,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
           }
         },
         child: Text(
-          'Never Show Again',
+          l10n.neverShowAgain,
           style: TextStyle(color: colorScheme.error),
         ),
       ),
@@ -378,7 +380,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
-        child: const Text('Learn More'),
+        child: Text(l10n.learnMore),
       ),
     ];
   }
