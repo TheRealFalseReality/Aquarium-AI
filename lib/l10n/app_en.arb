@@ -4432,5 +4432,115 @@
       "limit": {"type": "int"},
       "max": {"type": "int"}
     }
+  },
+
+  "apiKeyDialogTitle": "Unlock the Power of AI with Your Own API Key!",
+  "@apiKeyDialogTitle": {
+    "description": "Title of the API key prompt dialog"
+  },
+
+  "apiKeyDialogIntro": "Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique \"Bring Your Own Key\" model gives you:",
+  "@apiKeyDialogIntro": {
+    "description": "Introductory paragraph in the API key prompt dialog"
+  },
+
+  "apiKeyDialogBullet1": "Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.",
+  "@apiKeyDialogBullet1": {
+    "description": "First benefit bullet point in the API key prompt dialog"
+  },
+
+  "apiKeyDialogBullet2": "Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.",
+  "@apiKeyDialogBullet2": {
+    "description": "Second benefit bullet point in the API key prompt dialog"
+  },
+
+  "apiKeyDialogFreeTierNote": "No API key? No problem! You can still use Aquarium AI's free service tier powered by our built-in key. The free tier is limited to {reqPerMinute} AI requests per minute, {reqPerDay} AI requests per day, and {photoPerDay} {photoPerDay, plural, =1{photo analysis} other{photo analyses}} per day. Add your own key in Settings to remove these limits.",
+  "@apiKeyDialogFreeTierNote": {
+    "description": "Free tier notice in the API key prompt dialog",
+    "placeholders": {
+      "reqPerMinute": {"type": "int"},
+      "reqPerDay": {"type": "int"},
+      "photoPerDay": {"type": "int"}
+    }
+  },
+
+  "apiKeyDialogDisclaimer": "Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.",
+  "@apiKeyDialogDisclaimer": {
+    "description": "Disclaimer note in the API key prompt dialog"
+  },
+
+  "apiKeyDialogNoKeyNote": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@apiKeyDialogNoKeyNote": {
+    "description": "Note at the bottom of the API key dialog clarifying that calculators work without a key"
+  },
+
+  "apiKeyDialogCta": "Please go to the settings screen to add your API key and unlock these AI-powered benefits.",
+  "@apiKeyDialogCta": {
+    "description": "Call-to-action text at the bottom of the API key dialog"
+  },
+
+  "apiKeyDialogEnableAIToggleSubtitle": "Toggle AI features to use only calculators and tank management tools.",
+  "@apiKeyDialogEnableAIToggleSubtitle": {
+    "description": "Subtitle for the Enable AI toggle inside the API key dialog"
+  },
+
+  "goToSettings": "Go to Settings",
+  "@goToSettings": {
+    "description": "Button label to navigate to the settings screen"
+  },
+
+  "appPromoDialogTitle": "Get Aquarium AI on Your Device!",
+  "@appPromoDialogTitle": {
+    "description": "Title of the app promotion dialog"
+  },
+
+  "appPromoDialogIntro": "Experience the full power of Aquarium AI with our mobile app:",
+  "@appPromoDialogIntro": {
+    "description": "Introductory text in the app promotion dialog"
+  },
+
+  "appPromoBenefitOfflineTitle": "Offline Access",
+  "@appPromoBenefitOfflineTitle": {
+    "description": "Title of the offline access benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitOfflineDesc": "Use key features even without internet connection",
+  "@appPromoBenefitOfflineDesc": {
+    "description": "Description of the offline access benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitCameraTitle": "Enhanced Camera",
+  "@appPromoBenefitCameraTitle": {
+    "description": "Title of the enhanced camera benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitCameraDesc": "Better photo analysis with native camera integration",
+  "@appPromoBenefitCameraDesc": {
+    "description": "Description of the enhanced camera benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitNotificationsTitle": "Smart Notifications",
+  "@appPromoBenefitNotificationsTitle": {
+    "description": "Title of the smart notifications benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitNotificationsDesc": "Get reminders for water changes and tank maintenance",
+  "@appPromoBenefitNotificationsDesc": {
+    "description": "Description of the smart notifications benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitPerformanceTitle": "Native Performance",
+  "@appPromoBenefitPerformanceTitle": {
+    "description": "Title of the native performance benefit in the app promotion dialog"
+  },
+
+  "appPromoBenefitPerformanceDesc": "Faster, smoother experience optimized for mobile",
+  "@appPromoBenefitPerformanceDesc": {
+    "description": "Description of the native performance benefit in the app promotion dialog"
+  },
+
+  "getTheApp": "Get the App",
+  "@getTheApp": {
+    "description": "Button label to download the mobile app"
   }
 }

@@ -892,5 +892,28 @@
   "chatHistoryLimit": "Chatverlauf-Limit",
   "freeTier": "Gratiskontingent",
   "chatHistoryLimitDescription": "Steuern Sie, wie viele vergangene Nachrichten bei jeder Anfrage einbezogen werden. Mehr Nachrichten bedeuten reichhaltigeren Gesprächskontext, verbrauchen aber mehr Token und können Ratenlimits schneller erreichen.",
-  "chatHistoryFreeTierDescription": "Ohne eigenen API-Schlüssel verwendet die App unser kostenloses Dienstkontingent mit einem festen Limit von {limit} vergangenen Nachrichten pro Anfrage. Fügen Sie oben Ihren eigenen API-Schlüssel hinzu, um ein konfigurierbares Limit (bis zu {max} Nachrichten) zu erhalten."
+  "chatHistoryFreeTierDescription": "Ohne eigenen API-Schlüssel verwendet die App unser kostenloses Dienstkontingent mit einem festen Limit von {limit} vergangenen Nachrichten pro Anfrage. Fügen Sie oben Ihren eigenen API-Schlüssel hinzu, um ein konfigurierbares Limit (bis zu {max} Nachrichten) zu erhalten.",
+
+  "apiKeyDialogTitle": "Nutzen Sie die Kraft der KI mit Ihrem eigenen API-Schlüssel!",
+  "apiKeyDialogIntro": "Aquarium AI unterscheidet sich von anderen KI-fähigen Aquarium-Apps. Wir ermöglichen es Ihnen, Ihre eigenen KI-API-Schlüssel von Gemini, OpenAI und Groq zu verwenden. Dieses einzigartige \"Bring Your Own Key\"-Modell bietet Ihnen:",
+  "apiKeyDialogBullet1": "Höhere KI-API-Anruflimits: Genießen Sie deutlich mehr Interaktionen mit Ihrer KI, einschließlich des leistungsstarken Gemini 2.5 Flash.",
+  "apiKeyDialogBullet2": "Unbegrenzte Funktionen: Erhalten Sie uneingeschränkten Zugang zu allen unseren Funktionen, einschließlich der Möglichkeit, eine unbegrenzte Anzahl von Tanks hinzuzufügen und zu verwalten.",
+  "apiKeyDialogFreeTierNote": "Kein API-Schlüssel? Kein Problem! Sie können Aquarium AIs kostenlosen Dienst weiterhin nutzen. Das Gratis-Kontingent ist begrenzt auf {reqPerMinute} KI-Anfragen pro Minute, {reqPerDay} KI-Anfragen pro Tag und {photoPerDay} {photoPerDay, plural, =1{Fotoanalyse} other{Fotoanalysen}} pro Tag. Fügen Sie in den Einstellungen Ihren eigenen Schlüssel hinzu, um diese Limits aufzuheben.",
+  "apiKeyDialogDisclaimer": "Haftungsausschluss: Die In-App-Gratis-KI wird als Dienst für Aquariumliebhaber bereitgestellt und vom Entwickler finanziert. Sie kann jederzeit entfernt oder geändert werden, und die Limits sind ohne Vorankündigung änderbar.",
+  "apiKeyDialogNoKeyNote": "Hinweis: Tankmanagement (einschließlich Harmonie-Score) und alle Rechner (Tankvolumenrechner usw.) funktionieren ohne KI-Schlüssel.",
+  "apiKeyDialogCta": "Bitte gehen Sie zum Einstellungsbildschirm, um Ihren API-Schlüssel hinzuzufügen und diese KI-Vorteile freizuschalten.",
+  "apiKeyDialogEnableAIToggleSubtitle": "KI-Funktionen umschalten, um nur Rechner und Tankmanagement-Tools zu verwenden.",
+  "goToSettings": "Zu den Einstellungen",
+
+  "appPromoDialogTitle": "Holen Sie sich Aquarium AI auf Ihr Gerät!",
+  "appPromoDialogIntro": "Erleben Sie die volle Leistung von Aquarium AI mit unserer mobilen App:",
+  "appPromoBenefitOfflineTitle": "Offline-Zugang",
+  "appPromoBenefitOfflineDesc": "Nutzen Sie wichtige Funktionen auch ohne Internetverbindung",
+  "appPromoBenefitCameraTitle": "Erweiterte Kamera",
+  "appPromoBenefitCameraDesc": "Bessere Fotoanalyse mit nativer Kameraintegration",
+  "appPromoBenefitNotificationsTitle": "Smarte Benachrichtigungen",
+  "appPromoBenefitNotificationsDesc": "Erhalten Sie Erinnerungen für Wasserwechsel und Tankwartung",
+  "appPromoBenefitPerformanceTitle": "Native Leistung",
+  "appPromoBenefitPerformanceDesc": "Schnelleres, flüssigeres Erlebnis optimiert für Mobilgeräte",
+  "getTheApp": "App herunterladen"
 }

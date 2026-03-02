@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/remote_config_service.dart';
 
@@ -47,6 +48,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   static const double _smallScreenBreakpoint = 600;
 
   List<Widget> _buildDialogActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < _smallScreenBreakpoint;
 
@@ -64,7 +66,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Dismiss'),
+                      child: Text(l10n.dismiss),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -79,7 +81,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
                       ),
-                      child: const Text('Never Show Again'),
+                      child: Text(l10n.neverShowAgain),
                     ),
                   ),
                 ],
@@ -92,7 +94,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushNamed('/settings');
                   },
-                  child: const Text('Go to Settings'),
+                  child: Text(l10n.goToSettings),
                 ),
               ),
             ],
@@ -105,7 +107,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
     return [
       TextButton(
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Dismiss'),
+        child: Text(l10n.dismiss),
       ),
       TextButton(
         onPressed: () async {
@@ -117,31 +119,32 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         style: TextButton.styleFrom(
           foregroundColor: Theme.of(context).colorScheme.error,
         ),
-        child: const Text('Never Show Again'),
+        child: Text(l10n.neverShowAgain),
       ),
       ElevatedButton(
         onPressed: () {
           Navigator.of(context).pop();
           Navigator.of(context).pushNamed('/settings');
         },
-        child: const Text('Go to Settings'),
+        child: Text(l10n.goToSettings),
       ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.watch(appSettingsProvider);
     
     return AlertDialog(
-      title: const Text('Unlock the Power of AI with Your Own API Key!'),
+      title: Text(l10n.apiKeyDialogTitle),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:',
+              l10n.apiKeyDialogIntro,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -158,7 +161,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    'Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.',
+                    l10n.apiKeyDialogBullet1,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
@@ -178,7 +181,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    'Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.',
+                    l10n.apiKeyDialogBullet2,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
@@ -205,7 +208,11 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute, ${RemoteConfigService.maxRequestsPerDay} AI requests per day, and ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
+                      l10n.apiKeyDialogFreeTierNote(
+                        RemoteConfigService.maxRequestsPerMinute,
+                        RemoteConfigService.maxRequestsPerDay,
+                        RemoteConfigService.maxPhotoAnalysesPerDay,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onTertiaryContainer,
                       ),
@@ -231,7 +238,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.',
+                      l10n.apiKeyDialogDisclaimer,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Colors.amber.shade900,
@@ -262,7 +269,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
+                      l10n.apiKeyDialogNoKeyNote,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -274,7 +281,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Please go to the settings screen to add your API key and unlock these AI-powered benefits.',
+              l10n.apiKeyDialogCta,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -289,7 +296,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               ),
               child: SwitchListTile(
                 title: Text(
-                  'Enable AI Features',
+                  l10n.enableAI,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -297,7 +304,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
-                    'Toggle AI features to use only calculators and tank management tools.',
+                    l10n.apiKeyDialogEnableAIToggleSubtitle,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),

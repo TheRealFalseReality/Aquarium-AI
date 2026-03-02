@@ -892,5 +892,28 @@
   "chatHistoryLimit": "Límite de Historial de Chat",
   "freeTier": "Nivel Gratuito",
   "chatHistoryLimitDescription": "Controla cuántos mensajes pasados se incluyen con cada solicitud. Más mensajes significan un contexto de conversación más rico, pero usan más tokens y pueden alcanzar los límites de velocidad más rápido.",
-  "chatHistoryFreeTierDescription": "Sin tu propia clave API, la app usa nuestro nivel de servicio gratuito con un límite fijo de {limit} mensajes pasados por solicitud. Agrega tu propia clave API arriba para desbloquear un límite configurable (hasta {max} mensajes)."
+  "chatHistoryFreeTierDescription": "Sin tu propia clave API, la app usa nuestro nivel de servicio gratuito con un límite fijo de {limit} mensajes pasados por solicitud. Agrega tu propia clave API arriba para desbloquear un límite configurable (hasta {max} mensajes).",
+
+  "apiKeyDialogTitle": "¡Desbloquea el Poder de la IA con tu Propia Clave API!",
+  "apiKeyDialogIntro": "Aquarium AI es diferente de otras apps de acuario con IA. Te empoderamos permitiéndote usar tus propias claves API de IA de Gemini, OpenAI y Groq. Este único modelo de \"Trae tu Propia Clave\" te brinda:",
+  "apiKeyDialogBullet1": "Mayores Límites de Llamadas a la API de IA: Disfruta de significativamente más interacciones con tu IA, incluyendo el poderoso Gemini 2.5 flash.",
+  "apiKeyDialogBullet2": "Funciones Ilimitadas: Obtén acceso sin restricciones a todas nuestras funciones, incluyendo la capacidad de agregar y gestionar un número ilimitado de tanques.",
+  "apiKeyDialogFreeTierNote": "¿Sin clave API? ¡No hay problema! Aún puedes usar el servicio gratuito de Aquarium AI. El nivel gratuito está limitado a {reqPerMinute} solicitudes de IA por minuto, {reqPerDay} solicitudes de IA por día y {photoPerDay} {photoPerDay, plural, =1{análisis de foto} other{análisis de fotos}} por día. Agrega tu propia clave en Configuración para eliminar estos límites.",
+  "apiKeyDialogDisclaimer": "Aviso legal: La IA gratuita integrada se proporciona como cortesía para los aficionados a los acuarios y está financiada por el desarrollador. Puede eliminarse o modificarse en cualquier momento, y los límites están sujetos a cambios sin previo aviso.",
+  "apiKeyDialogNoKeyNote": "Nota: La gestión de tanques (incluida la puntuación de armonía) y todas las calculadoras (calculadora de volumen de tanque, etc.) funcionan sin una clave de IA.",
+  "apiKeyDialogCta": "Por favor, ve a la pantalla de configuración para agregar tu clave API y desbloquear estos beneficios de IA.",
+  "apiKeyDialogEnableAIToggleSubtitle": "Activa o desactiva las funciones de IA para usar solo calculadoras y herramientas de gestión de tanques.",
+  "goToSettings": "Ir a Configuración",
+
+  "appPromoDialogTitle": "¡Obtén Aquarium AI en Tu Dispositivo!",
+  "appPromoDialogIntro": "Experimenta todo el poder de Aquarium AI con nuestra app móvil:",
+  "appPromoBenefitOfflineTitle": "Acceso Sin Conexión",
+  "appPromoBenefitOfflineDesc": "Usa funciones clave incluso sin conexión a internet",
+  "appPromoBenefitCameraTitle": "Cámara Mejorada",
+  "appPromoBenefitCameraDesc": "Mejor análisis de fotos con integración de cámara nativa",
+  "appPromoBenefitNotificationsTitle": "Notificaciones Inteligentes",
+  "appPromoBenefitNotificationsDesc": "Recibe recordatorios para cambios de agua y mantenimiento del tanque",
+  "appPromoBenefitPerformanceTitle": "Rendimiento Nativo",
+  "appPromoBenefitPerformanceDesc": "Experiencia más rápida y fluida optimizada para móvil",
+  "getTheApp": "Obtener la App"
 }

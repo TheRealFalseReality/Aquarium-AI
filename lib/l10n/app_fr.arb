@@ -892,5 +892,28 @@
   "chatHistoryLimit": "Limite d'Historique de Chat",
   "freeTier": "Niveau Gratuit",
   "chatHistoryLimitDescription": "Contrôlez le nombre de messages passés inclus dans chaque requête. Plus de messages signifient un contexte de conversation plus riche, mais consomment plus de tokens et peuvent atteindre les limites de débit plus rapidement.",
-  "chatHistoryFreeTierDescription": "Sans votre propre clé API, l'application utilise notre niveau de service gratuit avec une limite fixe de {limit} messages passés par requête. Ajoutez votre propre clé API ci-dessus pour déverrouiller une limite configurable (jusqu'à {max} messages)."
+  "chatHistoryFreeTierDescription": "Sans votre propre clé API, l'application utilise notre niveau de service gratuit avec une limite fixe de {limit} messages passés par requête. Ajoutez votre propre clé API ci-dessus pour déverrouiller une limite configurable (jusqu'à {max} messages).",
+
+  "apiKeyDialogTitle": "Débloquez la Puissance de l'IA avec Votre Propre Clé API !",
+  "apiKeyDialogIntro": "Aquarium AI est différent des autres applications d'aquarium avec IA. Nous vous permettons d'utiliser vos propres clés API d'IA de Gemini, OpenAI et Groq. Ce modèle unique « Apportez votre propre clé » vous offre :",
+  "apiKeyDialogBullet1": "Des limites d'appels API d'IA plus élevées : Profitez de beaucoup plus d'interactions avec votre IA, y compris le puissant Gemini 2.5 flash.",
+  "apiKeyDialogBullet2": "Des fonctionnalités illimitées : Obtenez un accès illimité à toutes nos fonctionnalités, y compris la possibilité d'ajouter et de gérer un nombre illimité d'aquariums.",
+  "apiKeyDialogFreeTierNote": "Pas de clé API ? Pas de problème ! Vous pouvez toujours utiliser le service gratuit d'Aquarium AI. Le niveau gratuit est limité à {reqPerMinute} requêtes IA par minute, {reqPerDay} requêtes IA par jour et {photoPerDay} {photoPerDay, plural, =1{analyse photo} other{analyses photos}} par jour. Ajoutez votre propre clé dans les Paramètres pour supprimer ces limites.",
+  "apiKeyDialogDisclaimer": "Avertissement : L'IA gratuite intégrée est fournie par courtoisie pour les passionnés d'aquariophilie et est financée par le développeur. Elle peut être supprimée ou modifiée à tout moment, et les limites sont susceptibles de changer sans préavis.",
+  "apiKeyDialogNoKeyNote": "Remarque : La gestion des aquariums (y compris le score d'harmonie) et toutes les calculatrices (calculatrice de volume d'aquarium, etc.) fonctionnent sans clé IA.",
+  "apiKeyDialogCta": "Veuillez aller à l'écran des paramètres pour ajouter votre clé API et débloquer ces avantages IA.",
+  "apiKeyDialogEnableAIToggleSubtitle": "Activez ou désactivez les fonctionnalités IA pour n'utiliser que les calculatrices et les outils de gestion d'aquarium.",
+  "goToSettings": "Aller aux Paramètres",
+
+  "appPromoDialogTitle": "Obtenez Aquarium AI sur Votre Appareil !",
+  "appPromoDialogIntro": "Découvrez toute la puissance d'Aquarium AI avec notre application mobile :",
+  "appPromoBenefitOfflineTitle": "Accès Hors Ligne",
+  "appPromoBenefitOfflineDesc": "Utilisez les fonctionnalités clés même sans connexion internet",
+  "appPromoBenefitCameraTitle": "Caméra Améliorée",
+  "appPromoBenefitCameraDesc": "Meilleure analyse de photos avec intégration native de la caméra",
+  "appPromoBenefitNotificationsTitle": "Notifications Intelligentes",
+  "appPromoBenefitNotificationsDesc": "Recevez des rappels pour les changements d'eau et l'entretien de l'aquarium",
+  "appPromoBenefitPerformanceTitle": "Performance Native",
+  "appPromoBenefitPerformanceDesc": "Expérience plus rapide et fluide optimisée pour mobile",
+  "getTheApp": "Obtenir l'App"
 }

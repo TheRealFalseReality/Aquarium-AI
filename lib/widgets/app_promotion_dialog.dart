@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
 
 class AppPromotionDialog extends StatelessWidget {
@@ -35,6 +36,7 @@ class AppPromotionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     
     return AlertDialog(
@@ -51,7 +53,7 @@ class AppPromotionDialog extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Get Aquarium AI on Your Device!',
+              l10n.appPromoDialogTitle,
               style: TextStyle(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -67,36 +69,36 @@ class AppPromotionDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Experience the full power of Aquarium AI with our mobile app:',
+              l10n.appPromoDialogIntro,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             _buildBenefitItem(
               context,
               Icons.offline_bolt,
-              'Offline Access',
-              'Use key features even without internet connection',
+              l10n.appPromoBenefitOfflineTitle,
+              l10n.appPromoBenefitOfflineDesc,
             ),
             const SizedBox(height: 12),
             _buildBenefitItem(
               context,
               Icons.camera_alt,
-              'Enhanced Camera',
-              'Better photo analysis with native camera integration',
+              l10n.appPromoBenefitCameraTitle,
+              l10n.appPromoBenefitCameraDesc,
             ),
             const SizedBox(height: 12),
             _buildBenefitItem(
               context,
               Icons.notifications,
-              'Smart Notifications',
-              'Get reminders for water changes and tank maintenance',
+              l10n.appPromoBenefitNotificationsTitle,
+              l10n.appPromoBenefitNotificationsDesc,
             ),
             const SizedBox(height: 12),
             _buildBenefitItem(
               context,
               Icons.dashboard,
-              'Native Performance',
-              'Faster, smoother experience optimized for mobile',
+              l10n.appPromoBenefitPerformanceTitle,
+              l10n.appPromoBenefitPerformanceDesc,
             ),
             const SizedBox(height: 20),
             Center(
@@ -123,7 +125,7 @@ class AppPromotionDialog extends StatelessWidget {
             Navigator.of(context).pop();
           },
           child: Text(
-            'Maybe Later',
+            l10n.maybeLater,
             style: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
         ),
@@ -140,7 +142,7 @@ class AppPromotionDialog extends StatelessWidget {
             }
           },
           child: Text(
-            'Never Show Again',
+            l10n.neverShowAgain,
             style: TextStyle(color: colorScheme.error),
           ),
         ),
@@ -153,7 +155,7 @@ class AppPromotionDialog extends StatelessWidget {
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
           ),
-          child: const Text('Get the App'),
+          child: Text(l10n.getTheApp),
         ),
       ],
     );
