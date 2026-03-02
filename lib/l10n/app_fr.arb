@@ -728,5 +728,7 @@
   "profileSignatureShowTankCount": "Nombre d'aquariums",
   "profileSignatureShowFishCount": "Nombre de poissons",
   "profileSignatureShowYearsExp": "Années d'expérience",
-  "profileSignatureShowMemberSince": "Membre depuis"
+  "profileSignatureShowMemberSince": "Membre depuis",
+  "userGuideCardTitle": "Guide d'utilisation",
+  "userGuideCardSubtitle": "Apprenez à utiliser chaque outil d'Aquarium AI"
 }

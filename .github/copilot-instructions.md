@@ -224,6 +224,81 @@ The Android release workflow requires `KEY_PROPERTIES`, `KEYSTORE_BASE64`, and `
 
 ---
 
+## Adding a New Tool
+
+When adding a new AI tool, calculator, or other significant feature:
+
+1. Create the screen in `lib/screens/my_tool_screen.dart` (see [Adding a New Screen](#adding-a-new-screen)).
+2. Register its named route in `lib/main.dart`.
+3. Add a feature card or navigation entry so it is discoverable (welcome screen, drawer, or information screen).
+4. **Update `assets/docs/USER_GUIDE.md`** to document the new tool:
+   - Add a new section under the appropriate heading (AI Tools, Calculators, Tank Tools, etc.).
+   - Explain all inputs, outputs, and any prerequisites (e.g. API key requirement).
+   - Add the section to the **Table of Contents** at the top of the file.
+5. Add any new user-visible strings to all `.arb` files (see [Localization Conventions](#localization-conventions-important-for-every-pr)).
+6. Log tool usage with `AnalyticsService.logFeatureUsed(featureName: 'my_tool', ...)` where appropriate.
+
+---
+
+## External Variables – Constants & Remote Config Convention
+
+**All URLs, default model names, feature flags, rate limits, and any other externally-sourced or remotely-configurable values must be declared as named constants** rather than being written as inline literals in business logic or UI code.
+
+### Where to put each type of constant
+
+| Type of value | Where to declare it |
+|---------------|---------------------|
+| Build-time secrets (API keys injected via `--dart-define`) | `lib/constants.dart` using `String.fromEnvironment(...)` |
+| Static app-wide IDs (AdMob, in-app purchase product IDs) | `lib/constants.dart` |
+| Remote Config **key names** | `RemoteConfigKeys` class in `lib/services/remote_config_service.dart` |
+| Remote Config **in-app fallback defaults** | Top-level `_default*` private constants in `lib/services/remote_config_service.dart` |
+| Default AI model names (overridable via Remote Config) | `_default*` constants in `lib/services/remote_config_service.dart` |
+| External URLs that may change without an app update | Remote Config key + `_default*` fallback in `lib/services/remote_config_service.dart` |
+
+### Rules
+
+- **Never hard-code a URL, model name, or rate limit inline.** Always reference the named constant or the Remote Config getter.
+- When adding a new Remote Config key:
+  1. Add the key string as a `static const String` on `RemoteConfigKeys`.
+  2. Add a `_default*` fallback constant above the class (document its expected format in a comment).
+  3. Register the default in `RemoteConfigService.initialize()` inside `setDefaults({...})`.
+  4. Expose a typed getter on `RemoteConfigService` (e.g. `static String get myNewValue`).
+- When adding a new `--dart-define` build-time variable:
+  1. Declare it in `lib/constants.dart` with `String.fromEnvironment('MY_VAR', defaultValue: '')`.
+  2. Add it to all relevant `flutter run` / `flutter build` commands in the project README and in `.github/workflows/` where it is used.
+  3. **Never commit the actual secret value**; it must live only in GitHub Secrets and local build environments.
+
+### Example
+
+```dart
+// lib/constants.dart
+const String myExternalServiceUrl =
+    String.fromEnvironment('MY_SERVICE_URL', defaultValue: 'https://example.com/api');
+```
+
+```dart
+// lib/services/remote_config_service.dart
+
+// In-app fallback default
+const String _defaultMyFeatureModel = 'my-model-v1';
+
+class RemoteConfigKeys {
+  /// String — model to use for My Feature.
+  static const String myFeatureModel = 'my_feature_model';
+}
+
+class RemoteConfigService {
+  // In initialize():
+  //   RemoteConfigKeys.myFeatureModel: _defaultMyFeatureModel,
+
+  static String get myFeatureModel =>
+      _instance?.getString(RemoteConfigKeys.myFeatureModel) ??
+      _defaultMyFeatureModel;
+}
+```
+
+---
+
 ## Adding a New Screen
 
 1. Create `lib/screens/my_screen.dart` as a `ConsumerStatefulWidget` (or `ConsumerWidget`).
