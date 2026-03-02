@@ -36,6 +36,7 @@ import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 import '../models/community_post.dart';
 import 'community_post_screen.dart';
+import 'markdown_viewer_screen.dart';
 
 class ToolChipInfo {
   final String label;
@@ -140,6 +141,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
   static const String _showCommunityCardKey = 'welcomeShowCommunityCard';
 
+  // Promo card keys
+  static const String _docsPromoShownAtKey = 'welcomeDocsPromoShownAt';
+  static const String _docsPromoDismissedKey = 'welcomeDocsPromoDismissed';
+  static const String _communityPromoShownAtKey = 'welcomeCommunityPromoShownAt';
+  static const String _communityPromoDismissedKey = 'welcomeCommunityPromoDismissed';
+  static const int _promoCardAutoDismissDays = 7;
+  static const int _millisecondsPerDay = 86400000;
+  static const String _userGuideAssetPath = 'assets/docs/USER_GUIDE.md';
+
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
 
@@ -156,12 +166,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   // Community card state
   bool _showCommunityCard = false;
   PostType? _communityCardFilterType; // null = show all post types
+
+  // Promo card visibility
+  bool _showDocsPromoCard = false;
+  bool _showCommunityPromoCard = false;
   
   @override
   void initState() {
     super.initState();
     _loadVersion();
     _loadHiddenFeatures();
+    _loadPromoCards();
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
@@ -205,6 +220,71 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_showCommunityCardKey, value);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  /// Load promo-card visibility. Each card is shown until manually dismissed
+  /// or 7 days have passed since it was first shown.
+  Future<void> _loadPromoCards() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      // ── Docs promo card ──────────────────────────────────────────────────
+      final docsDismissed = prefs.getBool(_docsPromoDismissedKey) ?? false;
+      if (!docsDismissed) {
+        int shownAt = prefs.getInt(_docsPromoShownAtKey) ?? 0;
+        if (shownAt == 0) {
+          // First time – record the timestamp and show
+          await prefs.setInt(_docsPromoShownAtKey, now);
+          shownAt = now;
+        }
+        final daysSince = (now - shownAt) / _millisecondsPerDay;
+        if (daysSince < _promoCardAutoDismissDays) {
+          if (mounted) setState(() => _showDocsPromoCard = true);
+        } else {
+          // Auto-dismiss after 7 days
+          await prefs.setBool(_docsPromoDismissedKey, true);
+        }
+      }
+
+      // ── Community promo card ─────────────────────────────────────────────
+      final communityDismissed = prefs.getBool(_communityPromoDismissedKey) ?? false;
+      if (!communityDismissed) {
+        int shownAt = prefs.getInt(_communityPromoShownAtKey) ?? 0;
+        if (shownAt == 0) {
+          await prefs.setInt(_communityPromoShownAtKey, now);
+          shownAt = now;
+        }
+        final daysSince = (now - shownAt) / _millisecondsPerDay;
+        if (daysSince < _promoCardAutoDismissDays) {
+          if (mounted) setState(() => _showCommunityPromoCard = true);
+        } else {
+          await prefs.setBool(_communityPromoDismissedKey, true);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _dismissDocsPromoCard() async {
+    setState(() => _showDocsPromoCard = false);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_docsPromoDismissedKey, true);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _dismissCommunityPromoCard() async {
+    setState(() => _showCommunityPromoCard = false);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_communityPromoDismissedKey, true);
     } catch (e) {
       // ignore
     }
@@ -735,6 +815,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       const SizedBox(height: 32),
                       
+                      // Documentation & Guides promo card (first launch, auto-dismissed after 7 days)
+                      if (_showDocsPromoCard) ...[
+                        _buildDocsPromoCard(context),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Community feature promo card (dismissible, auto-dismissed after 7 days)
+                      if (_showCommunityPromoCard) ...[
+                        _buildCommunityPromoCard(context),
+                        const SizedBox(height: 16),
+                      ],
+
                       // Prominent My Tanks Section
                       _buildMyTanksSection(context, tankState, tankCount, fishData),
                       
@@ -889,6 +981,186 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       case AIProvider.groq:
         return modelState.groqImageModel;
     }
+  }
+
+  Widget _buildDocsPromoCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedFeatureCard(
+      delay: const Duration(milliseconds: 550),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              cs.tertiary.withOpacity(0.12),
+              cs.primaryContainer.withOpacity(0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text('📖', style: TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.welcomeDocsCardTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.welcomeDocsCardBody,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MarkdownViewerScreen(
+                              assetPath: _userGuideAssetPath,
+                              title: l10n.userGuideCardTitle,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.menu_book_outlined, size: 16),
+                      label: Text(l10n.welcomeDocsCardButton),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        textStyle: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                tooltip: l10n.close,
+                onPressed: _dismissDocsPromoCard,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommunityPromoCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedFeatureCard(
+      delay: const Duration(milliseconds: 570),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.teal.shade400.withOpacity(0.12),
+              cs.primaryContainer.withOpacity(0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text('🌊', style: TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.welcomeCommunityPromoTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.welcomeCommunityPromoBody,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () => Navigator.pushNamed(context, '/community'),
+                      icon: const Icon(Icons.people_outline, size: 16),
+                      label: Text(l10n.welcomeCommunityPromoButton),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        textStyle: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                tooltip: l10n.close,
+                onPressed: _dismissCommunityPromoCard,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
