@@ -3987,5 +3987,100 @@
   "resultWeight": "Weight",
   "@resultWeight": {
     "description": "Label for the weight result in the tank volume calculator"
+  },
+
+  "informationContributeText": "Learn how to contribute to Aquarium AI and help make it available in your language.",
+  "@informationContributeText": {
+    "description": "Subtitle shown on the Information screen encouraging contributions"
+  },
+
+  "i18nGuideTitle": "Internationalization Guide",
+  "@i18nGuideTitle": {
+    "description": "Title for the Internationalization (i18n) guide document and card"
+  },
+
+  "i18nCardTitle": "Internationalization (i18n)",
+  "@i18nCardTitle": {
+    "description": "Card title for the internationalization section on the Information screen"
+  },
+
+  "i18nCardSubtitle": "Help translate Aquarium AI into your language",
+  "@i18nCardSubtitle": {
+    "description": "Card subtitle for the internationalization section on the Information screen"
+  },
+
+  "i18nGuideInfoText": "The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.",
+  "@i18nGuideInfoText": {
+    "description": "Informational note shown below the i18n guide card on the Information screen"
+  },
+
+  "aboutSubtitle": "Your intelligent assistant for aquatic compatibility.",
+  "@aboutSubtitle": {
+    "description": "Subtitle shown on the About screen below the app name"
+  },
+
+  "aboutGetMobileApp": "Get the Mobile App",
+  "@aboutGetMobileApp": {
+    "description": "Section title for the mobile app promotion on the About screen"
+  },
+
+  "aboutMobileAppDescription": "Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.",
+  "@aboutMobileAppDescription": {
+    "description": "Description for the mobile app promotion on the About screen"
+  },
+
+  "aboutBringYourOwnKey": "Bring Your Own API Key",
+  "@aboutBringYourOwnKey": {
+    "description": "Section title for the BYOK explanation on the About screen"
+  },
+
+  "aboutBringYourOwnKeyDescription": "Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique \"Bring Your Own Key\" model gives you:",
+  "@aboutBringYourOwnKeyDescription": {
+    "description": "Introduction paragraph for the BYOK section on the About screen"
+  },
+
+  "aboutHigherApiLimits": "Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.",
+  "@aboutHigherApiLimits": {
+    "description": "First bullet point in the BYOK benefits list on the About screen"
+  },
+
+  "aboutUnlimitedFeatures": "Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.",
+  "@aboutUnlimitedFeatures": {
+    "description": "Second bullet point in the BYOK benefits list on the About screen"
+  },
+
+  "aboutNoApiKeyNote": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@aboutNoApiKeyNote": {
+    "description": "Note shown in the BYOK section explaining features that work without an API key"
+  },
+
+  "aboutContactFeedback": "Contact & Feedback",
+  "@aboutContactFeedback": {
+    "description": "Section title for the Contact & Feedback section on the About screen"
+  },
+
+  "aboutProudlyBroughtBy": "Aquarium AI is proudly brought to you by",
+  "@aboutProudlyBroughtBy": {
+    "description": "Text preceding the Capital City Aquatics link on the About screen"
+  },
+
+  "aboutFeedbackText": "For feedback, bug reports, or questions, please create an issue on GitHub or email us.",
+  "@aboutFeedbackText": {
+    "description": "Feedback invitation text on the About screen"
+  },
+
+  "aboutReportBugsSubtitle": "Report bugs or suggest features on our GitHub repository",
+  "@aboutReportBugsSubtitle": {
+    "description": "Subtitle for the GitHub issues link on the About screen"
+  },
+
+  "aboutOpenSource": "Open Source",
+  "@aboutOpenSource": {
+    "description": "Section title for the Open Source section on the About screen"
+  },
+
+  "aboutOpenSourceDescription": "Aquarium AI is open source! Check out our code, contribute, or report issues on GitHub.",
+  "@aboutOpenSourceDescription": {
+    "description": "Description for the Open Source section on the About screen"
   }
 }

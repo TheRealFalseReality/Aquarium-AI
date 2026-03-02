@@ -690,7 +690,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -698,7 +698,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
           children: units.map((unitName) {
             final bool isSelected = _fromUnit == unitName;
             return ModernSelectableChip(
-              label: unitName,
+              label: unitName == 'Fahrenheit' ? l10n.fahrenheit : l10n.celsius,
               selected: isSelected,
               selectedColor: Theme.of(context).colorScheme.secondary,
               selectedTextColor: Theme.of(context).colorScheme.onSecondary,
@@ -747,10 +747,10 @@ class TemperatureConverterState extends State<TemperatureConverter> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildResultColumn(
-                        _fromUnit == 'Fahrenheit' ? 'Celsius' : 'Fahrenheit',
+                        _fromUnit == 'Fahrenheit' ? l10n.celsius : l10n.fahrenheit,
                         '${_results['toValue']} ${_fromUnit == 'Fahrenheit' ? '°C' : '°F'}',
                         Theme.of(context).colorScheme.primary),
-                    _buildResultColumn('Kelvin', '${_results['kelvin']} K',
+                    _buildResultColumn(l10n.kelvin, '${_results['kelvin']} K',
                         Theme.of(context).colorScheme.secondary),
                   ],
                 ),

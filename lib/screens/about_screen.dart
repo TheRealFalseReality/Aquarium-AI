@@ -44,7 +44,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
       if (info == null) {
         // Check failed (e.g. not distributed via Play or network error)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to check for updates.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.unableToCheckUpdates)),
         );
         return;
       }
@@ -52,7 +52,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         await InAppUpdateService.startFlexibleUpdate();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You're already on the latest version!")),
+          SnackBar(content: Text(AppLocalizations.of(context)!.alreadyLatestVersion)),
         );
       }
     } finally {
@@ -126,7 +126,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     final shouldShowMobileAppSection = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
     
     return MainLayout(
-      title: 'About',
+      title: l10n.about,
       bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(12.0),
@@ -146,7 +146,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               ),
           const SizedBox(height: 8),
           Text(
-            'Your intelligent assistant for aquatic compatibility.',
+            l10n.aboutSubtitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -163,10 +163,10 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(context, 'Get the Mobile App', Icons.phone_android),
+                    _buildSectionTitle(context, l10n.aboutGetMobileApp, Icons.phone_android),
                     const SizedBox(height: 16),
                     Text(
-                      'Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.',
+                      l10n.aboutMobileAppDescription,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 20),
@@ -194,10 +194,10 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(context, 'Bring Your Own API Key', Icons.key),
+                  _buildSectionTitle(context, l10n.aboutBringYourOwnKey, Icons.key),
                   const SizedBox(height: 16),
                   Text(
-                    'Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique "Bring Your Own Key" model gives you:',
+                    l10n.aboutBringYourOwnKeyDescription,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
@@ -213,7 +213,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                       ),
                       Expanded(
                         child: Text(
-                          'Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.',
+                          l10n.aboutHigherApiLimits,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -232,7 +232,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                       ),
                       Expanded(
                         child: Text(
-                          'Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.',
+                          l10n.aboutUnlimitedFeatures,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -249,7 +249,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                       ),
                     ),
                     child: Text(
-                      'Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.',
+                      l10n.aboutNoApiKeyNote,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                       ),
@@ -270,14 +270,14 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(context, 'Contact & Feedback', Icons.contact_support),
+                  _buildSectionTitle(context, l10n.aboutContactFeedback, Icons.contact_support),
                   const SizedBox(height: 16),
                   Text.rich(
                     TextSpan(
                       style: Theme.of(context).textTheme.bodyMedium,
                       children: [
-                        const TextSpan(
-                            text: 'Aquarium AI is proudly brought to you by '),
+                        TextSpan(
+                            text: '${l10n.aboutProudlyBroughtBy} '),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           child: InkWell(
@@ -298,16 +298,15 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'For feedback, bug reports, or questions, please create an issue on GitHub or email us.',
+                  Text(
+                    l10n.aboutFeedbackText,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   ListTile(
                     leading: const Icon(Icons.bug_report),
                     title: Text(l10n.createIssueOnGitHub),
-                    subtitle: const Text(
-                        'Report bugs or suggest features on our GitHub repository'),
+                    subtitle: Text(l10n.aboutReportBugsSubtitle),
                     onTap: () => _launchURL(
                         'https://github.com/TheRealFalseReality/aquarium-ai/issues'),
                   ),
@@ -331,10 +330,10 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(context, 'Open Source', Icons.code),
+                  _buildSectionTitle(context, l10n.aboutOpenSource, Icons.code),
                   const SizedBox(height: 16),
                   Text(
-                    'Aquarium AI is open source! Check out our code, contribute, or report issues on GitHub.',
+                    l10n.aboutOpenSourceDescription,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -362,7 +361,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Version $_version',
+                l10n.versionNumber(_version),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -382,7 +381,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.system_update_outlined, size: 18),
-                label: const Text('Check for Update'),
+                label: Text(l10n.checkForUpdate),
                 onPressed: _checkingUpdate ? null : _checkForUpdate,
               ),
             ),

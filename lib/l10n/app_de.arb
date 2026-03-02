@@ -804,5 +804,26 @@
   "fieldWidth": "Breite",
   "viewShapeDimensions": "Abmessungen von {shape} anzeigen",
   "resultVolume": "Volumen",
-  "resultWeight": "Gewicht"
+  "resultWeight": "Gewicht",
+
+  "informationContributeText": "Erfahren Sie, wie Sie zu Aquarium AI beitragen und es in Ihrer Sprache verfügbar machen können.",
+  "i18nGuideTitle": "Internationalisierungsleitfaden",
+  "i18nCardTitle": "Internationalisierung (i18n)",
+  "i18nCardSubtitle": "Helfen Sie, Aquarium AI in Ihre Sprache zu übersetzen",
+  "i18nGuideInfoText": "Der i18n-Leitfaden enthält Links zu weiteren Ressourcen, darunter Übersetzungsleitfäden, Testdokumentation und Implementierungsdetails.",
+
+  "aboutSubtitle": "Ihr intelligenter Assistent für aquatische Kompatibilität.",
+  "aboutGetMobileApp": "Mobile App herunterladen",
+  "aboutMobileAppDescription": "Erleben Sie die volle Leistung von Aquarium AI mit unserer mobilen App mit Offline-Zugriff, verbesserter Kamera und smarten Benachrichtigungen.",
+  "aboutBringYourOwnKey": "Eigenen API-Schlüssel verwenden",
+  "aboutBringYourOwnKeyDescription": "Aquarium AI unterscheidet sich von anderen KI-fähigen Aquarium-Apps. Wir ermöglichen Ihnen die Nutzung eigener KI-API-Schlüssel von Gemini, OpenAI und Groq. Dieses einzigartige \"Bring Your Own Key\"-Modell bietet Ihnen:",
+  "aboutHigherApiLimits": "Höhere KI-API-Limits: Genießen Sie deutlich mehr Interaktionen mit Ihrer KI, einschließlich des leistungsstarken Gemini 2.5 flash.",
+  "aboutUnlimitedFeatures": "Unbegrenzte Funktionen: Erhalten Sie uneingeschränkten Zugang zu allen Funktionen, einschließlich der Möglichkeit, unbegrenzt viele Aquarien hinzuzufügen und zu verwalten.",
+  "aboutNoApiKeyNote": "Hinweis: Aquarienverwaltung (einschließlich Harmony-Score) und alle Rechner (Beckenvolumen-Rechner usw.) funktionieren ohne KI-Schlüssel.",
+  "aboutContactFeedback": "Kontakt & Feedback",
+  "aboutProudlyBroughtBy": "Aquarium AI wird Ihnen stolz präsentiert von",
+  "aboutFeedbackText": "Für Feedback, Fehlermeldungen oder Fragen erstellen Sie bitte ein Issue auf GitHub oder senden Sie uns eine E-Mail.",
+  "aboutReportBugsSubtitle": "Fehler melden oder Funktionen in unserem GitHub-Repository vorschlagen",
+  "aboutOpenSource": "Open Source",
+  "aboutOpenSourceDescription": "Aquarium AI ist Open Source! Schauen Sie sich unseren Code an, tragen Sie bei oder melden Sie Probleme auf GitHub."
 }

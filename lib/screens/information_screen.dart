@@ -28,7 +28,7 @@ class InformationScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Learn how to contribute to Aquarium AI and help make it available in your language.',
+            l10n.informationContributeText,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -172,10 +172,10 @@ class InformationScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MarkdownViewerScreen(
+                    builder: (context) => MarkdownViewerScreen(
                       assetPath: 'assets/docs/START_HERE_I18N.md',
-                      title: 'Internationalization Guide',
-                      breadcrumbs: [], // Start with empty breadcrumbs from Information screen
+                      title: l10n.i18nGuideTitle,
+                      breadcrumbs: [],
                     ),
                   ),
                 );
@@ -202,14 +202,14 @@ class InformationScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Internationalization (i18n)',
+                            l10n.i18nCardTitle,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Help translate Aquarium AI into your language',
+                            l10n.i18nCardSubtitle,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
@@ -249,7 +249,7 @@ class InformationScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.',
+                    l10n.i18nGuideInfoText,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

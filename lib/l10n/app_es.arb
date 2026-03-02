@@ -804,5 +804,26 @@
   "fieldWidth": "Ancho",
   "viewShapeDimensions": "Ver dimensiones de {shape}",
   "resultVolume": "Volumen",
-  "resultWeight": "Peso"
+  "resultWeight": "Peso",
+
+  "informationContributeText": "Aprende cómo contribuir a Aquarium AI y ayudar a que esté disponible en tu idioma.",
+  "i18nGuideTitle": "Guía de Internacionalización",
+  "i18nCardTitle": "Internacionalización (i18n)",
+  "i18nCardSubtitle": "Ayuda a traducir Aquarium AI a tu idioma",
+  "i18nGuideInfoText": "La guía i18n contiene enlaces a recursos adicionales, incluidas guías de traducción, documentación de pruebas y detalles de implementación.",
+
+  "aboutSubtitle": "Tu asistente inteligente para la compatibilidad acuática.",
+  "aboutGetMobileApp": "Obtener la App Móvil",
+  "aboutMobileAppDescription": "Experimenta todo el poder de Aquarium AI con nuestra app móvil con acceso sin conexión, cámara mejorada y notificaciones inteligentes.",
+  "aboutBringYourOwnKey": "Usa tu Propia Clave API",
+  "aboutBringYourOwnKeyDescription": "Aquarium AI es diferente a otras apps de acuario con IA. Te damos el poder de usar tus propias claves de API de Gemini, OpenAI y Groq. Este exclusivo modelo \"Trae tu Propia Clave\" te ofrece:",
+  "aboutHigherApiLimits": "Mayores Límites de Llamadas API: Disfruta de significativamente más interacciones con tu IA, incluido el potente Gemini 2.5 flash.",
+  "aboutUnlimitedFeatures": "Funciones Ilimitadas: Obtén acceso sin restricciones a todas nuestras funciones, incluida la capacidad de agregar y gestionar un número ilimitado de acuarios.",
+  "aboutNoApiKeyNote": "Nota: La gestión de acuarios (incluida la puntuación de armonía) y todas las calculadoras (calculadora de volumen de pecera, etc.) funcionan sin clave de IA.",
+  "aboutContactFeedback": "Contacto y Comentarios",
+  "aboutProudlyBroughtBy": "Aquarium AI te es presentado con orgullo por",
+  "aboutFeedbackText": "Para comentarios, informes de errores o preguntas, crea un issue en GitHub o envíanos un correo electrónico.",
+  "aboutReportBugsSubtitle": "Reporta errores o sugiere funciones en nuestro repositorio de GitHub",
+  "aboutOpenSource": "Código Abierto",
+  "aboutOpenSourceDescription": "¡Aquarium AI es de código abierto! Revisa nuestro código, contribuye o reporta problemas en GitHub."
 }
