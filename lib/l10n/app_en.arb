@@ -3183,6 +3183,10 @@
   "@activityHistory": {
     "description": "Label for the activity history section on tank cards"
   },
+  "historySection": "History",
+  "@historySection": {
+    "description": "Section header label in the app drawer for the Analysis History entry"
+  },
   "visibleCards": "Visible Cards",
   "@visibleCards": {
     "description": "Title of the filter sheet for showing/hiding welcome screen feature cards"

@@ -284,30 +284,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 if (appSettings.enableAI) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 3,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'AI Tools',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _sectionHeader(context, 'AI Tools', Theme.of(context).colorScheme.primary),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 250),
                     child: Container(
@@ -377,30 +354,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ],
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 3,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Tools & Resources',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _sectionHeader(context, 'Tools & Resources', Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: Container(
@@ -443,6 +397,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                // ── Information ───────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, l10n.information, Theme.of(context).colorScheme.tertiary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 500),
                   child: Container(
@@ -450,7 +413,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
@@ -463,6 +426,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                // ── History ───────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, l10n.historySection, Theme.of(context).colorScheme.primary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 550),
                   child: Container(
@@ -470,7 +442,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
@@ -483,6 +455,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                // ── Community ─────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, l10n.communityTitle, Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 575),
                   child: Container(
@@ -503,7 +484,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                // Profile
+                // ── Profile ───────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, l10n.profileTitle, Theme.of(context).colorScheme.tertiary),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 590),
                   child: Container(
@@ -608,6 +597,34 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: _buildCollapsibleThemeMenu(),
           ),
           _buildDrawerFooter(context, navigate),
+        ],
+      ),
+    );
+  }
+
+  /// Compact section header with a colored left accent bar.
+  Widget _sectionHeader(BuildContext context, String label, Color color) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 16,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+          ),
         ],
       ),
     );
