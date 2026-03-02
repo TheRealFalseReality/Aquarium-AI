@@ -585,6 +585,7 @@
   "communitySignInToComment": "Inicia sesión para comentar",
   "communityCommentError": "No se pudo publicar el comentario. Por favor, inténtalo de nuevo.",
   "communityDeleteComment": "Eliminar comentario",
+  "communityDeleteCommentConfirm": "¿Estás seguro de que quieres eliminar este comentario? Esta acción no se puede deshacer.",
   "communityTankInfo": "Info del acuario",
   "communityPostType": "Tipo de publicación",
   "communityPostTitle": "Título",

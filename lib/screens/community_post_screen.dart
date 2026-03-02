@@ -55,6 +55,29 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final currentUserId = authState.asData?.value?.uid ?? '';
     if (currentUserId != userId) return;
 
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.communityDeleteComment),
+        content: Text(l10n.communityDeleteCommentConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
     // Create a lightweight comment object just to pass userId
     final commentsAsync =
         ref.read(communityCommentsStreamProvider(widget.post.id));

@@ -585,6 +585,7 @@
   "communitySignInToComment": "Connectez-vous pour commenter",
   "communityCommentError": "Impossible de publier le commentaire. Veuillez réessayer.",
   "communityDeleteComment": "Supprimer le commentaire",
+  "communityDeleteCommentConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.",
   "communityTankInfo": "Infos sur l'aquarium",
   "communityPostType": "Type de publication",
   "communityPostTitle": "Titre",
