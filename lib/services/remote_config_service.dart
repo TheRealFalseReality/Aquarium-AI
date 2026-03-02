@@ -39,7 +39,7 @@ class RemoteConfigService {
         RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
-        RemoteConfigKeys.changelog_en: rcDefaultChangelog,
+        RemoteConfigKeys.changelogEn: rcDefaultChangelog,
         RemoteConfigKeys.changelogDe: rcDefaultChangelogDe,
         RemoteConfigKeys.changelogEs: rcDefaultChangelogEs,
         RemoteConfigKeys.changelogFr: rcDefaultChangelogFr,
@@ -198,7 +198,7 @@ class RemoteConfigService {
   /// Returns an empty string when not set in Remote Config,
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
   static String get changelogEn =>
-      _modelString(RemoteConfigKeys.changelog_en, rcDefaultChangelog);
+      _modelString(RemoteConfigKeys.changelogEn, rcDefaultChangelog);
 
   /// Full markdown content of the German (de) changelog from Remote Config.
   /// Returns an empty string when not set, falling back to [changelogEn].
@@ -219,7 +219,7 @@ class RemoteConfigService {
   ///
   /// Priority:
   /// 1. Locale-specific content (e.g. `changelog_de` for `"de"`).
-  /// 2. English content (`changelog_en`).
+  /// 2. English content (`changelogEn`).
   /// 3. Empty string (caller should fall through to bundled asset).
   static String changelogForLocale(String languageCode) {
     String localeContent = '';
