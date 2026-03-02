@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
+import '../providers/profile_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
@@ -150,12 +151,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       };
     }
 
+    final profile = ref.read(currentUserProfileProvider).asData?.value;
     final post = await notifier.submitPost(
       type: _selectedType,
       title: _titleController.text.trim(),
       body: _bodyController.text.trim(),
       imageFilePath: _imageFilePath,
       tankInfo: tankInfo,
+      postSignature: profile?.buildPostSignature(),
     );
 
     if (mounted) {

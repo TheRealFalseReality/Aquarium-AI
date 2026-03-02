@@ -127,6 +127,7 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     required String body,
     String? imageFilePath,
     Map<String, dynamic>? tankInfo,
+    Map<String, String>? postSignature,
   }) async {
     state = state.copyWith(isSubmitting: true, clearError: true, success: false);
     final post = await CommunityService.createPost(
@@ -135,6 +136,7 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
       body: body,
       imageFilePath: imageFilePath,
       tankInfo: tankInfo,
+      postSignature: postSignature,
     );
     if (post != null) {
       state = state.copyWith(isSubmitting: false, success: true);

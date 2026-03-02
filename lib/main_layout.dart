@@ -5,12 +5,14 @@ import 'widgets/gradient_text.dart';
 class MainLayout extends StatelessWidget {
   final Widget child;
   final String title;
+  final List<Widget>? actions;
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton; 
 
   const MainLayout({
     required this.title,
     required this.child,
+    this.actions,
     this.bottomNavigationBar,
     this.floatingActionButton, 
     super.key,
@@ -47,6 +49,7 @@ class MainLayout extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: actions,
         // toolbarHeight: 60,
       ),
       drawer: AppDrawer(),

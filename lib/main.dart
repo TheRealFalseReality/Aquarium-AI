@@ -36,6 +36,8 @@ import '../l10n/app_localizations.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/appearance_screen.dart';
 import './screens/community_screen.dart';
+import './screens/auth_screen.dart';
+import './screens/profile_screen.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -507,6 +509,16 @@ class MyApp extends ConsumerWidget {
               case '/community':
                 page = const CommunityScreen();
                 screenName = 'community_screen';
+                break;
+              case '/auth':
+                page = const AuthScreen();
+                screenName = 'auth_screen';
+                break;
+              case '/profile':
+                String? uid;
+                if (args is Map) uid = args['userId'] as String?;
+                page = ProfileScreen(userId: uid);
+                screenName = 'profile_screen';
                 break;
               default:
                 page = const WelcomeScreen();
