@@ -890,10 +890,10 @@ class MessageBubble extends ConsumerWidget {
                   children: [
                     Text(
                       isUser
-                          ? 'You'
+                          ? l10n.chatbotYou
                           : isError
-                              ? 'Aquarium AI - Error'
-                              : 'Aquarium AI',
+                              ? l10n.chatbotAIError(appName: l10n.appTitle)
+                              : l10n.appTitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,

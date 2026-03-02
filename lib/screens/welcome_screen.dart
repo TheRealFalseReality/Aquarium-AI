@@ -829,11 +829,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${_getTextModelName(modelState)} (text)',
+                              '${_getTextModelName(modelState)} (${l10n.modelLabelText})',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              '${_getImageModelName(modelState)} (image)',
+                              '${_getImageModelName(modelState)} (${l10n.modelLabelImage})',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 16),
