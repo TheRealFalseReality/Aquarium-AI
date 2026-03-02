@@ -32,7 +32,7 @@ dependencies:
   firebase_auth: ^6.0.0
   cloud_firestore: ^6.1.2
   firebase_storage: ^13.0.6
-  google_sign_in: ^7.1.1
+  google_sign_in: ^6.2.1
   flutter_facebook_auth: ^7.1.5
   dart_openai: ^6.1.0
   groq: ^1.1.1 
