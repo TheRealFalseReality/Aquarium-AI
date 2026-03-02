@@ -976,11 +976,6 @@
     "description": "Notification added message"
   },
 
-  "notificationUpdated": "Notification updated",
-  "@notificationUpdated": {
-    "description": "Notification updated message"
-  },
-
   "nextOccurrence": "Next: {date}",
   "@nextOccurrence": {
     "description": "Next occurrence label",
@@ -1292,11 +1287,6 @@
   "allFishAndConfigurations": "All fish and configurations",
   "@allFishAndConfigurations": {
     "description": "All fish and configurations backup item"
-  },
-
-  "speciesTags": "Species tags",
-  "@speciesTags": {
-    "description": "Species tags backup item"
   },
 
   "activityLogs": "Activity logs",
@@ -2021,11 +2011,6 @@
   "addFirstReading": "Add First Reading",
   "@addFirstReading": {
     "description": "Add first reading button label when no readings exist"
-  },
-
-  "addParameter": "Add Parameter",
-  "@addParameter": {
-    "description": "Add parameter button label"
   },
 
   "addDose": "Add Dose",
