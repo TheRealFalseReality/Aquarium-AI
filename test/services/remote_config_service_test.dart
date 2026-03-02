@@ -110,8 +110,8 @@ void main() {
             equals('fishcompat_json'));
         expect(RemoteConfigKeys.buyMeACoffeeUrl,
             equals('buy_me_a_coffee_url'));
-        expect(RemoteConfigKeys.changelog_en,
-            equals('changelog_en'));
+        expect(RemoteConfigKeys.changelogEn,
+            equals('changelogEn'));
       });
     });
   });

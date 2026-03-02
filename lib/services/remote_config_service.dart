@@ -40,7 +40,7 @@ class RemoteConfigService {
         RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
-        RemoteConfigKeys.changelog_en: rcDefaultChangelog,
+        RemoteConfigKeys.changelogEn: rcDefaultChangelog,
         RemoteConfigKeys.changelogDe: rcDefaultChangelogDe,
         RemoteConfigKeys.changelogEs: rcDefaultChangelogEs,
         RemoteConfigKeys.changelogFr: rcDefaultChangelogFr,
@@ -200,7 +200,7 @@ class RemoteConfigService {
   /// Returns an empty string when not set in Remote Config,
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
   static String get changelogEn =>
-      _modelString(RemoteConfigKeys.changelog_en, rcDefaultChangelog);
+      _modelString(RemoteConfigKeys.changelogEn, rcDefaultChangelog);
 
   /// Full markdown content of the German (de) changelog from Remote Config.
   /// Returns an empty string when not set, falling back to [changelogEn].
