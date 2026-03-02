@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../providers/model_provider.dart';
 import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
@@ -15,6 +16,7 @@ import '../widgets/fish_card.dart';
 import '../widgets/ai_error_dialog.dart';
 import 'compatibility_report.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -351,6 +353,11 @@ class FishCompatibilityScreenState
     final l10n = AppLocalizations.of(context)!;
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
+    final modelState = ref.watch(modelProvider);
+
+    // Disabled for free-tier users when the per-tool RC toggle is off.
+    final isFishCompatDisabled = modelState.usingDeveloperGroqKeyForText &&
+        !RemoteConfigService.freeFishCompatEnabled;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -483,6 +490,48 @@ class FishCompatibilityScreenState
                   SliverToBoxAdapter(
                     child: _buildCategorySelector(notifier),
                   ),
+                  if (isFishCompatDisabled)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.block, color: Colors.orange, size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.freeTierFishCompatDisabledTitle,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      l10n.freeTierFishCompatDisabledMessage,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Colors.orange.shade800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ..._buildFishGridWithAds(providerState),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -538,7 +587,7 @@ class FishCompatibilityScreenState
               bottom: 0,
               left: 0,
               right: 0,
-              child: _buildBottomBar(providerState, notifier),
+              child: _buildBottomBar(providerState, notifier, isFishCompatDisabled),
             ),
         ],
       ),
@@ -715,7 +764,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildBottomBar(
-      FishCompatibilityState provider, FishCompatibilityNotifier notifier) {
+      FishCompatibilityState provider, FishCompatibilityNotifier notifier, bool isDisabled) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return ClipRRect(
@@ -796,7 +845,7 @@ class FishCompatibilityScreenState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ElevatedButton.icon(
-                  onPressed: provider.isLoading
+                  onPressed: (provider.isLoading || isDisabled)
                       ? null
                       : () async {
                           // Log fish compatibility report generation analytics

@@ -105,7 +105,7 @@ class AppPromotionDialog extends StatelessWidget {
               child: GestureDetector(
                 onTap: _launchPlayStore,
                 child: Image.asset(
-                  'assets/google_play_badge.png',
+                  'assets/images/system/google_play_badge.png',
                   height: 60,
                   fit: BoxFit.contain,
                 ),

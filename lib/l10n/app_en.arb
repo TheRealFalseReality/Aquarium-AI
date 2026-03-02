@@ -3603,6 +3603,62 @@
   "@profileSignatureShowMemberSince": {
     "description": "Switch label to show/hide member-since date in post signature"
   },
+  "freeTierFishCompatDisabledTitle": "Fish Compatibility Tool Unavailable",
+  "@freeTierFishCompatDisabledTitle": {
+    "description": "Title shown when the Fish Compatibility tool is disabled for free-tier users"
+  },
+  "freeTierFishCompatDisabledMessage": "The AI Fish Compatibility tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
+  "@freeTierFishCompatDisabledMessage": {
+    "description": "Body text shown when the Fish Compatibility tool is disabled for free-tier users"
+  },
+  "freeTierPhotoAnalysisDisabledTitle": "Photo Analysis Unavailable",
+  "@freeTierPhotoAnalysisDisabledTitle": {
+    "description": "Title shown when the Photo Analysis tool is disabled for free-tier users"
+  },
+  "freeTierPhotoAnalysisDisabledMessage": "The AI Photo Analysis tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
+  "@freeTierPhotoAnalysisDisabledMessage": {
+    "description": "Body text shown when the Photo Analysis tool is disabled for free-tier users"
+  },
+
+  "userGuideCardTitle": "User Guide",
+  "@userGuideCardTitle": {
+    "description": "Title for the User Guide card in the Information screen"
+  },
+
+  "userGuideCardSubtitle": "Learn how to use every tool in Aquarium AI",
+  "@userGuideCardSubtitle": {
+    "description": "Subtitle for the User Guide card in the Information screen"
+  },
+
+  "welcomeDocsCardTitle": "Documentation & Guides",
+  "@welcomeDocsCardTitle": {
+    "description": "Title for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardBody": "New to Aquarium AI? Browse the built-in User Guide to learn how to use every tool — Tank Management, AI tools, Calculators, and more.",
+  "@welcomeDocsCardBody": {
+    "description": "Body text for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardButton": "Open User Guide",
+  "@welcomeDocsCardButton": {
+    "description": "Button label on the Documentation & Guides promo card"
+  },
+
+  "welcomeCommunityPromoTitle": "New: Community Feature",
+  "@welcomeCommunityPromoTitle": {
+    "description": "Title for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoBody": "Connect with other aquarium enthusiasts! Share your tank showcases, ask questions, post tips, and explore what the community is up to.",
+  "@welcomeCommunityPromoBody": {
+    "description": "Body text for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoButton": "Explore Community",
+  "@welcomeCommunityPromoButton": {
+    "description": "Button label on the Community feature promo card"
+  },
 
   "appearanceDesc": "Themes, brightness mode and colour palette",
   "@appearanceDesc": {
@@ -3784,6 +3840,7 @@
     "description": "Button label to never show the AquaPi promotion dialog again (full label, for desktop)"
   },
 
+<<<<<<< copilot/translate-aquarium-calculators
   "calculators": "Calculators",
   "@calculators": {
     "description": "Short title for the Aquarium Calculators screen (AppBar)"
@@ -3974,11 +4031,159 @@
     "description": "Tooltip text on the dimension diagram button in the tank volume calculator",
     "placeholders": {
       "shape": {
+=======
+  "themeDefault": "Default",
+  "@themeDefault": {
+    "description": "Display name for the Default colour theme"
+  },
+
+  "themeMaterialYou": "Material You",
+  "@themeMaterialYou": {
+    "description": "Display name for the Material You colour theme"
+  },
+
+  "themeOceanBlue": "Ocean Blue",
+  "@themeOceanBlue": {
+    "description": "Display name for the Ocean Blue colour theme"
+  },
+
+  "themeIceBlue": "Ice Blue",
+  "@themeIceBlue": {
+    "description": "Display name for the Ice Blue colour theme"
+  },
+
+  "themeGold": "Gold",
+  "@themeGold": {
+    "description": "Display name for the Gold colour theme"
+  },
+
+  "themeMulberry": "Mulberry",
+  "@themeMulberry": {
+    "description": "Display name for the Mulberry colour theme"
+  },
+
+  "themeMidnight": "Midnight",
+  "@themeMidnight": {
+    "description": "Display name for the Midnight colour theme"
+  },
+
+  "themeOrange": "Orange",
+  "@themeOrange": {
+    "description": "Display name for the Orange colour theme"
+  },
+
+  "themeGreen": "Green",
+  "@themeGreen": {
+    "description": "Display name for the Green colour theme"
+  },
+
+  "themeSkyBlue": "Sky Blue",
+  "@themeSkyBlue": {
+    "description": "Display name for the Sky Blue colour theme"
+  },
+
+  "themeRoyalBlue": "Royal Blue",
+  "@themeRoyalBlue": {
+    "description": "Display name for the Royal Blue colour theme"
+  },
+
+  "themeOrchid": "Orchid",
+  "@themeOrchid": {
+    "description": "Display name for the Orchid colour theme"
+  },
+
+  "themeHotPink": "Hot Pink",
+  "@themeHotPink": {
+    "description": "Display name for the Hot Pink colour theme"
+  },
+
+  "themeCrimson": "Crimson",
+  "@themeCrimson": {
+    "description": "Display name for the Crimson colour theme"
+  },
+
+  "modelLabelText": "text",
+  "@modelLabelText": {
+    "description": "Label shown after the text AI model name on the welcome screen (e.g. 'gemini-flash (text)')"
+  },
+
+  "modelLabelImage": "image",
+  "@modelLabelImage": {
+    "description": "Label shown after the image AI model name on the welcome screen (e.g. 'gemini-flash (image)')"
+  },
+
+  "analysisHistoryTitle": "Analysis History",
+  "@analysisHistoryTitle": {
+    "description": "Screen title for the Analysis History screen"
+  },
+
+  "noAnalysisHistory": "No Analysis History",
+  "@noAnalysisHistory": {
+    "description": "Heading shown on the empty state of the Analysis History screen"
+  },
+
+  "noAnalysisHistoryDesc": "Every AI analysis you run will be saved here for easy review.",
+  "@noAnalysisHistoryDesc": {
+    "description": "Body text shown on the empty state of the Analysis History screen"
+  },
+
+  "clearAllHistory": "Clear All History",
+  "@clearAllHistory": {
+    "description": "Button label to clear all analysis history"
+  },
+
+  "clearHistory": "Clear History",
+  "@clearHistory": {
+    "description": "Title of the confirmation dialog for clearing analysis history"
+  },
+
+  "clearHistoryConfirm": "Are you sure you want to delete all analysis history? This cannot be undone.",
+  "@clearHistoryConfirm": {
+    "description": "Body text of the confirmation dialog for clearing analysis history"
+  },
+
+  "clearAll": "Clear All",
+  "@clearAll": {
+    "description": "Confirm button label in the clear history dialog"
+  },
+
+  "deleteEntry": "Delete Entry",
+  "@deleteEntry": {
+    "description": "Title of the confirmation dialog for deleting a single history entry"
+  },
+
+  "deleteEntryConfirm": "Remove this analysis from history?",
+  "@deleteEntryConfirm": {
+    "description": "Body text of the confirmation dialog for deleting a single history entry"
+  },
+
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
+    "description": "Tooltip for the star button when the entry is not yet a favorite"
+  },
+
+  "removeFromFavorites": "Remove from favorites",
+  "@removeFromFavorites": {
+    "description": "Tooltip for the star button when the entry is already a favorite"
+  },
+
+  "noRecommendationsFound": "No recommendations found in this history entry.",
+  "@noRecommendationsFound": {
+    "description": "Snackbar shown when a stocking recommendation history entry has no data"
+  },
+
+  "couldNotOpenReport": "Could not open report: {error}",
+  "@couldNotOpenReport": {
+    "description": "Snackbar shown when a history entry cannot be opened",
+    "placeholders": {
+      "error": {
+>>>>>>> main
         "type": "String"
       }
     }
   },
 
+<<<<<<< copilot/translate-aquarium-calculators
   "resultVolume": "Volume",
   "@resultVolume": {
     "description": "Label for the volume result in the tank volume calculator"
@@ -4169,11 +4374,54 @@
     "description": "Snackbar message shown after an API key is cleared",
     "placeholders": {
       "label": {
+=======
+  "analysisTypeWaterParameters": "Water Parameter Analysis",
+  "@analysisTypeWaterParameters": {
+    "description": "Display name for the water parameter analysis type in history"
+  },
+
+  "analysisTypePhotoAnalysis": "Photo Analysis",
+  "@analysisTypePhotoAnalysis": {
+    "description": "Display name for the photo analysis type in history"
+  },
+
+  "analysisTypeFishInfo": "Fish Info",
+  "@analysisTypeFishInfo": {
+    "description": "Display name for the fish info analysis type in history"
+  },
+
+  "analysisTypeAutomationScript": "Automation Script",
+  "@analysisTypeAutomationScript": {
+    "description": "Display name for the automation script analysis type in history"
+  },
+
+  "analysisTypeCompatibilityReport": "Compatibility Report",
+  "@analysisTypeCompatibilityReport": {
+    "description": "Display name for the compatibility report analysis type in history"
+  },
+
+  "analysisTypeStockingRecommendation": "Stocking Recommendation",
+  "@analysisTypeStockingRecommendation": {
+    "description": "Display name for the stocking recommendation analysis type in history"
+  },
+
+  "chatbotYou": "You",
+  "@chatbotYou": {
+    "description": "Label shown above user messages in the chatbot screen"
+  },
+
+  "chatbotAIError": "{appName} - Error",
+  "@chatbotAIError": {
+    "description": "Label shown above error messages in the chatbot screen",
+    "placeholders": {
+      "appName": {
+>>>>>>> main
         "type": "String"
       }
     }
   },
 
+<<<<<<< copilot/translate-aquarium-calculators
   "clear": "Clear",
   "@clear": {
     "description": "Short button label to clear/remove a value"
@@ -4542,5 +4790,10 @@
   "getTheApp": "Get the App",
   "@getTheApp": {
     "description": "Button label to download the mobile app"
+=======
+  "moreThemeOptions": "More theme options",
+  "@moreThemeOptions": {
+    "description": "Button label in the app drawer that navigates to the full Appearance screen"
+>>>>>>> main
   }
 }
