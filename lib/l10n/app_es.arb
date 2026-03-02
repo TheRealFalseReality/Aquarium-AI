@@ -593,6 +593,26 @@
   "communityPostBodyRequired": "Por favor, introduce una descripción",
   "communityPostImage": "Foto (opcional)",
   "communityPickImage": "Elegir de la galería",
+  "communityEditPost": "Editar publicación",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "¡Publicación actualizada con éxito!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Error al subir imagen. Por favor, inténtalo de nuevo.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
+  "communityRegisterToUploadImage": "Regístrate para subir imágenes",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "Debes registrar una cuenta para subir imágenes.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
   "communityAttachTank": "Adjuntar info del acuario",
   "communitySelectTank": "Seleccionar acuario",
   "communityPostPublish": "Publicar",
@@ -693,4 +713,8 @@
   "profilePersonIcons": "Persona",
   "profileAquariumIcons": "Acuario",
   "profileRestoreProviderPhoto": "Restaurar Foto de Inicio de Sesión"
+  "communityCardLabel": "Tarjeta de Comunidad",
+  "communityCardLatestPosts": "Publicaciones Recientes",
+  "communityCardViewAll": "Ver Todo",
+  "communityCardNoPostsYet": "Aún no hay publicaciones"
 }

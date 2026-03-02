@@ -48,12 +48,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: authState.asData?.value == null
             ? null
-            : () => _navigateToCreate(context),
+            : () => _navigateToCreate(context, feedState.selectedType),
         tooltip: l10n.communityCreatePost,
         child: const Icon(Icons.add),
       ),
       child: Column(
         children: [
+          // Header banner
+          _buildHeader(context, l10n),
           // Filter chips
           _buildFilterRow(context, l10n, feedState.selectedType),
           // Posts feed
@@ -81,7 +83,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               ),
               data: (posts) {
                 if (posts.isEmpty) {
-                  return _buildEmptyState(context, l10n, currentUserId);
+                  return _buildEmptyState(context, l10n, currentUserId, feedState.selectedType);
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
@@ -97,11 +99,69 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                         currentUserId: currentUserId,
                         onTap: () => _openPost(context, post),
                         onDelete: () => _confirmDelete(context, l10n, post),
+                        onEdit: post.userId == currentUserId
+                            ? () => _navigateToEdit(context, post)
+                            : null,
                       );
                     },
                   ),
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primaryContainer,
+            theme.colorScheme.secondaryContainer,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor:
+                theme.colorScheme.primary.withOpacity(0.15),
+            child: Icon(Icons.people,
+                color: theme.colorScheme.primary, size: 26),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.communityTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.communityDrawerDescription,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer
+                        .withOpacity(0.8),
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -149,7 +209,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _buildEmptyState(
-      BuildContext context, AppLocalizations l10n, String currentUserId) {
+      BuildContext context, AppLocalizations l10n, String currentUserId, PostType? selectedType) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -177,7 +237,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             const SizedBox(height: 24),
             if (currentUserId.isNotEmpty)
               FilledButton.icon(
-                onPressed: () => _navigateToCreate(context),
+                onPressed: () => _navigateToCreate(context, selectedType),
                 icon: const Icon(Icons.add),
                 label: Text(l10n.communityCreatePost),
               ),
@@ -196,10 +256,19 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     );
   }
 
-  void _navigateToCreate(BuildContext context) {
+  void _navigateToCreate(BuildContext context, PostType? initialType) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const CreatePostScreen()),
+      MaterialPageRoute(
+          builder: (_) => CreatePostScreen(initialType: initialType)),
+    );
+  }
+
+  void _navigateToEdit(BuildContext context, CommunityPost post) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (_) => CreatePostScreen(editPost: post)),
     );
   }
 

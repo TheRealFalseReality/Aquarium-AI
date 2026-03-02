@@ -3126,6 +3126,26 @@
   "@communityPickImage": {
     "description": "Button label to open gallery for image selection"
   },
+  "communityEditPost": "Edit Post",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "Post updated successfully!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Image upload failed. Please try again.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
+  "communityRegisterToUploadImage": "Sign up to upload images",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "You must register an account to upload images.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
   "communityAttachTank": "Attach tank info",
   "@communityAttachTank": {
     "description": "Switch label to attach tank data to a post"
@@ -3531,5 +3551,20 @@
   "profileRestoreProviderPhoto": "Restore Sign-In Photo",
   "@profileRestoreProviderPhoto": {
     "description": "Option to restore the profile photo pulled from Google or Facebook sign-in"
+  "communityCardLabel": "Community Card",
+  "@communityCardLabel": {
+    "description": "Label for the community card toggle in the welcome screen card filter sheet"
+  },
+  "communityCardLatestPosts": "Latest Posts",
+  "@communityCardLatestPosts": {
+    "description": "Section title on the welcome screen community card"
+  },
+  "communityCardViewAll": "View All",
+  "@communityCardViewAll": {
+    "description": "Button on the welcome screen community card to navigate to the full community screen"
+  },
+  "communityCardNoPostsYet": "No posts yet",
+  "@communityCardNoPostsYet": {
+    "description": "Placeholder text on the welcome screen community card when there are no posts"
   }
 }

@@ -71,6 +71,17 @@ final communityPostsStreamProvider =
   return CommunityService.postsStream();
 });
 
+/// Live stream of the most-recent [limit] community posts used by the
+/// Welcome Screen community card. Uses a separate provider so it doesn't
+/// interfere with the main community feed filter state.
+/// Pass a [PostType] to filter by type, or `null` for all types.
+final welcomeCommunityPostsProvider =
+    StreamProvider.autoDispose.family<List<CommunityPost>, PostType?>(
+  (ref, type) => type != null
+      ? CommunityService.postsByTypeStream(type, limit: 5)
+      : CommunityService.postsStream(limit: 5),
+);
+
 // ─── Comments Provider ────────────────────────────────────────────────────────
 
 /// Live stream of comments for a given post.
@@ -131,6 +142,27 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
       state = state.copyWith(isSubmitting: false, error: 'post_creation_failed');
     }
     return post;
+  }
+
+  Future<CommunityPost?> updatePost({
+    required CommunityPost post,
+    required String title,
+    required String body,
+    String? newImageFilePath,
+  }) async {
+    state = state.copyWith(isSubmitting: true, clearError: true, success: false);
+    final updated = await CommunityService.updatePost(
+      post: post,
+      title: title,
+      body: body,
+      newImageFilePath: newImageFilePath,
+    );
+    if (updated != null) {
+      state = state.copyWith(isSubmitting: false, success: true);
+    } else {
+      state = state.copyWith(isSubmitting: false, error: 'post_update_failed');
+    }
+    return updated;
   }
 }
 
