@@ -143,7 +143,7 @@ class RemoteConfigKeys {
   // ── Changelog ───────────────────────────────────────────────────────────
   /// String — full markdown content of the changelog.
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
-  static const String changelog = 'changelog';
+  static const String changelog = 'changelog_en';
 
   /// String — URL for the German (de) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
