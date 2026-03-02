@@ -3618,6 +3618,7 @@
   "freeTierPhotoAnalysisDisabledMessage": "The AI Photo Analysis tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
   "@freeTierPhotoAnalysisDisabledMessage": {
     "description": "Body text shown when the Photo Analysis tool is disabled for free-tier users"
+  },
 
   "userGuideCardTitle": "User Guide",
   "@userGuideCardTitle": {
