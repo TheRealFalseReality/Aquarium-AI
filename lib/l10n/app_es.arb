@@ -628,5 +628,9 @@
   "activityHistory": "Actividad",
   "visibleCards": "Tarjetas Visibles",
   "purchaseToHideCard": "Compra Eliminar Anuncios para ocultar",
-  "filterCards": "Filtrar Tarjetas"
+  "filterCards": "Filtrar Tarjetas",
+  "communityCardLabel": "Tarjeta de Comunidad",
+  "communityCardLatestPosts": "Publicaciones Recientes",
+  "communityCardViewAll": "Ver Todo",
+  "communityCardNoPostsYet": "Aún no hay publicaciones"
 }

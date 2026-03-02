@@ -3209,5 +3209,21 @@
   "filterCards": "Filter Cards",
   "@filterCards": {
     "description": "Tooltip for the filter button on the welcome screen"
+  },
+  "communityCardLabel": "Community Card",
+  "@communityCardLabel": {
+    "description": "Label for the community card toggle in the welcome screen card filter sheet"
+  },
+  "communityCardLatestPosts": "Latest Posts",
+  "@communityCardLatestPosts": {
+    "description": "Section title on the welcome screen community card"
+  },
+  "communityCardViewAll": "View All",
+  "@communityCardViewAll": {
+    "description": "Button on the welcome screen community card to navigate to the full community screen"
+  },
+  "communityCardNoPostsYet": "No posts yet",
+  "@communityCardNoPostsYet": {
+    "description": "Placeholder text on the welcome screen community card when there are no posts"
   }
 }

@@ -20,6 +20,7 @@ import '../widgets/ad_component.dart';
 import 'changelog_screen.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/community_provider.dart';
 import '../widgets/remove_ads_dialog.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
@@ -33,6 +34,7 @@ import '../services/in_app_review_service.dart';
 import '../services/in_app_update_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
+import '../models/community_post.dart';
 
 class ToolChipInfo {
   final String label;
@@ -135,6 +137,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _changelogBannerShownAtKey = 'changelog_banner_shown_at';
   static const int _changelogBannerAutoDismissDays = 3;
   static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
+  static const String _showCommunityCardKey = 'welcomeShowCommunityCard';
 
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
@@ -148,6 +151,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   // Hidden feature card IDs
   Set<String> _hiddenFeatures = {};
+
+  // Community card state
+  bool _showCommunityCard = false;
+  PostType? _communityCardFilterType; // null = show all post types
   
   @override
   void initState() {
@@ -184,6 +191,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           _hiddenFeatures = stored.split(',').where((s) => s.isNotEmpty).toSet();
         });
       }
+      final showCard = prefs.getBool(_showCommunityCardKey) ?? false;
+      if (mounted) {
+        setState(() => _showCommunityCard = showCard);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _saveCommunityCardVisible(bool value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_showCommunityCardKey, value);
     } catch (e) {
       // ignore
     }
@@ -213,6 +233,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 children: [
                   Text(l10n.visibleCards, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
+                  // Community card toggle (always first)
+                  CheckboxListTile(
+                    value: _showCommunityCard,
+                    title: Text(l10n.communityCardLabel),
+                    onChanged: (val) {
+                      setState(() => _showCommunityCard = val ?? false);
+                      setSheetState(() {});
+                      _saveCommunityCardVisible(val ?? false);
+                    },
+                  ),
+                  const Divider(),
                   ...allFeatures.map((f) {
                     final isAquaPiStore = f.fullWidth;
                     final isDisabled = isAquaPiStore && !adsRemoved;
@@ -707,6 +738,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       
                       // Remove Ads hint below My Tanks
                       _buildRemoveAdsHint(context),
+                      
+                      // Community Card (shown above feature cards when enabled)
+                      if (_showCommunityCard) ...[
+                        const SizedBox(height: 16),
+                        _buildCommunityCard(context),
+                        _buildCommunityCardAd(),
+                      ],
                       
                       const SizedBox(height: 16),
                       
@@ -1345,6 +1383,243 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCommunityCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final postsAsync = ref.watch(welcomeCommunityPostsProvider(_communityCardFilterType));
+
+    return AnimatedFeatureCard(
+      delay: const Duration(milliseconds: 580),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.teal.shade400.withOpacity(0.12),
+              Colors.blue.shade300.withOpacity(0.12),
+              cs.primaryContainer.withOpacity(0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: cs.primary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text('🌊', style: TextStyle(fontSize: 24)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.communityTitle,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            l10n.communityCardLatestPosts,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, '/community'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(l10n.communityCardViewAll),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.arrow_forward_ios, size: 12),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Post-type filter chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _communityFilterChip(context, l10n.communityFilterAll, null),
+                      const SizedBox(width: 8),
+                      _communityFilterChip(context, l10n.communityPostTypeTankShowcase, PostType.tankShowcase),
+                      const SizedBox(width: 8),
+                      _communityFilterChip(context, l10n.communityPostTypeTip, PostType.tip),
+                      const SizedBox(width: 8),
+                      _communityFilterChip(context, l10n.communityPostTypeQuestion, PostType.question),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Posts list
+                postsAsync.when(
+                  data: (posts) {
+                    if (posts.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            l10n.communityCardNoPostsYet,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: posts
+                          .take(5)
+                          .map((post) => _buildCommunityPostTile(context, post, cs))
+                          .toList(),
+                    );
+                  },
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _communityFilterChip(BuildContext context, String label, PostType? type) {
+    final isSelected = _communityCardFilterType == type;
+    final cs = Theme.of(context).colorScheme;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => setState(() => _communityCardFilterType = type),
+      selectedColor: cs.primaryContainer,
+      checkmarkColor: cs.primary,
+    );
+  }
+
+  Widget _buildCommunityPostTile(BuildContext context, CommunityPost post, ColorScheme cs) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => Navigator.pushNamed(context, '/community'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 4,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _postTypeColor(post.type),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    post.title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        post.displayName,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Spacer(),
+                      Icon(Icons.favorite_outline, size: 12, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${post.likes}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(Icons.comment_outlined, size: 12, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${post.commentCount}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _postTypeColor(PostType type) {
+    switch (type) {
+      case PostType.tankShowcase:
+        return Colors.blue.shade400;
+      case PostType.tip:
+        return Colors.green.shade400;
+      case PostType.question:
+        return Colors.orange.shade400;
+    }
+  }
+
+  Widget _buildCommunityCardAd() {
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+    return const Padding(
+      padding: EdgeInsets.only(top: 16),
+      child: NativeAdWidget(),
     );
   }
 
