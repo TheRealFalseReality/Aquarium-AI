@@ -21,6 +21,8 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 }
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
+  static const double _kTypeChipWidth = 140.0;
+
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
@@ -84,7 +86,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       final types = [PostType.tankShowcase, PostType.tip, PostType.question];
       final index = types.indexOf(type);
       if (index >= 0 && _typeScrollController.hasClients) {
-        final offset = index * 140.0;
+        final offset = index * _kTypeChipWidth;
         _typeScrollController.animateTo(
           offset.clamp(0.0, _typeScrollController.position.maxScrollExtent),
           duration: const Duration(milliseconds: 300),
@@ -130,7 +132,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     }
 
     Map<String, dynamic>? tankInfo;
-    if (_includeTankInfo && _selectedTankId != null && _selectedType == PostType.tankShowcase) {
+    if (_includeTankInfo && _selectedTankId != null) {
       final tanks = ref.read(tankProvider).tanks;
       final tank = tanks.firstWhere(
         (t) => t.id == _selectedTankId,
