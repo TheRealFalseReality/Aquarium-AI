@@ -716,5 +716,13 @@
   "communityCardLabel": "Carte Communauté",
   "communityCardLatestPosts": "Dernières Publications",
   "communityCardViewAll": "Voir Tout",
-  "communityCardNoPostsYet": "Pas encore de publications"
+  "communityCardNoPostsYet": "Pas encore de publications",
+  "profileSignatureSection": "Signature de Publication",
+  "profileSignatureDescription": "Choisissez quelles métriques apparaissent sous vos publications communautaires.",
+  "profileSignatureShowExpLevel": "Niveau d'expérience",
+  "profileSignatureShowLocation": "Localisation",
+  "profileSignatureShowTankCount": "Nombre d'aquariums",
+  "profileSignatureShowFishCount": "Nombre de poissons",
+  "profileSignatureShowYearsExp": "Années d'expérience",
+  "profileSignatureShowMemberSince": "Membre depuis"
 }

@@ -33,6 +33,65 @@ extension ExperienceLevelExt on ExperienceLevel {
   }
 }
 
+/// Controls which profile metrics are shown in the user's community post
+/// signature. All fields default to `true`; the user can disable individual
+/// fields in the edit-profile screen.
+class PostSignatureSettings {
+  final bool showLocation;
+  final bool showTankCount;
+  final bool showFishCount;
+  final bool showYearsExperience;
+  final bool showMemberSince;
+  final bool showExperienceLevel;
+
+  const PostSignatureSettings({
+    this.showLocation = true,
+    this.showTankCount = true,
+    this.showFishCount = true,
+    this.showYearsExperience = true,
+    this.showMemberSince = true,
+    this.showExperienceLevel = true,
+  });
+
+  PostSignatureSettings copyWith({
+    bool? showLocation,
+    bool? showTankCount,
+    bool? showFishCount,
+    bool? showYearsExperience,
+    bool? showMemberSince,
+    bool? showExperienceLevel,
+  }) =>
+      PostSignatureSettings(
+        showLocation: showLocation ?? this.showLocation,
+        showTankCount: showTankCount ?? this.showTankCount,
+        showFishCount: showFishCount ?? this.showFishCount,
+        showYearsExperience: showYearsExperience ?? this.showYearsExperience,
+        showMemberSince: showMemberSince ?? this.showMemberSince,
+        showExperienceLevel: showExperienceLevel ?? this.showExperienceLevel,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'showLocation': showLocation,
+        'showTankCount': showTankCount,
+        'showFishCount': showFishCount,
+        'showYearsExperience': showYearsExperience,
+        'showMemberSince': showMemberSince,
+        'showExperienceLevel': showExperienceLevel,
+      };
+
+  factory PostSignatureSettings.fromMap(Map<String, dynamic>? map) {
+    if (map == null) return const PostSignatureSettings();
+    return PostSignatureSettings(
+      showLocation: map['showLocation'] as bool? ?? true,
+      showTankCount: map['showTankCount'] as bool? ?? true,
+      showFishCount: map['showFishCount'] as bool? ?? true,
+      showYearsExperience: map['showYearsExperience'] as bool? ?? true,
+      showMemberSince: map['showMemberSince'] as bool? ?? true,
+      showExperienceLevel: map['showExperienceLevel'] as bool? ?? true,
+    );
+  }
+}
+
 /// A summary of a single tank synced from the user's local tank data.
 class ProfileTankSummary {
   final String id;
@@ -103,6 +162,8 @@ class UserProfile {
   final List<ProfileTankSummary> tanks;
   final DateTime joinedAt;
   final DateTime updatedAt;
+  /// Controls which metrics are shown in the user's community post signature.
+  final PostSignatureSettings signatureSettings;
 
   const UserProfile({
     required this.uid,
@@ -122,6 +183,7 @@ class UserProfile {
     this.tanks = const [],
     required this.joinedAt,
     required this.updatedAt,
+    this.signatureSettings = const PostSignatureSettings(),
   });
 
   UserProfile copyWith({
@@ -144,6 +206,7 @@ class UserProfile {
     int? totalFishCount,
     List<ProfileTankSummary>? tanks,
     DateTime? updatedAt,
+    PostSignatureSettings? signatureSettings,
   }) =>
       UserProfile(
         uid: uid,
@@ -165,6 +228,7 @@ class UserProfile {
         tanks: tanks ?? this.tanks,
         joinedAt: joinedAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        signatureSettings: signatureSettings ?? this.signatureSettings,
       );
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
@@ -193,6 +257,8 @@ class UserProfile {
           [],
       joinedAt: (data['joinedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      signatureSettings: PostSignatureSettings.fromMap(
+          data['signatureSettings'] as Map<String, dynamic>?),
     );
   }
 
@@ -213,6 +279,40 @@ class UserProfile {
         'tankCount': tankCount,
         'totalFishCount': totalFishCount,
         'tanks': tanks.map((t) => t.toMap()).toList(),
+        'signatureSettings': signatureSettings.toMap(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
+
+  /// Builds a snapshot map of visible signature fields for embedding in a
+  /// community post. Only fields enabled in [signatureSettings] are included,
+  /// and only when they have meaningful values. Returns null when no fields are
+  /// enabled.
+  ///
+  /// All values are stored as [String] so the map has a uniform type that
+  /// serialises cleanly to `Map<String, String>` in Firestore without type
+  /// coercion issues.
+  Map<String, String>? buildPostSignature() {
+    final sig = <String, String>{};
+    if (signatureSettings.showLocation &&
+        location != null &&
+        location!.isNotEmpty) {
+      sig['location'] = location!;
+    }
+    if (signatureSettings.showTankCount) {
+      sig['tankCount'] = '$tankCount';
+    }
+    if (signatureSettings.showFishCount) {
+      sig['fishCount'] = '$totalFishCount';
+    }
+    if (signatureSettings.showYearsExperience) {
+      sig['yearsExperience'] = '$yearsOfExperience';
+    }
+    if (signatureSettings.showMemberSince) {
+      sig['memberSince'] = joinedAt.toIso8601String();
+    }
+    if (signatureSettings.showExperienceLevel) {
+      sig['experienceLevel'] = experienceLevel.value;
+    }
+    return sig.isEmpty ? null : sig;
+  }
 }

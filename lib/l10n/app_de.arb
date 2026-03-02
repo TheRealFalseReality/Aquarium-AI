@@ -716,5 +716,13 @@
   "communityCardLabel": "Community-Karte",
   "communityCardLatestPosts": "Neueste Beiträge",
   "communityCardViewAll": "Alle anzeigen",
-  "communityCardNoPostsYet": "Noch keine Beiträge"
+  "communityCardNoPostsYet": "Noch keine Beiträge",
+  "profileSignatureSection": "Beitrags-Signatur",
+  "profileSignatureDescription": "Wähle, welche Metriken unter deinen Community-Beiträgen erscheinen.",
+  "profileSignatureShowExpLevel": "Erfahrungsstufe",
+  "profileSignatureShowLocation": "Standort",
+  "profileSignatureShowTankCount": "Anzahl Aquarien",
+  "profileSignatureShowFishCount": "Anzahl Fische",
+  "profileSignatureShowYearsExp": "Jahre Erfahrung",
+  "profileSignatureShowMemberSince": "Mitglied seit"
 }

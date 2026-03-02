@@ -3552,5 +3552,37 @@
   "communityCardNoPostsYet": "No posts yet",
   "@communityCardNoPostsYet": {
     "description": "Placeholder text on the welcome screen community card when there are no posts"
+  },
+  "profileSignatureSection": "Post Signature",
+  "@profileSignatureSection": {
+    "description": "Section header in the edit profile screen for the post signature settings"
+  },
+  "profileSignatureDescription": "Choose which metrics appear below your community posts.",
+  "@profileSignatureDescription": {
+    "description": "Subtitle under the post signature section in the edit profile screen"
+  },
+  "profileSignatureShowExpLevel": "Experience Level",
+  "@profileSignatureShowExpLevel": {
+    "description": "Switch label to show/hide experience level in post signature"
+  },
+  "profileSignatureShowLocation": "Location",
+  "@profileSignatureShowLocation": {
+    "description": "Switch label to show/hide location in post signature"
+  },
+  "profileSignatureShowTankCount": "Tank Count",
+  "@profileSignatureShowTankCount": {
+    "description": "Switch label to show/hide tank count in post signature"
+  },
+  "profileSignatureShowFishCount": "Fish Count",
+  "@profileSignatureShowFishCount": {
+    "description": "Switch label to show/hide fish count in post signature"
+  },
+  "profileSignatureShowYearsExp": "Years of Experience",
+  "@profileSignatureShowYearsExp": {
+    "description": "Switch label to show/hide years of experience in post signature"
+  },
+  "profileSignatureShowMemberSince": "Member Since",
+  "@profileSignatureShowMemberSince": {
+    "description": "Switch label to show/hide member-since date in post signature"
   }
 }

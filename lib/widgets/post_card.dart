@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
@@ -152,6 +153,12 @@ class _PostCardState extends State<PostCard> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  // Post signature (aquarist metrics at time of posting)
+                  if (widget.post.postSignature != null &&
+                      widget.post.postSignature!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    _buildSignature(context, theme, widget.post.postSignature!),
+                  ],
                   const SizedBox(height: 8),
                   // Footer: likes + comments
                   Row(
@@ -277,5 +284,119 @@ class _PostCardState extends State<PostCard> {
     }
     if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildSignature(BuildContext context, ThemeData theme,
+      Map<String, String> sig) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
+
+    // Build ordered list of signature chips
+    final chips = <Widget>[];
+
+    if (sig.containsKey('experienceLevel')) {
+      final level = sig['experienceLevel']!;
+      IconData icon;
+      switch (level) {
+        case 'intermediate':
+          icon = Icons.trending_up;
+          break;
+        case 'advanced':
+          icon = Icons.star_outline;
+          break;
+        case 'expert':
+          icon = Icons.workspace_premium_outlined;
+          break;
+        default:
+          icon = Icons.school_outlined;
+      }
+      final label = _levelLabel(l10n, level);
+      chips.add(_SigChip(icon: icon, label: label));
+    }
+    if (sig.containsKey('location')) {
+      chips.add(_SigChip(
+          icon: Icons.location_on_outlined, label: sig['location']!));
+    }
+    if (sig.containsKey('tankCount')) {
+      chips.add(_SigChip(
+          icon: Icons.water_drop,
+          label: '${l10n.profileStatTanks}: ${sig['tankCount']}'));
+    }
+    if (sig.containsKey('fishCount')) {
+      chips.add(_SigChip(
+          icon: Icons.set_meal,
+          label: '${l10n.profileStatFish}: ${sig['fishCount']}'));
+    }
+    if (sig.containsKey('yearsExperience')) {
+      chips.add(_SigChip(
+          icon: Icons.calendar_today_outlined,
+          label: '${l10n.profileStatYears}: ${sig['yearsExperience']}'));
+    }
+    if (sig.containsKey('memberSince')) {
+      final dt = DateTime.tryParse(sig['memberSince']!);
+      if (dt != null) {
+        chips.add(_SigChip(
+            icon: Icons.access_time_outlined,
+            label: '${l10n.profileJoined} ${DateFormat.yMMM().format(dt)}'));
+      }
+    }
+
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withOpacity(0.4),
+          width: 0.5,
+        ),
+      ),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: chips,
+      ),
+    );
+  }
+
+  String _levelLabel(AppLocalizations l10n, String level) {
+    switch (level) {
+      case 'intermediate':
+        return l10n.profileLevelIntermediate;
+      case 'advanced':
+        return l10n.profileLevelAdvanced;
+      case 'expert':
+        return l10n.profileLevelExpert;
+      default:
+        return l10n.profileLevelBeginner;
+    }
+  }
+}
+
+/// A tiny icon+label chip used in the post signature footer.
+class _SigChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _SigChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 11, color: colorScheme.onSurfaceVariant),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 10,
+              ),
+        ),
+      ],
+    );
   }
 }

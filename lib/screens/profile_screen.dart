@@ -109,8 +109,16 @@ IconData _levelIcon(ExperienceLevel level) {
 
 // ─── Tank-type icons ──────────────────────────────────────────────────────────
 
-IconData _tankTypeIcon(String type) =>
-    type == 'marine' ? Icons.waves : Icons.water_drop;
+IconData _tankTypeIcon(String type) {
+  switch (type) {
+    case 'marine':
+      return Icons.waves;
+    case 'reef':
+      return Icons.water;
+    default:
+      return Icons.water_drop;
+  }
+}
 
 // ─── ProfileScreen ────────────────────────────────────────────────────────────
 
@@ -209,20 +217,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return MainLayout(
       title: l10n.profileTitle,
-      actions: profile != null && isOwner
-          ? [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: l10n.profileEdit,
-                onPressed: () => _navigateToEdit(context, profile),
-              ),
-              IconButton(
-                icon: const Icon(Icons.share_outlined),
-                tooltip: l10n.profileShare,
-                onPressed: () => _shareProfile(profile),
-              ),
-            ]
-          : null,
       child: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.profileLoadError)),
@@ -282,7 +276,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         slivers: [
           // ── Header ──────────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: _buildHeader(context, l10n, profile),
+            child: _buildHeader(context, l10n, profile, isOwner),
           ),
           // ── Stats row ────────────────────────────────────────────────────
           SliverToBoxAdapter(
@@ -324,59 +318,86 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildHeader(
-      BuildContext context, AppLocalizations l10n, UserProfile profile) {
+      BuildContext context, AppLocalizations l10n, UserProfile profile,
+      bool isOwner) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-      child: Column(
-        children: [
-          // Avatar — icon takes priority, then photo URL, then default
-          _buildAvatarWidget(profile, colorScheme, radius: 48),
-          const SizedBox(height: 12),
-          // Display name
-          Text(
-            profile.displayName,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Column(
+            children: [
+              // Avatar — icon takes priority, then photo URL, then default
+              _buildAvatarWidget(profile, colorScheme, radius: 48),
+              const SizedBox(height: 12),
+              // Display name
+              Text(
+                profile.displayName,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              // Anonymous badge
+              if (profile.isAnonymous) ...[
+                const SizedBox(height: 4),
+                Chip(
+                  label: Text(l10n.profileAnonymous,
+                      style: const TextStyle(fontSize: 12)),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+              // Location
+              if (profile.location != null && profile.location!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 14, color: colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 2),
+                    Text(profile.location!,
+                        style: TextStyle(
+                            color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                  ],
+                ),
+              ],
+              // Bio
+              if (profile.bio != null && profile.bio!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(profile.bio!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: colorScheme.onSurfaceVariant)),
+              ],
+            ],
           ),
-          // Anonymous badge
-          if (profile.isAnonymous) ...[
-            const SizedBox(height: 4),
-            Chip(
-              label: Text(l10n.profileAnonymous,
-                  style: const TextStyle(fontSize: 12)),
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-          // Location
-          if (profile.location != null && profile.location!.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        ),
+        // ── Edit + Share icon buttons (owner only) ─────────────────────────
+        if (isOwner)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: colorScheme.onSurfaceVariant),
-                const SizedBox(width: 2),
-                Text(profile.location!,
-                    style: TextStyle(
-                        color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                _ActionIconButton(
+                  icon: Icons.edit_outlined,
+                  tooltip: l10n.profileEdit,
+                  onPressed: () => _navigateToEdit(context, profile),
+                ),
+                const SizedBox(width: 4),
+                _ActionIconButton(
+                  icon: Icons.share_outlined,
+                  tooltip: l10n.profileShare,
+                  onPressed: () => _shareProfile(profile),
+                ),
               ],
             ),
-          ],
-          // Bio
-          if (profile.bio != null && profile.bio!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(profile.bio!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurfaceVariant)),
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -583,6 +604,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     switch (type) {
       case 'marine':
         return l10n.profileTankTypeMarine;
+      case 'reef':
+        return l10n.profileTankTypeReef;
       case 'freshwater':
       default:
         return l10n.profileTankTypeFreshwater;
@@ -701,7 +724,10 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
   /// Cached provider photo URL (from Google / Facebook sign-in).
   String? _providerPhotoUrl;
 
-  static const _tankTypeOptions = ['freshwater', 'marine'];
+  /// Per-field signature visibility settings.
+  late PostSignatureSettings _signatureSettings;
+
+  static const _tankTypeOptions = ['freshwater', 'marine', 'reef'];
   static const _interestOptions = [
     'planted',
     'nano',
@@ -732,6 +758,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     _useProviderPhoto = (p.avatarIconCodePoint == null && p.avatarUrl != null);
     // Cache the provider photo URL (Google / Facebook) once at build time
     _providerPhotoUrl = FirebaseAuth.instance.currentUser?.photoURL;
+    _signatureSettings = p.signatureSettings;
   }
 
   @override
@@ -783,6 +810,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
       clearAvatarUrl: targetAvatarUrl == null,
       avatarIconCodePoint: targetIconCodePoint,
       clearAvatarIconCodePoint: targetIconCodePoint == null,
+      signatureSettings: _signatureSettings,
       updatedAt: DateTime.now(),
     );
 
@@ -1007,6 +1035,62 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
               onChanged: (v) => setState(() => _isPublic = v),
               secondary: Icon(_isPublic ? Icons.public : Icons.lock_outline),
             ),
+            const SizedBox(height: 16),
+
+            // ── Post signature settings ────────────────────────────────────
+            _SectionHeader(l10n.profileSignatureSection),
+            Text(l10n.profileSignatureDescription,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            const SizedBox(height: 8),
+            _buildSigSwitch(
+              l10n.profileSignatureShowExpLevel,
+              Icons.school_outlined,
+              _signatureSettings.showExperienceLevel,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showExperienceLevel: v)),
+            ),
+            _buildSigSwitch(
+              l10n.profileSignatureShowLocation,
+              Icons.location_on_outlined,
+              _signatureSettings.showLocation,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showLocation: v)),
+            ),
+            _buildSigSwitch(
+              l10n.profileSignatureShowTankCount,
+              Icons.water_drop,
+              _signatureSettings.showTankCount,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showTankCount: v)),
+            ),
+            _buildSigSwitch(
+              l10n.profileSignatureShowFishCount,
+              Icons.set_meal,
+              _signatureSettings.showFishCount,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showFishCount: v)),
+            ),
+            _buildSigSwitch(
+              l10n.profileSignatureShowYearsExp,
+              Icons.calendar_today_outlined,
+              _signatureSettings.showYearsExperience,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showYearsExperience: v)),
+            ),
+            _buildSigSwitch(
+              l10n.profileSignatureShowMemberSince,
+              Icons.access_time_outlined,
+              _signatureSettings.showMemberSince,
+              (v) => setState(() =>
+                  _signatureSettings =
+                      _signatureSettings.copyWith(showMemberSince: v)),
+            ),
             const SizedBox(height: 32),
           ],
         ),
@@ -1120,10 +1204,24 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     switch (type) {
       case 'marine':
         return l10n.profileTankTypeMarine;
+      case 'reef':
+        return l10n.profileTankTypeReef;
       case 'freshwater':
       default:
         return l10n.profileTankTypeFreshwater;
     }
+  }
+
+  Widget _buildSigSwitch(String label, IconData icon, bool value,
+      void Function(bool) onChanged) {
+    return SwitchListTile(
+      title: Text(label, style: const TextStyle(fontSize: 14)),
+      secondary: Icon(icon, size: 20),
+      value: value,
+      onChanged: onChanged,
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+    );
   }
 }
 
@@ -1244,6 +1342,47 @@ class _SectionHeader extends StatelessWidget {
               .textTheme
               .titleSmall
               ?.copyWith(fontWeight: FontWeight.bold)),
+    );
+  }
+}
+
+// ─── Action icon button (profile header top-right) ────────────────────────────
+
+/// A compact icon button with a semi-transparent background, used for the
+/// Edit and Share actions overlaid in the profile header's top-right corner.
+class _ActionIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _ActionIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.85),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: colorScheme.outlineVariant.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+          child: Icon(icon, size: 18, color: colorScheme.onSurface),
+        ),
+      ),
     );
   }
 }

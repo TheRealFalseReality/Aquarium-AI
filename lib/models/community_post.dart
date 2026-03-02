@@ -38,6 +38,10 @@ class CommunityPost {
   final String body;
   final String? imageUrl;
   final Map<String, dynamic>? tankInfo;
+  /// Snapshot of the author's profile signature at posting time.
+  /// Keys: location, tankCount, fishCount, yearsExperience, memberSince,
+  /// experienceLevel — only enabled + non-empty fields are present.
+  final Map<String, String>? postSignature;
   final int likes;
   final int commentCount;
   final DateTime createdAt;
@@ -53,6 +57,7 @@ class CommunityPost {
     required this.body,
     this.imageUrl,
     this.tankInfo,
+    this.postSignature,
     this.likes = 0,
     this.commentCount = 0,
     required this.createdAt,
@@ -71,6 +76,8 @@ class CommunityPost {
       body: data['body'] as String? ?? '',
       imageUrl: data['imageUrl'] as String?,
       tankInfo: data['tankInfo'] as Map<String, dynamic>?,
+      postSignature: (data['postSignature'] as Map?)
+          ?.cast<String, String>(),
       likes: data['likes'] as int? ?? 0,
       commentCount: data['commentCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -88,6 +95,7 @@ class CommunityPost {
       'body': body,
       if (imageUrl != null) 'imageUrl': imageUrl,
       if (tankInfo != null) 'tankInfo': tankInfo,
+      if (postSignature != null) 'postSignature': postSignature,
       'likes': likes,
       'commentCount': commentCount,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -105,6 +113,7 @@ class CommunityPost {
     String? body,
     String? imageUrl,
     Map<String, dynamic>? tankInfo,
+    Map<String, String>? postSignature,
     int? likes,
     int? commentCount,
     DateTime? createdAt,
@@ -120,6 +129,7 @@ class CommunityPost {
       body: body ?? this.body,
       imageUrl: imageUrl ?? this.imageUrl,
       tankInfo: tankInfo ?? this.tankInfo,
+      postSignature: postSignature ?? this.postSignature,
       likes: likes ?? this.likes,
       commentCount: commentCount ?? this.commentCount,
       createdAt: createdAt ?? this.createdAt,
