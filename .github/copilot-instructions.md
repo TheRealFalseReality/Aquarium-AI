@@ -240,6 +240,26 @@ When adding a new AI tool, calculator, or other significant feature:
 
 ---
 
+## Keeping the User Guide Up to Date
+
+`assets/docs/USER_GUIDE.md` is the single source of truth for end-user documentation. **Any PR that changes how a tool works must also update the corresponding section of the User Guide.**
+
+Update the User Guide when you:
+
+| Change | What to update in `USER_GUIDE.md` |
+|--------|-----------------------------------|
+| Add a new input field or option | Add it to the tool's **Inputs** / **How to Use** list |
+| Remove or rename a field | Remove or rename it in the same list |
+| Change a prerequisite (e.g. now requires an API key, or no longer does) | Update the **Requires** line at the top of that section |
+| Rename a screen or route | Update the **Route** line and any cross-references |
+| Add or remove a calculator | Add/remove the row in the Calculators table |
+| Change outputs or report format | Update the "Reading the Report" / result description |
+| Rename a setting or move it to a different settings group | Update the Settings & Appearance table |
+
+If the change is purely internal (refactor, performance, bug fix with no UX impact) no User Guide update is needed.
+
+---
+
 ## External Variables – Constants & Remote Config Convention
 
 **All URLs, default model names, feature flags, rate limits, and any other externally-sourced or remotely-configurable values must be declared as named constants** rather than being written as inline literals in business logic or UI code.

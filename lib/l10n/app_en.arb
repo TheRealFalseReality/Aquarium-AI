@@ -3612,5 +3612,35 @@
   "userGuideCardSubtitle": "Learn how to use every tool in Aquarium AI",
   "@userGuideCardSubtitle": {
     "description": "Subtitle for the User Guide card in the Information screen"
+  },
+
+  "welcomeDocsCardTitle": "Documentation & Guides",
+  "@welcomeDocsCardTitle": {
+    "description": "Title for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardBody": "New to Aquarium AI? Browse the built-in User Guide to learn how to use every tool — Tank Management, AI tools, Calculators, and more.",
+  "@welcomeDocsCardBody": {
+    "description": "Body text for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardButton": "Open User Guide",
+  "@welcomeDocsCardButton": {
+    "description": "Button label on the Documentation & Guides promo card"
+  },
+
+  "welcomeCommunityPromoTitle": "New: Community Feature",
+  "@welcomeCommunityPromoTitle": {
+    "description": "Title for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoBody": "Connect with other aquarium enthusiasts! Share your tank showcases, ask questions, post tips, and explore what the community is up to.",
+  "@welcomeCommunityPromoBody": {
+    "description": "Body text for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoButton": "Explore Community",
+  "@welcomeCommunityPromoButton": {
+    "description": "Button label on the Community feature promo card"
   }
 }

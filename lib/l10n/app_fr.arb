@@ -730,5 +730,11 @@
   "profileSignatureShowYearsExp": "Années d'expérience",
   "profileSignatureShowMemberSince": "Membre depuis",
   "userGuideCardTitle": "Guide d'utilisation",
-  "userGuideCardSubtitle": "Apprenez à utiliser chaque outil d'Aquarium AI"
+  "userGuideCardSubtitle": "Apprenez à utiliser chaque outil d'Aquarium AI",
+  "welcomeDocsCardTitle": "Documentation et guides",
+  "welcomeDocsCardBody": "Nouveau sur Aquarium AI ? Parcourez le guide d'utilisation intégré pour apprendre à utiliser chaque outil — Gestion des aquariums, outils IA, Calculatrices et plus encore.",
+  "welcomeDocsCardButton": "Ouvrir le guide",
+  "welcomeCommunityPromoTitle": "Nouveau : Fonctionnalité Communauté",
+  "welcomeCommunityPromoBody": "Connectez-vous avec d'autres passionnés d'aquariophilie ! Partagez vos aquariums, posez des questions, publiez des conseils et explorez ce que fait la communauté.",
+  "welcomeCommunityPromoButton": "Explorer la communauté"
 }
