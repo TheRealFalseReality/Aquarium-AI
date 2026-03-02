@@ -17,7 +17,7 @@ const String _prefKeyJson = 'fishcompat_cached_json';
 ///      persisted to SharedPreferences so offline re-launches can use it.
 ///   3. SharedPreferences persistent cache (the last value fetched from RC;
 ///      used when RC is unavailable on the current launch).
-///   4. Bundled local asset `assets/data/fishcompat.json` (always available offline).
+///   4. Bundled local asset `assets/fishcompat.json` (always available offline).
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
 
@@ -48,7 +48,7 @@ class FishDataService {
     }
 
     // Final fallback: bundled local asset.
-    return rootBundle.loadString('assets/data/fishcompat.json');
+    return rootBundle.loadString('assets/fishcompat.json');
   }
 
   // ---------------------------------------------------------------------------
