@@ -226,8 +226,8 @@ class RemoteConfigService {
   /// Returns the best-match changelog URL for [languageCode].
   ///
   /// Priority:
-  /// 1. Locale-specific URL (e.g. `changelog_url_de` for `"de"`).
-  /// 2. Generic English URL (`changelog_url`).
+  /// 1. Locale-specific URL (e.g. `changelog_de` for `"de"`).
+  /// 2. Generic English URL (`changelog`).
   /// 3. Empty string (caller should fall through to inline content or bundled asset).
   static String changelogUrlForLocale(String languageCode) {
     String localeUrl = '';

@@ -131,10 +131,6 @@ class RemoteConfigKeys {
   /// Empty string (default) means use the bundled `assets/data/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
 
-  /// String — URL from which to fetch the fish compatibility JSON at runtime.
-  /// Empty string (default) means fall back to [fishcompatJson] or bundled asset.
-  static const String fishcompatJsonUrl = 'fishcompat_json_url';
-
   // ── In-app purchase pricing ─────────────────────────────────────────────
   /// String — USD price for the Early Supporter lifetime purchase.
   /// Store a positive number (e.g. `0.99`) in Remote Config.
@@ -149,21 +145,15 @@ class RemoteConfigKeys {
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
   static const String changelog = 'changelog';
 
-  /// String — URL from which to fetch the changelog markdown at runtime.
-  /// When set, the app fetches content from this URL instead of using the
-  /// bundled asset or the [changelog] full-content key.
-  /// Empty string (default) means fall back to [changelog] or bundled asset.
-  static const String changelogUrl = 'changelog_url';
-
   /// String — URL for the German (de) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlDe = 'changelog_url_de';
+  static const String changelogUrlDe = 'changelog_de';
 
   /// String — URL for the Spanish (es) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlEs = 'changelog_url_es';
+  static const String changelogUrlEs = 'changelog_es';
 
   /// String — URL for the French (fr) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlFr = 'changelog_url_fr';
+  static const String changelogUrlFr = 'changelog_fr';
 }

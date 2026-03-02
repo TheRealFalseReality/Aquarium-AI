@@ -42,8 +42,8 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   }
 
   Future<void> _loadChangelog(String languageCode) async {
-    // 1. Locale-specific Remote Config URL (e.g. changelog_url_de).
-    //    Falls back to the generic changelog_url when no locale URL is set.
+    // 1. Locale-specific Remote Config URL (e.g. changelog_de).
+    //    Falls back to the generic changelog when no locale URL is set.
     final remoteUrl = RemoteConfigService.changelogUrlForLocale(languageCode);
     if (remoteUrl.isNotEmpty) {
       try {
