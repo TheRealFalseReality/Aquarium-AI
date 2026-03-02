@@ -568,6 +568,59 @@
   "fontPreviewText": "Portez ce vieux whisky au juge blond qui fume.",
   "customTheme": "Thème personnalisé",
   "themeName": "Nom du thème",
+  "communityTitle": "Communauté",
+  "communityDrawerDescription": "Partagez et explorez des aquariums, conseils et questions",
+  "communityCreatePost": "Créer une publication",
+  "communityPostDetail": "Publication",
+  "communityEmptyTitle": "Aucune publication pour l'instant",
+  "communityEmptySubtitle": "Soyez le premier à partager votre aquarium ou un conseil avec la communauté !",
+  "communityLoadError": "Impossible de charger les publications. Vérifiez votre connexion.",
+  "communityFilterAll": "Toutes",
+  "communityPostTypeTankShowcase": "Présentation d'aquarium",
+  "communityPostTypeTip": "Conseil",
+  "communityPostTypeQuestion": "Question",
+  "communityDeletePost": "Supprimer la publication",
+  "communityDeletePostConfirm": "Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.",
+  "communityComments": "Commentaires",
+  "communityNoComments": "Aucun commentaire pour l'instant. Soyez le premier !",
+  "communityAddComment": "Ajouter un commentaire…",
+  "communitySignInToComment": "Connectez-vous pour commenter",
+  "communityCommentError": "Impossible de publier le commentaire. Veuillez réessayer.",
+  "communityDeleteComment": "Supprimer le commentaire",
+  "communityDeleteCommentConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.",
+  "communityTankInfo": "Infos sur l'aquarium",
+  "communityPostType": "Type de publication",
+  "communityPostTitle": "Titre",
+  "communityPostTitleRequired": "Veuillez saisir un titre",
+  "communityPostBody": "Description",
+  "communityPostBodyRequired": "Veuillez saisir une description",
+  "communityPostImage": "Photo (optionnel)",
+  "communityPickImage": "Choisir dans la galerie",
+  "communityEditPost": "Modifier la publication",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "Publication mise à jour avec succès !",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Échec du téléchargement de l'image. Veuillez réessayer.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
+  "communityRegisterToUploadImage": "Inscrivez-vous pour télécharger des images",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "Vous devez créer un compte pour télécharger des images.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
+  "communityAttachTank": "Joindre les infos de l'aquarium",
+  "communitySelectTank": "Sélectionner un aquarium",
+  "communityPostPublish": "Publier",
+  "communityPostCreated": "Publication publiée avec succès !",
+  "communityPostError": "Impossible de publier la publication. Veuillez réessayer.",
   "sortFilterAndView": "Trier, Filtrer et Afficher",
   "viewSection": "Afficher",
   "cardContent": "Contenu de la Carte",
@@ -578,5 +631,9 @@
   "activityHistory": "Activité",
   "visibleCards": "Cartes Visibles",
   "purchaseToHideCard": "Achetez Supprimer les annonces pour masquer",
-  "filterCards": "Filtrer les cartes"
+  "filterCards": "Filtrer les cartes",
+  "communityCardLabel": "Carte Communauté",
+  "communityCardLatestPosts": "Dernières Publications",
+  "communityCardViewAll": "Voir Tout",
+  "communityCardNoPostsYet": "Pas encore de publications"
 }

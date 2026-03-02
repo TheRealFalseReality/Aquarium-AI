@@ -3028,6 +3028,158 @@
   "@themeName": {
     "description": "Label for the theme name text field in the custom theme dialog"
   },
+  "communityTitle": "Community",
+  "@communityTitle": {
+    "description": "Title of the community screen"
+  },
+  "communityDrawerDescription": "Share and explore tank showcases, tips, and questions",
+  "@communityDrawerDescription": {
+    "description": "Subtitle shown in app drawer for community"
+  },
+  "communityCreatePost": "Create Post",
+  "@communityCreatePost": {
+    "description": "Label for create post button"
+  },
+  "communityPostDetail": "Post",
+  "@communityPostDetail": {
+    "description": "AppBar title for single post detail screen"
+  },
+  "communityEmptyTitle": "No Posts Yet",
+  "@communityEmptyTitle": {
+    "description": "Title shown when community feed is empty"
+  },
+  "communityEmptySubtitle": "Be the first to share your tank or a tip with the community!",
+  "@communityEmptySubtitle": {
+    "description": "Subtitle shown when community feed is empty"
+  },
+  "communityLoadError": "Could not load posts. Check your connection.",
+  "@communityLoadError": {
+    "description": "Error message when posts fail to load"
+  },
+  "communityFilterAll": "All",
+  "@communityFilterAll": {
+    "description": "Filter chip label to show all post types"
+  },
+  "communityPostTypeTankShowcase": "Tank Showcase",
+  "@communityPostTypeTankShowcase": {
+    "description": "Post type label: tank showcase"
+  },
+  "communityPostTypeTip": "Tip",
+  "@communityPostTypeTip": {
+    "description": "Post type label: fish care tip"
+  },
+  "communityPostTypeQuestion": "Question",
+  "@communityPostTypeQuestion": {
+    "description": "Post type label: question"
+  },
+  "communityDeletePost": "Delete Post",
+  "@communityDeletePost": {
+    "description": "Tooltip/button label to delete a post"
+  },
+  "communityDeletePostConfirm": "Are you sure you want to delete this post? This cannot be undone.",
+  "@communityDeletePostConfirm": {
+    "description": "Confirmation message before deleting a post"
+  },
+  "communityComments": "Comments",
+  "@communityComments": {
+    "description": "Section header for comments on a post"
+  },
+  "communityNoComments": "No comments yet. Be the first!",
+  "@communityNoComments": {
+    "description": "Message when there are no comments on a post"
+  },
+  "communityAddComment": "Add a comment…",
+  "@communityAddComment": {
+    "description": "Hint text for the comment input field"
+  },
+  "communitySignInToComment": "Sign in to comment",
+  "@communitySignInToComment": {
+    "description": "Hint shown in comment input when user is not signed in"
+  },
+  "communityCommentError": "Failed to post comment. Please try again.",
+  "@communityCommentError": {
+    "description": "Error message when comment submission fails"
+  },
+  "communityDeleteComment": "Delete comment",
+  "@communityDeleteComment": {
+    "description": "Tooltip for delete comment icon"
+  },
+  "communityDeleteCommentConfirm": "Are you sure you want to delete this comment? This cannot be undone.",
+  "@communityDeleteCommentConfirm": {
+    "description": "Confirmation message shown before deleting a comment"
+  },
+  "communityTankInfo": "Tank Info",
+  "@communityTankInfo": {
+    "description": "Section header for attached tank information on a post"
+  },
+  "communityPostType": "Post type",
+  "@communityPostType": {
+    "description": "Label above the post type chip selector on create post screen"
+  },
+  "communityPostTitle": "Title",
+  "@communityPostTitle": {
+    "description": "Label for the title field on create post screen"
+  },
+  "communityPostTitleRequired": "Please enter a title",
+  "@communityPostTitleRequired": {
+    "description": "Validation message when title is empty"
+  },
+  "communityPostBody": "Description",
+  "@communityPostBody": {
+    "description": "Label for the body/description field on create post screen"
+  },
+  "communityPostBodyRequired": "Please enter a description",
+  "@communityPostBodyRequired": {
+    "description": "Validation message when body is empty"
+  },
+  "communityPostImage": "Photo (optional)",
+  "@communityPostImage": {
+    "description": "Label for the optional image picker on create post screen"
+  },
+  "communityPickImage": "Pick from gallery",
+  "@communityPickImage": {
+    "description": "Button label to open gallery for image selection"
+  },
+  "communityEditPost": "Edit Post",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "Post updated successfully!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Image upload failed. Please try again.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
+  "communityRegisterToUploadImage": "Sign up to upload images",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "You must register an account to upload images.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
+  "communityAttachTank": "Attach tank info",
+  "@communityAttachTank": {
+    "description": "Switch label to attach tank data to a post"
+  },
+  "communitySelectTank": "Select tank",
+  "@communitySelectTank": {
+    "description": "Dropdown label to choose a tank to attach to a post"
+  },
+  "communityPostPublish": "Publish",
+  "@communityPostPublish": {
+    "description": "Button label to publish a new post"
+  },
+  "communityPostCreated": "Post published successfully!",
+  "@communityPostCreated": {
+    "description": "Success snackbar when a post is published"
+  },
+  "communityPostError": "Failed to publish post. Please try again.",
+  "@communityPostError": {
+    "description": "Error snackbar when post submission fails"
+  },
   "sortFilterAndView": "Sort, Filter & View",
   "@sortFilterAndView": {
     "description": "Label for the sort, filter and view panel button in tank management"
@@ -3071,5 +3223,21 @@
   "filterCards": "Filter Cards",
   "@filterCards": {
     "description": "Tooltip for the filter button on the welcome screen"
+  },
+  "communityCardLabel": "Community Card",
+  "@communityCardLabel": {
+    "description": "Label for the community card toggle in the welcome screen card filter sheet"
+  },
+  "communityCardLatestPosts": "Latest Posts",
+  "@communityCardLatestPosts": {
+    "description": "Section title on the welcome screen community card"
+  },
+  "communityCardViewAll": "View All",
+  "@communityCardViewAll": {
+    "description": "Button on the welcome screen community card to navigate to the full community screen"
+  },
+  "communityCardNoPostsYet": "No posts yet",
+  "@communityCardNoPostsYet": {
+    "description": "Placeholder text on the welcome screen community card when there are no posts"
   }
 }

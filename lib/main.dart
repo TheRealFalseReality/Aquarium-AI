@@ -35,6 +35,7 @@ import './services/remote_config_service.dart';
 import '../l10n/app_localizations.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/appearance_screen.dart';
+import './screens/community_screen.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -502,6 +503,10 @@ class MyApp extends ConsumerWidget {
                 }
                 page = const WelcomeScreen();
                 screenName = 'welcome_screen';
+                break;
+              case '/community':
+                page = const CommunityScreen();
+                screenName = 'community_screen';
                 break;
               default:
                 page = const WelcomeScreen();

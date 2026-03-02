@@ -568,6 +568,59 @@
   "fontPreviewText": "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.",
   "customTheme": "Benutzerdefiniertes Design",
   "themeName": "Designname",
+  "communityTitle": "Community",
+  "communityDrawerDescription": "Teile und entdecke Aquarium-Präsentationen, Tipps und Fragen",
+  "communityCreatePost": "Beitrag erstellen",
+  "communityPostDetail": "Beitrag",
+  "communityEmptyTitle": "Noch keine Beiträge",
+  "communityEmptySubtitle": "Sei der Erste, der sein Aquarium oder einen Tipp mit der Community teilt!",
+  "communityLoadError": "Beiträge konnten nicht geladen werden. Überprüfe deine Verbindung.",
+  "communityFilterAll": "Alle",
+  "communityPostTypeTankShowcase": "Aquarium-Präsentation",
+  "communityPostTypeTip": "Tipp",
+  "communityPostTypeQuestion": "Frage",
+  "communityDeletePost": "Beitrag löschen",
+  "communityDeletePostConfirm": "Bist du sicher, dass du diesen Beitrag löschen möchtest? Dies kann nicht rückgängig gemacht werden.",
+  "communityComments": "Kommentare",
+  "communityNoComments": "Noch keine Kommentare. Sei der Erste!",
+  "communityAddComment": "Kommentar hinzufügen…",
+  "communitySignInToComment": "Anmelden, um zu kommentieren",
+  "communityCommentError": "Kommentar konnte nicht gepostet werden. Bitte erneut versuchen.",
+  "communityDeleteComment": "Kommentar löschen",
+  "communityDeleteCommentConfirm": "Möchtest du diesen Kommentar wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+  "communityTankInfo": "Aquarium-Infos",
+  "communityPostType": "Beitragstyp",
+  "communityPostTitle": "Titel",
+  "communityPostTitleRequired": "Bitte einen Titel eingeben",
+  "communityPostBody": "Beschreibung",
+  "communityPostBodyRequired": "Bitte eine Beschreibung eingeben",
+  "communityPostImage": "Foto (optional)",
+  "communityPickImage": "Aus Galerie wählen",
+  "communityEditPost": "Beitrag bearbeiten",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "Beitrag erfolgreich aktualisiert!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Bild-Upload fehlgeschlagen. Bitte erneut versuchen.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
+  "communityRegisterToUploadImage": "Registrieren, um Bilder hochzuladen",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "Du musst ein Konto registrieren, um Bilder hochzuladen.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
+  "communityAttachTank": "Aquarium-Infos anhängen",
+  "communitySelectTank": "Aquarium auswählen",
+  "communityPostPublish": "Veröffentlichen",
+  "communityPostCreated": "Beitrag erfolgreich veröffentlicht!",
+  "communityPostError": "Beitrag konnte nicht veröffentlicht werden. Bitte erneut versuchen.",
   "sortFilterAndView": "Sortieren, Filtern & Ansicht",
   "viewSection": "Ansicht",
   "cardContent": "Karteninhalt",
@@ -578,5 +631,9 @@
   "activityHistory": "Aktivität",
   "visibleCards": "Sichtbare Karten",
   "purchaseToHideCard": "Werbung entfernen kaufen, um auszublenden",
-  "filterCards": "Karten filtern"
+  "filterCards": "Karten filtern",
+  "communityCardLabel": "Community-Karte",
+  "communityCardLatestPosts": "Neueste Beiträge",
+  "communityCardViewAll": "Alle anzeigen",
+  "communityCardNoPostsYet": "Noch keine Beiträge"
 }

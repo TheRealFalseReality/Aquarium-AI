@@ -45,6 +45,9 @@ const String _defaultAquapiEssentialImageUrl = '';
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
 
+/// Fallback for whether community image uploads are enabled (default: true).
+const bool _defaultCommunityImageUpload = true;
+
 // Early Supporter lifetime purchase pricing.
 // 0.0 = do not display a price label in the Remove Ads dialog.
 // Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
@@ -131,6 +134,12 @@ class RemoteConfigKeys {
   /// String — full markdown content of the changelog.
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
   static const String changelog = 'changelog';
+
+  // ── Community ──────────────────────────────────────────────────────────────
+  /// Boolean — when `false` nobody can upload images to community posts.
+  /// Defaults to `true`. Set to `false` in Firebase Remote Config to disable
+  /// image uploads globally without shipping an app update.
+  static const String communityImageUpload = 'community_image_upload';
 }
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
@@ -170,6 +179,7 @@ class RemoteConfigService {
         RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: _defaultBuyMeACoffeeUrl,
         RemoteConfigKeys.changelog: _defaultChangelog,
+        RemoteConfigKeys.communityImageUpload: _defaultCommunityImageUpload,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -326,4 +336,12 @@ class RemoteConfigService {
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
   static String get changelog =>
       _modelString(RemoteConfigKeys.changelog, _defaultChangelog);
+
+  // ── Community ───────────────────────────────────────────────────────────────
+
+  /// Whether image uploads are enabled for community posts.
+  /// When `false`, the image picker is hidden for all users.
+  static bool get communityImageUploadEnabled =>
+      _instance?.getBool(RemoteConfigKeys.communityImageUpload) ??
+      _defaultCommunityImageUpload;
 }
