@@ -9,6 +9,7 @@ import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final PostType? initialType;
@@ -194,6 +195,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
     final isAnonymous = authState.asData?.value?.isAnonymous ?? true;
+    final imageUploadEnabled = RemoteConfigService.communityImageUploadEnabled;
 
     return Scaffold(
       appBar: AppBar(
@@ -267,7 +269,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             const SizedBox(height: 12),
 
             // Image picker (not on web, limit 1 image)
-            if (!kIsWeb) ...[
+            if (!kIsWeb && imageUploadEnabled) ...[
               Text(l10n.communityPostImage,
                   style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
