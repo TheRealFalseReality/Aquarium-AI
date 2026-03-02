@@ -3189,5 +3189,274 @@
   "filterCards": "Filter Cards",
   "@filterCards": {
     "description": "Tooltip for the filter button on the welcome screen"
+  },
+
+  "profileTitle": "My Profile",
+  "@profileTitle": {
+    "description": "Title for the profile screen"
+  },
+  "profileDrawerDescription": "View and edit your aquarist profile",
+  "@profileDrawerDescription": {
+    "description": "Short description of profile in app drawer"
+  },
+  "profileEdit": "Edit Profile",
+  "@profileEdit": {
+    "description": "Button to open profile edit screen"
+  },
+  "profileEditTitle": "Edit Profile",
+  "@profileEditTitle": {
+    "description": "App bar title for the edit profile screen"
+  },
+  "profileShare": "Share",
+  "@profileShare": {
+    "description": "Button to share the user profile"
+  },
+  "profileSaved": "Profile saved!",
+  "@profileSaved": {
+    "description": "Snackbar message when profile is saved successfully"
+  },
+  "profileSaveError": "Failed to save profile. Please try again.",
+  "@profileSaveError": {
+    "description": "Snackbar message when profile save fails"
+  },
+  "profileLoadError": "Failed to load profile.",
+  "@profileLoadError": {
+    "description": "Error message when profile fails to load"
+  },
+  "profileNotFound": "Profile not found.",
+  "@profileNotFound": {
+    "description": "Message when a profile doesn't exist"
+  },
+  "profileAnonymous": "Anonymous",
+  "@profileAnonymous": {
+    "description": "Badge shown on anonymous user profiles"
+  },
+  "profileSignInPromptTitle": "Create Your Aquarist Profile",
+  "@profileSignInPromptTitle": {
+    "description": "Title for the sign-in prompt on the profile screen"
+  },
+  "profileSignInPromptSubtitle": "Sign in or create an account to build your aquarist profile, track your tanks, and share with the community.",
+  "@profileSignInPromptSubtitle": {
+    "description": "Subtitle for the sign-in prompt on the profile screen"
+  },
+  "profileNameRequired": "Please enter a display name",
+  "@profileNameRequired": {
+    "description": "Validation error when display name is empty"
+  },
+  "profileBio": "Bio",
+  "@profileBio": {
+    "description": "Label for the bio field on profile edit screen"
+  },
+  "profileBioHint": "Tell the community about yourself and your tanks",
+  "@profileBioHint": {
+    "description": "Helper text for the bio field"
+  },
+  "profileLocation": "Location",
+  "@profileLocation": {
+    "description": "Label for the location field"
+  },
+  "profileYearsOfExperience": "Years of Experience",
+  "@profileYearsOfExperience": {
+    "description": "Label for the years of experience field"
+  },
+  "profileYearsValue": "{years, plural, =0{Less than 1 year} =1{1 year} other{{years} years}}",
+  "@profileYearsValue": {
+    "description": "Formatted years of experience value",
+    "placeholders": {
+      "years": {"type": "int"}
+    }
+  },
+  "profileYearsInvalid": "Please enter a valid number (0–100)",
+  "@profileYearsInvalid": {
+    "description": "Validation error for years of experience"
+  },
+  "profileExperienceLevel": "Experience Level",
+  "@profileExperienceLevel": {
+    "description": "Label for the experience level section/field"
+  },
+  "profileLevelBeginner": "Beginner",
+  "@profileLevelBeginner": {
+    "description": "Experience level: beginner"
+  },
+  "profileLevelIntermediate": "Intermediate",
+  "@profileLevelIntermediate": {
+    "description": "Experience level: intermediate"
+  },
+  "profileLevelAdvanced": "Advanced",
+  "@profileLevelAdvanced": {
+    "description": "Experience level: advanced"
+  },
+  "profileLevelExpert": "Expert",
+  "@profileLevelExpert": {
+    "description": "Experience level: expert"
+  },
+  "profilePreferredTankTypes": "Preferred Tank Types",
+  "@profilePreferredTankTypes": {
+    "description": "Label for the preferred tank types section"
+  },
+  "profileTankTypeFreshwater": "Freshwater",
+  "@profileTankTypeFreshwater": {
+    "description": "Freshwater tank type label in profile"
+  },
+  "profileTankTypeMarine": "Marine",
+  "@profileTankTypeMarine": {
+    "description": "Marine tank type label in profile"
+  },
+  "profileTankTypeReef": "Reef",
+  "@profileTankTypeReef": {
+    "description": "Reef tank type label in profile"
+  },
+  "profileInterests": "Interests",
+  "@profileInterests": {
+    "description": "Label for the interests section on profile"
+  },
+  "profilePublicToggle": "Public Profile",
+  "@profilePublicToggle": {
+    "description": "Toggle label for making profile public or private"
+  },
+  "profilePublicDescription": "Your profile is visible to the community",
+  "@profilePublicDescription": {
+    "description": "Description when profile is set to public"
+  },
+  "profilePrivateDescription": "Your profile is only visible to you",
+  "@profilePrivateDescription": {
+    "description": "Description when profile is set to private"
+  },
+  "profilePublic": "Public profile",
+  "@profilePublic": {
+    "description": "Label shown when profile is public"
+  },
+  "profilePrivate": "Private profile",
+  "@profilePrivate": {
+    "description": "Label shown when profile is private"
+  },
+  "profileTanksSection": "My Tanks",
+  "@profileTanksSection": {
+    "description": "Section header for tanks list on profile screen"
+  },
+  "profileDetailsSection": "Profile Details",
+  "@profileDetailsSection": {
+    "description": "Section header for profile details card"
+  },
+  "profileStatTanks": "Tanks",
+  "@profileStatTanks": {
+    "description": "Stat chip label for tank count"
+  },
+  "profileStatFish": "Fish",
+  "@profileStatFish": {
+    "description": "Stat chip label for fish count"
+  },
+  "profileStatYears": "Yrs Exp.",
+  "@profileStatYears": {
+    "description": "Stat chip label for years of experience"
+  },
+  "profileJoined": "Member since",
+  "@profileJoined": {
+    "description": "Label for join date on profile details card"
+  },
+
+  "authSignIn": "Sign In",
+  "@authSignIn": {
+    "description": "Button/title for sign-in action"
+  },
+  "authSignUp": "Sign Up",
+  "@authSignUp": {
+    "description": "Button/title for sign-up action"
+  },
+  "authSignOut": "Sign Out",
+  "@authSignOut": {
+    "description": "Button to sign out"
+  },
+  "authSignInTitle": "Welcome Back",
+  "@authSignInTitle": {
+    "description": "Headline on the sign-in screen"
+  },
+  "authSignInSubtitle": "Sign in to your Aquarium AI account",
+  "@authSignInSubtitle": {
+    "description": "Subtitle on the sign-in screen"
+  },
+  "authSignUpTitle": "Create Account",
+  "@authSignUpTitle": {
+    "description": "Headline on the sign-up screen"
+  },
+  "authSignUpSubtitle": "Join the Aquarium AI community",
+  "@authSignUpSubtitle": {
+    "description": "Subtitle on the sign-up screen"
+  },
+  "authDisplayName": "Display Name",
+  "@authDisplayName": {
+    "description": "Label for the display name field in sign-up"
+  },
+  "authEmail": "Email",
+  "@authEmail": {
+    "description": "Label for the email field"
+  },
+  "authEmailRequired": "Please enter your email",
+  "@authEmailRequired": {
+    "description": "Validation error when email is empty"
+  },
+  "authPassword": "Password",
+  "@authPassword": {
+    "description": "Label for the password field"
+  },
+  "authPasswordRequired": "Please enter your password",
+  "@authPasswordRequired": {
+    "description": "Validation error when password is empty"
+  },
+  "authPasswordTooShort": "Password must be at least 6 characters",
+  "@authPasswordTooShort": {
+    "description": "Validation error when password is too short"
+  },
+  "authForgotPassword": "Forgot password?",
+  "@authForgotPassword": {
+    "description": "Link to trigger password reset"
+  },
+  "authPasswordResetSent": "Password reset email sent. Check your inbox.",
+  "@authPasswordResetSent": {
+    "description": "Confirmation message after password reset email is sent"
+  },
+  "authAlreadyHaveAccount": "Already have an account?",
+  "@authAlreadyHaveAccount": {
+    "description": "Text before the sign-in toggle link on the sign-up form"
+  },
+  "authDontHaveAccount": "Don't have an account?",
+  "@authDontHaveAccount": {
+    "description": "Text before the sign-up toggle link on the sign-in form"
+  },
+  "authContinueAnonymously": "Continue without account",
+  "@authContinueAnonymously": {
+    "description": "Button to skip sign-in and continue anonymously"
+  },
+  "authErrorUserNotFound": "No account found with this email.",
+  "@authErrorUserNotFound": {
+    "description": "Auth error: user not found"
+  },
+  "authErrorWrongPassword": "Incorrect password. Please try again.",
+  "@authErrorWrongPassword": {
+    "description": "Auth error: wrong password"
+  },
+  "authErrorEmailInUse": "This email is already in use by another account.",
+  "@authErrorEmailInUse": {
+    "description": "Auth error: email already in use"
+  },
+  "authErrorInvalidEmail": "Please enter a valid email address.",
+  "@authErrorInvalidEmail": {
+    "description": "Auth error: invalid email"
+  },
+  "authErrorWeakPassword": "Password is too weak. Use at least 6 characters.",
+  "@authErrorWeakPassword": {
+    "description": "Auth error: weak password"
+  },
+  "authErrorTooManyRequests": "Too many attempts. Please try again later.",
+  "@authErrorTooManyRequests": {
+    "description": "Auth error: too many requests"
+  },
+  "authErrorNetwork": "Network error. Check your connection and try again.",
+  "@authErrorNetwork": {
+    "description": "Auth error: network failure"
+  },
+  "authErrorGeneric": "An error occurred. Please try again.",
+  "@authErrorGeneric": {
+    "description": "Generic auth error fallback"
   }
 }

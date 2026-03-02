@@ -12,6 +12,7 @@ import '../theme_provider.dart';
 import '../providers/tank_provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/community_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
@@ -479,6 +480,22 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+                // Profile
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 590),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: _buildProfileTile(context, l10n, navigate),
+                  ),
+                ),
                 // Debug-only: Fish Compat Editor
                 if (kDebugMode) ...[
                   AnimatedDrawerItem(
@@ -570,6 +587,50 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           _buildDrawerFooter(context, navigate),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileTile(BuildContext context, AppLocalizations l10n,
+      void Function(String) navigate) {
+    final authAsync = ref.watch(authStateProvider);
+    final user = authAsync.asData?.value;
+
+    if (user == null) {
+      return ListTile(
+        leading: Icon(Icons.account_circle_outlined,
+            color: Theme.of(context).colorScheme.tertiary),
+        title: Text(l10n.authSignIn),
+        subtitle: Text(l10n.profileDrawerDescription),
+        onTap: () => navigate('/auth'),
+      );
+    }
+
+    final isAnon = user.isAnonymous;
+    final displayName = user.displayName?.isNotEmpty == true
+        ? user.displayName!
+        : (isAnon
+            ? l10n.profileAnonymous
+            : user.email ?? l10n.profileAnonymous);
+
+    return ListTile(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: CircleAvatar(
+          backgroundColor:
+              Theme.of(context).colorScheme.tertiaryContainer,
+          child: Icon(
+            isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
+            color: Theme.of(context).colorScheme.tertiary,
+            size: 22,
+          ),
+        ),
+      ),
+      title: Text(displayName,
+          overflow: TextOverflow.ellipsis, maxLines: 1),
+      subtitle: Text(l10n.profileDrawerDescription,
+          overflow: TextOverflow.ellipsis, maxLines: 1),
+      onTap: () => navigate('/profile'),
     );
   }
 

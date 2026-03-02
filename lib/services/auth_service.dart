@@ -29,6 +29,94 @@ class AuthService {
     }
   }
 
+  /// Sign in with email and password.
+  ///
+  /// Returns the signed-in [User] on success, or null on failure.
+  /// Throws [FirebaseAuthException] so callers can show user-friendly messages.
+  static Future<User?> signInWithEmail(
+      String email, String password) async {
+    try {
+      final credential = await _auth.signInWithEmailAndPassword(
+          email: email.trim(), password: password);
+      final user = credential.user;
+      if (user != null) {
+        await _ensureUserDocument(user);
+      }
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) debugPrint('AuthService signInWithEmail error: $e');
+      return null;
+    }
+  }
+
+  /// Register a new account with email and password.
+  ///
+  /// If there is currently an anonymous session, attempts to link it first so
+  /// that the user's community activity is preserved. Falls back to plain
+  /// createUserWithEmailAndPassword if linking fails.
+  static Future<User?> signUpWithEmail(
+      String email, String password, {String? displayName}) async {
+    try {
+      User? user;
+      final current = _auth.currentUser;
+      final credential =
+          EmailAuthProvider.credential(email: email.trim(), password: password);
+
+      if (current != null && current.isAnonymous) {
+        // Try to upgrade the anonymous account
+        try {
+          final linked = await current.linkWithCredential(credential);
+          user = linked.user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'email-already-in-use' ||
+              e.code == 'credential-already-in-use') {
+            // Fall back: sign in to the existing account
+            final cred = await _auth.signInWithEmailAndPassword(
+                email: email.trim(), password: password);
+            user = cred.user;
+          } else {
+            rethrow;
+          }
+        }
+      } else {
+        final cred = await _auth.createUserWithEmailAndPassword(
+            email: email.trim(), password: password);
+        user = cred.user;
+      }
+
+      if (user != null) {
+        if (displayName != null && displayName.isNotEmpty) {
+          await user.updateDisplayName(displayName);
+        }
+        await _ensureUserDocument(user);
+        if (displayName != null && displayName.isNotEmpty) {
+          await _updateUserDocument(user.uid, {'displayName': displayName});
+        }
+      }
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) debugPrint('AuthService signUpWithEmail error: $e');
+      return null;
+    }
+  }
+
+  /// Send a password-reset email.
+  static Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AuthService sendPasswordResetEmail error: $e');
+      }
+    }
+  }
+
   /// Sign out the current user.
   static Future<void> signOut() async {
     try {
@@ -76,6 +164,10 @@ class AuthService {
           'joinedAt': FieldValue.serverTimestamp(),
           'isAnonymous': user.isAnonymous,
         });
+      } else {
+        // Keep isAnonymous flag in sync
+        await ref.set({'isAnonymous': user.isAnonymous},
+            SetOptions(merge: true));
       }
     } catch (e) {
       if (kDebugMode) {
