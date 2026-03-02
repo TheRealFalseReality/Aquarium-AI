@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -396,8 +397,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       subtitle: Text(_tankSubtitle(l10n, tank)),
       trailing: tank.inhabitantCount > 0
           ? Chip(
-              label: Text('${tank.inhabitantCount} 🐟',
+              label: Text(
+                  '${tank.inhabitantCount}',
                   style: const TextStyle(fontSize: 12)),
+              avatar: const Icon(Icons.set_meal, size: 14),
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
             )
@@ -442,8 +445,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _formatDate(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')}';
+    // Use locale-aware date formatting from intl package
+    return DateFormat.yMMMd().format(dt);
   }
 }
 

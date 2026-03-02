@@ -165,9 +165,12 @@ class AuthService {
           'isAnonymous': user.isAnonymous,
         });
       } else {
-        // Keep isAnonymous flag in sync
-        await ref.set({'isAnonymous': user.isAnonymous},
-            SetOptions(merge: true));
+        // Only update isAnonymous if it has changed (avoids unnecessary write)
+        final storedAnon = snapshot.data()?['isAnonymous'] as bool?;
+        if (storedAnon != user.isAnonymous) {
+          await ref.set({'isAnonymous': user.isAnonymous},
+              SetOptions(merge: true));
+        }
       }
     } catch (e) {
       if (kDebugMode) {
