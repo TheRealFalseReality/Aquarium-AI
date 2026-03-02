@@ -68,6 +68,9 @@ const String rcDefaultChangelogDe = '';
 const String rcDefaultChangelogEs = '';
 const String rcDefaultChangelogFr = '';
 
+// Community image upload (true = enabled)
+const bool rcDefaultCommunityImageUpload = true;
+
 // ---------------------------------------------------------------------------
 // Firebase Remote Config key names
 // These string constants are the exact key names used in the Firebase Console.
@@ -141,7 +144,7 @@ class RemoteConfigKeys {
   // ── Changelog ───────────────────────────────────────────────────────────
   /// String — full markdown content of the changelog (English).
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
-  static const String changelogEn = 'changelogEn';
+  static const String changelog_en = 'changelog_en';
 
   /// String — full markdown content of the changelog (German).
   /// Empty string (default) means fall back to [changelogEn] or bundled asset.
@@ -154,4 +157,10 @@ class RemoteConfigKeys {
   /// String — full markdown content of the changelog (French).
   /// Empty string (default) means fall back to [changelogEn] or bundled asset.
   static const String changelogFr = 'changelog_fr';
+
+  // ── Community ──────────────────────────────────────────────────────────────
+  /// Boolean — when `false` nobody can upload images to community posts.
+  /// Defaults to `true`. Set to `false` in Firebase Remote Config to disable
+  /// image uploads globally without shipping an app update.
+  static const String communityImageUpload = 'community_image_upload';
 }
