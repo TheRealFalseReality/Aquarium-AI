@@ -31,6 +31,21 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
     }
   }
 
+  String _calculatorTypeLabel(String typeName, AppLocalizations l10n) {
+    switch (typeName) {
+      case 'Salinity':
+        return l10n.salinity;
+      case 'CO2':
+        return 'CO₂';
+      case 'Alkalinity':
+        return l10n.alkalinity;
+      case 'Temperature':
+        return l10n.temperature;
+      default:
+        return typeName;
+    }
+  }
+
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
@@ -47,6 +62,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> calculatorTypes = [
       'Salinity',
       'CO2',
@@ -55,7 +71,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
     ];
 
     return MainLayout(
-      title: 'Calculators',
+      title: l10n.calculators,
       bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
@@ -64,7 +80,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
           child: Column(
             children: [
               Text(
-                'Aquarium Calculators',
+                l10n.aquariumCalculators,
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge
@@ -73,7 +89,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Essential tools for your aquarium.',
+                l10n.essentialToolsForAquarium,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -84,7 +100,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
                   child: Column(
                     children: [
-                      _buildSectionTitle(context, 'Calculator Type'),
+                      _buildSectionTitle(context, l10n.calculatorType),
                       Wrap(
                         alignment: WrapAlignment.center,
                         spacing: 14.0,
@@ -93,7 +109,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                           final bool isSelected =
                               _activeCalculator == typeName;
                           return ModernSelectableChip(
-                            label: typeName == 'CO2' ? 'CO₂' : typeName,
+                            label: _calculatorTypeLabel(typeName, l10n),
                             selected: isSelected,
                             onTap: () {
                               setState(() {
@@ -197,18 +213,18 @@ class SalinityConverterState extends State<SalinityConverter> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const Map<String, String> units = {
-      'Salinity (ppt)': 'Salinity',
+    final Map<String, String> units = {
+      'Salinity (ppt)': l10n.salinity,
       'Specific Gravity': 'SG',
-      'Density (kg/L)': 'Density',
-      'Conductivity (mS/cm)': 'Conduct.',
+      'Density (kg/L)': l10n.density,
+      'Conductivity (mS/cm)': l10n.conductivityShort,
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           const BannerAdWidget(),
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -236,7 +252,7 @@ class SalinityConverterState extends State<SalinityConverter> {
               child: TextField(
                 controller: _valueController,
                 decoration: InputDecoration(
-                  labelText: 'Value ($_unitAbbreviation)',
+                  labelText: l10n.valueWithUnit(_unitAbbreviation),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -285,13 +301,13 @@ class SalinityConverterState extends State<SalinityConverter> {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 14,
                   children: [
-                    _buildResultColumn('Salinity',
+                    _buildResultColumn(l10n.salinity,
                         '${_results['salinity']} ppt', Colors.teal),
-                    _buildResultColumn('Specific Gravity',
+                    _buildResultColumn(l10n.specificGravity,
                         '${_results['specificGravity']}', Colors.orange),
-                    _buildResultColumn('Density',
+                    _buildResultColumn(l10n.density,
                         '${_results['density']} kg/L', Colors.purple),
-                    _buildResultColumn('Conductivity',
+                    _buildResultColumn(l10n.conductivity,
                         '${_results['conductivity']} mS/cm', Colors.green),
                   ],
                 ),
@@ -430,7 +446,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
                     horizontal: 22.0, vertical: 26.0),
                 child: Column(
                   children: [
-                    Text('Estimated CO₂ Level',
+                    Text(l10n.estimatedCO2Level,
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     Text('$_result ppm',
@@ -523,7 +539,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -547,7 +563,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             child: TextField(
               controller: _inputValueController,
               decoration: InputDecoration(
-                labelText: 'Value ($_fromUnit)',
+                labelText: l10n.valueWithUnit(_fromUnit),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),

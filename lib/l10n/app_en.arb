@@ -3782,5 +3782,210 @@
   "neverShowAgain": "Never Show Again",
   "@neverShowAgain": {
     "description": "Button label to never show the AquaPi promotion dialog again (full label, for desktop)"
+  },
+
+  "calculators": "Calculators",
+  "@calculators": {
+    "description": "Short title for the Aquarium Calculators screen (AppBar)"
+  },
+
+  "essentialToolsForAquarium": "Essential tools for your aquarium.",
+  "@essentialToolsForAquarium": {
+    "description": "Subtitle shown on the Aquarium Calculators screen"
+  },
+
+  "calculatorType": "Calculator Type",
+  "@calculatorType": {
+    "description": "Section title for the calculator type chip selector"
+  },
+
+  "convertFrom": "Convert From",
+  "@convertFrom": {
+    "description": "Subsection title shown above the unit selector chips in converters"
+  },
+
+  "specificGravity": "Specific Gravity",
+  "@specificGravity": {
+    "description": "Label for specific gravity in the salinity converter"
+  },
+
+  "density": "Density",
+  "@density": {
+    "description": "Label for density in the salinity converter"
+  },
+
+  "conductivity": "Conductivity",
+  "@conductivity": {
+    "description": "Label for conductivity in the salinity converter result"
+  },
+
+  "conductivityShort": "Conduct.",
+  "@conductivityShort": {
+    "description": "Short label for conductivity used in the salinity unit chip"
+  },
+
+  "valueWithUnit": "Value ({unit})",
+  "@valueWithUnit": {
+    "description": "Text field label for entering a value with the unit shown in parentheses",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+
+  "fahrenheit": "Fahrenheit",
+  "@fahrenheit": {
+    "description": "Fahrenheit temperature unit label"
+  },
+
+  "celsius": "Celsius",
+  "@celsius": {
+    "description": "Celsius temperature unit label"
+  },
+
+  "kelvin": "Kelvin",
+  "@kelvin": {
+    "description": "Kelvin temperature unit label"
+  },
+
+  "shape": "Shape",
+  "@shape": {
+    "description": "Section title for tank shape selection in the tank volume calculator"
+  },
+
+  "cylinderType": "Cylinder Type",
+  "@cylinderType": {
+    "description": "Section title for cylinder type selection in the tank volume calculator"
+  },
+
+  "units": "Units",
+  "@units": {
+    "description": "Section title for units selection in the tank volume calculator"
+  },
+
+  "shapeRectangle": "Rectangle",
+  "@shapeRectangle": {
+    "description": "Label for rectangular tank shape chip"
+  },
+
+  "shapeCube": "Cube",
+  "@shapeCube": {
+    "description": "Label for cube tank shape chip"
+  },
+
+  "shapeCylinder": "Cylinder",
+  "@shapeCylinder": {
+    "description": "Label for cylindrical tank shape chip"
+  },
+
+  "shapeHexagonal": "Hexagonal",
+  "@shapeHexagonal": {
+    "description": "Label for hexagonal tank shape chip"
+  },
+
+  "shapeBowFront": "BowFront",
+  "@shapeBowFront": {
+    "description": "Label for bow-front tank shape chip"
+  },
+
+  "cylinderFull": "Full",
+  "@cylinderFull": {
+    "description": "Label for full cylinder type chip"
+  },
+
+  "cylinderHalf": "Half",
+  "@cylinderHalf": {
+    "description": "Label for half cylinder type chip"
+  },
+
+  "cylinderCorner": "Corner",
+  "@cylinderCorner": {
+    "description": "Label for corner cylinder type chip"
+  },
+
+  "unitInches": "Inches",
+  "@unitInches": {
+    "description": "Label for inches unit chip"
+  },
+
+  "unitFeet": "Feet",
+  "@unitFeet": {
+    "description": "Label for feet unit chip"
+  },
+
+  "unitCentimeters": "cm",
+  "@unitCentimeters": {
+    "description": "Label for centimeters unit chip"
+  },
+
+  "unitMeters": "Meters",
+  "@unitMeters": {
+    "description": "Label for meters unit chip"
+  },
+
+  "fieldSideLength": "Side Length",
+  "@fieldSideLength": {
+    "description": "Input field label for cube side length"
+  },
+
+  "fieldDiameter": "Diameter",
+  "@fieldDiameter": {
+    "description": "Input field label for cylinder diameter"
+  },
+
+  "fieldHeight": "Height",
+  "@fieldHeight": {
+    "description": "Input field label for tank height"
+  },
+
+  "fieldEdgeLength": "Edge Length",
+  "@fieldEdgeLength": {
+    "description": "Input field label for hexagonal prism edge length"
+  },
+
+  "fieldLengthBack": "Length (Back)",
+  "@fieldLengthBack": {
+    "description": "Input field label for bow-front tank back length"
+  },
+
+  "fieldWidthSide": "Width (Side)",
+  "@fieldWidthSide": {
+    "description": "Input field label for bow-front tank side width"
+  },
+
+  "fieldFullWidth": "Full Width",
+  "@fieldFullWidth": {
+    "description": "Input field label for bow-front tank full width"
+  },
+
+  "fieldLength": "Length",
+  "@fieldLength": {
+    "description": "Input field label for tank length"
+  },
+
+  "fieldWidth": "Width",
+  "@fieldWidth": {
+    "description": "Input field label for tank width"
+  },
+
+  "viewShapeDimensions": "View {shape} dimensions",
+  "@viewShapeDimensions": {
+    "description": "Tooltip text on the dimension diagram button in the tank volume calculator",
+    "placeholders": {
+      "shape": {
+        "type": "String"
+      }
+    }
+  },
+
+  "resultVolume": "Volume",
+  "@resultVolume": {
+    "description": "Label for the volume result in the tank volume calculator"
+  },
+
+  "resultWeight": "Weight",
+  "@resultWeight": {
+    "description": "Label for the weight result in the tank volume calculator"
   }
 }
