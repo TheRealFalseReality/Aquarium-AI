@@ -600,13 +600,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+            ),
           ),
         ],
       ),
@@ -705,7 +707,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           if (isMaterialYouAvailable) ...[
             const SizedBox(height: 6),
             FilterChip(
-              label: const Text('Material You'),
+              label: Text(l10n.themeMaterialYou),
               labelStyle:
                   TextStyle(color: Theme.of(context).colorScheme.onSurface),
               labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -740,7 +742,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 });
               },
               icon: const Icon(Icons.tune, size: 16),
-              label: const Text('More theme options'),
+              label: Text(l10n.moreThemeOptions),
               style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -863,7 +865,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   Image.asset('assets/AquaAi Logo.png', height: 72),
                   const SizedBox(width: 10),
                   GradientText(
-                    'Aquarium\nAI',
+                    l10n.appTitle,
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
