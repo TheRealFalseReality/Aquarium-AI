@@ -736,8 +736,7 @@
   "welcomeDocsCardButton": "Abrir guía de usuario",
   "welcomeCommunityPromoTitle": "Nuevo: Función de Comunidad",
   "welcomeCommunityPromoBody": "¡Conéctate con otros entusiastas del acuario! Comparte tus acuarios, haz preguntas, publica consejos y explora lo que hace la comunidad.",
-  "welcomeCommunityPromoButton": "Explorar comunidad"
-
+  "welcomeCommunityPromoButton": "Explorar comunidad",
   "appearanceDesc": "Temas, modo de brillo y paleta de colores",
   "contactUsSubtitle": "Deja una reseña o envía un problema",
   "contactUsMessage": "¡Nos encantaría saber de ti! Deja una reseña rápida en la tienda para compartir tu experiencia, o abre un problema en GitHub para reportar un error o sugerir una nueva función.",

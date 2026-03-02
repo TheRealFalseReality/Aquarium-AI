@@ -3642,6 +3642,8 @@
   "welcomeCommunityPromoButton": "Explore Community",
   "@welcomeCommunityPromoButton": {
     "description": "Button label on the Community feature promo card"
+  },
+
   "appearanceDesc": "Themes, brightness mode and colour palette",
   "@appearanceDesc": {
     "description": "Subtitle for the Appearance menu card in settings"
