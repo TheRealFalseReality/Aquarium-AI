@@ -83,6 +83,17 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       orElse: () => null,
     );
 
+    // Resolve banner photo (if set)
+    TankPhoto? bannerPhoto;
+    if (tank.bannerPhotoId != null) {
+      try {
+        bannerPhoto = tank.photos.firstWhere((p) => p.id == tank.bannerPhotoId);
+      } catch (_) {
+        bannerPhoto = null;
+      }
+    }
+    final hasBanner = bannerPhoto != null && (bannerPhoto.imageUrl != null || bannerPhoto.imagePath != null);
+
     // Gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
         ? [
@@ -109,58 +120,75 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(tank.name),
-            backgroundColor: cs.surface.withOpacity(0.95),
+            title: Text(
+              tank.name,
+              style: hasBanner
+                  ? const TextStyle(
+                      color: Colors.white,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                    )
+                  : null,
+            ),
+            backgroundColor: hasBanner ? Colors.transparent : cs.surface.withOpacity(0.95),
             elevation: 0,
+            iconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
+            actionsIconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
+            flexibleSpace: hasBanner
+                ? _buildBannerFlexibleSpace(bannerPhoto!)
+                : null,
             bottom: TabBar(
               controller: _tabController,
               isScrollable: true,
-              indicatorColor: cs.primary,
+              indicatorColor: hasBanner ? Colors.white : cs.primary,
               indicatorWeight: 3,
-              labelColor: cs.primary,
-              unselectedLabelColor: cs.onSurface.withOpacity(0.6),
-              dividerColor: cs.outlineVariant.withOpacity(0.2),
+              labelColor: hasBanner ? Colors.white : cs.primary,
+              unselectedLabelColor: hasBanner
+                  ? Colors.white.withOpacity(0.7)
+                  : cs.onSurface.withOpacity(0.6),
+              dividerColor: hasBanner
+                  ? Colors.white.withOpacity(0.2)
+                  : cs.outlineVariant.withOpacity(0.2),
               indicatorSize: TabBarIndicatorSize.tab,
               tabs: [
                 Tab(
                   icon: Icon(
                     Icons.dashboard_outlined,
-                    color: _tabController.index == 0 ? cs.primary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(0, cs, hasBanner),
                   ),
                   text: l10n.overview,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.photo_library_outlined,
-                    color: _tabController.index == 1 ? cs.secondary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(1, cs, hasBanner),
                   ),
                   text: l10n.photos,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.science_outlined,
-                    color: _tabController.index == 2 ? cs.tertiary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(2, cs, hasBanner),
                   ),
                   text: l10n.waterParameters,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.medication_outlined,
-                    color: _tabController.index == 3 ? cs.primary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(3, cs, hasBanner),
                   ),
                   text: l10n.dosing,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.history,
-                    color: _tabController.index == 4 ? cs.secondary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(4, cs, hasBanner),
                   ),
                   text: l10n.activity,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.note_outlined,
-                    color: _tabController.index == 5 ? cs.tertiary : cs.onSurface.withOpacity(0.6),
+                    color: _tabIconColor(5, cs, hasBanner),
                   ),
                   text: l10n.notes,
                 ),
@@ -218,6 +246,74 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     );
   }
 
+  /// Returns the appropriate icon color for a tab based on whether a banner
+  /// is displayed and whether the tab is currently selected.
+  Color _tabIconColor(int tabIndex, ColorScheme cs, bool hasBanner) {
+    final isSelected = _tabController.index == tabIndex;
+    if (hasBanner) {
+      return isSelected ? Colors.white : Colors.white.withOpacity(0.7);
+    }
+    // Use theme accent colors per tab to match the original design
+    final Color selectedColor;
+    switch (tabIndex) {
+      case 1:
+      case 4:
+        selectedColor = cs.secondary;
+        break;
+      case 2:
+      case 5:
+        selectedColor = cs.tertiary;
+        break;
+      default:
+        selectedColor = cs.primary;
+    }
+    return isSelected ? selectedColor : cs.onSurface.withOpacity(0.6);
+  }
+
+  /// Builds the banner image for the AppBar flexibleSpace
+  Widget _buildBannerFlexibleSpace(TankPhoto photo) {
+    final imageUrl = photo.imageUrl ?? photo.imagePath;
+    if (imageUrl == null) return const SizedBox.expand();
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        imageUrl.startsWith('http')
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => const SizedBox.expand(),
+              )
+            : Image.file(
+                File(imageUrl),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.expand(),
+              ),
+        // Dark overlay for text readability
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0x99000000),
+                Color(0xBB000000),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Sets or clears the banner photo for the tank details screen
+  void _setBannerPhoto(Tank tank, String? photoId) {
+    final updatedTank = photoId == null
+        ? tank.copyWith(clearBannerPhotoId: true, updatedAt: DateTime.now())
+        : tank.copyWith(bannerPhotoId: photoId, updatedAt: DateTime.now());
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+  }
+
   /// Add a new photo to the tank
   void _addPhoto(BuildContext context, Tank tank) {
     showDialog(
@@ -270,8 +366,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              final isBanner = photo.id == tank.bannerPhotoId;
               final updatedTank = tank.copyWith(
                 photos: tank.photos.where((p) => p.id != photo.id).toList(),
+                clearBannerPhotoId: isBanner,
                 updatedAt: DateTime.now(),
               );
               ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -616,39 +714,86 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     ),
                   ),
                 ),
-                // Edit / Delete buttons
+                // Banner indicator (top-left)
+                if (photo.id == tank.bannerPhotoId)
+                  Positioned(
+                    top: 4,
+                    left: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.star,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                  ),
+                // Photo options menu (top-right)
                 Positioned(
                   top: 4,
                   right: 4,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _editPhoto(context, tank, photo),
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(Icons.edit, color: Colors.white, size: 16),
+                  child: Material(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(16),
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white, size: 16),
+                      iconSize: 16,
+                      padding: const EdgeInsets.all(4),
+                      onSelected: (value) {
+                        if (value == 'edit') _editPhoto(context, tank, photo);
+                        if (value == 'delete') _deletePhoto(context, tank, photo);
+                        if (value == 'set_banner') _setBannerPhoto(tank, photo.id);
+                        if (value == 'remove_banner') _setBannerPhoto(tank, null);
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit_outlined, size: 18),
+                              const SizedBox(width: 8),
+                              Text(l10n.edit),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _deletePhoto(context, tank, photo),
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(Icons.delete_outline, color: Colors.white, size: 16),
+                        PopupMenuItem(
+                          value: photo.id == tank.bannerPhotoId
+                              ? 'remove_banner'
+                              : 'set_banner',
+                          child: Row(
+                            children: [
+                              Icon(
+                                photo.id == tank.bannerPhotoId
+                                    ? Icons.star
+                                    : Icons.star_outline,
+                                size: 18,
+                                color: Colors.amber,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                photo.id == tank.bannerPhotoId
+                                    ? l10n.removeBanner
+                                    : l10n.setAsBanner,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 18, color: cs.error),
+                              const SizedBox(width: 8),
+                              Text(l10n.delete, style: TextStyle(color: cs.error)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1385,45 +1530,62 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.black,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        final isBanner = photo.id == tank.bannerPhotoId;
+        return Dialog(
+          backgroundColor: Colors.black,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                title: Text(
+                  DateFormat.yMMMd().format(photo.dateTaken),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      isBanner ? Icons.star : Icons.star_outline,
+                      color: isBanner ? Colors.amber : Colors.white,
+                    ),
+                    tooltip: isBanner ? l10n.removeBanner : l10n.setAsBanner,
+                    onPressed: () {
+                      _setBannerPhoto(tank, isBanner ? null : photo.id);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
-              title: Text(
-                DateFormat.yMMMd().format(photo.dateTaken),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            Expanded(
-              child: InteractiveViewer(
-                child: imageUrl.startsWith('http')
-                    ? CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(),
+              Expanded(
+                child: InteractiveViewer(
+                  child: imageUrl.startsWith('http')
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        )
+                      : Image.file(
+                          File(imageUrl),
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.error),
                         ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                      )
-                    : Image.file(
-                        File(imageUrl),
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.error),
-                      ),
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

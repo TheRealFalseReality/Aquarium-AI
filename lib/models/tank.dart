@@ -187,6 +187,7 @@ class Tank {
   final List<TankPhoto> photos; // Photos of the tank (not fish)
   final String? customBackgroundPhotoId; // ID of photo to use as card background
   final String? customIconPhotoId; // ID of photo to use as tank icon
+  final String? bannerPhotoId; // ID of photo to use as banner in tank details screen
   final int? customIconCodePoint; // Custom icon code point for tank card
   final List<WaterParameter> waterParameters; // Water parameter logs
   final List<DosingEntry> dosingEntries; // Dosing diary entries
@@ -211,6 +212,7 @@ class Tank {
     List<TankPhoto>? photos,
     this.customBackgroundPhotoId,
     this.customIconPhotoId,
+    this.bannerPhotoId,
     this.customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
@@ -240,6 +242,7 @@ class Tank {
     List<TankPhoto>? photos,
     String? customBackgroundPhotoId,
     String? customIconPhotoId,
+    String? bannerPhotoId,
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
@@ -265,6 +268,7 @@ class Tank {
       photos: photos,
       customBackgroundPhotoId: customBackgroundPhotoId,
       customIconPhotoId: customIconPhotoId,
+      bannerPhotoId: bannerPhotoId,
       customIconCodePoint: customIconCodePoint,
       waterParameters: waterParameters,
       dosingEntries: dosingEntries,
@@ -292,6 +296,7 @@ class Tank {
       'photos': photos.map((p) => p.toJson(includeLocalPaths: includeLocalPaths)).toList(),
       'customBackgroundPhotoId': customBackgroundPhotoId,
       'customIconPhotoId': customIconPhotoId,
+      'bannerPhotoId': bannerPhotoId,
       'customIconCodePoint': customIconCodePoint,
       'waterParameters': waterParameters.map((wp) => wp.toJson()).toList(),
       'dosingEntries': dosingEntries.map((de) => de.toJson()).toList(),
@@ -323,6 +328,7 @@ class Tank {
           .toList() ?? [],
       customBackgroundPhotoId: json['customBackgroundPhotoId'] as String?,
       customIconPhotoId: json['customIconPhotoId'] as String?,
+      bannerPhotoId: json['bannerPhotoId'] as String?,
       customIconCodePoint: json['customIconCodePoint'] as int?,
       waterParameters: (json['waterParameters'] as List?)
           ?.map((wp) => WaterParameter.fromJson(wp))
@@ -361,6 +367,7 @@ class Tank {
     List<TankPhoto>? photos,
     String? customBackgroundPhotoId,
     String? customIconPhotoId,
+    String? bannerPhotoId,
     int? customIconCodePoint,
     List<WaterParameter>? waterParameters,
     List<DosingEntry>? dosingEntries,
@@ -370,6 +377,7 @@ class Tank {
     List<TankTag>? tags,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
+    bool clearBannerPhotoId = false,
     bool clearCustomIconCodePoint = false,
   }) {
     return Tank(
@@ -388,6 +396,7 @@ class Tank {
       photos: photos ?? this.photos,
       customBackgroundPhotoId: clearCustomBackgroundPhotoId ? null : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
       customIconPhotoId: clearCustomIconPhotoId ? null : (customIconPhotoId ?? this.customIconPhotoId),
+      bannerPhotoId: clearBannerPhotoId ? null : (bannerPhotoId ?? this.bannerPhotoId),
       customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
       waterParameters: waterParameters ?? this.waterParameters,
       dosingEntries: dosingEntries ?? this.dosingEntries,

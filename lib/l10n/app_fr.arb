@@ -483,6 +483,8 @@
   "dosing": "Dosage",
   "activity": "Activité",
   "noPhotos": "Pas encore de photos",
+  "setAsBanner": "Définir comme bannière",
+  "removeBanner": "Supprimer la bannière",
   "noParameters": "Aucun paramètre d'eau enregistré",
   "noDosing": "Aucune entrée de dosage",
   "noActivity": "Aucune activité enregistrée",

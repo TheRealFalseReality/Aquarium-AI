@@ -483,6 +483,8 @@
   "dosing": "Dosificación",
   "activity": "Actividad",
   "noPhotos": "No hay fotos todavía",
+  "setAsBanner": "Establecer como Banner",
+  "removeBanner": "Eliminar Banner",
   "noParameters": "No hay parámetros de agua registrados",
   "noDosing": "No hay entradas de dosificación",
   "noActivity": "No hay actividad registrada",
