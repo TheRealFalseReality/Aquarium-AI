@@ -27,11 +27,13 @@ class FishDataService {
 
   /// Returns the raw JSON string for the fish-compat dataset.
   ///
-  /// Tries [RemoteConfigService.fishcompatJson] first.  When RC has data the
-  /// value is also written to SharedPreferences so future offline launches can
-  /// use it.  Falls back to the SP cache and finally to the bundled local asset.
+  /// Tries sources in priority order:
+  ///   1. Remote Config full-content string ([RemoteConfigKeys.fishcompatJson])
+  ///      — uses the JSON string directly and caches it.
+  ///   2. SharedPreferences persistent cache (from a previous fetch).
+  ///   3. Bundled local asset `assets/data/fishcompat.json`.
   Future<String> _getJsonString() async {
-    // RC takes priority when set.
+    // 1. RC full-content string takes highest priority when set.
     final rcJson = RemoteConfigService.fishcompatJson;
     if (rcJson.isNotEmpty) {
       // Persist RC data for subsequent offline launches.
@@ -40,14 +42,14 @@ class FishDataService {
       return rcJson;
     }
 
-    // No RC data: try the persistent cache (from a previous RC fetch).
+    // 2. No RC data: try the persistent cache (from a previous fetch).
     final prefs = await SharedPreferences.getInstance();
     final cachedJson = prefs.getString(_prefKeyJson);
     if (cachedJson != null && cachedJson.isNotEmpty) {
       return cachedJson;
     }
 
-    // Final fallback: bundled local asset.
+    // 3. Final fallback: bundled local asset.
     return rootBundle.loadString('assets/data/fishcompat.json');
   }
 

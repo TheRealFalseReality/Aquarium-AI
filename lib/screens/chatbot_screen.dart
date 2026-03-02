@@ -454,7 +454,7 @@ Widget _suggestionMenu(BuildContext context) {
                 label: l10n.aquaPi,
                 // Simply provide the image. The chip will color it automatically.
                 customIcon: Image.asset(
-                  'assets/AquaPiLogo300.png',
+                  'assets/images/system/AquaPiLogo300.png',
                   height: 24,
                   width: 24,
                 ),
@@ -880,7 +880,7 @@ class MessageBubble extends ConsumerWidget {
                       : cs.primary.withOpacity(0.15),
                   child: isError
                       ? Icon(Icons.error_outline, color: cs.error)
-                      : Image.asset('assets/AquaAi Logo.png'),
+                      : Image.asset('assets/images/system/AquaAi Logo.png'),
                 ),
               if (!isUser) const SizedBox(width: 8),
               Flexible(

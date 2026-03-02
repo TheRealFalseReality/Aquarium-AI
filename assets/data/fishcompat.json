@@ -1985,9 +1985,9 @@
         "Copperband Butterflyfish",
         "Heniochus Butterflyfish",
         "Auriga (Threadfin) Butterflyfish",
-        "Sunburst (Klein’s) Butterflyfish",
+        "Sunburst (Klein\u2019s) Butterflyfish",
         "Pearlscale Butterflyfish",
-        "Merten’s Butterflyfish",
+        "Merten\u2019s Butterflyfish",
         "Pyramid Butterflyfish",
         "Zoster Butterflyfish",
         "Raccoon Butterflyfish",
@@ -2118,7 +2118,7 @@
       "name": "Chromis",
       "commonNames": [
         "Blue-Green Reef Chromis",
-        "Vanderbilt’s Chromis",
+        "Vanderbilt\u2019s Chromis",
         "Barrier Reef Chromis",
         "Black-Axil Chromis"
       ],
@@ -2377,8 +2377,8 @@
         "Blue Damsel",
         "Yellowtail Damsel",
         "Azure Damselfish",
-        "Talbot’s Damselfish",
-        "Springer’s Damselfish",
+        "Talbot\u2019s Damselfish",
+        "Springer\u2019s Damselfish",
         "Three-Stripe & Four-Stripe Damsels",
         "Domino Damselfish",
         "Blue Devil Damselfish",
@@ -3035,7 +3035,7 @@
         "Cuban (Spotfin) Hogfish",
         "Coral (Eclipse) Hogfish",
         "Peppermint (Candy) Hogfish",
-        "Diana’s Hogfish"
+        "Diana\u2019s Hogfish"
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hogfish.jpg",
       "reefSafe": "No",

@@ -174,7 +174,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                       child: GestureDetector(
                         onTap: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
                         child: Image.asset(
-                          'assets/google_play_badge.png',
+                          'assets/images/system/google_play_badge.png',
                           height: 60,
                           fit: BoxFit.contain,
                         ),
