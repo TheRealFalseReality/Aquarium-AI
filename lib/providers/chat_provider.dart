@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -12,6 +13,7 @@ import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/fish_info_result.dart';
 import 'analysis_history_provider.dart';
+import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import '../prompts/aquapi_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
@@ -143,8 +145,36 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   /// Returns the effective system prompt for [message].
-  /// Appends the AquaPi supplement when the message is AquaPi-related.
-  String _effectiveSystemPrompt(String message) => effectiveSystemPrompt(message);
+  /// Appends the AquaPi supplement when the message is AquaPi-related,
+  /// and adds a language instruction when the app is not set to English.
+  String _effectiveSystemPrompt(String message) {
+    final base = effectiveSystemPrompt(message);
+    final settings = _ref.read(appSettingsProvider);
+    // Use the explicitly set locale code, or fall back to the device's locale.
+    final localeCode = settings.localeCode ??
+        PlatformDispatcher.instance.locale.languageCode;
+    final languageName = _languageName(localeCode);
+    if (languageName != null) {
+      return '$base\nIMPORTANT: Always respond in $languageName.';
+    }
+    return base;
+  }
+
+  /// Maps a supported BCP-47 language code to a display name used in the
+  /// system prompt. Returns null for English (the default) or any
+  /// unrecognized code so that no unnecessary language instruction is added.
+  static String? _languageName(String code) {
+    switch (code) {
+      case 'de':
+        return 'German';
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      default:
+        return null;
+    }
+  }
 
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {

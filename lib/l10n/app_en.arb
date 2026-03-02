@@ -2490,6 +2490,41 @@
     "description": "AI tools section label"
   },
 
+  "chatSuggestionCycleAquarium": "How do I cycle my aquarium?",
+  "@chatSuggestionCycleAquarium": {
+    "description": "Suggested chat question: how to cycle an aquarium"
+  },
+
+  "chatSuggestionBeginnerFish": "What are the best beginner fish?",
+  "@chatSuggestionBeginnerFish": {
+    "description": "Suggested chat question: best beginner fish"
+  },
+
+  "chatSuggestionWaterChange": "How often should I change water?",
+  "@chatSuggestionWaterChange": {
+    "description": "Suggested chat question: water change frequency"
+  },
+
+  "chatSuggestionWhatIsAquaPi": "What is AquaPi?",
+  "@chatSuggestionWhatIsAquaPi": {
+    "description": "Suggested chat question: what is AquaPi"
+  },
+
+  "chatSuggestionCompareApexNeptune": "Compare to Apex Neptune",
+  "@chatSuggestionCompareApexNeptune": {
+    "description": "Suggested chat question: compare AquaPi to Apex Neptune"
+  },
+
+  "chatSuggestionAquaPiMonitor": "What can AquaPi monitor?",
+  "@chatSuggestionAquaPiMonitor": {
+    "description": "Suggested chat question: what AquaPi can monitor"
+  },
+
+  "chatSuggestionOwnSensors": "Can I use my own sensors?",
+  "@chatSuggestionOwnSensors": {
+    "description": "Suggested chat question: using own sensors with AquaPi"
+  },
+
   "viewAnalysis": "View Analysis",
   "@viewAnalysis": {
     "description": "View analysis button label"

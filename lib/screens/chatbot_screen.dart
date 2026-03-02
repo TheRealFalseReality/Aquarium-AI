@@ -539,19 +539,20 @@ Widget _suggestionMenu(BuildContext context) {
   }
 
   Widget _menuContent(String menu, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (menu) {
       case 'aquarium':
         return _suggestionChips([
-          "How do I cycle my aquarium?",
-          "What are the best beginner fish?",
-          "How often should I change water?",
+          l10n.chatSuggestionCycleAquarium,
+          l10n.chatSuggestionBeginnerFish,
+          l10n.chatSuggestionWaterChange,
         ]);
       case 'aquapi':
         return _suggestionChips([
-          "What is AquaPi?",
-          "Compare to Apex Neptune",
-          "What can AquaPi monitor?",
-          "Can I use my own sensors?",
+          l10n.chatSuggestionWhatIsAquaPi,
+          l10n.chatSuggestionCompareApexNeptune,
+          l10n.chatSuggestionAquaPiMonitor,
+          l10n.chatSuggestionOwnSensors,
         ]);
       case 'ai_tools':
         return _toolButtons(context);
