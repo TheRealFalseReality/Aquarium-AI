@@ -658,7 +658,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         routeName: '',
         url: 'https://www.capitalcityaquatics.com/store/aquapi',
         delay: const Duration(milliseconds: 950),
-        imagePath: 'assets/AquaPiEssentials.jpg',
+        imagePath: 'assets/images/system/AquaPiEssentials.jpg',
         fullWidth: true,
       ),
     ];
@@ -1440,7 +1440,7 @@ class AnimatedHeaderState extends State<AnimatedHeader> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset('assets/AquaAi Logo.png', height: 125),
+          Image.asset('assets/images/system/AquaAi Logo.png', height: 125),
           const SizedBox(width: 16),
           GradientText(
             'Aquarium\nAI',

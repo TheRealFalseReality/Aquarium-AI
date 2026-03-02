@@ -61,7 +61,9 @@ flutter:
   generate: true
 
   assets:
-    - assets/
+    - assets/data/
+    - assets/images/system/
+    - assets/images/fish/
     - assets/docs/
     - assets/docs/START_HERE_I18N.md
     - assets/docs/TRANSLATION_GUIDE.md

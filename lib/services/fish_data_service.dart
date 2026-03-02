@@ -22,7 +22,7 @@ const String _prefKeyJson = 'fishcompat_cached_json';
 ///      persisted to SharedPreferences so offline re-launches can use it.
 ///   4. SharedPreferences persistent cache (the last value fetched from RC or
 ///      a URL; used when both are unavailable on the current launch).
-///   5. Bundled local asset `assets/fishcompat.json` (always available offline).
+///   5. Bundled local asset `assets/data/fishcompat.json` (always available offline).
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
 
@@ -38,7 +38,7 @@ class FishDataService {
   ///   2. Remote Config full-content string ([RemoteConfigKeys.fishcompatJson])
   ///      — uses the JSON string directly and caches it.
   ///   3. SharedPreferences persistent cache (from a previous fetch).
-  ///   4. Bundled local asset `assets/fishcompat.json`.
+  ///   4. Bundled local asset `assets/data/fishcompat.json`.
   Future<String> _getJsonString() async {
     // 1. RC URL takes highest priority when set.
     final rcUrl = RemoteConfigService.fishcompatJsonUrl;
@@ -78,7 +78,7 @@ class FishDataService {
     }
 
     // 4. Final fallback: bundled local asset.
-    return rootBundle.loadString('assets/fishcompat.json');
+    return rootBundle.loadString('assets/data/fishcompat.json');
   }
 
   // ---------------------------------------------------------------------------

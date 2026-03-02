@@ -40,7 +40,7 @@ const String _defaultAquapiOriginalImageUrl = '';
 const String _defaultAquapiEssentialImageUrl = '';
 
 // Fish compatibility data.
-// Empty string = use the bundled local assets/fishcompat.json as fallback.
+// Empty string = use the bundled local assets/data/fishcompat.json as fallback.
 // Set a JSON string in Remote Config to override without an app update.
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
@@ -110,17 +110,17 @@ class RemoteConfigKeys {
   // ── Promotion images ──────────────────────────────────────────────────────
   /// String — URL for the "original" AquaPi promotion image
   /// (`AquaPiMainSmaller.jpg`) shown in the AquaPi promotion dialog.
-  /// Empty string (default) means use the bundled `assets/AquaPiMainSmaller.jpg`.
+  /// Empty string (default) means use the bundled `assets/images/system/AquaPiMainSmaller.jpg`.
   static const String aquapiOriginalImageUrl = 'aquapi_original_image_url';
 
   /// String — URL for the "essential" AquaPi promotion image
   /// (`AquaPiEssentials.jpg`) shown on the welcome-screen feature card.
-  /// Empty string (default) means use the bundled `assets/AquaPiEssentials.jpg`.
+  /// Empty string (default) means use the bundled `assets/images/system/AquaPiEssentials.jpg`.
   static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
 
   // ── Fish compatibility data ───────────────────────────────────────────────
   /// String — full JSON content of the fish compatibility database.
-  /// Empty string (default) means use the bundled `assets/fishcompat.json`.
+  /// Empty string (default) means use the bundled `assets/data/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
 
   // ── In-app purchase pricing ───────────────────────────────────────────────
@@ -295,13 +295,13 @@ class RemoteConfigService {
 
   /// URL for the "original" AquaPi promotion image (shown in the dialog).
   /// Returns an empty string when no URL is set in Remote Config,
-  /// signalling that the bundled `assets/AquaPiMainSmaller.jpg` should be used.
+  /// signalling that the bundled `assets/images/system/AquaPiMainSmaller.jpg` should be used.
   static String get aquapiOriginalImageUrl =>
       _modelString(RemoteConfigKeys.aquapiOriginalImageUrl, _defaultAquapiOriginalImageUrl);
 
   /// URL for the "essential" AquaPi promotion image (shown on the welcome screen).
   /// Returns an empty string when no URL is set in Remote Config,
-  /// signalling that the bundled `assets/AquaPiEssentials.jpg` should be used.
+  /// signalling that the bundled `assets/images/system/AquaPiEssentials.jpg` should be used.
   static String get aquapiEssentialImageUrl =>
       _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, _defaultAquapiEssentialImageUrl);
 
@@ -309,7 +309,7 @@ class RemoteConfigService {
 
   /// Full JSON string of the fish compatibility database from Remote Config.
   /// Returns an empty string when not set in Remote Config,
-  /// signalling that the bundled `assets/fishcompat.json` should be used.
+  /// signalling that the bundled `assets/data/fishcompat.json` should be used.
   static String get fishcompatJson =>
       _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
 
