@@ -7,7 +7,7 @@
         "P. altum",
         "P. leopoldi"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_female_freshwater.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_female_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -52,7 +52,7 @@
         "P. altum",
         "P. leopoldi"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_male_freshwater.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_male_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Cory Cats",
@@ -98,7 +98,7 @@
         "Cherry Barb",
         "Denison (Red Line) Barb"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/barb.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/barb.jpg",
       "compatible": [
         "Barbs",
         "Cory Cats",
@@ -141,7 +141,7 @@
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/betta_female.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/betta_female.jpg",
       "compatible": [
         "Cory Cats",
         "Hatchets",
@@ -184,7 +184,7 @@
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/betta_male.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/betta_male.jpg",
       "compatible": [
         "Cory Cats",
         "Loaches",
@@ -235,7 +235,7 @@
         "Green Terror",
         "Flowerhorn"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cichlids_amerian_large.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_amerian_large.jpg",
       "compatible": [
         "Cichlids - American, Large",
         "Larger Catfish",
@@ -283,7 +283,7 @@
         "Lake Victoria",
         "Lake Malawi"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cichlids_malawi.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_malawi.jpg",
       "compatible": [],
       "notRecommended": [
         "Cichlids - American, Large",
@@ -330,7 +330,7 @@
         "Tropheus",
         "Sand-Sifters"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cichlids_tanganyikan.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_tanganyikan.jpg",
       "compatible": [
         "Cichlids - Lake Tanganyikan"
       ],
@@ -379,7 +379,7 @@
         "Pygmy Cory",
         "Emerald Cory"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cory_cats.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cory_cats.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -427,7 +427,7 @@
         "Giant Danio",
         "Rosy Red Minnow"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/danios_minnows.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/danios_minnows.jpg",
       "compatible": [
         "Barbs",
         "Cory Cats",
@@ -477,7 +477,7 @@
         "Snake Skin",
         "Checkerboard"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/discus.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/discus.jpg",
       "compatible": [
         "Discus",
         "Hatchets",
@@ -524,7 +524,7 @@
         "Roseline Shark",
         "Colombian Shark"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/freshwater_sharks.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/freshwater_sharks.jpg",
       "compatible": [
         "Barbs",
         "Hatchets",
@@ -573,7 +573,7 @@
         "Oranda",
         "Ryukin"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/goldfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/goldfish.jpg",
       "compatible": [
         "Goldfish",
         "Plecos / Catfish",
@@ -621,7 +621,7 @@
         "Sparkling Gourami",
         "Kissing Gourami"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/gourami.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/gourami.jpg",
       "compatible": [
         "Cory Cats",
         "Hatchets",
@@ -668,7 +668,7 @@
         "Cobra",
         "Tuxedo"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/guppies.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/guppies.jpg",
       "compatible": [
         "Cory Cats",
         "Danios / Minnows",
@@ -714,7 +714,7 @@
         "Marbled Hatchetfish",
         "Black-Winged Hatchetfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/hatchets.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hatchets.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -762,7 +762,7 @@
         "American Flagfish",
         "Rachovii Killifish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/killifish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/killifish.jpg",
       "compatible": [
         "Cory Cats",
         "Freshwater Sharks",
@@ -813,7 +813,7 @@
         "Chagoi",
         "Utsuri"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/koi.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/koi.jpg",
       "compatible": [
         "Goldfish",
         "Plecos / Catfish",
@@ -860,7 +860,7 @@
         "Flathead Catfish",
         "Channel Catfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/large_catfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/large_catfish.jpg",
       "compatible": [
         "Cichlids - American, Large",
         "Larger Catfish",
@@ -909,7 +909,7 @@
         "Zebra Loach",
         "Dwarf Chain Loach"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/loaches.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/loaches.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -958,7 +958,7 @@
         "Red Wag Platy",
         "Red Swordtail"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/mollies.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/mollies.jpg",
       "compatible": [
         "Cory Cats",
         "Danios / Minnows",
@@ -1008,7 +1008,7 @@
         "Vallisneria",
         "Hornwort"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/plants_freshwater.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/plants_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -1056,7 +1056,7 @@
         "Otocinclus (Oto Catfish)",
         "Upside-Down Catfish (Synodontis)"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/pleco.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/pleco.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -1102,7 +1102,7 @@
         "Madagascar Rainbowfish",
         "Threadfin Rainbowfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/rainbowfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/rainbowfish.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -1149,7 +1149,7 @@
         "Scissortail Rasbora",
         "Kubotai (Neon Green) Rasbora"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/rasboras.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/rasboras.jpg",
       "compatible": [
         "Barbs",
         "Cory Cats",
@@ -1196,7 +1196,7 @@
         "Orange Pumpkin & Yellow Goldenback",
         "Rili Shrimp"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/shrimp_freshwater.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/shrimp_freshwater.jpg",
       "compatible": [
         "Cory Cats",
         "Guppies",
@@ -1243,7 +1243,7 @@
         "Assassin Snails",
         "Ramshorn Snails"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/snails_freshwater.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/snails_freshwater.jpg",
       "compatible": [
         "Angelfish (Female) \u2640",
         "Angelfish (Male) \u2642",
@@ -1291,7 +1291,7 @@
         "Lemon Tetra",
         "Glowlight Tetra"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/tetras.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/tetras.jpg",
       "compatible": [
         "Cory Cats",
         "Danios / Minnows",
@@ -1340,7 +1340,7 @@
         "Aiptasia and Majano Anemones",
         "Orange Ball Anemone"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anemone_fish_only.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/anemone_fish_only.jpg",
       "reefSafe": "No",
       "compatible": [
         "Anthias",
@@ -1403,7 +1403,7 @@
         "Long Tentacle Anemone",
         "Mini-Maxi Carpet Anemone"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anemone_reef_safe.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/anemone_reef_safe.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -1467,7 +1467,7 @@
         "Blueface Angelfish",
         "Koran (Semicircle) Angelfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_marine.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_marine.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Blennies",
@@ -1532,7 +1532,7 @@
         "Bicolor Angelfish",
         "Lemonpeel Angelfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/angelfish_dwarf_marine.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_dwarf_marine.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -1598,7 +1598,7 @@
         "Sargassum Fish",
         "Psychedelic Frogfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/frogfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/frogfish.jpg",
       "reefSafe": "No",
       "compatible": [
         "Batfish",
@@ -1664,7 +1664,7 @@
         "Sunburst (Fathead) Anthias",
         "Bimaculatus Anthias"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/anthias.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/anthias.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -1730,7 +1730,7 @@
         "Candy Basslet",
         "Yellow Assessor"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/basslets.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/basslets.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -1793,7 +1793,7 @@
         "Teira (Longfin) Batfish",
         "Orbicular (Round) Batfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/batfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/batfish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anglers / Frogfish",
@@ -1859,7 +1859,7 @@
         "Tailspot Blenny",
         "Fang Blennies"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/blennies.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/blennies.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish",
@@ -1923,7 +1923,7 @@
         "Spotted Boxfish",
         "Scrawled Cowfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/boxfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/boxfish.jpg",
       "reefSafe": "Caution",
       "compatible": [
         "Angelfish - Dwarf",
@@ -1993,7 +1993,7 @@
         "Raccoon Butterflyfish",
         "Yellow Longnose Butterflyfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/butterflyfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/butterflyfish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anglers / Frogfish",
@@ -2058,7 +2058,7 @@
         "Flame (Red) Cardinalfish",
         "Blue-Eyed Cardinalfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/cardinalfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cardinalfish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2122,7 +2122,7 @@
         "Barrier Reef Chromis",
         "Black-Axil Chromis"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/chromis.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/chromis.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2187,7 +2187,7 @@
         "Clarkii Clownfish",
         "Tomato Clownfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_female.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/clownfish_female.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2252,7 +2252,7 @@
         "Clarkii Clownfish",
         "Tomato Clownfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/clownfish_male.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/clownfish_male.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2385,7 +2385,7 @@
         "Garibaldi Damselfish",
         "Neon Velvet Damsel"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/damselfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/damselfish.jpg",
       "reefSafe": "Caution",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2449,7 +2449,7 @@
         "Zebra Barred Dartfish",
         "Blue Gudgeon Dartfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/dartfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/dartfish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2515,7 +2515,7 @@
         "Red Scooter Dragonet",
         "Scooter Blenny"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/dragonets.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/dragonets.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Boxfish",
@@ -2582,7 +2582,7 @@
         "Garden Eels",
         "Electric Eels"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/eels.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/eels.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -2648,7 +2648,7 @@
         "Mimic Filefish",
         "Radiant (Red Tail) Filefish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/filefish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/filefish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2713,7 +2713,7 @@
         "Orange-Spotted Rabbitfish",
         "Bicolor Foxface"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/foxface.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/foxface.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish",
@@ -2778,7 +2778,7 @@
         "Neon Cleaner Goby",
         "Engineer Goby"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/gobies.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/gobies.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -2842,7 +2842,7 @@
         "Polleni (Harlequin) Grouper",
         "Blue Line Grouper"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/groupers.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/groupers.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -2906,7 +2906,7 @@
         "Oriental Sweetlips",
         "French Grunt"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/grunts.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/grunts.jpg",
       "reefSafe": "Caution",
       "compatible": [
         "Angelfish",
@@ -2972,7 +2972,7 @@
         "Freckled Hawkfish",
         "Pixy (Spotted) Hawkfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/hawkfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hawkfish.jpg",
       "reefSafe": "Caution",
       "compatible": [
         "Angelfish",
@@ -3037,7 +3037,7 @@
         "Peppermint (Candy) Hogfish",
         "Diana\u2019s Hogfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/hogfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hogfish.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -3101,7 +3101,7 @@
         "Tiger Jawfish",
         "Dusky Jawfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/jawfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/jawfish.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",
@@ -3165,7 +3165,7 @@
         "Weedy Scorpionfish",
         "Bearded Scorpionfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/lionfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/lionfish.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -3226,7 +3226,7 @@
       "commonNames": [
         "C. altivelis"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/marine_betta.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/marine_betta.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish",
@@ -3291,7 +3291,7 @@
         "Rainbow Parrotfish",
         "Quoyi Parrotfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/parrotfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/parrotfish.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -3356,7 +3356,7 @@
         "Sunrise Dottyback",
         "Springer's Dottyback"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/pseudochromis.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/pseudochromis.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Boxfish",
@@ -3422,7 +3422,7 @@
         "Blue Spot Puffer",
         "Guineafowl Puffer"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/puffers.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/puffers.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -3484,7 +3484,7 @@
         "Chocolate Chip Starfish",
         "Red Knob (African) Sea Star"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/sea_star_fish_only.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/sea_star_fish_only.jpg",
       "reefSafe": "No",
       "compatible": [
         "Anthias",
@@ -3548,7 +3548,7 @@
         "Sand Sifting Starfish",
         "Asterina Starfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/sea_star_reef_safe.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/sea_star_reef_safe.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -3616,7 +3616,7 @@
         "Bluestripe Pipefish",
         "Ghost Pipefish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/seahorse.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/seahorse.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Dragonets",
@@ -3683,7 +3683,7 @@
         "Atlantic Yellow Ray",
         "California Stingray"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/rays.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/rays.jpg",
       "reefSafe": "No",
       "compatible": [
         "Sharks / Rays"
@@ -3749,7 +3749,7 @@
         "Harlequin Shrimp",
         "Sexy Shrimp"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/shrimp_marine.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/shrimp_marine.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -3814,7 +3814,7 @@
         "Cerith Snail",
         "Turbo Snail"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/snails_marine.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/snails_marine.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -3880,7 +3880,7 @@
         "Neon/Reef Squirrelfish",
         "Ruby Blue-Lined Squirrelfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/squirrelfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/squirrelfish.jpg",
       "reefSafe": "Caution",
       "compatible": [
         "Angelfish",
@@ -3946,7 +3946,7 @@
         "Naso (Lipstick) Tang",
         "Powder Blue Tang"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/tangs.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/tangs.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish",
@@ -4011,7 +4011,7 @@
         "Blue Throat Triggerfish",
         "Pink Tail Triggerfish"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/triggerfish.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/triggerfish.jpg",
       "reefSafe": "No",
       "compatible": [
         "Triggerfish"
@@ -4077,7 +4077,7 @@
         "Spaghetti Worms",
         "Peanut Worms"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/worms.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/worms.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Anthias",
@@ -4142,7 +4142,7 @@
         "Dragon (Rock Mover) Wrasse",
         "Lunar (Moon) Wrasse"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/wrasse_fish_only.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/wrasse_fish_only.jpg",
       "reefSafe": "No",
       "compatible": [
         "Angelfish",
@@ -4207,7 +4207,7 @@
         "Melanurus Wrasse",
         "Pink-Streaked Wrasse"
       ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/wrasse_reef_safe.jpg",
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/wrasse_reef_safe.jpg",
       "reefSafe": "Yes",
       "compatible": [
         "Angelfish - Dwarf",

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/analysis_history_entry.dart';
 import '../models/analysis_result.dart';
@@ -30,6 +31,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // Watch for state changes to trigger rebuilds
     final allEntries = ref.watch(analysisHistoryProvider);
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
@@ -52,7 +54,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
     }
 
     return MainLayout(
-      title: 'Analysis History',
+      title: l10n.analysisHistoryTitle,
       child: entries.isEmpty
           ? _buildEmpty(context)
           : Column(
@@ -83,6 +85,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
   }
 
   Widget _buildEmpty(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
@@ -93,7 +96,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
             Icon(Icons.history, size: 72, color: cs.primary.withOpacity(0.4)),
             const SizedBox(height: 16),
             Text(
-              'No Analysis History',
+              l10n.noAnalysisHistory,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
@@ -101,7 +104,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Every AI analysis you run will be saved here for easy review.',
+              l10n.noAnalysisHistoryDesc,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: cs.onSurface.withOpacity(0.5),
@@ -114,6 +117,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
   }
 
   Widget _buildClearButton(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: OutlinedButton.icon(
@@ -121,16 +125,15 @@ class AnalysisHistoryScreen extends ConsumerWidget {
           final confirm = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('Clear History'),
-              content: const Text(
-                  'Are you sure you want to delete all analysis history? This cannot be undone.'),
+              title: Text(l10n.clearHistory),
+              content: Text(l10n.clearHistoryConfirm),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancel')),
+                    child: Text(l10n.cancel)),
                 TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Clear All')),
+                    child: Text(l10n.clearAll)),
               ],
             ),
           );
@@ -139,7 +142,7 @@ class AnalysisHistoryScreen extends ConsumerWidget {
           }
         },
         icon: const Icon(Icons.delete_sweep, size: 18),
-        label: const Text('Clear All History'),
+        label: Text(l10n.clearAllHistory),
       ),
     );
   }
@@ -198,6 +201,7 @@ class _HistoryEntryTile extends ConsumerWidget {
   }
 
   void _openResult(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     try {
       switch (entry.type) {
         case AnalysisType.waterParameters:
@@ -263,7 +267,7 @@ class _HistoryEntryTile extends ConsumerWidget {
               .toList();
           if (recs.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No recommendations found in this history entry.')),
+              SnackBar(content: Text(l10n.noRecommendationsFound)),
             );
             break;
           }
@@ -282,13 +286,31 @@ class _HistoryEntryTile extends ConsumerWidget {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open report: $e')),
+        SnackBar(content: Text(l10n.couldNotOpenReport(e.toString()))),
       );
+    }
+  }
+
+  String _localizedTypeName(AnalysisType type, AppLocalizations l10n) {
+    switch (type) {
+      case AnalysisType.waterParameters:
+        return l10n.analysisTypeWaterParameters;
+      case AnalysisType.photoAnalysis:
+        return l10n.analysisTypePhotoAnalysis;
+      case AnalysisType.fishInfo:
+        return l10n.analysisTypeFishInfo;
+      case AnalysisType.automationScript:
+        return l10n.analysisTypeAutomationScript;
+      case AnalysisType.compatibilityReport:
+        return l10n.analysisTypeCompatibilityReport;
+      case AnalysisType.stockingRecommendation:
+        return l10n.analysisTypeStockingRecommendation;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final color = _typeColor(entry.type, cs);
     final dateStr = DateFormat('MMM d, y • h:mm a').format(entry.timestamp);
@@ -362,7 +384,7 @@ class _HistoryEntryTile extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      entry.type.displayName,
+                      _localizedTypeName(entry.type, l10n),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: color,
                             fontWeight: FontWeight.w500,
@@ -391,8 +413,9 @@ class _HistoryEntryTile extends ConsumerWidget {
               ),
               // Favorite star button
               IconButton(
-                tooltip:
-                    entry.isFavorite ? 'Remove from favorites' : 'Add to favorites',
+                tooltip: entry.isFavorite
+                    ? l10n.removeFromFavorites
+                    : l10n.addToFavorites,
                 icon: Icon(
                   entry.isFavorite ? Icons.star : Icons.star_border,
                   color: entry.isFavorite ? Colors.amber : cs.onSurface.withOpacity(0.4),
@@ -405,23 +428,22 @@ class _HistoryEntryTile extends ConsumerWidget {
               ),
               // Delete button
               IconButton(
-                tooltip: 'Delete',
+                tooltip: l10n.delete,
                 icon: Icon(Icons.delete_outline,
                     color: cs.onSurface.withOpacity(0.4)),
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Delete Entry'),
-                      content: const Text(
-                          'Remove this analysis from history?'),
+                      title: Text(l10n.deleteEntry),
+                      content: Text(l10n.deleteEntryConfirm),
                       actions: [
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel')),
+                            child: Text(l10n.cancel)),
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Delete')),
+                            child: Text(l10n.delete)),
                       ],
                     ),
                   );

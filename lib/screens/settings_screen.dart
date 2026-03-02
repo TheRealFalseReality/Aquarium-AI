@@ -877,8 +877,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'Appearance',
-          subtitle: 'Themes, brightness mode and colour palette',
+          title: l10n.appearance,
+          subtitle: l10n.appearanceDesc,
           icon: Icons.palette_outlined,
           gradient: LinearGradient(
             colors: [
@@ -952,8 +952,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'Contact Us',
-          subtitle: 'Leave a review or submit an issue',
+          title: l10n.contactUs,
+          subtitle: l10n.contactUsSubtitle,
           icon: Icons.chat_bubble_outline,
           gradient: LinearGradient(
             colors: [
@@ -970,8 +970,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 16),
           _buildMenuCard(
             context: context,
-            title: 'Debug Menu',
-            subtitle: 'Developer tools (debug builds only)',
+            title: l10n.debugMenu,
+            subtitle: l10n.debugMenuSubtitle,
             icon: Icons.bug_report,
             gradient: LinearGradient(
               colors: [
@@ -1081,15 +1081,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (ctx, setDialogState) {
           final appSettings = ref.read(appSettingsProvider);
           final purchaseState = ref.read(purchaseProvider);
+          final l10n = AppLocalizations.of(ctx)!;
           return AlertDialog(
             icon: Icon(Icons.bug_report, color: Colors.red.shade700, size: 36),
-            title: const Text('Debug Menu'),
+            title: Text(l10n.debugMenu),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'These tools are only available in debug builds and are not visible in release.',
+                  l10n.debugMenuDescription,
                   style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                   ),
@@ -1099,8 +1100,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // Hide Ads toggle
                 SwitchListTile(
                   secondary: Icon(Icons.block, color: Colors.red.shade700),
-                  title: const Text('Hide Ads'),
-                  subtitle: const Text('Hide all ads and references to removing them'),
+                  title: Text(l10n.debugHideAds),
+                  subtitle: Text(l10n.debugHideAdsDesc),
                   value: appSettings.debugHideAds,
                   onChanged: (value) {
                     ref.read(appSettingsProvider.notifier).setDebugHideAds(value);
@@ -1925,11 +1926,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           size: 24,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          l10n.appSettings,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.secondary,
+                        Flexible(
+                          child: Text(
+                            l10n.appSettings,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
                           ),
                         ),
                       ],
@@ -1956,8 +1959,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Icons.palette_outlined,
                       color: Theme.of(context).colorScheme.tertiary,
                     ),
-                    title: const Text('Appearance'),
-                    subtitle: const Text('Themes, brightness mode and colour palette'),
+                    title: Text(l10n.appearance),
+                    subtitle: Text(l10n.appearanceDesc),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       Navigator.of(context).pop();
@@ -1994,8 +1997,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Icons.history,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    title: const Text('Analysis History'),
-                    subtitle: const Text('View saved AI analysis reports'),
+                    title: Text(l10n.analysisHistory),
+                    subtitle: Text(l10n.analysisHistoryDesc),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       Navigator.pushNamed(context, '/analysis-history');
@@ -3925,13 +3928,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showFeedbackDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.chat_bubble_outline, size: 36),
         iconColor: Colors.orange.shade700,
-        title: const Text(
-          'Contact Us',
+        title: Text(
+          l10n.contactUs,
           textAlign: TextAlign.center,
         ),
         content: Column(
@@ -3939,9 +3943,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'We\'d love to hear from you! Leave a quick review on the store '
-              'to share your experience, or open a GitHub issue to report a '
-              'bug or suggest a new feature.',
+              l10n.contactUsMessage,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -3953,8 +3955,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ctx: ctx,
               icon: Icons.star_rate_outlined,
               iconColor: Colors.amber.shade700,
-              title: 'Leave a Review',
-              subtitle: 'Rate the app on the store',
+              title: l10n.leaveAReview,
+              subtitle: l10n.leaveAReviewDesc,
               onTap: () {
                 Navigator.of(ctx).pop();
                 InAppReviewService.forceRequestReview();
@@ -3966,8 +3968,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ctx: ctx,
               icon: Icons.bug_report_outlined,
               iconColor: Colors.orange.shade700,
-              title: 'Submit an Issue',
-              subtitle: 'Report a bug or request a feature on GitHub',
+              title: l10n.submitAnIssue,
+              subtitle: l10n.submitAnIssueDesc,
               onTap: () {
                 Navigator.of(ctx).pop();
                 launchUrl(
@@ -3985,7 +3987,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),

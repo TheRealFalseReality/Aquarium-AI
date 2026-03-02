@@ -132,6 +132,16 @@ chmod +x scripts/validate_translations.sh
 - Placeholders use `{paramName}` syntax in ARB files. Ensure all translations carry the same placeholders as the English template.
 - The `validate-translations.yml` workflow checks JSON validity and key completeness for every PR touching `lib/l10n/**.arb`. Warnings (missing keys) do **not** fail the build, but errors (invalid JSON) do.
 - The `l10n_template.arb` file at the repo root is a copy-and-translate starting point for new languages.
+- **Strings that are not visible to users** (analytics event names, SharedPreferences keys, JSON field names, route names, debug-only labels) do **not** need to be localized.
+
+### Text Overflow Prevention
+Translated strings are often longer than their English originals. Always design layouts to handle variable-length text:
+- **In `Row` widgets:** Wrap `Text` (and any widget that displays text) in `Flexible` or `Expanded` so it can wrap or truncate instead of overflowing. Never place a bare `Text` as a direct child of `Row` when the text length is unbounded.
+- **In `Row` heading widgets** (e.g., icon + label rows in section headers or card titles): wrap the `Text` in `Flexible`.
+- **Buttons next to text in a `Row`:** If the combined content can be long (e.g., label + restore button), place the button on a new line using a `Column` instead of a `Row`.
+- **`PopupMenuButton` items:** Always wrap item `Text` widgets in `Flexible` inside their `Row` to prevent overflow in narrow menus.
+- **`ListTile` subtitles:** Do not set `maxLines: 1` / `overflow: TextOverflow.ellipsis` unless truncation is intentional. Allow subtitles to wrap for longer translations.
+- **Card/dialog titles:** Wrap in `Flexible` if inside a `Row`; rely on `Text` natural wrapping if standalone.
 
 ### Models
 - Plain Dart classes in `lib/models/`. Most implement `toJson()` / `fromJson()`.
@@ -220,7 +230,8 @@ The Android release workflow requires `KEY_PROPERTIES`, `KEYSTORE_BASE64`, and `
 2. Add its seed colour constant to `AquaThemeColors` in `lib/theme_colors.dart`.
 3. Add a `case` in `AppColorThemeExt.seedColor` and `AppColorThemeExt.displayName`.
 4. Add entries to the swatch maps in `lib/screens/appearance_screen.dart`.
-5. Add a `case` in `_buildFlexTheme` in `lib/main.dart` if the theme needs special handling.
+5. Add a `case` in `_themeLocalizedName()` in `lib/screens/appearance_screen.dart` and add a `theme<Name>` key to all four ARB files.
+6. Add a `case` in `_buildFlexTheme` in `lib/main.dart` if the theme needs special handling.
 
 ---
 

@@ -22,6 +22,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   String _markdownContent = '';
   bool _isLoading = true;
   String? _error;
+  bool _changelogLoadStarted = false;
 
   static const String _latestReleaseUrl =
       'https://github.com/TheRealFalseReality/Aquarium-AI/releases/latest';
@@ -29,14 +30,18 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       'https://github.com/TheRealFalseReality/Aquarium-AI/releases';
 
   @override
-  void initState() {
-    super.initState();
-    _loadChangelog();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_changelogLoadStarted) {
+      _changelogLoadStarted = true;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      _loadChangelog(languageCode);
+    }
   }
 
-  Future<void> _loadChangelog() async {
-    // Try Remote Config first; fall back to the bundled .md asset.
-    final remoteContent = RemoteConfigService.changelog;
+  Future<void> _loadChangelog(String languageCode) async {
+    // 1. Remote Config content (locale-specific first, then English).
+    final remoteContent = RemoteConfigService.changelogForLocale(languageCode);
     if (remoteContent.isNotEmpty) {
       setState(() {
         _markdownContent = remoteContent;
@@ -44,6 +49,8 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       });
       return;
     }
+
+    // 2. Bundled local asset.
     try {
       final content =
           await rootBundle.loadString('assets/docs/CHANGELOG.md');
