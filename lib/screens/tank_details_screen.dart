@@ -134,7 +134,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             iconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
             actionsIconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
             flexibleSpace: hasBanner
-                ? _buildBannerFlexibleSpace(bannerPhoto!)
+                ? _buildBannerFlexibleSpace(bannerPhoto)
                 : null,
             bottom: TabBar(
               controller: _tabController,

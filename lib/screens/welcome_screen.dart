@@ -839,7 +839,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             const SizedBox(height: 16),
                             if (_version.isNotEmpty)
                               Text(
-                                l10n.versionNumber(version: _version),
+                                l10n.versionNumber(_version),
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
