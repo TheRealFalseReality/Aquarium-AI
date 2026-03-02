@@ -147,13 +147,13 @@ class RemoteConfigKeys {
 
   /// String — URL for the German (de) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlDe = 'changelog_de';
+  static const String changelogDe = 'changelog_de';
 
   /// String — URL for the Spanish (es) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlEs = 'changelog_es';
+  static const String changelogEs = 'changelog_es';
 
   /// String — URL for the French (fr) changelog markdown.
   /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
-  static const String changelogUrlFr = 'changelog_fr';
+  static const String changelogFr = 'changelog_fr';
 }

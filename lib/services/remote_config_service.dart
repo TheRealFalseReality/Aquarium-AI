@@ -41,9 +41,9 @@ class RemoteConfigService {
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
         RemoteConfigKeys.changelog: rcDefaultChangelog,
         RemoteConfigKeys.changelogUrl: rcDefaultChangelogUrl,
-        RemoteConfigKeys.changelogUrlDe: rcDefaultChangelogUrlDe,
-        RemoteConfigKeys.changelogUrlEs: rcDefaultChangelogUrlEs,
-        RemoteConfigKeys.changelogUrlFr: rcDefaultChangelogUrlFr,
+        RemoteConfigKeys.changelogDe: rcDefaultChangelogUrlDe,
+        RemoteConfigKeys.changelogEs: rcDefaultChangelogUrlEs,
+        RemoteConfigKeys.changelogFr: rcDefaultChangelogUrlFr,
         RemoteConfigKeys.fishcompatJsonUrl: rcDefaultFishcompatJsonUrl,
       });
 
@@ -210,18 +210,18 @@ class RemoteConfigService {
 
   /// URL for the German (de) changelog markdown.
   /// Returns an empty string when not set, falling back to [changelogUrl].
-  static String get changelogUrlDe =>
-      _modelString(RemoteConfigKeys.changelogUrlDe, rcDefaultChangelogUrlDe);
+  static String get changelogDe =>
+      _modelString(RemoteConfigKeys.changelogDe, rcDefaultChangelogUrlDe);
 
   /// URL for the Spanish (es) changelog markdown.
   /// Returns an empty string when not set, falling back to [changelogUrl].
-  static String get changelogUrlEs =>
-      _modelString(RemoteConfigKeys.changelogUrlEs, rcDefaultChangelogUrlEs);
+  static String get changelogEs =>
+      _modelString(RemoteConfigKeys.changelogEs, rcDefaultChangelogUrlEs);
 
   /// URL for the French (fr) changelog markdown.
   /// Returns an empty string when not set, falling back to [changelogUrl].
-  static String get changelogUrlFr =>
-      _modelString(RemoteConfigKeys.changelogUrlFr, rcDefaultChangelogUrlFr);
+  static String get changelogFr =>
+      _modelString(RemoteConfigKeys.changelogFr, rcDefaultChangelogUrlFr);
 
   /// Returns the best-match changelog URL for [languageCode].
   ///
@@ -233,11 +233,11 @@ class RemoteConfigService {
     String localeUrl = '';
     switch (languageCode) {
       case 'de':
-        localeUrl = changelogUrlDe;
+        localeUrl = changelogDe;
       case 'es':
-        localeUrl = changelogUrlEs;
+        localeUrl = changelogEs;
       case 'fr':
-        localeUrl = changelogUrlFr;
+        localeUrl = changelogFr;
     }
     if (localeUrl.isNotEmpty) return localeUrl;
     return changelogUrl;
