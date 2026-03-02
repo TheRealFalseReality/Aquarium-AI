@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:math' show pi;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -205,7 +206,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     // ── Social sign-in buttons ────────────────────────────
                     _SocialSignInButton(
                       label: l10n.authSignInWithGoogle,
-                      icon: _GoogleIcon(),
+                      icon: const _GoogleIcon(),
                       isLoading: _isSocialLoading,
                       onPressed: _isSocialLoading || _isLoading
                           ? null
@@ -468,8 +469,8 @@ class _GoogleLogoPainter extends CustomPainter {
         ..strokeWidth = size.width * 0.18;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: r * 0.72),
-        starts[i] * 3.14159 / 180,
-        sweeps[i] * 3.14159 / 180,
+        starts[i] * pi / 180,
+        sweeps[i] * pi / 180,
         false,
         paint,
       );

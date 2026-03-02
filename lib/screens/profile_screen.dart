@@ -74,9 +74,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false);
       // Use a brief delay so the route has settled before showing the snackbar
       Future.delayed(const Duration(milliseconds: 300), () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.authSignOutSuccess)),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.authSignOutSuccess)),
+          );
+        }
       });
     }
   }
@@ -658,7 +660,8 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     } else {
       // Use URL field value if it was changed
       final urlField = _avatarUrlController.text.trim();
-      if (urlField.isNotEmpty && urlField != (widget.profile.avatarUrl ?? '')) {
+      final existingUrl = widget.profile.avatarUrl ?? '';
+      if (urlField.isNotEmpty && urlField != existingUrl) {
         resolvedAvatarUrl = urlField;
       }
     }

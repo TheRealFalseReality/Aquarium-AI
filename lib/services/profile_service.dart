@@ -121,12 +121,14 @@ class ProfileService {
     if (user == null) return null;
     try {
       final file = File(filePath);
-      final ext = file.uri.pathSegments.last.split('.').last;
-      final fileName =
+      final fileName = file.uri.pathSegments.last;
+      final dotIndex = fileName.lastIndexOf('.');
+      final ext = dotIndex >= 0 ? fileName.substring(dotIndex + 1) : 'jpg';
+      final uploadName =
           'avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
       final ref = _storage
           .ref()
-          .child('profile_avatars/${user.uid}/$fileName');
+          .child('profile_avatars/${user.uid}/$uploadName');
       final uploadTask = await ref.putFile(file);
       final url = await uploadTask.ref.getDownloadURL();
       // Persist the new avatar URL in the Firestore profile document
