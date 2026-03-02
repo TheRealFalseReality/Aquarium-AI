@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   /// The currently signed-in user, or null if not signed in.
   static User? get currentUser => _auth.currentUser;
@@ -114,6 +116,69 @@ class AuthService {
       if (kDebugMode) {
         debugPrint('AuthService sendPasswordResetEmail error: $e');
       }
+    }
+  }
+
+  /// Sign in with Google.
+  ///
+  /// On web, uses a Firebase popup flow. On mobile, uses the native Google
+  /// sign-in sheet via the [google_sign_in] package.
+  ///
+  /// If the current session is anonymous, attempts to link the Google credential
+  /// so that existing community data is preserved.
+  static Future<User?> signInWithGoogle() async {
+    try {
+      AuthCredential credential;
+
+      if (kIsWeb) {
+        // Web: use Firebase popup directly
+        final provider = GoogleAuthProvider();
+        final result = await _auth.signInWithPopup(provider);
+        final user = result.user;
+        if (user != null) await _ensureUserDocument(user);
+        return user;
+      }
+
+      // Mobile: use google_sign_in package
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return null; // User cancelled
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      User? user;
+      final current = _auth.currentUser;
+      if (current != null && current.isAnonymous) {
+        // Try to link the Google credential to the anonymous account
+        try {
+          final linked = await current.linkWithCredential(credential);
+          user = linked.user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'credential-already-in-use' ||
+              e.code == 'account-exists-with-different-credential') {
+            final cred =
+                await _auth.signInWithCredential(credential);
+            user = cred.user;
+          } else {
+            rethrow;
+          }
+        }
+      } else {
+        final result = await _auth.signInWithCredential(credential);
+        user = result.user;
+      }
+
+      if (user != null) await _ensureUserDocument(user);
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) debugPrint('AuthService signInWithGoogle error: $e');
+      return null;
     }
   }
 
