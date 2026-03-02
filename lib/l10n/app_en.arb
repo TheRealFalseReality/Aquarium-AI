@@ -3508,12 +3508,28 @@
   "@profileAvatarUploadError": {
     "description": "Error message when avatar upload fails"
   },
-  "profileAvatarRemove": "Remove Photo",
+  "profileAvatarRemove": "Use Default Icon",
   "@profileAvatarRemove": {
-    "description": "Option to remove the current avatar photo"
+    "description": "Option to remove the current avatar and revert to default person icon"
   },
   "profileChangePhoto": "Change Photo",
   "@profileChangePhoto": {
     "description": "Label for the button that opens the avatar change options"
+  },
+  "profileSelectIcon": "Select Profile Icon",
+  "@profileSelectIcon": {
+    "description": "Label/title for the profile icon selection sheet"
+  },
+  "profilePersonIcons": "Person",
+  "@profilePersonIcons": {
+    "description": "Category label for person icons in the profile icon picker"
+  },
+  "profileAquariumIcons": "Aquarium",
+  "@profileAquariumIcons": {
+    "description": "Category label for aquarium icons in the profile icon picker"
+  },
+  "profileRestoreProviderPhoto": "Restore Sign-In Photo",
+  "@profileRestoreProviderPhoto": {
+    "description": "Option to restore the profile photo pulled from Google or Facebook sign-in"
   }
 }

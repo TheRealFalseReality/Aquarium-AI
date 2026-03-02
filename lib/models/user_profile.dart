@@ -42,6 +42,9 @@ class ProfileTankSummary {
   final double? sizeGallons;
   final double? sizeLiters;
   final int inhabitantCount;
+  /// Custom icon code point copied from the Tank, used to match the icon shown
+  /// in the My Tanks screen.
+  final int? customIconCodePoint;
 
   const ProfileTankSummary({
     required this.id,
@@ -51,6 +54,7 @@ class ProfileTankSummary {
     this.sizeGallons,
     this.sizeLiters,
     required this.inhabitantCount,
+    this.customIconCodePoint,
   });
 
   Map<String, dynamic> toMap() => {
@@ -61,6 +65,7 @@ class ProfileTankSummary {
         if (sizeGallons != null) 'sizeGallons': sizeGallons,
         if (sizeLiters != null) 'sizeLiters': sizeLiters,
         'inhabitantCount': inhabitantCount,
+        if (customIconCodePoint != null) 'customIconCodePoint': customIconCodePoint,
       };
 
   factory ProfileTankSummary.fromMap(Map<String, dynamic> map) =>
@@ -72,6 +77,7 @@ class ProfileTankSummary {
         sizeGallons: (map['sizeGallons'] as num?)?.toDouble(),
         sizeLiters: (map['sizeLiters'] as num?)?.toDouble(),
         inhabitantCount: map['inhabitantCount'] as int? ?? 0,
+        customIconCodePoint: map['customIconCodePoint'] as int?,
       );
 }
 
@@ -81,6 +87,9 @@ class UserProfile {
   final String displayName;
   final String? bio;
   final String? avatarUrl;
+  /// Code point of the Material icon chosen as the user's profile avatar.
+  /// When non-null, it takes priority over [avatarUrl] for display.
+  final int? avatarIconCodePoint;
   final String? location;
   final int yearsOfExperience;
   final ExperienceLevel experienceLevel;
@@ -100,6 +109,7 @@ class UserProfile {
     required this.displayName,
     this.bio,
     this.avatarUrl,
+    this.avatarIconCodePoint,
     this.location,
     this.yearsOfExperience = 0,
     this.experienceLevel = ExperienceLevel.beginner,
@@ -120,6 +130,8 @@ class UserProfile {
     bool clearBio = false,
     String? avatarUrl,
     bool clearAvatarUrl = false,
+    int? avatarIconCodePoint,
+    bool clearAvatarIconCodePoint = false,
     String? location,
     bool clearLocation = false,
     int? yearsOfExperience,
@@ -138,6 +150,9 @@ class UserProfile {
         displayName: displayName ?? this.displayName,
         bio: clearBio ? null : bio ?? this.bio,
         avatarUrl: clearAvatarUrl ? null : avatarUrl ?? this.avatarUrl,
+        avatarIconCodePoint: clearAvatarIconCodePoint
+            ? null
+            : avatarIconCodePoint ?? this.avatarIconCodePoint,
         location: clearLocation ? null : location ?? this.location,
         yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
         experienceLevel: experienceLevel ?? this.experienceLevel,
@@ -159,6 +174,7 @@ class UserProfile {
       displayName: data['displayName'] as String? ?? 'Aquarist',
       bio: data['bio'] as String?,
       avatarUrl: data['avatarUrl'] as String?,
+      avatarIconCodePoint: data['avatarIconCodePoint'] as int?,
       location: data['location'] as String?,
       yearsOfExperience: data['yearsOfExperience'] as int? ?? 0,
       experienceLevel: ExperienceLevelExt.fromString(
@@ -182,9 +198,12 @@ class UserProfile {
 
   Map<String, dynamic> toFirestore() => {
         'displayName': displayName,
-        if (bio != null) 'bio': bio,
-        if (avatarUrl != null) 'avatarUrl': avatarUrl,
-        if (location != null) 'location': location,
+        // Use FieldValue.delete() so that nulling any of these fields correctly
+        // removes the value from Firestore instead of leaving it stale.
+        'bio': bio ?? FieldValue.delete(),
+        'avatarUrl': avatarUrl ?? FieldValue.delete(),
+        'avatarIconCodePoint': avatarIconCodePoint ?? FieldValue.delete(),
+        'location': location ?? FieldValue.delete(),
         'yearsOfExperience': yearsOfExperience,
         'experienceLevel': experienceLevel.value,
         'preferredTankTypes': preferredTankTypes,

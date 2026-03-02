@@ -88,6 +88,7 @@ class ProfileService {
                 sizeLiters: t.sizeLiters,
                 inhabitantCount: t.inhabitants
                     .fold(0, (sum, i) => sum + i.quantity),
+                customIconCodePoint: t.customIconCodePoint,
               ))
           .toList();
 

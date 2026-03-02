@@ -687,6 +687,10 @@
   "profileAvatarUrlHint": "https://exemple.com/avatar.jpg",
   "profileAvatarUploading": "Téléchargement de la photo…",
   "profileAvatarUploadError": "Impossible de télécharger la photo. Veuillez réessayer.",
-  "profileAvatarRemove": "Supprimer la Photo",
-  "profileChangePhoto": "Changer la Photo"
+  "profileAvatarRemove": "Utiliser l'icône par défaut",
+  "profileChangePhoto": "Changer la Photo",
+  "profileSelectIcon": "Sélectionner une icône de profil",
+  "profilePersonIcons": "Personne",
+  "profileAquariumIcons": "Aquarium",
+  "profileRestoreProviderPhoto": "Restaurer la photo de connexion"
 }

@@ -687,6 +687,10 @@
   "profileAvatarUrlHint": "https://ejemplo.com/avatar.jpg",
   "profileAvatarUploading": "Subiendo foto…",
   "profileAvatarUploadError": "No se pudo subir la foto. Por favor, inténtalo de nuevo.",
-  "profileAvatarRemove": "Eliminar Foto",
-  "profileChangePhoto": "Cambiar Foto"
+  "profileAvatarRemove": "Usar Icono Predeterminado",
+  "profileChangePhoto": "Cambiar Foto",
+  "profileSelectIcon": "Seleccionar Icono de Perfil",
+  "profilePersonIcons": "Persona",
+  "profileAquariumIcons": "Acuario",
+  "profileRestoreProviderPhoto": "Restaurar Foto de Inicio de Sesión"
 }

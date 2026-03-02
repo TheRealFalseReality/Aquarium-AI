@@ -687,6 +687,10 @@
   "profileAvatarUrlHint": "https://beispiel.de/avatar.jpg",
   "profileAvatarUploading": "Foto wird hochgeladen…",
   "profileAvatarUploadError": "Foto konnte nicht hochgeladen werden. Bitte erneut versuchen.",
-  "profileAvatarRemove": "Foto entfernen",
-  "profileChangePhoto": "Foto ändern"
+  "profileAvatarRemove": "Standardsymbol verwenden",
+  "profileChangePhoto": "Foto ändern",
+  "profileSelectIcon": "Profilsymbol auswählen",
+  "profilePersonIcons": "Personen",
+  "profileAquariumIcons": "Aquarium",
+  "profileRestoreProviderPhoto": "Anmeldefoto wiederherstellen"
 }
