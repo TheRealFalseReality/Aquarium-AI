@@ -321,16 +321,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       BuildContext context, AppLocalizations l10n, UserProfile profile,
       bool isOwner) {
     final colorScheme = Theme.of(context).colorScheme;
+    const double avatarRadius = 48;
     return Stack(
       children: [
         Container(
+          // Extra top padding so the content isn't hidden behind the share btn
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          width: double.infinity,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar — icon takes priority, then photo URL, then default
-              _buildAvatarWidget(profile, colorScheme, radius: 48),
+              // Avatar with edit-badge overlay (owner only)
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  _buildAvatarWidget(profile, colorScheme,
+                      radius: avatarRadius),
+                  if (isOwner)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: _ActionIconButton(
+                        icon: Icons.edit_outlined,
+                        tooltip: l10n.profileEdit,
+                        onPressed: () => _navigateToEdit(context, profile),
+                        size: 28,
+                        iconSize: 14,
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(height: 12),
-              // Display name
+              // Display name — centered
               Text(
                 profile.displayName,
                 style: Theme.of(context)
@@ -349,7 +371,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   visualDensity: VisualDensity.compact,
                 ),
               ],
-              // Location
+              // Location — centered
               if (profile.location != null && profile.location!.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Row(
@@ -365,7 +387,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ],
-              // Bio
+              // Bio — centered
               if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(profile.bio!,
@@ -375,26 +397,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ),
-        // ── Edit + Share icon buttons (owner only) ─────────────────────────
+        // ── Share icon button (owner only) — top-right overlay ──────────────
         if (isOwner)
           Positioned(
             top: 8,
             right: 8,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ActionIconButton(
-                  icon: Icons.edit_outlined,
-                  tooltip: l10n.profileEdit,
-                  onPressed: () => _navigateToEdit(context, profile),
-                ),
-                const SizedBox(width: 4),
-                _ActionIconButton(
-                  icon: Icons.share_outlined,
-                  tooltip: l10n.profileShare,
-                  onPressed: () => _shareProfile(profile),
-                ),
-              ],
+            child: _ActionIconButton(
+              icon: Icons.share_outlined,
+              tooltip: l10n.profileShare,
+              onPressed: () => _shareProfile(profile),
             ),
           ),
       ],
@@ -1349,16 +1360,22 @@ class _SectionHeader extends StatelessWidget {
 // ─── Action icon button (profile header top-right) ────────────────────────────
 
 /// A compact icon button with a semi-transparent background, used for the
-/// Edit and Share actions overlaid in the profile header's top-right corner.
+/// Edit and Share actions overlaid in the profile header.
 class _ActionIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
+  /// Container size in logical pixels (default 36).
+  final double size;
+  /// Icon size in logical pixels (default 18).
+  final double iconSize;
 
   const _ActionIconButton({
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.size = 36,
+    this.iconSize = 18,
   });
 
   @override
@@ -1368,10 +1385,10 @@ class _ActionIconButton extends StatelessWidget {
       message: tooltip,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(size / 2),
         child: Container(
-          width: 36,
-          height: 36,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHighest.withOpacity(0.85),
             shape: BoxShape.circle,
@@ -1380,7 +1397,7 @@ class _ActionIconButton extends StatelessWidget {
               width: 1,
             ),
           ),
-          child: Icon(icon, size: 18, color: colorScheme.onSurface),
+          child: Icon(icon, size: iconSize, color: colorScheme.onSurface),
         ),
       ),
     );

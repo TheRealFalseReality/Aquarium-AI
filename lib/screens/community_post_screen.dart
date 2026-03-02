@@ -8,6 +8,7 @@ import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/community_service.dart';
 import '../widgets/comment_tile.dart';
+import '../widgets/post_card.dart';
 
 class CommunityPostScreen extends ConsumerStatefulWidget {
   final CommunityPost post;
@@ -148,6 +149,13 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         widget.post.body,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
+                      // Post signature footer
+                      if (widget.post.postSignature != null &&
+                          widget.post.postSignature!.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        PostSignatureFooter(
+                            sig: widget.post.postSignature!),
+                      ],
                       // Tank info section
                       if (widget.post.tankInfo != null &&
                           widget.post.tankInfo!.isNotEmpty) ...[

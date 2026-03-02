@@ -157,7 +157,7 @@ class _PostCardState extends State<PostCard> {
                   if (widget.post.postSignature != null &&
                       widget.post.postSignature!.isNotEmpty) ...[
                     const SizedBox(height: 6),
-                    _buildSignature(context, theme, widget.post.postSignature!),
+                    PostSignatureFooter(sig: widget.post.postSignature!),
                   ],
                   const SizedBox(height: 8),
                   // Footer: likes + comments
@@ -285,13 +285,23 @@ class _PostCardState extends State<PostCard> {
     if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
+}
 
-  Widget _buildSignature(BuildContext context, ThemeData theme,
-      Map<String, String> sig) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Public reusable signature footer — used in PostCard and CommunityPostScreen.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Renders the author's aquarist-metrics footer for a community post.
+/// [sig] is the `postSignature` map stored on [CommunityPost].
+class PostSignatureFooter extends StatelessWidget {
+  final Map<String, String> sig;
+
+  const PostSignatureFooter({super.key, required this.sig});
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = theme.colorScheme;
-
-    // Build ordered list of signature chips
+    final colorScheme = Theme.of(context).colorScheme;
     final chips = <Widget>[];
 
     if (sig.containsKey('experienceLevel')) {
@@ -310,12 +320,11 @@ class _PostCardState extends State<PostCard> {
         default:
           icon = Icons.school_outlined;
       }
-      final label = _levelLabel(l10n, level);
-      chips.add(_SigChip(icon: icon, label: label));
+      chips.add(_SigChip(icon: icon, label: _levelLabel(l10n, level)));
     }
     if (sig.containsKey('location')) {
-      chips.add(_SigChip(
-          icon: Icons.location_on_outlined, label: sig['location']!));
+      chips.add(
+          _SigChip(icon: Icons.location_on_outlined, label: sig['location']!));
     }
     if (sig.containsKey('tankCount')) {
       chips.add(_SigChip(
@@ -353,15 +362,11 @@ class _PostCardState extends State<PostCard> {
           width: 0.5,
         ),
       ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        children: chips,
-      ),
+      child: Wrap(spacing: 8, runSpacing: 4, children: chips),
     );
   }
 
-  String _levelLabel(AppLocalizations l10n, String level) {
+  static String _levelLabel(AppLocalizations l10n, String level) {
     switch (level) {
       case 'intermediate':
         return l10n.profileLevelIntermediate;
