@@ -35,6 +35,7 @@ import '../services/in_app_update_service.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../models/tank.dart';
 import '../models/community_post.dart';
+import 'community_post_screen.dart';
 
 class ToolChipInfo {
   final String label;
@@ -1469,18 +1470,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Post-type filter chips
+                // Post-type filter chips (icon-only)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _communityFilterChip(context, l10n.communityFilterAll, null),
+                      _communityFilterChip(context, Icons.all_inclusive, l10n.communityFilterAll, null),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, l10n.communityPostTypeTankShowcase, PostType.tankShowcase),
+                      _communityFilterChip(context, Icons.waves, l10n.communityPostTypeTankShowcase, PostType.tankShowcase),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, l10n.communityPostTypeTip, PostType.tip),
+                      _communityFilterChip(context, Icons.lightbulb_outline, l10n.communityPostTypeTip, PostType.tip),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, l10n.communityPostTypeQuestion, PostType.question),
+                      _communityFilterChip(context, Icons.help_outline, l10n.communityPostTypeQuestion, PostType.question),
                     ],
                   ),
                 ),
@@ -1522,22 +1523,38 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _communityFilterChip(BuildContext context, String label, PostType? type) {
+  Widget _communityFilterChip(BuildContext context, IconData icon, String tooltip, PostType? type) {
     final isSelected = _communityCardFilterType == type;
     final cs = Theme.of(context).colorScheme;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => setState(() => _communityCardFilterType = type),
-      selectedColor: cs.primaryContainer,
-      checkmarkColor: cs.primary,
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        label: tooltip,
+        child: ChoiceChip(
+          label: Icon(
+            icon,
+            size: 18,
+            color: isSelected ? cs.primary : cs.onSurfaceVariant,
+          ),
+          selected: isSelected,
+          onSelected: (_) => setState(() => _communityCardFilterType = type),
+          selectedColor: cs.primaryContainer,
+          labelPadding: EdgeInsets.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+        ),
+      ),
     );
   }
 
   Widget _buildCommunityPostTile(BuildContext context, CommunityPost post, ColorScheme cs) {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
-      onTap: () => Navigator.pushNamed(context, '/community'),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CommunityPostScreen(post: post),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
