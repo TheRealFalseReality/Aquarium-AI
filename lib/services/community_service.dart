@@ -91,7 +91,8 @@ class CommunityService {
   }
 
   /// Deletes a post and its associated image (if any).
-  static Future<bool> deletePost(CommunityPost post) async {    final user = FirebaseAuth.instance.currentUser;
+  static Future<bool> deletePost(CommunityPost post) async {
+    final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != post.userId) return false;
 
     try {
