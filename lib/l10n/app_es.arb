@@ -674,5 +674,19 @@
   "authErrorWeakPassword": "La contraseña es demasiado débil. Usa al menos 6 caracteres.",
   "authErrorTooManyRequests": "Demasiados intentos. Por favor, inténtalo más tarde.",
   "authErrorNetwork": "Error de red. Comprueba tu conexión e inténtalo de nuevo.",
-  "authErrorGeneric": "Se produjo un error. Por favor, inténtalo de nuevo."
+  "authErrorGeneric": "Se produjo un error. Por favor, inténtalo de nuevo.",
+  "authSignInWithGoogle": "Continuar con Google",
+  "authSignInWithFacebook": "Continuar con Facebook",
+  "authOrDivider": "o",
+  "authSignOutConfirmTitle": "Cerrar Sesión",
+  "authSignOutConfirmBody": "¿Estás seguro de que quieres cerrar sesión?",
+  "authSignOutSuccess": "Has cerrado sesión correctamente.",
+  "profileAvatarPhoto": "Subir Foto",
+  "profileAvatarUrl": "Usar URL de Imagen",
+  "profileAvatarUrlLabel": "URL de Imagen",
+  "profileAvatarUrlHint": "https://ejemplo.com/avatar.jpg",
+  "profileAvatarUploading": "Subiendo foto…",
+  "profileAvatarUploadError": "No se pudo subir la foto. Por favor, inténtalo de nuevo.",
+  "profileAvatarRemove": "Eliminar Foto",
+  "profileChangePhoto": "Cambiar Foto"
 }

@@ -674,5 +674,19 @@
   "authErrorWeakPassword": "Das Passwort ist zu schwach. Verwende mindestens 6 Zeichen.",
   "authErrorTooManyRequests": "Zu viele Versuche. Bitte später erneut versuchen.",
   "authErrorNetwork": "Netzwerkfehler. Überprüfe deine Verbindung und versuche es erneut.",
-  "authErrorGeneric": "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
+  "authErrorGeneric": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+  "authSignInWithGoogle": "Mit Google fortfahren",
+  "authSignInWithFacebook": "Mit Facebook fortfahren",
+  "authOrDivider": "oder",
+  "authSignOutConfirmTitle": "Abmelden",
+  "authSignOutConfirmBody": "Möchtest du dich wirklich abmelden?",
+  "authSignOutSuccess": "Du wurdest abgemeldet.",
+  "profileAvatarPhoto": "Foto hochladen",
+  "profileAvatarUrl": "Bild-URL verwenden",
+  "profileAvatarUrlLabel": "Bild-URL",
+  "profileAvatarUrlHint": "https://beispiel.de/avatar.jpg",
+  "profileAvatarUploading": "Foto wird hochgeladen…",
+  "profileAvatarUploadError": "Foto konnte nicht hochgeladen werden. Bitte erneut versuchen.",
+  "profileAvatarRemove": "Foto entfernen",
+  "profileChangePhoto": "Foto ändern"
 }

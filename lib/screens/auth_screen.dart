@@ -23,6 +23,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _isSignUp = false;
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isSocialLoading = false;
   String? _errorMessage;
 
   @override
@@ -64,13 +65,46 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       if (user != null && mounted) {
-        // Navigate to profile
         Navigator.of(context).pushReplacementNamed('/profile');
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isSocialLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final user = await AuthService.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.of(context).pushReplacementNamed('/profile');
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => _errorMessage = _friendlyError(e.code));
+    } finally {
+      if (mounted) setState(() => _isSocialLoading = false);
+    }
+  }
+
+  Future<void> _signInWithFacebook() async {
+    setState(() {
+      _isSocialLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final user = await AuthService.signInWithFacebook();
+      if (user != null && mounted) {
+        Navigator.of(context).pushReplacementNamed('/profile');
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => _errorMessage = _friendlyError(e.code));
+    } finally {
+      if (mounted) setState(() => _isSocialLoading = false);
     }
   }
 
@@ -166,7 +200,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ?.copyWith(color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
+
+                    // ── Social sign-in buttons ────────────────────────────
+                    _SocialSignInButton(
+                      label: l10n.authSignInWithGoogle,
+                      icon: _GoogleIcon(),
+                      isLoading: _isSocialLoading,
+                      onPressed: _isSocialLoading || _isLoading
+                          ? null
+                          : _signInWithGoogle,
+                    ),
+                    const SizedBox(height: 8),
+                    _SocialSignInButton(
+                      label: l10n.authSignInWithFacebook,
+                      icon: const Icon(Icons.facebook,
+                          color: Color(0xFF1877F2), size: 22),
+                      isLoading: _isSocialLoading,
+                      onPressed: _isSocialLoading || _isLoading
+                          ? null
+                          : _signInWithFacebook,
+                    ),
+
+                    // ── Divider ───────────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Row(
+                        children: [
+                          const Expanded(child: Divider()),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(l10n.authOrDivider,
+                                style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant)),
+                          ),
+                          const Expanded(child: Divider()),
+                        ],
+                      ),
+                    ),
 
                     // Display name (sign-up only)
                     if (_isSignUp) ...[
@@ -262,7 +334,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                     // Submit button
                     FilledButton(
-                      onPressed: _isLoading ? null : _submit,
+                      onPressed: _isLoading || _isSocialLoading
+                          ? null
+                          : _submit,
                       child: _isLoading
                           ? const SizedBox(
                               height: 20,
@@ -298,7 +372,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     OutlinedButton.icon(
                       icon: const Icon(Icons.no_accounts_outlined),
                       label: Text(l10n.authContinueAnonymously),
-                      onPressed: _isLoading
+                      onPressed: _isLoading || _isSocialLoading
                           ? null
                           : () async {
                               setState(() => _isLoading = true);
@@ -320,3 +394,99 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 }
+
+// ─── Social sign-in button ────────────────────────────────────────────────────
+
+class _SocialSignInButton extends StatelessWidget {
+  final String label;
+  final Widget icon;
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  const _SocialSignInButton({
+    required this.label,
+    required this.icon,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: BorderSide(color: colorScheme.outline),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(width: 22, height: 22, child: icon),
+          const SizedBox(width: 12),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Google icon (coloured G logo drawn with Canvas) ─────────────────────────
+
+class _GoogleIcon extends StatelessWidget {
+  const _GoogleIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(22, 22),
+      painter: _GoogleLogoPainter(),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    // Draw coloured arcs for the Google logo approximation
+    const colors = [
+      Color(0xFF4285F4), // Blue
+      Color(0xFF34A853), // Green
+      Color(0xFFFBBC05), // Yellow
+      Color(0xFFEA4335), // Red
+    ];
+    const sweeps = [90.0, 90.0, 90.0, 90.0];
+    const starts = [-45.0, 45.0, 135.0, 225.0];
+
+    for (int i = 0; i < 4; i++) {
+      final paint = Paint()
+        ..color = colors[i]
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 0.18;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: r * 0.72),
+        starts[i] * 3.14159 / 180,
+        sweeps[i] * 3.14159 / 180,
+        false,
+        paint,
+      );
+    }
+
+    // White cutout for the G bar
+    final barPaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(center.dx, center.dy - size.height * 0.12,
+          r * 0.72, size.height * 0.24),
+      barPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+

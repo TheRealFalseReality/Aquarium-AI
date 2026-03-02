@@ -674,5 +674,19 @@
   "authErrorWeakPassword": "Le mot de passe est trop faible. Utilisez au moins 6 caractères.",
   "authErrorTooManyRequests": "Trop de tentatives. Veuillez réessayer plus tard.",
   "authErrorNetwork": "Erreur réseau. Vérifiez votre connexion et réessayez.",
-  "authErrorGeneric": "Une erreur s'est produite. Veuillez réessayer."
+  "authErrorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
+  "authSignInWithGoogle": "Continuer avec Google",
+  "authSignInWithFacebook": "Continuer avec Facebook",
+  "authOrDivider": "ou",
+  "authSignOutConfirmTitle": "Se Déconnecter",
+  "authSignOutConfirmBody": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "authSignOutSuccess": "Vous avez été déconnecté.",
+  "profileAvatarPhoto": "Télécharger une Photo",
+  "profileAvatarUrl": "Utiliser une URL d'Image",
+  "profileAvatarUrlLabel": "URL d'Image",
+  "profileAvatarUrlHint": "https://exemple.com/avatar.jpg",
+  "profileAvatarUploading": "Téléchargement de la photo…",
+  "profileAvatarUploadError": "Impossible de télécharger la photo. Veuillez réessayer.",
+  "profileAvatarRemove": "Supprimer la Photo",
+  "profileChangePhoto": "Changer la Photo"
 }

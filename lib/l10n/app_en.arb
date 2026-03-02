@@ -3458,5 +3458,62 @@
   "authErrorGeneric": "An error occurred. Please try again.",
   "@authErrorGeneric": {
     "description": "Generic auth error fallback"
+  },
+
+  "authSignInWithGoogle": "Continue with Google",
+  "@authSignInWithGoogle": {
+    "description": "Button label for Google sign-in"
+  },
+  "authSignInWithFacebook": "Continue with Facebook",
+  "@authSignInWithFacebook": {
+    "description": "Button label for Facebook sign-in"
+  },
+  "authOrDivider": "or",
+  "@authOrDivider": {
+    "description": "Divider text between social sign-in and email/password form"
+  },
+  "authSignOutConfirmTitle": "Sign Out",
+  "@authSignOutConfirmTitle": {
+    "description": "Title of the sign-out confirmation dialog"
+  },
+  "authSignOutConfirmBody": "Are you sure you want to sign out?",
+  "@authSignOutConfirmBody": {
+    "description": "Body text of the sign-out confirmation dialog"
+  },
+  "authSignOutSuccess": "You have been signed out.",
+  "@authSignOutSuccess": {
+    "description": "Snackbar message shown after successful sign-out"
+  },
+  "profileAvatarPhoto": "Upload Photo",
+  "@profileAvatarPhoto": {
+    "description": "Button/option label for uploading a profile photo from device"
+  },
+  "profileAvatarUrl": "Use Image URL",
+  "@profileAvatarUrl": {
+    "description": "Button/option label for entering an avatar image URL"
+  },
+  "profileAvatarUrlLabel": "Image URL",
+  "@profileAvatarUrlLabel": {
+    "description": "Label for the image URL text field in avatar editing"
+  },
+  "profileAvatarUrlHint": "https://example.com/avatar.jpg",
+  "@profileAvatarUrlHint": {
+    "description": "Hint text for the avatar URL field"
+  },
+  "profileAvatarUploading": "Uploading photo…",
+  "@profileAvatarUploading": {
+    "description": "Progress message while the avatar photo is being uploaded"
+  },
+  "profileAvatarUploadError": "Failed to upload photo. Please try again.",
+  "@profileAvatarUploadError": {
+    "description": "Error message when avatar upload fails"
+  },
+  "profileAvatarRemove": "Remove Photo",
+  "@profileAvatarRemove": {
+    "description": "Option to remove the current avatar photo"
+  },
+  "profileChangePhoto": "Change Photo",
+  "@profileChangePhoto": {
+    "description": "Label for the button that opens the avatar change options"
   }
 }

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -182,10 +183,72 @@ class AuthService {
     }
   }
 
-  /// Sign out the current user.
+  /// Sign in with Facebook.
+  ///
+  /// Uses [flutter_facebook_auth] to obtain a Facebook access token, then
+  /// signs in to Firebase with [FacebookAuthProvider]. Anonymous accounts are
+  /// automatically linked when possible.
+  static Future<User?> signInWithFacebook() async {
+    try {
+      AuthCredential credential;
+
+      if (kIsWeb) {
+        // Web: use Firebase popup directly
+        final provider = FacebookAuthProvider();
+        final result = await _auth.signInWithPopup(provider);
+        final user = result.user;
+        if (user != null) await _ensureUserDocument(user);
+        return user;
+      }
+
+      // Mobile: obtain access token from Facebook SDK
+      final LoginResult loginResult = await FacebookAuth.instance.login(
+        permissions: const ['email', 'public_profile'],
+      );
+
+      if (loginResult.status != LoginStatus.success) return null;
+
+      final AccessToken accessToken = loginResult.accessToken!;
+      credential = FacebookAuthProvider.credential(accessToken.tokenString);
+
+      User? user;
+      final current = _auth.currentUser;
+      if (current != null && current.isAnonymous) {
+        try {
+          final linked = await current.linkWithCredential(credential);
+          user = linked.user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'credential-already-in-use' ||
+              e.code == 'account-exists-with-different-credential') {
+            final cred = await _auth.signInWithCredential(credential);
+            user = cred.user;
+          } else {
+            rethrow;
+          }
+        }
+      } else {
+        final result = await _auth.signInWithCredential(credential);
+        user = result.user;
+      }
+
+      if (user != null) await _ensureUserDocument(user);
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) debugPrint('AuthService signInWithFacebook error: $e');
+      return null;
+    }
+  }
+
+  /// Sign out the current user (also signs out from Google / Facebook if needed).
   static Future<void> signOut() async {
     try {
       await _auth.signOut();
+      // Also sign out from Google if the user signed in that way
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
     } catch (e) {
       if (kDebugMode) {
         debugPrint('AuthService signOut error: $e');

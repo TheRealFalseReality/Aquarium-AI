@@ -1,8 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
@@ -43,9 +45,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _signOut(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    // 1. Confirm
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.authSignOutConfirmTitle),
+        content: Text(l10n.authSignOutConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.authSignOut),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    // 2. Sign out
     await AuthService.signOut();
+
+    // 3. Navigate home and show success snackbar
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/');
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false);
+      // Use a brief delay so the route has settled before showing the snackbar
+      Future.delayed(const Duration(milliseconds: 300), () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.authSignOutSuccess)),
+        );
+      });
     }
   }
 
@@ -545,6 +577,7 @@ class _EditProfileScreen extends ConsumerStatefulWidget {
 class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  late final TextEditingController _avatarUrlController;
   late final TextEditingController _nameController;
   late final TextEditingController _bioController;
   late final TextEditingController _locationController;
@@ -554,6 +587,12 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
   late List<String> _preferredTankTypes;
   late List<String> _interests;
   late bool _isPublic;
+
+  /// Tracks a locally-picked avatar file path (not yet uploaded).
+  String? _pendingAvatarPath;
+  /// Tracks whether the user explicitly cleared the avatar.
+  bool _clearAvatar = false;
+  bool _isUploadingAvatar = false;
 
   static const _tankTypeOptions = ['freshwater', 'marine'];
   static const _interestOptions = [
@@ -578,6 +617,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     _locationController = TextEditingController(text: p.location ?? '');
     _yearsController =
         TextEditingController(text: '${p.yearsOfExperience}');
+    _avatarUrlController = TextEditingController(text: p.avatarUrl ?? '');
     _experienceLevel = p.experienceLevel;
     _preferredTankTypes = List.from(p.preferredTankTypes);
     _interests = List.from(p.interests);
@@ -590,11 +630,38 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     _bioController.dispose();
     _locationController.dispose();
     _yearsController.dispose();
+    _avatarUrlController.dispose();
     super.dispose();
   }
 
   Future<void> _save(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Upload pending avatar file first (mobile only)
+    String? resolvedAvatarUrl = widget.profile.avatarUrl;
+    if (_pendingAvatarPath != null) {
+      setState(() => _isUploadingAvatar = true);
+      final url = await ProfileService.uploadAvatar(_pendingAvatarPath!);
+      setState(() => _isUploadingAvatar = false);
+      if (url == null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.profileAvatarUploadError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        return;
+      }
+      resolvedAvatarUrl = url;
+    } else if (_clearAvatar) {
+      resolvedAvatarUrl = null;
+    } else {
+      // Use URL field value if it was changed
+      final urlField = _avatarUrlController.text.trim();
+      if (urlField.isNotEmpty && urlField != (widget.profile.avatarUrl ?? '')) {
+        resolvedAvatarUrl = urlField;
+      }
+    }
 
     final updated = widget.profile.copyWith(
       displayName: _nameController.text.trim(),
@@ -611,6 +678,8 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
       preferredTankTypes: List.from(_preferredTankTypes),
       interests: List.from(_interests),
       isPublic: _isPublic,
+      avatarUrl: resolvedAvatarUrl,
+      clearAvatarUrl: resolvedAvatarUrl == null,
       updatedAt: DateTime.now(),
     );
 
@@ -636,17 +705,156 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     }
   }
 
+  Future<void> _pickAvatarFromGallery(AppLocalizations l10n) async {
+    if (kIsWeb) {
+      _showUrlDialog(l10n);
+      return;
+    }
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 512,
+      );
+      if (picked != null && mounted) {
+        setState(() {
+          _pendingAvatarPath = picked.path;
+          _clearAvatar = false;
+          _avatarUrlController.clear();
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _pickAvatarFromCamera(AppLocalizations l10n) async {
+    if (kIsWeb) {
+      _showUrlDialog(l10n);
+      return;
+    }
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 512,
+      );
+      if (picked != null && mounted) {
+        setState(() {
+          _pendingAvatarPath = picked.path;
+          _clearAvatar = false;
+          _avatarUrlController.clear();
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _showUrlDialog(AppLocalizations l10n) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.profileAvatarUrl),
+        content: TextFormField(
+          controller: _avatarUrlController,
+          decoration: InputDecoration(
+            labelText: l10n.profileAvatarUrlLabel,
+            hintText: l10n.profileAvatarUrlHint,
+            border: const OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.url,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              setState(() {
+                _pendingAvatarPath = null;
+                _clearAvatar = false;
+              });
+              Navigator.of(ctx).pop();
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAvatarOptions(AppLocalizations l10n) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!kIsWeb) ...[
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(l10n.profileAvatarPhoto),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickAvatarFromGallery(l10n);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: Text(l10n.camera),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickAvatarFromCamera(l10n);
+                },
+              ),
+            ],
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: Text(l10n.profileAvatarUrl),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _showUrlDialog(l10n);
+              },
+            ),
+            if (widget.profile.avatarUrl != null || _pendingAvatarPath != null)
+              ListTile(
+                leading: Icon(Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error),
+                title: Text(l10n.profileAvatarRemove,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error)),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  setState(() {
+                    _pendingAvatarPath = null;
+                    _clearAvatar = true;
+                    _avatarUrlController.clear();
+                  });
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final saveState = ref.watch(saveProfileProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Determine the avatar to preview: pending file (mobile), URL field, or existing
+    final previewAvatarUrl = _clearAvatar
+        ? null
+        : (_avatarUrlController.text.trim().isNotEmpty
+            ? _avatarUrlController.text.trim()
+            : widget.profile.avatarUrl);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profileEditTitle),
         centerTitle: true,
         actions: [
-          if (saveState.isSaving)
+          if (saveState.isSaving || _isUploadingAvatar)
             const Padding(
               padding: EdgeInsets.all(16),
               child: SizedBox(
@@ -667,6 +875,51 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // ── Avatar picker ──────────────────────────────────────────────
+            Center(
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 52,
+                    backgroundColor: colorScheme.primaryContainer,
+                    backgroundImage: _pendingAvatarPath != null && !kIsWeb
+                        ? null // will be shown via FutureBuilder below
+                        : (previewAvatarUrl != null
+                            ? CachedNetworkImageProvider(previewAvatarUrl)
+                            : null),
+                    child: _pendingAvatarPath == null && previewAvatarUrl == null
+                        ? Icon(Icons.person,
+                            size: 52, color: colorScheme.primary)
+                        : null,
+                  ),
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: colorScheme.primary,
+                    child: IconButton(
+                      icon: Icon(Icons.edit,
+                          size: 18, color: colorScheme.onPrimary),
+                      tooltip: l10n.profileChangePhoto,
+                      onPressed: () => _showAvatarOptions(l10n),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_pendingAvatarPath != null) ...[
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  _pendingAvatarPath!.split('/').last,
+                  style: TextStyle(
+                      color: colorScheme.primary, fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+
             // Display name
             TextFormField(
               controller: _nameController,

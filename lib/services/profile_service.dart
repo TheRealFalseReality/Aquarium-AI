@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../models/tank.dart';
 
 class ProfileService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseStorage _storage = FirebaseStorage.instance;
 
   static const String _usersCollection = 'users';
 
@@ -103,6 +106,46 @@ class ProfileService {
     } catch (e) {
       if (kDebugMode) debugPrint('ProfileService syncTanks error: $e');
     }
+  }
+
+  // ─── Avatar ──────────────────────────────────────────────────────────────────
+
+  /// Uploads a local image file as the profile avatar and returns the download URL.
+  ///
+  /// Stores the file under `profile_avatars/{uid}/avatar_<timestamp>.jpg` in
+  /// Firebase Storage. Returns null on failure or when running on web (where
+  /// File-based uploads are unavailable — use [updateAvatarUrl] directly instead).
+  static Future<String?> uploadAvatar(String filePath) async {
+    if (kIsWeb) return null;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+    try {
+      final file = File(filePath);
+      final ext = file.uri.pathSegments.last.split('.').last;
+      final fileName =
+          'avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final ref = _storage
+          .ref()
+          .child('profile_avatars/${user.uid}/$fileName');
+      final uploadTask = await ref.putFile(file);
+      final url = await uploadTask.ref.getDownloadURL();
+      // Persist the new avatar URL in the Firestore profile document
+      await _firestore
+          .collection(_usersCollection)
+          .doc(user.uid)
+          .set({'avatarUrl': url}, SetOptions(merge: true));
+      return url;
+    } catch (e) {
+      if (kDebugMode) debugPrint('ProfileService uploadAvatar error: $e');
+      return null;
+    }
+  }
+
+  /// Saves a remote avatar URL to the user's Firestore profile.
+  ///
+  /// Use this when the user provides a URL directly instead of picking a file.
+  static Future<bool> updateAvatarUrl(String url) async {
+    return updateProfile({'avatarUrl': url});
   }
 
   // ─── Share Snippet ───────────────────────────────────────────────────────────
