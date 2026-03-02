@@ -28,9 +28,16 @@ class MarkdownViewerScreen extends StatefulWidget {
 }
 
 class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
-  String _markdownContent = '';
   bool _isLoading = true;
   String? _error;
+  final ScrollController _scrollController = ScrollController();
+
+  /// Each entry is one logical section: its anchor id (nullable for the
+  /// preamble before the first heading) and its raw markdown text.
+  List<({String? anchorId, String content})> _sections = [];
+
+  /// Maps anchor id → GlobalKey so we can scroll to it.
+  final Map<String, GlobalKey> _anchorKeys = {};
 
   @override
   void initState() {
@@ -38,25 +45,104 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     _loadMarkdown();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadMarkdown() async {
     try {
       final content = await rootBundle.loadString(widget.assetPath);
-      setState(() {
-        _markdownContent = content;
-        _isLoading = false;
-      });
+      final sections = _buildSections(content);
+      final keys = <String, GlobalKey>{};
+      for (final s in sections) {
+        if (s.anchorId != null) keys[s.anchorId!] = GlobalKey();
+      }
+      if (mounted) {
+        setState(() {
+          _sections = sections;
+          _anchorKeys.clear();
+          _anchorKeys.addAll(keys);
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Failed to load content: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load content: $e';
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  /// Split [markdown] into sections at every h1 / h2 boundary.
+  ///
+  /// The text of the heading that opens a section is included at the top of
+  /// that section's [content] so it renders correctly.
+  static List<({String? anchorId, String content})> _buildSections(
+      String markdown) {
+    final lines = markdown.split('\n');
+    final sections = <({String? anchorId, String content})>[];
+    var buffer = StringBuffer();
+    String? currentAnchor;
+
+    for (final line in lines) {
+      // Match only h1 and h2 (# or ##) as section anchors.
+      final match = RegExp(r'^#{1,2} (.+)$').firstMatch(line);
+      if (match != null) {
+        // Flush previous section.
+        final text = buffer.toString().trim();
+        if (text.isNotEmpty) {
+          sections.add((anchorId: currentAnchor, content: text));
+        }
+        buffer = StringBuffer();
+        currentAnchor = _toAnchorId(match.group(1)!);
+      }
+      buffer.writeln(line);
+    }
+    // Flush final section.
+    final text = buffer.toString().trim();
+    if (text.isNotEmpty) {
+      sections.add((anchorId: currentAnchor, content: text));
+    }
+    return sections;
+  }
+
+  /// Convert a heading string to a GFM-compatible anchor id.
+  ///
+  /// Rules (matching GitHub Flavored Markdown):
+  ///   1. Lowercase.
+  ///   2. Strip any character that is not a word character (`\w`), a space,
+  ///      or an existing hyphen.  This removes `–`, `&`, `/`, etc.
+  ///   3. Replace every space with a hyphen (preserving doubled spaces that
+  ///      result from stripping surrounding punctuation, e.g. `–` → `--`).
+  static String _toAnchorId(String heading) {
+    return heading
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s-]'), '') // strip non-word, non-space, non-hyphen chars
+        .replaceAll(' ', '-'); // each space → one hyphen (consecutive spaces → consecutive hyphens)
   }
 
   Future<void> _handleLink(String text, String? href, String title) async {
     if (href == null) return;
 
-    // Check if it's a local markdown file link
+    // ── Anchor link: scroll to the matching section ───────────────────────
+    if (href.startsWith('#')) {
+      final anchorId = href.substring(1);
+      final key = _anchorKeys[anchorId];
+      if (key?.currentContext != null) {
+        await Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+      return;
+    }
+
+    // ── Local markdown file link ──────────────────────────────────────────
     if (href.endsWith('.md')) {
       // Create new breadcrumb trail including current page
       final newBreadcrumbs = [
@@ -65,6 +151,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
       ];
       
       // Navigate to another markdown viewer with the new file
+      if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -75,28 +162,29 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
           ),
         ),
       );
-    } else {
-      // External link - open in browser
-      try {
-        final uri = Uri.parse(href);
-        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-        if (!launched && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Could not open link: $href'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Invalid link: $href'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+      return;
+    }
+
+    // ── External link: open in browser ───────────────────────────────────
+    try {
+      final uri = Uri.parse(href);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open link: $href'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid link: $href'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
   }
@@ -231,6 +319,61 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     );
   }
 
+  MarkdownStyleSheet _buildStyleSheet(BuildContext context) {
+    return MarkdownStyleSheet(
+      h1: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+      h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+      h3: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
+      p: Theme.of(context).textTheme.bodyLarge,
+      code: TextStyle(
+        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontFamily: 'monospace',
+      ),
+      codeblockDecoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline,
+        ),
+      ),
+      blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontStyle: FontStyle.italic,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+      blockquoteDecoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(4),
+        border: Border(
+          left: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 4,
+          ),
+        ),
+      ),
+      tableHead: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+      tableBody: Theme.of(context).textTheme.bodyMedium,
+      tableBorder: TableBorder.all(
+        color: Theme.of(context).colorScheme.outline,
+      ),
+      a: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+        decoration: TextDecoration.underline,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
@@ -265,66 +408,22 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                         ),
                       )
                     : ListView(
+                        controller: _scrollController,
                         padding: const EdgeInsets.all(16.0),
-                        children: [
-                          MarkdownBody(
-                            data: _markdownContent,
-                            selectable: true,
-                            onTapLink: _handleLink,
-                            styleSheet: MarkdownStyleSheet(
-                              h1: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                              h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                              h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.secondary,
-                                  ),
-                              p: Theme.of(context).textTheme.bodyLarge,
-                              code: TextStyle(
-                                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontFamily: 'monospace',
-                              ),
-                              codeblockDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceVariant,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                              ),
-                              blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontStyle: FontStyle.italic,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                              blockquoteDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border(
-                                  left: BorderSide(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    width: 4,
-                                  ),
-                                ),
-                              ),
-                              tableHead: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              tableBody: Theme.of(context).textTheme.bodyMedium,
-                              tableBorder: TableBorder.all(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
-                              a: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                              ),
+                        children: _sections.map((section) {
+                          final key = section.anchorId != null
+                              ? _anchorKeys[section.anchorId!]
+                              : null;
+                          return Container(
+                            key: key,
+                            child: MarkdownBody(
+                              data: section.content,
+                              selectable: true,
+                              onTapLink: _handleLink,
+                              styleSheet: _buildStyleSheet(context),
                             ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       ),
           ),
         ],

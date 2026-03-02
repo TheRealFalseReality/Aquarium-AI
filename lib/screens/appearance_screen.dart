@@ -320,6 +320,45 @@ class _ThemeGrid extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: returns the localized display name for a colour theme.
+// ---------------------------------------------------------------------------
+
+String _themeLocalizedName(AppColorTheme theme, AppLocalizations l10n) {
+  switch (theme) {
+    case AppColorTheme.defaultTheme:
+      return l10n.themeDefault;
+    case AppColorTheme.materialYou:
+      return l10n.themeMaterialYou;
+    case AppColorTheme.oceanBlue:
+      return l10n.themeOceanBlue;
+    case AppColorTheme.iceBlue:
+      return l10n.themeIceBlue;
+    case AppColorTheme.gold:
+      return l10n.themeGold;
+    case AppColorTheme.mulberry:
+      return l10n.themeMulberry;
+    case AppColorTheme.midnight:
+      return l10n.themeMidnight;
+    case AppColorTheme.orange:
+      return l10n.themeOrange;
+    case AppColorTheme.green:
+      return l10n.themeGreen;
+    case AppColorTheme.skyBlue:
+      return l10n.themeSkyBlue;
+    case AppColorTheme.royalBlue:
+      return l10n.themeRoyalBlue;
+    case AppColorTheme.orchid:
+      return l10n.themeOrchid;
+    case AppColorTheme.hotPink:
+      return l10n.themeHotPink;
+    case AppColorTheme.crimson:
+      return l10n.themeCrimson;
+    case AppColorTheme.custom:
+      return l10n.colorCustom;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Individual theme chip
 // ---------------------------------------------------------------------------
 
@@ -390,7 +429,7 @@ class _ThemeChip extends StatelessWidget {
       secondary = _swatchSecondary[theme] ?? Colors.grey.shade700;
     }
 
-    final String label = isCustom ? customThemeName : theme.displayName;
+    final String label = isCustom ? customThemeName : _themeLocalizedName(theme, AppLocalizations.of(context)!);
 
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;

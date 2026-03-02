@@ -3618,5 +3618,424 @@
   "freeTierPhotoAnalysisDisabledMessage": "The AI Photo Analysis tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
   "@freeTierPhotoAnalysisDisabledMessage": {
     "description": "Body text shown when the Photo Analysis tool is disabled for free-tier users"
+
+  "userGuideCardTitle": "User Guide",
+  "@userGuideCardTitle": {
+    "description": "Title for the User Guide card in the Information screen"
+  },
+
+  "userGuideCardSubtitle": "Learn how to use every tool in Aquarium AI",
+  "@userGuideCardSubtitle": {
+    "description": "Subtitle for the User Guide card in the Information screen"
+  },
+
+  "welcomeDocsCardTitle": "Documentation & Guides",
+  "@welcomeDocsCardTitle": {
+    "description": "Title for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardBody": "New to Aquarium AI? Browse the built-in User Guide to learn how to use every tool — Tank Management, AI tools, Calculators, and more.",
+  "@welcomeDocsCardBody": {
+    "description": "Body text for the Documentation & Guides promo card on the welcome screen"
+  },
+
+  "welcomeDocsCardButton": "Open User Guide",
+  "@welcomeDocsCardButton": {
+    "description": "Button label on the Documentation & Guides promo card"
+  },
+
+  "welcomeCommunityPromoTitle": "New: Community Feature",
+  "@welcomeCommunityPromoTitle": {
+    "description": "Title for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoBody": "Connect with other aquarium enthusiasts! Share your tank showcases, ask questions, post tips, and explore what the community is up to.",
+  "@welcomeCommunityPromoBody": {
+    "description": "Body text for the Community feature promo card on the welcome screen"
+  },
+
+  "welcomeCommunityPromoButton": "Explore Community",
+  "@welcomeCommunityPromoButton": {
+    "description": "Button label on the Community feature promo card"
+  },
+
+  "appearanceDesc": "Themes, brightness mode and colour palette",
+  "@appearanceDesc": {
+    "description": "Subtitle for the Appearance menu card in settings"
+  },
+
+  "contactUsSubtitle": "Leave a review or submit an issue",
+  "@contactUsSubtitle": {
+    "description": "Subtitle for the Contact Us menu card in settings"
+  },
+
+  "contactUsMessage": "We'd love to hear from you! Leave a quick review on the store to share your experience, or open a GitHub issue to report a bug or suggest a new feature.",
+  "@contactUsMessage": {
+    "description": "Body text in the Contact Us dialog"
+  },
+
+  "leaveAReview": "Leave a Review",
+  "@leaveAReview": {
+    "description": "Option title in the Contact Us dialog"
+  },
+
+  "leaveAReviewDesc": "Rate the app on the store",
+  "@leaveAReviewDesc": {
+    "description": "Option subtitle in the Contact Us dialog"
+  },
+
+  "submitAnIssue": "Submit an Issue",
+  "@submitAnIssue": {
+    "description": "Option title in the Contact Us dialog"
+  },
+
+  "submitAnIssueDesc": "Report a bug or request a feature on GitHub",
+  "@submitAnIssueDesc": {
+    "description": "Option subtitle in the Contact Us dialog"
+  },
+
+  "debugMenu": "Debug Menu",
+  "@debugMenu": {
+    "description": "Title for the Debug Menu card and dialog"
+  },
+
+  "debugMenuSubtitle": "Developer tools (debug builds only)",
+  "@debugMenuSubtitle": {
+    "description": "Subtitle for the Debug Menu card in settings"
+  },
+
+  "debugMenuDescription": "These tools are only available in debug builds and are not visible in release.",
+  "@debugMenuDescription": {
+    "description": "Explanatory text inside the Debug Menu dialog"
+  },
+
+  "debugHideAds": "Hide Ads",
+  "@debugHideAds": {
+    "description": "Label for the Hide Ads toggle in the Debug Menu"
+  },
+
+  "debugHideAdsDesc": "Hide all ads and references to removing them",
+  "@debugHideAdsDesc": {
+    "description": "Subtitle for the Hide Ads toggle in the Debug Menu"
+  },
+
+  "analysisHistory": "Analysis History",
+  "@analysisHistory": {
+    "description": "Title for the Analysis History list tile in settings and the app drawer"
+  },
+
+  "analysisHistoryDesc": "View saved AI analysis reports",
+  "@analysisHistoryDesc": {
+    "description": "Subtitle for the Analysis History list tile"
+  },
+
+  "toolsAndResources": "Tools & Resources",
+  "@toolsAndResources": {
+    "description": "Section header in the app drawer for tools and resources"
+  },
+
+  "guidesAndDocs": "Guides & Docs",
+  "@guidesAndDocs": {
+    "description": "Section header in the app drawer for guides and documentation"
+  },
+
+  "currentlyUsingModels": "Currently using the following models:",
+  "@currentlyUsingModels": {
+    "description": "Label shown above the active AI model names on the welcome screen"
+  },
+
+  "versionNumber": "Version {version}",
+  "@versionNumber": {
+    "description": "App version display label on the welcome screen",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+
+  "checkForUpdate": "Check for Update",
+  "@checkForUpdate": {
+    "description": "Button label to check for an app update on the welcome screen"
+  },
+
+  "alreadyLatestVersion": "You're already on the latest version!",
+  "@alreadyLatestVersion": {
+    "description": "Snackbar message shown when no app update is available"
+  },
+
+  "unableToCheckUpdates": "Unable to check for updates.",
+  "@unableToCheckUpdates": {
+    "description": "Snackbar message shown when the update check fails"
+  },
+
+  "meetAquaPi": "Meet AquaPi!",
+  "@meetAquaPi": {
+    "description": "Title of the AquaPi promotion dialog"
+  },
+
+  "aquaPiPromoDescription": "Take your aquarium to the next level with AquaPi - the open-source smart monitoring and automation system!",
+  "@aquaPiPromoDescription": {
+    "description": "Main marketing description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureSmartMonitoring": "Smart Monitoring",
+  "@aquaPiFeatureSmartMonitoring": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureSmartMonitoringDesc": "Real-time monitoring of temperature, pH, water level, and more",
+  "@aquaPiFeatureSmartMonitoringDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureHomeAssistant": "Home Assistant Integration",
+  "@aquaPiFeatureHomeAssistant": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureHomeAssistantDesc": "Seamlessly integrates with your smart home ecosystem",
+  "@aquaPiFeatureHomeAssistantDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureCustomizable": "Fully Customizable",
+  "@aquaPiFeatureCustomizable": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureCustomizableDesc": "Open-source design lets you add unlimited sensors and automations",
+  "@aquaPiFeatureCustomizableDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureAlerts": "Automated Alerts",
+  "@aquaPiFeatureAlerts": {
+    "description": "Feature title in the AquaPi promotion dialog"
+  },
+
+  "aquaPiFeatureAlertsDesc": "Get notified instantly about critical changes in your aquarium",
+  "@aquaPiFeatureAlertsDesc": {
+    "description": "Feature description in the AquaPi promotion dialog"
+  },
+
+  "aquaPiPerfectFor": "Perfect for DIY enthusiasts and tech-savvy aquarists!",
+  "@aquaPiPerfectFor": {
+    "description": "Tagline in the AquaPi promotion dialog"
+  },
+
+  "learnMore": "Learn More",
+  "@learnMore": {
+    "description": "Button label to learn more about AquaPi"
+  },
+
+  "neverShow": "Never Show",
+  "@neverShow": {
+    "description": "Button label to never show the AquaPi promotion dialog again (compact, for mobile)"
+  },
+
+  "neverShowAgain": "Never Show Again",
+  "@neverShowAgain": {
+    "description": "Button label to never show the AquaPi promotion dialog again (full label, for desktop)"
+  },
+
+  "themeDefault": "Default",
+  "@themeDefault": {
+    "description": "Display name for the Default colour theme"
+  },
+
+  "themeMaterialYou": "Material You",
+  "@themeMaterialYou": {
+    "description": "Display name for the Material You colour theme"
+  },
+
+  "themeOceanBlue": "Ocean Blue",
+  "@themeOceanBlue": {
+    "description": "Display name for the Ocean Blue colour theme"
+  },
+
+  "themeIceBlue": "Ice Blue",
+  "@themeIceBlue": {
+    "description": "Display name for the Ice Blue colour theme"
+  },
+
+  "themeGold": "Gold",
+  "@themeGold": {
+    "description": "Display name for the Gold colour theme"
+  },
+
+  "themeMulberry": "Mulberry",
+  "@themeMulberry": {
+    "description": "Display name for the Mulberry colour theme"
+  },
+
+  "themeMidnight": "Midnight",
+  "@themeMidnight": {
+    "description": "Display name for the Midnight colour theme"
+  },
+
+  "themeOrange": "Orange",
+  "@themeOrange": {
+    "description": "Display name for the Orange colour theme"
+  },
+
+  "themeGreen": "Green",
+  "@themeGreen": {
+    "description": "Display name for the Green colour theme"
+  },
+
+  "themeSkyBlue": "Sky Blue",
+  "@themeSkyBlue": {
+    "description": "Display name for the Sky Blue colour theme"
+  },
+
+  "themeRoyalBlue": "Royal Blue",
+  "@themeRoyalBlue": {
+    "description": "Display name for the Royal Blue colour theme"
+  },
+
+  "themeOrchid": "Orchid",
+  "@themeOrchid": {
+    "description": "Display name for the Orchid colour theme"
+  },
+
+  "themeHotPink": "Hot Pink",
+  "@themeHotPink": {
+    "description": "Display name for the Hot Pink colour theme"
+  },
+
+  "themeCrimson": "Crimson",
+  "@themeCrimson": {
+    "description": "Display name for the Crimson colour theme"
+  },
+
+  "modelLabelText": "text",
+  "@modelLabelText": {
+    "description": "Label shown after the text AI model name on the welcome screen (e.g. 'gemini-flash (text)')"
+  },
+
+  "modelLabelImage": "image",
+  "@modelLabelImage": {
+    "description": "Label shown after the image AI model name on the welcome screen (e.g. 'gemini-flash (image)')"
+  },
+
+  "analysisHistoryTitle": "Analysis History",
+  "@analysisHistoryTitle": {
+    "description": "Screen title for the Analysis History screen"
+  },
+
+  "noAnalysisHistory": "No Analysis History",
+  "@noAnalysisHistory": {
+    "description": "Heading shown on the empty state of the Analysis History screen"
+  },
+
+  "noAnalysisHistoryDesc": "Every AI analysis you run will be saved here for easy review.",
+  "@noAnalysisHistoryDesc": {
+    "description": "Body text shown on the empty state of the Analysis History screen"
+  },
+
+  "clearAllHistory": "Clear All History",
+  "@clearAllHistory": {
+    "description": "Button label to clear all analysis history"
+  },
+
+  "clearHistory": "Clear History",
+  "@clearHistory": {
+    "description": "Title of the confirmation dialog for clearing analysis history"
+  },
+
+  "clearHistoryConfirm": "Are you sure you want to delete all analysis history? This cannot be undone.",
+  "@clearHistoryConfirm": {
+    "description": "Body text of the confirmation dialog for clearing analysis history"
+  },
+
+  "clearAll": "Clear All",
+  "@clearAll": {
+    "description": "Confirm button label in the clear history dialog"
+  },
+
+  "deleteEntry": "Delete Entry",
+  "@deleteEntry": {
+    "description": "Title of the confirmation dialog for deleting a single history entry"
+  },
+
+  "deleteEntryConfirm": "Remove this analysis from history?",
+  "@deleteEntryConfirm": {
+    "description": "Body text of the confirmation dialog for deleting a single history entry"
+  },
+
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
+    "description": "Tooltip for the star button when the entry is not yet a favorite"
+  },
+
+  "removeFromFavorites": "Remove from favorites",
+  "@removeFromFavorites": {
+    "description": "Tooltip for the star button when the entry is already a favorite"
+  },
+
+  "noRecommendationsFound": "No recommendations found in this history entry.",
+  "@noRecommendationsFound": {
+    "description": "Snackbar shown when a stocking recommendation history entry has no data"
+  },
+
+  "couldNotOpenReport": "Could not open report: {error}",
+  "@couldNotOpenReport": {
+    "description": "Snackbar shown when a history entry cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "analysisTypeWaterParameters": "Water Parameter Analysis",
+  "@analysisTypeWaterParameters": {
+    "description": "Display name for the water parameter analysis type in history"
+  },
+
+  "analysisTypePhotoAnalysis": "Photo Analysis",
+  "@analysisTypePhotoAnalysis": {
+    "description": "Display name for the photo analysis type in history"
+  },
+
+  "analysisTypeFishInfo": "Fish Info",
+  "@analysisTypeFishInfo": {
+    "description": "Display name for the fish info analysis type in history"
+  },
+
+  "analysisTypeAutomationScript": "Automation Script",
+  "@analysisTypeAutomationScript": {
+    "description": "Display name for the automation script analysis type in history"
+  },
+
+  "analysisTypeCompatibilityReport": "Compatibility Report",
+  "@analysisTypeCompatibilityReport": {
+    "description": "Display name for the compatibility report analysis type in history"
+  },
+
+  "analysisTypeStockingRecommendation": "Stocking Recommendation",
+  "@analysisTypeStockingRecommendation": {
+    "description": "Display name for the stocking recommendation analysis type in history"
+  },
+
+  "chatbotYou": "You",
+  "@chatbotYou": {
+    "description": "Label shown above user messages in the chatbot screen"
+  },
+
+  "chatbotAIError": "{appName} - Error",
+  "@chatbotAIError": {
+    "description": "Label shown above error messages in the chatbot screen",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "moreThemeOptions": "More theme options",
+  "@moreThemeOptions": {
+    "description": "Button label in the app drawer that navigates to the full Appearance screen"
   }
 }
