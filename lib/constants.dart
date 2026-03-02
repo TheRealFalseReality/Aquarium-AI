@@ -69,3 +69,101 @@ const String rcDefaultChangelogUrl = '';
 const String rcDefaultChangelogUrlDe = '';
 const String rcDefaultChangelogUrlEs = '';
 const String rcDefaultChangelogUrlFr = '';
+
+// ---------------------------------------------------------------------------
+// Firebase Remote Config key names
+// These string constants are the exact key names used in the Firebase Console.
+// Update them here if you ever rename a key in the Console.
+// ---------------------------------------------------------------------------
+
+/// Key names used in Firebase Remote Config.
+///
+/// Set these keys in the Firebase Console → Remote Config to override the
+/// in-app defaults without shipping an app update.
+class RemoteConfigKeys {
+  /// Boolean — when `false` the built-in developer Groq key is disabled and
+  /// users must supply their own API key.  Defaults to `true`.
+  static const String freeAiEnabled = 'free_ai_enabled';
+
+  /// Integer — per-minute request cap for the free (developer-key) tier.
+  static const String devMaxRequestsPerMinute = 'dev_max_requests_per_minute';
+
+  /// Integer — per-day request cap for the free (developer-key) tier.
+  static const String devMaxRequestsPerDay = 'dev_max_requests_per_day';
+
+  /// Integer — per-day photo-analysis cap for the free (developer-key) tier.
+  static const String devMaxPhotoAnalysesPerDay = 'dev_max_photo_analyses_per_day';
+
+  /// Integer — chat-history window (past messages per request) applied to
+  /// free-tier users. Users with their own API key can configure this freely.
+  static const String devDefaultChatHistoryLimit = 'dev_default_chat_history_limit';
+
+  // ── Model defaults ──────────────────────────────────────────────────────
+  /// String — default Gemini text/chat model name.
+  static const String defaultGeminiModel = 'default_gemini_model';
+
+  /// String — default Gemini image-analysis model name.
+  static const String defaultGeminiImageModel = 'default_gemini_image_model';
+
+  /// String — default OpenAI (ChatGPT) text/chat model name.
+  static const String defaultOpenAIModel = 'default_openai_model';
+
+  /// String — default OpenAI image-analysis model name.
+  static const String defaultOpenAIImageModel = 'default_openai_image_model';
+
+  /// String — default Groq text/chat model name.
+  static const String defaultGroqModel = 'default_groq_model';
+
+  /// String — default Groq image-analysis model name.
+  static const String defaultGroqImageModel = 'default_groq_image_model';
+
+  // ── Promotion images ────────────────────────────────────────────────────
+  /// String — URL for the "original" AquaPi promotion image.
+  /// Empty string (default) means use the bundled `assets/images/system/AquaPiMainSmaller.jpg`.
+  static const String aquapiOriginalImageUrl = 'aquapi_original_image_url';
+
+  /// String — URL for the "essential" AquaPi promotion image.
+  /// Empty string (default) means use the bundled `assets/images/system/AquaPiEssentials.jpg`.
+  static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
+
+  // ── Fish compatibility data ─────────────────────────────────────────────
+  /// String — full JSON content of the fish compatibility database.
+  /// Empty string (default) means use the bundled `assets/data/fishcompat.json`.
+  static const String fishcompatJson = 'fishcompat_json';
+
+  /// String — URL from which to fetch the fish compatibility JSON at runtime.
+  /// Empty string (default) means fall back to [fishcompatJson] or bundled asset.
+  static const String fishcompatJsonUrl = 'fishcompat_json_url';
+
+  // ── In-app purchase pricing ─────────────────────────────────────────────
+  /// String — USD price for the Early Supporter lifetime purchase.
+  /// Store a positive number (e.g. `0.99`) in Remote Config.
+  /// `0` or unset means no price label is shown in the Remove Ads dialog.
+  static const String earlySupporterPrice = 'early_supporter_price';
+
+  /// String — URL for the Buy Me a Coffee page.
+  static const String buyMeACoffeeUrl = 'buy_me_a_coffee_url';
+
+  // ── Changelog ───────────────────────────────────────────────────────────
+  /// String — full markdown content of the changelog.
+  /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
+  static const String changelog = 'changelog';
+
+  /// String — URL from which to fetch the changelog markdown at runtime.
+  /// When set, the app fetches content from this URL instead of using the
+  /// bundled asset or the [changelog] full-content key.
+  /// Empty string (default) means fall back to [changelog] or bundled asset.
+  static const String changelogUrl = 'changelog_url';
+
+  /// String — URL for the German (de) changelog markdown.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlDe = 'changelog_url_de';
+
+  /// String — URL for the Spanish (es) changelog markdown.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlEs = 'changelog_url_es';
+
+  /// String — URL for the French (fr) changelog markdown.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlFr = 'changelog_url_fr';
+}
