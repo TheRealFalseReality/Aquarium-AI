@@ -88,7 +88,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
 
     // Core library desugaring for flutter_local_notifications
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // Updated to 2.1.4+ to satisfy flutter_local_notifications AAR metadata
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
     // Add the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
