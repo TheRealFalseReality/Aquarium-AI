@@ -3602,5 +3602,21 @@
   "profileSignatureShowMemberSince": "Member Since",
   "@profileSignatureShowMemberSince": {
     "description": "Switch label to show/hide member-since date in post signature"
+  },
+  "freeTierFishCompatDisabledTitle": "Fish Compatibility Tool Unavailable",
+  "@freeTierFishCompatDisabledTitle": {
+    "description": "Title shown when the Fish Compatibility tool is disabled for free-tier users"
+  },
+  "freeTierFishCompatDisabledMessage": "The AI Fish Compatibility tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
+  "@freeTierFishCompatDisabledMessage": {
+    "description": "Body text shown when the Fish Compatibility tool is disabled for free-tier users"
+  },
+  "freeTierPhotoAnalysisDisabledTitle": "Photo Analysis Unavailable",
+  "@freeTierPhotoAnalysisDisabledTitle": {
+    "description": "Title shown when the Photo Analysis tool is disabled for free-tier users"
+  },
+  "freeTierPhotoAnalysisDisabledMessage": "The AI Photo Analysis tool is currently unavailable on the free tier. Please add your own API key in Settings to continue using this feature.",
+  "@freeTierPhotoAnalysisDisabledMessage": {
+    "description": "Body text shown when the Photo Analysis tool is disabled for free-tier users"
   }
 }

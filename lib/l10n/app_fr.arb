@@ -728,5 +728,9 @@
   "profileSignatureShowTankCount": "Nombre d'aquariums",
   "profileSignatureShowFishCount": "Nombre de poissons",
   "profileSignatureShowYearsExp": "Années d'expérience",
-  "profileSignatureShowMemberSince": "Membre depuis"
+  "profileSignatureShowMemberSince": "Membre depuis",
+  "freeTierFishCompatDisabledTitle": "Outil de compatibilité des poissons indisponible",
+  "freeTierFishCompatDisabledMessage": "L'outil de compatibilité des poissons par IA est actuellement indisponible sur le niveau gratuit. Veuillez ajouter votre propre clé API dans les Paramètres pour continuer à utiliser cette fonctionnalité.",
+  "freeTierPhotoAnalysisDisabledTitle": "Analyse photo indisponible",
+  "freeTierPhotoAnalysisDisabledMessage": "L'outil d'analyse photo par IA est actuellement indisponible sur le niveau gratuit. Veuillez ajouter votre propre clé API dans les Paramètres pour continuer à utiliser cette fonctionnalité."
 }

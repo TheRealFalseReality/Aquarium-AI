@@ -728,5 +728,9 @@
   "profileSignatureShowTankCount": "Número de Acuarios",
   "profileSignatureShowFishCount": "Número de Peces",
   "profileSignatureShowYearsExp": "Años de Experiencia",
-  "profileSignatureShowMemberSince": "Miembro Desde"
+  "profileSignatureShowMemberSince": "Miembro Desde",
+  "freeTierFishCompatDisabledTitle": "Herramienta de Compatibilidad de Peces No Disponible",
+  "freeTierFishCompatDisabledMessage": "La herramienta de compatibilidad de peces con IA no está disponible actualmente en el nivel gratuito. Por favor, añade tu propia clave de API en Ajustes para continuar usando esta función.",
+  "freeTierPhotoAnalysisDisabledTitle": "Análisis de Fotos No Disponible",
+  "freeTierPhotoAnalysisDisabledMessage": "La herramienta de análisis de fotos con IA no está disponible actualmente en el nivel gratuito. Por favor, añade tu propia clave de API en Ajustes para continuar usando esta función."
 }

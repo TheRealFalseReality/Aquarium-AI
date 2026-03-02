@@ -728,5 +728,9 @@
   "profileSignatureShowTankCount": "Anzahl Aquarien",
   "profileSignatureShowFishCount": "Anzahl Fische",
   "profileSignatureShowYearsExp": "Jahre Erfahrung",
-  "profileSignatureShowMemberSince": "Mitglied seit"
+  "profileSignatureShowMemberSince": "Mitglied seit",
+  "freeTierFishCompatDisabledTitle": "Fish Compatibility Tool nicht verfügbar",
+  "freeTierFishCompatDisabledMessage": "Das KI-Fischabgleich-Tool ist auf dem Free-Tier derzeit nicht verfügbar. Bitte füge in den Einstellungen einen eigenen API-Schlüssel hinzu, um diese Funktion weiterhin nutzen zu können.",
+  "freeTierPhotoAnalysisDisabledTitle": "Fotoanalyse nicht verfügbar",
+  "freeTierPhotoAnalysisDisabledMessage": "Das KI-Fotoanalyse-Tool ist auf dem Free-Tier derzeit nicht verfügbar. Bitte füge in den Einstellungen einen eigenen API-Schlüssel hinzu, um diese Funktion weiterhin nutzen zu können."
 }

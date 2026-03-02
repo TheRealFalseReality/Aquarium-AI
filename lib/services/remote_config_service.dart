@@ -45,6 +45,8 @@ class RemoteConfigService {
         RemoteConfigKeys.changelogEs: rcDefaultChangelogEs,
         RemoteConfigKeys.changelogFr: rcDefaultChangelogFr,
         RemoteConfigKeys.communityImageUpload: rcDefaultCommunityImageUpload,
+        RemoteConfigKeys.freeFishCompatEnabled: rcDefaultFreeFishCompatEnabled,
+        RemoteConfigKeys.freePhotoAnalysisEnabled: rcDefaultFreePhotoAnalysisEnabled,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -242,4 +244,18 @@ class RemoteConfigService {
   static bool get communityImageUploadEnabled =>
       _instance?.getBool(RemoteConfigKeys.communityImageUpload) ??
       rcDefaultCommunityImageUpload;
+
+  /// Whether the AI Fish Compatibility tool is available to free-tier users.
+  /// Defaults to `true`. Set to `false` in Firebase Remote Config to disable
+  /// the tool for users on the free (developer Groq key) tier.
+  static bool get freeFishCompatEnabled =>
+      _instance?.getBool(RemoteConfigKeys.freeFishCompatEnabled) ??
+      rcDefaultFreeFishCompatEnabled;
+
+  /// Whether the Photo Analysis tool is available to free-tier users.
+  /// Defaults to `true`. Set to `false` in Firebase Remote Config to disable
+  /// the tool for users on the free (developer Groq key) tier.
+  static bool get freePhotoAnalysisEnabled =>
+      _instance?.getBool(RemoteConfigKeys.freePhotoAnalysisEnabled) ??
+      rcDefaultFreePhotoAnalysisEnabled;
 }
