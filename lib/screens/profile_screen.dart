@@ -176,14 +176,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await AuthService.signOut();
 
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false);
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.authSignOutSuccess)),
-          );
-        }
-      });
+      Navigator.of(context).pushNamedAndRemoveUntil('/auth', (r) => false);
     }
   }
 

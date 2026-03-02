@@ -959,6 +959,56 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
+              )
+            else
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 250), () {
+                    if (!mounted) return;
+                    Navigator.pushNamed(context, '/auth');
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: colorScheme.onSurface.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 26,
+                        height: 26,
+                        child: CircleAvatar(
+                          backgroundColor: colorScheme.primary.withOpacity(0.3),
+                          child: Icon(Icons.login,
+                              size: 16, color: colorScheme.onSurface),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.authSignIn,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios,
+                          size: 10,
+                          color: colorScheme.onSurface.withOpacity(0.6)),
+                    ],
+                  ),
+                ),
               ),
           ],
         ),
