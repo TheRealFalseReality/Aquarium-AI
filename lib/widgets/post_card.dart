@@ -9,6 +9,7 @@ class PostCard extends StatefulWidget {
   final String currentUserId;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const PostCard({
     super.key,
@@ -16,6 +17,7 @@ class PostCard extends StatefulWidget {
     required this.currentUserId,
     this.onTap,
     this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -113,6 +115,15 @@ class _PostCardState extends State<PostCard> {
                         ),
                       ),
                       _buildTypeBadge(context, l10n),
+                      if (isOwner)
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          color: theme.colorScheme.primary,
+                          tooltip: l10n.communityEditPost,
+                          onPressed: widget.onEdit,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
                       if (isOwner)
                         IconButton(
                           icon: const Icon(Icons.delete_outline, size: 18),

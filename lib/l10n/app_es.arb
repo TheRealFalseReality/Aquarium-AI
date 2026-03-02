@@ -593,6 +593,18 @@
   "communityPostBodyRequired": "Por favor, introduce una descripción",
   "communityPostImage": "Foto (opcional)",
   "communityPickImage": "Elegir de la galería",
+  "communityEditPost": "Editar publicación",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "¡Publicación actualizada con éxito!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Error al subir imagen. Por favor, inténtalo de nuevo.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
   "communityAttachTank": "Adjuntar info del acuario",
   "communitySelectTank": "Seleccionar acuario",
   "communityPostPublish": "Publicar",

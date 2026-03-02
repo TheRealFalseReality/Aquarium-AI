@@ -3126,6 +3126,18 @@
   "@communityPickImage": {
     "description": "Button label to open gallery for image selection"
   },
+  "communityEditPost": "Edit Post",
+  "@communityEditPost": {
+    "description": "Label for editing a community post"
+  },
+  "communityPostEdited": "Post updated successfully!",
+  "@communityPostEdited": {
+    "description": "Snackbar message after editing a post"
+  },
+  "communityImageUploadFailed": "Image upload failed. Please try again.",
+  "@communityImageUploadFailed": {
+    "description": "Error shown when post image upload fails"
+  },
   "communityAttachTank": "Attach tank info",
   "@communityAttachTank": {
     "description": "Switch label to attach tank data to a post"

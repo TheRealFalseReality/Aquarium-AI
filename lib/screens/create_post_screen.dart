@@ -11,7 +11,10 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
-  const CreatePostScreen({super.key});
+  final PostType? initialType;
+  final CommunityPost? editPost;
+
+  const CreatePostScreen({super.key, this.initialType, this.editPost});
 
   @override
   ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -21,23 +24,36 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
+  final ScrollController _typeScrollController = ScrollController();
 
-  PostType _selectedType = PostType.tip;
+  late PostType _selectedType;
   String? _imageFilePath;
   String? _imageFileName;
   bool _includeTankInfo = false;
   String? _selectedTankId;
 
+  bool get _isEditing => widget.editPost != null;
+
   @override
   void initState() {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'create_post_screen');
+    final post = widget.editPost;
+    if (post != null) {
+      _selectedType = post.type;
+      _titleController.text = post.title;
+      _bodyController.text = post.body;
+      // tankInfo editing not supported in edit mode for simplicity
+    } else {
+      _selectedType = widget.initialType ?? PostType.tip;
+    }
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _bodyController.dispose();
+    _typeScrollController.dispose();
     super.dispose();
   }
 
@@ -61,11 +77,60 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     });
   }
 
+  void _onTypeSelected(PostType type) {
+    setState(() => _selectedType = type);
+    // Auto-scroll so the selected chip is visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final types = [PostType.tankShowcase, PostType.tip, PostType.question];
+      final index = types.indexOf(type);
+      if (index >= 0 && _typeScrollController.hasClients) {
+        final offset = index * 140.0;
+        _typeScrollController.animateTo(
+          offset.clamp(0.0, _typeScrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+    // Clear tank info when switching away from tank showcase
+    if (type != PostType.tankShowcase && _includeTankInfo) {
+      setState(() => _includeTankInfo = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context)!;
+    final notifier = ref.read(createPostProvider.notifier);
+
+    if (_isEditing) {
+      final updated = await notifier.updatePost(
+        post: widget.editPost!,
+        title: _titleController.text.trim(),
+        body: _bodyController.text.trim(),
+        newImageFilePath: _imageFilePath,
+      );
+      if (mounted) {
+        if (updated != null) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.communityPostEdited)),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.communityPostError),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+      return;
+    }
+
     Map<String, dynamic>? tankInfo;
-    if (_includeTankInfo && _selectedTankId != null) {
+    if (_includeTankInfo && _selectedTankId != null && _selectedType == PostType.tankShowcase) {
       final tanks = ref.read(tankProvider).tanks;
       final tank = tanks.firstWhere(
         (t) => t.id == _selectedTankId,
@@ -82,8 +147,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       };
     }
 
-    final l10n = AppLocalizations.of(context)!;
-    final notifier = ref.read(createPostProvider.notifier);
     final post = await notifier.submitPost(
       type: _selectedType,
       title: _titleController.text.trim(),
@@ -102,9 +165,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             featureName: 'community_post_created',
             parameters: {'post_type': _selectedType.value});
       } else {
+        final errorMsg = _imageFilePath != null
+            ? l10n.communityImageUploadFailed
+            : l10n.communityPostError;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.communityPostError),
+            content: Text(errorMsg),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -121,7 +187,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.communityCreatePost),
+        title: Text(_isEditing ? l10n.communityEditPost : l10n.communityCreatePost),
         actions: [
           TextButton(
             onPressed: createState.isSubmitting ? null : _submit,
@@ -145,12 +211,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Post type selector
-            Text(l10n.communityPostType,
-                style: theme.textTheme.labelLarge),
-            const SizedBox(height: 8),
-            _buildTypeChips(l10n),
-            const SizedBox(height: 16),
+            // Post type selector (hidden in edit mode)
+            if (!_isEditing) ...[
+              Text(l10n.communityPostType,
+                  style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              _buildTypeChips(l10n),
+              const SizedBox(height: 16),
+            ],
 
             // Title
             TextFormField(
@@ -188,7 +256,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Image picker (not on web)
+            // Image picker (not on web, limit 1 image)
             if (!kIsWeb) ...[
               Text(l10n.communityPostImage,
                   style: theme.textTheme.labelLarge),
@@ -220,8 +288,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               const SizedBox(height: 12),
             ],
 
-            // Attach tank info
-            if (tanks.isNotEmpty) ...[
+            // Attach tank info — only for Tank Showcase type
+            if (_selectedType == PostType.tankShowcase && tanks.isNotEmpty && !_isEditing) ...[
               SwitchListTile(
                 title: Text(l10n.communityAttachTank),
                 value: _includeTankInfo,
@@ -265,23 +333,29 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
     ];
 
-    return Wrap(
-      spacing: 8,
-      children: types.map((item) {
-        final isSelected = _selectedType == item.$1;
-        return ChoiceChip(
-          selected: isSelected,
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(item.$3, size: 16),
-              const SizedBox(width: 4),
-              Text(item.$2),
-            ],
-          ),
-          onSelected: (_) => setState(() => _selectedType = item.$1),
-        );
-      }).toList(),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      controller: _typeScrollController,
+      child: Row(
+        children: types.map((item) {
+          final isSelected = _selectedType == item.$1;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              selected: isSelected,
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(item.$3, size: 16),
+                  const SizedBox(width: 4),
+                  Text(item.$2),
+                ],
+              ),
+              onSelected: (_) => _onTypeSelected(item.$1),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

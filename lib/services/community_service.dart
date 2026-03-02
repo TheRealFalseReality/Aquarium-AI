@@ -56,6 +56,10 @@ class CommunityService {
       String? imageUrl;
       if (imageFilePath != null) {
         imageUrl = await _uploadImage(imageFilePath, user.uid);
+        if (imageUrl == null) {
+          // Image upload failed — abort to surface error to user
+          return null;
+        }
       }
 
       final now = DateTime.now();
@@ -87,8 +91,7 @@ class CommunityService {
   }
 
   /// Deletes a post and its associated image (if any).
-  static Future<bool> deletePost(CommunityPost post) async {
-    final user = FirebaseAuth.instance.currentUser;
+  static Future<bool> deletePost(CommunityPost post) async {    final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != post.userId) return false;
 
     try {
@@ -106,6 +109,50 @@ class CommunityService {
         debugPrint('CommunityService deletePost error: $e');
       }
       return false;
+    }
+  }
+
+  /// Updates a post's title, body, and optionally image.
+  static Future<CommunityPost?> updatePost({
+    required CommunityPost post,
+    required String title,
+    required String body,
+    String? newImageFilePath,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != post.userId) return null;
+
+    try {
+      String? imageUrl = post.imageUrl;
+
+      if (newImageFilePath != null) {
+        // Delete old image first
+        if (post.imageUrl != null) {
+          await _deleteImageByUrl(post.imageUrl!);
+        }
+        imageUrl = await _uploadImage(newImageFilePath, user.uid);
+        if (imageUrl == null) return null;
+      }
+
+      final updatedAt = DateTime.now();
+      await _firestore.collection(_postsCollection).doc(post.id).update({
+        'title': title,
+        'body': body,
+        'imageUrl': imageUrl,
+        'updatedAt': Timestamp.fromDate(updatedAt),
+      });
+
+      return post.copyWith(
+        title: title,
+        body: body,
+        imageUrl: imageUrl,
+        updatedAt: updatedAt,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService updatePost error: $e');
+      }
+      return null;
     }
   }
 
