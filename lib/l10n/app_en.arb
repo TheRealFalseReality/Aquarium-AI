@@ -3551,6 +3551,7 @@
   "profileRestoreProviderPhoto": "Restore Sign-In Photo",
   "@profileRestoreProviderPhoto": {
     "description": "Option to restore the profile photo pulled from Google or Facebook sign-in"
+  },
   "communityCardLabel": "Community Card",
   "@communityCardLabel": {
     "description": "Label for the community card toggle in the welcome screen card filter sheet"
