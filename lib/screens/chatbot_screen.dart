@@ -892,7 +892,7 @@ class MessageBubble extends ConsumerWidget {
                       isUser
                           ? l10n.chatbotYou
                           : isError
-                              ? l10n.chatbotAIError(appName: l10n.appTitle)
+                              ? l10n.chatbotAIError(l10n.appTitle)
                               : l10n.appTitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,

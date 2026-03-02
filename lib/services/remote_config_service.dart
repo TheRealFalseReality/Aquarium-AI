@@ -40,7 +40,7 @@ const String _defaultAquapiOriginalImageUrl = '';
 const String _defaultAquapiEssentialImageUrl = '';
 
 // Fish compatibility data.
-// Empty string = use the bundled local assets/fishcompat.json as fallback.
+// Empty string = use the bundled local assets/data/fishcompat.json as fallback.
 // Set a JSON string in Remote Config to override without an app update.
 /// Fallback fish compatibility JSON (empty = use bundled local asset).
 const String _defaultFishcompatJson = '';
@@ -117,7 +117,7 @@ class RemoteConfigKeys {
 
   // ── Fish compatibility data ───────────────────────────────────────────────
   /// String — full JSON content of the fish compatibility database.
-  /// Empty string (default) means use the bundled `assets/fishcompat.json`.
+  /// Empty string (default) means use the bundled `assets/data/fishcompat.json`.
   static const String fishcompatJson = 'fishcompat_json';
 
   // ── In-app purchase pricing ───────────────────────────────────────────────
@@ -298,7 +298,7 @@ class RemoteConfigService {
 
   /// Full JSON string of the fish compatibility database from Remote Config.
   /// Returns an empty string when not set in Remote Config,
-  /// signalling that the bundled `assets/fishcompat.json` should be used.
+  /// signalling that the bundled `assets/data/fishcompat.json` should be used.
   static String get fishcompatJson =>
       _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
 
