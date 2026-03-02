@@ -2630,6 +2630,16 @@
     "description": "Empty state message for photos tab"
   },
 
+  "setAsBanner": "Set as Banner",
+  "@setAsBanner": {
+    "description": "Option to set a photo as the tank details screen banner"
+  },
+
+  "removeBanner": "Remove Banner",
+  "@removeBanner": {
+    "description": "Option to remove the current banner photo"
+  },
+
   "noParameters": "No water parameters logged",
   "@noParameters": {
     "description": "Empty state message for parameters tab"
