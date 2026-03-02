@@ -3138,6 +3138,14 @@
   "@communityImageUploadFailed": {
     "description": "Error shown when post image upload fails"
   },
+  "communityRegisterToUploadImage": "Sign up to upload images",
+  "@communityRegisterToUploadImage": {
+    "description": "Label shown to anonymous users in place of the image picker button"
+  },
+  "communityRegisterToUploadImageError": "You must register an account to upload images.",
+  "@communityRegisterToUploadImageError": {
+    "description": "Error shown when an anonymous user tries to publish a post with an image"
+  },
   "communityAttachTank": "Attach tank info",
   "@communityAttachTank": {
     "description": "Switch label to attach tank data to a post"

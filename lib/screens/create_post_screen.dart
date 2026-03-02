@@ -167,9 +167,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             featureName: 'community_post_created',
             parameters: {'post_type': _selectedType.value});
       } else {
-        final errorMsg = _imageFilePath != null
-            ? l10n.communityImageUploadFailed
-            : l10n.communityPostError;
+        final user = ref.read(authStateProvider).asData?.value;
+        final String errorMsg;
+        if (_imageFilePath != null && (user?.isAnonymous ?? true)) {
+          errorMsg = l10n.communityRegisterToUploadImageError;
+        } else if (_imageFilePath != null) {
+          errorMsg = l10n.communityImageUploadFailed;
+        } else {
+          errorMsg = l10n.communityPostError;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),
@@ -186,6 +192,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final createState = ref.watch(createPostProvider);
     final tanks = ref.watch(tankProvider).tanks;
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final isAnonymous = authState.asData?.value?.isAnonymous ?? true;
 
     return Scaffold(
       appBar: AppBar(
@@ -278,6 +286,22 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: _removeImage,
+                    ),
+                  ],
+                )
+              else if (isAnonymous)
+                Row(
+                  children: [
+                    Icon(Icons.lock_outline,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.communityRegisterToUploadImage,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 )
