@@ -802,5 +802,6 @@
   "analysisTypeCompatibilityReport": "Kompatibilitätsbericht",
   "analysisTypeStockingRecommendation": "Besatzempfehlung",
   "chatbotYou": "Sie",
-  "chatbotAIError": "{appName} - Fehler"
+  "chatbotAIError": "{appName} - Fehler",
+  "moreThemeOptions": "Weitere Theme-Optionen"
 }

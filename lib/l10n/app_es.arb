@@ -802,5 +802,6 @@
   "analysisTypeCompatibilityReport": "Informe de Compatibilidad",
   "analysisTypeStockingRecommendation": "Recomendación de Población",
   "chatbotYou": "Tú",
-  "chatbotAIError": "{appName} - Error"
+  "chatbotAIError": "{appName} - Error",
+  "moreThemeOptions": "Más opciones de tema"
 }

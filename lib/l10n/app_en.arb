@@ -3977,5 +3977,10 @@
         "type": "String"
       }
     }
+  },
+
+  "moreThemeOptions": "More theme options",
+  "@moreThemeOptions": {
+    "description": "Button label in the app drawer that navigates to the full Appearance screen"
   }
 }
