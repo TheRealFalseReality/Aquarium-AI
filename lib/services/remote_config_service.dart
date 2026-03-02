@@ -1,68 +1,7 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-
-// ---------------------------------------------------------------------------
-// In-app fallback defaults
-// These are used when Firebase Remote Config is unreachable (offline / first
-// launch). Update these values when you change the defaults in the Firebase
-// Console so that a first-run experience is still sensible.
-// ---------------------------------------------------------------------------
-
-/// Default per-minute request cap for the free (developer-key) tier.
-const int _defaultMaxRequestsPerMinute = 4;
-
-/// Default per-day request cap for the free (developer-key) tier.
-const int _defaultMaxRequestsPerDay = 50;
-
-/// Default per-day photo-analysis cap for the free (developer-key) tier.
-const int _defaultMaxPhotoAnalysesPerDay = 3;
-
-/// Default chat-history window (number of past messages sent per request)
-/// applied to free-tier users. Users with their own API key can configure
-/// this freely; free-tier users are capped at this value.
-const int _defaultFreeTierChatHistoryLimit = 3;
-
-// Model string fallbacks — these mirror what used to live in constants.dart.
-const String _defaultGeminiModel = 'gemini-flash-latest';
-const String _defaultGeminiImageModel = 'gemini-flash-latest';
-const String _defaultOpenAIModel = 'gpt-4o';
-const String _defaultOpenAIImageModel = 'gpt-4-vision-preview';
-const String _defaultGroqModel = 'llama-3.1-8b-instant';
-const String _defaultGroqImageModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
-
-// AquaPi promotion images.
-// Empty string = use the bundled local asset as fallback.
-// Set a URL in Remote Config to override with a newer image without an app update.
-/// Fallback for the "original" AquaPi image (AquaPiMainSmaller.jpg).
-const String _defaultAquapiOriginalImageUrl = '';
-/// Fallback for the "essential" AquaPi image (AquaPiEssentials.jpg).
-const String _defaultAquapiEssentialImageUrl = '';
-
-// Fish compatibility data.
-// Empty string = use the bundled local assets/data/fishcompat.json as fallback.
-// Set a JSON string in Remote Config to override without an app update.
-/// Fallback fish compatibility JSON (empty = use bundled local asset).
-const String _defaultFishcompatJson = '';
-
-// Early Supporter lifetime purchase pricing.
-// 0.0 = do not display a price label in the Remove Ads dialog.
-// Set a positive USD amount (e.g. 0.99) in Remote Config to show a formatted
-// price on the purchase button without shipping an app update.
-/// Fallback USD price for the Early Supporter lifetime purchase.
-const double _defaultEarlySupporterPrice = 0.99;
-
-/// Fallback Buy Me a Coffee URL.
-const String _defaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
-
-/// Fallback changelog markdown content (empty = use bundled local asset).
-const String _defaultChangelog = '';
-
-/// Fallback URL for fetching the changelog markdown (empty = use bundled local asset).
-const String _defaultChangelogUrl = '';
-
-/// Fallback URL for fetching the fish compatibility JSON (empty = use bundled local asset).
-const String _defaultFishcompatJsonUrl = '';
+import '../constants.dart';
 
 /// Key names used in Firebase Remote Config.
 ///
@@ -144,6 +83,21 @@ class RemoteConfigKeys {
   /// Empty string (default) means fall back to [changelog] or bundled asset.
   static const String changelogUrl = 'changelog_url';
 
+  /// String — URL for the German (de) changelog markdown.
+  /// When set, takes priority over [changelogUrl] for German users.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlDe = 'changelog_url_de';
+
+  /// String — URL for the Spanish (es) changelog markdown.
+  /// When set, takes priority over [changelogUrl] for Spanish users.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlEs = 'changelog_url_es';
+
+  /// String — URL for the French (fr) changelog markdown.
+  /// When set, takes priority over [changelogUrl] for French users.
+  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  static const String changelogUrlFr = 'changelog_url_fr';
+
   // ── Fish compatibility data URL ───────────────────────────────────────────
   /// String — URL from which to fetch the fish compatibility JSON at runtime.
   /// When set, the app fetches content from this URL instead of using the
@@ -173,24 +127,27 @@ class RemoteConfigService {
       // successful fetch or when offline.
       await remoteConfig.setDefaults({
         RemoteConfigKeys.freeAiEnabled: true,
-        RemoteConfigKeys.devMaxRequestsPerMinute: _defaultMaxRequestsPerMinute,
-        RemoteConfigKeys.devMaxRequestsPerDay: _defaultMaxRequestsPerDay,
-        RemoteConfigKeys.devMaxPhotoAnalysesPerDay: _defaultMaxPhotoAnalysesPerDay,
-        RemoteConfigKeys.devDefaultChatHistoryLimit: _defaultFreeTierChatHistoryLimit,
-        RemoteConfigKeys.defaultGeminiModel: _defaultGeminiModel,
-        RemoteConfigKeys.defaultGeminiImageModel: _defaultGeminiImageModel,
-        RemoteConfigKeys.defaultOpenAIModel: _defaultOpenAIModel,
-        RemoteConfigKeys.defaultOpenAIImageModel: _defaultOpenAIImageModel,
-        RemoteConfigKeys.defaultGroqModel: _defaultGroqModel,
-        RemoteConfigKeys.defaultGroqImageModel: _defaultGroqImageModel,
-        RemoteConfigKeys.aquapiOriginalImageUrl: _defaultAquapiOriginalImageUrl,
-        RemoteConfigKeys.aquapiEssentialImageUrl: _defaultAquapiEssentialImageUrl,
-        RemoteConfigKeys.fishcompatJson: _defaultFishcompatJson,
-        RemoteConfigKeys.earlySupporterPrice: _defaultEarlySupporterPrice,
-        RemoteConfigKeys.buyMeACoffeeUrl: _defaultBuyMeACoffeeUrl,
-        RemoteConfigKeys.changelog: _defaultChangelog,
-        RemoteConfigKeys.changelogUrl: _defaultChangelogUrl,
-        RemoteConfigKeys.fishcompatJsonUrl: _defaultFishcompatJsonUrl,
+        RemoteConfigKeys.devMaxRequestsPerMinute: rcDefaultMaxRequestsPerMinute,
+        RemoteConfigKeys.devMaxRequestsPerDay: rcDefaultMaxRequestsPerDay,
+        RemoteConfigKeys.devMaxPhotoAnalysesPerDay: rcDefaultMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.devDefaultChatHistoryLimit: rcDefaultFreeTierChatHistoryLimit,
+        RemoteConfigKeys.defaultGeminiModel: rcDefaultGeminiModel,
+        RemoteConfigKeys.defaultGeminiImageModel: rcDefaultGeminiImageModel,
+        RemoteConfigKeys.defaultOpenAIModel: rcDefaultOpenAIModel,
+        RemoteConfigKeys.defaultOpenAIImageModel: rcDefaultOpenAIImageModel,
+        RemoteConfigKeys.defaultGroqModel: rcDefaultGroqModel,
+        RemoteConfigKeys.defaultGroqImageModel: rcDefaultGroqImageModel,
+        RemoteConfigKeys.aquapiOriginalImageUrl: rcDefaultAquapiOriginalImageUrl,
+        RemoteConfigKeys.aquapiEssentialImageUrl: rcDefaultAquapiEssentialImageUrl,
+        RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
+        RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
+        RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
+        RemoteConfigKeys.changelog: rcDefaultChangelog,
+        RemoteConfigKeys.changelogUrl: rcDefaultChangelogUrl,
+        RemoteConfigKeys.changelogUrlDe: rcDefaultChangelogUrlDe,
+        RemoteConfigKeys.changelogUrlEs: rcDefaultChangelogUrlEs,
+        RemoteConfigKeys.changelogUrlFr: rcDefaultChangelogUrlFr,
+        RemoteConfigKeys.fishcompatJsonUrl: rcDefaultFishcompatJsonUrl,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -240,24 +197,24 @@ class RemoteConfigService {
   /// Per-minute request limit for the free (developer-key) tier.
   static int get maxRequestsPerMinute =>
       _instance?.getInt(RemoteConfigKeys.devMaxRequestsPerMinute) ??
-      _defaultMaxRequestsPerMinute;
+      rcDefaultMaxRequestsPerMinute;
 
   /// Per-day request limit for the free (developer-key) tier.
   static int get maxRequestsPerDay =>
       _instance?.getInt(RemoteConfigKeys.devMaxRequestsPerDay) ??
-      _defaultMaxRequestsPerDay;
+      rcDefaultMaxRequestsPerDay;
 
   /// Per-day photo-analysis limit for the free (developer-key) tier.
   static int get maxPhotoAnalysesPerDay =>
       _instance?.getInt(RemoteConfigKeys.devMaxPhotoAnalysesPerDay) ??
-      _defaultMaxPhotoAnalysesPerDay;
+      rcDefaultMaxPhotoAnalysesPerDay;
 
   /// Chat-history window applied to free-tier users (number of past messages
   /// sent to the AI per request). Users with their own API key can configure
   /// this freely; free-tier users are capped at this value.
   static int get freeTierChatHistoryLimit =>
       _instance?.getInt(RemoteConfigKeys.devDefaultChatHistoryLimit) ??
-      _defaultFreeTierChatHistoryLimit;
+      rcDefaultFreeTierChatHistoryLimit;
 
   // ── Model defaults ─────────────────────────────────────────────────────────
 
@@ -269,27 +226,27 @@ class RemoteConfigService {
 
   /// Default Gemini text/chat model name.
   static String get defaultGeminiModel =>
-      _modelString(RemoteConfigKeys.defaultGeminiModel, _defaultGeminiModel);
+      _modelString(RemoteConfigKeys.defaultGeminiModel, rcDefaultGeminiModel);
 
   /// Default Gemini image-analysis model name.
   static String get defaultGeminiImageModel =>
-      _modelString(RemoteConfigKeys.defaultGeminiImageModel, _defaultGeminiImageModel);
+      _modelString(RemoteConfigKeys.defaultGeminiImageModel, rcDefaultGeminiImageModel);
 
   /// Default OpenAI (ChatGPT) text/chat model name.
   static String get defaultOpenAIModel =>
-      _modelString(RemoteConfigKeys.defaultOpenAIModel, _defaultOpenAIModel);
+      _modelString(RemoteConfigKeys.defaultOpenAIModel, rcDefaultOpenAIModel);
 
   /// Default OpenAI image-analysis model name.
   static String get defaultOpenAIImageModel =>
-      _modelString(RemoteConfigKeys.defaultOpenAIImageModel, _defaultOpenAIImageModel);
+      _modelString(RemoteConfigKeys.defaultOpenAIImageModel, rcDefaultOpenAIImageModel);
 
   /// Default Groq text/chat model name.
   static String get defaultGroqModel =>
-      _modelString(RemoteConfigKeys.defaultGroqModel, _defaultGroqModel);
+      _modelString(RemoteConfigKeys.defaultGroqModel, rcDefaultGroqModel);
 
   /// Default Groq image-analysis model name.
   static String get defaultGroqImageModel =>
-      _modelString(RemoteConfigKeys.defaultGroqImageModel, _defaultGroqImageModel);
+      _modelString(RemoteConfigKeys.defaultGroqImageModel, rcDefaultGroqImageModel);
 
   // ── Promotion images ────────────────────────────────────────────────────────
 
@@ -297,13 +254,13 @@ class RemoteConfigService {
   /// Returns an empty string when no URL is set in Remote Config,
   /// signalling that the bundled `assets/images/system/AquaPiMainSmaller.jpg` should be used.
   static String get aquapiOriginalImageUrl =>
-      _modelString(RemoteConfigKeys.aquapiOriginalImageUrl, _defaultAquapiOriginalImageUrl);
+      _modelString(RemoteConfigKeys.aquapiOriginalImageUrl, rcDefaultAquapiOriginalImageUrl);
 
   /// URL for the "essential" AquaPi promotion image (shown on the welcome screen).
   /// Returns an empty string when no URL is set in Remote Config,
   /// signalling that the bundled `assets/images/system/AquaPiEssentials.jpg` should be used.
   static String get aquapiEssentialImageUrl =>
-      _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, _defaultAquapiEssentialImageUrl);
+      _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, rcDefaultAquapiEssentialImageUrl);
 
   // ── Fish compatibility data ─────────────────────────────────────────────────
 
@@ -311,7 +268,7 @@ class RemoteConfigService {
   /// Returns an empty string when not set in Remote Config,
   /// signalling that the bundled `assets/data/fishcompat.json` should be used.
   static String get fishcompatJson =>
-      _modelString(RemoteConfigKeys.fishcompatJson, _defaultFishcompatJson);
+      _modelString(RemoteConfigKeys.fishcompatJson, rcDefaultFishcompatJson);
 
   // ── In-app purchase pricing ─────────────────────────────────────────────────
 
@@ -324,7 +281,7 @@ class RemoteConfigService {
   /// currency symbol.
   static String getEarlySupporterPrice({String? locale}) {
     final raw = _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice)
-        ?? _defaultEarlySupporterPrice;
+        ?? rcDefaultEarlySupporterPrice;
     if (raw <= 0) return '';
     return NumberFormat.currency(
       locale: locale ?? 'en_US',
@@ -338,7 +295,7 @@ class RemoteConfigService {
   /// URL for the Buy Me a Coffee page. Returns the Remote Config value when
   /// set, otherwise falls back to the in-app default.
   static String get buyMeACoffeeUrl =>
-      _modelString(RemoteConfigKeys.buyMeACoffeeUrl, _defaultBuyMeACoffeeUrl);
+      _modelString(RemoteConfigKeys.buyMeACoffeeUrl, rcDefaultBuyMeACoffeeUrl);
 
   // ── Changelog ───────────────────────────────────────────────────────────────
 
@@ -346,17 +303,52 @@ class RemoteConfigService {
   /// Returns an empty string when not set in Remote Config,
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
   static String get changelog =>
-      _modelString(RemoteConfigKeys.changelog, _defaultChangelog);
+      _modelString(RemoteConfigKeys.changelog, rcDefaultChangelog);
 
   /// URL from which to fetch the changelog markdown at runtime.
   /// Returns an empty string when not set, signalling that [changelog] or
   /// the bundled asset should be used.
   static String get changelogUrl =>
-      _modelString(RemoteConfigKeys.changelogUrl, _defaultChangelogUrl);
+      _modelString(RemoteConfigKeys.changelogUrl, rcDefaultChangelogUrl);
+
+  /// URL for the German (de) changelog markdown.
+  /// Returns an empty string when not set, falling back to [changelogUrl].
+  static String get changelogUrlDe =>
+      _modelString(RemoteConfigKeys.changelogUrlDe, rcDefaultChangelogUrlDe);
+
+  /// URL for the Spanish (es) changelog markdown.
+  /// Returns an empty string when not set, falling back to [changelogUrl].
+  static String get changelogUrlEs =>
+      _modelString(RemoteConfigKeys.changelogUrlEs, rcDefaultChangelogUrlEs);
+
+  /// URL for the French (fr) changelog markdown.
+  /// Returns an empty string when not set, falling back to [changelogUrl].
+  static String get changelogUrlFr =>
+      _modelString(RemoteConfigKeys.changelogUrlFr, rcDefaultChangelogUrlFr);
+
+  /// Returns the best-match changelog URL for [languageCode].
+  ///
+  /// Priority:
+  /// 1. Locale-specific URL (e.g. `changelog_url_de` for `"de"`).
+  /// 2. Generic English URL (`changelog_url`).
+  /// 3. Empty string (caller should fall through to inline content or bundled asset).
+  static String changelogUrlForLocale(String languageCode) {
+    String localeUrl = '';
+    switch (languageCode) {
+      case 'de':
+        localeUrl = changelogUrlDe;
+      case 'es':
+        localeUrl = changelogUrlEs;
+      case 'fr':
+        localeUrl = changelogUrlFr;
+    }
+    if (localeUrl.isNotEmpty) return localeUrl;
+    return changelogUrl;
+  }
 
   /// URL from which to fetch the fish compatibility JSON at runtime.
   /// Returns an empty string when not set, signalling that [fishcompatJson] or
   /// the bundled asset should be used.
   static String get fishcompatJsonUrl =>
-      _modelString(RemoteConfigKeys.fishcompatJsonUrl, _defaultFishcompatJsonUrl);
+      _modelString(RemoteConfigKeys.fishcompatJsonUrl, rcDefaultFishcompatJsonUrl);
 }

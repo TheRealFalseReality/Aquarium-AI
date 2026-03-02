@@ -24,6 +24,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   String _markdownContent = '';
   bool _isLoading = true;
   String? _error;
+  bool _changelogLoadStarted = false;
 
   static const String _latestReleaseUrl =
       'https://github.com/TheRealFalseReality/Aquarium-AI/releases/latest';
@@ -31,14 +32,19 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       'https://github.com/TheRealFalseReality/Aquarium-AI/releases';
 
   @override
-  void initState() {
-    super.initState();
-    _loadChangelog();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_changelogLoadStarted) {
+      _changelogLoadStarted = true;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      _loadChangelog(languageCode);
+    }
   }
 
-  Future<void> _loadChangelog() async {
-    // 1. Remote Config URL — fetch content from the URL when set.
-    final remoteUrl = RemoteConfigService.changelogUrl;
+  Future<void> _loadChangelog(String languageCode) async {
+    // 1. Locale-specific Remote Config URL (e.g. changelog_url_de).
+    //    Falls back to the generic changelog_url when no locale URL is set.
+    final remoteUrl = RemoteConfigService.changelogUrlForLocale(languageCode);
     if (remoteUrl.isNotEmpty) {
       try {
         final response = await http
