@@ -55,7 +55,6 @@ const String rcDefaultAquapiEssentialImageUrl = '';
 
 // Fish compatibility data (empty = use bundled assets/data/fishcompat.json)
 const String rcDefaultFishcompatJson = '';
-const String rcDefaultFishcompatJsonUrl = '';
 
 // In-app purchase pricing (0.0 = do not show a price label)
 const double rcDefaultEarlySupporterPrice = 0.99;
@@ -65,10 +64,9 @@ const String rcDefaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaqu
 
 // Changelog (empty = use bundled assets/docs/CHANGELOG.md)
 const String rcDefaultChangelog = '';
-const String rcDefaultChangelogUrl = '';
-const String rcDefaultChangelogUrlDe = '';
-const String rcDefaultChangelogUrlEs = '';
-const String rcDefaultChangelogUrlFr = '';
+const String rcDefaultChangelogDe = '';
+const String rcDefaultChangelogEs = '';
+const String rcDefaultChangelogFr = '';
 
 // ---------------------------------------------------------------------------
 // Firebase Remote Config key names
@@ -141,19 +139,19 @@ class RemoteConfigKeys {
   static const String buyMeACoffeeUrl = 'buy_me_a_coffee_url';
 
   // ── Changelog ───────────────────────────────────────────────────────────
-  /// String — full markdown content of the changelog.
+  /// String — full markdown content of the changelog (English).
   /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
-  static const String changelog = 'changelog_en';
+  static const String changelog_en = 'changelog_en';
 
-  /// String — URL for the German (de) changelog markdown.
-  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  /// String — full markdown content of the changelog (German).
+  /// Empty string (default) means fall back to [changelog_en] or bundled asset.
   static const String changelogDe = 'changelog_de';
 
-  /// String — URL for the Spanish (es) changelog markdown.
-  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  /// String — full markdown content of the changelog (Spanish).
+  /// Empty string (default) means fall back to [changelog_en] or bundled asset.
   static const String changelogEs = 'changelog_es';
 
-  /// String — URL for the French (fr) changelog markdown.
-  /// Empty string (default) means fall back to [changelogUrl] or bundled asset.
+  /// String — full markdown content of the changelog (French).
+  /// Empty string (default) means fall back to [changelog_en] or bundled asset.
   static const String changelogFr = 'changelog_fr';
 }

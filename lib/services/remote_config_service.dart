@@ -39,12 +39,10 @@ class RemoteConfigService {
         RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
-        RemoteConfigKeys.changelog: rcDefaultChangelog,
-        RemoteConfigKeys.changelogUrl: rcDefaultChangelogUrl,
-        RemoteConfigKeys.changelogDe: rcDefaultChangelogUrlDe,
-        RemoteConfigKeys.changelogEs: rcDefaultChangelogUrlEs,
-        RemoteConfigKeys.changelogFr: rcDefaultChangelogUrlFr,
-        RemoteConfigKeys.fishcompatJsonUrl: rcDefaultFishcompatJsonUrl,
+        RemoteConfigKeys.changelog_en: rcDefaultChangelog,
+        RemoteConfigKeys.changelogDe: rcDefaultChangelogDe,
+        RemoteConfigKeys.changelogEs: rcDefaultChangelogEs,
+        RemoteConfigKeys.changelogFr: rcDefaultChangelogFr,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -196,56 +194,44 @@ class RemoteConfigService {
 
   // ── Changelog ───────────────────────────────────────────────────────────────
 
-  /// Full markdown content of the changelog from Remote Config.
+  /// Full markdown content of the English changelog from Remote Config.
   /// Returns an empty string when not set in Remote Config,
   /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
-  static String get changelog =>
-      _modelString(RemoteConfigKeys.changelog, rcDefaultChangelog);
+  static String get changelogEn =>
+      _modelString(RemoteConfigKeys.changelog_en, rcDefaultChangelog);
 
-  /// URL from which to fetch the changelog markdown at runtime.
-  /// Returns an empty string when not set, signalling that [changelog] or
-  /// the bundled asset should be used.
-  static String get changelogUrl =>
-      _modelString(RemoteConfigKeys.changelogUrl, rcDefaultChangelogUrl);
-
-  /// URL for the German (de) changelog markdown.
-  /// Returns an empty string when not set, falling back to [changelogUrl].
+  /// Full markdown content of the German (de) changelog from Remote Config.
+  /// Returns an empty string when not set, falling back to [changelogEn].
   static String get changelogDe =>
-      _modelString(RemoteConfigKeys.changelogDe, rcDefaultChangelogUrlDe);
+      _modelString(RemoteConfigKeys.changelogDe, rcDefaultChangelogDe);
 
-  /// URL for the Spanish (es) changelog markdown.
-  /// Returns an empty string when not set, falling back to [changelogUrl].
+  /// Full markdown content of the Spanish (es) changelog from Remote Config.
+  /// Returns an empty string when not set, falling back to [changelogEn].
   static String get changelogEs =>
-      _modelString(RemoteConfigKeys.changelogEs, rcDefaultChangelogUrlEs);
+      _modelString(RemoteConfigKeys.changelogEs, rcDefaultChangelogEs);
 
-  /// URL for the French (fr) changelog markdown.
-  /// Returns an empty string when not set, falling back to [changelogUrl].
+  /// Full markdown content of the French (fr) changelog from Remote Config.
+  /// Returns an empty string when not set, falling back to [changelogEn].
   static String get changelogFr =>
-      _modelString(RemoteConfigKeys.changelogFr, rcDefaultChangelogUrlFr);
+      _modelString(RemoteConfigKeys.changelogFr, rcDefaultChangelogFr);
 
-  /// Returns the best-match changelog URL for [languageCode].
+  /// Returns the best-match changelog content for [languageCode].
   ///
   /// Priority:
-  /// 1. Locale-specific URL (e.g. `changelog_de` for `"de"`).
-  /// 2. Generic English URL (`changelog`).
-  /// 3. Empty string (caller should fall through to inline content or bundled asset).
-  static String changelogUrlForLocale(String languageCode) {
-    String localeUrl = '';
+  /// 1. Locale-specific content (e.g. `changelog_de` for `"de"`).
+  /// 2. English content (`changelog_en`).
+  /// 3. Empty string (caller should fall through to bundled asset).
+  static String changelogForLocale(String languageCode) {
+    String localeContent = '';
     switch (languageCode) {
       case 'de':
-        localeUrl = changelogDe;
+        localeContent = changelogDe;
       case 'es':
-        localeUrl = changelogEs;
+        localeContent = changelogEs;
       case 'fr':
-        localeUrl = changelogFr;
+        localeContent = changelogFr;
     }
-    if (localeUrl.isNotEmpty) return localeUrl;
-    return changelogUrl;
+    if (localeContent.isNotEmpty) return localeContent;
+    return changelogEn;
   }
-
-  /// URL from which to fetch the fish compatibility JSON at runtime.
-  /// Returns an empty string when not set, signalling that [fishcompatJson] or
-  /// the bundled asset should be used.
-  static String get fishcompatJsonUrl =>
-      _modelString(RemoteConfigKeys.fishcompatJsonUrl, rcDefaultFishcompatJsonUrl);
 }
