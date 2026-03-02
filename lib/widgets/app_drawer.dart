@@ -418,35 +418,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                // ── Information ───────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Divider(
-                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
-                    thickness: 1,
-                  ),
-                ),
-                _sectionHeader(context, l10n.information, Theme.of(context).colorScheme.tertiary),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 500),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
-                      title: Text(l10n.information),
-                      subtitle: Text(l10n.informationDescription),
-                      onTap: () => navigate('/information'),
-                    ),
-                  ),
-                ),
                 // ── Community & Profile ───────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -489,6 +460,35 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                     ),
                     child: _buildProfileTile(context, l10n, navigate),
+                  ),
+                ),
+                // ── Guides & Docs ─────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                    thickness: 1,
+                  ),
+                ),
+                _sectionHeader(context, 'Guides & Docs', Theme.of(context).colorScheme.tertiary),
+                AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 600),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
+                      title: Text(l10n.information),
+                      subtitle: Text(l10n.informationDescription),
+                      onTap: () => navigate('/information'),
+                    ),
                   ),
                 ),
                 // Debug-only: Fish Compat Editor
