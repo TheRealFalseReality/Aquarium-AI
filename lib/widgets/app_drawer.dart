@@ -346,6 +346,27 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       ),
                     ),
                   ),
+                  // History under AI Tools
+                  AnimatedDrawerItem(
+                    delay: const Duration(milliseconds: 380),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                        title: const Text('Analysis History'),
+                        subtitle: const Text('View saved AI analysis reports'),
+                        onTap: () => navigate('/analysis-history'),
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Divider(
@@ -426,36 +447,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                // ── History ───────────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Divider(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    thickness: 1,
-                  ),
-                ),
-                _sectionHeader(context, l10n.historySection, Theme.of(context).colorScheme.primary),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 550),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-                      title: const Text('Analysis History'),
-                      subtitle: const Text('View saved AI analysis reports'),
-                      onTap: () => navigate('/analysis-history'),
-                    ),
-                  ),
-                ),
-                // ── Community ─────────────────────────────────────────────────
+                // ── Community & Profile ───────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Divider(
@@ -463,9 +455,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     thickness: 1,
                   ),
                 ),
-                _sectionHeader(context, l10n.communityTitle, Theme.of(context).colorScheme.secondary),
+                _sectionHeader(context, '${l10n.communityTitle} & ${l10n.profileTitle}', Theme.of(context).colorScheme.secondary),
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 575),
+                  delay: const Duration(milliseconds: 550),
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
@@ -484,23 +476,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                // ── Profile ───────────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Divider(
-                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
-                    thickness: 1,
-                  ),
-                ),
-                _sectionHeader(context, l10n.profileTitle, Theme.of(context).colorScheme.tertiary),
                 AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 590),
+                  delay: const Duration(milliseconds: 575),
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4),
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
