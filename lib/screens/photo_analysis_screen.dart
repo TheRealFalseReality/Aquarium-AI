@@ -8,6 +8,7 @@ import '../main_layout.dart';
 import '../providers/chat_provider.dart';
 import '../providers/model_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
@@ -124,6 +125,11 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     final l10n = AppLocalizations.of(context)!;
     final activeImageProvider = ref.watch(modelProvider).activeImageProvider;
     final isGroq = activeImageProvider == AIProvider.groq;
+    final modelState = ref.watch(modelProvider);
+
+    // Disabled for free-tier users when the per-tool RC toggle is off.
+    final isPhotoAnalysisDisabled = modelState.usingDeveloperGroqKeyForImage &&
+        !RemoteConfigService.freePhotoAnalysisEnabled;
     
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
@@ -201,6 +207,45 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.amber[900],
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (isPhotoAnalysisDisabled) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.block, color: Colors.orange, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.freeTierPhotoAnalysisDisabledTitle,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.freeTierPhotoAnalysisDisabledMessage,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -295,7 +340,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               const BannerAdWidget(),
               const SizedBox(height: 12),
             ElevatedButton.icon(
-              onPressed: (_imageBytes == null || _isSubmitting) ? null : _submit,
+              onPressed: (_imageBytes == null || _isSubmitting || isPhotoAnalysisDisabled) ? null : _submit,
               icon: _isSubmitting
                   ? const SizedBox(
                       width: 18,

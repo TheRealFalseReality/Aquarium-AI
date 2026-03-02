@@ -71,6 +71,10 @@ const String rcDefaultChangelogFr = '';
 // Community image upload (true = enabled)
 const bool rcDefaultCommunityImageUpload = true;
 
+// Per-tool free-tier availability (true = enabled on free tier)
+const bool rcDefaultFreeFishCompatEnabled = true;
+const bool rcDefaultFreePhotoAnalysisEnabled = true;
+
 // ---------------------------------------------------------------------------
 // Firebase Remote Config key names
 // These string constants are the exact key names used in the Firebase Console.
@@ -163,4 +167,13 @@ class RemoteConfigKeys {
   /// Defaults to `true`. Set to `false` in Firebase Remote Config to disable
   /// image uploads globally without shipping an app update.
   static const String communityImageUpload = 'community_image_upload';
+
+  // ── Per-tool free-tier toggles ─────────────────────────────────────────────
+  /// Boolean — when `false` the AI Fish Compatibility tool is disabled for
+  /// free-tier (developer Groq key) users.  Defaults to `true`.
+  static const String freeFishCompatEnabled = 'free_fish_compat_enabled';
+
+  /// Boolean — when `false` the Photo Analysis tool is disabled for
+  /// free-tier (developer Groq key) users.  Defaults to `true`.
+  static const String freePhotoAnalysisEnabled = 'free_photo_analysis_enabled';
 }
