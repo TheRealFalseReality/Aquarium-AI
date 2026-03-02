@@ -349,8 +349,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
                     Text(
                       l10n.orRestoreFromBackup,
@@ -358,7 +357,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => BackupRestoreUtils.importData(context, ref, source: 'tank_management'),
                       icon: const Icon(Icons.restore, size: 18),
@@ -860,7 +859,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       children: [
                         const Icon(Icons.backup, color: Colors.blue),
                         const SizedBox(width: 8),
-                        Text(l10n.backup),
+                        Flexible(child: Text(l10n.backup)),
                       ],
                     ),
                   ),
@@ -870,7 +869,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       children: [
                         const Icon(Icons.restore, color: Colors.green),
                         const SizedBox(width: 8),
-                        Text(l10n.restore),
+                        Flexible(child: Text(l10n.restore)),
                       ],
                     ),
                   ),
@@ -880,7 +879,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       children: [
                         const Icon(Icons.download, color: Colors.teal),
                         const SizedBox(width: 8),
-                        Text(l10n.importTank),
+                        Flexible(child: Text(l10n.importTank)),
                       ],
                     ),
                   ),
@@ -1444,7 +1443,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.edit, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.editTank),
+                Flexible(child: Text(l10n.editTank)),
               ],
             ),
           ),
@@ -1454,7 +1453,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.label_outline, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.manageTags),
+                Flexible(child: Text(l10n.manageTags)),
               ],
             ),
           ),
@@ -1464,7 +1463,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.notifications, color: Colors.orange, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange)),
+                Flexible(child: Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange))),
               ],
             ),
           ),
@@ -1474,7 +1473,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.history, color: Colors.green, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.activityLog, style: const TextStyle(color: Colors.green)),
+                Flexible(child: Text(l10n.activityLog, style: const TextStyle(color: Colors.green))),
               ],
             ),
           ),
@@ -1485,7 +1484,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.wallpaper, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.setCardBackground),
+                  Flexible(child: Text(l10n.setCardBackground)),
                 ],
               ),
             ),
@@ -1495,7 +1494,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.emoji_emotions_outlined, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.changeIcon),
+                Flexible(child: Text(l10n.changeIcon)),
               ],
             ),
           ),
@@ -1506,7 +1505,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.restore, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.resetBackground),
+                  Flexible(child: Text(l10n.resetBackground)),
                 ],
               ),
             ),
@@ -1517,7 +1516,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue)),
+                  Flexible(child: Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue))),
                 ],
               ),
             ),
@@ -1528,7 +1527,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.biotech, color: Colors.teal, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal)),
+                  Flexible(child: Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal))),
                 ],
               ),
             ),
@@ -1538,7 +1537,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.copy, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.duplicate),
+                Flexible(child: Text(l10n.duplicate)),
               ],
             ),
           ),
@@ -1548,7 +1547,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.share, color: Colors.teal, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.shareTank, style: const TextStyle(color: Colors.teal)),
+                Flexible(child: Text(l10n.shareTank, style: const TextStyle(color: Colors.teal))),
               ],
             ),
           ),
@@ -1558,7 +1557,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.delete, color: Colors.red, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.deleteTank, style: const TextStyle(color: Colors.red)),
+                Flexible(child: Text(l10n.deleteTank, style: const TextStyle(color: Colors.red))),
               ],
             ),
           ),
@@ -2840,7 +2839,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         children: [
                           Icon(Icons.wallpaper, size: 18),
                           SizedBox(width: 8),
-                          Text(l10n.setAsCardBackground),
+                          Flexible(child: Text(l10n.setAsCardBackground)),
                         ],
                       ),
                     ),
@@ -2850,7 +2849,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         children: [
                           Icon(Icons.image_aspect_ratio, size: 18),
                           SizedBox(width: 8),
-                          Text(l10n.setAsTankIcon),
+                          Flexible(child: Text(l10n.setAsTankIcon)),
                         ],
                       ),
                     ),

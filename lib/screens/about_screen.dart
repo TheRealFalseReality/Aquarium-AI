@@ -134,7 +134,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
           // Header Section
           const SizedBox(height: 16),
               GradientText(
-                'Aquarium AI',
+                l10n.appTitle,
                 style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
