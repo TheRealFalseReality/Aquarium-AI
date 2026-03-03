@@ -9,9 +9,13 @@ import '../providers/community_provider.dart';
 import '../services/auth_service.dart';
 import '../services/community_service.dart';
 import '../services/analytics_service.dart';
+import '../widgets/ad_component.dart';
 import '../widgets/post_card.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import 'community_post_screen.dart';
 import 'create_post_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class CommunityScreen extends ConsumerStatefulWidget {
   const CommunityScreen({super.key});
@@ -40,6 +44,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final authState = ref.watch(authStateProvider);
     final feedState = ref.watch(communityFeedProvider);
     final postsAsync = ref.watch(communityPostsStreamProvider);
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    final showAds = !kIsWeb && !adsRemoved && !debugHideAds;
 
     final currentUserId = authState.asData?.value?.uid ?? '';
 
@@ -89,21 +97,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   onRefresh: () async {
                     ref.invalidate(communityPostsStreamProvider);
                   },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 4, bottom: 80),
-                    itemCount: posts.length,
-                    itemBuilder: (context, i) {
-                      final post = posts[i];
-                      return PostCard(
-                        post: post,
-                        currentUserId: currentUserId,
-                        onTap: () => _openPost(context, post),
-                        onDelete: () => _confirmDelete(context, l10n, post),
-                        onEdit: post.userId == currentUserId
-                            ? () => _navigateToEdit(context, post)
-                            : null,
-                      );
-                    },
+                  child: _buildPostsList(
+                    context,
+                    posts,
+                    currentUserId,
+                    showAds,
                   ),
                 );
               },
@@ -111,6 +109,51 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Builds the posts list, inserting a [NativeAdWidget] after every 5 posts
+  /// when [showAds] is true.
+  Widget _buildPostsList(
+    BuildContext context,
+    List<CommunityPost> posts,
+    String currentUserId,
+    bool showAds,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    const int adInterval = 5; // show an ad after every 5 posts
+
+    // Build a combined list of posts and ad placeholders.
+    final items = <_FeedItem>[];
+    for (int i = 0; i < posts.length; i++) {
+      items.add(_FeedItem.post(posts[i]));
+      if (showAds && (i + 1) % adInterval == 0 && i + 1 < posts.length) {
+        items.add(const _FeedItem.ad());
+      }
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 4, bottom: 80),
+      itemCount: items.length,
+      itemBuilder: (context, i) {
+        final item = items[i];
+        if (item.isAd) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: NativeAdWidget(),
+          );
+        }
+        final post = item.post!;
+        return PostCard(
+          post: post,
+          currentUserId: currentUserId,
+          onTap: () => _openPost(context, post),
+          onDelete: () => _confirmDelete(context, l10n, post),
+          onEdit: post.userId == currentUserId
+              ? () => _navigateToEdit(context, post)
+              : null,
+        );
+      },
     );
   }
 
@@ -299,4 +342,16 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       await CommunityService.deletePost(post);
     }
   }
+}
+
+/// A thin discriminated-union type used to build the community feed list.
+/// Each item is either a [CommunityPost] or a native-ad placeholder.
+class _FeedItem {
+  final CommunityPost? post;
+  final bool isAd;
+
+  const _FeedItem.post(this.post) : isAd = false;
+  const _FeedItem.ad()
+      : post = null,
+        isAd = true;
 }

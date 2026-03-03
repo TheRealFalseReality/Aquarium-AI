@@ -7,6 +7,8 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
@@ -17,6 +19,7 @@ import '../widgets/ai_error_dialog.dart';
 import 'compatibility_report.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/interstitial_ad_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -33,11 +36,13 @@ class FishCompatibilityScreenState
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
   String? _reefSafeFilter; // null = no filter, 'Yes'/'No'/'Caution' = filtered
+  final InterstitialAdService _interstitialAdService = InterstitialAdService();
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_filterFishList);
+    _interstitialAdService.load();
     // Initialize the list on the first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateAndFilterFishList();
@@ -49,6 +54,7 @@ class FishCompatibilityScreenState
     _loadingOverlayEntry?.remove();
     _searchController.removeListener(_filterFishList);
     _searchController.dispose();
+    _interstitialAdService.dispose();
     super.dispose();
   }
 
@@ -354,10 +360,17 @@ class FishCompatibilityScreenState
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
     final modelState = ref.watch(modelProvider);
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
 
     // Disabled for free-tier users when the per-tool RC toggle is off.
     final isFishCompatDisabled = modelState.usingDeveloperGroqKeyForText &&
         !RemoteConfigService.freeFishCompatEnabled;
+
+    // Interstitial eligible: free-tier text user who hasn't removed ads.
+    final interstitialEligible =
+        !kIsWeb && modelState.usingDeveloperGroqKeyForText && !adsRemoved && !debugHideAds;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -368,6 +381,10 @@ class FishCompatibilityScreenState
       }
 
       if (next.report != null && previous?.report != next.report) {
+        // Show interstitial ad for eligible free-tier users after analysis.
+        if (interstitialEligible) {
+          _interstitialAdService.showIfEligible();
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             _openReport(next.report!);

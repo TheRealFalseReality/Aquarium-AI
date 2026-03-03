@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:fish_ai/widgets/ad_component.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/interstitial_ad_service.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
@@ -26,6 +30,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
+  final InterstitialAdService _interstitialAdService = InterstitialAdService();
 
   @override
   void initState() {
@@ -33,6 +38,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     if (widget.initialImageBytes != null) {
       _imageBytes = widget.initialImageBytes;
     }
+    _interstitialAdService.load();
   }
 
   Future<void> _pick(ImageSource source) async {
@@ -116,6 +122,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   @override
   void dispose() {
     _noteController.dispose();
+    _interstitialAdService.dispose();
     super.dispose();
   }
 
@@ -126,16 +133,29 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     final activeImageProvider = ref.watch(modelProvider).activeImageProvider;
     final isGroq = activeImageProvider == AIProvider.groq;
     final modelState = ref.watch(modelProvider);
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
 
     // Disabled for free-tier users when the per-tool RC toggle is off.
     final isPhotoAnalysisDisabled = modelState.usingDeveloperGroqKeyForImage &&
         !RemoteConfigService.freePhotoAnalysisEnabled;
-    
+
+    // Interstitial eligible: free-tier image user who hasn't removed ads.
+    final interstitialEligible = !kIsWeb &&
+        modelState.usingDeveloperGroqKeyForImage &&
+        !adsRemoved &&
+        !debugHideAds;
+
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
       if (next.messages.isNotEmpty) {
         final last = next.messages.last;
         if (!last.isUser && last.photoAnalysisResult != null && !next.isLoading) {
+          // Show interstitial ad for eligible free-tier users after analysis.
+          if (interstitialEligible) {
+            _interstitialAdService.showIfEligible();
+          }
           // Navigate to result screen when analysis is complete
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
