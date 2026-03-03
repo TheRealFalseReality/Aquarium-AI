@@ -653,6 +653,7 @@
   },
   "communityAttachTank": "Aquarium-Infos anhängen",
   "communitySelectTank": "Aquarium auswählen",
+  "communityNoTanksForShowcase": "Füge Aquarien in der Aquariumverwaltung hinzu, um Aquariuminfos an deinen Showcase-Beitrag anzuhängen.",
   "communityPostPublish": "Veröffentlichen",
   "communityPostCreated": "Beitrag erfolgreich veröffentlicht!",
   "communityPostError": "Beitrag konnte nicht veröffentlicht werden. Bitte erneut versuchen.",

@@ -3313,6 +3313,10 @@
   "@communitySelectTank": {
     "description": "Dropdown label to choose a tank to attach to a post"
   },
+  "communityNoTanksForShowcase": "Add tanks in Tank Management to attach tank info to your showcase post.",
+  "@communityNoTanksForShowcase": {
+    "description": "Hint shown when user selects Tank Showcase but has no tanks set up"
+  },
   "communityPostPublish": "Publish",
   "@communityPostPublish": {
     "description": "Button label to publish a new post"

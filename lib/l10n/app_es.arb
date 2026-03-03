@@ -653,6 +653,7 @@
   },
   "communityAttachTank": "Adjuntar info del acuario",
   "communitySelectTank": "Seleccionar acuario",
+  "communityNoTanksForShowcase": "Agrega acuarios en la Gestión de Acuarios para adjuntar información del acuario a tu publicación de exhibición.",
   "communityPostPublish": "Publicar",
   "communityPostCreated": "¡Publicación publicada con éxito!",
   "communityPostError": "No se pudo publicar la publicación. Por favor, inténtalo de nuevo.",

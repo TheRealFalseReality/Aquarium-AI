@@ -236,7 +236,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final createState = ref.watch(createPostProvider);
-    final tanks = ref.watch(tankProvider).tanks;
+    final tankState = ref.watch(tankProvider);
+    final tanks = tankState.tanks;
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
     final isAnonymous = authState.asData?.value?.isAnonymous ?? true;
@@ -362,34 +363,62 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ],
 
             // Attach tank info — only for Tank Showcase type
-            if (_selectedType == PostType.tankShowcase && tanks.isNotEmpty && !_isEditing) ...[
-              SwitchListTile(
-                title: Text(l10n.communityAttachTank),
-                value: _includeTankInfo,
-                onChanged: (v) => setState(() {
-                  _includeTankInfo = v;
-                  if (v && _selectedTankId == null) {
-                    _selectedTankId = tanks.first.id;
-                  }
-                }),
-                contentPadding: EdgeInsets.zero,
-              ),
-              if (_includeTankInfo) ...[
-                DropdownButtonFormField<String>(
-                  value: _selectedTankId,
-                  decoration: InputDecoration(
-                    labelText: l10n.communitySelectTank,
-                    border: const OutlineInputBorder(),
+            if (_selectedType == PostType.tankShowcase && !_isEditing) ...[
+              if (tankState.isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(),
+                )
+              else if (tanks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.communityNoTanksForShowcase,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  items: tanks
-                      .map((t) => DropdownMenuItem(
-                            value: t.id,
-                            child: Text(t.name),
-                          ))
-                      .toList(),
-                  onChanged: (v) => setState(() => _selectedTankId = v),
+                )
+              else ...[
+                SwitchListTile(
+                  title: Text(l10n.communityAttachTank),
+                  value: _includeTankInfo,
+                  onChanged: (v) => setState(() {
+                    _includeTankInfo = v;
+                    if (v && _selectedTankId == null) {
+                      _selectedTankId = tanks.first.id;
+                    }
+                  }),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SizedBox(height: 12),
+                if (_includeTankInfo) ...[
+                  DropdownButtonFormField<String>(
+                    value: _selectedTankId,
+                    decoration: InputDecoration(
+                      labelText: l10n.communitySelectTank,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: tanks
+                        .map((t) => DropdownMenuItem(
+                              value: t.id,
+                              child: Text(t.name),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedTankId = v),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ],
             ],
           ],
