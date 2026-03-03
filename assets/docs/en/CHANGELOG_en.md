@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.00] - 2026-3-3 - Perks, Community and Profile Features  
+
+### Added
+
+- **Add user profile section with social auth**
+- **Founder Aquarist tier, modern Tank Showcase hero image, founder perks system, community post fixes**
+- User-selectable font families in Appearance screen
+- Add reef tank subtype for saltwater tanks with filter support
+- Add fish data sorting and reef safety classification
+- Add global TankTag registry with explicit backup/restore support
+- Add single-tank share/import feature  
+- Welcome screen: 2-column grid with list/grid toggle + tank management grid/mosaic mode & card customization
+- Add main tank banner photo to Tank Details screen
+- Allow permanent dismissal of welcome screen header
+
+### Changed
+
+- Localize chatbot suggestion chips, add AI Response Language setting,
+- Localize AI compat, calculators, about, information, and AI provider settings screens  
+- Localize hardcoded strings across settings, drawer, welcome screen, AquaPi promo dialog, history screen, and more
+
+**Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.10...v3.1.00>
+
+### Added
+
 ## [3.0.10] - 2026-2-27 - Visual Updates, Stocking Tool Fixes
 
 ### Added
