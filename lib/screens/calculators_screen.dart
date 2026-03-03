@@ -47,15 +47,22 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> calculatorTypes = [
       'Salinity',
       'CO2',
       'Alkalinity',
       'Temperature'
     ];
+    final Map<String, String> calcTypeLabels = {
+      'Salinity': l10n.salinity,
+      'CO2': l10n.co2Label,
+      'Alkalinity': l10n.alkalinity,
+      'Temperature': l10n.temperature,
+    };
 
     return MainLayout(
-      title: 'Calculators',
+      title: l10n.calculators,
       bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
@@ -64,7 +71,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
           child: Column(
             children: [
               Text(
-                'Aquarium Calculators',
+                l10n.aquariumCalculators,
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge
@@ -73,7 +80,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Essential tools for your aquarium.',
+                l10n.essentialToolsDescription,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -84,7 +91,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
                   child: Column(
                     children: [
-                      _buildSectionTitle(context, 'Calculator Type'),
+                      _buildSectionTitle(context, l10n.calculatorType),
                       Wrap(
                         alignment: WrapAlignment.center,
                         spacing: 14.0,
@@ -93,7 +100,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                           final bool isSelected =
                               _activeCalculator == typeName;
                           return ModernSelectableChip(
-                            label: typeName == 'CO2' ? 'CO₂' : typeName,
+                            label: calcTypeLabels[typeName]!,
                             selected: isSelected,
                             onTap: () {
                               setState(() {
@@ -197,18 +204,19 @@ class SalinityConverterState extends State<SalinityConverter> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const Map<String, String> units = {
-      'Salinity (ppt)': 'Salinity',
-      'Specific Gravity': 'SG',
-      'Density (kg/L)': 'Density',
-      'Conductivity (mS/cm)': 'Conduct.',
+    // Map from internal state key to localized chip display label
+    final Map<String, String> units = {
+      'Salinity (ppt)': l10n.salinity,
+      'Specific Gravity': l10n.specificGravityAbbr,
+      'Density (kg/L)': l10n.density,
+      'Conductivity (mS/cm)': l10n.conductivityAbbr,
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           const BannerAdWidget(),
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -236,7 +244,7 @@ class SalinityConverterState extends State<SalinityConverter> {
               child: TextField(
                 controller: _valueController,
                 decoration: InputDecoration(
-                  labelText: 'Value ($_unitAbbreviation)',
+                  labelText: l10n.valueWithUnit(_unitAbbreviation),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -249,7 +257,7 @@ class SalinityConverterState extends State<SalinityConverter> {
               child: TextField(
                 controller: _tempController,
                 decoration: InputDecoration(
-                  labelText: 'Temp (°C)',
+                  labelText: l10n.tempInCelsius,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -285,13 +293,13 @@ class SalinityConverterState extends State<SalinityConverter> {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 14,
                   children: [
-                    _buildResultColumn('Salinity',
+                    _buildResultColumn(l10n.salinity,
                         '${_results['salinity']} ppt', Colors.teal),
-                    _buildResultColumn('Specific Gravity',
+                    _buildResultColumn(l10n.specificGravity,
                         '${_results['specificGravity']}', Colors.orange),
-                    _buildResultColumn('Density',
+                    _buildResultColumn(l10n.density,
                         '${_results['density']} kg/L', Colors.purple),
-                    _buildResultColumn('Conductivity',
+                    _buildResultColumn(l10n.conductivity,
                         '${_results['conductivity']} mS/cm', Colors.green),
                   ],
                 ),
@@ -386,7 +394,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
               child: TextField(
                 controller: _phController,
                 decoration: InputDecoration(
-                  labelText: 'pH',
+                  labelText: l10n.labelPH,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -399,7 +407,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
               child: TextField(
                 controller: _dkhController,
                 decoration: InputDecoration(
-                  labelText: 'dKH',
+                  labelText: l10n.labelDKH,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -430,7 +438,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
                     horizontal: 22.0, vertical: 26.0),
                 child: Column(
                   children: [
-                    Text('Estimated CO₂ Level',
+                    Text(l10n.estimatedCO2Level,
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     Text('$_result ppm',
@@ -520,10 +528,15 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     const List<String> units = ['dKH', 'ppm', 'meq/L'];
+    final Map<String, String> unitLabels = {
+      'dKH': l10n.labelDKH,
+      'ppm': l10n.labelPPM,
+      'meq/L': l10n.labelMeqL,
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -531,7 +544,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
           children: units.map((unitName) {
             final bool isSelected = _fromUnit == unitName;
             return ModernSelectableChip(
-              label: unitName,
+              label: unitLabels[unitName]!,
               selected: isSelected,
               selectedColor: Theme.of(context).colorScheme.secondary,
               selectedTextColor: Theme.of(context).colorScheme.onSecondary,
@@ -547,7 +560,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             child: TextField(
               controller: _inputValueController,
               decoration: InputDecoration(
-                labelText: 'Value ($_fromUnit)',
+                labelText: l10n.valueWithUnit(_fromUnit),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -578,12 +591,12 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildResultColumn('dKH', _results['dkh']!,
+                    _buildResultColumn(l10n.labelDKH, _results['dkh']!,
                         Theme.of(context).colorScheme.primary),
-                    _buildResultColumn('ppm', _results['ppm']!,
+                    _buildResultColumn(l10n.labelPPM, _results['ppm']!,
                         Theme.of(context).colorScheme.secondary),
                     _buildResultColumn(
-                        'meq/L', _results['meq']!, Colors.green),
+                        l10n.labelMeqL, _results['meq']!, Colors.green),
                   ],
                 ),
               ),
@@ -671,10 +684,14 @@ class TemperatureConverterState extends State<TemperatureConverter> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     const List<String> units = ['Fahrenheit', 'Celsius'];
+    final Map<String, String> unitLabels = {
+      'Fahrenheit': l10n.fahrenheit,
+      'Celsius': l10n.celsius,
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -682,7 +699,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
           children: units.map((unitName) {
             final bool isSelected = _fromUnit == unitName;
             return ModernSelectableChip(
-              label: unitName,
+              label: unitLabels[unitName]!,
               selected: isSelected,
               selectedColor: Theme.of(context).colorScheme.secondary,
               selectedTextColor: Theme.of(context).colorScheme.onSecondary,
@@ -698,8 +715,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             child: TextField(
               controller: _inputValueController,
               decoration: InputDecoration(
-                labelText:
-                    'Temp (°${_fromUnit == 'Fahrenheit' ? 'F' : 'C'})',
+                labelText: l10n.tempFieldLabel(_fromUnit == 'Fahrenheit' ? 'F' : 'C'),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -731,10 +747,10 @@ class TemperatureConverterState extends State<TemperatureConverter> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildResultColumn(
-                        _fromUnit == 'Fahrenheit' ? 'Celsius' : 'Fahrenheit',
+                        _fromUnit == 'Fahrenheit' ? l10n.celsius : l10n.fahrenheit,
                         '${_results['toValue']} ${_fromUnit == 'Fahrenheit' ? '°C' : '°F'}',
                         Theme.of(context).colorScheme.primary),
-                    _buildResultColumn('Kelvin', '${_results['kelvin']} K',
+                    _buildResultColumn(l10n.kelvin, '${_results['kelvin']} K',
                         Theme.of(context).colorScheme.secondary),
                   ],
                 ),

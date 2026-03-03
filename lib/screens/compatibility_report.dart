@@ -38,23 +38,20 @@ Widget _formatAIResponse(BuildContext context, String text) {
 
 void showReportDialog(BuildContext context, CompatibilityReport report,
     {bool fromHistory = false, String? fishType}) {
-  final sections = {
-    'Selected Fish': _buildSelectedFishSection(context, report.selectedFish, fishType, selectedSpecies: report.selectedSpecies),
-    'Compatible Tank Mates': _buildTankMatesSection(context, report, fishType),
-    // MODIFIED: Use the new formatter for these sections.
-    'Detailed Summary': _formatAIResponse(context, report.detailedSummary),
-    'Recommended Tank Size':
-        SelectableText(report.tankSize, textAlign: TextAlign.center),
-    'Decorations and Setup': _formatAIResponse(context, report.decorations),
-    'Care Guide': _formatAIResponse(context, report.careGuide),
-  };
-
   showDialog(
     context: context,
     builder: (context) => Consumer(
       builder: (context, ref, child) {
         final l10n = AppLocalizations.of(context)!;
         final notifier = ref.read(fishCompatibilityProvider.notifier);
+        final sections = [
+          ('selectedFish', l10n.selectedFish, _buildSelectedFishSection(context, report.selectedFish, fishType, selectedSpecies: report.selectedSpecies)),
+          ('compatibleTankMates', l10n.compatibleTankMates, _buildTankMatesSection(context, report, fishType)),
+          ('detailedSummary', l10n.detailedSummary, _formatAIResponse(context, report.detailedSummary)),
+          ('recommendedTankSize', l10n.recommendedTankSize, SelectableText(report.tankSize, textAlign: TextAlign.center)),
+          ('decorationsAndSetup', l10n.decorationsAndSetup, _formatAIResponse(context, report.decorations)),
+          ('careGuide', l10n.careGuide, _formatAIResponse(context, report.careGuide)),
+        ];
         return AlertDialog(
           insetPadding:
               const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -89,9 +86,10 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   const SizedBox(height: 12),
                   _buildHarmonyCard(context, report),
                   const SizedBox(height: 16),
-                  ...sections.entries.map((entry) {
-                    final index = sections.keys.toList().indexOf(entry.key);
-                    if (entry.key == 'Detailed Summary') {
+                  ...sections.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final (sectionKey, sectionTitle, sectionContent) = entry.value;
+                    if (sectionKey == 'detailedSummary') {
                       return Column(
                         children: [
                           const Padding(
@@ -100,8 +98,8 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                           ),
                           _buildSection(
                             context,
-                            entry.key,
-                            entry.value,
+                            sectionTitle,
+                            sectionContent,
                             index,
                           ),
                         ],
@@ -109,8 +107,8 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                     }
                     return _buildSection(
                       context,
-                      entry.key,
-                      entry.value,
+                      sectionTitle,
+                      sectionContent,
                       index,
                     );
                   }),
@@ -119,7 +117,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   const BannerAdWidget(),
                   const SizedBox(height: 12),
                   Text(
-                    'Disclaimer: AI may occasionally provide inaccurate recommendations. Always cross-check critical information.',
+                    l10n.aiDisclaimer,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.error,
                           fontStyle: FontStyle.italic,
@@ -130,7 +128,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   OutlinedButton.icon(
                     onPressed: () => shareCompatibilityReport(report),
                     icon: const Icon(Icons.share),
-                    label: const Text('Share Report'),
+                    label: Text(l10n.shareReport),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(44),
                     ),
@@ -146,6 +144,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
 }
 
 Widget _buildHarmonyCard(BuildContext context, CompatibilityReport report) {
+  final l10n = AppLocalizations.of(context)!;
   final harmonyColor = _getHarmonyColor(report.groupHarmonyScore);
   return Card(
     elevation: 4,
@@ -155,7 +154,7 @@ Widget _buildHarmonyCard(BuildContext context, CompatibilityReport report) {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Group Harmony',
+            l10n.groupHarmony,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -227,6 +226,7 @@ Widget _buildSection(
 
 Widget _buildCalculationBreakdown(
     BuildContext context, CompatibilityReport report) {
+  final l10n = AppLocalizations.of(context)!;
   final cs = Theme.of(context).colorScheme;
   return Card(
     margin: const EdgeInsets.only(bottom: 14.0),
@@ -240,7 +240,7 @@ Widget _buildCalculationBreakdown(
     ),
     child: ExpansionTile(
       title: Text(
-        'Calculation Breakdown',
+        l10n.calculationBreakdown,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -338,12 +338,13 @@ Widget _buildSelectedFishSection(
 
 Widget _buildTankMatesSection(
     BuildContext context, CompatibilityReport report, String? fishType) {
+  final l10n = AppLocalizations.of(context)!;
   return Column(
     children: [
       SelectableText(report.tankMatesSummary, textAlign: TextAlign.center),
       const SizedBox(height: 10),
       Text(
-        "(Click a fish to search)",
+        l10n.clickFishToSearch,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontStyle: FontStyle.italic,
             ),

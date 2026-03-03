@@ -50,19 +50,20 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       return;
     }
 
-    // 2. Bundled local asset — try locale-specific first, then English fallback.
+    // 2. Bundled local asset (locale-specific, fall back to English).
     try {
       String content;
       if (languageCode != 'en') {
         try {
-          content = await rootBundle
-              .loadString('assets/docs/$languageCode/CHANGELOG_$languageCode.md');
+          content = await rootBundle.loadString(
+              'assets/docs/$languageCode/CHANGELOG_$languageCode.md');
         } catch (_) {
           content =
               await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
         }
       } else {
-        content = await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
+        content =
+            await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
       }
       setState(() {
         _markdownContent = content;

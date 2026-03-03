@@ -15,6 +15,11 @@ class AppSettingsState {
   final bool showStockingButton;
   final bool enableAI; // Controls whether AI features are enabled
   final String? localeCode; // null means system default
+  /// Language the AI should respond in.
+  /// - null  → follow the app locale (uses [localeCode] to determine language)
+  /// - ""    → no instruction (AI default, typically English)
+  /// - other → explicit language name, e.g. "Portuguese"
+  final String? aiResponseLanguage;
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
   final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
@@ -32,6 +37,7 @@ class AppSettingsState {
     required this.showStockingButton,
     this.enableAI = true, // Default to true (AI enabled)
     this.localeCode,
+    this.aiResponseLanguage, // null = follow app language
     this.isLoading = true,
     this.hasRememberedRescheduleOptions = false,
     this.welcomeGridLayout = false, // Default to list layout
@@ -64,6 +70,11 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final showStockingButton = prefs.getBool('showStockingButton') ?? true;
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
     final localeCode = prefs.getString('localeCode'); // null means system default
+    // aiResponseLanguage: not present in prefs = null (follow app language)
+    // stored as empty string = no instruction
+    final aiResponseLanguage = prefs.containsKey('aiResponseLanguage')
+        ? prefs.getString('aiResponseLanguage')
+        : null;
     final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
     final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? false; // Default to list
     final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
@@ -80,6 +91,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: showStockingButton,
       enableAI: enableAI,
       localeCode: localeCode,
+      aiResponseLanguage: aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: welcomeGridLayout,
@@ -109,6 +121,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: value,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -132,6 +145,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: value,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -159,6 +173,34 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+    );
+  }
+
+  Future<void> setAiResponseLanguage(String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null) {
+      await prefs.remove('aiResponseLanguage');
+    } else {
+      await prefs.setString('aiResponseLanguage', value);
+    }
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: value,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -181,6 +223,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: value,
@@ -205,6 +248,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -228,6 +272,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -250,6 +295,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -272,6 +318,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -294,6 +341,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -316,6 +364,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -338,6 +387,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -360,6 +410,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -382,6 +433,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -412,6 +464,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: false,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -436,6 +489,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: hasRememberedRescheduleOptions,
       welcomeGridLayout: state.welcomeGridLayout,
@@ -494,6 +548,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
       localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
       isLoading: false,
       hasRememberedRescheduleOptions: preferences.isNotEmpty,
       welcomeGridLayout: state.welcomeGridLayout,

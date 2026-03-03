@@ -1,7 +1,7 @@
 name: fish_ai
 description: "AI tools for Aquarium!"
 publish_to: 'none'
-version: 3.0.11+3.0.11
+version: 3.1.00+3.1.00
 
 environment:
   sdk: ^3.9.2
@@ -26,6 +26,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_mobile_ads: ^7.0.0
   firebase_analytics: ^12.1.2
+  firebase_app_check: ^0.4.0
   firebase_core: ^4.4.0 
   firebase_crashlytics: ^5.0.7
   firebase_remote_config: ^6.1.4

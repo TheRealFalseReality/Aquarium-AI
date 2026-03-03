@@ -7,9 +7,13 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/species_tags_provider.dart';
+import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../services/analytics_service.dart';
+import '../services/interstitial_ad_service.dart';
 import 'stocking_report_screen.dart';
 import '../widgets/fish_selection_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
@@ -28,17 +32,49 @@ class AquariumStockingScreenState extends ConsumerState<AquariumStockingScreen> 
   String _selectedCategory = 'freshwater';
   String _selectedUnit = 'gallons';
   Map<String, List<String>>? _speciesSelections;
+  final InterstitialAdService _interstitialAdService = InterstitialAdService();
+
+  @override
+  void initState() {
+    super.initState();
+    _interstitialAdService.load();
+  }
 
   @override
   void dispose() {
     _tankSizeController.dispose();
     _notesController.dispose();
+    _interstitialAdService.dispose();
     super.dispose();
   }
 
 
   Future<void> _getRecommendations() async {
     if (_formKey.currentState!.validate()) {
+      // Show interstitial ad for eligible free-tier users when they tap
+      // Get Recommendations (before analysis starts).
+      final modelState = ref.read(modelProvider);
+      final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+      final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+      final interstitialEligible = !kIsWeb &&
+          modelState.usingDeveloperGroqKeyForText &&
+          !adsRemoved &&
+          !debugHideAds;
+      if (interstitialEligible) {
+        _interstitialAdService.showIfEligible(
+          onWillShow: () {
+            final l10n = AppLocalizations.of(context)!;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.freeTierAdNotice),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+        );
+      }
+
       // Build tank size string with unit (empty if not provided)
       final rawTankSize = _tankSizeController.text.trim();
       final tankSizeWithUnit = rawTankSize.isEmpty ? '' : '$rawTankSize $_selectedUnit';

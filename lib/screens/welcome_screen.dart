@@ -149,6 +149,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const int _promoCardAutoDismissDays = 7;
   static const int _millisecondsPerDay = 86400000;
   static const String _userGuideAssetPath = 'assets/docs/en/USER_GUIDE_en.md';
+  static const String _hideWelcomeHeaderKey = 'hideWelcomeHeader';
 
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
@@ -170,6 +171,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   // Promo card visibility
   bool _showDocsPromoCard = false;
   bool _showCommunityPromoCard = false;
+
+  // Welcome header visibility
+  bool _hideWelcomeHeader = false;
   
   @override
   void initState() {
@@ -208,8 +212,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         });
       }
       final showCard = prefs.getBool(_showCommunityCardKey) ?? false;
+      final hideHeader = prefs.getBool(_hideWelcomeHeaderKey) ?? false;
       if (mounted) {
-        setState(() => _showCommunityCard = showCard);
+        setState(() {
+          _showCommunityCard = showCard;
+          _hideWelcomeHeader = hideHeader;
+        });
       }
     } catch (e) {
       // ignore
@@ -220,6 +228,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_showCommunityCardKey, value);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _dismissWelcomeHeader() async {
+    setState(() => _hideWelcomeHeader = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_hideWelcomeHeaderKey, true);
     } catch (e) {
       // ignore
     }
@@ -806,8 +824,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 child: Center(
                   child: Column(
                     children: <Widget>[
-                      const AnimatedHeader(),
-                      const SizedBox(height: 16),
+                      if (!_hideWelcomeHeader) ...[
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const AnimatedHeader(),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                tooltip: l10n.close,
+                                onPressed: _dismissWelcomeHeader,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       AnimatedText(
                         l10n.welcomeSubtitle,
                         style: Theme.of(context).textTheme.titleMedium,

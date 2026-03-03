@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../services/remote_config_service.dart';
+import '../theme_colors.dart';
 
 class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
@@ -185,34 +187,69 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.tertiary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to ${RemoteConfigService.maxRequestsPerMinute} AI requests per minute, ${RemoteConfigService.maxRequestsPerDay} AI requests per day, and ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onTertiaryContainer,
-                      ),
+            Builder(
+              builder: (context) {
+                final isFounder = ref.watch(isFounderProvider);
+                final maxPerMin = isFounder
+                    ? RemoteConfigService.founderMaxRequestsPerMinute
+                    : RemoteConfigService.maxRequestsPerMinute;
+                final maxPerDay = isFounder
+                    ? RemoteConfigService.founderMaxRequestsPerDay
+                    : RemoteConfigService.maxRequestsPerDay;
+                final maxPhotos = isFounder
+                    ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+                    : RemoteConfigService.maxPhotoAnalysesPerDay;
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isFounder
+                        ? AquaThemeColors.founderColor(context).withOpacity(0.08)
+                        : Theme.of(context)
+                            .colorScheme
+                            .tertiaryContainer
+                            .withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isFounder
+                          ? AquaThemeColors.founderColor(context).withOpacity(0.35)
+                          : Theme.of(context)
+                              .colorScheme
+                              .tertiary
+                              .withOpacity(0.4),
                     ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        isFounder ? Icons.diamond : Icons.info_outline,
+                        size: 16,
+                        color: isFounder
+                            ? AquaThemeColors.founderColor(context)
+                            : Theme.of(context).colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isFounder
+                              ? 'As a Founder Aquarist, your built-in key is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits entirely.'
+                              : 'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                            color: isFounder
+                                ? AquaThemeColors.founderColor(context)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onTertiaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 8),
             Container(

@@ -47,6 +47,11 @@ class RemoteConfigService {
         RemoteConfigKeys.communityImageUpload: rcDefaultCommunityImageUpload,
         RemoteConfigKeys.freeFishCompatEnabled: rcDefaultFreeFishCompatEnabled,
         RemoteConfigKeys.freePhotoAnalysisEnabled: rcDefaultFreePhotoAnalysisEnabled,
+        RemoteConfigKeys.interstitialCooldownHours: rcDefaultInterstitialCooldownHours,
+        RemoteConfigKeys.founderMaxRequestsPerMinute: rcDefaultFounderMaxRequestsPerMinute,
+        RemoteConfigKeys.founderMaxRequestsPerDay: rcDefaultFounderMaxRequestsPerDay,
+        RemoteConfigKeys.founderMaxPhotoAnalysesPerDay: rcDefaultFounderMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.founderChatHistoryLimit: rcDefaultFounderChatHistoryLimit,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -200,7 +205,7 @@ class RemoteConfigService {
 
   /// Full markdown content of the English changelog from Remote Config.
   /// Returns an empty string when not set in Remote Config,
-  /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
+  /// signalling that the bundled `assets/docs/en/CHANGELOG_en.md` should be used.
   static String get changelogEn =>
       _modelString(RemoteConfigKeys.changelogEn, rcDefaultChangelog);
 
@@ -258,4 +263,34 @@ class RemoteConfigService {
   static bool get freePhotoAnalysisEnabled =>
       _instance?.getBool(RemoteConfigKeys.freePhotoAnalysisEnabled) ??
       rcDefaultFreePhotoAnalysisEnabled;
+
+  // ── Ads ─────────────────────────────────────────────────────────────────────
+
+  /// Minimum hours between interstitial ad impressions for free-tier users.
+  /// Defaults to [rcDefaultInterstitialCooldownHours] (6).
+  /// Increase this value in Firebase Remote Config to reduce ad frequency.
+  static int get interstitialCooldownHours =>
+      _instance?.getInt(RemoteConfigKeys.interstitialCooldownHours) ??
+      rcDefaultInterstitialCooldownHours;
+  // ── Founder Aquarist AI limits ──────────────────────────────────────────────
+
+  /// Per-minute request limit for Founder Aquarist users.
+  static int get founderMaxRequestsPerMinute =>
+      _instance?.getInt(RemoteConfigKeys.founderMaxRequestsPerMinute) ??
+      rcDefaultFounderMaxRequestsPerMinute;
+
+  /// Per-day request limit for Founder Aquarist users.
+  static int get founderMaxRequestsPerDay =>
+      _instance?.getInt(RemoteConfigKeys.founderMaxRequestsPerDay) ??
+      rcDefaultFounderMaxRequestsPerDay;
+
+  /// Per-day photo-analysis limit for Founder Aquarist users.
+  static int get founderMaxPhotoAnalysesPerDay =>
+      _instance?.getInt(RemoteConfigKeys.founderMaxPhotoAnalysesPerDay) ??
+      rcDefaultFounderMaxPhotoAnalysesPerDay;
+
+  /// Chat-history window for Founder Aquarist users.
+  static int get founderChatHistoryLimit =>
+      _instance?.getInt(RemoteConfigKeys.founderChatHistoryLimit) ??
+      rcDefaultFounderChatHistoryLimit;
 }
