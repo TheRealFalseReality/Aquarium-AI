@@ -87,13 +87,13 @@ class ProfileService {
                 sizeGallons: t.sizeGallons,
                 sizeLiters: t.sizeLiters,
                 inhabitantCount: t.inhabitants
-                    .fold(0, (sum, i) => sum + i.quantity),
+                    .fold(0, (acc, i) => acc + i.quantity),
                 customIconCodePoint: t.customIconCodePoint,
               ))
           .toList();
 
       final totalFish =
-          summaries.fold(0, (sum, s) => sum + s.inhabitantCount);
+          summaries.fold(0, (acc, s) => acc + s.inhabitantCount);
 
       await _firestore
           .collection(_usersCollection)
