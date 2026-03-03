@@ -18,6 +18,7 @@ import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/storage_image_utils.dart';
 import '../services/analytics_service.dart';
+import '../theme_colors.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 import 'remove_ads_dialog.dart';
@@ -620,6 +621,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       void Function(String) navigate) {
     final authAsync = ref.watch(authStateProvider);
     final user = authAsync.asData?.value;
+    final isFounder = ref.watch(isFounderProvider);
 
     if (user == null) {
       return ListTile(
@@ -644,17 +646,35 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         height: 40,
         child: CircleAvatar(
           backgroundColor:
-              Theme.of(context).colorScheme.tertiaryContainer,
+              isFounder
+                  ? AquaThemeColors.founderColor(context).withOpacity(0.18)
+                  : Theme.of(context).colorScheme.tertiaryContainer,
           child: Icon(
             isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: isFounder
+                ? AquaThemeColors.founderColor(context)
+                : Theme.of(context).colorScheme.tertiary,
             size: 22,
           ),
         ),
       ),
-      title: Text(displayName,
-          overflow: TextOverflow.ellipsis, maxLines: 1),
-      subtitle: Text(l10n.profileDrawerDescription),
+      title: Row(
+        children: [
+          Flexible(
+            child: Text(displayName,
+                overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
+          if (isFounder) ...[
+            const SizedBox(width: 4),
+            Icon(Icons.diamond,
+                size: 13,
+                color: AquaThemeColors.founderColor(context)),
+          ],
+        ],
+      ),
+      subtitle: Text(isFounder
+          ? l10n.founderAquaristTitle
+          : l10n.profileDrawerDescription),
       onTap: () => navigate('/profile'),
     );
   }
@@ -817,6 +837,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     // Observe auth + profile for the profile chip
     final user = ref.watch(authStateProvider).asData?.value;
     final profile = ref.watch(currentUserProfileProvider).asData?.value;
+    final isFounder = ref.watch(isFounderProvider);
 
     String? displayName;
     IconData avatarIcon = Icons.account_circle;
@@ -923,41 +944,90 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Avatar
+                          // Avatar (with founder ring when applicable)
                           SizedBox(
                             width: 26,
                             height: 26,
-                            child: avatarUrl != null
-                                ? FutureBuilder<String>(
-                                    future: resolveResizedStorageUrl(avatarUrl),
-                                    initialData: getCachedResizedUrl(avatarUrl) ?? avatarUrl!,
-                                    builder: (_, snap) => CircleAvatar(
-                                      backgroundColor:
-                                          colorScheme.primary.withOpacity(0.3),
-                                      backgroundImage:
-                                          CachedNetworkImageProvider(snap.data!),
+                            child: isFounder
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AquaThemeColors.founderColor(context),
                                     ),
+                                    padding: const EdgeInsets.all(1.5),
+                                    child: avatarUrl != null
+                                        ? FutureBuilder<String>(
+                                            future: resolveResizedStorageUrl(
+                                                avatarUrl),
+                                            initialData:
+                                                getCachedResizedUrl(avatarUrl) ??
+                                                    avatarUrl!,
+                                            builder: (_, snap) => CircleAvatar(
+                                              backgroundColor: colorScheme
+                                                  .primary
+                                                  .withOpacity(0.3),
+                                              backgroundImage:
+                                                  CachedNetworkImageProvider(
+                                                      snap.data!),
+                                            ),
+                                          )
+                                        : CircleAvatar(
+                                            backgroundColor: colorScheme.primary
+                                                .withOpacity(0.3),
+                                            child: Icon(avatarIcon,
+                                                size: 14,
+                                                color: colorScheme.onSurface),
+                                          ),
                                   )
-                                : CircleAvatar(
-                                    backgroundColor:
-                                        colorScheme.primary.withOpacity(0.3),
-                                    child: Icon(avatarIcon,
-                                        size: 16,
-                                        color: colorScheme.onSurface),
-                                  ),
+                                : avatarUrl != null
+                                    ? FutureBuilder<String>(
+                                        future: resolveResizedStorageUrl(
+                                            avatarUrl),
+                                        initialData:
+                                            getCachedResizedUrl(avatarUrl) ??
+                                                avatarUrl!,
+                                        builder: (_, snap) => CircleAvatar(
+                                          backgroundColor: colorScheme.primary
+                                              .withOpacity(0.3),
+                                          backgroundImage:
+                                              CachedNetworkImageProvider(
+                                                  snap.data!),
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        backgroundColor:
+                                            colorScheme.primary.withOpacity(0.3),
+                                        child: Icon(avatarIcon,
+                                            size: 16,
+                                            color: colorScheme.onSurface),
+                                      ),
                           ),
                           const SizedBox(width: 8),
-                          // Name
+                          // Name + optional founder diamond
                           Flexible(
-                            child: Text(
-                              displayName ?? l10n.profileAnonymous,
-                              style: TextStyle(
-                                color: colorScheme.onSurface,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    displayName ?? l10n.profileAnonymous,
+                                    style: TextStyle(
+                                      color: colorScheme.onSurface,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                                if (isFounder) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.diamond,
+                                      size: 11,
+                                      color:
+                                          AquaThemeColors.founderPurpleLight),
+                                ],
+                              ],
                             ),
                           ),
                           const SizedBox(width: 4),

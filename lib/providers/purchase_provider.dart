@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,6 +64,13 @@ class PurchaseState {
       restoreOutcome: restoreOutcome ?? this.restoreOutcome,
     );
   }
+
+  /// Whether the user has Founder Aquarist status.
+  ///
+  /// Founder Aquarists have purchased any product in [founderProductIds] which
+  /// currently includes the "remove ads" lifetime purchase.  Add new product
+  /// IDs to [founderProductIds] in `constants.dart` to extend this status.
+  bool get isFounder => adsRemoved;
 }
 
 /// Manages the in-app purchase state for removing ads.
@@ -249,3 +257,23 @@ final purchaseProvider =
     StateNotifierProvider<PurchaseNotifier, PurchaseState>(
   (ref) => PurchaseNotifier(),
 );
+
+/// Debug-only provider that forces Founder Aquarist status without a real
+/// purchase. Only meaningful in debug builds ([kDebugMode]); always `false`
+/// in release builds. Reset on every cold start.
+final debugForceFounderProvider = StateProvider<bool>((ref) => false);
+
+/// The effective Founder Aquarist status for the current user.
+///
+/// In debug builds, this is `true` when either:
+///   - the user has actually purchased a founder product ([PurchaseState.isFounder]), or
+///   - the [debugForceFounderProvider] override is enabled.
+/// In release builds, this only reflects the real purchase state.
+final isFounderProvider = Provider<bool>((ref) {
+  final purchased = ref.watch(purchaseProvider).isFounder;
+  if (kDebugMode) {
+    final forced = ref.watch(debugForceFounderProvider);
+    return purchased || forced;
+  }
+  return purchased;
+});

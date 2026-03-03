@@ -43,6 +43,13 @@ const String adSenseAdUnitId = '9994371406';
 const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';
 const String buyMeACoffeeProductId = 'buy_me_a_coffee';
 
+/// Product IDs that grant "Founder Aquarist" status.
+/// Add new founder product IDs here as they are introduced — every entry in
+/// this list will be treated as a Founder Aquarist purchase.
+const List<String> founderProductIds = [
+  earlySupporterLifetimeProductId,
+];
+
 // ---------------------------------------------------------------------------
 // Remote Config in-app fallback defaults
 // These are used when Firebase Remote Config is unreachable (offline / first
@@ -89,6 +96,12 @@ const bool rcDefaultCommunityImageUpload = true;
 // Per-tool free-tier availability (true = enabled on free tier)
 const bool rcDefaultFreeFishCompatEnabled = true;
 const bool rcDefaultFreePhotoAnalysisEnabled = true;
+
+// Founder Aquarist tier limits (increased vs standard free tier)
+const int rcDefaultFounderMaxRequestsPerMinute = 10;
+const int rcDefaultFounderMaxRequestsPerDay = 150;
+const int rcDefaultFounderMaxPhotoAnalysesPerDay = 10;
+const int rcDefaultFounderChatHistoryLimit = 10;
 
 // ---------------------------------------------------------------------------
 // Firebase Remote Config key names
@@ -191,4 +204,17 @@ class RemoteConfigKeys {
   /// Boolean — when `false` the Photo Analysis tool is disabled for
   /// free-tier (developer Groq key) users.  Defaults to `true`.
   static const String freePhotoAnalysisEnabled = 'free_photo_analysis_enabled';
+
+  // ── Founder Aquarist AI limits ──────────────────────────────────────────────
+  /// Integer — per-minute request cap for Founder Aquarist users.
+  static const String founderMaxRequestsPerMinute = 'founder_max_requests_per_minute';
+
+  /// Integer — per-day request cap for Founder Aquarist users.
+  static const String founderMaxRequestsPerDay = 'founder_max_requests_per_day';
+
+  /// Integer — per-day photo-analysis cap for Founder Aquarist users.
+  static const String founderMaxPhotoAnalysesPerDay = 'founder_max_photo_analyses_per_day';
+
+  /// Integer — chat-history window for Founder Aquarist users.
+  static const String founderChatHistoryLimit = 'founder_chat_history_limit';
 }

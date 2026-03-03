@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
+import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
+
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -48,6 +50,26 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync like count from the Firestore stream when not mid-operation.
+    if (!_likeLoading && widget.post.likes != oldWidget.post.likes) {
+      _likes = widget.post.likes;
+    }
+    // Re-resolve images only when the URLs actually change.
+    if (widget.post.imageUrl != oldWidget.post.imageUrl) {
+      _resolvedPostImageUrl = widget.post.imageUrl != null
+          ? resolveResizedStorageUrl(widget.post.imageUrl!)
+          : null;
+    }
+    if (widget.post.avatarUrl != oldWidget.post.avatarUrl) {
+      _resolvedAvatarUrl = widget.post.avatarUrl != null
+          ? resolveResizedStorageUrl(widget.post.avatarUrl!)
+          : null;
+    }
+  }
+
   Future<void> _loadLikeStatus() async {
     if (widget.currentUserId.isEmpty) return;
     final liked = await CommunityService.hasLiked(widget.post.id);
@@ -58,14 +80,24 @@ class _PostCardState extends State<PostCard> {
 
   Future<void> _handleLike() async {
     if (_likeLoading || widget.currentUserId.isEmpty) return;
+    // Snapshot previous state for rollback.
+    final wasLiked = _isLiked;
+    final prevLikes = _likes;
     setState(() {
       _likeLoading = true;
       _isLiked = !_isLiked;
       _likes += _isLiked ? 1 : -1;
     });
-    await CommunityService.toggleLike(widget.post.id);
+    final success = await CommunityService.toggleLike(widget.post.id);
     if (mounted) {
-      setState(() => _likeLoading = false);
+      setState(() {
+        _likeLoading = false;
+        if (!success) {
+          // Roll back the optimistic update on failure.
+          _isLiked = wasLiked;
+          _likes = prevLikes;
+        }
+      });
     }
   }
 
@@ -74,83 +106,38 @@ class _PostCardState extends State<PostCard> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isOwner = widget.currentUserId == widget.post.userId;
+    final isFounder = widget.post.isFounderPost;
+    final isTankShowcase = widget.post.type == PostType.tankShowcase;
+    final hasImage = widget.post.imageUrl != null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       clipBehavior: Clip.antiAlias,
+      shape: isFounder
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: AquaThemeColors.founderColor(context), width: 2),
+            )
+          : null,
       child: InkWell(
         onTap: widget.onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Post image
-            if (widget.post.imageUrl != null)
-              FutureBuilder<String>(
-                future: _resolvedPostImageUrl,
-                builder: (_, snap) => CachedNetworkImage(
-                  imageUrl: snap.data ?? widget.post.imageUrl!,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, _, _) => Container(
-                    height: 200,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(Icons.broken_image,
-                        color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ),
-              ),
+            // ── Image section ─────────────────────────────────────────────
+            if (hasImage) _buildImageSection(theme, l10n, isTankShowcase, isOwner, isFounder),
+            // ── Card body ─────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header row: avatar + name + type badge
-                  Row(
-                    children: [
-                      _buildAvatar(theme),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.post.displayName,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              _formatDate(widget.post.createdAt, l10n),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      _buildTypeBadge(context, l10n),
-                      if (isOwner)
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 18),
-                          color: theme.colorScheme.primary,
-                          tooltip: l10n.communityEditPost,
-                          onPressed: widget.onEdit,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      if (isOwner)
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18),
-                          color: theme.colorScheme.error,
-                          tooltip: l10n.communityDeletePost,
-                          onPressed: widget.onDelete,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  // Header row — hidden for showcase when an image is present
+                  // (author info is already overlaid on the hero image).
+                  if (!isTankShowcase || !hasImage) ...[
+                    _buildHeader(theme, l10n, isOwner, isFounder),
+                    const SizedBox(height: 8),
+                  ],
                   // Title
                   Text(
                     widget.post.title,
@@ -167,12 +154,8 @@ class _PostCardState extends State<PostCard> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  // Post signature (aquarist metrics at time of posting)
-                  if (widget.post.postSignature != null &&
-                      widget.post.postSignature!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    PostSignatureFooter(sig: widget.post.postSignature!),
-                  ],
+                  // Signature is intentionally omitted from the preview card.
+                  // It appears only in the full post detail screen.
                   const SizedBox(height: 8),
                   // Footer: likes + comments
                   Row(
@@ -223,7 +206,206 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildAvatar(ThemeData theme) {
+  /// Builds the image section of the card.
+  /// For Tank Showcase posts this is a 280 px hero with a gradient scrim and
+  /// the author row overlaid at the bottom.  All other post types show a plain
+  /// 200 px cover image.
+  Widget _buildImageSection(ThemeData theme, AppLocalizations l10n,
+      bool isTankShowcase, bool isOwner, bool isFounder) {
+    if (!isTankShowcase) {
+      return FutureBuilder<String>(
+        future: _resolvedPostImageUrl,
+        builder: (_, snap) => CachedNetworkImage(
+          imageUrl: snap.data ?? widget.post.imageUrl!,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorWidget: (_, _, _) => Container(
+            height: 200,
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Icon(Icons.broken_image,
+                color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
+    // ── Tank Showcase hero ─────────────────────────────────────────────────
+    return SizedBox(
+      height: 280,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Hero image
+          FutureBuilder<String>(
+            future: _resolvedPostImageUrl,
+            builder: (_, snap) => CachedNetworkImage(
+              imageUrl: snap.data ?? widget.post.imageUrl!,
+              width: double.infinity,
+              height: 280,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) => Container(
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(Icons.broken_image,
+                    color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+          // Gradient scrim
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.65),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.45, 1.0],
+              ),
+            ),
+          ),
+          // Author row + edit/delete overlaid at the bottom
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: Row(
+              children: [
+                _buildAvatar(theme, small: true),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.post.displayName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                shadows: [
+                                  Shadow(blurRadius: 4, color: Colors.black54)
+                                ],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isFounder) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.diamond,
+                                size: 13,
+                                color: AquaThemeColors.founderPurpleLight),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        _formatDate(widget.post.createdAt, l10n),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          shadows: [
+                            Shadow(blurRadius: 4, color: Colors.black54)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildTypeBadge(context, l10n),
+                if (isOwner) ...[
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined,
+                        size: 18, color: Colors.white),
+                    tooltip: l10n.communityEditPost,
+                    onPressed: widget.onEdit,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline,
+                        size: 18, color: Colors.white70),
+                    tooltip: l10n.communityDeletePost,
+                    onPressed: widget.onDelete,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme, AppLocalizations l10n, bool isOwner,
+      bool isFounder) {
+    return Row(
+      children: [
+        _buildAvatar(theme),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.post.displayName,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isFounder) ...[
+                    const SizedBox(width: 4),
+                    Icon(Icons.diamond,
+                        size: 13, color: AquaThemeColors.founderColor(context)),
+                  ],
+                ],
+              ),
+              Text(
+                _formatDate(widget.post.createdAt, l10n),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildTypeBadge(context, l10n),
+        if (isOwner)
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            color: theme.colorScheme.primary,
+            tooltip: l10n.communityEditPost,
+            onPressed: widget.onEdit,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        if (isOwner)
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 18),
+            color: theme.colorScheme.error,
+            tooltip: l10n.communityDeletePost,
+            onPressed: widget.onDelete,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme, {bool small = false}) {
+    final radius = small ? 14.0 : 18.0;
     if (widget.post.avatarUrl != null) {
       return FutureBuilder<String>(
         future: _resolvedAvatarUrl,
@@ -236,7 +418,7 @@ class _PostCardState extends State<PostCard> {
       );
     }
     return CircleAvatar(
-      radius: 18,
+      radius: radius,
       backgroundColor: theme.colorScheme.primaryContainer,
       child: Text(
         widget.post.displayName.isNotEmpty
@@ -245,6 +427,7 @@ class _PostCardState extends State<PostCard> {
         style: TextStyle(
           color: theme.colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.bold,
+          fontSize: small ? 12 : 14,
         ),
       ),
     );

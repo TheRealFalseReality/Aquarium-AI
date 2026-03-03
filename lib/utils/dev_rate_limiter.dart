@@ -44,13 +44,17 @@ class DevRateLimiter {
   /// Checks whether a new AI request is within both the per-minute and per-day
   /// limits.
   ///
+  /// When [isFounder] is `true`, Founder Aquarist limits from
+  /// [RemoteConfigService] are used instead of the standard free-tier limits.
+  ///
   /// Checks are applied in this order:
   /// 1. Per-day limit — returns [DevRateLimitResult.dailyLimitReached] if exceeded.
   /// 2. Per-minute limit — returns [DevRateLimitResult.minuteLimitReached] if exceeded.
   ///
   /// On success, records the timestamp and increments the daily counter, then
   /// returns [DevRateLimitResult.allowed].
-  static Future<DevRateLimitResult> checkAndRecordRequest() async {
+  static Future<DevRateLimitResult> checkAndRecordRequest(
+      {bool isFounder = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
@@ -60,12 +64,19 @@ class DevRateLimiter {
     final requestDailyCountKey = _key(deviceId, _requestDailyCountSuffix);
     final requestDailyDateKey = _key(deviceId, _requestDailyDateSuffix);
 
+    final maxPerDay = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerDay
+        : RemoteConfigService.maxRequestsPerDay;
+    final maxPerMinute = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerMinute
+        : RemoteConfigService.maxRequestsPerMinute;
+
     // --- per-day check ---
     final storedDate = prefs.getString(requestDailyDateKey) ?? '';
     final dailyCount = storedDate == todayStr
         ? (prefs.getInt(requestDailyCountKey) ?? 0)
         : 0;
-    if (dailyCount >= RemoteConfigService.maxRequestsPerDay) {
+    if (dailyCount >= maxPerDay) {
       return DevRateLimitResult.dailyLimitReached;
     }
 
@@ -78,7 +89,7 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    if (recent.length >= RemoteConfigService.maxRequestsPerMinute) {
+    if (recent.length >= maxPerMinute) {
       return DevRateLimitResult.minuteLimitReached;
     }
 
@@ -97,8 +108,10 @@ class DevRateLimiter {
   /// Returns the number of seconds until the oldest in-window request
   /// expires (i.e. how long the user must wait before the next slot opens).
   ///
+  /// When [isFounder] is `true`, the Founder per-minute cap is used.
+  ///
   /// Returns 0 if a slot is already available.
-  static Future<int> secondsUntilNextSlot() async {
+  static Future<int> secondsUntilNextSlot({bool isFounder = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
@@ -111,7 +124,10 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    if (recent.length < RemoteConfigService.maxRequestsPerMinute) return 0;
+    final maxPerMinute = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerMinute
+        : RemoteConfigService.maxRequestsPerMinute;
+    if (recent.length < maxPerMinute) return 0;
 
     recent.sort();
     final oldest = recent.first;
@@ -121,7 +137,9 @@ class DevRateLimiter {
   }
 
   /// Returns the number of AI requests remaining today.
-  static Future<int> remainingRequestsToday() async {
+  ///
+  /// When [isFounder] is `true`, the Founder daily cap is used.
+  static Future<int> remainingRequestsToday({bool isFounder = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
@@ -131,7 +149,10 @@ class DevRateLimiter {
         ? (prefs.getInt(_key(deviceId, _requestDailyCountSuffix)) ?? 0)
         : 0;
 
-    final remaining = RemoteConfigService.maxRequestsPerDay - count;
+    final maxPerDay = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerDay
+        : RemoteConfigService.maxRequestsPerDay;
+    final remaining = maxPerDay - count;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -141,9 +162,11 @@ class DevRateLimiter {
 
   /// Checks whether a new photo analysis is within today's daily limit.
   ///
+  /// When [isFounder] is `true`, the Founder photo-analyses cap is used.
+  ///
   /// Returns `true` and increments the counter if allowed.
   /// Returns `false` (without incrementing) if the limit is exceeded.
-  static Future<bool> checkAndRecordPhotoAnalysis() async {
+  static Future<bool> checkAndRecordPhotoAnalysis({bool isFounder = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
@@ -156,7 +179,10 @@ class DevRateLimiter {
         ? (prefs.getInt(photoDailyCountKey) ?? 0)
         : 0;
 
-    if (count >= RemoteConfigService.maxPhotoAnalysesPerDay) {
+    final maxPhotos = isFounder
+        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    if (count >= maxPhotos) {
       return false;
     }
 
@@ -166,7 +192,9 @@ class DevRateLimiter {
   }
 
   /// Returns the number of photo analyses remaining for today.
-  static Future<int> remainingPhotoAnalysesToday() async {
+  ///
+  /// When [isFounder] is `true`, the Founder photo-analyses cap is used.
+  static Future<int> remainingPhotoAnalysesToday({bool isFounder = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
@@ -176,7 +204,10 @@ class DevRateLimiter {
         ? (prefs.getInt(_key(deviceId, _photoDailyCountSuffix)) ?? 0)
         : 0;
 
-    final remaining = RemoteConfigService.maxPhotoAnalysesPerDay - count;
+    final maxPhotos = isFounder
+        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final remaining = maxPhotos - count;
     return remaining > 0 ? remaining : 0;
   }
 

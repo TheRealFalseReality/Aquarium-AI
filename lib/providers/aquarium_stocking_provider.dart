@@ -9,6 +9,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
+import 'purchase_provider.dart' show isFounderProvider;
 import '../models/analysis_history_entry.dart';
 import 'analysis_history_provider.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
@@ -134,17 +135,24 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final isFounder = ref.read(isFounderProvider);
+      final maxPerMin = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerMinute
+          : RemoteConfigService.maxRequestsPerMinute;
+      final maxPerDay = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerDay
+          : RemoteConfigService.maxRequestsPerDay;
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: isFounder);
         state = state.copyWith(
-          error: '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          error: '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         state = state.copyWith(
-          error: '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          error: '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
@@ -336,17 +344,24 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final isFounder = ref.read(isFounderProvider);
+      final maxPerMin = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerMinute
+          : RemoteConfigService.maxRequestsPerMinute;
+      final maxPerDay = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerDay
+          : RemoteConfigService.maxRequestsPerDay;
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: isFounder);
         state = state.copyWith(
-          error: '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          error: '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         state = state.copyWith(
-          error: '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          error: '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;

@@ -14,6 +14,7 @@ import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
+import '../theme_colors.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
@@ -807,31 +808,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // Indicator: show when the app is using the built-in dev API key
         if (appSettings.enableAI && models.usingDeveloperGroqKeyForAny) ...[
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.amber.withOpacity(0.4),
+          Builder(builder: (context) {
+            final isFounder = ref.watch(isFounderProvider);
+            final maxPerMin = isFounder
+                ? RemoteConfigService.founderMaxRequestsPerMinute
+                : RemoteConfigService.maxRequestsPerMinute;
+            final maxPerDay = isFounder
+                ? RemoteConfigService.founderMaxRequestsPerDay
+                : RemoteConfigService.maxRequestsPerDay;
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isFounder
+                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
+                    : Colors.amber.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isFounder
+                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
+                      : Colors.amber.withOpacity(0.4),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline, color: Colors.amber, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Using App\'s Built-in Dev API Key (Groq free tier). '
-                    'Add your own Groq key in AI Provider settings for dedicated limits.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.amber.shade900,
+              child: Row(
+                children: [
+                  Icon(
+                    isFounder ? Icons.diamond : Icons.info_outline,
+                    color: isFounder
+                        ? AquaThemeColors.founderColor(context)
+                        : Colors.amber,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isFounder
+                          ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
+                          : 'Using App\'s Built-in Dev API Key (free tier). '
+                              'Add your own API key in AI Provider settings for dedicated limits.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isFounder
+                            ? AquaThemeColors.founderColor(context)
+                            : Colors.amber.shade900,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
         ],
         // Warning: shown when the free AI tier is disabled server-side but the
         // user has no own Groq key configured.
@@ -1113,6 +1137,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: appSettings.debugHideAds,
                   onChanged: (value) {
                     ref.read(appSettingsProvider.notifier).setDebugHideAds(value);
+                    setDialogState(() {});
+                  },
+                ),
+                const Divider(),
+                // Simulate Founder Tier toggle
+                SwitchListTile(
+                  secondary: Icon(Icons.diamond,
+                      color: AquaThemeColors.founderColor(context)),
+                  title: const Text('Simulate Founder Tier'),
+                  subtitle: Text(
+                    ref.read(debugForceFounderProvider)
+                        ? 'Currently: Founder Aquarist active'
+                        : 'Currently: Standard tier',
+                  ),
+                  value: ref.read(debugForceFounderProvider),
+                  onChanged: (value) {
+                    ref.read(debugForceFounderProvider.notifier).state = value;
                     setDialogState(() {});
                   },
                 ),
@@ -1400,6 +1441,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAIProviderContent([StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
+    final isFounder = ref.read(isFounderProvider);
+
+    // Effective per-tier limits for the built-in dev key.
+    final limitPerMin = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerMinute
+        : RemoteConfigService.maxRequestsPerMinute;
+    final limitPerDay = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerDay
+        : RemoteConfigService.maxRequestsPerDay;
+    final limitPhotos = isFounder
+        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final limitChatHistory = isFounder
+        ? RemoteConfigService.founderChatHistoryLimit
+        : RemoteConfigService.freeTierChatHistoryLimit;
 
     // ─── Segmented button style helpers ───────────────────────────────────────
     SegmentedButton<AIProvider> providerButton({
@@ -1455,37 +1511,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // ─── Free-tier notice (collapsible; always shown when a dev key is available) ──
+        // ─── Limits notice (collapsible; always shown when a dev key is available) ──
         if (RemoteConfigService.freeAiEnabled) Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: RemoteConfigService.freeAiEnabled
-                    ? Colors.amber.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.08),
+                color: isFounder
+                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
+                    : Colors.amber.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: RemoteConfigService.freeAiEnabled
-                      ? Colors.amber.withOpacity(0.4)
-                      : Colors.red.withOpacity(0.4),
+                  color: isFounder
+                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
+                      : Colors.amber.withOpacity(0.4),
                 ),
               ),
               child: RemoteConfigService.freeAiEnabled
                   ? ExpansionTile(
-                      leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                      leading: isFounder
+                          ? Icon(Icons.diamond, color: AquaThemeColors.founderColor(context), size: 20)
+                          : const Icon(Icons.speed, color: Colors.amber, size: 20),
                       title: Text(
-                        l10n.freeTierLimits,
+                        isFounder ? l10n.founderAquaristTitle : l10n.freeTierLimits,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Colors.amber.shade800,
+                              color: isFounder
+                                  ? AquaThemeColors.founderColor(context)
+                                  : Colors.amber.shade800,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
-                      // Collapsed subtitle: just the key numbers (from Remote Config)
+                      // Collapsed subtitle: just the key numbers
                       subtitle: Text(
-                        l10n.freeTierLimitsSubtitle(RemoteConfigService.maxRequestsPerDay, RemoteConfigService.maxRequestsPerMinute, RemoteConfigService.maxPhotoAnalysesPerDay),
+                        l10n.freeTierLimitsSubtitle(limitPerDay, limitPerMin, limitPhotos),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.amber.shade700,
+                              color: isFounder
+                                  ? AquaThemeColors.founderColor(context).withOpacity(0.8)
+                                  : Colors.amber.shade700,
                             ),
                       ),
                       initiallyExpanded: false,
@@ -1494,37 +1556,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '• ${RemoteConfigService.maxRequestsPerMinute} ${l10n.freeTierRequestsPerMin}\n'
-                          '• ${RemoteConfigService.maxRequestsPerDay} ${l10n.freeTierRequestsPerDay}\n'
-                          '• ${RemoteConfigService.maxPhotoAnalysesPerDay} ${l10n.freeTierPhotoAnalysesPerDay}\n'
-                          '• ${RemoteConfigService.freeTierChatHistoryLimit}-${l10n.freeTierChatHistoryPerRequest}',
+                          '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
+                          '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
+                          '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
+                          '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade900,
+                                color: isFounder
+                                    ? AquaThemeColors.founderColor(context)
+                                    : Colors.amber.shade900,
                               ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          l10n.freeTierModelNote,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade900,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.freeTierRecommendation,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade800,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.freeTierDisclaimer,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade800,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        ),
+                        if (!isFounder) ...[
+                          Text(
+                            l10n.freeTierModelNote,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade900,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.freeTierRecommendation,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.freeTierDisclaimer,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ],
                       ],
                     )
                   : ListTile(

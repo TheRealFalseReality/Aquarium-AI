@@ -49,6 +49,7 @@ class CommunityService {
     String? imageFilePath,
     Map<String, dynamic>? tankInfo,
     Map<String, String>? postSignature,
+    bool isFounderPost = false,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -76,6 +77,7 @@ class CommunityService {
         imageUrl: imageUrl,
         tankInfo: tankInfo,
         postSignature: postSignature,
+        isFounderPost: isFounderPost,
         likes: 0,
         commentCount: 0,
         createdAt: now,
@@ -161,9 +163,10 @@ class CommunityService {
 
   /// Toggles a like on a post for the current user.
   /// Uses a sub-collection /posts/{postId}/likes/{uid} to track per-user likes.
-  static Future<void> toggleLike(String postId) async {
+  /// Returns `true` if the operation succeeded, `false` otherwise.
+  static Future<bool> toggleLike(String postId) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) return false;
 
     final likeRef = _firestore
         .collection(_postsCollection)
@@ -183,10 +186,12 @@ class CommunityService {
           tx.update(postRef, {'likes': FieldValue.increment(1)});
         }
       });
+      return true;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService toggleLike error: $e');
       }
+      return false;
     }
   }
 
