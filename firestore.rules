@@ -2,51 +2,36 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Community posts ───────────────────────────────────────────────────────
-    match /posts/{postId} {
-      // Anyone (including unauthenticated) can read posts.
-      allow read: if true;
-
-      // Any authenticated user can create a post.
-      allow create: if request.auth != null;
-
-      // The post author can update any field.
-      // Any authenticated user can update only the denormalised counters
-      // (likes and commentCount) — used by toggleLike and createComment.
-      allow update: if request.auth != null && (
-        request.auth.uid == resource.data.userId ||
-        request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['likes', 'commentCount'])
-      );
-
-      // Only the author can delete their own post.
-      allow delete: if request.auth != null
-          && request.auth.uid == resource.data.userId;
-
-      // ── Per-user like tracking ──────────────────────────────────────────────
-      // Each user may read and write only their own like document.
-      match /likes/{userId} {
-        allow read, write: if request.auth != null
-            && request.auth.uid == userId;
-      }
-
-      // ── Comments ─────────────────────────────────────────────────────────────
-      match /comments/{commentId} {
-        allow read: if true;
-        allow create: if request.auth != null;
-        // Only the comment author can delete their own comment.
-        allow delete: if request.auth != null
-            && request.auth.uid == resource.data.userId;
-      }
+    // Users can read/write their own profile
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // ── User profiles ─────────────────────────────────────────────────────────
-    // Profiles are public-readable (needed for community display names/avatars).
-    // Only the owning user may write their own document.
-    match /users/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null
-          && request.auth.uid == userId;
+    // Anyone signed in (including anonymous) can read posts
+    // Only the author can delete their own post
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Per-user like tracking.
+      // Any signed-in user can read like documents (needed by hasLiked).
+      // Each user may only write (create/delete) their own like document,
+      // which enforces the one-like-per-user rule and allows unliking.
+      // Authors can like their own posts — no restriction on that.
+      match /likes/{userId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Comments sub-collection
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      }
     }
   }
 }

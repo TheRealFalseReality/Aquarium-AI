@@ -1441,6 +1441,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildAIProviderContent([StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
+    final isFounder = ref.read(isFounderProvider);
+
+    // Effective per-tier limits for the built-in dev key.
+    final limitPerMin = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerMinute
+        : RemoteConfigService.maxRequestsPerMinute;
+    final limitPerDay = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerDay
+        : RemoteConfigService.maxRequestsPerDay;
+    final limitPhotos = isFounder
+        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final limitChatHistory = isFounder
+        ? RemoteConfigService.founderChatHistoryLimit
+        : RemoteConfigService.freeTierChatHistoryLimit;
 
     // ─── Segmented button style helpers ───────────────────────────────────────
     SegmentedButton<AIProvider> providerButton({
@@ -1496,37 +1511,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // ─── Free-tier notice (collapsible; always shown when a dev key is available) ──
+        // ─── Limits notice (collapsible; always shown when a dev key is available) ──
         if (RemoteConfigService.freeAiEnabled) Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: RemoteConfigService.freeAiEnabled
-                    ? Colors.amber.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.08),
+                color: isFounder
+                    ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                    : Colors.amber.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: RemoteConfigService.freeAiEnabled
-                      ? Colors.amber.withOpacity(0.4)
-                      : Colors.red.withOpacity(0.4),
+                  color: isFounder
+                      ? AquaThemeColors.founderPurple.withOpacity(0.4)
+                      : Colors.amber.withOpacity(0.4),
                 ),
               ),
               child: RemoteConfigService.freeAiEnabled
                   ? ExpansionTile(
-                      leading: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                      leading: isFounder
+                          ? const Icon(Icons.diamond, color: AquaThemeColors.founderPurple, size: 20)
+                          : const Icon(Icons.speed, color: Colors.amber, size: 20),
                       title: Text(
-                        l10n.freeTierLimits,
+                        isFounder ? l10n.founderAquaristTitle : l10n.freeTierLimits,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Colors.amber.shade800,
+                              color: isFounder
+                                  ? AquaThemeColors.founderPurple
+                                  : Colors.amber.shade800,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
-                      // Collapsed subtitle: just the key numbers (from Remote Config)
+                      // Collapsed subtitle: just the key numbers
                       subtitle: Text(
-                        l10n.freeTierLimitsSubtitle(RemoteConfigService.maxRequestsPerDay, RemoteConfigService.maxRequestsPerMinute, RemoteConfigService.maxPhotoAnalysesPerDay),
+                        l10n.freeTierLimitsSubtitle(limitPerDay, limitPerMin, limitPhotos),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.amber.shade700,
+                              color: isFounder
+                                  ? AquaThemeColors.founderPurple.withOpacity(0.8)
+                                  : Colors.amber.shade700,
                             ),
                       ),
                       initiallyExpanded: false,
@@ -1535,37 +1556,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '• ${RemoteConfigService.maxRequestsPerMinute} ${l10n.freeTierRequestsPerMin}\n'
-                          '• ${RemoteConfigService.maxRequestsPerDay} ${l10n.freeTierRequestsPerDay}\n'
-                          '• ${RemoteConfigService.maxPhotoAnalysesPerDay} ${l10n.freeTierPhotoAnalysesPerDay}\n'
-                          '• ${RemoteConfigService.freeTierChatHistoryLimit}-${l10n.freeTierChatHistoryPerRequest}',
+                          '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
+                          '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
+                          '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
+                          '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade900,
+                                color: isFounder
+                                    ? AquaThemeColors.founderPurple
+                                    : Colors.amber.shade900,
                               ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          l10n.freeTierModelNote,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade900,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.freeTierRecommendation,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade800,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.freeTierDisclaimer,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade800,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        ),
+                        if (!isFounder) ...[
+                          Text(
+                            l10n.freeTierModelNote,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade900,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.freeTierRecommendation,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.freeTierDisclaimer,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ],
                       ],
                     )
                   : ListTile(
