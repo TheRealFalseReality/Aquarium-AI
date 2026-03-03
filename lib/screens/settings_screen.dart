@@ -3969,7 +3969,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (aiResponseLanguage == null) return l10n.aiResponseLanguageFollowApp;
     if (aiResponseLanguage.isEmpty) return l10n.aiResponseLanguageNone;
-    return aiResponseLanguage;
+    return _localizedLanguageName(aiResponseLanguage, l10n);
+  }
+
+  /// Returns the localized display name for a preset AI response language.
+  /// Falls back to the raw [lang] value for custom languages.
+  static String _localizedLanguageName(String lang, AppLocalizations l10n) {
+    switch (lang) {
+      case 'English': return l10n.aiResponseLanguageNameEnglish;
+      case 'German': return l10n.aiResponseLanguageNameGerman;
+      case 'Spanish': return l10n.aiResponseLanguageNameSpanish;
+      case 'French': return l10n.aiResponseLanguageNameFrench;
+      case 'Portuguese': return l10n.aiResponseLanguageNamePortuguese;
+      case 'Italian': return l10n.aiResponseLanguageNameItalian;
+      case 'Japanese': return l10n.aiResponseLanguageNameJapanese;
+      case 'Chinese': return l10n.aiResponseLanguageNameChinese;
+      case 'Korean': return l10n.aiResponseLanguageNameKorean;
+      case 'Dutch': return l10n.aiResponseLanguageNameDutch;
+      case 'Russian': return l10n.aiResponseLanguageNameRussian;
+      case 'Arabic': return l10n.aiResponseLanguageNameArabic;
+      default: return lang;
+    }
   }
 
   void _showAiResponseLanguageDialog([StateSetter? parentSetDialogState]) {
@@ -4056,7 +4076,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: Text(l10n.aiResponseLanguageNone),
                       ),
                       ...presets.whereType<String>().where((p) => p.isNotEmpty).map(
-                            (lang) => DropdownMenuItem<String?>(value: lang, child: Text(lang)),
+                            (lang) => DropdownMenuItem<String?>(value: lang, child: Text(_localizedLanguageName(lang, l10n))),
                           ),
                       DropdownMenuItem<String?>(
                         value: 'custom',

@@ -341,6 +341,55 @@
     "description": "Hint text for the custom AI response language text field"
   },
 
+  "aiResponseLanguageNameEnglish": "English",
+  "@aiResponseLanguageNameEnglish": {
+    "description": "Language name: English"
+  },
+  "aiResponseLanguageNameGerman": "German",
+  "@aiResponseLanguageNameGerman": {
+    "description": "Language name: German"
+  },
+  "aiResponseLanguageNameSpanish": "Spanish",
+  "@aiResponseLanguageNameSpanish": {
+    "description": "Language name: Spanish"
+  },
+  "aiResponseLanguageNameFrench": "French",
+  "@aiResponseLanguageNameFrench": {
+    "description": "Language name: French"
+  },
+  "aiResponseLanguageNamePortuguese": "Portuguese",
+  "@aiResponseLanguageNamePortuguese": {
+    "description": "Language name: Portuguese"
+  },
+  "aiResponseLanguageNameItalian": "Italian",
+  "@aiResponseLanguageNameItalian": {
+    "description": "Language name: Italian"
+  },
+  "aiResponseLanguageNameJapanese": "Japanese",
+  "@aiResponseLanguageNameJapanese": {
+    "description": "Language name: Japanese"
+  },
+  "aiResponseLanguageNameChinese": "Chinese",
+  "@aiResponseLanguageNameChinese": {
+    "description": "Language name: Chinese"
+  },
+  "aiResponseLanguageNameKorean": "Korean",
+  "@aiResponseLanguageNameKorean": {
+    "description": "Language name: Korean"
+  },
+  "aiResponseLanguageNameDutch": "Dutch",
+  "@aiResponseLanguageNameDutch": {
+    "description": "Language name: Dutch"
+  },
+  "aiResponseLanguageNameRussian": "Russian",
+  "@aiResponseLanguageNameRussian": {
+    "description": "Language name: Russian"
+  },
+  "aiResponseLanguageNameArabic": "Arabic",
+  "@aiResponseLanguageNameArabic": {
+    "description": "Language name: Arabic"
+  },
+
   "translationCommunityTitle": "Help Translate",
   "@translationCommunityTitle": {
     "description": "Title for translation community section"
