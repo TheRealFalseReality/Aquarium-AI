@@ -11,6 +11,7 @@ import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/fish_data_service.dart';
 import '../services/remote_config_service.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
@@ -141,6 +142,43 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         (t) => t.id == _selectedTankId,
         orElse: () => tanks.first,
       );
+
+      // Build a flat lookup: fishUnit name → default imageURL from fishcompat.
+      // TankInhabitant.fishUnit is set from fish.name at selection time, so
+      // keys match exactly when the fish data source is the same.
+      Map<String, String> defaultImageLookup = {};
+      try {
+        final fishDataService = ref.read(fishDataServiceProvider);
+        final fishData = await fishDataService.loadFishData();
+        for (final fishList in fishData.values) {
+          for (final fish in fishList) {
+            defaultImageLookup[fish.name] = fish.imageURL;
+          }
+        }
+      } catch (_) {
+        // If fish data is unavailable, inhabitant images fall back to null.
+      }
+
+      // Serialize each inhabitant with name, fishUnit, quantity, and the
+      // best-available image URL (user URL > default from fishcompat).
+      final inhabitantsList = tank.inhabitants.map((i) {
+        // Use the user-provided URL when it's a real remote URL.
+        // If they only have a local file path (customImagePath non-null and
+        // customImageUrl is null/empty), fall back to the fishcompat default.
+        final String? imageUrl = (i.customImageUrl != null &&
+                i.customImageUrl!.isNotEmpty &&
+                (i.customImageUrl!.startsWith('http://') ||
+                    i.customImageUrl!.startsWith('https://')))
+            ? i.customImageUrl
+            : defaultImageLookup[i.fishUnit];
+        return {
+          'name': i.customName,
+          'fishUnit': i.fishUnit,
+          'quantity': i.quantity,
+          if (imageUrl != null) 'imageUrl': imageUrl,
+        };
+      }).toList();
+
       tankInfo = {
         'name': tank.name,
         if (tank.sizeGallons != null)
@@ -149,6 +187,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           'sizeLiters': tank.sizeLiters,
         'type': tank.type,
         'inhabitants': tank.inhabitants.length,
+        if (inhabitantsList.isNotEmpty) 'inhabitantsList': inhabitantsList,
       };
     }
 

@@ -434,11 +434,21 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     } else if (info['sizeLiters'] != null) {
       fields.add(_TankField(Icons.straighten, l10n.communityTankFieldSize, '${info['sizeLiters']} L'));
     }
-    if (info['inhabitants'] != null) {
+
+    // Parse detailed inhabitant list (stored since the new post format).
+    final rawList = info['inhabitantsList'];
+    final List<Map<String, dynamic>> inhabitantsList = rawList is List
+        ? rawList
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : [];
+
+    // Fall back to simple count if no detailed list is available.
+    if (inhabitantsList.isEmpty && info['inhabitants'] != null) {
       fields.add(_TankField(Icons.set_meal_outlined, l10n.communityTankFieldInhabitants, '${info['inhabitants']}'));
     }
 
-    if (fields.isEmpty) return const SizedBox.shrink();
+    if (fields.isEmpty && inhabitantsList.isEmpty) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
@@ -469,19 +479,130 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             ),
           ),
           Divider(height: 1, color: cs.secondary.withOpacity(0.2)),
-          // Field rows
+          // Field rows (name, type, size)
+          if (fields.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 10,
+                children: fields
+                    .map((f) => _buildTankField(context, f))
+                    .toList(),
+              ),
+            ),
+          // Detailed inhabitants section
+          if (inhabitantsList.isNotEmpty) ...[
+            if (fields.isNotEmpty)
+              Divider(height: 1, color: cs.secondary.withOpacity(0.15)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+              child: Row(
+                children: [
+                  Icon(Icons.set_meal_outlined, size: 15, color: cs.secondary),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.communityTankFieldInhabitants,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.onSecondaryContainer.withOpacity(0.65),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 92,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+                itemCount: inhabitantsList.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (_, i) =>
+                    _buildInhabitantChip(context, inhabitantsList[i]),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Renders a compact avatar + name + quantity chip for one inhabitant.
+  Widget _buildInhabitantChip(BuildContext context, Map<String, dynamic> inh) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final name = (inh['name'] as String?)?.isNotEmpty == true
+        ? inh['name'] as String
+        : (inh['fishUnit'] as String?)?.isNotEmpty == true
+            ? inh['fishUnit'] as String
+            : '?';
+    final qty = inh['quantity'] as int? ?? 1;
+    final imageUrl = inh['imageUrl'] as String?;
+
+    return Container(
+      width: 72,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Avatar
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+            child: imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    width: 72,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
+                  )
+                : _inhabitantPlaceholder(cs),
+          ),
+          // Name + qty
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: fields
-                  .map((f) => _buildTankField(context, f))
-                  .toList(),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 9,
+                    color: cs.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (qty > 1)
+                  Text(
+                    '×$qty',
+                    style: tt.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _inhabitantPlaceholder(ColorScheme cs) {
+    return Container(
+      width: 72,
+      height: 48,
+      color: cs.secondaryContainer,
+      child: Icon(Icons.set_meal_outlined, size: 22, color: cs.secondary),
     );
   }
 
