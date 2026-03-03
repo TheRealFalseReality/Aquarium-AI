@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
+import '../utils/storage_image_utils.dart';
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -29,12 +30,22 @@ class _PostCardState extends State<PostCard> {
   late int _likes;
   bool _isLiked = false;
   bool _likeLoading = false;
+  Future<String>? _resolvedPostImageUrl;
+  Future<String>? _resolvedAvatarUrl;
 
   @override
   void initState() {
     super.initState();
     _likes = widget.post.likes;
     _loadLikeStatus();
+    if (widget.post.imageUrl != null) {
+      _resolvedPostImageUrl =
+          resolveResizedStorageUrl(widget.post.imageUrl!);
+    }
+    if (widget.post.avatarUrl != null) {
+      _resolvedAvatarUrl =
+          resolveResizedStorageUrl(widget.post.avatarUrl!);
+    }
   }
 
   Future<void> _loadLikeStatus() async {
@@ -74,16 +85,19 @@ class _PostCardState extends State<PostCard> {
           children: [
             // Post image
             if (widget.post.imageUrl != null)
-              CachedNetworkImage(
-                imageUrl: widget.post.imageUrl!,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-                errorWidget: (_, _, _) => Container(
+              FutureBuilder<String>(
+                future: _resolvedPostImageUrl,
+                builder: (_, snap) => CachedNetworkImage(
+                  imageUrl: snap.data ?? widget.post.imageUrl!,
+                  width: double.infinity,
                   height: 200,
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: Icon(Icons.broken_image,
-                      color: theme.colorScheme.onSurfaceVariant),
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => Container(
+                    height: 200,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.broken_image,
+                        color: theme.colorScheme.onSurfaceVariant),
+                  ),
                 ),
               ),
             Padding(
@@ -211,11 +225,14 @@ class _PostCardState extends State<PostCard> {
 
   Widget _buildAvatar(ThemeData theme) {
     if (widget.post.avatarUrl != null) {
-      return CircleAvatar(
-        radius: 18,
-        backgroundImage:
-            CachedNetworkImageProvider(widget.post.avatarUrl!),
-        backgroundColor: theme.colorScheme.primaryContainer,
+      return FutureBuilder<String>(
+        future: _resolvedAvatarUrl,
+        builder: (_, snap) => CircleAvatar(
+          radius: 18,
+          backgroundImage: CachedNetworkImageProvider(
+              snap.data ?? widget.post.avatarUrl!),
+          backgroundColor: theme.colorScheme.primaryContainer,
+        ),
       );
     }
     return CircleAvatar(

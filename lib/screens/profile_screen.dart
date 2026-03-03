@@ -15,6 +15,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+import '../utils/storage_image_utils.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -417,10 +418,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
     if (profile.avatarUrl != null) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: colorScheme.primaryContainer,
-        backgroundImage: CachedNetworkImageProvider(profile.avatarUrl!),
+      return FutureBuilder<String>(
+        future: resolveResizedStorageUrl(profile.avatarUrl!),
+        initialData:
+            getCachedResizedUrl(profile.avatarUrl!) ?? profile.avatarUrl!,
+        builder: (_, snap) => CircleAvatar(
+          radius: radius,
+          backgroundColor: colorScheme.primaryContainer,
+          backgroundImage: CachedNetworkImageProvider(snap.data!),
+        ),
       );
     }
     return CircleAvatar(

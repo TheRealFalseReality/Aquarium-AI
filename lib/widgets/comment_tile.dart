@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_comment.dart';
+import '../utils/storage_image_utils.dart';
 
 class CommentTile extends StatelessWidget {
   final CommunityComment comment;
@@ -75,10 +76,14 @@ class CommentTile extends StatelessWidget {
 
   Widget _buildAvatar(ThemeData theme) {
     if (comment.avatarUrl != null) {
-      return CircleAvatar(
-        radius: 16,
-        backgroundImage: CachedNetworkImageProvider(comment.avatarUrl!),
-        backgroundColor: theme.colorScheme.secondaryContainer,
+      return FutureBuilder<String>(
+        future: resolveResizedStorageUrl(comment.avatarUrl!),
+        initialData: getCachedResizedUrl(comment.avatarUrl!) ?? comment.avatarUrl!,
+        builder: (_, snap) => CircleAvatar(
+          radius: 16,
+          backgroundImage: CachedNetworkImageProvider(snap.data!),
+          backgroundColor: theme.colorScheme.secondaryContainer,
+        ),
       );
     }
     return CircleAvatar(
