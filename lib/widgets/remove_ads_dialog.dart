@@ -82,8 +82,8 @@ class RemoveAdsDialog extends ConsumerWidget {
     });
 
     return AlertDialog(
-      icon: const Icon(Icons.diamond,
-          size: 36, color: AquaThemeColors.founderPurple),
+      icon: Icon(Icons.diamond,
+          size: 36, color: AquaThemeColors.founderColor(context)),
       title: Text(l10n.removeAds),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -92,10 +92,10 @@ class RemoveAdsDialog extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AquaThemeColors.founderPurple.withOpacity(0.08),
+              color: AquaThemeColors.founderColor(context).withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: AquaThemeColors.founderPurple.withOpacity(0.35),
+                color: AquaThemeColors.founderColor(context).withOpacity(0.35),
               ),
             ),
             child: Column(
@@ -103,15 +103,15 @@ class RemoveAdsDialog extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.diamond,
+                    Icon(Icons.diamond,
                         size: 16,
-                        color: AquaThemeColors.founderPurple),
+                        color: AquaThemeColors.founderColor(context)),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         l10n.founderAquaristPerksTitle,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AquaThemeColors.founderPurple,
+                          color: AquaThemeColors.founderColor(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -211,7 +211,7 @@ class _PerkRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: AquaThemeColors.founderPurple),
+        Icon(icon, size: 14, color: AquaThemeColors.founderColor(context)),
         const SizedBox(width: 6),
         Flexible(
           child: Text(

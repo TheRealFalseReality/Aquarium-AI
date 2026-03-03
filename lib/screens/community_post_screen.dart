@@ -315,9 +315,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                             const SizedBox(width: 4),
                             Tooltip(
                               message: l10n.founderAquaristTitle,
-                              child: const Icon(Icons.diamond,
+                              child: Icon(Icons.diamond,
                                   size: 14,
-                                  color: AquaThemeColors.founderPurple),
+                                  color: AquaThemeColors.founderColor(context)),
                             ),
                           ],
                         ],
@@ -370,9 +370,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     const SizedBox(width: 4),
                     Tooltip(
                       message: l10n.founderAquaristTitle,
-                      child: const Icon(Icons.diamond,
+                      child: Icon(Icons.diamond,
                           size: 14,
-                          color: AquaThemeColors.founderPurple),
+                          color: AquaThemeColors.founderColor(context)),
                     ),
                   ],
                 ],

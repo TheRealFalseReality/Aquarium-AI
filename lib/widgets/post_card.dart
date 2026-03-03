@@ -7,8 +7,6 @@ import '../services/community_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
 
-/// Deep purple used for Founder Aquarist post borders.
-const Color _kFounderBorderColor = AquaThemeColors.founderPurple;
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -118,7 +116,7 @@ class _PostCardState extends State<PostCard> {
       shape: isFounder
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: _kFounderBorderColor, width: 2),
+              side: BorderSide(color: AquaThemeColors.founderColor(context), width: 2),
             )
           : null,
       child: InkWell(
@@ -369,8 +367,8 @@ class _PostCardState extends State<PostCard> {
                   ),
                   if (isFounder) ...[
                     const SizedBox(width: 4),
-                    const Icon(Icons.diamond,
-                        size: 13, color: _kFounderBorderColor),
+                    Icon(Icons.diamond,
+                        size: 13, color: AquaThemeColors.founderColor(context)),
                   ],
                 ],
               ),

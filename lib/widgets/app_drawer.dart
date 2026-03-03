@@ -647,12 +647,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         child: CircleAvatar(
           backgroundColor:
               isFounder
-                  ? AquaThemeColors.founderPurple.withOpacity(0.18)
+                  ? AquaThemeColors.founderColor(context).withOpacity(0.18)
                   : Theme.of(context).colorScheme.tertiaryContainer,
           child: Icon(
             isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
             color: isFounder
-                ? AquaThemeColors.founderPurple
+                ? AquaThemeColors.founderColor(context)
                 : Theme.of(context).colorScheme.tertiary,
             size: 22,
           ),
@@ -666,9 +666,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           ),
           if (isFounder) ...[
             const SizedBox(width: 4),
-            const Icon(Icons.diamond,
+            Icon(Icons.diamond,
                 size: 13,
-                color: AquaThemeColors.founderPurple),
+                color: AquaThemeColors.founderColor(context)),
           ],
         ],
       ),
@@ -950,9 +950,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                             height: 26,
                             child: isFounder
                                 ? Container(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: AquaThemeColors.founderPurple,
+                                      color: AquaThemeColors.founderColor(context),
                                     ),
                                     padding: const EdgeInsets.all(1.5),
                                     child: avatarUrl != null

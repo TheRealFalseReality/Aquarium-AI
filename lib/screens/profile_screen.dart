@@ -330,7 +330,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  _buildAvatarWidget(profile, colorScheme,
+                  _buildAvatarWidget(context, profile, colorScheme,
                       radius: avatarRadius, isFounder: isFounder),
                   if (isOwner)
                     Positioned(
@@ -363,23 +363,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AquaThemeColors.founderPurple.withOpacity(0.12),
+                    color: AquaThemeColors.founderColor(context).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AquaThemeColors.founderPurple.withOpacity(0.5),
+                      color: AquaThemeColors.founderColor(context).withOpacity(0.5),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.diamond,
+                      Icon(Icons.diamond,
                           size: 13,
-                          color: AquaThemeColors.founderPurple),
+                          color: AquaThemeColors.founderColor(context)),
                       const SizedBox(width: 5),
                       Text(
                         l10n.founderAquaristTitle,
-                        style: const TextStyle(
-                          color: AquaThemeColors.founderPurple,
+                        style: TextStyle(
+                          color: AquaThemeColors.founderColor(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -442,7 +442,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// Builds the circular avatar widget respecting the icon > photo > default
   /// priority. When [isFounder] is true a deep-purple ring is added around
   /// the avatar.
-  Widget _buildAvatarWidget(UserProfile profile, ColorScheme colorScheme,
+  Widget _buildAvatarWidget(BuildContext context, UserProfile profile, ColorScheme colorScheme,
       {double radius = 48, bool isFounder = false}) {
     Widget avatar;
     if (profile.avatarIconCodePoint != null) {
@@ -472,7 +472,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-              color: AquaThemeColors.founderPurple, width: 2.5),
+              color: AquaThemeColors.founderColor(context), width: 2.5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(2),
@@ -487,12 +487,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
     if (!isFounder) return avatar;
-    // Wrap with a deep-purple ring for Founder Aquarists
+    // Wrap with a purple ring for Founder Aquarists
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-            color: AquaThemeColors.founderPurple, width: 2.5),
+            color: AquaThemeColors.founderColor(context), width: 2.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(2),

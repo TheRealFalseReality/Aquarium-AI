@@ -820,12 +820,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: isFounder
-                    ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
                     : Colors.amber.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isFounder
-                      ? AquaThemeColors.founderPurple.withOpacity(0.4)
+                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
                       : Colors.amber.withOpacity(0.4),
                 ),
               ),
@@ -834,7 +834,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Icon(
                     isFounder ? Icons.diamond : Icons.info_outline,
                     color: isFounder
-                        ? AquaThemeColors.founderPurple
+                        ? AquaThemeColors.founderColor(context)
                         : Colors.amber,
                     size: 16,
                   ),
@@ -847,7 +847,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               'Add your own API key in AI Provider settings for dedicated limits.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isFounder
-                            ? AquaThemeColors.founderPurple
+                            ? AquaThemeColors.founderColor(context)
                             : Colors.amber.shade900,
                       ),
                     ),
@@ -1143,8 +1143,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(),
                 // Simulate Founder Tier toggle
                 SwitchListTile(
-                  secondary: const Icon(Icons.diamond,
-                      color: AquaThemeColors.founderPurple),
+                  secondary: Icon(Icons.diamond,
+                      color: AquaThemeColors.founderColor(context)),
                   title: const Text('Simulate Founder Tier'),
                   subtitle: Text(
                     ref.read(debugForceFounderProvider)
@@ -1518,25 +1518,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: isFounder
-                    ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
                     : Colors.amber.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isFounder
-                      ? AquaThemeColors.founderPurple.withOpacity(0.4)
+                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
                       : Colors.amber.withOpacity(0.4),
                 ),
               ),
               child: RemoteConfigService.freeAiEnabled
                   ? ExpansionTile(
                       leading: isFounder
-                          ? const Icon(Icons.diamond, color: AquaThemeColors.founderPurple, size: 20)
+                          ? Icon(Icons.diamond, color: AquaThemeColors.founderColor(context), size: 20)
                           : const Icon(Icons.speed, color: Colors.amber, size: 20),
                       title: Text(
                         isFounder ? l10n.founderAquaristTitle : l10n.freeTierLimits,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: isFounder
-                                  ? AquaThemeColors.founderPurple
+                                  ? AquaThemeColors.founderColor(context)
                                   : Colors.amber.shade800,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1546,7 +1546,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         l10n.freeTierLimitsSubtitle(limitPerDay, limitPerMin, limitPhotos),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: isFounder
-                                  ? AquaThemeColors.founderPurple.withOpacity(0.8)
+                                  ? AquaThemeColors.founderColor(context).withOpacity(0.8)
                                   : Colors.amber.shade700,
                             ),
                       ),
@@ -1562,7 +1562,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: isFounder
-                                    ? AquaThemeColors.founderPurple
+                                    ? AquaThemeColors.founderColor(context)
                                     : Colors.amber.shade900,
                               ),
                         ),

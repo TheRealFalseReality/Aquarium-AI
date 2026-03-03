@@ -203,7 +203,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isFounder
-                        ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                        ? AquaThemeColors.founderColor(context).withOpacity(0.08)
                         : Theme.of(context)
                             .colorScheme
                             .tertiaryContainer
@@ -211,7 +211,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isFounder
-                          ? AquaThemeColors.founderPurple.withOpacity(0.35)
+                          ? AquaThemeColors.founderColor(context).withOpacity(0.35)
                           : Theme.of(context)
                               .colorScheme
                               .tertiary
@@ -225,7 +225,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                         isFounder ? Icons.diamond : Icons.info_outline,
                         size: 16,
                         color: isFounder
-                            ? AquaThemeColors.founderPurple
+                            ? AquaThemeColors.founderColor(context)
                             : Theme.of(context).colorScheme.tertiary,
                       ),
                       const SizedBox(width: 8),
@@ -239,7 +239,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                               .bodySmall
                               ?.copyWith(
                             color: isFounder
-                                ? AquaThemeColors.founderPurple
+                                ? AquaThemeColors.founderColor(context)
                                 : Theme.of(context)
                                     .colorScheme
                                     .onTertiaryContainer,
