@@ -104,11 +104,13 @@ chmod +x scripts/validate_translations.sh
 ## Key Architecture Patterns
 
 ### State Management (Riverpod)
+
 - All global state lives in `lib/providers/`. Every provider is a `StateNotifier` or `AsyncNotifier`.
 - `themeProviderNotifierProvider` (in `theme_provider.dart`) controls theme mode, color theme, and font family. It persists state via `SharedPreferences`.
 - Use `ref.watch()` in `ConsumerWidget`s and `ref.read()` for one-shot mutations.
 
 ### Theming
+
 - **`AppColorTheme`** enum has 15 values:
   `defaultTheme`, `materialYou`, `oceanBlue`, `iceBlue`, `gold`, `mulberry`, `midnight`,
   `orange`, `green`, `skyBlue`, `royalBlue`, `orchid`, `hotPink`, `crimson`, `custom`.
@@ -119,10 +121,12 @@ chmod +x scripts/validate_translations.sh
 - Persist theme by **name** (`colorThemeName` SharedPreferences key) not index, to survive enum reordering.
 
 ### Fonts
+
 - **`AppFont`** enum: `poppins`, `karla`, `notoSans`. Persisted via `appFont` SharedPreferences key.
 - Font families must match names in `pubspec.yaml` fonts section.
 
 ### Localization (i18n)
+
 - **All user-visible strings must be localized.** Never use bare string literals in widget trees.
 - Template: `lib/l10n/app_en.arb` (source of truth). When adding a new string:
   1. Add the key/value + `@key` metadata to `app_en.arb`.
@@ -135,7 +139,9 @@ chmod +x scripts/validate_translations.sh
 - **Strings that are not visible to users** (analytics event names, SharedPreferences keys, JSON field names, route names, debug-only labels) do **not** need to be localized.
 
 ### Text Overflow Prevention
+
 Translated strings are often longer than their English originals. Always design layouts to handle variable-length text:
+
 - **In `Row` widgets:** Wrap `Text` (and any widget that displays text) in `Flexible` or `Expanded` so it can wrap or truncate instead of overflowing. Never place a bare `Text` as a direct child of `Row` when the text length is unbounded.
 - **In `Row` heading widgets** (e.g., icon + label rows in section headers or card titles): wrap the `Text` in `Flexible`.
 - **Buttons next to text in a `Row`:** If the combined content can be long (e.g., label + restore button), place the button on a new line using a `Column` instead of a `Row`.
@@ -144,22 +150,26 @@ Translated strings are often longer than their English originals. Always design 
 - **Card/dialog titles:** Wrap in `Flexible` if inside a `Row`; rely on `Text` natural wrapping if standalone.
 
 ### Models
+
 - Plain Dart classes in `lib/models/`. Most implement `toJson()` / `fromJson()`.
 - `TankTag` supports both the new `{name, color}` map format **and** the legacy plain-string format in `fromJson()` for backwards compatibility. `color` is a nullable ARGB `int`; `null` means "use theme secondary colour at render time".
 - Use `uuid` package for ID generation (`const Uuid().v4()`).
 
 ### Services
+
 - `lib/services/` wraps external services (Firebase, ads, in-app purchases, notifications, etc.).
 - `InAppUpdateService` no-ops gracefully on non-Android/web platforms; call its methods without platform guards.
 - `RemoteConfigService` gates feature flags and fish data updates.
 - `AnalyticsService` and `CrashlyticsService` are safe to call unconditionally (they guard internally when Firebase is not initialized).
 
 ### Screens
+
 - Each screen in `lib/screens/` is typically a `ConsumerStatefulWidget` or `ConsumerWidget`.
 - Use `MainLayout` wrapper (`lib/main_layout.dart`) for full-page screens to get the shared AppBar and drawer.
 - To avoid Flutter `ListTile`/`ExpansionTile` layout assertion errors, always give `leading` widgets explicit size constraints (e.g., `SizedBox(width: 48, height: 48, …)` or `Container(width: 40, height: 40, …)`).
 
 ### Firebase Initialization
+
 - Firebase is initialized in `main.dart` with an exponential-backoff retry loop (up to 3 attempts) to handle intermittent `HandshakeException` / `SocketException` errors in CI or restricted network environments.
 - A global `_firebaseInitialized` flag is checked before using Firebase services.
 
@@ -170,6 +180,7 @@ Translated strings are often longer than their English originals. Always design 
 When any PR adds or modifies user-visible strings:
 
 1. **Add to `app_en.arb`** with an `@key` metadata block:
+
    ```json
    "myNewKey": "My new string with {param}",
    "@myNewKey": {
@@ -179,6 +190,7 @@ When any PR adds or modifies user-visible strings:
      }
    }
    ```
+
 2. **Add to all other `.arb` files** (`app_de.arb`, `app_es.arb`, `app_fr.arb`) with your best translation. Use the same placeholder names.
 3. **Run `flutter gen-l10n`** to verify generation succeeds without errors.
 4. **Use `AppLocalizations.of(context)!.myNewKey`** in the widget.
@@ -203,22 +215,27 @@ The Android release workflow requires `KEY_PROPERTIES`, `KEYSTORE_BASE64`, and `
 ## Known Errors and Workarounds
 
 ### Firebase HandshakeException / SocketException in CI
+
 - **Symptom:** Firebase initialization fails with TLS or network errors during `flutter test` or web builds in CI.
 - **Workaround:** `main.dart` already handles this with a 3-attempt exponential-backoff retry and degrades gracefully (app runs without Firebase features). No additional action required.
 
 ### Flutter ListTile/ExpansionTile Leading Widget Layout Assert
+
 - **Symptom:** `BoxConstraints forces an infinite width/height` or `RenderBox was not laid out` assertions when using image/icon widgets as `leading`.
 - **Workaround:** Wrap the leading widget in a `SizedBox(width: 48, height: 48, child: …)` or `Container(width: 40, height: 40, child: …)`.
 
 ### Localization Code Generation Errors
+
 - **Symptom:** `flutter gen-l10n` fails because a key exists in a translation `.arb` file but not in `app_en.arb`, or a placeholder name differs.
 - **Workaround:** Ensure `app_en.arb` is the source of truth. All keys and placeholder names in non-English ARB files must exactly match those in `app_en.arb`.
 
 ### `colorSchemeSeed` vs `FlexSchemeColor.from()`
+
 - **Symptom:** Build error or unexpected theme colours when using `colorSchemeSeed:` parameter on `FlexThemeData`.
 - **Workaround:** Use `colors: FlexSchemeColor.from(primary: seedColor)` (not `colorSchemeSeed`) with `flex_color_scheme` v8.
 
 ### Firebase Hosting Preview Workflow Requires Approval
+
 - **Symptom:** The `firebase-hosting-pull-request.yml` workflow shows `action_required` for PRs from bots/forks.
 - **Workaround:** This is a Firebase Hosting security gate. A repository owner must manually approve the deployment. It does not reflect a code issue.
 
@@ -350,8 +367,10 @@ flutter run --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
 
 - **Never commit the key to the repository.** It lives only in GitHub Secrets (`DEVELOPER_GROQ_API_KEY`) and local build environments.
 - The constant is declared in `lib/constants.dart`:
+
   ```dart
   const String developerGroqApiKey =
       String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
   ```
+
 - If empty, the app simply requires users to supply their own API key.
