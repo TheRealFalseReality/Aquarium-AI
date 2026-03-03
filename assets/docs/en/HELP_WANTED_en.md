@@ -28,14 +28,17 @@ Add advanced fish database integration and intelligent features:
 ## How to Contribute
 
 ### 📧 Contact via Email
-**contactus@capitalcityaquatics.com**
+
+**[contactus@capitalcityaquatics.com](mailto:contactus@capitalcityaquatics.com)**
 
 Feel free to reach out with:
+
 - Questions about the codebase
 - Ideas for features
 - Your experience and what you'd like to work on
 
 ### 🔗 Visit Our GitHub
+
 **[github.com/TheRealFalseReality/Aquarium-AI](https://github.com/TheRealFalseReality/Aquarium-AI)**
 
 - Explore the code and understand the project structure
@@ -75,6 +78,7 @@ Feel free to reach out with:
 ## Recognition
 
 All contributors are recognized in:
+
 - The app's About section
 - GitHub contributors page
 - Release notes for significant contributions
@@ -82,6 +86,7 @@ All contributors are recognized in:
 ## Not a Coder?
 
 You can still help! We also need:
+
 - **Translators** - Help translate the app to your language (no coding required!)
 - **Testers** - Test new features and report bugs
 - **Documentation Writers** - Improve guides and documentation
@@ -91,6 +96,6 @@ See our [Translation Guide](TRANSLATION_GUIDE.md) and [Contributing Guide](CONTR
 
 ---
 
-**Whether you're experienced or just starting out, your contributions can make a real difference! Let's build something amazing together. 🐠**
+Whether you're experienced or just starting out, your contributions can make a real difference! Let's build something amazing together. 🐠
 
-For questions or to get started, reach out at **contactus@capitalcityaquatics.com** or visit our [GitHub repository](https://github.com/TheRealFalseReality/Aquarium-AI).
+For questions or to get started, reach out at **[contactus@capitalcityaquatics.com](mailto:contactus@capitalcityaquatics.com)** or visit our [GitHub repository](https://github.com/TheRealFalseReality/Aquarium-AI).

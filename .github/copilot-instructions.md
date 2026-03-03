@@ -11,7 +11,7 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ----- | ---------- |
 | UI framework | Flutter (Material 3, `flex_color_scheme`) |
 | State management | Riverpod (`flutter_riverpod`, `riverpod_annotation`) |
 | AI providers | Google Gemini (`google_generative_ai`), OpenAI (`dart_openai`), Groq (`groq`) |
@@ -27,8 +27,7 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
 
 ## Repository Layout
 
-```
-lib/
+```text
   main.dart               # App entry point; Firebase init with retry, route definitions
   main_layout.dart        # Shared Scaffold wrapper (AppBar + drawer + body)
   constants.dart          # AdMob IDs, product IDs, developer Groq key (--dart-define)
@@ -51,6 +50,30 @@ lib/
   utils/                  # Utility/helper functions
   examples/               # Example data files
 assets/                   # Images, fonts, JSON data, documentation markdown files
+  docs/
+    en/                   # All English docs (source of truth for user-facing; dev-only)
+      USER_GUIDE_en.md        # English user guide
+      HELP_WANTED_en.md       # English contributor recruitment doc
+      CHANGELOG_en.md         # English changelog
+      CONTRIBUTING_en.md
+      START_HERE_I18N_en.md
+      TRANSLATION_GUIDE_en.md
+      TRANSLATION_QUICK_REF_en.md
+      LOCALIZATION_DEV_GUIDE_en.md
+      TESTING_I18N_en.md
+      I18N_IMPLEMENTATION_en.md
+    de/                   # German translations of user-facing docs
+      USER_GUIDE_de.md
+      HELP_WANTED_de.md
+      CHANGELOG_de.md
+    es/                   # Spanish translations of user-facing docs
+      USER_GUIDE_es.md
+      HELP_WANTED_es.md
+      CHANGELOG_es.md
+    fr/                   # French translations of user-facing docs
+      USER_GUIDE_fr.md
+      HELP_WANTED_fr.md
+      CHANGELOG_fr.md
 scripts/
   validate_translations.sh  # Bash script; checks ARB key completeness and placeholder parity
 test/                     # Flutter unit/widget tests (run with `flutter test`)
@@ -104,11 +127,13 @@ chmod +x scripts/validate_translations.sh
 ## Key Architecture Patterns
 
 ### State Management (Riverpod)
+
 - All global state lives in `lib/providers/`. Every provider is a `StateNotifier` or `AsyncNotifier`.
 - `themeProviderNotifierProvider` (in `theme_provider.dart`) controls theme mode, color theme, and font family. It persists state via `SharedPreferences`.
 - Use `ref.watch()` in `ConsumerWidget`s and `ref.read()` for one-shot mutations.
 
 ### Theming
+
 - **`AppColorTheme`** enum has 15 values:
   `defaultTheme`, `materialYou`, `oceanBlue`, `iceBlue`, `gold`, `mulberry`, `midnight`,
   `orange`, `green`, `skyBlue`, `royalBlue`, `orchid`, `hotPink`, `crimson`, `custom`.
@@ -119,10 +144,12 @@ chmod +x scripts/validate_translations.sh
 - Persist theme by **name** (`colorThemeName` SharedPreferences key) not index, to survive enum reordering.
 
 ### Fonts
+
 - **`AppFont`** enum: `poppins`, `karla`, `notoSans`. Persisted via `appFont` SharedPreferences key.
 - Font families must match names in `pubspec.yaml` fonts section.
 
 ### Localization (i18n)
+
 - **All user-visible strings must be localized.** Never use bare string literals in widget trees.
 - Template: `lib/l10n/app_en.arb` (source of truth). When adding a new string:
   1. Add the key/value + `@key` metadata to `app_en.arb`.
@@ -135,7 +162,9 @@ chmod +x scripts/validate_translations.sh
 - **Strings that are not visible to users** (analytics event names, SharedPreferences keys, JSON field names, route names, debug-only labels) do **not** need to be localized.
 
 ### Text Overflow Prevention
+
 Translated strings are often longer than their English originals. Always design layouts to handle variable-length text:
+
 - **In `Row` widgets:** Wrap `Text` (and any widget that displays text) in `Flexible` or `Expanded` so it can wrap or truncate instead of overflowing. Never place a bare `Text` as a direct child of `Row` when the text length is unbounded.
 - **In `Row` heading widgets** (e.g., icon + label rows in section headers or card titles): wrap the `Text` in `Flexible`.
 - **Buttons next to text in a `Row`:** If the combined content can be long (e.g., label + restore button), place the button on a new line using a `Column` instead of a `Row`.
@@ -144,22 +173,26 @@ Translated strings are often longer than their English originals. Always design 
 - **Card/dialog titles:** Wrap in `Flexible` if inside a `Row`; rely on `Text` natural wrapping if standalone.
 
 ### Models
+
 - Plain Dart classes in `lib/models/`. Most implement `toJson()` / `fromJson()`.
 - `TankTag` supports both the new `{name, color}` map format **and** the legacy plain-string format in `fromJson()` for backwards compatibility. `color` is a nullable ARGB `int`; `null` means "use theme secondary colour at render time".
 - Use `uuid` package for ID generation (`const Uuid().v4()`).
 
 ### Services
+
 - `lib/services/` wraps external services (Firebase, ads, in-app purchases, notifications, etc.).
 - `InAppUpdateService` no-ops gracefully on non-Android/web platforms; call its methods without platform guards.
 - `RemoteConfigService` gates feature flags and fish data updates.
 - `AnalyticsService` and `CrashlyticsService` are safe to call unconditionally (they guard internally when Firebase is not initialized).
 
 ### Screens
+
 - Each screen in `lib/screens/` is typically a `ConsumerStatefulWidget` or `ConsumerWidget`.
 - Use `MainLayout` wrapper (`lib/main_layout.dart`) for full-page screens to get the shared AppBar and drawer.
 - To avoid Flutter `ListTile`/`ExpansionTile` layout assertion errors, always give `leading` widgets explicit size constraints (e.g., `SizedBox(width: 48, height: 48, …)` or `Container(width: 40, height: 40, …)`).
 
 ### Firebase Initialization
+
 - Firebase is initialized in `main.dart` with an exponential-backoff retry loop (up to 3 attempts) to handle intermittent `HandshakeException` / `SocketException` errors in CI or restricted network environments.
 - A global `_firebaseInitialized` flag is checked before using Firebase services.
 
@@ -170,6 +203,7 @@ Translated strings are often longer than their English originals. Always design 
 When any PR adds or modifies user-visible strings:
 
 1. **Add to `app_en.arb`** with an `@key` metadata block:
+
    ```json
    "myNewKey": "My new string with {param}",
    "@myNewKey": {
@@ -179,6 +213,7 @@ When any PR adds or modifies user-visible strings:
      }
    }
    ```
+
 2. **Add to all other `.arb` files** (`app_de.arb`, `app_es.arb`, `app_fr.arb`) with your best translation. Use the same placeholder names.
 3. **Run `flutter gen-l10n`** to verify generation succeeds without errors.
 4. **Use `AppLocalizations.of(context)!.myNewKey`** in the widget.
@@ -188,7 +223,7 @@ When any PR adds or modifies user-visible strings:
 ## CI / Workflows
 
 | Workflow | Trigger | What it does |
-|----------|---------|-------------|
+| -------- | ------- | ------------ |
 | `validate-translations.yml` | PR / push to `main` (paths: `lib/l10n/**`) | Validates JSON syntax + key completeness of all `.arb` files |
 | `firebase-hosting-pull-request.yml` | Pull request | Builds web app and deploys preview to Firebase Hosting |
 | `firebase-hosting-merge.yml` | Push to `main` | Deploys web app to production Firebase Hosting |
@@ -203,22 +238,27 @@ The Android release workflow requires `KEY_PROPERTIES`, `KEYSTORE_BASE64`, and `
 ## Known Errors and Workarounds
 
 ### Firebase HandshakeException / SocketException in CI
+
 - **Symptom:** Firebase initialization fails with TLS or network errors during `flutter test` or web builds in CI.
 - **Workaround:** `main.dart` already handles this with a 3-attempt exponential-backoff retry and degrades gracefully (app runs without Firebase features). No additional action required.
 
 ### Flutter ListTile/ExpansionTile Leading Widget Layout Assert
+
 - **Symptom:** `BoxConstraints forces an infinite width/height` or `RenderBox was not laid out` assertions when using image/icon widgets as `leading`.
 - **Workaround:** Wrap the leading widget in a `SizedBox(width: 48, height: 48, child: …)` or `Container(width: 40, height: 40, child: …)`.
 
 ### Localization Code Generation Errors
+
 - **Symptom:** `flutter gen-l10n` fails because a key exists in a translation `.arb` file but not in `app_en.arb`, or a placeholder name differs.
 - **Workaround:** Ensure `app_en.arb` is the source of truth. All keys and placeholder names in non-English ARB files must exactly match those in `app_en.arb`.
 
 ### `colorSchemeSeed` vs `FlexSchemeColor.from()`
+
 - **Symptom:** Build error or unexpected theme colours when using `colorSchemeSeed:` parameter on `FlexThemeData`.
 - **Workaround:** Use `colors: FlexSchemeColor.from(primary: seedColor)` (not `colorSchemeSeed`) with `flex_color_scheme` v8.
 
 ### Firebase Hosting Preview Workflow Requires Approval
+
 - **Symptom:** The `firebase-hosting-pull-request.yml` workflow shows `action_required` for PRs from bots/forks.
 - **Workaround:** This is a Firebase Hosting security gate. A repository owner must manually approve the deployment. It does not reflect a code issue.
 
@@ -242,7 +282,7 @@ When adding a new AI tool, calculator, or other significant feature:
 1. Create the screen in `lib/screens/my_tool_screen.dart` (see [Adding a New Screen](#adding-a-new-screen)).
 2. Register its named route in `lib/main.dart`.
 3. Add a feature card or navigation entry so it is discoverable (welcome screen, drawer, or information screen).
-4. **Update `assets/docs/USER_GUIDE.md`** to document the new tool:
+4. **Update `assets/docs/en/USER_GUIDE_en.md`** to document the new tool:
    - Add a new section under the appropriate heading (AI Tools, Calculators, Tank Tools, etc.).
    - Explain all inputs, outputs, and any prerequisites (e.g. API key requirement).
    - Add the section to the **Table of Contents** at the top of the file.
@@ -253,12 +293,14 @@ When adding a new AI tool, calculator, or other significant feature:
 
 ## Keeping the User Guide Up to Date
 
-`assets/docs/USER_GUIDE.md` is the single source of truth for end-user documentation. **Any PR that changes how a tool works must also update the corresponding section of the User Guide.**
+`assets/docs/en/USER_GUIDE_en.md` is the single source of truth for end-user documentation.
+**Any PR that changes how a tool works must also update the corresponding section of
+the User Guide and its translations.**
 
 Update the User Guide when you:
 
-| Change | What to update in `USER_GUIDE.md` |
-|--------|-----------------------------------|
+| Change | What to update in `USER_GUIDE_en.md` |
+| ------ | --------------------------------- |
 | Add a new input field or option | Add it to the tool's **Inputs** / **How to Use** list |
 | Remove or rename a field | Remove or rename it in the same list |
 | Change a prerequisite (e.g. now requires an API key, or no longer does) | Update the **Requires** line at the top of that section |
@@ -267,7 +309,93 @@ Update the User Guide when you:
 | Change outputs or report format | Update the "Reading the Report" / result description |
 | Rename a setting or move it to a different settings group | Update the Settings & Appearance table |
 
-If the change is purely internal (refactor, performance, bug fix with no UX impact) no User Guide update is needed.
+If the change is purely internal (refactor, performance, bug fix with no UX impact)
+no User Guide update is needed.
+
+---
+
+## Markdown Authoring Rules
+
+All `.md` files in this repository must pass `markdownlint` using the repo-root
+`.markdownlint.json` config. Run the linter before committing any markdown change:
+
+```bash
+# Install once (requires Node.js)
+npm install -g markdownlint-cli
+
+# Lint a single file
+markdownlint --config .markdownlint.json path/to/file.md
+
+# Auto-fix what can be fixed automatically
+markdownlint --fix --config .markdownlint.json path/to/file.md
+```
+
+### Rules enforced (and notable exceptions)
+
+| Rule | Status | Notes |
+| ---- | ------ | ----- |
+| MD013 line-length | **disabled** | Technical docs contain long URLs and code |
+| MD024 no-duplicate-heading | **disabled** | Changelogs repeat "Added"/"Fixed" per version |
+| All other default rules | **enabled** | Blanks around headings, lists, fences; table style; etc. |
+
+### Table formatting
+
+Use the **compact spaced** style – separator rows must have a space on each side of
+every dash group:
+
+```markdown
+| Header A | Header B |
+| -------- | -------- |
+| cell     | cell     |
+```
+
+### Fenced code blocks
+
+Always specify a language after the opening triple-backtick. Example:
+```` ```dart // your code here ``` ````
+
+---
+
+## Translating Documentation (User-Facing Docs)
+
+The following docs in `assets/docs/` are displayed inside the app and must have
+translated versions for German (`de`), Spanish (`es`), and French (`fr`):
+
+| English source | Description |
+| -------------- | ----------- |
+| `assets/docs/en/USER_GUIDE_en.md` | In-app user guide |
+| `assets/docs/en/HELP_WANTED_en.md` | Contributor recruitment page |
+| `assets/docs/en/CHANGELOG_en.md` | Release changelog |
+
+### File naming convention
+
+Files follow the pattern `{DOCNAME}_{locale}.md` inside `assets/docs/{locale}/`:
+
+- `assets/docs/en/USER_GUIDE_en.md` (English source of truth)
+- `assets/docs/de/USER_GUIDE_de.md` (German)
+- `assets/docs/es/USER_GUIDE_es.md` (Spanish)
+- `assets/docs/fr/USER_GUIDE_fr.md` (French)
+
+The app loads the locale-appropriate file at runtime with a fallback to the English
+original (`assets/docs/en/{DOCNAME}_en.md`).
+
+### When to update translations
+
+- **Any PR that modifies a user-facing English doc** must also update (or create) the
+  corresponding file in all three locale subdirectories.
+- Translate to best ability; machine-assisted translation is acceptable as a starting
+  point, but review for accuracy.
+- Keep the same markdown structure (headings, lists, tables, code fences) as the
+  English source so the app renders correctly.
+- All translated files must pass `markdownlint --config .markdownlint.json`.
+
+### Developer-only docs (no translation needed)
+
+These docs are not shown in the app UI and do **not** need translated copies:
+
+- `CONTRIBUTING_en.md`, `START_HERE_I18N_en.md`, `TRANSLATION_GUIDE_en.md`
+- `TRANSLATION_QUICK_REF_en.md`, `LOCALIZATION_DEV_GUIDE_en.md`
+- `TESTING_I18N_en.md`, `I18N_IMPLEMENTATION_en.md`
 
 ---
 
@@ -278,7 +406,7 @@ If the change is purely internal (refactor, performance, bug fix with no UX impa
 ### Where to put each type of constant
 
 | Type of value | Where to declare it |
-|---------------|---------------------|
+| ------------- | ------------------- |
 | Build-time secrets (API keys injected via `--dart-define`) | `lib/constants.dart` using `String.fromEnvironment(...)` |
 | Static app-wide IDs (AdMob, in-app purchase product IDs) | `lib/constants.dart` |
 | Remote Config **key names** | `RemoteConfigKeys` class in `lib/services/remote_config_service.dart` |
@@ -350,8 +478,10 @@ flutter run --dart-define=DEVELOPER_GROQ_API_KEY=gsk_your_key_here
 
 - **Never commit the key to the repository.** It lives only in GitHub Secrets (`DEVELOPER_GROQ_API_KEY`) and local build environments.
 - The constant is declared in `lib/constants.dart`:
+
   ```dart
   const String developerGroqApiKey =
       String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
   ```
+
 - If empty, the app simply requires users to supply their own API key.

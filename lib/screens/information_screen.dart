@@ -108,7 +108,7 @@ class InformationScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => MarkdownViewerScreen(
-                      assetPath: 'assets/docs/USER_GUIDE.md',
+                      assetPath: 'assets/docs/en/USER_GUIDE_en.md',
                       title: AppLocalizations.of(context)!.userGuideCardTitle,
                       breadcrumbs: const [],
                     ),
@@ -173,7 +173,7 @@ class InformationScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => MarkdownViewerScreen(
-                      assetPath: 'assets/docs/HELP_WANTED.md',
+                      assetPath: 'assets/docs/en/HELP_WANTED_en.md',
                       title: AppLocalizations.of(context)!.helpWantedForCoders,
                       breadcrumbs: const [],
                     ),
@@ -238,7 +238,7 @@ class InformationScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const MarkdownViewerScreen(
-                      assetPath: 'assets/docs/START_HERE_I18N.md',
+                      assetPath: 'assets/docs/en/START_HERE_I18N_en.md',
                       title: 'Internationalization Guide',
                       breadcrumbs: [], // Start with empty breadcrumbs from Information screen
                     ),

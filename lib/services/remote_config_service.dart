@@ -205,7 +205,7 @@ class RemoteConfigService {
 
   /// Full markdown content of the English changelog from Remote Config.
   /// Returns an empty string when not set in Remote Config,
-  /// signalling that the bundled `assets/docs/CHANGELOG.md` should be used.
+  /// signalling that the bundled `assets/docs/en/CHANGELOG_en.md` should be used.
   static String get changelogEn =>
       _modelString(RemoteConfigKeys.changelogEn, rcDefaultChangelog);
 

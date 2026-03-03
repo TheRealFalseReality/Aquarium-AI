@@ -15,7 +15,7 @@ Aquarium AI now supports internationalization, making it easy for the community 
 ### 2. Configuration Files
 
 | File | Purpose |
-|------|---------|
+| ---- | ------- |
 | `l10n.yaml` | Configuration for l10n code generation |
 | `pubspec.yaml` | Updated with `generate: true` and dependencies |
 | `lib/main.dart` | Configured localization delegates and supported locales |
@@ -23,7 +23,7 @@ Aquarium AI now supports internationalization, making it easy for the community 
 ### 3. Translation Files
 
 | Language | File | Status |
-|----------|------|--------|
+| -------- | ---- | ------ |
 | English | `lib/l10n/app_en.arb` | ✅ Complete (Template) |
 | Spanish | `lib/l10n/app_es.arb` | ✅ Complete |
 | French | `lib/l10n/app_fr.arb` | ✅ Complete |
@@ -43,7 +43,7 @@ The following files have been updated to use localized strings:
 ### 5. Documentation
 
 | Document | Purpose |
-|----------|---------|
+| -------- | ------- |
 | `TRANSLATION_GUIDE.md` | Comprehensive guide for translators |
 | `TRANSLATION_QUICK_REF.md` | Quick reference for common scenarios |
 | `LOCALIZATION_DEV_GUIDE.md` | Developer guide for using l10n in code |
@@ -93,11 +93,13 @@ supportedLocales: const [
 ### 1. Placeholders
 
 Support for dynamic values:
+
 ```json
 "totalTanks": "Total: {count}"
 ```
 
 Usage:
+
 ```dart
 Text(l10n.totalTanks(tankCount))
 ```
@@ -105,6 +107,7 @@ Text(l10n.totalTanks(tankCount))
 ### 2. Descriptions
 
 All strings include descriptions for context:
+
 ```json
 "@welcomeTitle": {
   "description": "Title for the welcome screen"
@@ -114,16 +117,15 @@ All strings include descriptions for context:
 ### 3. Type Safety
 
 Generated code is type-safe. Compiler catches:
+
 - Misnamed keys
 - Missing translations
 - Incorrect parameters
 
 ## File Structure
 
-```
+```text
 Aquarium-AI/
-├── lib/
-│   ├── l10n/
 │   │   ├── app_en.arb           # English (template)
 │   │   ├── app_es.arb           # Spanish
 │   │   ├── app_fr.arb           # French
@@ -145,7 +147,7 @@ Aquarium-AI/
 
 When running `flutter gen-l10n`, these files are generated:
 
-```
+```text
 .dart_tool/flutter_gen/gen_l10n/
 ├── app_localizations.dart       # Main localizations class
 ├── app_localizations_en.dart    # English implementation
@@ -169,6 +171,7 @@ When running `flutter gen-l10n`, these files are generated:
 
 1. Create `lib/l10n/app_ja.arb`
 2. Update `lib/main.dart`:
+
    ```dart
    supportedLocales: const [
      Locale('en'),
@@ -178,18 +181,21 @@ When running `flutter gen-l10n`, these files are generated:
      Locale('ja'), // Add this
    ],
    ```
+
 3. Run `flutter gen-l10n`
 4. Test and submit
 
 ## Current Coverage
 
 ### Screens
+
 - ✅ Welcome Screen (complete)
 - ✅ App Drawer (complete)
 - ⚠️ Settings Screen (partial - error messages only)
 - ❌ Other screens (not yet localized)
 
 ### Components
+
 - ✅ Feature names and descriptions
 - ✅ Navigation items
 - ✅ Error messages (in Settings)
@@ -244,6 +250,7 @@ When running `flutter gen-l10n`, these files are generated:
 ### Credits
 
 All translators will be credited in:
+
 - App's About screen
 - README.md
 - Release notes
@@ -251,17 +258,20 @@ All translators will be credited in:
 ## Benefits
 
 ### For Users
+
 - ✅ App in their native language
 - ✅ Better understanding of features
 - ✅ More accessible to non-English speakers
 
 ### For Developers
+
 - ✅ Type-safe string access
 - ✅ Compiler catches missing translations
 - ✅ Easy to maintain
 - ✅ Standard Flutter approach
 
 ### For Community
+
 - ✅ Easy to contribute translations
 - ✅ No programming knowledge required
 - ✅ Clear documentation
@@ -272,6 +282,7 @@ All translators will be credited in:
 ### Dependencies
 
 Added to `pubspec.yaml`:
+
 ```yaml
 dependencies:
   flutter:
@@ -287,6 +298,7 @@ dev_dependencies:
 ### Configuration
 
 `l10n.yaml`:
+
 ```yaml
 arb-dir: lib/l10n
 template-arb-file: app_en.arb
@@ -306,21 +318,24 @@ This is automatically run by `flutter run` and `flutter build`.
 ### Missing Package Errors
 
 If you see errors like:
+
 - `'package:flutter_localizations/flutter_localizations.dart' not found`
 - `'package:flutter_gen/gen_l10n/app_localizations.dart' not found`
 
 **Solution:**
 
 1. **Install dependencies**:
+
    ```bash
    flutter pub get
    ```
 
 2. **Generate localization files**:
+
    ```bash
    flutter gen-l10n
    ```
-   
+
    The generated files will be in `.dart_tool/flutter_gen/gen_l10n/`
 
 3. **Verify setup**:
@@ -341,6 +356,7 @@ If you see errors like:
 ## Support
 
 For questions or issues:
+
 - Check documentation in this repository
 - Open a GitHub issue
 - See `CONTRIBUTING.md` for guidelines

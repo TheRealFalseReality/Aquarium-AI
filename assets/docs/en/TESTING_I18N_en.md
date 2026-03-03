@@ -17,6 +17,7 @@ flutter gen-l10n
 ```
 
 This command:
+
 - Reads ARB files from `lib/l10n/`
 - Generates Dart code in `.dart_tool/flutter_gen/gen_l10n/`
 - Creates `AppLocalizations` class and locale-specific implementations
@@ -26,6 +27,7 @@ This command:
 ### 1. Change Device Language
 
 **On Android Emulator:**
+
 1. Open Settings
 2. Navigate to System > Languages & input > Languages
 3. Add and select your test language (e.g., Spanish, French, German)
@@ -33,6 +35,7 @@ This command:
 5. Verify translated strings appear correctly
 
 **On iOS Simulator:**
+
 1. Open Settings
 2. Navigate to General > Language & Region
 3. Select your test language
@@ -90,6 +93,7 @@ For right-to-left languages like Arabic:
 ## What to Test
 
 ### Welcome Screen
+
 - [ ] Welcome title
 - [ ] Welcome subtitle
 - [ ] All feature names (AI Compatibility Tool, AI Chatbot, etc.)
@@ -97,12 +101,14 @@ For right-to-left languages like Arabic:
 - [ ] "Create Your First Tank" button
 
 ### App Drawer
+
 - [ ] "My Tanks" title
 - [ ] "No tanks yet" message
 - [ ] All menu item titles
 - [ ] All menu item descriptions
 
 ### Settings Screen
+
 - [ ] Settings title
 - [ ] Save button text
 - [ ] Success message after saving
@@ -110,6 +116,7 @@ For right-to-left languages like Arabic:
 - [ ] All provider names (where applicable)
 
 ### Common Elements
+
 - [ ] Loading indicators
 - [ ] Error messages
 - [ ] Success messages
@@ -165,6 +172,7 @@ Ensure no translation data is stripped in release mode.
 ### 1. ARB File Validation
 
 Validate JSON syntax:
+
 ```bash
 # Install jq if not already installed
 # macOS: brew install jq
@@ -180,6 +188,7 @@ jq empty lib/l10n/app_de.arb
 ### 2. Check for Missing Translations
 
 Compare key counts:
+
 ```bash
 # Count keys in English (template)
 grep -c '"[a-zA-Z]' lib/l10n/app_en.arb
@@ -195,6 +204,7 @@ All should match!
 ### 3. Find Missing Keys Script
 
 Create `scripts/check_translations.sh`:
+
 ```bash
 #!/bin/bash
 
@@ -217,6 +227,7 @@ done
 ```
 
 Run it:
+
 ```bash
 chmod +x scripts/check_translations.sh
 ./scripts/check_translations.sh
@@ -231,6 +242,7 @@ chmod +x scripts/check_translations.sh
 ### Issue: Translation not appearing
 
 **Solution:**
+
 1. Check ARB file syntax
 2. Verify key matches exactly (case-sensitive)
 3. Run `flutter gen-l10n`
@@ -239,6 +251,7 @@ chmod +x scripts/check_translations.sh
 ### Issue: Placeholder not working
 
 **Solution:**
+
 1. Verify placeholder syntax: `{variableName}`
 2. Check ARB file has placeholders section
 3. Ensure code passes correct parameter
@@ -246,6 +259,7 @@ chmod +x scripts/check_translations.sh
 ### Issue: Text overflow
 
 **Solution:**
+
 1. Use `Flexible` or `Expanded` widgets
 2. Enable text wrapping: `overflow: TextOverflow.ellipsis`
 3. Consider abbreviations in translation
@@ -253,6 +267,7 @@ chmod +x scripts/check_translations.sh
 ### Issue: Special characters display as boxes
 
 **Solution:**
+
 1. Ensure font supports the character set
 2. Check font configuration in `pubspec.yaml`
 3. Verify file encoding is UTF-8
@@ -343,6 +358,7 @@ Add to CI/CD pipeline:
 ## Feedback Collection
 
 After release:
+
 - Monitor user feedback for translation quality
 - Check analytics for language usage
 - Create issues for reported translation problems

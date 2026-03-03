@@ -7,17 +7,19 @@ This guide explains how to use the localization system in Aquarium AI for develo
 After pulling the i18n changes, you need to:
 
 1. **Install dependencies**:
+
    ```bash
    flutter pub get
    ```
 
 2. **Generate localization files**:
+
    ```bash
    flutter gen-l10n
    ```
-   
+
    This generates the Dart code in `.dart_tool/flutter_gen/gen_l10n/`
-   
+
    **Note**: This step is also automatically run when you do `flutter run` or `flutter build`.
 
 3. **Verify the generated files**:
@@ -50,11 +52,13 @@ class MyWidget extends StatelessWidget {
 #### 1. Simple Text
 
 **Before:**
+
 ```dart
 Text('Welcome')
 ```
 
 **After:**
+
 ```dart
 Text(AppLocalizations.of(context)!.welcomeTitle)
 ```
@@ -62,11 +66,13 @@ Text(AppLocalizations.of(context)!.welcomeTitle)
 #### 2. With Placeholders
 
 **Before:**
+
 ```dart
 Text('Total: $count')
 ```
 
 **After (in ARB file):**
+
 ```json
 "totalTanks": "Total: {count}",
 "@totalTanks": {
@@ -80,6 +86,7 @@ Text('Total: $count')
 ```
 
 **After (in code):**
+
 ```dart
 Text(AppLocalizations.of(context)!.totalTanks(count))
 ```
@@ -87,6 +94,7 @@ Text(AppLocalizations.of(context)!.totalTanks(count))
 #### 3. In AppBar
 
 **Before:**
+
 ```dart
 AppBar(
   title: Text('Settings'),
@@ -94,6 +102,7 @@ AppBar(
 ```
 
 **After:**
+
 ```dart
 AppBar(
   title: Text(AppLocalizations.of(context)!.settings),
@@ -103,6 +112,7 @@ AppBar(
 #### 4. In Dialogs
 
 **Before:**
+
 ```dart
 AlertDialog(
   title: Text('Error'),
@@ -117,6 +127,7 @@ AlertDialog(
 ```
 
 **After:**
+
 ```dart
 final l10n = AppLocalizations.of(context)!;
 
@@ -135,6 +146,7 @@ AlertDialog(
 #### 5. In ListView/ListTile
 
 **Before:**
+
 ```dart
 ListTile(
   title: Text('My Tanks'),
@@ -143,6 +155,7 @@ ListTile(
 ```
 
 **After:**
+
 ```dart
 final l10n = AppLocalizations.of(context)!;
 
@@ -188,6 +201,7 @@ Add translations to `app_es.arb`, `app_fr.arb`, etc.
 For strings that change based on count:
 
 **In app_en.arb:**
+
 ```json
 {
   "tankCount": "{count, plural, =0{No tanks} =1{1 tank} other{{count} tanks}}",
@@ -203,6 +217,7 @@ For strings that change based on count:
 ```
 
 **In code:**
+
 ```dart
 Text(AppLocalizations.of(context)!.tankCount(tankList.length))
 ```
@@ -212,6 +227,7 @@ Text(AppLocalizations.of(context)!.tankCount(tankList.length))
 ### 1. Extract All User-Facing Strings
 
 Every string that users see should be in ARB files:
+
 - ✅ Button labels
 - ✅ Screen titles
 - ✅ Error messages
@@ -224,11 +240,13 @@ Every string that users see should be in ARB files:
 ### 2. Use Descriptive Keys
 
 **Good:**
+
 ```json
 "settingsUpdatedSuccess": "Settings updated successfully!"
 ```
 
 **Bad:**
+
 ```json
 "msg1": "Settings updated successfully!"
 ```
@@ -236,6 +254,7 @@ Every string that users see should be in ARB files:
 ### 3. Provide Context
 
 Always include `@description`:
+
 ```json
 {
   "save": "Save",
@@ -248,6 +267,7 @@ Always include `@description`:
 ### 4. Handle Null Safety
 
 Always use the null assertion operator `!` when accessing AppLocalizations:
+
 ```dart
 final l10n = AppLocalizations.of(context)!;
 ```
@@ -257,6 +277,7 @@ This is safe because we configure `localizationsDelegates` in `main.dart`.
 ### 5. Create a Helper Variable
 
 For multiple uses in the same widget:
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -301,13 +322,15 @@ If a translation is missing, the app will fall back to English.
 ### Issue: "AppLocalizations not found"
 
 **Solution:** Run code generation:
+
 ```bash
 flutter gen-l10n
 ```
 
 ### Issue: "l10n.myNewString doesn't exist"
 
-**Solution:** 
+**Solution:**
+
 1. Make sure the key is in `app_en.arb`
 2. Run `flutter gen-l10n`
 3. Restart your IDE/editor
@@ -315,6 +338,7 @@ flutter gen-l10n
 ### Issue: Placeholder not working
 
 **Solution:** Check ARB file syntax:
+
 ```json
 {
   "message": "Hello {name}",
@@ -333,26 +357,31 @@ flutter gen-l10n
 To migrate existing hardcoded strings:
 
 1. **Find hardcoded string:**
+
    ```dart
    Text('Welcome')
    ```
 
 2. **Add to app_en.arb:**
+
    ```json
    "welcomeTitle": "Welcome"
    ```
 
 3. **Run generation:**
+
    ```bash
    flutter gen-l10n
    ```
 
 4. **Update code:**
+
    ```dart
    Text(AppLocalizations.of(context)!.welcomeTitle)
    ```
 
 5. **Add to other language files:**
+
    ```json
    // app_es.arb
    "welcomeTitle": "Bienvenido"
@@ -360,9 +389,8 @@ To migrate existing hardcoded strings:
 
 ## File Structure
 
-```
+```text
 lib/
-├── l10n/
 │   ├── app_en.arb    (English - template)
 │   ├── app_es.arb    (Spanish)
 │   ├── app_fr.arb    (French)
@@ -387,6 +415,7 @@ lib/
 ## Example: Complete Widget Migration
 
 **Before:**
+
 ```dart
 class WelcomeScreen extends StatelessWidget {
   @override
@@ -410,6 +439,7 @@ class WelcomeScreen extends StatelessWidget {
 ```
 
 **After:**
+
 ```dart
 class WelcomeScreen extends StatelessWidget {
   @override

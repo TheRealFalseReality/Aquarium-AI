@@ -31,6 +31,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   bool _isLoading = true;
   String? _error;
   final ScrollController _scrollController = ScrollController();
+  bool _loadStarted = false;
 
   /// Each entry is one logical section: its anchor id (nullable for the
   /// preamble before the first heading) and its raw markdown text.
@@ -42,7 +43,16 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMarkdown();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loadStarted) {
+      _loadStarted = true;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      _loadMarkdown(languageCode);
+    }
   }
 
   @override
@@ -51,9 +61,49 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     super.dispose();
   }
 
-  Future<void> _loadMarkdown() async {
+  /// Returns a locale-specific asset path if one exists for the given
+  /// [languageCode], otherwise returns [widget.assetPath] unchanged.
+  ///
+  /// E.g. `assets/docs/en/USER_GUIDE_en.md` → `assets/docs/de/USER_GUIDE_de.md`.
+  String _localizedPath(String languageCode) {
+    if (languageCode == 'en') return widget.assetPath;
+    // Replace the locale directory and the _en suffix in the filename.
+    return widget.assetPath
+        .replaceFirst('/en/', '/$languageCode/')
+        .replaceAll('_en.md', '_$languageCode.md');
+  }
+
+  /// Returns the English equivalent of any locale-specific asset path.
+  ///
+  /// E.g. `assets/docs/de/TRANSLATION_GUIDE_de.md`
+  ///       → `assets/docs/en/TRANSLATION_GUIDE_en.md`.
+  String _englishFallbackPath(String path) {
+    return path
+        .replaceFirst(RegExp(r'(?<=/)[a-z]{2}(?=/)'), 'en')
+        .replaceFirst(RegExp(r'_[a-z]{2}(?=\.md$)'), '_en');
+  }
+
+  Future<void> _loadMarkdown(String languageCode) async {
     try {
-      final content = await rootBundle.loadString(widget.assetPath);
+      String content;
+      // 1. Try locale-specific asset (e.g. assets/docs/de/USER_GUIDE_de.md).
+      final localizedPath = _localizedPath(languageCode);
+      if (localizedPath != widget.assetPath) {
+        try {
+          content = await rootBundle.loadString(localizedPath);
+        } catch (_) {
+          // 2. Fall back to the English asset path.
+          content = await rootBundle.loadString(widget.assetPath);
+        }
+      } else {
+        try {
+          content = await rootBundle.loadString(widget.assetPath);
+        } catch (_) {
+          // 3. If assetPath is already locale-specific (e.g. a cross-doc link
+          //    to an untranslated file), fall back to the English equivalent.
+          content = await rootBundle.loadString(_englishFallbackPath(widget.assetPath));
+        }
+      }
       final sections = _buildSections(content);
       final keys = <String, GlobalKey>{};
       for (final s in sections) {
@@ -144,19 +194,34 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
 
     // ── Local markdown file link ──────────────────────────────────────────
     if (href.endsWith('.md')) {
+      // Resolve relative to the current document's locale directory, adding
+      // the locale suffix. E.g. clicking "TRANSLATION_GUIDE.md" from
+      // assets/docs/en/HELP_WANTED_en.md → assets/docs/en/TRANSLATION_GUIDE_en.md.
+      final currentPath = widget.assetPath;
+      final lastSlash = currentPath.lastIndexOf('/');
+      final currentDir = lastSlash >= 0
+          ? currentPath.substring(0, lastSlash + 1)
+          : 'assets/docs/en/';
+      // Extract locale from the current file's own suffix (e.g. '_en.md' → 'en').
+      final localeMatch = RegExp(r'_([a-z]{2})\.md$').firstMatch(currentPath);
+      final locale = localeMatch?.group(1) ?? 'en';
+      // Strip .md extension from href and add the locale suffix.
+      final baseName = href.replaceFirst(RegExp(r'\.md$'), '');
+      final resolvedPath = '$currentDir${baseName}_$locale.md';
+
       // Create new breadcrumb trail including current page
       final newBreadcrumbs = [
         ...widget.breadcrumbs,
         Breadcrumb(title: widget.title),
       ];
-      
+
       // Navigate to another markdown viewer with the new file
       if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => MarkdownViewerScreen(
-            assetPath: 'assets/docs/$href',
+            assetPath: resolvedPath,
             title: _getTitleFromFilename(href),
             breadcrumbs: newBreadcrumbs,
           ),

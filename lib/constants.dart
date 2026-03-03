@@ -86,7 +86,7 @@ const double rcDefaultEarlySupporterPrice = 0.99;
 // Buy Me a Coffee URL
 const String rcDefaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
 
-// Changelog (empty = use bundled assets/docs/CHANGELOG.md)
+// Changelog (empty = use bundled assets/docs/en/CHANGELOG_en.md)
 const String rcDefaultChangelog = '';
 const String rcDefaultChangelogDe = '';
 const String rcDefaultChangelogEs = '';
@@ -177,7 +177,7 @@ class RemoteConfigKeys {
 
   // ── Changelog ───────────────────────────────────────────────────────────
   /// String — full markdown content of the changelog (English).
-  /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
+  /// Empty string (default) means use the bundled `assets/docs/en/CHANGELOG_en.md`.
   static const String changelogEn = 'changelog_en';
 
   /// String — full markdown content of the changelog (German).

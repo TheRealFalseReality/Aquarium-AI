@@ -70,17 +70,10 @@ flutter:
     - assets/data/
     - assets/images/system/
     - assets/images/fish/
-    - assets/docs/
-    - assets/docs/START_HERE_I18N.md
-    - assets/docs/TRANSLATION_GUIDE.md
-    - assets/docs/TRANSLATION_QUICK_REF.md
-    - assets/docs/CONTRIBUTING.md
-    - assets/docs/LOCALIZATION_DEV_GUIDE.md
-    - assets/docs/TESTING_I18N.md
-    - assets/docs/I18N_IMPLEMENTATION.md
-    - assets/docs/HELP_WANTED.md
-    - assets/docs/CHANGELOG.md
-    - assets/docs/USER_GUIDE.md
+    - assets/docs/en/
+    - assets/docs/de/
+    - assets/docs/es/
+    - assets/docs/fr/
 
   fonts:
     - family: Poppins
