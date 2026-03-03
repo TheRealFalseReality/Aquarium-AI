@@ -1728,29 +1728,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // Reset (hidden when using free provider) + Save (always shown)
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    OutlinedButton.icon(
-                        onPressed: () {
-                          switch (_selectedTextProvider) {
-                            case AIProvider.gemini:
-                              _geminiModelController.text = RemoteConfigService.defaultGeminiModel;
-                            case AIProvider.openAI:
-                              _chatGPTModelController.text = RemoteConfigService.defaultOpenAIModel;
-                            case AIProvider.groq:
-                              _groqModelController.text = RemoteConfigService.defaultGroqModel;
-                          }
-                          if (setDialogState != null) setDialogState(() {});
-                          context.showAccessibleMessage(l10n.modelsResetDefault);
-                        },
-                        icon: const Icon(Icons.refresh, size: 18),
-                        label: Text(l10n.resetModels),
-                      ),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                          onPressed: () {
+                            switch (_selectedTextProvider) {
+                              case AIProvider.gemini:
+                                _geminiModelController.text = RemoteConfigService.defaultGeminiModel;
+                              case AIProvider.openAI:
+                                _chatGPTModelController.text = RemoteConfigService.defaultOpenAIModel;
+                              case AIProvider.groq:
+                                _groqModelController.text = RemoteConfigService.defaultGroqModel;
+                            }
+                            if (setDialogState != null) setDialogState(() {});
+                            context.showAccessibleMessage(l10n.modelsResetDefault);
+                          },
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: Text(l10n.resetModels),
+                        ),
+                    ),
                     const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () => _saveTextSettings(context),
-                      icon: const Icon(Icons.save, size: 18),
-                      label: Text(l10n.save),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _saveTextSettings(context),
+                        icon: const Icon(Icons.save, size: 18),
+                        label: Text(l10n.save),
+                      ),
                     ),
                   ],
                 ),
@@ -1838,29 +1841,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // Reset (hidden when using free provider) + Save (always shown)
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    OutlinedButton.icon(
-                        onPressed: () {
-                          switch (_selectedImageProvider) {
-                            case AIProvider.gemini:
-                              _geminiImageModelController.text = RemoteConfigService.defaultGeminiImageModel;
-                            case AIProvider.openAI:
-                              _chatGPTImageModelController.text = RemoteConfigService.defaultOpenAIImageModel;
-                            case AIProvider.groq:
-                              _groqImageModelController.text = RemoteConfigService.defaultGroqImageModel;
-                          }
-                          if (setDialogState != null) setDialogState(() {});
-                          context.showAccessibleMessage(l10n.modelsResetDefault);
-                        },
-                        icon: const Icon(Icons.refresh, size: 18),
-                        label: Text(l10n.resetModels),
-                      ),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                          onPressed: () {
+                            switch (_selectedImageProvider) {
+                              case AIProvider.gemini:
+                                _geminiImageModelController.text = RemoteConfigService.defaultGeminiImageModel;
+                              case AIProvider.openAI:
+                                _chatGPTImageModelController.text = RemoteConfigService.defaultOpenAIImageModel;
+                              case AIProvider.groq:
+                                _groqImageModelController.text = RemoteConfigService.defaultGroqImageModel;
+                            }
+                            if (setDialogState != null) setDialogState(() {});
+                            context.showAccessibleMessage(l10n.modelsResetDefault);
+                          },
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: Text(l10n.resetModels),
+                        ),
+                    ),
                     const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () => _saveImageSettings(context),
-                      icon: const Icon(Icons.save, size: 18),
-                      label: Text(l10n.save),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _saveImageSettings(context),
+                        icon: const Icon(Icons.save, size: 18),
+                        label: Text(l10n.save),
+                      ),
                     ),
                   ],
                 ),

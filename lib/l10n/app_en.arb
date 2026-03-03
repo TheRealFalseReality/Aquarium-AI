@@ -4678,5 +4678,160 @@
         "type": "String"
       }
     }
+  },
+
+  "aboutSubtitle": "Your intelligent assistant for aquatic compatibility.",
+  "@aboutSubtitle": {
+    "description": "Subtitle shown on the About screen under the app title"
+  },
+
+  "getMobileApp": "Get the Mobile App",
+  "@getMobileApp": {
+    "description": "Section title on About screen for the mobile app download"
+  },
+
+  "getMobileAppDescription": "Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.",
+  "@getMobileAppDescription": {
+    "description": "Description text in the Get the Mobile App card on the About screen"
+  },
+
+  "bringYourOwnApiKey": "Bring Your Own API Key",
+  "@bringYourOwnApiKey": {
+    "description": "Section title on About screen for the BYOK feature"
+  },
+
+  "byokDescription": "Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique \"Bring Your Own Key\" model gives you:",
+  "@byokDescription": {
+    "description": "Introductory paragraph in the Bring Your Own API Key card"
+  },
+
+  "byokBullet1": "Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.",
+  "@byokBullet1": {
+    "description": "First bullet point in the BYOK benefits list"
+  },
+
+  "byokBullet2": "Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.",
+  "@byokBullet2": {
+    "description": "Second bullet point in the BYOK benefits list"
+  },
+
+  "byokNote": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@byokNote": {
+    "description": "Italic note at the bottom of the BYOK card"
+  },
+
+  "contactFeedback": "Contact & Feedback",
+  "@contactFeedback": {
+    "description": "Section title on About screen for the contact/feedback card"
+  },
+
+  "broughtToYouBy": "Aquarium AI is proudly brought to you by ",
+  "@broughtToYouBy": {
+    "description": "Text before the company name in the Contact & Feedback card"
+  },
+
+  "feedbackDescription": "For feedback, bug reports, or questions, please create an issue on GitHub or email us.",
+  "@feedbackDescription": {
+    "description": "Description text in the Contact & Feedback card"
+  },
+
+  "createIssueSubtitle": "Report bugs or suggest features on our GitHub repository",
+  "@createIssueSubtitle": {
+    "description": "Subtitle for the Create Issue on GitHub list tile"
+  },
+
+  "openSource": "Open Source",
+  "@openSource": {
+    "description": "Section title on About screen for the open source card"
+  },
+
+  "openSourceDescription": "Aquarium AI is open source! Check out our code, contribute, or report issues on GitHub.",
+  "@openSourceDescription": {
+    "description": "Description text in the Open Source card"
+  },
+
+  "versionDisplay": "Version {version}",
+  "@versionDisplay": {
+    "description": "Version label shown at the bottom of the About screen",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+
+  "co2Label": "CO₂",
+  "@co2Label": {
+    "description": "Display label for the CO₂ calculator type chip"
+  },
+
+  "specificGravityAbbr": "SG",
+  "@specificGravityAbbr": {
+    "description": "Abbreviated chip label for Specific Gravity in the salinity converter"
+  },
+
+  "conductivityAbbr": "Cond.",
+  "@conductivityAbbr": {
+    "description": "Abbreviated chip label for Conductivity in the salinity converter"
+  },
+
+  "valueWithUnit": "Value ({unit})",
+  "@valueWithUnit": {
+    "description": "Text field label showing input value with its unit in parentheses",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+
+  "tempInCelsius": "Temp (°C)",
+  "@tempInCelsius": {
+    "description": "Text field label for a temperature input in Celsius"
+  },
+
+  "labelPH": "pH",
+  "@labelPH": {
+    "description": "Text field label for pH input in the CO₂ calculator"
+  },
+
+  "labelDKH": "dKH",
+  "@labelDKH": {
+    "description": "Text field label / chip label for dKH alkalinity unit"
+  },
+
+  "labelPPM": "ppm",
+  "@labelPPM": {
+    "description": "Chip label for parts-per-million alkalinity unit"
+  },
+
+  "labelMeqL": "meq/L",
+  "@labelMeqL": {
+    "description": "Chip label for milliequivalents-per-litre alkalinity unit"
+  },
+
+  "fahrenheit": "Fahrenheit",
+  "@fahrenheit": {
+    "description": "Temperature unit name Fahrenheit, used as chip label and result label"
+  },
+
+  "celsius": "Celsius",
+  "@celsius": {
+    "description": "Temperature unit name Celsius, used as chip label and result label"
+  },
+
+  "kelvin": "Kelvin",
+  "@kelvin": {
+    "description": "Temperature unit name Kelvin, used as result column label"
+  },
+
+  "tempFieldLabel": "Temp (°{unit})",
+  "@tempFieldLabel": {
+    "description": "Text field label for temperature input, unit is F or C",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
   }
 }

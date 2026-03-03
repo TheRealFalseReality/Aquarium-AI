@@ -466,11 +466,13 @@ class FishCompatibilityScreenState
                                     color: Theme.of(context).colorScheme.primary,
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    l10n.tagFishForBetterSearch,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                      fontWeight: FontWeight.w500,
+                                  Flexible(
+                                    child: Text(
+                                      l10n.tagFishForBetterSearch,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
