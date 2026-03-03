@@ -47,6 +47,7 @@ class RemoteConfigService {
         RemoteConfigKeys.communityImageUpload: rcDefaultCommunityImageUpload,
         RemoteConfigKeys.freeFishCompatEnabled: rcDefaultFreeFishCompatEnabled,
         RemoteConfigKeys.freePhotoAnalysisEnabled: rcDefaultFreePhotoAnalysisEnabled,
+        RemoteConfigKeys.interstitialCooldownHours: rcDefaultInterstitialCooldownHours,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -258,4 +259,13 @@ class RemoteConfigService {
   static bool get freePhotoAnalysisEnabled =>
       _instance?.getBool(RemoteConfigKeys.freePhotoAnalysisEnabled) ??
       rcDefaultFreePhotoAnalysisEnabled;
+
+  // ── Ads ─────────────────────────────────────────────────────────────────────
+
+  /// Minimum hours between interstitial ad impressions for free-tier users.
+  /// Defaults to [rcDefaultInterstitialCooldownHours] (6).
+  /// Increase this value in Firebase Remote Config to reduce ad frequency.
+  static int get interstitialCooldownHours =>
+      _instance?.getInt(RemoteConfigKeys.interstitialCooldownHours) ??
+      rcDefaultInterstitialCooldownHours;
 }
