@@ -50,6 +50,13 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
   utils/                  # Utility/helper functions
   examples/               # Example data files
 assets/                   # Images, fonts, JSON data, documentation markdown files
+  docs/
+    USER_GUIDE.md         # English user-facing guide (source of truth)
+    HELP_WANTED.md        # English contributor recruitment doc
+    CHANGELOG.md          # English changelog (source of truth)
+    de/                   # German translations of user-facing docs
+    es/                   # Spanish translations of user-facing docs
+    fr/                   # French translations of user-facing docs
 scripts/
   validate_translations.sh  # Bash script; checks ARB key completeness and placeholder parity
 test/                     # Flutter unit/widget tests (run with `flutter test`)
@@ -269,7 +276,9 @@ When adding a new AI tool, calculator, or other significant feature:
 
 ## Keeping the User Guide Up to Date
 
-`assets/docs/USER_GUIDE.md` is the single source of truth for end-user documentation. **Any PR that changes how a tool works must also update the corresponding section of the User Guide.**
+`assets/docs/USER_GUIDE.md` is the single source of truth for end-user documentation.
+**Any PR that changes how a tool works must also update the corresponding section of
+the User Guide and its translations.**
 
 Update the User Guide when you:
 
@@ -283,7 +292,85 @@ Update the User Guide when you:
 | Change outputs or report format | Update the "Reading the Report" / result description |
 | Rename a setting or move it to a different settings group | Update the Settings & Appearance table |
 
-If the change is purely internal (refactor, performance, bug fix with no UX impact) no User Guide update is needed.
+If the change is purely internal (refactor, performance, bug fix with no UX impact)
+no User Guide update is needed.
+
+---
+
+## Markdown Authoring Rules
+
+All `.md` files in this repository must pass `markdownlint` using the repo-root
+`.markdownlint.json` config. Run the linter before committing any markdown change:
+
+```bash
+# Install once (requires Node.js)
+npm install -g markdownlint-cli
+
+# Lint a single file
+markdownlint --config .markdownlint.json path/to/file.md
+
+# Auto-fix what can be fixed automatically
+markdownlint --fix --config .markdownlint.json path/to/file.md
+```
+
+### Rules enforced (and notable exceptions)
+
+| Rule | Status | Notes |
+| ---- | ------ | ----- |
+| MD013 line-length | **disabled** | Technical docs contain long URLs and code |
+| MD024 no-duplicate-heading | **disabled** | Changelogs repeat "Added"/"Fixed" per version |
+| All other default rules | **enabled** | Blanks around headings, lists, fences; table style; etc. |
+
+### Table formatting
+
+Use the **compact spaced** style – separator rows must have a space on each side of
+every dash group:
+
+```markdown
+| Header A | Header B |
+| -------- | -------- |
+| cell     | cell     |
+```
+
+### Fenced code blocks
+
+Always specify a language after the opening triple-backtick. Example:
+```` ```dart // your code here ``` ````
+
+---
+
+## Translating Documentation (User-Facing Docs)
+
+The following docs in `assets/docs/` are displayed inside the app and must have
+translated versions for German (`de`), Spanish (`es`), and French (`fr`):
+
+| English source | Description |
+| -------------- | ----------- |
+| `assets/docs/USER_GUIDE.md` | In-app user guide |
+| `assets/docs/HELP_WANTED.md` | Contributor recruitment page |
+| `assets/docs/CHANGELOG.md` | Release changelog |
+
+Translations live in locale subdirectories: `assets/docs/de/`, `assets/docs/es/`,
+`assets/docs/fr/`. The app loads the locale-appropriate file at runtime with a
+fallback to the English original.
+
+### When to update translations
+
+- **Any PR that modifies a user-facing English doc** must also update (or create) the
+  corresponding file in all three locale subdirectories.
+- Translate to best ability; machine-assisted translation is acceptable as a starting
+  point, but review for accuracy.
+- Keep the same markdown structure (headings, lists, tables, code fences) as the
+  English source so the app renders correctly.
+- All translated files must pass `markdownlint --config .markdownlint.json`.
+
+### Developer-only docs (no translation needed)
+
+These docs are not shown in the app UI and do **not** need translated copies:
+
+- `CONTRIBUTING.md`, `START_HERE_I18N.md`, `TRANSLATION_GUIDE.md`
+- `TRANSLATION_QUICK_REF.md`, `LOCALIZATION_DEV_GUIDE.md`
+- `TESTING_I18N.md`, `I18N_IMPLEMENTATION.md`
 
 ---
 

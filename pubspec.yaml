@@ -80,6 +80,9 @@ flutter:
     - assets/docs/HELP_WANTED.md
     - assets/docs/CHANGELOG.md
     - assets/docs/USER_GUIDE.md
+    - assets/docs/de/
+    - assets/docs/es/
+    - assets/docs/fr/
 
   fonts:
     - family: Poppins

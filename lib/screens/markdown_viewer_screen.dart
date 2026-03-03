@@ -31,6 +31,7 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   bool _isLoading = true;
   String? _error;
   final ScrollController _scrollController = ScrollController();
+  bool _loadStarted = false;
 
   /// Each entry is one logical section: its anchor id (nullable for the
   /// preamble before the first heading) and its raw markdown text.
@@ -42,7 +43,16 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMarkdown();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loadStarted) {
+      _loadStarted = true;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      _loadMarkdown(languageCode);
+    }
   }
 
   @override
@@ -51,9 +61,34 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     super.dispose();
   }
 
-  Future<void> _loadMarkdown() async {
+  /// Returns a locale-specific asset path if one exists for the given
+  /// [languageCode], otherwise returns [widget.assetPath] unchanged.
+  ///
+  /// E.g. `assets/docs/USER_GUIDE.md` → `assets/docs/de/USER_GUIDE.md`.
+  String _localizedPath(String languageCode) {
+    if (languageCode == 'en') return widget.assetPath;
+    final uri = Uri.parse(widget.assetPath);
+    final segments = uri.pathSegments; // e.g. ['assets', 'docs', 'USER_GUIDE.md']
+    if (segments.length < 2) return widget.assetPath;
+    final dir = segments.sublist(0, segments.length - 1).join('/');
+    final file = segments.last;
+    return '$dir/$languageCode/$file';
+  }
+
+  Future<void> _loadMarkdown(String languageCode) async {
     try {
-      final content = await rootBundle.loadString(widget.assetPath);
+      String content;
+      // Try locale-specific asset first, fall back to the original path.
+      final localizedPath = _localizedPath(languageCode);
+      if (localizedPath != widget.assetPath) {
+        try {
+          content = await rootBundle.loadString(localizedPath);
+        } catch (_) {
+          content = await rootBundle.loadString(widget.assetPath);
+        }
+      } else {
+        content = await rootBundle.loadString(widget.assetPath);
+      }
       final sections = _buildSections(content);
       final keys = <String, GlobalKey>{};
       for (final s in sections) {
