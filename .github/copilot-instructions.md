@@ -11,7 +11,7 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ----- | ---------- |
 | UI framework | Flutter (Material 3, `flex_color_scheme`) |
 | State management | Riverpod (`flutter_riverpod`, `riverpod_annotation`) |
 | AI providers | Google Gemini (`google_generative_ai`), OpenAI (`dart_openai`), Groq (`groq`) |
@@ -27,8 +27,7 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
 
 ## Repository Layout
 
-```
-lib/
+```text
   main.dart               # App entry point; Firebase init with retry, route definitions
   main_layout.dart        # Shared Scaffold wrapper (AppBar + drawer + body)
   constants.dart          # AdMob IDs, product IDs, developer Groq key (--dart-define)
@@ -200,7 +199,7 @@ When any PR adds or modifies user-visible strings:
 ## CI / Workflows
 
 | Workflow | Trigger | What it does |
-|----------|---------|-------------|
+| -------- | ------- | ------------ |
 | `validate-translations.yml` | PR / push to `main` (paths: `lib/l10n/**`) | Validates JSON syntax + key completeness of all `.arb` files |
 | `firebase-hosting-pull-request.yml` | Pull request | Builds web app and deploys preview to Firebase Hosting |
 | `firebase-hosting-merge.yml` | Push to `main` | Deploys web app to production Firebase Hosting |
@@ -275,7 +274,7 @@ When adding a new AI tool, calculator, or other significant feature:
 Update the User Guide when you:
 
 | Change | What to update in `USER_GUIDE.md` |
-|--------|-----------------------------------|
+| ------ | --------------------------------- |
 | Add a new input field or option | Add it to the tool's **Inputs** / **How to Use** list |
 | Remove or rename a field | Remove or rename it in the same list |
 | Change a prerequisite (e.g. now requires an API key, or no longer does) | Update the **Requires** line at the top of that section |
@@ -295,7 +294,7 @@ If the change is purely internal (refactor, performance, bug fix with no UX impa
 ### Where to put each type of constant
 
 | Type of value | Where to declare it |
-|---------------|---------------------|
+| ------------- | ------------------- |
 | Build-time secrets (API keys injected via `--dart-define`) | `lib/constants.dart` using `String.fromEnvironment(...)` |
 | Static app-wide IDs (AdMob, in-app purchase product IDs) | `lib/constants.dart` |
 | Remote Config **key names** | `RemoteConfigKeys` class in `lib/services/remote_config_service.dart` |
