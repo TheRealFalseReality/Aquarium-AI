@@ -948,24 +948,59 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                           SizedBox(
                             width: 26,
                             height: 26,
-                            child: avatarUrl != null
-                                ? FutureBuilder<String>(
-                                    future: resolveResizedStorageUrl(avatarUrl),
-                                    initialData: getCachedResizedUrl(avatarUrl) ?? avatarUrl!,
-                                    builder: (_, snap) => CircleAvatar(
-                                      backgroundColor:
-                                          colorScheme.primary.withOpacity(0.3),
-                                      backgroundImage:
-                                          CachedNetworkImageProvider(snap.data!),
+                            child: isFounder
+                                ? Container(
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AquaThemeColors.founderPurple,
                                     ),
+                                    padding: const EdgeInsets.all(1.5),
+                                    child: avatarUrl != null
+                                        ? FutureBuilder<String>(
+                                            future: resolveResizedStorageUrl(
+                                                avatarUrl),
+                                            initialData:
+                                                getCachedResizedUrl(avatarUrl) ??
+                                                    avatarUrl!,
+                                            builder: (_, snap) => CircleAvatar(
+                                              backgroundColor: colorScheme
+                                                  .primary
+                                                  .withOpacity(0.3),
+                                              backgroundImage:
+                                                  CachedNetworkImageProvider(
+                                                      snap.data!),
+                                            ),
+                                          )
+                                        : CircleAvatar(
+                                            backgroundColor: colorScheme.primary
+                                                .withOpacity(0.3),
+                                            child: Icon(avatarIcon,
+                                                size: 14,
+                                                color: colorScheme.onSurface),
+                                          ),
                                   )
-                                : CircleAvatar(
-                                    backgroundColor:
-                                        colorScheme.primary.withOpacity(0.3),
-                                    child: Icon(avatarIcon,
-                                        size: 16,
-                                        color: colorScheme.onSurface),
-                                  ),
+                                : avatarUrl != null
+                                    ? FutureBuilder<String>(
+                                        future: resolveResizedStorageUrl(
+                                            avatarUrl),
+                                        initialData:
+                                            getCachedResizedUrl(avatarUrl) ??
+                                                avatarUrl!,
+                                        builder: (_, snap) => CircleAvatar(
+                                          backgroundColor: colorScheme.primary
+                                              .withOpacity(0.3),
+                                          backgroundImage:
+                                              CachedNetworkImageProvider(
+                                                  snap.data!),
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        backgroundColor:
+                                            colorScheme.primary.withOpacity(0.3),
+                                        child: Icon(avatarIcon,
+                                            size: 16,
+                                            color: colorScheme.onSurface),
+                                      ),
                           ),
                           const SizedBox(width: 8),
                           // Name + optional founder diamond

@@ -5,10 +5,10 @@ import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
+import '../utils/storage_image_utils.dart';
 
 /// Deep purple used for Founder Aquarist post borders.
 const Color _kFounderBorderColor = AquaThemeColors.founderPurple;
-import '../utils/storage_image_utils.dart';
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -95,8 +95,10 @@ class _PostCardState extends State<PostCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Post image
-            if (widget.post.imageUrl != null)
+            // Post image — full hero for Tank Showcase, regular for others
+            if (isTankShowcase && widget.post.imageUrl != null)
+              _buildShowcaseHero(theme, l10n, isOwner, isFounder)
+            else if (widget.post.imageUrl != null)
               FutureBuilder<String>(
                 future: _resolvedPostImageUrl,
                 builder: (_, snap) => CachedNetworkImage(
@@ -215,16 +217,19 @@ class _PostCardState extends State<PostCard> {
     return Stack(
       children: [
         // Full-width hero image
-        CachedNetworkImage(
-          imageUrl: widget.post.imageUrl!,
-          width: double.infinity,
-          height: 280,
-          fit: BoxFit.cover,
-          errorWidget: (_, _, _) => Container(
+        FutureBuilder<String>(
+          future: _resolvedPostImageUrl,
+          builder: (_, snap) => CachedNetworkImage(
+            imageUrl: snap.data ?? widget.post.imageUrl!,
+            width: double.infinity,
             height: 280,
-            color: theme.colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.broken_image,
-                color: theme.colorScheme.onSurfaceVariant),
+            fit: BoxFit.cover,
+            errorWidget: (_, _, _) => Container(
+              height: 280,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Icon(Icons.broken_image,
+                  color: theme.colorScheme.onSurfaceVariant),
+            ),
           ),
         ),
         // Gradient scrim so overlay text is readable

@@ -140,7 +140,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         color: Theme.of(context)
                             .colorScheme
                             .surfaceContainerHighest,
-                        child: const Center(child: CircularProgressIndicator()
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (_, _, _) => const SizedBox(),
                     ),

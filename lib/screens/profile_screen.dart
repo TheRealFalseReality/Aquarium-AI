@@ -16,11 +16,8 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
-<<<<<<< copilot/update-tank-showcase-feature
 import '../theme_colors.dart';
-=======
 import '../utils/storage_image_utils.dart';
->>>>>>> main
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -460,7 +457,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
     if (profile.avatarUrl != null) {
-      return FutureBuilder<String>(
+      final avatarWidget = FutureBuilder<String>(
         future: resolveResizedStorageUrl(profile.avatarUrl!),
         initialData:
             getCachedResizedUrl(profile.avatarUrl!) ?? profile.avatarUrl!,
@@ -468,6 +465,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           radius: radius,
           backgroundColor: colorScheme.primaryContainer,
           backgroundImage: CachedNetworkImageProvider(snap.data!),
+        ),
+      );
+      if (!isFounder) return avatarWidget;
+      return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+              color: AquaThemeColors.founderPurple, width: 2.5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: avatarWidget,
         ),
       );
     } else {
