@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Community posts ───────────────────────────────────────────────────────
+    match /posts/{postId} {
+      // Anyone (including unauthenticated) can read posts.
+      allow read: if true;
+
+      // Any authenticated user can create a post.
+      allow create: if request.auth != null;
+
+      // The post author can update any field.
+      // Any authenticated user can update only the denormalised counters
+      // (likes and commentCount) — used by toggleLike and createComment.
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['likes', 'commentCount'])
+      );
+
+      // Only the author can delete their own post.
+      allow delete: if request.auth != null
+          && request.auth.uid == resource.data.userId;
+
+      // ── Per-user like tracking ──────────────────────────────────────────────
+      // Each user may read and write only their own like document.
+      match /likes/{userId} {
+        allow read, write: if request.auth != null
+            && request.auth.uid == userId;
+      }
+
+      // ── Comments ─────────────────────────────────────────────────────────────
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        // Only the comment author can delete their own comment.
+        allow delete: if request.auth != null
+            && request.auth.uid == resource.data.userId;
+      }
+    }
+
+    // ── User profiles ─────────────────────────────────────────────────────────
+    // Profiles are public-readable (needed for community display names/avatars).
+    // Only the owning user may write their own document.
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null
+          && request.auth.uid == userId;
+    }
+  }
+}

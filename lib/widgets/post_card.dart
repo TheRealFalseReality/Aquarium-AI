@@ -52,6 +52,26 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync like count from the Firestore stream when not mid-operation.
+    if (!_likeLoading && widget.post.likes != oldWidget.post.likes) {
+      _likes = widget.post.likes;
+    }
+    // Re-resolve images only when the URLs actually change.
+    if (widget.post.imageUrl != oldWidget.post.imageUrl) {
+      _resolvedPostImageUrl = widget.post.imageUrl != null
+          ? resolveResizedStorageUrl(widget.post.imageUrl!)
+          : null;
+    }
+    if (widget.post.avatarUrl != oldWidget.post.avatarUrl) {
+      _resolvedAvatarUrl = widget.post.avatarUrl != null
+          ? resolveResizedStorageUrl(widget.post.avatarUrl!)
+          : null;
+    }
+  }
+
   Future<void> _loadLikeStatus() async {
     if (widget.currentUserId.isEmpty) return;
     final liked = await CommunityService.hasLiked(widget.post.id);
@@ -62,14 +82,24 @@ class _PostCardState extends State<PostCard> {
 
   Future<void> _handleLike() async {
     if (_likeLoading || widget.currentUserId.isEmpty) return;
+    // Snapshot previous state for rollback.
+    final wasLiked = _isLiked;
+    final prevLikes = _likes;
     setState(() {
       _likeLoading = true;
       _isLiked = !_isLiked;
       _likes += _isLiked ? 1 : -1;
     });
-    await CommunityService.toggleLike(widget.post.id);
+    final success = await CommunityService.toggleLike(widget.post.id);
     if (mounted) {
-      setState(() => _likeLoading = false);
+      setState(() {
+        _likeLoading = false;
+        if (!success) {
+          // Roll back the optimistic update on failure.
+          _isLiked = wasLiked;
+          _likes = prevLikes;
+        }
+      });
     }
   }
 

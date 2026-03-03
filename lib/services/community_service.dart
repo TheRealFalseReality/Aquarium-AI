@@ -163,9 +163,10 @@ class CommunityService {
 
   /// Toggles a like on a post for the current user.
   /// Uses a sub-collection /posts/{postId}/likes/{uid} to track per-user likes.
-  static Future<void> toggleLike(String postId) async {
+  /// Returns `true` if the operation succeeded, `false` otherwise.
+  static Future<bool> toggleLike(String postId) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) return false;
 
     final likeRef = _firestore
         .collection(_postsCollection)
@@ -185,10 +186,12 @@ class CommunityService {
           tx.update(postRef, {'likes': FieldValue.increment(1)});
         }
       });
+      return true;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService toggleLike error: $e');
       }
+      return false;
     }
   }
 

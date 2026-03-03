@@ -842,9 +842,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Expanded(
                     child: Text(
                       isFounder
-                          ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own Groq key for unlimited access.'
-                          : 'Using App\'s Built-in Dev API Key (Groq free tier). '
-                              'Add your own Groq key in AI Provider settings for dedicated limits.',
+                          ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
+                          : 'Using App\'s Built-in Dev API Key (free tier). '
+                              'Add your own API key in AI Provider settings for dedicated limits.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isFounder
                             ? AquaThemeColors.founderPurple
