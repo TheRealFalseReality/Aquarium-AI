@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Localize chatbot suggestion chips, add AI Response Language setting,
+- Localize chatbot suggestion chips, add AI Response Language setting
 - Localize AI compat, calculators, about, information, and AI provider settings screens  
 - Localize hardcoded strings across settings, drawer, welcome screen, AquaPi promo dialog, history screen, and more
 
