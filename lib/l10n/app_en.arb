@@ -311,6 +311,36 @@
     "description": "German language option"
   },
 
+  "aiResponseLanguage": "AI Response Language",
+  "@aiResponseLanguage": {
+    "description": "Label for the AI response language setting"
+  },
+
+  "aiResponseLanguageDesc": "Language the AI uses in its responses",
+  "@aiResponseLanguageDesc": {
+    "description": "Subtitle for the AI response language setting"
+  },
+
+  "aiResponseLanguageFollowApp": "Follow App Language",
+  "@aiResponseLanguageFollowApp": {
+    "description": "AI response language option: follow the app UI language"
+  },
+
+  "aiResponseLanguageNone": "No Instruction (AI Default)",
+  "@aiResponseLanguageNone": {
+    "description": "AI response language option: no language instruction, AI decides"
+  },
+
+  "aiResponseLanguageCustom": "Custom",
+  "@aiResponseLanguageCustom": {
+    "description": "AI response language option: enter a custom language"
+  },
+
+  "aiResponseLanguageCustomHint": "Enter a language (e.g. Portuguese)",
+  "@aiResponseLanguageCustomHint": {
+    "description": "Hint text for the custom AI response language text field"
+  },
+
   "translationCommunityTitle": "Help Translate",
   "@translationCommunityTitle": {
     "description": "Title for translation community section"

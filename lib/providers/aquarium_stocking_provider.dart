@@ -6,12 +6,14 @@ import 'package:fish_ai/models/stocking_recommendation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import 'fish_compatibility_provider.dart';
 import '../models/analysis_history_entry.dart';
 import 'analysis_history_provider.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
+import '../utils/ai_language_utils.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/json_utils.dart';
 import '../models/tank.dart';
@@ -119,6 +121,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         return;
     }
     final models = ref.read(modelProvider);
+    final settings = ref.read(appSettingsProvider);
     final allFish = fishData[tankType] ?? [];
 
     if (allFish.isEmpty) {
@@ -148,13 +151,17 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       }
     }
     final processedTankSize = _processTankSize(tankSize);
-    final prompt = buildStockingRecommendationPrompt(
-      processedTankSize, 
-      tankType, 
-      userNotes, 
-      allFish,
-      selectedFish: state.selectedFish,
-      speciesSelections: speciesSelections,
+    final prompt = appendLanguageInstruction(
+      buildStockingRecommendationPrompt(
+        processedTankSize,
+        tankType,
+        userNotes,
+        allFish,
+        selectedFish: state.selectedFish,
+        speciesSelections: speciesSelections,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
 
     try {
@@ -317,6 +324,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         return;
     }
     final models = ref.read(modelProvider);
+    final settings = ref.read(appSettingsProvider);
     final allFish = fishData[tank.type] ?? [];
     if (allFish.isEmpty) {
       state = state.copyWith(
@@ -376,13 +384,17 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
 
     // Calculate current tank harmony score
     final currentHarmonyScore = TankHarmonyCalculator.calculateHarmonyScore(existingFish);
-    
-    final prompt = buildTankStockingRecommendationPrompt(
-      tank,
-      allFish,
-      existingFish,
-      currentHarmonyScore,
-      additionalNotes: additionalNotes,
+
+    final prompt = appendLanguageInstruction(
+      buildTankStockingRecommendationPrompt(
+        tank,
+        allFish,
+        existingFish,
+        currentHarmonyScore,
+        additionalNotes: additionalNotes,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
 
     try {

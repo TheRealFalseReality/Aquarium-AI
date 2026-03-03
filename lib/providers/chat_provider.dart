@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -20,6 +19,7 @@ import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/fish_info_prompt.dart';
+import '../utils/ai_language_utils.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
@@ -146,34 +146,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// Returns the effective system prompt for [message].
   /// Appends the AquaPi supplement when the message is AquaPi-related,
-  /// and adds a language instruction when the app is not set to English.
+  /// and adds a language instruction based on the AI response language setting.
   String _effectiveSystemPrompt(String message) {
     final base = effectiveSystemPrompt(message);
     final settings = _ref.read(appSettingsProvider);
-    // Use the explicitly set locale code, or fall back to the device's locale.
-    final localeCode = settings.localeCode ??
-        PlatformDispatcher.instance.locale.languageCode;
-    final languageName = _languageName(localeCode);
-    if (languageName != null) {
-      return '$base\nIMPORTANT: Always respond in $languageName.';
-    }
-    return base;
-  }
-
-  /// Maps a supported BCP-47 language code to a display name used in the
-  /// system prompt. Returns null for English (the default) or any
-  /// unrecognized code so that no unnecessary language instruction is added.
-  static String? _languageName(String code) {
-    switch (code) {
-      case 'de':
-        return 'German';
-      case 'es':
-        return 'Spanish';
-      case 'fr':
-        return 'French';
-      default:
-        return null;
-    }
+    return appendLanguageInstruction(
+      base,
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
   }
 
   // ================== Generic Chat ==================

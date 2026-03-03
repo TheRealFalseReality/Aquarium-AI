@@ -1952,6 +1952,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: () => _showLanguageDialog(setDialogState),
                   ),
                   const Divider(height: 24),
+
+                  // AI Response Language
+                  ListTile(
+                    leading: Icon(
+                      Icons.translate,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(l10n.aiResponseLanguage),
+                    subtitle: Text(_getAiResponseLanguageDisplayName(appSettings.aiResponseLanguage)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => _showAiResponseLanguageDialog(setDialogState),
+                  ),
+                  const Divider(height: 24),
                   
                   // Appearance shortcut
                   ListTile(
@@ -3925,6 +3938,127 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  String _getAiResponseLanguageDisplayName(String? aiResponseLanguage) {
+    final l10n = AppLocalizations.of(context)!;
+    if (aiResponseLanguage == null) return l10n.aiResponseLanguageFollowApp;
+    if (aiResponseLanguage.isEmpty) return l10n.aiResponseLanguageNone;
+    return aiResponseLanguage;
+  }
+
+  void _showAiResponseLanguageDialog([StateSetter? parentSetDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+
+    // Preset options: null = follow app, '' = no instruction, named language otherwise.
+    const List<String?> presets = [
+      null, // Follow App Language
+      '', // No Instruction
+      'English',
+      'German',
+      'Spanish',
+      'French',
+      'Portuguese',
+      'Italian',
+      'Japanese',
+      'Chinese',
+      'Korean',
+      'Dutch',
+      'Russian',
+      'Arabic',
+    ];
+
+    // Determine initial dropdown value.
+    // Use the special sentinel 'custom' when the stored value is not in presets.
+    final isCustom = appSettings.aiResponseLanguage != null &&
+        appSettings.aiResponseLanguage!.isNotEmpty &&
+        !presets.contains(appSettings.aiResponseLanguage);
+    String? selectedPreset = isCustom ? 'custom' : appSettings.aiResponseLanguage;
+    final customController = TextEditingController(
+      text: isCustom ? appSettings.aiResponseLanguage : '',
+    );
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          void applyChange(String? newValue) {
+            ref.read(appSettingsProvider.notifier).setAiResponseLanguage(newValue);
+            AnalyticsService.logSettingsChange(
+              settingName: 'ai_response_language',
+              newValue: newValue ?? 'follow_app',
+              oldValue: appSettings.aiResponseLanguage ?? 'follow_app',
+            );
+            if (parentSetDialogState != null) parentSetDialogState(() {});
+          }
+
+          return AlertDialog(
+            title: Text(l10n.aiResponseLanguage),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<String?>(
+                    value: selectedPreset,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text(l10n.aiResponseLanguageFollowApp),
+                      ),
+                      DropdownMenuItem<String?>(
+                        value: '',
+                        child: Text(l10n.aiResponseLanguageNone),
+                      ),
+                      ...presets.whereType<String>().where((p) => p.isNotEmpty).map(
+                            (lang) => DropdownMenuItem<String?>(value: lang, child: Text(lang)),
+                          ),
+                      DropdownMenuItem<String?>(
+                        value: 'custom',
+                        child: Text(l10n.aiResponseLanguageCustom),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setDialogState(() => selectedPreset = value);
+                      if (value != 'custom') {
+                        applyChange(value);
+                      }
+                    },
+                  ),
+                  if (selectedPreset == 'custom') ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: customController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: l10n.aiResponseLanguageCustomHint,
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (text) {
+                        if (text.trim().isNotEmpty) {
+                          applyChange(text.trim());
+                        }
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.close),
+              ),
+            ],
+          );
+        },
+      ),
+    ).whenComplete(() => customController.dispose());
   }
 
   void _showFeedbackDialog() {
