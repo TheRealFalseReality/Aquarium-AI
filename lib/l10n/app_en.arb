@@ -4992,5 +4992,10 @@
   "unitMeters": "Meters",
   "@unitMeters": {
     "description": "Unit chip label: meters"
+  },
+
+  "freeTierAdNotice": "Ad shown: supporting the free AI tier",
+  "@freeTierAdNotice": {
+    "description": "Brief snackbar message shown just before an interstitial ad appears for free-tier AI users"
   }
 }

@@ -1012,5 +1012,6 @@
   "unitInches": "Pulgadas",
   "unitFeet": "Pies",
   "unitCm": "cm",
-  "unitMeters": "Metros"
+  "unitMeters": "Metros",
+  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito"
 }

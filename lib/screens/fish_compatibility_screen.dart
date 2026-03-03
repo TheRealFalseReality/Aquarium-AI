@@ -381,10 +381,6 @@ class FishCompatibilityScreenState
       }
 
       if (next.report != null && previous?.report != next.report) {
-        // Show interstitial ad for eligible free-tier users after analysis.
-        if (interstitialEligible) {
-          _interstitialAdService.showIfEligible();
-        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             _openReport(next.report!);
@@ -888,6 +884,23 @@ class FishCompatibilityScreenState
                           // Show species selection dialog if any fish have species tags
                           final speciesSelections = await _showSpeciesSelectionDialog(provider.selectedFish);
                           if (!mounted || speciesSelections == null) return;
+
+                          // Show interstitial ad for eligible free-tier users when
+                          // the report is requested (not after analysis completes).
+                          if (interstitialEligible) {
+                            _interstitialAdService.showIfEligible(
+                              onWillShow: () {
+                                final l10n = AppLocalizations.of(context)!;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.freeTierAdNotice),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                            );
+                          }
 
                           // Build additional notes from species selections
                           String? additionalNotes;

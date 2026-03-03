@@ -1012,5 +1012,6 @@
   "unitInches": "Pouces",
   "unitFeet": "Pieds",
   "unitCm": "cm",
-  "unitMeters": "Mètres"
+  "unitMeters": "Mètres",
+  "freeTierAdNotice": "Publicité : soutenir le niveau IA gratuit"
 }

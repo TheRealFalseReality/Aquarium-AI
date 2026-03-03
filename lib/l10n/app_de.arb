@@ -1012,5 +1012,6 @@
   "unitInches": "Zoll",
   "unitFeet": "Fuß",
   "unitCm": "cm",
-  "unitMeters": "Meter"
+  "unitMeters": "Meter",
+  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe"
 }

@@ -87,6 +87,30 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       _error = null;
     });
 
+    // Show interstitial ad for eligible free-tier image users when they tap
+    // Analyze Photo (before the analysis starts).
+    final modelState = ref.read(modelProvider);
+    final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+    final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+    final interstitialEligible = !kIsWeb &&
+        modelState.usingDeveloperGroqKeyForImage &&
+        !adsRemoved &&
+        !debugHideAds;
+    if (interstitialEligible) {
+      _interstitialAdService.showIfEligible(
+        onWillShow: () {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.freeTierAdNotice),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+    }
+
     // Log photo analysis submission
     AnalyticsService.logPhotoAnalysis(
       analysisType: 'photo_analysis_submit',
@@ -133,29 +157,16 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     final activeImageProvider = ref.watch(modelProvider).activeImageProvider;
     final isGroq = activeImageProvider == AIProvider.groq;
     final modelState = ref.watch(modelProvider);
-    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    final debugHideAds =
-        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
 
     // Disabled for free-tier users when the per-tool RC toggle is off.
     final isPhotoAnalysisDisabled = modelState.usingDeveloperGroqKeyForImage &&
         !RemoteConfigService.freePhotoAnalysisEnabled;
-
-    // Interstitial eligible: free-tier image user who hasn't removed ads.
-    final interstitialEligible = !kIsWeb &&
-        modelState.usingDeveloperGroqKeyForImage &&
-        !adsRemoved &&
-        !debugHideAds;
 
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
       if (next.messages.isNotEmpty) {
         final last = next.messages.last;
         if (!last.isUser && last.photoAnalysisResult != null && !next.isLoading) {
-          // Show interstitial ad for eligible free-tier users after analysis.
-          if (interstitialEligible) {
-            _interstitialAdService.showIfEligible();
-          }
           // Navigate to result screen when analysis is complete
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {

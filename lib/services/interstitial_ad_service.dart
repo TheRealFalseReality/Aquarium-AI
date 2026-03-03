@@ -59,11 +59,17 @@ class InterstitialAdService {
   /// - The ad is loaded
   /// - The 6-hour cooldown has elapsed
   ///
+  /// [onWillShow] is called just before the ad is presented, allowing the
+  /// caller to show a brief toast or notification to the user.
+  ///
   /// After showing, reloads the ad for the next opportunity.
-  Future<void> showIfEligible() async {
+  Future<void> showIfEligible({VoidCallback? onWillShow}) async {
     if (!AdHelper.isSupportedPlatform) return;
     if (!_isAdReady || _interstitialAd == null) return;
     if (!await _canShow()) return;
+
+    // Notify caller so it can show a toast/hint before the ad appears.
+    onWillShow?.call();
 
     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdShowedFullScreenContent: (ad) async {
