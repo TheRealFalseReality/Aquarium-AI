@@ -333,14 +333,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${params['salinity']!.isNotEmpty ? ', Salinity: ${params['salinity']} ${params['salinityUnit']}' : ''}'
         '${params['additionalInfo']!.isNotEmpty ? ', Additional Info: ${params['additionalInfo']}' : ''}';
     _prepareForSending(userMsg);
-    final prompt = buildWaterAnalysisPrompt(
-      tankType: params['tankType']!,
-      ph: params['ph']!,
-      temp: params['temp']!,
-      salinity: params['salinity']!,
-      additionalInfo: params['additionalInfo']!,
-      tempUnit: params['tempUnit']!,
-      salinityUnit: params['salinityUnit']!,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildWaterAnalysisPrompt(
+        tankType: params['tankType']!,
+        ph: params['ph']!,
+        temp: params['temp']!,
+        salinity: params['salinity']!,
+        additionalInfo: params['additionalInfo']!,
+        tempUnit: params['tempUnit']!,
+        salinityUnit: params['salinityUnit']!,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -391,7 +396,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
-    final prompt = buildAutomationScriptPrompt(description);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildAutomationScriptPrompt(description),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
       final decoded = json.decode(extractJson(responseText));
@@ -446,10 +456,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
         '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
     _prepareForSending(userMsg);
-    final prompt = buildFishInfoPrompt(
-      fishNames: fishNames,
-      tankSize: tankSize,
-      additionalNotes: additionalNotes,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildFishInfoPrompt(
+        fishNames: fishNames,
+        tankSize: tankSize,
+        additionalNotes: additionalNotes,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -552,7 +567,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     } else {
       state = ChatState(messages: state.messages, isLoading: true);
     }
-    final prompt = buildPhotoAnalysisPrompt(note);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildPhotoAnalysisPrompt(note),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     final originalMessage = 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
     try {
       final responseText = await _generateContentWithImage(prompt, imageBytes, mimeType);

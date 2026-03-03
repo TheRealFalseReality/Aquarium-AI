@@ -3863,8 +3863,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  /// Bidirectional map between app locale codes and AI response language names
+  /// for the four supported languages.
+  static const Map<String, String> _localeToLanguageMap = {
+    'en': 'English',
+    'de': 'German',
+    'es': 'Spanish',
+    'fr': 'French',
+  };
+
+  /// Reverse map (language name → locale code), derived from [_localeToLanguageMap]
+  /// to ensure a single source of truth when adding new languages.
+  static final Map<String, String> _languageToLocaleMap = Map.fromEntries(
+    _localeToLanguageMap.entries.map((e) => MapEntry(e.value, e.key)),
+  );
+
+  /// Returns the AI response language name for [localeCode], or null when
+  /// [localeCode] is null (system default → "Follow App Language") or
+  /// unrecognised.
+  static String? _localeToAiLanguage(String? localeCode) {
+    if (localeCode == null) return null; // system default → follow app
+    return _localeToLanguageMap[localeCode]; // null for unrecognized codes
+  }
+
   void _applyLocaleChange(String? newLocale, String oldLocale, [StateSetter? parentSetDialogState]) {
     ref.read(appSettingsProvider.notifier).setLocale(newLocale);
+    // Sync AI response language to match the new app locale
+    ref.read(appSettingsProvider.notifier).setAiResponseLanguage(_localeToAiLanguage(newLocale));
     CrashlyticsService.setLocale(newLocale);
     AnalyticsService.logSettingsChange(
       settingName: 'language',
@@ -3985,6 +4010,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (dialogContext, setDialogState) {
           void applyChange(String? newValue) {
             ref.read(appSettingsProvider.notifier).setAiResponseLanguage(newValue);
+            // Sync app locale when the selected AI language is null (follow app)
+            // or maps to one of the 4 supported locale codes.
+            if (newValue == null) {
+              // "Follow App Language" → reset app locale to system default
+              ref.read(appSettingsProvider.notifier).setLocale(null);
+              CrashlyticsService.setLocale(null);
+            } else {
+              // O(1) reverse lookup: language name → locale code
+              final localeCode = _languageToLocaleMap[newValue];
+              if (localeCode != null) {
+                ref.read(appSettingsProvider.notifier).setLocale(localeCode);
+                CrashlyticsService.setLocale(localeCode);
+              }
+              // Custom language values: no app locale sync
+            }
             AnalyticsService.logSettingsChange(
               settingName: 'ai_response_language',
               newValue: newValue ?? 'follow_app',
