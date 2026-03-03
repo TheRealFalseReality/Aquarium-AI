@@ -48,7 +48,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Added (Soon)
+### To be Added
 
 - Fish, equipment and plants specific details with images
 - Better & Modern parameter, Dosing UX/UI  
