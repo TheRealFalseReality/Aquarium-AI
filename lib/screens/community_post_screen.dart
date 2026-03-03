@@ -27,6 +27,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   bool _isSubmitting = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
+  // Tracks which inhabitant chip indices are tapped-open.
+  final Set<int> _expandedInhabitants = {};
 
   @override
   void initState() {
@@ -442,6 +444,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             .whereType<Map<String, dynamic>>()
             .toList()
         : [];
+    final totalInhabitants = inhabitantsList.fold<int>(
+        0, (sum, inh) => sum + ((inh['quantity'] as int?) ?? 1));
 
     // Fall back to simple count if no detailed list is available.
     if (inhabitantsList.isEmpty && info['inhabitants'] != null) {
@@ -509,6 +513,23 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(width: 6),
+                  // Total inhabitants count badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: cs.secondary.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$totalInhabitants',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cs.secondary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -517,9 +538,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               child: Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: inhabitantsList
-                    .map((inh) => _buildInhabitantChip(context, inh))
-                    .toList(),
+                alignment: WrapAlignment.center,
+                children: inhabitantsList.asMap().entries.map(
+                    (e) => _buildInhabitantChip(context, e.value, e.key)).toList(),
               ),
             ),
           ],
@@ -529,7 +550,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   }
 
   /// Renders a compact avatar + name + quantity chip for one inhabitant.
-  Widget _buildInhabitantChip(BuildContext context, Map<String, dynamic> inh) {
+  /// Tapping the chip toggles an expanded view that also shows the species name.
+  Widget _buildInhabitantChip(
+      BuildContext context, Map<String, dynamic> inh, int index) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final name = (inh['name'] as String?)?.isNotEmpty == true
@@ -537,61 +560,97 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
         : (inh['fishUnit'] as String?)?.isNotEmpty == true
             ? inh['fishUnit'] as String
             : '?';
+    final species = (inh['fishUnit'] as String?)?.isNotEmpty == true
+        ? inh['fishUnit'] as String
+        : null;
     final qty = inh['quantity'] as int? ?? 1;
     final imageUrl = inh['imageUrl'] as String?;
+    final isExpanded = _expandedInhabitants.contains(index);
+    // Only show species row when it differs from the display name.
+    final showSpecies = isExpanded && species != null && species != name;
 
-    return SizedBox(
-      width: 88,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest.withOpacity(0.6),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Avatar
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
-              child: imageUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      width: 88,
-                      height: 56,
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
-                    )
-                  : _inhabitantPlaceholder(cs),
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (isExpanded) {
+          _expandedInhabitants.remove(index);
+        } else {
+          _expandedInhabitants.add(index);
+        }
+      }),
+      child: SizedBox(
+        width: 88,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: isExpanded
+                ? cs.secondaryContainer.withOpacity(0.8)
+                : cs.surfaceContainerHighest.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isExpanded
+                  ? cs.secondary.withOpacity(0.55)
+                  : cs.outlineVariant.withOpacity(0.5),
             ),
-            // Name + qty
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: tt.labelSmall?.copyWith(
-                      fontSize: 10,
-                      color: cs.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '×$qty',
-                    style: tt.labelSmall?.copyWith(
-                      fontSize: 10,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Avatar
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+                child: imageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        width: 88,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
+                      )
+                    : _inhabitantPlaceholder(cs),
               ),
-            ),
-          ],
+              // Name + optional species + qty
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (showSpecies) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        species,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 9,
+                          color: cs.secondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    Text(
+                      '×$qty',
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
