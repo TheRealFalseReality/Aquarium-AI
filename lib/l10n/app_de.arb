@@ -966,7 +966,7 @@
   "openSourceDescription": "Aquarium AI ist Open Source! Schau dir unseren Code an, trage bei oder melde Probleme auf GitHub.",
   "versionDisplay": "Version {version}",
   "co2Label": "CO₂",
-  "specificGravityAbbr": "Dichte",
+  "specificGravityAbbr": "SG",
   "conductivityAbbr": "Leitf.",
   "valueWithUnit": "Wert ({unit})",
   "tempInCelsius": "Temp (°C)",
