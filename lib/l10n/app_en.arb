@@ -4030,6 +4030,11 @@
     "description": "Tooltip text on the dimension diagram button in the tank volume calculator",
     "placeholders": {
       "shape": {
+        "type": "String"
+      }
+    }
+  },
+
   "themeDefault": "Default",
   "@themeDefault": {
     "description": "Display name for the Default colour theme"
@@ -4370,6 +4375,11 @@
     "description": "Snackbar message shown after an API key is cleared",
     "placeholders": {
       "label": {
+        "type": "String"
+      }
+    }
+  },
+
   "analysisTypeWaterParameters": "Water Parameter Analysis",
   "@analysisTypeWaterParameters": {
     "description": "Display name for the water parameter analysis type in history"
@@ -4413,11 +4423,6 @@
         "type": "String"
       }
     }
-  },
-
-  "clear": "Clear",
-  "@clear": {
-    "description": "Short button label to clear/remove a value"
   },
 
   "clearKey": "Clear Key",
@@ -4782,10 +4787,11 @@
 
   "getTheApp": "Get the App",
   "@getTheApp": {
-    "description": "Button label to download the mobile app",
+    "description": "Button label to download the mobile app"
+  },
+
   "moreThemeOptions": "More theme options",
   "@moreThemeOptions": {
     "description": "Button label in the app drawer that navigates to the full Appearance screen"
   }
 }
-      

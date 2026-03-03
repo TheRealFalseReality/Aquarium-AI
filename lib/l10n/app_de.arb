@@ -854,7 +854,6 @@
   "clearApiKey": "API-Schlüssel löschen",
   "clearApiKeyConfirm": "Möchten Sie {label} wirklich löschen? Sie müssen den Schlüssel erneut eingeben, um ihn zu verwenden.",
   "keyCleared": "{label} gelöscht.",
-  "clear": "Löschen",
   "clearKey": "Schlüssel löschen",
   "saveKey": "Schlüssel speichern",
   "seeGuide": "Anleitung ansehen",
@@ -926,7 +925,7 @@
   "appPromoBenefitNotificationsDesc": "Erhalten Sie Erinnerungen für Wasserwechsel und Tankwartung",
   "appPromoBenefitPerformanceTitle": "Native Leistung",
   "appPromoBenefitPerformanceDesc": "Schnelleres, flüssigeres Erlebnis optimiert für Mobilgeräte",
-  "getTheApp": "App herunterladen"
+  "getTheApp": "App herunterladen",
   "themeDefault": "Standard",
   "themeMaterialYou": "Material You",
   "themeOceanBlue": "Ozeanblau",
