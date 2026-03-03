@@ -4182,5 +4182,845 @@
   "moreThemeOptions": "More theme options",
   "@moreThemeOptions": {
     "description": "Button label in the app drawer that navigates to the full Appearance screen"
+  },
+
+  "analyzingFish": "Analyzing Fish...",
+  "@analyzingFish": {
+    "description": "Loading overlay title when AI is analyzing fish compatibility"
+  },
+
+  "pleaseWaitAIReport": "Please wait while the AI generates your compatibility report.",
+  "@pleaseWaitAIReport": {
+    "description": "Loading overlay subtitle when AI is generating compatibility report"
+  },
+
+  "aiCompatibilityCalculator": "AI Compatibility Calculator",
+  "@aiCompatibilityCalculator": {
+    "description": "Title for the AI fish compatibility screen"
+  },
+
+  "failedToLoadFishData": "Failed to load fish data:\n{error}",
+  "@failedToLoadFishData": {
+    "description": "Error message when fish data fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "aiInhabitantCompatibility": "AI Inhabitant Compatibility",
+  "@aiInhabitantCompatibility": {
+    "description": "Heading on the fish compatibility screen"
+  },
+
+  "selectInhabitantsHint": "Select two or more inhabitants to generate a compatibility report.",
+  "@selectInhabitantsHint": {
+    "description": "Subtitle hint on the fish compatibility screen"
+  },
+
+  "tagFishForBetterSearch": "Tag fish with species names for better search",
+  "@tagFishForBetterSearch": {
+    "description": "Label on the species tags link on the fish compatibility screen"
+  },
+
+  "searchByNameSpecies": "Search by name, species...",
+  "@searchByNameSpecies": {
+    "description": "Hint text in the fish search bar"
+  },
+
+  "reefSafe": "Reef Safe",
+  "@reefSafe": {
+    "description": "Label for the reef safe filter"
+  },
+
+  "reefSafeYes": "Yes",
+  "@reefSafeYes": {
+    "description": "Reef safe filter chip: yes"
+  },
+
+  "reefSafeNo": "No",
+  "@reefSafeNo": {
+    "description": "Reef safe filter chip: no"
+  },
+
+  "reefSafeCaution": "Caution",
+  "@reefSafeCaution": {
+    "description": "Reef safe filter chip: caution"
+  },
+
+  "clearSelection": "Clear Selection",
+  "@clearSelection": {
+    "description": "Tooltip on the clear selection button in the fish compatibility bottom bar"
+  },
+
+  "aiCompatToolFooterDescription": "This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you're interested in, and click \"Get Report\" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.",
+  "@aiCompatToolFooterDescription": {
+    "description": "Footer description on the fish compatibility screen"
+  },
+
+  "selectSpecificSpecies": "Select Specific Species",
+  "@selectSpecificSpecies": {
+    "description": "Title of the species selection dialog"
+  },
+
+  "optionallySelectSpecies": "Optionally select specific species to refine the AI analysis.",
+  "@optionallySelectSpecies": {
+    "description": "Subtitle in the species selection dialog"
+  },
+
+  "showMoreSpecies": "Show {count} more...",
+  "@showMoreSpecies": {
+    "description": "Button to show more species tags in the selection dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "showLess": "Show less",
+  "@showLess": {
+    "description": "Button to collapse species tags in the selection dialog"
+  },
+
+  "addSpeciesHint": "Add species...",
+  "@addSpeciesHint": {
+    "description": "Hint text in the add species text field"
+  },
+
+  "selectedFish": "Selected Fish",
+  "@selectedFish": {
+    "description": "Section title in the compatibility report for selected fish"
+  },
+
+  "compatibleTankMates": "Compatible Tank Mates",
+  "@compatibleTankMates": {
+    "description": "Section title in the compatibility report for compatible tank mates"
+  },
+
+  "detailedSummary": "Detailed Summary",
+  "@detailedSummary": {
+    "description": "Section title in the compatibility report for the detailed summary"
+  },
+
+  "recommendedTankSize": "Recommended Tank Size",
+  "@recommendedTankSize": {
+    "description": "Section title in the compatibility report for the recommended tank size"
+  },
+
+  "decorationsAndSetup": "Decorations and Setup",
+  "@decorationsAndSetup": {
+    "description": "Section title in the compatibility report for decorations and setup"
+  },
+
+  "careGuide": "Care Guide",
+  "@careGuide": {
+    "description": "Section title in the compatibility report for the care guide"
+  },
+
+  "aiDisclaimer": "Disclaimer: AI may occasionally provide inaccurate recommendations. Always cross-check critical information.",
+  "@aiDisclaimer": {
+    "description": "Disclaimer text at the bottom of the compatibility report"
+  },
+
+  "shareReport": "Share Report",
+  "@shareReport": {
+    "description": "Button label to share the compatibility report"
+  },
+
+  "groupHarmony": "Group Harmony",
+  "@groupHarmony": {
+    "description": "Title of the group harmony card in the compatibility report"
+  },
+
+  "calculationBreakdown": "Calculation Breakdown",
+  "@calculationBreakdown": {
+    "description": "Title of the calculation breakdown section in the compatibility report"
+  },
+
+  "clickFishToSearch": "(Click a fish to search)",
+  "@clickFishToSearch": {
+    "description": "Hint text below the compatible tank mates list"
+  },
+
+  "calculators": "Calculators",
+  "@calculators": {
+    "description": "Title of the calculators screen"
+  },
+
+  "essentialToolsDescription": "Essential tools for your aquarium.",
+  "@essentialToolsDescription": {
+    "description": "Subtitle on the calculators screen"
+  },
+
+  "calculatorType": "Calculator Type",
+  "@calculatorType": {
+    "description": "Section title for the calculator type selector"
+  },
+
+  "convertFrom": "Convert From",
+  "@convertFrom": {
+    "description": "Section title for the convert-from unit selector in calculators"
+  },
+
+  "estimatedCO2Level": "Estimated CO₂ Level",
+  "@estimatedCO2Level": {
+    "description": "Label for the CO₂ result in the CO₂ calculator"
+  },
+
+  "specificGravity": "Specific Gravity",
+  "@specificGravity": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "density": "Density",
+  "@density": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "conductivity": "Conductivity",
+  "@conductivity": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "shape": "Shape",
+  "@shape": {
+    "description": "Section title for the tank shape selector"
+  },
+
+  "cylinderType": "Cylinder Type",
+  "@cylinderType": {
+    "description": "Section title for the cylinder type selector"
+  },
+
+  "units": "Units",
+  "@units": {
+    "description": "Section title for the units selector in calculators"
+  },
+
+  "cylinderFull": "Full",
+  "@cylinderFull": {
+    "description": "Cylinder type chip label: full cylinder"
+  },
+
+  "cylinderHalf": "Half",
+  "@cylinderHalf": {
+    "description": "Cylinder type chip label: half cylinder"
+  },
+
+  "cylinderCorner": "Corner",
+  "@cylinderCorner": {
+    "description": "Cylinder type chip label: corner cylinder"
+  },
+
+  "sideLength": "Side Length",
+  "@sideLength": {
+    "description": "Field label for cube side length in the tank volume calculator"
+  },
+
+  "diameter": "Diameter",
+  "@diameter": {
+    "description": "Field label for cylinder diameter in the tank volume calculator"
+  },
+
+  "height": "Height",
+  "@height": {
+    "description": "Field label for tank height in the tank volume calculator"
+  },
+
+  "edgeLength": "Edge Length",
+  "@edgeLength": {
+    "description": "Field label for hexagonal tank edge length in the tank volume calculator"
+  },
+
+  "lengthBack": "Length (Back)",
+  "@lengthBack": {
+    "description": "Field label for bowfront tank back length in the tank volume calculator"
+  },
+
+  "widthSide": "Width (Side)",
+  "@widthSide": {
+    "description": "Field label for bowfront tank side width in the tank volume calculator"
+  },
+
+  "fullWidth": "Full Width",
+  "@fullWidth": {
+    "description": "Field label for bowfront tank full width in the tank volume calculator"
+  },
+
+  "lengthLabel": "Length",
+  "@lengthLabel": {
+    "description": "Field label for tank length in the tank volume calculator"
+  },
+
+  "widthLabel": "Width",
+  "@widthLabel": {
+    "description": "Field label for tank width in the tank volume calculator"
+  },
+
+  "volume": "Volume",
+  "@volume": {
+    "description": "Result column label for tank volume"
+  },
+
+  "weight": "Weight",
+  "@weight": {
+    "description": "Result column label for tank water weight"
+  },
+
+  "informationSubtitle": "Learn how to contribute to Aquarium AI and help make it available in your language.",
+  "@informationSubtitle": {
+    "description": "Subtitle on the information screen"
+  },
+
+  "i18nCardTitle": "Internationalization (i18n)",
+  "@i18nCardTitle": {
+    "description": "Title of the i18n card on the information screen"
+  },
+
+  "i18nCardSubtitle": "Help translate Aquarium AI into your language",
+  "@i18nCardSubtitle": {
+    "description": "Subtitle of the i18n card on the information screen"
+  },
+
+  "i18nGuideInfo": "The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.",
+  "@i18nGuideInfo": {
+    "description": "Info text below the i18n card on the information screen"
+  },
+
+  "freeTierLimits": "Free-tier limits",
+  "@freeTierLimits": {
+    "description": "Title for the free tier limits expansion tile"
+  },
+  "freeTierLimitsSubtitle": "{reqPerDay} req/day  •  {reqPerMin} req/min  •  {photosPerDay} photo/day",
+  "@freeTierLimitsSubtitle": {
+    "description": "Subtitle showing free tier limits",
+    "placeholders": {
+      "reqPerDay": {"type": "int"},
+      "reqPerMin": {"type": "int"},
+      "photosPerDay": {"type": "int"}
+    }
+  },
+  "freeTierRequestsPerMin": "AI requests per minute",
+  "@freeTierRequestsPerMin": {
+    "description": "Label for AI requests per minute in free tier bullet list"
+  },
+  "freeTierRequestsPerDay": "AI requests per day",
+  "@freeTierRequestsPerDay": {
+    "description": "Label for AI requests per day in free tier bullet list"
+  },
+  "freeTierPhotoAnalysesPerDay": "photo analyses per day",
+  "@freeTierPhotoAnalysesPerDay": {
+    "description": "Label for photo analyses per day in free tier bullet list"
+  },
+  "freeTierChatHistoryPerRequest": "message chat history per request",
+  "@freeTierChatHistoryPerRequest": {
+    "description": "Label for chat history per request in free tier bullet list"
+  },
+  "freeTierModelNote": "Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.",
+  "@freeTierModelNote": {
+    "description": "Note about the model used in the free tier"
+  },
+  "freeTierRecommendation": "For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).",
+  "@freeTierRecommendation": {
+    "description": "Recommendation to use own key for best results"
+  },
+  "freeTierDisclaimer": "⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.",
+  "@freeTierDisclaimer": {
+    "description": "Disclaimer about the free AI tier"
+  },
+  "freeTierUnavailable": "Free AI tier currently unavailable",
+  "@freeTierUnavailable": {
+    "description": "Title shown when free AI tier is disabled"
+  },
+  "freeTierUnavailableDesc": "The built-in free AI provider has been disabled by the developer. Please add your own API key below to continue using AI features.",
+  "@freeTierUnavailableDesc": {
+    "description": "Description shown when free AI tier is disabled"
+  },
+  "freeAI": "Free AI",
+  "@freeAI": {
+    "description": "Title for the Free AI card section"
+  },
+  "freeAIDescription": "Use the built-in free AI service instead of your own API key.",
+  "@freeAIDescription": {
+    "description": "Description of the free AI service"
+  },
+  "useFreeAIForText": "Use Free AI for Text / Chat",
+  "@useFreeAIForText": {
+    "description": "Toggle label for using free AI for text/chat"
+  },
+  "useFreeAIForImage": "Use Free AI for Image / Photo",
+  "@useFreeAIForImage": {
+    "description": "Toggle label for using free AI for image/photo"
+  },
+  "chatHistoryLimit": "Chat History Limit",
+  "@chatHistoryLimit": {
+    "description": "Title for the chat history limit section"
+  },
+  "aiKeysNotRequired": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@aiKeysNotRequired": {
+    "description": "Note that calculators and tank management work without an AI key"
+  },
+  "freeTierBadge": "Free Tier",
+  "@freeTierBadge": {
+    "description": "Badge label shown next to chat history limit when on free tier"
+  },
+  "chatHistoryLimitDesc": "Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.",
+  "@chatHistoryLimitDesc": {
+    "description": "Description for the chat history limit slider"
+  },
+  "chatHistoryFreeTierDesc": "Without your own API key, the app uses our free service tier with a fixed limit of {limit} past messages per request. Add your own API key above to unlock a configurable limit (up to {maxLimit} messages).",
+  "@chatHistoryFreeTierDesc": {
+    "description": "Description shown when chat history is locked on free tier",
+    "placeholders": {
+      "limit": {"type": "int"},
+      "maxLimit": {"type": "int"}
+    }
+  },
+  "providerMismatch": "Provider Mismatch",
+  "@providerMismatch": {
+    "description": "Title of the provider mismatch dialog"
+  },
+  "providerMismatchMessage": "The following providers are selected but have no API key configured:",
+  "@providerMismatchMessage": {
+    "description": "Message in the provider mismatch dialog"
+  },
+  "providerMismatchHint": "AI features using these providers will not work until a key is entered or a different provider is selected.",
+  "@providerMismatchHint": {
+    "description": "Hint in the provider mismatch dialog"
+  },
+  "stayAndFix": "Stay & Fix",
+  "@stayAndFix": {
+    "description": "Button to stay and fix provider mismatch"
+  },
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Button to dismiss the provider mismatch dialog"
+  },
+  "unsavedChanges": "Unsaved Changes",
+  "@unsavedChanges": {
+    "description": "Title of the unsaved changes dialog"
+  },
+  "textProviderChanged": "Text provider changed",
+  "@textProviderChanged": {
+    "description": "Unsaved changes item: text provider was changed"
+  },
+  "imageProviderChanged": "Image provider changed",
+  "@imageProviderChanged": {
+    "description": "Unsaved changes item: image provider was changed"
+  },
+  "textModelChanged": "Text model changed",
+  "@textModelChanged": {
+    "description": "Unsaved changes item: text model was changed"
+  },
+  "imageModelChanged": "Image model changed",
+  "@imageModelChanged": {
+    "description": "Unsaved changes item: image model was changed"
+  },
+  "apiKeysUpdated": "API keys updated",
+  "@apiKeysUpdated": {
+    "description": "Unsaved changes item: API keys were updated"
+  },
+  "providerKeyMismatchWarning": "Provider/key mismatch — AI will not work:",
+  "@providerKeyMismatchWarning": {
+    "description": "Warning shown in unsaved changes dialog when there is a provider/key mismatch"
+  },
+  "saveAllAndClose": "Save All & Close",
+  "@saveAllAndClose": {
+    "description": "Button to save all changes and close the dialog"
+  },
+  "apiKeys": "API Keys",
+  "@apiKeys": {
+    "description": "Title of the API Keys section"
+  },
+  "apiKeysDescription": "Enter your API key for each provider once. It will be used for both text and image features.",
+  "@apiKeysDescription": {
+    "description": "Description for the API keys section"
+  },
+  "geminiDescription": "Google's most capable AI model",
+  "@geminiDescription": {
+    "description": "Subtitle description for Gemini provider"
+  },
+  "groqDescription": "Lightning-fast LLM inference",
+  "@groqDescription": {
+    "description": "Subtitle description for Groq provider"
+  },
+  "openAIDescription": "ChatGPT and GPT models by OpenAI",
+  "@openAIDescription": {
+    "description": "Subtitle description for OpenAI provider"
+  },
+  "googleAIApiKey": "Google AI API Key",
+  "@googleAIApiKey": {
+    "description": "Label for the Google AI API key text field"
+  },
+  "groqApiKeyLabel": "Groq API Key",
+  "@groqApiKeyLabel": {
+    "description": "Label for the Groq API key text field"
+  },
+  "openAIApiKeyLabel": "OpenAI API Key",
+  "@openAIApiKeyLabel": {
+    "description": "Label for the OpenAI API key text field"
+  },
+  "saveKey": "Save Key",
+  "@saveKey": {
+    "description": "Button to save an API key"
+  },
+  "howToGetGoogleApiKey": "How to get your Google AI API key:",
+  "@howToGetGoogleApiKey": {
+    "description": "Guide title for getting a Google AI API key"
+  },
+  "geminiModelsRateLimits": "Gemini Models & Rate Limits:",
+  "@geminiModelsRateLimits": {
+    "description": "Guide title for Gemini models and rate limits"
+  },
+  "viewModelsRateLimits": "View available models and free-tier rate limits:",
+  "@viewModelsRateLimits": {
+    "description": "Link label for viewing models and free-tier rate limits"
+  },
+  "howToGetGroqApiKey": "How to get your Groq API key:",
+  "@howToGetGroqApiKey": {
+    "description": "Guide title for getting a Groq API key"
+  },
+  "groqModelsRateLimits": "Groq Models & Rate Limits:",
+  "@groqModelsRateLimits": {
+    "description": "Guide title for Groq models and rate limits"
+  },
+  "howToGetOpenAIApiKey": "How to get your OpenAI API key:",
+  "@howToGetOpenAIApiKey": {
+    "description": "Guide title for getting an OpenAI API key"
+  },
+  "openAIModelsRateLimits": "OpenAI Models & Rate Limits:",
+  "@openAIModelsRateLimits": {
+    "description": "Guide title for OpenAI models and rate limits"
+  },
+  "viewModelsUsageLimits": "View available models and usage limits:",
+  "@viewModelsUsageLimits": {
+    "description": "Link label for viewing models and usage limits"
+  },
+  "rateLimits": "Rate Limits",
+  "@rateLimits": {
+    "description": "Button/link label for rate limits"
+  },
+  "seeGuide": "See Guide",
+  "@seeGuide": {
+    "description": "Link label to see a guide"
+  },
+  "geminiTextModel": "Gemini Text Model",
+  "@geminiTextModel": {
+    "description": "Label for the Gemini text model text field"
+  },
+  "geminiMultimediaModel": "Gemini Multimedia Model",
+  "@geminiMultimediaModel": {
+    "description": "Label for the Gemini multimedia model text field"
+  },
+  "chatGPTTextModel": "ChatGPT Text Model",
+  "@chatGPTTextModel": {
+    "description": "Label for the ChatGPT text model text field"
+  },
+  "chatGPTMultimediaModel": "ChatGPT Multimedia Model",
+  "@chatGPTMultimediaModel": {
+    "description": "Label for the ChatGPT multimedia model text field"
+  },
+  "groqTextModel": "Groq Text Model",
+  "@groqTextModel": {
+    "description": "Label for the Groq text model text field"
+  },
+  "groqMultimediaModel": "Groq Multimedia Model",
+  "@groqMultimediaModel": {
+    "description": "Label for the Groq multimedia model text field"
+  },
+  "clearKey": "Clear Key",
+  "@clearKey": {
+    "description": "Button label to clear an API key"
+  },
+  "fixedWhenUsingFreeProvider": "Fixed when using the Free Provider.",
+  "@fixedWhenUsingFreeProvider": {
+    "description": "Helper text shown when a model field is locked due to using the free provider"
+  },
+  "mustBeVisionModel": "Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)",
+  "@mustBeVisionModel": {
+    "description": "Helper text for the Groq multimedia model field"
+  },
+  "freeAIUnavailable": "Free AI unavailable",
+  "@freeAIUnavailable": {
+    "description": "Subtitle shown in toggle when free AI is unavailable"
+  },
+  "usingFreeProvider": "Using Free Provider",
+  "@usingFreeProvider": {
+    "description": "Subtitle shown in toggle when free provider is active"
+  },
+  "useYourOwnKey": "Use your own key",
+  "@useYourOwnKey": {
+    "description": "Subtitle shown in toggle when free provider is not active"
+  },
+  "modelsButton": "Models",
+  "@modelsButton": {
+    "description": "Button label for the Models link"
+  },
+
+  "clearApiKeyTitle": "Clear API Key",
+  "@clearApiKeyTitle": {
+    "description": "Title of the confirmation dialog for clearing an API key"
+  },
+
+  "clearApiKeyConfirm": "Are you sure you want to clear the {label}? You will need to re-enter the key to use it again.",
+  "@clearApiKeyConfirm": {
+    "description": "Body of the confirmation dialog for clearing an API key",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+
+  "apiKeyCleared": "{label} cleared.",
+  "@apiKeyCleared": {
+    "description": "Toast shown after an API key is successfully cleared",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+
+  "unableToOpenLink": "Unable to open link at this time.",
+  "@unableToOpenLink": {
+    "description": "Snackbar shown when a URL cannot be opened"
+  },
+
+  "storeNotAvailable": "Store not available on this device.",
+  "@storeNotAvailable": {
+    "description": "Snackbar shown when the in-app purchase store is unavailable"
+  },
+
+  "storeError": "Store error: {message}",
+  "@storeError": {
+    "description": "Snackbar shown when there is an in-app store error",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+
+  "productNotFound": "Product not found. Please try again later.",
+  "@productNotFound": {
+    "description": "Snackbar shown when the in-app purchase product is not found"
+  },
+
+  "unableToInitiatePurchase": "Unable to initiate purchase. Please try again later.",
+  "@unableToInitiatePurchase": {
+    "description": "Snackbar shown when an in-app purchase cannot be started"
+  },
+
+  "purchaseError": "Purchase error: {error}",
+  "@purchaseError": {
+    "description": "Snackbar shown when an in-app purchase throws an exception",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "aboutSubtitle": "Your intelligent assistant for aquatic compatibility.",
+  "@aboutSubtitle": {
+    "description": "Subtitle shown on the About screen under the app title"
+  },
+
+  "getMobileApp": "Get the Mobile App",
+  "@getMobileApp": {
+    "description": "Section title on About screen for the mobile app download"
+  },
+
+  "getMobileAppDescription": "Experience the full power of Aquarium AI with our mobile app featuring offline access, enhanced camera, and smart notifications.",
+  "@getMobileAppDescription": {
+    "description": "Description text in the Get the Mobile App card on the About screen"
+  },
+
+  "bringYourOwnApiKey": "Bring Your Own API Key",
+  "@bringYourOwnApiKey": {
+    "description": "Section title on About screen for the BYOK feature"
+  },
+
+  "byokDescription": "Aquarium AI is different from other AI-enabled aquarium apps. We empower you by allowing you to use your own AI API keys from Gemini, OpenAI, and Groq. This unique \"Bring Your Own Key\" model gives you:",
+  "@byokDescription": {
+    "description": "Introductory paragraph in the Bring Your Own API Key card"
+  },
+
+  "byokBullet1": "Higher AI API Call Limits: Enjoy significantly more interactions with your AI, including the powerful Gemini 2.5 flash.",
+  "@byokBullet1": {
+    "description": "First bullet point in the BYOK benefits list"
+  },
+
+  "byokBullet2": "Unlimited Features: Get unrestricted access to all our features, including the ability to add and manage an unlimited number of tanks.",
+  "@byokBullet2": {
+    "description": "Second bullet point in the BYOK benefits list"
+  },
+
+  "byokNote": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@byokNote": {
+    "description": "Italic note at the bottom of the BYOK card"
+  },
+
+  "contactFeedback": "Contact & Feedback",
+  "@contactFeedback": {
+    "description": "Section title on About screen for the contact/feedback card"
+  },
+
+  "broughtToYouBy": "Aquarium AI is proudly brought to you by ",
+  "@broughtToYouBy": {
+    "description": "Text before the company name in the Contact & Feedback card"
+  },
+
+  "feedbackDescription": "For feedback, bug reports, or questions, please create an issue on GitHub or email us.",
+  "@feedbackDescription": {
+    "description": "Description text in the Contact & Feedback card"
+  },
+
+  "createIssueSubtitle": "Report bugs or suggest features on our GitHub repository",
+  "@createIssueSubtitle": {
+    "description": "Subtitle for the Create Issue on GitHub list tile"
+  },
+
+  "openSource": "Open Source",
+  "@openSource": {
+    "description": "Section title on About screen for the open source card"
+  },
+
+  "openSourceDescription": "Aquarium AI is open source! Check out our code, contribute, or report issues on GitHub.",
+  "@openSourceDescription": {
+    "description": "Description text in the Open Source card"
+  },
+
+  "versionDisplay": "Version {version}",
+  "@versionDisplay": {
+    "description": "Version label shown at the bottom of the About screen",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+
+  "co2Label": "CO₂",
+  "@co2Label": {
+    "description": "Display label for the CO₂ calculator type chip"
+  },
+
+  "specificGravityAbbr": "SG",
+  "@specificGravityAbbr": {
+    "description": "Abbreviated chip label for Specific Gravity in the salinity converter"
+  },
+
+  "conductivityAbbr": "Cond.",
+  "@conductivityAbbr": {
+    "description": "Abbreviated chip label for Conductivity in the salinity converter"
+  },
+
+  "valueWithUnit": "Value ({unit})",
+  "@valueWithUnit": {
+    "description": "Text field label showing input value with its unit in parentheses",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+
+  "tempInCelsius": "Temp (°C)",
+  "@tempInCelsius": {
+    "description": "Text field label for a temperature input in Celsius"
+  },
+
+  "labelPH": "pH",
+  "@labelPH": {
+    "description": "Text field label for pH input in the CO₂ calculator"
+  },
+
+  "labelDKH": "dKH",
+  "@labelDKH": {
+    "description": "Text field label / chip label for dKH alkalinity unit"
+  },
+
+  "labelPPM": "ppm",
+  "@labelPPM": {
+    "description": "Chip label for parts-per-million alkalinity unit"
+  },
+
+  "labelMeqL": "meq/L",
+  "@labelMeqL": {
+    "description": "Chip label for milliequivalents-per-litre alkalinity unit"
+  },
+
+  "fahrenheit": "Fahrenheit",
+  "@fahrenheit": {
+    "description": "Temperature unit name Fahrenheit, used as chip label and result label"
+  },
+
+  "celsius": "Celsius",
+  "@celsius": {
+    "description": "Temperature unit name Celsius, used as chip label and result label"
+  },
+
+  "kelvin": "Kelvin",
+  "@kelvin": {
+    "description": "Temperature unit name Kelvin, used as result column label"
+  },
+
+  "tempFieldLabel": "Temp (°{unit})",
+  "@tempFieldLabel": {
+    "description": "Text field label for temperature input, unit is F or C",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+
+  "shapeRectangle": "Rectangle",
+  "@shapeRectangle": {
+    "description": "Tank shape chip label: rectangular tank"
+  },
+
+  "shapeCube": "Cube",
+  "@shapeCube": {
+    "description": "Tank shape chip label: cube tank"
+  },
+
+  "shapeCylinder": "Cylinder",
+  "@shapeCylinder": {
+    "description": "Tank shape chip label: cylindrical tank"
+  },
+
+  "shapeHexagonal": "Hexagonal",
+  "@shapeHexagonal": {
+    "description": "Tank shape chip label: hexagonal tank"
+  },
+
+  "shapeBowFront": "Bow Front",
+  "@shapeBowFront": {
+    "description": "Tank shape chip label: bow-front tank"
+  },
+
+  "unitInches": "Inches",
+  "@unitInches": {
+    "description": "Unit chip label: inches"
+  },
+
+  "unitFeet": "Feet",
+  "@unitFeet": {
+    "description": "Unit chip label: feet"
+  },
+
+  "unitCm": "cm",
+  "@unitCm": {
+    "description": "Unit chip label: centimetres (universal abbreviation)"
+  },
+
+  "unitMeters": "Meters",
+  "@unitMeters": {
+    "description": "Unit chip label: meters"
   }
 }

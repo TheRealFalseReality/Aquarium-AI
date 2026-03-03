@@ -16,7 +16,11 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+<<<<<<< copilot/update-tank-showcase-feature
 import '../theme_colors.dart';
+=======
+import '../utils/storage_image_utils.dart';
+>>>>>>> main
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -454,11 +458,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           color: colorScheme.primary,
         ),
       );
-    } else if (profile.avatarUrl != null) {
-      avatar = CircleAvatar(
-        radius: radius,
-        backgroundColor: colorScheme.primaryContainer,
-        backgroundImage: CachedNetworkImageProvider(profile.avatarUrl!),
+    }
+    if (profile.avatarUrl != null) {
+      return FutureBuilder<String>(
+        future: resolveResizedStorageUrl(profile.avatarUrl!),
+        initialData:
+            getCachedResizedUrl(profile.avatarUrl!) ?? profile.avatarUrl!,
+        builder: (_, snap) => CircleAvatar(
+          radius: radius,
+          backgroundColor: colorScheme.primaryContainer,
+          backgroundImage: CachedNetworkImageProvider(snap.data!),
+        ),
       );
     } else {
       avatar = CircleAvatar(

@@ -8,6 +8,7 @@ import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
+import '../utils/storage_image_utils.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
@@ -24,6 +25,21 @@ class CommunityPostScreen extends ConsumerStatefulWidget {
 class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
+  Future<String>? _resolvedPostImageUrl;
+  Future<String>? _resolvedAvatarUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.post.imageUrl != null) {
+      _resolvedPostImageUrl =
+          resolveResizedStorageUrl(widget.post.imageUrl!);
+    }
+    if (widget.post.avatarUrl != null) {
+      _resolvedAvatarUrl =
+          resolveResizedStorageUrl(widget.post.avatarUrl!);
+    }
+  }
 
   @override
   void dispose() {
@@ -112,19 +128,22 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               children: [
                 // Post header image — taller for Tank Showcase
                 if (widget.post.imageUrl != null)
-                  CachedNetworkImage(
-                    imageUrl: widget.post.imageUrl!,
-                    width: double.infinity,
-                    height: isTankShowcase ? 320 : 240,
-                    fit: BoxFit.cover,
-                    placeholder: (_, _) => Container(
+                  FutureBuilder<String>(
+                    future: _resolvedPostImageUrl,
+                    builder: (_, snap) => CachedNetworkImage(
+                      imageUrl: snap.data ?? widget.post.imageUrl!,
+                      width: double.infinity,
                       height: isTankShowcase ? 320 : 240,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      child: const Center(child: CircularProgressIndicator()),
+                      fit: BoxFit.cover,
+                      placeholder: (_, _) => Container(
+                        height: isTankShowcase ? 320 : 240,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: const Center(child: CircularProgressIndicator()
+                      ),
+                      errorWidget: (_, _, _) => const SizedBox(),
                     ),
-                    errorWidget: (_, _, _) => const SizedBox(),
                   ),
                 // Post content
                 Padding(
@@ -275,11 +294,14 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
     if (widget.post.avatarUrl != null) {
-      return CircleAvatar(
-        radius: 20,
-        backgroundImage:
-            CachedNetworkImageProvider(widget.post.avatarUrl!),
-        backgroundColor: theme.colorScheme.primaryContainer,
+      return FutureBuilder<String>(
+        future: _resolvedAvatarUrl,
+        builder: (_, snap) => CircleAvatar(
+          radius: 20,
+          backgroundImage: CachedNetworkImageProvider(
+              snap.data ?? widget.post.avatarUrl!),
+          backgroundColor: theme.colorScheme.primaryContainer,
+        ),
       );
     }
     return CircleAvatar(
