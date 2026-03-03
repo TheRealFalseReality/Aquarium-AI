@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../l10n/app_localizations.dart';
-import '../models/tank_notification.dart';
 import '../models/notification_log.dart';
+import '../models/tank_notification.dart';
 
 /// Options for scheduling a notification when activity logs exist
 enum ScheduleOption {
   /// Schedule based on the specified date/time in the notification form
   useSpecifiedTime,
+
   /// Schedule based on the last logged activity
   useLastActivity,
+
   /// Go back to edit the notification form without saving
   goBackToEdit,
+
   /// Discard changes and go back to the notification list
   discardChanges,
 }
 
 /// Dialog to ask the user how they want to schedule a notification
 /// when there are existing activity logs that match the notification type.
-/// 
+///
 /// This dialog is shown when adding or editing a notification to let the user
 /// choose whether the next notification should be based on:
 /// - The date/time specified in the notification form
 /// - The most recent activity log of the same type
 class NotificationScheduleOptionDialog extends StatelessWidget {
   final TankNotification notification;
+
   /// The last matching activity log for displaying the last logged activity date
   final NotificationLog? lastActivityLog;
+
   /// The specified date/time from the notification form for displaying in the specified time option
   final DateTime? specifiedDateTime;
 
@@ -66,22 +72,27 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
     String specifiedTimeDescription = l10n.useSpecifiedTimeDescription;
     final specifiedDateTimeVal = specifiedDateTime;
     if (specifiedDateTimeVal != null) {
-      final formattedDateTime = '${dateFormat.format(specifiedDateTimeVal)} ${timeFormat.format(specifiedDateTimeVal)}';
-      specifiedTimeDescription = '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: $formattedDateTime';
+      final formattedDateTime =
+          '${dateFormat.format(specifiedDateTimeVal)} ${timeFormat.format(specifiedDateTimeVal)}';
+      specifiedTimeDescription =
+          '${l10n.useSpecifiedTimeDescription}\n${l10n.scheduledFor}: $formattedDateTime';
     }
 
     // Build description for "From Last Activity" option
     String? lastActivityDate;
     String? nextScheduledDate;
-    
+
     final lastActivityLogVal = lastActivityLog;
     if (lastActivityLogVal != null) {
       lastActivityDate = dateFormat.format(lastActivityLogVal.loggedAt);
-      
+
       // Calculate next scheduled date based on last activity
-      final nextDate = notification.getNextNotificationDateFromBase(lastActivityLogVal.loggedAt);
+      final nextDate = notification.getNextNotificationDateFromBase(
+        lastActivityLogVal.loggedAt,
+      );
       if (nextDate != null) {
-        nextScheduledDate = '${dateFormat.format(nextDate)} ${timeFormat.format(nextDate)}';
+        nextScheduledDate =
+            '${dateFormat.format(nextDate)} ${timeFormat.format(nextDate)}';
       }
     }
 
@@ -107,7 +118,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 24),
-          
+
           // Option 1: Use specified time
           _buildOption(
             context,
@@ -115,10 +126,11 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
             iconColor: cs.primary,
             title: l10n.useSpecifiedTime,
             description: specifiedTimeDescription,
-            onTap: () => Navigator.of(context).pop(ScheduleOption.useSpecifiedTime),
+            onTap: () =>
+                Navigator.of(context).pop(ScheduleOption.useSpecifiedTime),
           ),
           const SizedBox(height: 12),
-          
+
           // Option 2: Use last activity
           _buildOptionWithDetails(
             context,
@@ -128,20 +140,21 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
             description: l10n.useLastActivityDescription,
             lastActivityDate: lastActivityDate,
             nextScheduledDate: nextScheduledDate,
-            onTap: () => Navigator.of(context).pop(ScheduleOption.useLastActivity),
+            onTap: () =>
+                Navigator.of(context).pop(ScheduleOption.useLastActivity),
           ),
         ],
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(ScheduleOption.discardChanges),
-          style: TextButton.styleFrom(
-            foregroundColor: cs.error,
-          ),
+          onPressed: () =>
+              Navigator.of(context).pop(ScheduleOption.discardChanges),
+          style: TextButton.styleFrom(foregroundColor: cs.error),
           child: Text(l10n.discard),
         ),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(ScheduleOption.goBackToEdit),
+          onPressed: () =>
+              Navigator.of(context).pop(ScheduleOption.goBackToEdit),
           child: Text(l10n.goBack),
         ),
       ],
@@ -157,7 +170,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -220,7 +233,7 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
   }) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -293,4 +306,3 @@ class NotificationScheduleOptionDialog extends StatelessWidget {
     );
   }
 }
-

@@ -1,21 +1,21 @@
 import 'dart:async';
 
 /// A completer that can be cancelled, preventing completion after cancellation.
-/// 
+///
 /// This utility class is used across the application to manage async operations
 /// that may need to be cancelled, such as AI API calls.
-/// 
+///
 /// Example usage:
 /// ```dart
 /// final cancellable = CancellableCompleter<String>();
-/// 
+///
 /// // Start async operation
 /// someAsyncOperation().then((result) {
 ///   cancellable.complete(result);
 /// }).catchError((error) {
 ///   cancellable.completeError(error);
 /// });
-/// 
+///
 /// // Cancel if needed
 /// if (shouldCancel) {
 ///   cancellable.cancel();
@@ -26,7 +26,9 @@ class CancellableCompleter<T> {
   bool _isCancelled = false;
 
   Future<T> get future => _completer.future;
+
   bool get isCompleted => _completer.isCompleted;
+
   bool get isCancelled => _isCancelled;
 
   void complete([FutureOr<T>? value]) {
@@ -54,4 +56,3 @@ class CancelledException implements Exception {
   @override
   String toString() => 'Future was cancelled';
 }
-

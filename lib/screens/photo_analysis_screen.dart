@@ -1,22 +1,23 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../l10n/app_localizations.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
-import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
-import '../services/remote_config_service.dart';
 import '../services/interstitial_ad_service.dart';
+import '../services/remote_config_service.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
   final Uint8List? initialImageBytes;
-  
+
   const PhotoAnalysisScreen({super.key, this.initialImageBytes});
 
   @override
@@ -42,13 +43,13 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
 
   Future<void> _pick(ImageSource source) async {
     setState(() => _error = null);
-    
+
     // Log photo picker usage
     AnalyticsService.logPhotoAnalysis(
       analysisType: 'image_picker',
       success: null,
     );
-    
+
     try {
       final x = await _picker.pickImage(
         source: source,
@@ -58,7 +59,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       if (x != null) {
         final bytes = await x.readAsBytes();
         setState(() => _imageBytes = bytes);
-        
+
         // Log successful image selection
         AnalyticsService.logPhotoAnalysis(
           analysisType: 'image_selected',
@@ -69,7 +70,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       setState(() => _error = l10n.failedToPickImage);
-      
+
       // Log image selection error
       AnalyticsService.logPhotoAnalysis(
         analysisType: 'image_selected',
@@ -90,8 +91,10 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     // Analyze Photo (before the analysis starts).
     final modelState = ref.read(modelProvider);
     final adsRemoved = ref.read(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
-    final interstitialEligible = !kIsWeb &&
+    final debugHideAds =
+        kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+    final interstitialEligible =
+        !kIsWeb &&
         modelState.usingDeveloperGroqKeyForImage &&
         !adsRemoved &&
         !debugHideAds;
@@ -131,10 +134,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       },
     );
 
-    await ref.read(chatProvider.notifier).analyzePhoto(
-          imageBytes: _imageBytes!,
-          userNote: _noteController.text,
-        );
+    await ref
+        .read(chatProvider.notifier)
+        .analyzePhoto(imageBytes: _imageBytes!, userNote: _noteController.text);
 
     if (mounted) {
       setState(() => _isSubmitting = false);
@@ -158,14 +160,17 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     final modelState = ref.watch(modelProvider);
 
     // Disabled for free-tier users when the per-tool RC toggle is off.
-    final isPhotoAnalysisDisabled = modelState.usingDeveloperGroqKeyForImage &&
+    final isPhotoAnalysisDisabled =
+        modelState.usingDeveloperGroqKeyForImage &&
         !RemoteConfigService.freePhotoAnalysisEnabled;
 
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
       if (next.messages.isNotEmpty) {
         final last = next.messages.last;
-        if (!last.isUser && last.photoAnalysisResult != null && !next.isLoading) {
+        if (!last.isUser &&
+            last.photoAnalysisResult != null &&
+            !next.isLoading) {
           // Navigate to result screen when analysis is complete
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -183,7 +188,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         }
       }
     });
-    
+
     return MainLayout(
       title: l10n.photoAnalyzer,
       child: SingleChildScrollView(
@@ -195,10 +200,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 Expanded(
                   child: Text(
                     'AI Aquarium Photo Analysis',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -227,7 +231,11 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.amber, size: 20),
+                    const Icon(
+                      Icons.info_outline,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -246,7 +254,10 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
             if (isPhotoAnalysisDisabled) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -263,17 +274,17 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         children: [
                           Text(
                             l10n.freeTierPhotoAnalysisDisabledTitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange.shade800,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             l10n.freeTierPhotoAnalysisDisabledMessage,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.orange.shade800,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.orange.shade800),
                           ),
                         ],
                       ),
@@ -293,7 +304,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                     ? LinearGradient(
                         colors: [
                           cs.primary.withOpacity(0.15),
-                          cs.secondary.withOpacity(0.12)
+                          cs.secondary.withOpacity(0.12),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -318,9 +329,13 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(Icons.broken_image_outlined, size: 48),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 48,
+                              ),
+                            ),
                       ),
                     ),
             ),
@@ -361,16 +376,18 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
             if (_error != null)
               Text(
                 _error!,
-                style: TextStyle(
-                  color: cs.error,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: cs.error, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
-              const BannerAdWidget(),
-              const SizedBox(height: 12),
+            const BannerAdWidget(),
+            const SizedBox(height: 12),
             ElevatedButton.icon(
-              onPressed: (_imageBytes == null || _isSubmitting || isPhotoAnalysisDisabled) ? null : _submit,
+              onPressed:
+                  (_imageBytes == null ||
+                      _isSubmitting ||
+                      isPhotoAnalysisDisabled)
+                  ? null
+                  : _submit,
               icon: _isSubmitting
                   ? const SizedBox(
                       width: 18,
@@ -380,21 +397,25 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                   : const Icon(Icons.analytics_outlined),
               label: Text(_isSubmitting ? l10n.analyzing : l10n.analyzePhoto),
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 16,
+                ),
                 textStyle: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.bold),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'Disclaimer: Visual analysis can be imperfect. Always confirm species and health concerns with reliable sources.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: cs.onSurface.withOpacity(0.7),
-                  ),
+                fontStyle: FontStyle.italic,
+                color: cs.onSurface.withOpacity(0.7),
+              ),
               textAlign: TextAlign.center,
-            )
+            ),
           ],
         ),
       ),

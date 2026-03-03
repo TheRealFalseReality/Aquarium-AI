@@ -2,25 +2,27 @@
 
 import 'dart:io';
 import 'dart:math';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../l10n/app_localizations.dart';
-import '../theme_provider.dart';
-import '../providers/tank_provider.dart';
+import '../models/tank.dart';
 import '../providers/app_settings_provider.dart';
-import '../providers/purchase_provider.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
-import '../models/tank.dart';
-import '../utils/tank_harmony_calculator.dart';
-import '../utils/storage_image_utils.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../theme_colors.dart';
-import 'gradient_text.dart';
+import '../theme_provider.dart';
+import '../utils/storage_image_utils.dart';
+import '../utils/tank_harmony_calculator.dart';
 import 'animated_drawer_item.dart';
+import 'gradient_text.dart';
 import 'remove_ads_dialog.dart';
 
 class AppDrawer extends ConsumerStatefulWidget {
@@ -127,7 +129,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         to: targetScreen,
         method: 'drawer_menu',
       );
-      
+
       Navigator.pop(context); // Close the drawer first
       Future.delayed(const Duration(milliseconds: 250), () {
         if (!mounted) return;
@@ -144,7 +146,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       if (harmonyScore != null) {
         final percentage = (harmonyScore * 100).toStringAsFixed(0);
         final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
-        
+
         Color chipColor;
         Color textColor;
         if (harmonyScore >= 0.8) {
@@ -190,36 +192,53 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 180),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: randomTank != null
                             ? (randomTank.type == 'freshwater'
-                                ? [
-                                    Colors.blue.shade400.withOpacity(0.15),
-                                    Colors.cyan.shade300.withOpacity(0.15),
-                                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
-                                  ]
-                                : [
-                                    Colors.indigo.shade400.withOpacity(0.15),
-                                    Colors.purple.shade300.withOpacity(0.15),
-                                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
-                                  ])
+                                  ? [
+                                      Colors.blue.shade400.withOpacity(0.15),
+                                      Colors.cyan.shade300.withOpacity(0.15),
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer
+                                          .withOpacity(0.5),
+                                    ]
+                                  : [
+                                      Colors.indigo.shade400.withOpacity(0.15),
+                                      Colors.purple.shade300.withOpacity(0.15),
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer
+                                          .withOpacity(0.5),
+                                    ])
                             : [
-                                Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withOpacity(0.1),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer.withOpacity(0.3),
                               ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.4),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -233,31 +252,45 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => navigate('/tank-management'),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               child: Row(
                                 children: [
                                   _buildTankIconWithCount(randomTank),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           l10n.myTanks,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).colorScheme.onSurface,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                              ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           tankCount == 0
                                               ? l10n.noTanksYet
                                               : 'Total: $tankCount\n${randomTank != null ? randomTank.name : ""}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                              ),
                                         ),
                                         if (harmonyScoreWidget != null) ...[
                                           const SizedBox(height: 6),
@@ -268,7 +301,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                   ),
                                   Icon(
                                     Icons.chevron_right,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ],
                               ),
@@ -286,24 +321,35 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 if (appSettings.enableAI) ...[
-                  _sectionHeader(context, l10n.aiTools, Theme.of(context).colorScheme.primary),
+                  _sectionHeader(
+                    context,
+                    l10n.aiTools,
+                    Theme.of(context).colorScheme.primary,
+                  ),
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 250),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                             width: 2,
                           ),
                         ),
                       ),
                       child: ListTile(
-                        leading: Icon(Icons.calculate, color: Theme.of(context).colorScheme.primary),
+                        leading: Icon(
+                          Icons.calculate,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         title: Text(l10n.aiCompatibilityTool),
-                        subtitle:
-                            Text(l10n.aiCompatibilityDrawerDescription),
+                        subtitle: Text(l10n.aiCompatibilityDrawerDescription),
                         onTap: () => navigate('/compat-ai'),
                       ),
                     ),
@@ -311,17 +357,25 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 300),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                             width: 2,
                           ),
                         ),
                       ),
                       child: ListTile(
-                        leading: Icon(Icons.chat, color: Theme.of(context).colorScheme.secondary),
+                        leading: Icon(
+                          Icons.chat,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                         title: Text(l10n.aiChatbot),
                         subtitle: Text(l10n.aiChatbotDrawerDescription),
                         onTap: () => navigate('/chatbot'),
@@ -331,17 +385,25 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 350),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                             width: 2,
                           ),
                         ),
                       ),
                       child: ListTile(
-                        leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.tertiary),
+                        leading: Icon(
+                          Icons.auto_awesome,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
                         title: Text(l10n.aiStockingAssistant),
                         subtitle: Text(l10n.aiStockingDrawerDescription),
                         onTap: () => navigate('/stocking'),
@@ -352,17 +414,25 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 380),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                             width: 2,
                           ),
                         ),
                       ),
                       child: ListTile(
-                        leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                        leading: Icon(
+                          Icons.history,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         title: Text(l10n.analysisHistory),
                         subtitle: Text(l10n.analysisHistoryDesc),
                         onTap: () => navigate('/analysis-history'),
@@ -370,31 +440,47 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Divider(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.2),
                       thickness: 1,
                     ),
                   ),
                 ],
-                _sectionHeader(context, l10n.toolsAndResources, Theme.of(context).colorScheme.secondary),
+                _sectionHeader(
+                  context,
+                  l10n.toolsAndResources,
+                  Theme.of(context).colorScheme.secondary,
+                ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
+                      leading: Icon(
+                        Icons.science,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       title: Text(l10n.aquariumCalculators),
-                      subtitle:
-                          Text(l10n.aquariumCalculatorsDrawerDescription),
+                      subtitle: Text(l10n.aquariumCalculatorsDrawerDescription),
                       onTap: () => navigate('/calculators'),
                     ),
                   ),
@@ -402,47 +488,71 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 450),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.view_in_ar, color: Theme.of(context).colorScheme.secondary),
+                      leading: Icon(
+                        Icons.view_in_ar,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
                       title: Text(l10n.tankVolumeCalculator),
-                      subtitle:
-                          Text(l10n.tankVolumeDrawerDescription),
+                      subtitle: Text(l10n.tankVolumeDrawerDescription),
                       onTap: () => navigate('/tank-volume'),
                     ),
                   ),
                 ),
                 // ── Community & Profile ───────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Divider(
-                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondary.withOpacity(0.2),
                     thickness: 1,
                   ),
                 ),
-                _sectionHeader(context, '${l10n.communityTitle} & ${l10n.profileTitle}', Theme.of(context).colorScheme.secondary),
+                _sectionHeader(
+                  context,
+                  '${l10n.communityTitle} & ${l10n.profileTitle}',
+                  Theme.of(context).colorScheme.secondary,
+                ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 550),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.people, color: Theme.of(context).colorScheme.secondary),
+                      leading: Icon(
+                        Icons.people,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
                       title: Text(l10n.communityTitle),
                       subtitle: Text(l10n.communityDrawerDescription),
                       onTap: () => navigate('/community'),
@@ -452,11 +562,16 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 575),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
@@ -466,27 +581,44 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 ),
                 // ── Guides & Docs ─────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Divider(
-                    color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.tertiary.withOpacity(0.2),
                     thickness: 1,
                   ),
                 ),
-                _sectionHeader(context, l10n.guidesAndDocs, Theme.of(context).colorScheme.tertiary),
+                _sectionHeader(
+                  context,
+                  l10n.guidesAndDocs,
+                  Theme.of(context).colorScheme.tertiary,
+                ),
                 AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 600),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.tertiary.withOpacity(0.3),
                           width: 2,
                         ),
                       ),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.library_books, color: Theme.of(context).colorScheme.tertiary),
+                      leading: Icon(
+                        Icons.library_books,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
                       title: Text(l10n.information),
                       subtitle: Text(l10n.informationDescription),
                       onTap: () => navigate('/information'),
@@ -498,7 +630,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   AnimatedDrawerItem(
                     delay: const Duration(milliseconds: 600),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
@@ -508,9 +643,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         ),
                       ),
                       child: ListTile(
-                        leading: const Icon(Icons.bug_report, color: Colors.amber),
+                        leading: const Icon(
+                          Icons.bug_report,
+                          color: Colors.amber,
+                        ),
                         title: const Text('Fish Compat Editor'),
-                        subtitle: const Text('Debug: edit & validate fishcompat.json'),
+                        subtitle: const Text(
+                          'Debug: edit & validate fishcompat.json',
+                        ),
                         onTap: () => navigate('/fishcompat-editor'),
                       ),
                     ),
@@ -520,7 +660,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             ),
           ),
           // Remove Ads entry (hidden when ads already removed or debug hide-ads is on)
-          if (!kIsWeb && !ref.watch(purchaseProvider).adsRemoved && !(kDebugMode && appSettings.debugHideAds)) ...[
+          if (!kIsWeb &&
+              !ref.watch(purchaseProvider).adsRemoved &&
+              !(kDebugMode && appSettings.debugHideAds)) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Divider(
@@ -544,7 +686,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListTile(
-                  leading: Icon(Icons.block, color: Colors.green.shade600, size: 22),
+                  leading: Icon(
+                    Icons.block,
+                    color: Colors.green.shade600,
+                    size: 22,
+                  ),
                   title: Text(
                     l10n.removeAds,
                     style: TextStyle(
@@ -606,10 +752,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
+                color: color,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
         ],
@@ -617,16 +763,21 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     );
   }
 
-  Widget _buildProfileTile(BuildContext context, AppLocalizations l10n,
-      void Function(String) navigate) {
+  Widget _buildProfileTile(
+    BuildContext context,
+    AppLocalizations l10n,
+    void Function(String) navigate,
+  ) {
     final authAsync = ref.watch(authStateProvider);
     final user = authAsync.asData?.value;
     final isFounder = ref.watch(isFounderProvider);
 
     if (user == null) {
       return ListTile(
-        leading: Icon(Icons.account_circle_outlined,
-            color: Theme.of(context).colorScheme.tertiary),
+        leading: Icon(
+          Icons.account_circle_outlined,
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
         title: Text(l10n.authSignIn),
         subtitle: Text(l10n.profileDrawerDescription),
         onTap: () => navigate('/auth'),
@@ -637,18 +788,17 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final displayName = user.displayName?.isNotEmpty == true
         ? user.displayName!
         : (isAnon
-            ? l10n.profileAnonymous
-            : user.email ?? l10n.profileAnonymous);
+              ? l10n.profileAnonymous
+              : user.email ?? l10n.profileAnonymous);
 
     return ListTile(
       leading: SizedBox(
         width: 40,
         height: 40,
         child: CircleAvatar(
-          backgroundColor:
-              isFounder
-                  ? AquaThemeColors.founderColor(context).withOpacity(0.18)
-                  : Theme.of(context).colorScheme.tertiaryContainer,
+          backgroundColor: isFounder
+              ? AquaThemeColors.founderColor(context).withOpacity(0.18)
+              : Theme.of(context).colorScheme.tertiaryContainer,
           child: Icon(
             isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
             color: isFounder
@@ -661,20 +811,25 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       title: Row(
         children: [
           Flexible(
-            child: Text(displayName,
-                overflow: TextOverflow.ellipsis, maxLines: 1),
+            child: Text(
+              displayName,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
           if (isFounder) ...[
             const SizedBox(width: 4),
-            Icon(Icons.diamond,
-                size: 13,
-                color: AquaThemeColors.founderColor(context)),
+            Icon(
+              Icons.diamond,
+              size: 13,
+              color: AquaThemeColors.founderColor(context),
+            ),
           ],
         ],
       ),
-      subtitle: Text(isFounder
-          ? l10n.founderAquaristTitle
-          : l10n.profileDrawerDescription),
+      subtitle: Text(
+        isFounder ? l10n.founderAquaristTitle : l10n.profileDrawerDescription,
+      ),
       onTap: () => navigate('/profile'),
     );
   }
@@ -700,28 +855,28 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               themeNotifier.setThemeMode(themeModes[index]);
             },
             borderRadius: BorderRadius.circular(8.0),
-            constraints: const BoxConstraints(
-              minHeight: 36.0,
-              minWidth: 48.0,
-            ),
+            constraints: const BoxConstraints(minHeight: 36.0, minWidth: 48.0),
             children: const [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
-                    message: 'Light Mode',
-                    child: Icon(Icons.light_mode_outlined, size: 18)),
+                  message: 'Light Mode',
+                  child: Icon(Icons.light_mode_outlined, size: 18),
+                ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
-                    message: 'System Default',
-                    child: Icon(Icons.brightness_auto_outlined, size: 18)),
+                  message: 'System Default',
+                  child: Icon(Icons.brightness_auto_outlined, size: 18),
+                ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.0),
                 child: Tooltip(
-                    message: 'Dark Mode',
-                    child: Icon(Icons.dark_mode_outlined, size: 18)),
+                  message: 'Dark Mode',
+                  child: Icon(Icons.dark_mode_outlined, size: 18),
+                ),
               ),
             ],
           ),
@@ -729,18 +884,19 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             const SizedBox(height: 6),
             FilterChip(
               label: Text(l10n.themeMaterialYou),
-              labelStyle:
-                  TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              labelStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
               padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
               visualDensity: VisualDensity.compact,
               avatar: Icon(
-                themeState.useMaterialYou 
-                    ? Icons.check_circle 
-                    : Icons.color_lens_outlined, 
+                themeState.useMaterialYou
+                    ? Icons.check_circle
+                    : Icons.color_lens_outlined,
                 size: 16,
-                color: themeState.useMaterialYou 
-                    ? Theme.of(context).colorScheme.primary 
+                color: themeState.useMaterialYou
+                    ? Theme.of(context).colorScheme.primary
                     : null,
               ),
               selected: themeState.useMaterialYou,
@@ -766,7 +922,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               label: Text(l10n.moreThemeOptions),
               style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
               ),
             ),
           ),
@@ -779,7 +938,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         ListTile(
           dense: true,
           visualDensity: VisualDensity.compact,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 0,
+          ),
           leading: Icon(
             Icons.palette_outlined,
             color: Theme.of(context).colorScheme.tertiary,
@@ -804,8 +966,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 : _normalDuration,
             curve: _isSpringAnimation
                 ? (_isCollapsingSpring
-                    ? Curves.easeInOutCubic
-                    : Curves.easeOutCubic)
+                      ? Curves.easeInOutCubic
+                      : Curves.easeOutCubic)
                 : Curves.easeInOut,
             child: Icon(
               Icons.expand_more,
@@ -819,18 +981,22 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               : _normalDuration,
           curve: _isSpringAnimation
               ? (_isCollapsingSpring
-                  ? Curves.easeInOutCubic
-                  : Curves.easeOutCubic)
+                    ? Curves.easeInOutCubic
+                    : Curves.easeOutCubic)
               : Curves.easeInOut,
-          child:
-              _isAppearanceExpanded ? collapsibleContent : const SizedBox.shrink(),
+          child: _isAppearanceExpanded
+              ? collapsibleContent
+              : const SizedBox.shrink(),
         ),
       ],
     );
   }
 
   Widget _buildDrawerHeader(
-      BuildContext context, bool isDarkMode, VoidCallback onTap) {
+    BuildContext context,
+    bool isDarkMode,
+    VoidCallback onTap,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
@@ -843,7 +1009,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     IconData avatarIcon = Icons.account_circle;
     String? avatarUrl;
     if (user != null) {
-      displayName = profile?.displayName ??
+      displayName =
+          profile?.displayName ??
           (user.displayName?.isNotEmpty == true
               ? user.displayName
               : (user.isAnonymous ? l10n.profileAnonymous : user.email));
@@ -870,7 +1037,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [colorScheme.surfaceContainerHighest, colorScheme.primary]
-                : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+                : [
+                    colorScheme.primaryContainer,
+                    colorScheme.secondaryContainer,
+                  ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -884,7 +1054,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/system/AquaAi Logo.png', height: 72),
+                  Image.asset(
+                    'assets/images/system/AquaAi Logo.png',
+                    height: 72,
+                  ),
                   const SizedBox(width: 10),
                   GradientText(
                     l10n.appTitle,
@@ -901,7 +1074,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                     gradient: LinearGradient(
                       colors: isDarkMode
-                          ? [Colors.white, const Color.fromARGB(255, 220, 230, 255)]
+                          ? [
+                              Colors.white,
+                              const Color.fromARGB(255, 220, 230, 255),
+                            ]
                           : [colorScheme.primary, colorScheme.secondary],
                     ),
                   ),
@@ -932,7 +1108,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: colorScheme.surface.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(20),
@@ -952,55 +1130,65 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                 ? Container(
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: AquaThemeColors.founderColor(context),
+                                      color: AquaThemeColors.founderColor(
+                                        context,
+                                      ),
                                     ),
                                     padding: const EdgeInsets.all(1.5),
                                     child: avatarUrl != null
                                         ? FutureBuilder<String>(
                                             future: resolveResizedStorageUrl(
-                                                avatarUrl),
+                                              avatarUrl,
+                                            ),
                                             initialData:
-                                                getCachedResizedUrl(avatarUrl) ??
-                                                    avatarUrl,
+                                                getCachedResizedUrl(
+                                                  avatarUrl,
+                                                ) ??
+                                                avatarUrl,
                                             builder: (_, snap) => CircleAvatar(
                                               backgroundColor: colorScheme
                                                   .primary
                                                   .withOpacity(0.3),
                                               backgroundImage:
                                                   CachedNetworkImageProvider(
-                                                      snap.data!),
+                                                    snap.data!,
+                                                  ),
                                             ),
                                           )
                                         : CircleAvatar(
                                             backgroundColor: colorScheme.primary
                                                 .withOpacity(0.3),
-                                            child: Icon(avatarIcon,
-                                                size: 14,
-                                                color: colorScheme.onSurface),
+                                            child: Icon(
+                                              avatarIcon,
+                                              size: 14,
+                                              color: colorScheme.onSurface,
+                                            ),
                                           ),
                                   )
                                 : avatarUrl != null
-                                    ? FutureBuilder<String>(
-                                        future: resolveResizedStorageUrl(
-                                            avatarUrl),
-                                        initialData:
-                                            getCachedResizedUrl(avatarUrl) ??
-                                                avatarUrl,
-                                        builder: (_, snap) => CircleAvatar(
-                                          backgroundColor: colorScheme.primary
-                                              .withOpacity(0.3),
-                                          backgroundImage:
-                                              CachedNetworkImageProvider(
-                                                  snap.data!),
-                                        ),
-                                      )
-                                    : CircleAvatar(
-                                        backgroundColor:
-                                            colorScheme.primary.withOpacity(0.3),
-                                        child: Icon(avatarIcon,
-                                            size: 16,
-                                            color: colorScheme.onSurface),
-                                      ),
+                                ? FutureBuilder<String>(
+                                    future: resolveResizedStorageUrl(avatarUrl),
+                                    initialData:
+                                        getCachedResizedUrl(avatarUrl) ??
+                                        avatarUrl,
+                                    builder: (_, snap) => CircleAvatar(
+                                      backgroundColor: colorScheme.primary
+                                          .withOpacity(0.3),
+                                      backgroundImage:
+                                          CachedNetworkImageProvider(
+                                            snap.data!,
+                                          ),
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor: colorScheme.primary
+                                        .withOpacity(0.3),
+                                    child: Icon(
+                                      avatarIcon,
+                                      size: 16,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
                           ),
                           const SizedBox(width: 8),
                           // Name + optional founder diamond
@@ -1022,18 +1210,21 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                 ),
                                 if (isFounder) ...[
                                   const SizedBox(width: 4),
-                                  const Icon(Icons.diamond,
-                                      size: 11,
-                                      color:
-                                          AquaThemeColors.founderPurpleLight),
+                                  const Icon(
+                                    Icons.diamond,
+                                    size: 11,
+                                    color: AquaThemeColors.founderPurpleLight,
+                                  ),
                                 ],
                               ],
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_ios,
-                              size: 10,
-                              color: colorScheme.onSurface.withOpacity(0.6)),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 10,
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ],
                       ),
                     ),
@@ -1051,8 +1242,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: colorScheme.surface.withOpacity(0.25),
                     borderRadius: BorderRadius.circular(20),
@@ -1069,8 +1262,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         height: 26,
                         child: CircleAvatar(
                           backgroundColor: colorScheme.primary.withOpacity(0.3),
-                          child: Icon(Icons.login,
-                              size: 16, color: colorScheme.onSurface),
+                          child: Icon(
+                            Icons.login,
+                            size: 16,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1083,9 +1279,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_ios,
-                          size: 10,
-                          color: colorScheme.onSurface.withOpacity(0.6)),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 10,
+                        color: colorScheme.onSurface.withOpacity(0.6),
+                      ),
                     ],
                   ),
                 ),
@@ -1097,12 +1295,18 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   }
 
   Widget _buildDrawerFooter(
-      BuildContext context, void Function(String) navigate) {
+    BuildContext context,
+    void Function(String) navigate,
+  ) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          16.0, 8.0, 16.0, bottomPadding > 0 ? bottomPadding : 16.0),
+        16.0,
+        8.0,
+        16.0,
+        bottomPadding > 0 ? bottomPadding : 16.0,
+      ),
       child: AnimatedDrawerItem(
         delay: const Duration(milliseconds: 600),
         child: Container(
@@ -1110,7 +1314,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           decoration: BoxDecoration(
             border: Border(
               top: BorderSide(
-                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withOpacity(0.5),
                 width: 1,
               ),
             ),
@@ -1220,7 +1426,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+        gradient:
+            tank.customIconCodePoint == null && tank.customIconPhotoId == null
             ? LinearGradient(
                 colors: tank.type == 'freshwater'
                     ? [Colors.blue.shade300, Colors.cyan.shade400]
@@ -1229,15 +1436,15 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 end: Alignment.bottomRight,
               )
             : null,
-        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+        color:
+            tank.customIconCodePoint == null && tank.customIconPhotoId != null
             ? Colors.grey.shade300
             : null,
         borderRadius: BorderRadius.circular(size * 0.25),
         boxShadow: [
           BoxShadow(
-            color: (tank.type == 'freshwater' 
-                ? Colors.blue 
-                : Colors.purple).withOpacity(0.2),
+            color: (tank.type == 'freshwater' ? Colors.blue : Colors.purple)
+                .withOpacity(0.2),
             blurRadius: size * 0.125,
             offset: Offset(0, size * 0.042),
           ),
@@ -1257,57 +1464,73 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 borderRadius: BorderRadius.circular(size * 0.25),
               ),
               child: Icon(
-                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
-                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                _getIconFromCodePoint(tank.customIconCodePoint) ??
+                    (tank.type == 'freshwater'
+                        ? Icons.water_drop
+                        : Icons.waves),
                 size: iconSize,
                 color: Colors.white,
               ),
             )
           : (tank.customIconPhotoId != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(size * 0.25),
-                  child: () {
-                    try {
-                      final photo = tank.photos.firstWhere(
-                        (p) => p.id == tank.customIconPhotoId,
-                      );
-                      final imageUrl = photo.imageUrl ?? photo.imagePath;
-                      return imageUrl != null
-                          ? (imageUrl.startsWith('http')
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl, 
-                                  fit: BoxFit.cover, 
-                                  width: size, 
-                                  height: size,
-                                  errorWidget: (context, url, error) => Icon(
-                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                    size: iconSize,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Image.file(File(imageUrl), fit: BoxFit.cover, width: size, height: size))
-                          : Icon(
-                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                              size: iconSize,
-                              color: Colors.white,
-                            );
-                    } catch (e) {
-                      return Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                        size: iconSize,
-                        color: Colors.white,
-                      );
-                    }
-                  }(),
-                )
-              : Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: Icon(
-                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                    size: iconSize,
-                    color: Colors.white,
-                  ),
-                )),
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(size * 0.25),
+                    child: () {
+                      try {
+                        final photo = tank.photos.firstWhere(
+                          (p) => p.id == tank.customIconPhotoId,
+                        );
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return imageUrl != null
+                            ? (imageUrl.startsWith('http')
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                      width: size,
+                                      height: size,
+                                      errorWidget: (context, url, error) =>
+                                          Icon(
+                                            tank.type == 'freshwater'
+                                                ? Icons.water_drop
+                                                : Icons.waves,
+                                            size: iconSize,
+                                            color: Colors.white,
+                                          ),
+                                    )
+                                  : Image.file(
+                                      File(imageUrl),
+                                      fit: BoxFit.cover,
+                                      width: size,
+                                      height: size,
+                                    ))
+                            : Icon(
+                                tank.type == 'freshwater'
+                                    ? Icons.water_drop
+                                    : Icons.waves,
+                                size: iconSize,
+                                color: Colors.white,
+                              );
+                      } catch (e) {
+                        return Icon(
+                          tank.type == 'freshwater'
+                              ? Icons.water_drop
+                              : Icons.waves,
+                          size: iconSize,
+                          color: Colors.white,
+                        );
+                      }
+                    }(),
+                  )
+                : Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: Icon(
+                      tank.type == 'freshwater'
+                          ? Icons.water_drop
+                          : Icons.waves,
+                      size: iconSize,
+                      color: Colors.white,
+                    ),
+                  )),
     );
   }
 
@@ -1329,10 +1552,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               Icon(
                 Icons.pets,
                 size: 8,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onTertiaryContainer
-                    .withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onTertiaryContainer.withOpacity(0.6),
               ),
               const SizedBox(width: 1),
               Text(
@@ -1340,20 +1562,18 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onTertiaryContainer
-                      .withOpacity(0.7),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onTertiaryContainer.withOpacity(0.7),
                 ),
               ),
               const SizedBox(width: 3),
               Icon(
                 Icons.category,
                 size: 8,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onTertiaryContainer
-                    .withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onTertiaryContainer.withOpacity(0.6),
               ),
               const SizedBox(width: 1),
               Text(
@@ -1361,10 +1581,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onTertiaryContainer
-                      .withOpacity(0.7),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onTertiaryContainer.withOpacity(0.7),
                 ),
               ),
             ],
@@ -1373,7 +1592,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     );
   }
 
-  Map<String, List<dynamic>> _groupInhabitantsByFishType(List<dynamic> inhabitants) {
+  Map<String, List<dynamic>> _groupInhabitantsByFishType(
+    List<dynamic> inhabitants,
+  ) {
     final grouped = <String, List<dynamic>>{};
     for (final inhabitant in inhabitants) {
       final fishType = inhabitant.fishUnit as String? ?? 'unknown';
@@ -1385,8 +1606,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     return grouped;
   }
 
-
   int _getTotalInhabitantCount(List<dynamic> inhabitants) {
-    return inhabitants.fold(0, (total, inhabitant) => total + (inhabitant.quantity as int? ?? 0));
+    return inhabitants.fold(
+      0,
+      (total, inhabitant) => total + (inhabitant.quantity as int? ?? 0),
+    );
   }
 }

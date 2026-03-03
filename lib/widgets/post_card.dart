@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
-
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -41,12 +41,10 @@ class _PostCardState extends State<PostCard> {
     _likes = widget.post.likes;
     _loadLikeStatus();
     if (widget.post.imageUrl != null) {
-      _resolvedPostImageUrl =
-          resolveResizedStorageUrl(widget.post.imageUrl!);
+      _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
     if (widget.post.avatarUrl != null) {
-      _resolvedAvatarUrl =
-          resolveResizedStorageUrl(widget.post.avatarUrl!);
+      _resolvedAvatarUrl = resolveResizedStorageUrl(widget.post.avatarUrl!);
     }
   }
 
@@ -116,7 +114,10 @@ class _PostCardState extends State<PostCard> {
       shape: isFounder
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AquaThemeColors.founderColor(context), width: 2),
+              side: BorderSide(
+                color: AquaThemeColors.founderColor(context),
+                width: 2,
+              ),
             )
           : null,
       child: InkWell(
@@ -125,7 +126,14 @@ class _PostCardState extends State<PostCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Image section ─────────────────────────────────────────────
-            if (hasImage) _buildImageSection(theme, l10n, isTankShowcase, isOwner, isFounder),
+            if (hasImage)
+              _buildImageSection(
+                theme,
+                l10n,
+                isTankShowcase,
+                isOwner,
+                isFounder,
+              ),
             // ── Card body ─────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(12),
@@ -141,8 +149,9 @@ class _PostCardState extends State<PostCard> {
                   // Title
                   Text(
                     widget.post.title,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -165,7 +174,9 @@ class _PostCardState extends State<PostCard> {
                         borderRadius: BorderRadius.circular(20),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 4),
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
                           child: Row(
                             children: [
                               Icon(
@@ -187,9 +198,11 @@ class _PostCardState extends State<PostCard> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.comment_outlined,
-                          size: 18,
-                          color: theme.colorScheme.onSurfaceVariant),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${widget.post.commentCount}',
@@ -210,8 +223,13 @@ class _PostCardState extends State<PostCard> {
   /// For Tank Showcase posts this is a 280 px hero with a gradient scrim and
   /// the author row overlaid at the bottom.  All other post types show a plain
   /// 200 px cover image.
-  Widget _buildImageSection(ThemeData theme, AppLocalizations l10n,
-      bool isTankShowcase, bool isOwner, bool isFounder) {
+  Widget _buildImageSection(
+    ThemeData theme,
+    AppLocalizations l10n,
+    bool isTankShowcase,
+    bool isOwner,
+    bool isFounder,
+  ) {
     if (!isTankShowcase) {
       return FutureBuilder<String>(
         future: _resolvedPostImageUrl,
@@ -223,8 +241,10 @@ class _PostCardState extends State<PostCard> {
           errorWidget: (_, _, _) => Container(
             height: 200,
             color: theme.colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.broken_image,
-                color: theme.colorScheme.onSurfaceVariant),
+            child: Icon(
+              Icons.broken_image,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       );
@@ -247,8 +267,10 @@ class _PostCardState extends State<PostCard> {
               fit: BoxFit.cover,
               errorWidget: (_, _, _) => Container(
                 color: theme.colorScheme.surfaceContainerHighest,
-                child: Icon(Icons.broken_image,
-                    color: theme.colorScheme.onSurfaceVariant),
+                child: Icon(
+                  Icons.broken_image,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -256,10 +278,7 @@ class _PostCardState extends State<PostCard> {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.65),
-                ],
+                colors: [Colors.transparent, Colors.black.withOpacity(0.65)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 stops: const [0.45, 1.0],
@@ -290,7 +309,7 @@ class _PostCardState extends State<PostCard> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                                 shadows: [
-                                  Shadow(blurRadius: 4, color: Colors.black54)
+                                  Shadow(blurRadius: 4, color: Colors.black54),
                                 ],
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -298,9 +317,11 @@ class _PostCardState extends State<PostCard> {
                           ),
                           if (isFounder) ...[
                             const SizedBox(width: 4),
-                            const Icon(Icons.diamond,
-                                size: 13,
-                                color: AquaThemeColors.founderPurpleLight),
+                            const Icon(
+                              Icons.diamond,
+                              size: 13,
+                              color: AquaThemeColors.founderPurpleLight,
+                            ),
                           ],
                         ],
                       ),
@@ -310,7 +331,7 @@ class _PostCardState extends State<PostCard> {
                           color: Colors.white70,
                           fontSize: 11,
                           shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54)
+                            Shadow(blurRadius: 4, color: Colors.black54),
                           ],
                         ),
                       ),
@@ -320,16 +341,22 @@ class _PostCardState extends State<PostCard> {
                 _buildTypeBadge(context, l10n),
                 if (isOwner) ...[
                   IconButton(
-                    icon: const Icon(Icons.edit_outlined,
-                        size: 18, color: Colors.white),
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     tooltip: l10n.communityEditPost,
                     onPressed: widget.onEdit,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline,
-                        size: 18, color: Colors.white70),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: Colors.white70,
+                    ),
                     tooltip: l10n.communityDeletePost,
                     onPressed: widget.onDelete,
                     padding: EdgeInsets.zero,
@@ -344,8 +371,12 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, AppLocalizations l10n, bool isOwner,
-      bool isFounder) {
+  Widget _buildHeader(
+    ThemeData theme,
+    AppLocalizations l10n,
+    bool isOwner,
+    bool isFounder,
+  ) {
     return Row(
       children: [
         _buildAvatar(theme),
@@ -367,8 +398,11 @@ class _PostCardState extends State<PostCard> {
                   ),
                   if (isFounder) ...[
                     const SizedBox(width: 4),
-                    Icon(Icons.diamond,
-                        size: 13, color: AquaThemeColors.founderColor(context)),
+                    Icon(
+                      Icons.diamond,
+                      size: 13,
+                      color: AquaThemeColors.founderColor(context),
+                    ),
                   ],
                 ],
               ),
@@ -412,7 +446,8 @@ class _PostCardState extends State<PostCard> {
         builder: (_, snap) => CircleAvatar(
           radius: 18,
           backgroundImage: CachedNetworkImageProvider(
-              snap.data ?? widget.post.avatarUrl!),
+            snap.data ?? widget.post.avatarUrl!,
+          ),
           backgroundColor: theme.colorScheme.primaryContainer,
         ),
       );
@@ -478,9 +513,7 @@ class _PostCardState extends State<PostCard> {
           : l10n.xMinutesAgo(diff.inMinutes);
     }
     if (diff.inHours < 24) {
-      return diff.inHours == 1
-          ? l10n.oneHourAgo
-          : l10n.xHoursAgo(diff.inHours);
+      return diff.inHours == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(diff.inHours);
     }
     if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
@@ -524,29 +557,42 @@ class PostSignatureFooter extends StatelessWidget {
     }
     if (sig.containsKey('location')) {
       chips.add(
-          _SigChip(icon: Icons.location_on_outlined, label: sig['location']!));
+        _SigChip(icon: Icons.location_on_outlined, label: sig['location']!),
+      );
     }
     if (sig.containsKey('tankCount')) {
-      chips.add(_SigChip(
+      chips.add(
+        _SigChip(
           icon: Icons.water_drop,
-          label: '${l10n.profileStatTanks}: ${sig['tankCount']}'));
+          label: '${l10n.profileStatTanks}: ${sig['tankCount']}',
+        ),
+      );
     }
     if (sig.containsKey('fishCount')) {
-      chips.add(_SigChip(
+      chips.add(
+        _SigChip(
           icon: Icons.set_meal,
-          label: '${l10n.profileStatFish}: ${sig['fishCount']}'));
+          label: '${l10n.profileStatFish}: ${sig['fishCount']}',
+        ),
+      );
     }
     if (sig.containsKey('yearsExperience')) {
-      chips.add(_SigChip(
+      chips.add(
+        _SigChip(
           icon: Icons.calendar_today_outlined,
-          label: '${l10n.profileStatYears}: ${sig['yearsExperience']}'));
+          label: '${l10n.profileStatYears}: ${sig['yearsExperience']}',
+        ),
+      );
     }
     if (sig.containsKey('memberSince')) {
       final dt = DateTime.tryParse(sig['memberSince']!);
       if (dt != null) {
-        chips.add(_SigChip(
+        chips.add(
+          _SigChip(
             icon: Icons.access_time_outlined,
-            label: '${l10n.profileJoined} ${DateFormat.yMMM().format(dt)}'));
+            label: '${l10n.profileJoined} ${DateFormat.yMMM().format(dt)}',
+          ),
+        );
       }
     }
 
@@ -584,6 +630,7 @@ class PostSignatureFooter extends StatelessWidget {
 class _SigChip extends StatelessWidget {
   final IconData icon;
   final String label;
+
   const _SigChip({required this.icon, required this.label});
 
   @override
@@ -597,9 +644,9 @@ class _SigChip extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 10,
-              ),
+            color: colorScheme.onSurfaceVariant,
+            fontSize: 10,
+          ),
         ),
       ],
     );

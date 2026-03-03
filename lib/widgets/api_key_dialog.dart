@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../services/remote_config_service.dart';
@@ -10,7 +11,8 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
   const ApiKeyDialog({super.key});
 
   static const String _neverShowAgainKey = 'api_key_dialog_never_show_again';
-  static const String _lastShownTimestampKey = 'api_key_dialog_last_shown_timestamp';
+  static const String _lastShownTimestampKey =
+      'api_key_dialog_last_shown_timestamp';
   static const int _cooldownDays = 7;
 
   static Future<void> setNeverShowAgain() async {
@@ -23,7 +25,9 @@ class ApiKeyDialog extends ConsumerStatefulWidget {
   static Future<void> recordDialogShown() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(
-        _lastShownTimestampKey, DateTime.now().millisecondsSinceEpoch);
+      _lastShownTimestampKey,
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   static Future<bool> shouldShowDialog() async {
@@ -134,7 +138,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   @override
   Widget build(BuildContext context) {
     final appSettings = ref.watch(appSettingsProvider);
-    
+
     return AlertDialog(
       title: const Text('Unlock the Power of AI with Your Own API Key!'),
       content: SingleChildScrollView(
@@ -203,19 +207,21 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isFounder
-                        ? AquaThemeColors.founderColor(context).withOpacity(0.08)
-                        : Theme.of(context)
-                            .colorScheme
-                            .tertiaryContainer
-                            .withOpacity(0.4),
+                        ? AquaThemeColors.founderColor(
+                            context,
+                          ).withOpacity(0.08)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.tertiaryContainer.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isFounder
-                          ? AquaThemeColors.founderColor(context).withOpacity(0.35)
-                          : Theme.of(context)
-                              .colorScheme
-                              .tertiary
-                              .withOpacity(0.4),
+                          ? AquaThemeColors.founderColor(
+                              context,
+                            ).withOpacity(0.35)
+                          : Theme.of(
+                              context,
+                            ).colorScheme.tertiary.withOpacity(0.4),
                     ),
                   ),
                   child: Row(
@@ -234,16 +240,14 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                           isFounder
                               ? 'As a Founder Aquarist, your built-in key is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits entirely.'
                               : 'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits.',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                            color: isFounder
-                                ? AquaThemeColors.founderColor(context)
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onTertiaryContainer,
-                          ),
+                                color: isFounder
+                                    ? AquaThemeColors.founderColor(context)
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onTertiaryContainer,
+                              ),
                         ),
                       ),
                     ],
@@ -257,14 +261,16 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.amber.withOpacity(0.35),
-                ),
+                border: Border.all(color: Colors.amber.withOpacity(0.35)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning_amber_outlined, size: 16, color: Colors.amber),
+                  const Icon(
+                    Icons.warning_amber_outlined,
+                    size: 16,
+                    color: Colors.amber,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -282,7 +288,9 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
@@ -318,7 +326,9 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
             // AI enable/disable toggle
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outline.withOpacity(0.3),

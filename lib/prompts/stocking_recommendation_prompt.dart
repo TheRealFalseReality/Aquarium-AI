@@ -1,23 +1,32 @@
 import 'dart:convert';
+
 import 'package:fish_ai/models/fish.dart';
 
 String buildStockingRecommendationPrompt(
-    String tankSize, String tankType, String userNotes, List<Fish> allFish,
-    {List<Fish>? selectedFish, Map<String, List<String>>? speciesSelections}) {
+  String tankSize,
+  String tankType,
+  String userNotes,
+  List<Fish> allFish, {
+  List<Fish>? selectedFish,
+  Map<String, List<String>>? speciesSelections,
+}) {
   final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected
   String selectedFishContext = '';
   if (selectedFish != null && selectedFish.isNotEmpty) {
     // Build a human-readable description including any specific species chosen
-    final selectedFishDetails = selectedFish.map((f) {
-      final species = speciesSelections?[f.name];
-      if (species != null && species.isNotEmpty) {
-        return '${f.name} (${species.join(', ')})';
-      }
-      return f.name;
-    }).join(', ');
-    selectedFishContext = '''
+    final selectedFishDetails = selectedFish
+        .map((f) {
+          final species = speciesSelections?[f.name];
+          if (species != null && species.isNotEmpty) {
+            return '${f.name} (${species.join(', ')})';
+          }
+          return f.name;
+        })
+        .join(', ');
+    selectedFishContext =
+        '''
 
     IMPORTANT: The user has specifically selected these fish that they want to include in the stocking plan:
     $selectedFishDetails

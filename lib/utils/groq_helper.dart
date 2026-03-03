@@ -4,22 +4,23 @@ import 'package:groq/groq.dart';
 import 'package:http/http.dart' as http;
 
 /// The Groq OpenAI-compatible chat completions endpoint.
-const String _groqChatEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
+const String _groqChatEndpoint =
+    'https://api.groq.com/openai/v1/chat/completions';
 
 /// Helper class for Groq API initialization and common operations
-/// 
+///
 /// This utility provides consistent Groq client initialization
 /// across the application, reducing code duplication.
 class GroqHelper {
   /// Creates and initializes a Groq client with the specified configuration
-  /// 
+  ///
   /// Parameters:
   /// - [apiKey]: The Groq API key
   /// - [model]: The model to use (e.g., 'llama3-8b-8192')
   /// - [systemPrompt]: Optional system prompt to set as custom instructions
-  /// 
+  ///
   /// Returns a configured Groq instance ready for chat
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final groq = GroqHelper.createClient(
@@ -37,11 +38,11 @@ class GroqHelper {
     final configuration = Configuration(model: model);
     final groq = Groq(apiKey: apiKey, configuration: configuration);
     groq.startChat();
-    
+
     if (systemPrompt != null) {
       groq.setCustomInstructionsWith(systemPrompt);
     }
-    
+
     return groq;
   }
 
@@ -83,20 +84,24 @@ class GroqHelper {
 
     final http.Response response;
     try {
-      response = await client.post(
-        Uri.parse(_groqChatEndpoint),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: requestBody,
-      ).timeout(timeout);
+      response = await client
+          .post(
+            Uri.parse(_groqChatEndpoint),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: requestBody,
+          )
+          .timeout(timeout);
     } finally {
       if (httpClient == null) client.close();
     }
 
     if (response.statusCode != 200) {
-      throw Exception('Groq chat API error (${response.statusCode}): ${response.body}');
+      throw Exception(
+        'Groq chat API error (${response.statusCode}): ${response.body}',
+      );
     }
 
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
@@ -151,21 +156,25 @@ class GroqHelper {
               'image_url': {'url': 'data:$mimeType;base64,$base64Image'},
             },
           ],
-        }
+        },
       ],
     });
 
-    final response = await http.post(
-      Uri.parse(_groqChatEndpoint),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: requestBody,
-    ).timeout(timeout);
+    final response = await http
+        .post(
+          Uri.parse(_groqChatEndpoint),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+          body: requestBody,
+        )
+        .timeout(timeout);
 
     if (response.statusCode != 200) {
-      throw Exception('Groq vision API error (${response.statusCode}): ${response.body}');
+      throw Exception(
+        'Groq vision API error (${response.statusCode}): ${response.body}',
+      );
     }
 
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
@@ -178,4 +187,3 @@ class GroqHelper {
     return message['content'] as String?;
   }
 }
-

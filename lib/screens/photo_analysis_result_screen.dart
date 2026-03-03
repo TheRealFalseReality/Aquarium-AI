@@ -1,12 +1,13 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../l10n/app_localizations.dart';
 
-import '../models/photo_analysis_result.dart';
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/photo_analysis_result.dart';
 import '../providers/chat_provider.dart';
 import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
@@ -68,9 +69,14 @@ class _PhotoAnalysisResultScreenState
                       maxScale: 5,
                       child: Image.memory(
                         widget.photoBytes!,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
                       ),
                     ),
                   ),
@@ -81,7 +87,7 @@ class _PhotoAnalysisResultScreenState
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -131,7 +137,8 @@ class _PhotoAnalysisResultScreenState
           ),
           const SizedBox(height: 12),
           const TipText(
-            text: 'Tip: Regenerating may produce slightly different identifications or wording.',
+            text:
+                'Tip: Regenerating may produce slightly different identifications or wording.',
           ),
           const SizedBox(height: 12),
         ],
@@ -179,13 +186,17 @@ class _PhotoAnalysisResultScreenState
                         fit: BoxFit.cover,
                         height: 180,
                         width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => const SizedBox(
-                          height: 180,
-                          width: double.infinity,
-                          child: Center(
-                            child: Icon(Icons.broken_image_outlined, size: 48),
-                          ),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox(
+                              height: 180,
+                              width: double.infinity,
+                              child: Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 48,
+                                ),
+                              ),
+                            ),
                       ),
                     ),
                     Positioned(
@@ -193,27 +204,33 @@ class _PhotoAnalysisResultScreenState
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black54,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.open_in_full,
-                                size: 14, color: Colors.white),
+                            Icon(
+                              Icons.open_in_full,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Tap to Zoom',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
         ),
@@ -254,10 +271,9 @@ class _PhotoAnalysisResultScreenState
                 children: [
                   Text(
                     'Identified Fish',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
@@ -279,9 +295,7 @@ class _PhotoAnalysisResultScreenState
                         children: [
                           Text(
                             '${f.commonName}  (${f.scientificName})',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 4),
@@ -289,9 +303,7 @@ class _PhotoAnalysisResultScreenState
                             children: [
                               Text(
                                 'Confidence: ${(c * 100).toStringAsFixed(1)}%',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: _confidenceColor(c),
                                       fontWeight: FontWeight.bold,
@@ -303,8 +315,9 @@ class _PhotoAnalysisResultScreenState
                                   value: c,
                                   minHeight: 6,
                                   color: _confidenceColor(c),
-                                  backgroundColor:
-                                      _confidenceColor(c).withOpacity(0.18),
+                                  backgroundColor: _confidenceColor(
+                                    c,
+                                  ).withOpacity(0.18),
                                 ),
                               ),
                             ],
@@ -322,9 +335,7 @@ class _PhotoAnalysisResultScreenState
                             const SizedBox(height: 8),
                             Text(
                               'Care Guide',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
+                              style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
@@ -355,11 +366,12 @@ class _PhotoAnalysisResultScreenState
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(l10n.tankHealth,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.tankHealth,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             if (th.observations.isNotEmpty)
               SectionCard(
@@ -396,11 +408,12 @@ class _PhotoAnalysisResultScreenState
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(l10n.visualWaterQualityGuesses,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.visualWaterQualityGuesses,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             InfoRow(label: 'Clarity', value: g.clarity),
             InfoRow(label: 'Algae Level', value: g.algaeLevel),
@@ -408,7 +421,7 @@ class _PhotoAnalysisResultScreenState
             const SizedBox(height: 10),
             const DisclaimerText(
               text: 'Visual impressions only — not actual measurements.',
-            )
+            ),
           ],
         ),
       ),
@@ -423,11 +436,12 @@ class _PhotoAnalysisResultScreenState
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-            child: Text(l10n.howAquaPiHelps,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.howAquaPiHelps,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),

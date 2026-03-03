@@ -29,10 +29,7 @@ class _AnimatedDrawerItemState extends State<AnimatedDrawerItem>
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(-1.0, 0.0), // Start off-screen to the left
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     // Wait for the delay then start the animation
     Future.delayed(widget.delay, () {
@@ -50,9 +47,6 @@ class _AnimatedDrawerItemState extends State<AnimatedDrawerItem>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _offsetAnimation,
-      child: widget.child,
-    );
+    return SlideTransition(position: _offsetAnimation, child: widget.child);
   }
 }

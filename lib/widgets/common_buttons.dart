@@ -63,9 +63,11 @@ class RegenerateButton extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.refresh),
-      label: Text(isLoading 
-          ? (loadingLabel ?? 'Regenerating...') 
-          : (label ?? 'Regenerate')),
+      label: Text(
+        isLoading
+            ? (loadingLabel ?? 'Regenerating...')
+            : (label ?? 'Regenerate'),
+      ),
     );
   }
 }
@@ -114,10 +116,7 @@ class ActionButtonRow extends StatelessWidget {
           const SizedBox(width: 16),
         ],
         Expanded(
-          child: CommonCloseButton(
-            onPressed: onClose,
-            label: closeLabel,
-          ),
+          child: CommonCloseButton(onPressed: onClose, label: closeLabel),
         ),
       ],
     );

@@ -1,12 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/analysis_history_entry.dart';
 
 final analysisHistoryProvider =
     StateNotifierProvider<AnalysisHistoryNotifier, List<AnalysisHistoryEntry>>(
-  (ref) => AnalysisHistoryNotifier(),
-);
+      (ref) => AnalysisHistoryNotifier(),
+    );
 
 class AnalysisHistoryNotifier
     extends StateNotifier<List<AnalysisHistoryEntry>> {
@@ -36,8 +38,7 @@ class AnalysisHistoryNotifier
   Future<void> _save() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final encoded =
-          json.encode(state.map((e) => e.toJson()).toList());
+      final encoded = json.encode(state.map((e) => e.toJson()).toList());
       await prefs.setString(_storageKey, encoded);
     } catch (_) {
       // Silently ignore save failures.
@@ -54,8 +55,10 @@ class AnalysisHistoryNotifier
   Future<void> toggleFavorite(String id) async {
     state = [
       for (final entry in state)
-        if (entry.id == id) entry.copyWith(isFavorite: !entry.isFavorite)
-        else entry,
+        if (entry.id == id)
+          entry.copyWith(isFavorite: !entry.isFavorite)
+        else
+          entry,
     ];
     await _save();
   }

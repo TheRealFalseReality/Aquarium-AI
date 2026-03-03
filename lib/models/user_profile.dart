@@ -60,24 +60,23 @@ class PostSignatureSettings {
     bool? showYearsExperience,
     bool? showMemberSince,
     bool? showExperienceLevel,
-  }) =>
-      PostSignatureSettings(
-        showLocation: showLocation ?? this.showLocation,
-        showTankCount: showTankCount ?? this.showTankCount,
-        showFishCount: showFishCount ?? this.showFishCount,
-        showYearsExperience: showYearsExperience ?? this.showYearsExperience,
-        showMemberSince: showMemberSince ?? this.showMemberSince,
-        showExperienceLevel: showExperienceLevel ?? this.showExperienceLevel,
-      );
+  }) => PostSignatureSettings(
+    showLocation: showLocation ?? this.showLocation,
+    showTankCount: showTankCount ?? this.showTankCount,
+    showFishCount: showFishCount ?? this.showFishCount,
+    showYearsExperience: showYearsExperience ?? this.showYearsExperience,
+    showMemberSince: showMemberSince ?? this.showMemberSince,
+    showExperienceLevel: showExperienceLevel ?? this.showExperienceLevel,
+  );
 
   Map<String, dynamic> toMap() => {
-        'showLocation': showLocation,
-        'showTankCount': showTankCount,
-        'showFishCount': showFishCount,
-        'showYearsExperience': showYearsExperience,
-        'showMemberSince': showMemberSince,
-        'showExperienceLevel': showExperienceLevel,
-      };
+    'showLocation': showLocation,
+    'showTankCount': showTankCount,
+    'showFishCount': showFishCount,
+    'showYearsExperience': showYearsExperience,
+    'showMemberSince': showMemberSince,
+    'showExperienceLevel': showExperienceLevel,
+  };
 
   factory PostSignatureSettings.fromMap(Map<String, dynamic>? map) {
     if (map == null) return const PostSignatureSettings();
@@ -101,6 +100,7 @@ class ProfileTankSummary {
   final double? sizeGallons;
   final double? sizeLiters;
   final int inhabitantCount;
+
   /// Custom icon code point copied from the Tank, used to match the icon shown
   /// in the My Tanks screen.
   final int? customIconCodePoint;
@@ -117,15 +117,15 @@ class ProfileTankSummary {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'type': type,
-        'isReef': isReef,
-        if (sizeGallons != null) 'sizeGallons': sizeGallons,
-        if (sizeLiters != null) 'sizeLiters': sizeLiters,
-        'inhabitantCount': inhabitantCount,
-        if (customIconCodePoint != null) 'customIconCodePoint': customIconCodePoint,
-      };
+    'id': id,
+    'name': name,
+    'type': type,
+    'isReef': isReef,
+    if (sizeGallons != null) 'sizeGallons': sizeGallons,
+    if (sizeLiters != null) 'sizeLiters': sizeLiters,
+    'inhabitantCount': inhabitantCount,
+    if (customIconCodePoint != null) 'customIconCodePoint': customIconCodePoint,
+  };
 
   factory ProfileTankSummary.fromMap(Map<String, dynamic> map) =>
       ProfileTankSummary(
@@ -146,22 +146,26 @@ class UserProfile {
   final String displayName;
   final String? bio;
   final String? avatarUrl;
+
   /// Code point of the Material icon chosen as the user's profile avatar.
   /// When non-null, it takes priority over [avatarUrl] for display.
   final int? avatarIconCodePoint;
   final String? location;
   final int yearsOfExperience;
   final ExperienceLevel experienceLevel;
-  final List<String> preferredTankTypes; // e.g. ['freshwater', 'marine', 'reef']
+  final List<String>
+  preferredTankTypes; // e.g. ['freshwater', 'marine', 'reef']
   final List<String> interests; // e.g. ['planted', 'nano', 'cichlids']
   final bool isPublic;
   final bool isAnonymous;
+
   // Tank stats synced from local data
   final int tankCount;
   final int totalFishCount;
   final List<ProfileTankSummary> tanks;
   final DateTime joinedAt;
   final DateTime updatedAt;
+
   /// Controls which metrics are shown in the user's community post signature.
   final PostSignatureSettings signatureSettings;
 
@@ -207,29 +211,28 @@ class UserProfile {
     List<ProfileTankSummary>? tanks,
     DateTime? updatedAt,
     PostSignatureSettings? signatureSettings,
-  }) =>
-      UserProfile(
-        uid: uid,
-        displayName: displayName ?? this.displayName,
-        bio: clearBio ? null : bio ?? this.bio,
-        avatarUrl: clearAvatarUrl ? null : avatarUrl ?? this.avatarUrl,
-        avatarIconCodePoint: clearAvatarIconCodePoint
-            ? null
-            : avatarIconCodePoint ?? this.avatarIconCodePoint,
-        location: clearLocation ? null : location ?? this.location,
-        yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
-        experienceLevel: experienceLevel ?? this.experienceLevel,
-        preferredTankTypes: preferredTankTypes ?? this.preferredTankTypes,
-        interests: interests ?? this.interests,
-        isPublic: isPublic ?? this.isPublic,
-        isAnonymous: isAnonymous ?? this.isAnonymous,
-        tankCount: tankCount ?? this.tankCount,
-        totalFishCount: totalFishCount ?? this.totalFishCount,
-        tanks: tanks ?? this.tanks,
-        joinedAt: joinedAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        signatureSettings: signatureSettings ?? this.signatureSettings,
-      );
+  }) => UserProfile(
+    uid: uid,
+    displayName: displayName ?? this.displayName,
+    bio: clearBio ? null : bio ?? this.bio,
+    avatarUrl: clearAvatarUrl ? null : avatarUrl ?? this.avatarUrl,
+    avatarIconCodePoint: clearAvatarIconCodePoint
+        ? null
+        : avatarIconCodePoint ?? this.avatarIconCodePoint,
+    location: clearLocation ? null : location ?? this.location,
+    yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
+    experienceLevel: experienceLevel ?? this.experienceLevel,
+    preferredTankTypes: preferredTankTypes ?? this.preferredTankTypes,
+    interests: interests ?? this.interests,
+    isPublic: isPublic ?? this.isPublic,
+    isAnonymous: isAnonymous ?? this.isAnonymous,
+    tankCount: tankCount ?? this.tankCount,
+    totalFishCount: totalFishCount ?? this.totalFishCount,
+    tanks: tanks ?? this.tanks,
+    joinedAt: joinedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    signatureSettings: signatureSettings ?? this.signatureSettings,
+  );
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
@@ -242,7 +245,8 @@ class UserProfile {
       location: data['location'] as String?,
       yearsOfExperience: data['yearsOfExperience'] as int? ?? 0,
       experienceLevel: ExperienceLevelExt.fromString(
-          data['experienceLevel'] as String?),
+        data['experienceLevel'] as String?,
+      ),
       preferredTankTypes:
           (data['preferredTankTypes'] as List?)?.cast<String>() ?? [],
       interests: (data['interests'] as List?)?.cast<String>() ?? [],
@@ -250,38 +254,41 @@ class UserProfile {
       isAnonymous: data['isAnonymous'] as bool? ?? false,
       tankCount: data['tankCount'] as int? ?? 0,
       totalFishCount: data['totalFishCount'] as int? ?? 0,
-      tanks: (data['tanks'] as List?)
-              ?.map((t) =>
-                  ProfileTankSummary.fromMap(t as Map<String, dynamic>))
+      tanks:
+          (data['tanks'] as List?)
+              ?.map(
+                (t) => ProfileTankSummary.fromMap(t as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       joinedAt: (data['joinedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       signatureSettings: PostSignatureSettings.fromMap(
-          data['signatureSettings'] as Map<String, dynamic>?),
+        data['signatureSettings'] as Map<String, dynamic>?,
+      ),
     );
   }
 
   Map<String, dynamic> toFirestore() => {
-        'displayName': displayName,
-        // Use FieldValue.delete() so that nulling any of these fields correctly
-        // removes the value from Firestore instead of leaving it stale.
-        'bio': bio ?? FieldValue.delete(),
-        'avatarUrl': avatarUrl ?? FieldValue.delete(),
-        'avatarIconCodePoint': avatarIconCodePoint ?? FieldValue.delete(),
-        'location': location ?? FieldValue.delete(),
-        'yearsOfExperience': yearsOfExperience,
-        'experienceLevel': experienceLevel.value,
-        'preferredTankTypes': preferredTankTypes,
-        'interests': interests,
-        'isPublic': isPublic,
-        'isAnonymous': isAnonymous,
-        'tankCount': tankCount,
-        'totalFishCount': totalFishCount,
-        'tanks': tanks.map((t) => t.toMap()).toList(),
-        'signatureSettings': signatureSettings.toMap(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
+    'displayName': displayName,
+    // Use FieldValue.delete() so that nulling any of these fields correctly
+    // removes the value from Firestore instead of leaving it stale.
+    'bio': bio ?? FieldValue.delete(),
+    'avatarUrl': avatarUrl ?? FieldValue.delete(),
+    'avatarIconCodePoint': avatarIconCodePoint ?? FieldValue.delete(),
+    'location': location ?? FieldValue.delete(),
+    'yearsOfExperience': yearsOfExperience,
+    'experienceLevel': experienceLevel.value,
+    'preferredTankTypes': preferredTankTypes,
+    'interests': interests,
+    'isPublic': isPublic,
+    'isAnonymous': isAnonymous,
+    'tankCount': tankCount,
+    'totalFishCount': totalFishCount,
+    'tanks': tanks.map((t) => t.toMap()).toList(),
+    'signatureSettings': signatureSettings.toMap(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  };
 
   /// Builds a snapshot map of visible signature fields for embedding in a
   /// community post. Only fields enabled in [signatureSettings] are included,

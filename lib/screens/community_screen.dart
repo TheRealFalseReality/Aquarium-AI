@@ -1,21 +1,22 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/community_post.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/community_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/community_service.dart';
-import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/post_card.dart';
-import '../providers/purchase_provider.dart';
-import '../providers/app_settings_provider.dart';
 import 'community_post_screen.dart';
 import 'create_post_screen.dart';
-import 'package:flutter/foundation.dart';
 
 class CommunityScreen extends ConsumerStatefulWidget {
   const CommunityScreen({super.key});
@@ -69,17 +70,18 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           // Posts feed
           Expanded(
             child: postsAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.error),
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         l10n.communityLoadError,
@@ -91,7 +93,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               ),
               data: (posts) {
                 if (posts.isEmpty) {
-                  return _buildEmptyState(context, l10n, currentUserId, feedState.selectedType);
+                  return _buildEmptyState(
+                    context,
+                    l10n,
+                    currentUserId,
+                    feedState.selectedType,
+                  );
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
@@ -177,10 +184,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor:
-                theme.colorScheme.primary.withOpacity(0.15),
-            child: Icon(Icons.people,
-                color: theme.colorScheme.primary, size: 26),
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+            child: Icon(
+              Icons.people,
+              color: theme.colorScheme.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -198,8 +207,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 Text(
                   l10n.communityDrawerDescription,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer
-                        .withOpacity(0.8),
+                    color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                      0.8,
+                    ),
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -213,14 +223,19 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _buildFilterRow(
-      BuildContext context, AppLocalizations l10n, PostType? selected) {
+    BuildContext context,
+    AppLocalizations l10n,
+    PostType? selected,
+  ) {
     final items = [
       (null, l10n.communityFilterAll, Icons.public),
-      (PostType.tankShowcase, l10n.communityPostTypeTankShowcase,
-          Icons.photo_camera),
+      (
+        PostType.tankShowcase,
+        l10n.communityPostTypeTankShowcase,
+        Icons.photo_camera,
+      ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
-      (PostType.question, l10n.communityPostTypeQuestion,
-          Icons.help_outline),
+      (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
     ];
 
     return SingleChildScrollView(
@@ -252,7 +267,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _buildEmptyState(
-      BuildContext context, AppLocalizations l10n, String currentUserId, PostType? selectedType) {
+    BuildContext context,
+    AppLocalizations l10n,
+    String currentUserId,
+    PostType? selectedType,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -262,8 +281,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             Icon(
               Icons.people_outline,
               size: 64,
-              color:
-                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -293,9 +311,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   void _openPost(BuildContext context, CommunityPost post) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => CommunityPostScreen(post: post),
-      ),
+      MaterialPageRoute(builder: (_) => CommunityPostScreen(post: post)),
     );
   }
 
@@ -303,20 +319,23 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (_) => CreatePostScreen(initialType: initialType)),
+        builder: (_) => CreatePostScreen(initialType: initialType),
+      ),
     );
   }
 
   void _navigateToEdit(BuildContext context, CommunityPost post) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-          builder: (_) => CreatePostScreen(editPost: post)),
+      MaterialPageRoute(builder: (_) => CreatePostScreen(editPost: post)),
     );
   }
 
   Future<void> _confirmDelete(
-      BuildContext context, AppLocalizations l10n, CommunityPost post) async {
+    BuildContext context,
+    AppLocalizations l10n,
+    CommunityPost post,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -331,8 +350,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               l10n.delete,
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.error),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -351,7 +369,6 @@ class _FeedItem {
   final bool isAd;
 
   const _FeedItem.post(this.post) : isAd = false;
-  const _FeedItem.ad()
-      : post = null,
-        isAd = true;
+
+  const _FeedItem.ad() : post = null, isAd = true;
 }

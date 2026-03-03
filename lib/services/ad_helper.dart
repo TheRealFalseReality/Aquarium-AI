@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:fish_ai/constants.dart';
 import 'package:flutter/foundation.dart';
 
@@ -27,9 +28,7 @@ class AdHelper {
           : admobBannerAdUnitIdIOSTest;
     } else {
       // Use real ad unit IDs in release mode
-      return Platform.isAndroid
-          ? admobBannerAdUnitId
-          : admobBannerAdUnitId;
+      return Platform.isAndroid ? admobBannerAdUnitId : admobBannerAdUnitId;
     }
   }
 
@@ -46,9 +45,7 @@ class AdHelper {
           : admobNativeAdUnitIdIOSTest;
     } else {
       // Use your real ad unit IDs in release mode
-      return Platform.isAndroid
-          ? admobNativeAdUnitId
-          : admobNativeAdUnitId;
+      return Platform.isAndroid ? admobNativeAdUnitId : admobNativeAdUnitId;
     }
   }
 

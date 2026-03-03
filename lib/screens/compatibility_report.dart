@@ -1,9 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../l10n/app_localizations.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
 import '../providers/fish_compatibility_provider.dart';
@@ -15,7 +15,9 @@ import '../widgets/modern_chip.dart';
 Widget _formatAIResponse(BuildContext context, String text) {
   final theme = Theme.of(context);
   final defaultStyle = theme.textTheme.bodyMedium;
-  final boldStyle = theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold);
+  final boldStyle = theme.textTheme.bodyMedium?.copyWith(
+    fontWeight: FontWeight.bold,
+  );
 
   final List<TextSpan> spans = [];
   // Standardize the bold markers and then split by them.
@@ -24,10 +26,9 @@ Widget _formatAIResponse(BuildContext context, String text) {
 
   for (int i = 0; i < parts.length; i++) {
     // Every odd part was inside the markers, so it should be bold.
-    spans.add(TextSpan(
-      text: parts[i],
-      style: i.isOdd ? boldStyle : defaultStyle,
-    ));
+    spans.add(
+      TextSpan(text: parts[i], style: i.isOdd ? boldStyle : defaultStyle),
+    );
   }
 
   return SelectableText.rich(
@@ -36,8 +37,12 @@ Widget _formatAIResponse(BuildContext context, String text) {
   );
 }
 
-void showReportDialog(BuildContext context, CompatibilityReport report,
-    {bool fromHistory = false, String? fishType}) {
+void showReportDialog(
+  BuildContext context,
+  CompatibilityReport report, {
+  bool fromHistory = false,
+  String? fishType,
+}) {
   showDialog(
     context: context,
     builder: (context) => Consumer(
@@ -45,16 +50,47 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
         final l10n = AppLocalizations.of(context)!;
         final notifier = ref.read(fishCompatibilityProvider.notifier);
         final sections = [
-          ('selectedFish', l10n.selectedFish, _buildSelectedFishSection(context, report.selectedFish, fishType, selectedSpecies: report.selectedSpecies)),
-          ('compatibleTankMates', l10n.compatibleTankMates, _buildTankMatesSection(context, report, fishType)),
-          ('detailedSummary', l10n.detailedSummary, _formatAIResponse(context, report.detailedSummary)),
-          ('recommendedTankSize', l10n.recommendedTankSize, SelectableText(report.tankSize, textAlign: TextAlign.center)),
-          ('decorationsAndSetup', l10n.decorationsAndSetup, _formatAIResponse(context, report.decorations)),
-          ('careGuide', l10n.careGuide, _formatAIResponse(context, report.careGuide)),
+          (
+            'selectedFish',
+            l10n.selectedFish,
+            _buildSelectedFishSection(
+              context,
+              report.selectedFish,
+              fishType,
+              selectedSpecies: report.selectedSpecies,
+            ),
+          ),
+          (
+            'compatibleTankMates',
+            l10n.compatibleTankMates,
+            _buildTankMatesSection(context, report, fishType),
+          ),
+          (
+            'detailedSummary',
+            l10n.detailedSummary,
+            _formatAIResponse(context, report.detailedSummary),
+          ),
+          (
+            'recommendedTankSize',
+            l10n.recommendedTankSize,
+            SelectableText(report.tankSize, textAlign: TextAlign.center),
+          ),
+          (
+            'decorationsAndSetup',
+            l10n.decorationsAndSetup,
+            _formatAIResponse(context, report.decorations),
+          ),
+          (
+            'careGuide',
+            l10n.careGuide,
+            _formatAIResponse(context, report.careGuide),
+          ),
         ];
         return AlertDialog(
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 24.0,
+          ),
           contentPadding: const EdgeInsets.all(8.0),
           title: Stack(
             alignment: Alignment.center,
@@ -75,7 +111,7 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
               ),
             ],
           ),
-          
+
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -88,7 +124,8 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   const SizedBox(height: 16),
                   ...sections.asMap().entries.map((entry) {
                     final index = entry.key;
-                    final (sectionKey, sectionTitle, sectionContent) = entry.value;
+                    final (sectionKey, sectionTitle, sectionContent) =
+                        entry.value;
                     if (sectionKey == 'detailedSummary') {
                       return Column(
                         children: [
@@ -119,9 +156,9 @@ void showReportDialog(BuildContext context, CompatibilityReport report,
                   Text(
                     l10n.aiDisclaimer,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.error,
-                          fontStyle: FontStyle.italic,
-                        ),
+                      color: Theme.of(context).colorScheme.error,
+                      fontStyle: FontStyle.italic,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
@@ -155,26 +192,26 @@ Widget _buildHarmonyCard(BuildContext context, CompatibilityReport report) {
         children: [
           Text(
             l10n.groupHarmony,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           SelectableText(
             report.harmonyLabel,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(color: harmonyColor, fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: harmonyColor,
+              fontWeight: FontWeight.w700,
+            ),
             textAlign: TextAlign.center,
           ),
           SelectableText(
             '${(report.groupHarmonyScore * 100).toStringAsFixed(0)}%',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: harmonyColor,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: harmonyColor,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -190,7 +227,11 @@ Widget _buildHarmonyCard(BuildContext context, CompatibilityReport report) {
 }
 
 Widget _buildSection(
-    BuildContext context, String title, Widget content, int index) {
+  BuildContext context,
+  String title,
+  Widget content,
+  int index,
+) {
   final isEven = index % 2 == 0;
   final cs = Theme.of(context).colorScheme;
   return Card(
@@ -199,10 +240,7 @@ Widget _buildSection(
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(18),
-      side: BorderSide(
-        color: cs.outlineVariant.withOpacity(0.4),
-        width: 0.8,
-      ),
+      side: BorderSide(color: cs.outlineVariant.withOpacity(0.4), width: 0.8),
     ),
     child: Padding(
       padding: const EdgeInsets.all(18.0),
@@ -211,9 +249,9 @@ Widget _buildSection(
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
@@ -225,7 +263,9 @@ Widget _buildSection(
 }
 
 Widget _buildCalculationBreakdown(
-    BuildContext context, CompatibilityReport report) {
+  BuildContext context,
+  CompatibilityReport report,
+) {
   final l10n = AppLocalizations.of(context)!;
   final cs = Theme.of(context).colorScheme;
   return Card(
@@ -233,23 +273,19 @@ Widget _buildCalculationBreakdown(
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(18),
-      side: BorderSide(
-        color: cs.outlineVariant.withOpacity(0.4),
-        width: 0.8,
-      ),
+      side: BorderSide(color: cs.outlineVariant.withOpacity(0.4), width: 0.8),
     ),
     child: ExpansionTile(
       title: Text(
         l10n.calculationBreakdown,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         textAlign: TextAlign.center,
       ),
       children: [
         Padding(
-          padding:
-              const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
+          padding: const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
           child: SelectableText(
             report.calculationBreakdown,
             textAlign: TextAlign.center,
@@ -261,8 +297,11 @@ Widget _buildCalculationBreakdown(
 }
 
 Widget _buildSelectedFishSection(
-    BuildContext context, List<Fish> selectedFish, String? fishType,
-    {Map<String, List<String>> selectedSpecies = const {}}) {
+  BuildContext context,
+  List<Fish> selectedFish,
+  String? fishType, {
+  Map<String, List<String>> selectedSpecies = const {},
+}) {
   return Column(
     children: selectedFish.map((fish) {
       // Show selected species when chosen; otherwise show up to the first 3 from commonNames.
@@ -275,9 +314,12 @@ Widget _buildSelectedFishSection(
         child: InkWell(
           onTap: () async {
             // Add fish type to search query
-            final searchQuery = fishType != null ? '${fish.name} $fishType' : fish.name;
+            final searchQuery = fishType != null
+                ? '${fish.name} $fishType'
+                : fish.name;
             final url = Uri.parse(
-                'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+              'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}',
+            );
             if (await canLaunchUrl(url)) {
               await launchUrl(url, mode: LaunchMode.externalApplication);
             }
@@ -289,10 +331,9 @@ Widget _buildSelectedFishSection(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHigh
-                    .withOpacity(0.4),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHigh.withOpacity(0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -301,35 +342,33 @@ Widget _buildSelectedFishSection(
                     radius: 30,
                     backgroundImage: CachedNetworkImageProvider(fish.imageURL),
                   ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fish.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                        // MODIFIED: Allow fish name to wrap to two lines.
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (subtitleText.isNotEmpty)
+                  const SizedBox(width: 16),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitleText,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          fish.name,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          // MODIFIED: Allow fish name to wrap to two lines.
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                    ],
+                        if (subtitleText.isNotEmpty)
+                          Text(
+                            subtitleText,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         ),
       );
     }).toList(),
@@ -337,7 +376,10 @@ Widget _buildSelectedFishSection(
 }
 
 Widget _buildTankMatesSection(
-    BuildContext context, CompatibilityReport report, String? fishType) {
+  BuildContext context,
+  CompatibilityReport report,
+  String? fishType,
+) {
   final l10n = AppLocalizations.of(context)!;
   return Column(
     children: [
@@ -345,9 +387,9 @@ Widget _buildTankMatesSection(
       const SizedBox(height: 10),
       Text(
         l10n.clickFishToSearch,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontStyle: FontStyle.italic,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
         textAlign: TextAlign.center,
       ),
       const SizedBox(height: 14),
@@ -362,9 +404,12 @@ Widget _buildTankMatesSection(
             dense: true,
             onTap: () async {
               // Add fish type to search query
-              final searchQuery = fishType != null ? '$fishName $fishType' : fishName;
+              final searchQuery = fishType != null
+                  ? '$fishName $fishType'
+                  : fishName;
               final url = Uri.parse(
-                  'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+                'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}',
+              );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
@@ -66,8 +67,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Future<void> _pickImage() async {
     if (kIsWeb) return; // Image upload not supported on web
     final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
     if (picked != null && mounted) {
       setState(() {
         _imageFilePath = picked.path;
@@ -120,9 +123,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       if (mounted) {
         if (updated != null) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.communityPostEdited)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.communityPostEdited)));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -165,7 +168,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         // Use the user-provided URL when it's a real remote URL.
         // If they only have a local file path (customImagePath non-null and
         // customImageUrl is null/empty), fall back to the fishcompat default.
-        final String? imageUrl = (i.customImageUrl != null &&
+        final String? imageUrl =
+            (i.customImageUrl != null &&
                 i.customImageUrl!.isNotEmpty &&
                 (i.customImageUrl!.startsWith('http://') ||
                     i.customImageUrl!.startsWith('https://')))
@@ -181,10 +185,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
       tankInfo = {
         'name': tank.name,
-        if (tank.sizeGallons != null)
-          'sizeGallons': tank.sizeGallons,
-        if (tank.sizeLiters != null)
-          'sizeLiters': tank.sizeLiters,
+        if (tank.sizeGallons != null) 'sizeGallons': tank.sizeGallons,
+        if (tank.sizeLiters != null) 'sizeLiters': tank.sizeLiters,
         'type': tank.type,
         'inhabitants': tank.inhabitants.length,
         if (inhabitantsList.isNotEmpty) 'inhabitantsList': inhabitantsList,
@@ -206,12 +208,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     if (mounted) {
       if (post != null) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.communityPostCreated)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.communityPostCreated)));
         AnalyticsService.logFeatureUsed(
-            featureName: 'community_post_created',
-            parameters: {'post_type': _selectedType.value});
+          featureName: 'community_post_created',
+          parameters: {'post_type': _selectedType.value},
+        );
       } else {
         final user = ref.read(authStateProvider).asData?.value;
         final String errorMsg;
@@ -245,7 +248,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? l10n.communityEditPost : l10n.communityCreatePost),
+        title: Text(
+          _isEditing ? l10n.communityEditPost : l10n.communityCreatePost,
+        ),
         actions: [
           TextButton(
             onPressed: createState.isSubmitting ? null : _submit,
@@ -258,8 +263,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 : Text(
                     l10n.communityPostPublish,
                     style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold),
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
           ),
         ],
@@ -271,8 +277,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           children: [
             // Post type selector (hidden in edit mode)
             if (!_isEditing) ...[
-              Text(l10n.communityPostType,
-                  style: theme.textTheme.labelLarge),
+              Text(l10n.communityPostType, style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               _buildTypeChips(l10n),
               const SizedBox(height: 16),
@@ -316,8 +321,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
             // Image picker (not on web, limit 1 image)
             if (!kIsWeb && imageUploadEnabled) ...[
-              Text(l10n.communityPostImage,
-                  style: theme.textTheme.labelLarge),
+              Text(l10n.communityPostImage, style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               if (_imageFilePath != null)
                 Row(
@@ -340,9 +344,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               else if (isAnonymous)
                 Row(
                   children: [
-                    Icon(Icons.lock_outline,
-                        size: 18,
-                        color: theme.colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.lock_outline,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       l10n.communityRegisterToUploadImage,
@@ -374,9 +380,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline,
-                          size: 18,
-                          color: theme.colorScheme.onSurfaceVariant),
+                      Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
@@ -410,10 +418,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       border: const OutlineInputBorder(),
                     ),
                     items: tanks
-                        .map((t) => DropdownMenuItem(
-                              value: t.id,
-                              child: Text(t.name),
-                            ))
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.id,
+                            child: Text(t.name),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) => setState(() => _selectedTankId = v),
                   ),
@@ -429,8 +439,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   Widget _buildTypeChips(AppLocalizations l10n) {
     final types = [
-      (PostType.tankShowcase, l10n.communityPostTypeTankShowcase,
-          Icons.photo_camera),
+      (
+        PostType.tankShowcase,
+        l10n.communityPostTypeTankShowcase,
+        Icons.photo_camera,
+      ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
     ];

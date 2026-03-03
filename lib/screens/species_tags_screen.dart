@@ -1,13 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import '../providers/species_tags_provider.dart';
-import '../services/fish_data_service.dart';
 import '../models/fish.dart';
-import '../widgets/accessible_feedback.dart';
+import '../providers/species_tags_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/fish_data_service.dart';
+import '../widgets/accessible_feedback.dart';
 
 class SpeciesTagsScreen extends ConsumerStatefulWidget {
   const SpeciesTagsScreen({super.key});
@@ -60,8 +61,9 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     }
     return fishList.where((fish) {
       final nameMatches = fish.name.toLowerCase().contains(_searchQuery);
-      final commonNamesMatch = fish.commonNames
-          .any((name) => name.toLowerCase().contains(_searchQuery));
+      final commonNamesMatch = fish.commonNames.any(
+        (name) => name.toLowerCase().contains(_searchQuery),
+      );
       final tagsMatch = ref
           .read(speciesTagsProvider.notifier)
           .getTagsForFishType(fish.name)
@@ -72,7 +74,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
 
   void _addTag(String fishType, String tag) {
     if (tag.trim().isEmpty) return;
-    
+
     ref.read(speciesTagsProvider.notifier).addTag(fishType, tag.trim());
     _getController(fishType).clear();
     context.showAccessibleMessage('Tag "$tag" added');
@@ -80,10 +82,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     // Log tag addition
     AnalyticsService.logFeatureUsed(
       featureName: 'species_tag_added',
-      parameters: {
-        'fish_type': fishType,
-        'category': _selectedCategory,
-      },
+      parameters: {'fish_type': fishType, 'category': _selectedCategory},
     );
   }
 
@@ -121,9 +120,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                     children: [
                       Text(
                         'Species Tags',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
+                        style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
@@ -143,7 +140,10 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
               // Category Selector
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8,
+                  ),
                   child: SegmentedButton<String>(
                     segments: [
                       ButtonSegment(
@@ -184,7 +184,10 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                             )
                           : null,
                       border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
                       isDense: true,
                     ),
                   ),
@@ -202,8 +205,8 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                             ? 'No fish found in this category.'
                             : 'No fish found matching "$_searchQuery".',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -213,13 +216,10 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final fish = filteredFish[index];
-                        return _buildFishCard(fish, colorScheme);
-                      },
-                      childCount: filteredFish.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final fish = filteredFish[index];
+                      return _buildFishCard(fish, colorScheme);
+                    }, childCount: filteredFish.length),
                   ),
                 ),
             ],
@@ -236,7 +236,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     // reflected here immediately, just like in search and the other dialogs.
     final tags = {...fish.commonNames, ...speciesTags}.toList();
     final controller = _getController(fish.name);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 1,
@@ -269,20 +269,26 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                 ),
               ],
             ),
-            
+
             // Tags section
             if (tags.isNotEmpty) ...[
               const SizedBox(height: 10),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: tags.map((tag) => _buildTagChip(
-                  fish.name, tag, colorScheme,
-                  isCommonName: fish.commonNames.contains(tag),
-                )).toList(),
+                children: tags
+                    .map(
+                      (tag) => _buildTagChip(
+                        fish.name,
+                        tag,
+                        colorScheme,
+                        isCommonName: fish.commonNames.contains(tag),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
-            
+
             // Add tag input
             const SizedBox(height: 10),
             Row(
@@ -292,11 +298,17 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                     controller: controller,
                     decoration: InputDecoration(
                       hintText: 'Add species name...',
-                      hintStyle: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant.withOpacity(0.6)),
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       isDense: true,
                     ),
                     style: const TextStyle(fontSize: 13),
@@ -309,7 +321,10 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
                   onPressed: () => _addTag(fish.name, controller.text),
                   icon: const Icon(Icons.add, size: 20),
                   padding: const EdgeInsets.all(8),
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                   tooltip: 'Add tag',
                 ),
               ],
@@ -320,17 +335,24 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     );
   }
 
-  Widget _buildTagChip(String fishType, String tag, ColorScheme colorScheme, {bool isCommonName = false}) {
+  Widget _buildTagChip(
+    String fishType,
+    String tag,
+    ColorScheme colorScheme, {
+    bool isCommonName = false,
+  }) {
     // A tag is considered a default (locked) if it comes from fish.commonNames
     // directly, or if it was previously persisted as a default in the provider.
     // Using isCommonName avoids a race condition with the async provider init.
-    final isDefault = isCommonName || ref.read(speciesTagsProvider.notifier).isDefaultTag(fishType, tag);
-    
+    final isDefault =
+        isCommonName ||
+        ref.read(speciesTagsProvider.notifier).isDefaultTag(fishType, tag);
+
     // Color scheme for tags
     final Color chipColor;
     final Color textColor;
     final Color iconColor;
-    
+
     if (isDefault) {
       // Default tags: greyish color
       chipColor = colorScheme.surfaceVariant;
@@ -363,7 +385,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
           break;
       }
     }
-    
+
     return Chip(
       label: Text(
         tag,
@@ -391,4 +413,3 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
     );
   }
 }
-

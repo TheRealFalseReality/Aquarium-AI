@@ -64,8 +64,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '209151214292',
     projectId: 'fishai-31d40',
     storageBucket: 'fishai-31d40.firebasestorage.app',
-    androidClientId: '209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com',
-    iosClientId: '209151214292-vnbsrrd88h5noj9sprmfqjfbv03js2dd.apps.googleusercontent.com',
+    androidClientId:
+        '209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com',
+    iosClientId:
+        '209151214292-vnbsrrd88h5noj9sprmfqjfbv03js2dd.apps.googleusercontent.com',
     iosBundleId: 'com.example.fishai',
   );
 
@@ -75,8 +77,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '209151214292',
     projectId: 'fishai-31d40',
     storageBucket: 'fishai-31d40.firebasestorage.app',
-    androidClientId: '209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com',
-    iosClientId: '209151214292-vnbsrrd88h5noj9sprmfqjfbv03js2dd.apps.googleusercontent.com',
+    androidClientId:
+        '209151214292-179fvt67uogjk8kpl0mno6tfciao6akm.apps.googleusercontent.com',
+    iosClientId:
+        '209151214292-vnbsrrd88h5noj9sprmfqjfbv03js2dd.apps.googleusercontent.com',
     iosBundleId: 'com.example.fishai',
   );
 
@@ -89,6 +93,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'fishai-31d40.firebasestorage.app',
     measurementId: 'G-ZQ13GWHZ2S',
   );
-
 }
-

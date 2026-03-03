@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
@@ -58,8 +59,13 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
-    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _bannerAd == null) {
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb ||
+        adsRemoved ||
+        debugHideAds ||
+        !_isAdLoaded ||
+        _bannerAd == null) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
@@ -112,12 +118,8 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       nativeTemplateStyle: NativeTemplateStyle(
         templateType: TemplateType.medium,
         mainBackgroundColor: Colors.grey[200],
-        callToActionTextStyle: NativeTemplateTextStyle(
-          size: 16.0,
-        ),
-        primaryTextStyle: NativeTemplateTextStyle(
-          size: 16.0,
-        ),
+        callToActionTextStyle: NativeTemplateTextStyle(size: 16.0),
+        primaryTextStyle: NativeTemplateTextStyle(size: 16.0),
       ),
     );
     nativeAd.load();
@@ -132,8 +134,13 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
-    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _nativeAd == null) {
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb ||
+        adsRemoved ||
+        debugHideAds ||
+        !_isAdLoaded ||
+        _nativeAd == null) {
       return const SizedBox.shrink();
     }
 
@@ -159,21 +166,19 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
               Icon(
                 Icons.block,
                 size: 12,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurfaceVariant
-                    .withOpacity(0.55),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.55),
               ),
               const SizedBox(width: 4),
               Text(
                 AppLocalizations.of(context)!.removeAds,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withOpacity(0.55),
-                      decoration: TextDecoration.underline,
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withOpacity(0.55),
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ],
           ),
@@ -233,8 +238,13 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
-    if (kIsWeb || adsRemoved || debugHideAds || !_isAdLoaded || _bannerAd == null) {
+    final debugHideAds =
+        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
+    if (kIsWeb ||
+        adsRemoved ||
+        debugHideAds ||
+        !_isAdLoaded ||
+        _bannerAd == null) {
       return const SizedBox.shrink();
     }
 

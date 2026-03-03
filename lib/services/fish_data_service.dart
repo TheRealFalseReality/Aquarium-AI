@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/fish.dart';
 import 'remote_config_service.dart';
 
@@ -76,7 +78,9 @@ class FishDataService {
         final list = (jsonResponse[category] as List)
             .map((f) => Fish.fromJson(f))
             .toList();
-        list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        list.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
         fishData[category] = list;
       }
     }
@@ -140,4 +144,3 @@ final fishDataProvider = FutureProvider<Map<String, List<Fish>>>((ref) async {
   final service = ref.watch(fishDataServiceProvider);
   return service.loadFishData();
 });
-

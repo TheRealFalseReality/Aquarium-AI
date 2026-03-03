@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../models/fish.dart';
 import '../models/tank.dart';
 
@@ -65,7 +66,10 @@ class TankHarmonyCalculator {
 
   /// Calculate harmony score for a tank based on its inhabitants
   /// Returns null if fish data is not available
-  static double? calculateTankHarmonyScore(Tank tank, Map<String, List<Fish>>? fishData) {
+  static double? calculateTankHarmonyScore(
+    Tank tank,
+    Map<String, List<Fish>>? fishData,
+  ) {
     if (fishData == null || tank.inhabitants.isEmpty) return null;
 
     // Get all fish types from the tank's category
@@ -142,10 +146,14 @@ class TankHarmonyCalculator {
       final prob = _getPairwiseProbability(fishA, fishB);
 
       buffer.writeln("Pairwise Compatibility:");
-      buffer.writeln("${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+      buffer.writeln(
+        "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%",
+      );
 
       buffer.writeln("\nGroup Harmony Score:");
-      buffer.writeln("pair(${fishA.name}, ${fishB.name}) = ${(prob * 100).toStringAsFixed(1)}%");
+      buffer.writeln(
+        "pair(${fishA.name}, ${fishB.name}) = ${(prob * 100).toStringAsFixed(1)}%",
+      );
       return buffer.toString();
     }
 
@@ -160,14 +168,20 @@ class TankHarmonyCalculator {
         final prob = _getPairwiseProbability(fishA, fishB);
         probabilities.add(prob);
 
-        buffer.writeln("${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+        buffer.writeln(
+          "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%",
+        );
       }
     }
 
     buffer.writeln("\nGroup Harmony Score:");
     final geometricMean = _geometricMean(probabilities);
-    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
-    buffer.writeln("geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%");
+    final probStrings = probabilities
+        .map((p) => "${(p * 100).toStringAsFixed(1)}%")
+        .join(', ');
+    buffer.writeln(
+      "geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%",
+    );
 
     return buffer.toString();
   }

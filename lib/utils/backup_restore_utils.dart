@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/accessible_feedback.dart';
-import '../l10n/app_localizations.dart';
 
 class BackupRestoreUtils {
-  /// 
+  ///
   /// [context] - BuildContext for showing dialogs and messages
   /// [ref] - WidgetRef for accessing providers
   /// [source] - Optional string to identify where the backup was initiated from (for analytics)
@@ -132,20 +133,26 @@ class BackupRestoreUtils {
 
     if (shouldExport == true && context.mounted) {
       final filePath = await tankNotifier.exportTanksToFile();
-      
+
       if (context.mounted) {
         if (filePath != null) {
           // Save backup timestamp
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('last_backup_time', DateTime.now().toIso8601String());
-          await prefs.setInt('last_backup_tank_count', backupInfo['tankCount'] as int);
+          await prefs.setString(
+            'last_backup_time',
+            DateTime.now().toIso8601String(),
+          );
+          await prefs.setInt(
+            'last_backup_tank_count',
+            backupInfo['tankCount'] as int,
+          );
 
           if (!context.mounted) return;
           context.showAccessibleMessage(
             '${l10n.backupCreatedSuccess}\n${l10n.savedToFile(filePath.split('/').last)}',
             duration: const Duration(seconds: 4),
           );
-          
+
           // Log backup action
           AnalyticsService.logFeatureUsed(
             featureName: 'backup_data',
@@ -168,10 +175,10 @@ class BackupRestoreUtils {
   }
 
   /// Import data (tanks and species tags) from a backup file
-  /// 
+  ///
   /// Shows a warning dialog and handles the import process.
   /// Can be called from any screen in the app.
-  /// 
+  ///
   /// [context] - BuildContext for showing dialogs and messages
   /// [ref] - WidgetRef for accessing providers
   /// [source] - Optional string to identify where the restore was initiated from (for analytics)
@@ -181,7 +188,7 @@ class BackupRestoreUtils {
     String? source,
   }) async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Show warning dialog first
     final shouldImport = await showDialog<bool>(
       context: context,
@@ -311,26 +318,29 @@ class BackupRestoreUtils {
     );
 
     if (shouldImport == true && context.mounted) {
-      final success = await ref.read(tankProvider.notifier).importTanksFromFile();
-      
+      final success = await ref
+          .read(tankProvider.notifier)
+          .importTanksFromFile();
+
       if (context.mounted) {
         if (success) {
           // Save restore timestamp
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('last_restore_time', DateTime.now().toIso8601String());
+          await prefs.setString(
+            'last_restore_time',
+            DateTime.now().toIso8601String(),
+          );
 
           if (!context.mounted) return;
           context.showAccessibleMessage(
             l10n.dataRestoredSuccess,
             duration: const Duration(seconds: 3),
           );
-          
+
           // Log restore action
           AnalyticsService.logFeatureUsed(
             featureName: 'restore_data',
-            parameters: {
-              'source': source ?? 'unknown',
-            },
+            parameters: {'source': source ?? 'unknown'},
           );
         } else {
           final error = ref.read(tankProvider).error;
@@ -438,8 +448,9 @@ class BackupRestoreUtils {
     );
 
     if (shouldShare == true && context.mounted) {
-      final success =
-          await ref.read(tankProvider.notifier).exportSingleTank(tank);
+      final success = await ref
+          .read(tankProvider.notifier)
+          .exportSingleTank(tank);
 
       if (context.mounted) {
         if (!success) {
@@ -526,8 +537,9 @@ class BackupRestoreUtils {
     );
 
     if (shouldImport == true && context.mounted) {
-      final importedTank =
-          await ref.read(tankProvider.notifier).importSingleTankFromFile();
+      final importedTank = await ref
+          .read(tankProvider.notifier)
+          .importSingleTankFromFile();
 
       if (context.mounted) {
         if (importedTank != null) {
@@ -553,4 +565,3 @@ class BackupRestoreUtils {
     }
   }
 }
-

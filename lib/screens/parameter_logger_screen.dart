@@ -1,19 +1,24 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import '../l10n/app_localizations.dart';
+import '../main_layout.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
-import '../main_layout.dart';
 import '../services/analytics_service.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final bool openAddDialog;
 
-  const ParameterLoggerScreen({super.key, required this.tank, this.openAddDialog = false});
+  const ParameterLoggerScreen({
+    super.key,
+    required this.tank,
+    this.openAddDialog = false,
+  });
 
   @override
   ParameterLoggerScreenState createState() => ParameterLoggerScreenState();
@@ -55,10 +60,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddParameterSheet(
-        tank: currentTank,
-        existingParameter: parameter,
-      ),
+      builder: (context) =>
+          _AddParameterSheet(tank: currentTank, existingParameter: parameter),
     );
   }
 
@@ -72,7 +75,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       updatedAt: DateTime.now(),
     );
     ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     // Log parameter deletion
     AnalyticsService.logFeatureUsed(
       featureName: 'parameter_deleted',
@@ -82,7 +85,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         'remaining_parameters': updatedParameters.length,
       },
     );
-    
+
     AnalyticsService.logTankAction(
       action: 'parameter_deleted',
       tankType: currentTank.type,
@@ -144,7 +147,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         if (parameterType.isEmpty) {
           return l10n.custom;
         }
-        return parameterType[0].toUpperCase() + (parameterType.length > 1 ? parameterType.substring(1) : '');
+        return parameterType[0].toUpperCase() +
+            (parameterType.length > 1 ? parameterType.substring(1) : '');
     }
   }
 
@@ -235,29 +239,29 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         if (value <= 1) return Colors.yellow.shade700;
         if (value < 4) return Colors.orange;
         return Colors.red;
-      
+
       case 'nitrite':
         if (value == 0) return Colors.green;
         if (value <= 1) return Colors.yellow.shade700;
         if (value < 2) return Colors.orange;
         return Colors.red;
-      
+
       case 'nitrate':
         if (value == 0) return Colors.green;
         if (value <= 5) return Colors.green.shade300;
         if (value <= 40) return Colors.blue.shade400;
         return Colors.blue.shade900;
-      
+
       case 'phosphate':
         if (value == 0) return Colors.green;
         if (value < 1) return Colors.yellow.shade700;
         if (value < 5) return Colors.orange;
         return Colors.red;
-      
+
       case 'salinity':
         // Determine if using ppt or SG
         final isSG = unit == 'SG';
-        
+
         if (isSG) {
           // SG thresholds (1.020-1.026 is ideal)
           if (value >= 1.023 && value <= 1.025) return Colors.green;
@@ -267,99 +271,125 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         } else {
           // ppt thresholds
           if (value >= 32 && value <= 35) return Colors.green;
-          if ((value >= 31 && value < 32) || (value > 35 && value <= 36)) return Colors.yellow.shade700;
-          if ((value >= 29 && value < 31) || (value > 36 && value <= 38)) return Colors.orange;
+          if ((value >= 31 && value < 32) || (value > 35 && value <= 36))
+            return Colors.yellow.shade700;
+          if ((value >= 29 && value < 31) || (value > 36 && value <= 38))
+            return Colors.orange;
           return Colors.red;
         }
-      
+
       case 'calcium':
         // Calcium thresholds for marine tanks (ppm)
         if (value >= 400 && value <= 450) return Colors.green;
-        if ((value >= 380 && value < 400) || (value > 450 && value <= 480)) return Colors.yellow.shade700;
-        if ((value >= 350 && value < 380) || (value > 480 && value <= 520)) return Colors.orange;
+        if ((value >= 380 && value < 400) || (value > 450 && value <= 480))
+          return Colors.yellow.shade700;
+        if ((value >= 350 && value < 380) || (value > 480 && value <= 520))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'magnesium':
         // Magnesium thresholds for marine tanks (ppm)
         if (value >= 1250 && value <= 1350) return Colors.green;
-        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400)) return Colors.yellow.shade700;
-        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500)) return Colors.orange;
+        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400))
+          return Colors.yellow.shade700;
+        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'kh':
         // KH thresholds (dKH)
         if (value >= 4 && value <= 8) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 8 && value <= 10)) return Colors.yellow.shade700;
-        if ((value >= 2 && value < 3) || (value > 10 && value <= 12)) return Colors.orange;
+        if ((value >= 3 && value < 4) || (value > 8 && value <= 10))
+          return Colors.yellow.shade700;
+        if ((value >= 2 && value < 3) || (value > 10 && value <= 12))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'gh':
         // GH thresholds (dGH) - general range for freshwater
         if (value >= 4 && value <= 12) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 12 && value <= 15)) return Colors.yellow.shade700;
-        if ((value >= 2 && value < 3) || (value > 15 && value <= 18)) return Colors.orange;
+        if ((value >= 3 && value < 4) || (value > 12 && value <= 15))
+          return Colors.yellow.shade700;
+        if ((value >= 2 && value < 3) || (value > 15 && value <= 18))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'alkalinity':
         // Alkalinity thresholds (meq/L or dKH)
         if (value >= 2.5 && value <= 4.0) return Colors.green;
-        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0)) return Colors.yellow.shade700;
-        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0)) return Colors.orange;
+        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0))
+          return Colors.yellow.shade700;
+        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'orp':
         // ORP thresholds (mV) - higher is better for most aquariums
         if (value >= 300 && value <= 450) return Colors.green;
-        if ((value >= 250 && value < 300) || (value > 450 && value <= 500)) return Colors.yellow.shade700;
-        if ((value >= 200 && value < 250) || (value > 500 && value <= 550)) return Colors.orange;
+        if ((value >= 250 && value < 300) || (value > 450 && value <= 500))
+          return Colors.yellow.shade700;
+        if ((value >= 200 && value < 250) || (value > 500 && value <= 550))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'ph':
         // pH thresholds - general range (6.5-8.0 is typical)
         if (value >= 6.8 && value <= 7.8) return Colors.green;
-        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2)) return Colors.yellow.shade700;
-        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5)) return Colors.orange;
+        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2))
+          return Colors.yellow.shade700;
+        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'potassium':
         // Potassium thresholds (ppm) - for planted tanks
         if (value >= 10 && value <= 30) return Colors.green;
-        if ((value >= 5 && value < 10) || (value > 30 && value <= 40)) return Colors.yellow.shade700;
-        if ((value >= 2 && value < 5) || (value > 40 && value <= 50)) return Colors.orange;
+        if ((value >= 5 && value < 10) || (value > 30 && value <= 40))
+          return Colors.yellow.shade700;
+        if ((value >= 2 && value < 5) || (value > 40 && value <= 50))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'tds':
         // TDS thresholds (ppm) - general freshwater range
         if (value >= 150 && value <= 250) return Colors.green;
-        if ((value >= 100 && value < 150) || (value > 250 && value <= 350)) return Colors.yellow.shade700;
-        if ((value >= 50 && value < 100) || (value > 350 && value <= 450)) return Colors.orange;
+        if ((value >= 100 && value < 150) || (value > 250 && value <= 350))
+          return Colors.yellow.shade700;
+        if ((value >= 50 && value < 100) || (value > 350 && value <= 450))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'iodine':
         // Iodine thresholds for marine tanks (ppm)
         if (value >= 0.06 && value <= 0.10) return Colors.green;
-        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12)) return Colors.yellow.shade700;
-        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15)) return Colors.orange;
+        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12))
+          return Colors.yellow.shade700;
+        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15))
+          return Colors.orange;
         return Colors.red;
-      
+
       case 'temperature':
         // Temperature thresholds - check unit for °F or °C
         final isFahrenheit = unit == '°F';
-        
+
         if (isFahrenheit) {
           // Fahrenheit thresholds (75-82°F is ideal for most tropical fish)
           if (value >= 76 && value <= 80) return Colors.green;
-          if ((value >= 72 && value < 76) || (value > 80 && value <= 84)) return Colors.yellow.shade700;
-          if ((value >= 68 && value < 72) || (value > 84 && value <= 88)) return Colors.orange;
+          if ((value >= 72 && value < 76) || (value > 80 && value <= 84))
+            return Colors.yellow.shade700;
+          if ((value >= 68 && value < 72) || (value > 84 && value <= 88))
+            return Colors.orange;
           return Colors.red;
         } else {
           // Celsius thresholds (24-28°C is ideal for most tropical fish)
           if (value >= 24 && value <= 27) return Colors.green;
-          if ((value >= 22 && value < 24) || (value > 27 && value <= 29)) return Colors.yellow.shade700;
-          if ((value >= 20 && value < 22) || (value > 29 && value <= 31)) return Colors.orange;
+          if ((value >= 22 && value < 24) || (value > 27 && value <= 29))
+            return Colors.yellow.shade700;
+          if ((value >= 20 && value < 22) || (value > 29 && value <= 31))
+            return Colors.orange;
           return Colors.red;
         }
-      
+
       default:
         return Colors.grey;
     }
@@ -367,33 +397,42 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
   /// Minimum number of entries to show on the graph when falling back from the 30-day filter
   static const int _minGraphEntries = 10;
-  
+
   /// Date span thresholds for determining X-axis label intervals
-  static const int _wideSpanThreshold = 20;  // Days; use interval of 5 above this
-  static const int _mediumSpanThreshold = 7; // Days; use interval of 2 above this
+  static const int _wideSpanThreshold =
+      20; // Days; use interval of 5 above this
+  static const int _mediumSpanThreshold =
+      7; // Days; use interval of 2 above this
 
   /// Get parameters for the graph display.
   /// Returns a record with the filtered parameters and whether we're using the fallback mode.
   /// - First tries to get data from the last 30 days
   /// - If no data in last 30 days, falls back to showing the most recent entries
-  ({List<WaterParameter> params, bool isRecentFallback}) _getParametersForGraph(List<WaterParameter> parameters) {
+  ({List<WaterParameter> params, bool isRecentFallback}) _getParametersForGraph(
+    List<WaterParameter> parameters,
+  ) {
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-    final last30Days = parameters.where((p) => p.dateRecorded.isAfter(thirtyDaysAgo)).toList();
-    
+    final last30Days = parameters
+        .where((p) => p.dateRecorded.isAfter(thirtyDaysAgo))
+        .toList();
+
     if (last30Days.isNotEmpty) {
       return (params: last30Days, isRecentFallback: false);
     }
-    
+
     // No data in last 30 days, fall back to showing the most recent entries
     // Sort by date (newest first) and take up to N most recent entries
     final sortedByDateDesc = List<WaterParameter>.from(parameters)
       ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
     final recentParams = sortedByDateDesc.take(_minGraphEntries).toList();
-    
+
     return (params: recentParams, isRecentFallback: true);
   }
 
-  Widget _buildParameterGraph(List<WaterParameter> parameters, String parameterType) {
+  Widget _buildParameterGraph(
+    List<WaterParameter> parameters,
+    String parameterType,
+  ) {
     if (parameters.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -402,7 +441,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final graphData = _getParametersForGraph(parameters);
     final filteredParams = graphData.params;
     final isRecentFallback = graphData.isRecentFallback;
-    
+
     if (filteredParams.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -425,35 +464,51 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final latestParam = sortedParams.last;
     final latestValue = latestParam.value;
     final latestUnit = latestParam.unit ?? '';
-    final latestColor = _getThresholdColor(parameterType, latestValue, unit: latestUnit);
+    final latestColor = _getThresholdColor(
+      parameterType,
+      latestValue,
+      unit: latestUnit,
+    );
 
     // Create data spots with color segments
     final spots = <FlSpot>[];
     final spotColors = <Color>[];
     final oldestDate = sortedParams.first.dateRecorded;
-    
+
     for (var param in sortedParams) {
-      final daysDiff = param.dateRecorded.difference(oldestDate).inDays.toDouble();
+      final daysDiff = param.dateRecorded
+          .difference(oldestDate)
+          .inDays
+          .toDouble();
       spots.add(FlSpot(daysDiff, param.value));
-      spotColors.add(_getThresholdColor(parameterType, param.value, unit: param.unit));
+      spotColors.add(
+        _getThresholdColor(parameterType, param.value, unit: param.unit),
+      );
     }
 
     // Use the latest value's threshold color for the line, except for salinity which is always blue
     final lineColor = parameterType == 'salinity' ? Colors.blue : latestColor;
-    final maxY = sortedParams.map((p) => p.value).reduce((a, b) => a > b ? a : b);
-    final minY = sortedParams.map((p) => p.value).reduce((a, b) => a < b ? a : b);
+    final maxY = sortedParams
+        .map((p) => p.value)
+        .reduce((a, b) => a > b ? a : b);
+    final minY = sortedParams
+        .map((p) => p.value)
+        .reduce((a, b) => a < b ? a : b);
     final yRange = maxY - minY;
     final yPadding = yRange * 0.1;
-    
+
     // Calculate the actual date range for the X axis
     final newestDate = sortedParams.last.dateRecorded;
     final daySpan = newestDate.difference(oldestDate).inDays.toDouble();
-    final maxXValue = daySpan > 0 ? daySpan : 1.0; // Ensure at least 1 day span for single data point
+    final maxXValue = daySpan > 0
+        ? daySpan
+        : 1.0; // Ensure at least 1 day span for single data point
 
     // Build the graph title based on the data range
     final String graphTitle;
     if (isRecentFallback) {
-      graphTitle = 'Last ${sortedParams.length} Reading${sortedParams.length == 1 ? '' : 's'}';
+      graphTitle =
+          'Last ${sortedParams.length} Reading${sortedParams.length == 1 ? '' : 's'}';
     } else {
       graphTitle = 'Last 30 Days Trend';
     }
@@ -469,12 +524,15 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             children: [
               Text(
                 graphTitle,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: latestColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -501,13 +559,17 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                   horizontalInterval: yRange > 0 ? yRange / 5 : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.1),
                       strokeWidth: 1,
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.1),
                       strokeWidth: 1,
                     );
                   },
@@ -524,15 +586,21 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: maxXValue > _wideSpanThreshold ? 5 : (maxXValue > _mediumSpanThreshold ? 2 : 1),
+                      interval: maxXValue > _wideSpanThreshold
+                          ? 5
+                          : (maxXValue > _mediumSpanThreshold ? 2 : 1),
                       getTitlesWidget: (value, meta) {
-                        final date = oldestDate.add(Duration(days: value.toInt()));
+                        final date = oldestDate.add(
+                          Duration(days: value.toInt()),
+                        );
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             DateFormat('M/d').format(date),
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.6),
                               fontSize: 10,
                             ),
                           ),
@@ -549,7 +617,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                         return Text(
                           value.toStringAsFixed(1),
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 10,
                           ),
                         );
@@ -560,7 +630,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                 borderData: FlBorderData(
                   show: true,
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.2),
                   ),
                 ),
                 minX: 0,
@@ -597,9 +669,13 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
-                        final date = oldestDate.add(Duration(days: spot.x.toInt()));
+                        final date = oldestDate.add(
+                          Duration(days: spot.x.toInt()),
+                        );
                         final param = sortedParams.firstWhere(
-                          (p) => p.dateRecorded.difference(oldestDate).inDays == spot.x.toInt(),
+                          (p) =>
+                              p.dateRecorded.difference(oldestDate).inDays ==
+                              spot.x.toInt(),
                           orElse: () => sortedParams.first,
                         );
                         return LineTooltipItem(
@@ -628,11 +704,41 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
-    
+
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
-        ? ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity', 'calcium', 'magnesium', 'iodine', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds']
-        : ['temperature', 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'kh', 'gh', 'alkalinity', 'orp', 'ph', 'potassium', 'tds'];
+        ? [
+            'temperature',
+            'ammonia',
+            'nitrite',
+            'nitrate',
+            'phosphate',
+            'salinity',
+            'calcium',
+            'magnesium',
+            'iodine',
+            'kh',
+            'gh',
+            'alkalinity',
+            'orp',
+            'ph',
+            'potassium',
+            'tds',
+          ]
+        : [
+            'temperature',
+            'ammonia',
+            'nitrite',
+            'nitrate',
+            'phosphate',
+            'kh',
+            'gh',
+            'alkalinity',
+            'orp',
+            'ph',
+            'potassium',
+            'tds',
+          ];
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -655,15 +761,15 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                   Text(
                     'Water Parameter History',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Track your aquarium\'s water quality over time',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withOpacity(0.7),
-                        ),
+                      color: cs.onSurface.withOpacity(0.7),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   ...parameterTypes.map((paramType) {
@@ -693,16 +799,23 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                             ),
                             title: Text(
                               _getParameterLabel(paramType, context),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            subtitle: Text('${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}'),
+                            subtitle: Text(
+                              '${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}',
+                            ),
                             trailing: Icon(
-                              isExpanded ? Icons.expand_less : Icons.expand_more,
+                              isExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
                             ),
                             onTap: () {
                               setState(() {
-                                _expandedParameter =
-                                    isExpanded ? null : paramType;
+                                _expandedParameter = isExpanded
+                                    ? null
+                                    : paramType;
                               });
                             },
                           ),
@@ -711,18 +824,19 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                             _buildParameterGraph(parameters, paramType),
                             const Divider(height: 1),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               child: Text(
                                 'All Readings',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
-                            ...parameters.map((param) => _buildParameterItem(
-                                  context,
-                                  param,
-                                )),
+                            ...parameters.map(
+                              (param) => _buildParameterItem(context, param),
+                            ),
                           ],
                         ],
                       ),
@@ -756,17 +870,17 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
             const SizedBox(height: 24),
             Text(
               'No Parameters Logged Yet',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Start tracking your water parameters to monitor your aquarium\'s health over time.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: cs.onSurface.withOpacity(0.7),
-                  ),
+                color: cs.onSurface.withOpacity(0.7),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -787,13 +901,14 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
   }
 
-  Widget _buildParameterItem(
-    BuildContext context,
-    WaterParameter parameter,
-  ) {
+  Widget _buildParameterItem(BuildContext context, WaterParameter parameter) {
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
-    final thresholdColor = _getThresholdColor(parameter.parameterType, parameter.value, unit: parameter.unit);
+    final thresholdColor = _getThresholdColor(
+      parameter.parameterType,
+      parameter.value,
+      unit: parameter.unit,
+    );
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -807,10 +922,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         ),
         child: Text(
           '${parameter.value}${parameter.unit ?? ''}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: thresholdColor,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: thresholdColor),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -876,10 +988,7 @@ class _AddParameterSheet extends ConsumerStatefulWidget {
   final Tank tank;
   final WaterParameter? existingParameter;
 
-  const _AddParameterSheet({
-    required this.tank,
-    this.existingParameter,
-  });
+  const _AddParameterSheet({required this.tank, this.existingParameter});
 
   @override
   ConsumerState<_AddParameterSheet> createState() => _AddParameterSheetState();
@@ -911,7 +1020,20 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     'tds': ['ppm', 'mg/L'],
     'iodine': ['ppm', 'mg/L'],
     'temperature': ['°F', '°C'],
-    'custom': ['ppm', 'mg/L', '%', 'dKH', 'meq/L', 'mV', 'pH', 'ppt', 'SG', 'dGH', '°F', '°C'],
+    'custom': [
+      'ppm',
+      'mg/L',
+      '%',
+      'dKH',
+      'meq/L',
+      'mV',
+      'pH',
+      'ppt',
+      'SG',
+      'dGH',
+      '°F',
+      '°C',
+    ],
   };
 
   @override
@@ -989,7 +1111,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
       final parameterType = _getParameterType();
-      
+
       // Additional safety check: prevent saving with empty parameter type
       if (parameterType.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1000,7 +1122,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         );
         return;
       }
-      
+
       if (isEditing) {
         // Update existing parameter
         parameter = widget.existingParameter!.copyWith(
@@ -1012,19 +1134,19 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
               ? _notesController.text.trim()
               : null,
         );
-        
+
         // Replace the existing parameter in the list
         final updatedParameters = widget.tank.waterParameters.map((p) {
           return p.id == parameter.id ? parameter : p;
         }).toList();
-        
+
         final updatedTank = widget.tank.copyWith(
           waterParameters: updatedParameters,
           updatedAt: DateTime.now(),
         );
-        
+
         ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log parameter edit event
         AnalyticsService.logFeatureUsed(
           featureName: 'parameter_edited',
@@ -1033,7 +1155,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty
+                ? 'true'
+                : 'false',
             'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
@@ -1056,7 +1180,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         );
 
         ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log parameter add event
         AnalyticsService.logFeatureUsed(
           featureName: 'parameter_added',
@@ -1065,19 +1189,21 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
             'tank_type': widget.tank.type,
             'value': parameter.value,
             'unit': _selectedUnit,
-            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty ? 'true' : 'false',
+            'has_notes': parameter.notes != null && parameter.notes!.isNotEmpty
+                ? 'true'
+                : 'false',
             'total_parameters': updatedParameters.length,
             'is_custom': _selectedParameter == 'custom' ? 'true' : 'false',
           },
         );
       }
-      
+
       // Log general parameter action for analytics
       AnalyticsService.logTankAction(
         action: isEditing ? 'parameter_updated' : 'parameter_created',
         tankType: widget.tank.type,
       );
-      
+
       Navigator.pop(context);
     }
   }
@@ -1104,12 +1230,12 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
               Row(
                 children: [
                   Text(
-                    widget.existingParameter != null 
+                    widget.existingParameter != null
                         ? 'Edit Parameter Reading'
                         : 'Add Parameter Reading',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
@@ -1126,23 +1252,44 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  DropdownMenuItem(value: 'temperature', child: Text(l10n.temperature)),
+                  DropdownMenuItem(
+                    value: 'temperature',
+                    child: Text(l10n.temperature),
+                  ),
                   DropdownMenuItem(value: 'ammonia', child: Text(l10n.ammonia)),
                   DropdownMenuItem(value: 'nitrite', child: Text(l10n.nitrite)),
                   DropdownMenuItem(value: 'nitrate', child: Text(l10n.nitrate)),
-                  DropdownMenuItem(value: 'phosphate', child: Text(l10n.phosphate)),
+                  DropdownMenuItem(
+                    value: 'phosphate',
+                    child: Text(l10n.phosphate),
+                  ),
                   DropdownMenuItem(value: 'kh', child: Text(l10n.kh)),
                   DropdownMenuItem(value: 'gh', child: Text(l10n.gh)),
-                  DropdownMenuItem(value: 'alkalinity', child: Text(l10n.alkalinity)),
+                  DropdownMenuItem(
+                    value: 'alkalinity',
+                    child: Text(l10n.alkalinity),
+                  ),
                   DropdownMenuItem(value: 'orp', child: Text(l10n.orp)),
                   DropdownMenuItem(value: 'ph', child: Text(l10n.ph)),
-                  DropdownMenuItem(value: 'potassium', child: Text(l10n.potassium)),
+                  DropdownMenuItem(
+                    value: 'potassium',
+                    child: Text(l10n.potassium),
+                  ),
                   DropdownMenuItem(value: 'tds', child: Text(l10n.tds)),
                   // Only show salinity, calcium, magnesium, and iodine for marine tanks
                   if (widget.tank.type == 'marine') ...[
-                    DropdownMenuItem(value: 'salinity', child: Text(l10n.salinity)),
-                    DropdownMenuItem(value: 'calcium', child: Text(l10n.calcium)),
-                    DropdownMenuItem(value: 'magnesium', child: Text(l10n.magnesium)),
+                    DropdownMenuItem(
+                      value: 'salinity',
+                      child: Text(l10n.salinity),
+                    ),
+                    DropdownMenuItem(
+                      value: 'calcium',
+                      child: Text(l10n.calcium),
+                    ),
+                    DropdownMenuItem(
+                      value: 'magnesium',
+                      child: Text(l10n.magnesium),
+                    ),
                     DropdownMenuItem(value: 'iodine', child: Text(l10n.iodine)),
                   ],
                   DropdownMenuItem(value: 'custom', child: Text(l10n.custom)),
@@ -1159,7 +1306,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Custom parameter name (shown only when "Custom" is selected)
               if (_selectedParameter == 'custom') ...[
                 TextFormField(
@@ -1171,7 +1318,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   ),
                   textCapitalization: TextCapitalization.words,
                   validator: (value) {
-                    if (_selectedParameter == 'custom' && 
+                    if (_selectedParameter == 'custom' &&
                         (value == null || value.trim().isEmpty)) {
                       return 'Please enter a parameter name';
                     }
@@ -1213,10 +1360,12 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                         border: OutlineInputBorder(),
                       ),
                       items: _unitOptions[_selectedParameter]!
-                          .map((unit) => DropdownMenuItem(
-                                value: unit,
-                                child: Text(unit),
-                              ))
+                          .map(
+                            (unit) => DropdownMenuItem(
+                              value: unit,
+                              child: Text(unit),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         setState(() {
@@ -1257,9 +1406,9 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    widget.existingParameter != null 
+                    widget.existingParameter != null
                         ? 'Update Reading'
-                        : 'Save Reading'
+                        : 'Save Reading',
                   ),
                 ),
               ),
@@ -1274,11 +1423,15 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
 /// Shows the parameter add/edit bottom sheet.
 /// [existingParameter] – pass to edit an existing entry.
-void showParameterSheet(BuildContext context, Tank tank, {WaterParameter? existingParameter}) {
+void showParameterSheet(
+  BuildContext context,
+  Tank tank, {
+  WaterParameter? existingParameter,
+}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (context) => _AddParameterSheet(tank: tank, existingParameter: existingParameter),
+    builder: (context) =>
+        _AddParameterSheet(tank: tank, existingParameter: existingParameter),
   );
 }
-

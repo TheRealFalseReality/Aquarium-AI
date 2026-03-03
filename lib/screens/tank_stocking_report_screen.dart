@@ -1,17 +1,19 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:fish_ai/widgets/ad_component.dart';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fish_ai/widgets/accessible_feedback.dart';
+import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../l10n/app_localizations.dart';
-import '../models/stocking_recommendation.dart';
-import '../models/tank.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
+import '../models/stocking_recommendation.dart';
+import '../models/tank.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
@@ -32,24 +34,26 @@ class TankStockingReportScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TankStockingReportScreen> createState() => _TankStockingReportScreenState();
+  ConsumerState<TankStockingReportScreen> createState() =>
+      _TankStockingReportScreenState();
 }
 
-class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScreen>
-    // SingleTickerProviderStateMixin is required so we can create an explicit
-    // TabController, which lets us read _tabController.index at share-time to
-    // know which tab's report the user is currently viewing.
-    with SingleTickerProviderStateMixin {
+class _TankStockingReportScreenState
+    extends
+        ConsumerState<
+          TankStockingReportScreen
+        > // SingleTickerProviderStateMixin is required so we can create an explicit
+        // TabController, which lets us read _tabController.index at share-time to
+        // know which tab's report the user is currently viewing.
+        with
+        SingleTickerProviderStateMixin {
   bool _isRegenerating = false;
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: widget.reports.length,
-      vsync: this,
-    );
+    _tabController = TabController(length: widget.reports.length, vsync: this);
   }
 
   @override
@@ -81,7 +85,9 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
     });
 
     // Tank-based regeneration
-    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(tank: widget.originalTank);
+    ref
+        .read(aquariumStockingProvider.notifier)
+        .getTankStockingRecommendations(tank: widget.originalTank);
   }
 
   String get _getDisplayTitle {
@@ -96,7 +102,10 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // Listen for new recommendations and replace current screen
-    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (
+      previous,
+      next,
+    ) {
       if (next.recommendations != null &&
           next.recommendations!.isNotEmpty &&
           next.recommendations != widget.reports) {
@@ -142,7 +151,10 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
             children: [
               // Merged header with title, tabs, and close button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 child: Column(
                   children: [
                     // Page title with close button
@@ -151,9 +163,7 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                         Expanded(
                           child: Text(
                             _getDisplayTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineLarge
+                            style: Theme.of(context).textTheme.headlineLarge
                                 ?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
@@ -175,7 +185,8 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                       isScrollable: true,
                       tabAlignment: TabAlignment.center,
                       tabs: List.generate(widget.reports.length, (index) {
-                        final harmony = (widget.reports[index].harmonyScore * 100).toInt();
+                        final harmony =
+                            (widget.reports[index].harmonyScore * 100).toInt();
                         return Tab(text: 'Option ${index + 1} ($harmony%)');
                       }),
                     ),
@@ -189,7 +200,9 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                       controller: _tabController,
                       children: widget.reports.asMap().entries.map((entry) {
                         return _TankRecommendationTabView(
-                          key: ValueKey('tab_${entry.key}_${widget.additionalNotes}'),
+                          key: ValueKey(
+                            'tab_${entry.key}_${widget.additionalNotes}',
+                          ),
                           report: entry.value,
                           originalTank: widget.originalTank,
                           existingFish: widget.existingFish,
@@ -216,7 +229,9 @@ class _TankStockingReportScreenState extends ConsumerState<TankStockingReportScr
                   children: [
                     // Regenerate: compact icon button
                     OutlinedButton(
-                      onPressed: _isRegenerating ? null : _regenerateRecommendations,
+                      onPressed: _isRegenerating
+                          ? null
+                          : _regenerateRecommendations,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.all(12),
                         minimumSize: Size.zero,
@@ -415,11 +430,16 @@ class _TankRecommendationTabView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               // Show tank size if available
-              if (originalTank.sizeGallons != null || originalTank.sizeLiters != null) ...[
+              if (originalTank.sizeGallons != null ||
+                  originalTank.sizeLiters != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.straighten, size: 14, color: cs.onSurfaceVariant),
+                    Icon(
+                      Icons.straighten,
+                      size: 14,
+                      color: cs.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Size: ',
@@ -438,12 +458,17 @@ class _TankRecommendationTabView extends StatelessWidget {
                 ),
               ],
               // Show tank notes if available
-              if (originalTank.notes != null && originalTank.notes!.isNotEmpty) ...[
+              if (originalTank.notes != null &&
+                  originalTank.notes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.note_outlined, size: 14, color: cs.onSurfaceVariant),
+                    Icon(
+                      Icons.note_outlined,
+                      size: 14,
+                      color: cs.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Notes: ',
@@ -487,11 +512,11 @@ class _TankRecommendationTabView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _FishCardGrid(
-          fishList: existingFish, 
-          originalTank: originalTank, 
+          fishList: existingFish,
+          originalTank: originalTank,
           isExisting: true,
         ),
-        
+
         const Divider(height: 32),
 
         _SectionHeader(title: 'Fish to Add'),
@@ -501,13 +526,22 @@ class _TankRecommendationTabView extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
-        _FishCardGrid(fishList: report.coreFish, originalTank: originalTank, isCore: true, isAddition: true),
+        _FishCardGrid(
+          fishList: report.coreFish,
+          originalTank: originalTank,
+          isCore: true,
+          isAddition: true,
+        ),
 
         if (report.otherDataBasedFish.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text(l10n.otherOptions, style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          _FishCardGrid(fishList: report.otherDataBasedFish, originalTank: originalTank, isAddition: true),
+          _FishCardGrid(
+            fishList: report.otherDataBasedFish,
+            originalTank: originalTank,
+            isAddition: true,
+          ),
         ],
 
         // Show compatibility notes
@@ -524,9 +558,7 @@ class _TankRecommendationTabView extends StatelessWidget {
             ),
             child: Text(
               report.compatibilityNotes!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             ),
           ),
         ],
@@ -543,9 +575,7 @@ class _TankRecommendationTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        const InstructionText(
-          text: "(Click a fish to search)",
-        ),
+        const InstructionText(text: "(Click a fish to search)"),
         const SizedBox(height: 14),
         Wrap(
           spacing: 8,
@@ -621,10 +651,7 @@ class _TankRecommendationTabView extends StatelessWidget {
     // Log external search usage
     AnalyticsService.logFeatureUsed(
       featureName: 'external_search',
-      parameters: {
-        'query': query,
-        'source': 'tank_stocking_report',
-      },
+      parameters: {'query': query, 'source': 'tank_stocking_report'},
     );
     AnalyticsService.logUserEngagement(
       engagementType: 'external_link_click',
@@ -633,7 +660,9 @@ class _TankRecommendationTabView extends StatelessWidget {
 
     // Add tank type to search query
     final searchQuery = '$query ${originalTank.type}';
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+    final url = Uri.parse(
+      'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}',
+    );
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
@@ -650,19 +679,26 @@ class _TankRecommendationTabView extends StatelessWidget {
     return 'Size not specified';
   }
 
-  String _generateCalculationBreakdown(List<Fish> existingFish, StockingRecommendation report) {
+  String _generateCalculationBreakdown(
+    List<Fish> existingFish,
+    StockingRecommendation report,
+  ) {
     // Combine existing fish with the recommended core fish to show full tank compatibility
     final allTankFish = [...existingFish, ...report.coreFish];
 
     final buffer = StringBuffer();
     buffer.writeln("Current Tank Analysis:");
-    buffer.writeln("Existing Fish: ${existingFish.map((f) => f.name).join(', ')}");
-    buffer.writeln("Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}");
+    buffer.writeln(
+      "Existing Fish: ${existingFish.map((f) => f.name).join(', ')}",
+    );
+    buffer.writeln(
+      "Recommended Additions: ${report.coreFish.map((f) => f.name).join(', ')}",
+    );
     buffer.writeln();
 
     return buffer.toString() + _calculateCompatibilityBreakdown(allTankFish);
   }
-  
+
   double _geometricMean(List<double> values) {
     if (values.isEmpty) return 1.0;
     // If any value is 0, the geometric mean is 0.
@@ -688,14 +724,19 @@ class _TankRecommendationTabView extends StatelessWidget {
         probabilities.add(prob);
 
         buffer.writeln(
-            "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%");
+          "${fishA.name} & ${fishB.name}: ${(prob * 100).toStringAsFixed(1)}%",
+        );
       }
     }
 
     buffer.writeln("\nGroup Harmony Score:");
     final geometricMean = _geometricMean(probabilities);
-    final probStrings = probabilities.map((p) => "${(p * 100).toStringAsFixed(1)}%").join(', ');
-    buffer.writeln("geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%");
+    final probStrings = probabilities
+        .map((p) => "${(p * 100).toStringAsFixed(1)}%")
+        .join(', ');
+    buffer.writeln(
+      "geometricMean([$probStrings]) = ${(geometricMean * 100).toStringAsFixed(1)}%",
+    );
 
     return buffer.toString();
   }
@@ -719,11 +760,11 @@ class _TankRecommendationTabView extends StatelessWidget {
     }
     return 0.5;
   }
-
 }
 
 class _SectionHeader extends StatelessWidget {
   final String title;
+
   const _SectionHeader({required this.title});
 
   @override
@@ -744,7 +785,7 @@ class _FishCardGrid extends StatelessWidget {
   final bool isAddition;
   final bool isExisting;
   final Tank originalTank;
-  
+
   const _FishCardGrid({
     required this.fishList,
     required this.originalTank,
@@ -757,28 +798,34 @@ class _FishCardGrid extends StatelessWidget {
   List<Map<String, dynamic>> _getGroupedInhabitants() {
     if (!isExisting) {
       // For non-existing fish, just show them normally
-      return fishList.map((fish) => {
-        'fish': fish,
-        'quantity': 1,
-        'customName': null,
-        'customImage': null,
-      }).toList();
+      return fishList
+          .map(
+            (fish) => {
+              'fish': fish,
+              'quantity': 1,
+              'customName': null,
+              'customImage': null,
+            },
+          )
+          .toList();
     }
 
     final Map<String, Map<String, dynamic>> grouped = {};
-    
+
     for (final inhabitant in originalTank.inhabitants) {
       // Create a unique key based on fishUnit, customName, and custom image
-      final customImage = inhabitant.customImageUrl ?? inhabitant.customImagePath;
+      final customImage =
+          inhabitant.customImageUrl ?? inhabitant.customImagePath;
       // Always show custom name if it differs from the fish unit name
-      final displayName = inhabitant.customName != inhabitant.fishUnit 
-          ? inhabitant.customName 
+      final displayName = inhabitant.customName != inhabitant.fishUnit
+          ? inhabitant.customName
           : null;
-      
+
       final key = '${inhabitant.fishUnit}|$displayName|$customImage';
-      
+
       if (grouped.containsKey(key)) {
-        grouped[key]!['quantity'] = (grouped[key]!['quantity'] as int) + inhabitant.quantity;
+        grouped[key]!['quantity'] =
+            (grouped[key]!['quantity'] as int) + inhabitant.quantity;
       } else {
         // Find the fish data
         final fish = fishList.firstWhere(
@@ -793,7 +840,7 @@ class _FishCardGrid extends StatelessWidget {
             withCaution: [],
           ),
         );
-        
+
         grouped[key] = {
           'fish': fish,
           'quantity': inhabitant.quantity,
@@ -802,7 +849,7 @@ class _FishCardGrid extends StatelessWidget {
         };
       }
     }
-    
+
     return grouped.values.toList();
   }
 
@@ -811,7 +858,7 @@ class _FishCardGrid extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final items = _getGroupedInhabitants();
-    
+
     return Wrap(
       spacing: 16,
       runSpacing: 16,
@@ -822,7 +869,7 @@ class _FishCardGrid extends StatelessWidget {
         final customName = item['customName'] as String?;
         final customImage = item['customImage'] as String?;
         final imageUrl = customImage ?? fish.imageURL;
-        
+
         return Card(
           elevation: 2,
           color: cs.surfaceContainerHighest,
@@ -832,8 +879,8 @@ class _FishCardGrid extends StatelessWidget {
             side: isExisting
                 ? BorderSide(color: cs.secondary, width: 2)
                 : isCore
-                    ? BorderSide(color: cs.primary, width: 2)
-                    : BorderSide.none,
+                ? BorderSide(color: cs.primary, width: 2)
+                : BorderSide.none,
           ),
           child: InkWell(
             onTap: () => _launchSearch(fish.name),
@@ -845,45 +892,54 @@ class _FishCardGrid extends StatelessWidget {
                     children: [
                       imageUrl.isNotEmpty
                           ? (customImage != null && customImage.startsWith('/'))
-                              ? Image.file(
-                                  File(customImage),
-                                  height: 80,
-                                  width: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return CachedNetworkImage(
-                                      imageUrl: fish.imageURL,
-                                      height: 80,
-                                      width: 100,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (context, url, error) => Container(
+                                ? Image.file(
+                                    File(customImage),
+                                    height: 80,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return CachedNetworkImage(
+                                        imageUrl: fish.imageURL,
                                         height: 80,
                                         width: 100,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.error_outline),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  height: 80,
-                                  width: 100,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, url, error) {
-                                    return Container(
-                                      height: 80,
-                                      width: 100,
-                                      color: cs.surfaceVariant,
-                                      child: Icon(Icons.image_not_supported, color: cs.onSurfaceVariant),
-                                    );
-                                  },
-                                )
+                                        fit: BoxFit.cover,
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                              height: 80,
+                                              width: 100,
+                                              color: Colors.grey[300],
+                                              child: const Icon(
+                                                Icons.error_outline,
+                                              ),
+                                            ),
+                                      );
+                                    },
+                                  )
+                                : CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    height: 80,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, url, error) {
+                                      return Container(
+                                        height: 80,
+                                        width: 100,
+                                        color: cs.surfaceVariant,
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      );
+                                    },
+                                  )
                           : Container(
                               height: 80,
                               width: 100,
                               color: cs.surfaceVariant,
-                              child: Icon(Icons.pets, color: cs.onSurfaceVariant),
+                              child: Icon(
+                                Icons.pets,
+                                color: cs.onSurfaceVariant,
+                              ),
                             ),
                       // Quantity badge
                       if (quantity > 1)
@@ -891,7 +947,10 @@ class _FishCardGrid extends StatelessWidget {
                           top: 4,
                           right: 4,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: cs.primary,
                               borderRadius: BorderRadius.circular(10),
@@ -929,7 +988,10 @@ class _FishCardGrid extends StatelessWidget {
                         if (customName != null) ...[
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: cs.secondaryContainer.withOpacity(0.5),
                               borderRadius: BorderRadius.circular(4),
@@ -960,12 +1022,13 @@ class _FishCardGrid extends StatelessWidget {
   }
 
   Future<void> _launchSearch(String query) async {
-    // Add tank type to search query  
+    // Add tank type to search query
     final searchQuery = '$query ${originalTank.type}';
-    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}');
+    final url = Uri.parse(
+      'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}',
+    );
     if (!await launchUrl(url)) {
       debugPrint('Could not launch $url');
     }
   }
 }
-

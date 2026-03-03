@@ -1,40 +1,41 @@
 // ignore_for_file: unused_element
 
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import '../widgets/gradient_text.dart';
-import '../widgets/ad_component.dart';
-import 'changelog_screen.dart';
+import '../models/community_post.dart';
+import '../models/tank.dart';
+import '../providers/app_settings_provider.dart';
+import '../providers/community_provider.dart';
+import '../providers/fish_compatibility_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
-import '../providers/community_provider.dart';
-import '../widgets/remove_ads_dialog.dart';
 import '../providers/tank_provider.dart';
-import '../providers/app_settings_provider.dart';
-import '../providers/fish_compatibility_provider.dart';
-import '../widgets/api_key_dialog.dart';
-import '../widgets/app_promotion_dialog.dart';
-import '../widgets/aquapi_promotion_dialog.dart';
-import '../theme_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/in_app_update_service.dart';
+import '../theme_provider.dart';
 import '../utils/tank_harmony_calculator.dart';
-import '../models/tank.dart';
-import '../models/community_post.dart';
+import '../widgets/ad_component.dart';
+import '../widgets/api_key_dialog.dart';
+import '../widgets/app_promotion_dialog.dart';
+import '../widgets/aquapi_promotion_dialog.dart';
+import '../widgets/gradient_text.dart';
+import '../widgets/remove_ads_dialog.dart';
+import 'changelog_screen.dart';
 import 'community_post_screen.dart';
 import 'markdown_viewer_screen.dart';
 
@@ -104,7 +105,10 @@ class WelcomeScreen extends ConsumerStatefulWidget {
   static Future<void> setPromotionDialogTimestamp(int timestamp) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_WelcomeScreenState._promotionDialogTimestampKey, timestamp);
+      await prefs.setInt(
+        _WelcomeScreenState._promotionDialogTimestampKey,
+        timestamp,
+      );
       debugPrint('Promotion dialog timestamp set to: $timestamp');
     } catch (e) {
       debugPrint('Error setting promotion dialog timestamp: $e');
@@ -115,15 +119,21 @@ class WelcomeScreen extends ConsumerStatefulWidget {
   static Future<void> checkPromotionDialogStatus() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp = prefs.getInt(_WelcomeScreenState._promotionDialogTimestampKey) ?? 0;
+      final lastShownTimestamp =
+          prefs.getInt(_WelcomeScreenState._promotionDialogTimestampKey) ?? 0;
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-      
+      final hoursSinceLastShown =
+          (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
+
       debugPrint('Promotion dialog status:');
       debugPrint('  Last shown timestamp: $lastShownTimestamp');
       debugPrint('  Current timestamp: $currentTimestamp');
-      debugPrint('  Hours since last shown: ${hoursSinceLastShown.toStringAsFixed(1)}');
-      debugPrint('  Will show dialog: ${hoursSinceLastShown >= _WelcomeScreenState._promotionDialogCooldownHours}');
+      debugPrint(
+        '  Hours since last shown: ${hoursSinceLastShown.toStringAsFixed(1)}',
+      );
+      debugPrint(
+        '  Will show dialog: ${hoursSinceLastShown >= _WelcomeScreenState._promotionDialogCooldownHours}',
+      );
     } catch (e) {
       debugPrint('Error checking promotion dialog status: $e');
     }
@@ -131,10 +141,13 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  static const String _promotionDialogTimestampKey = 'promotion_dialog_timestamp';
+  static const String _promotionDialogTimestampKey =
+      'promotion_dialog_timestamp';
   static const int _promotionDialogCooldownHours = 48;
-  static const String _aquapiPromotionDialogTimestampKey = 'aquapi_promotion_dialog_timestamp';
-  static const int _aquapiPromotionDialogCooldownHours = 72; // Show again after 72 hours have elapsed
+  static const String _aquapiPromotionDialogTimestampKey =
+      'aquapi_promotion_dialog_timestamp';
+  static const int _aquapiPromotionDialogCooldownHours =
+      72; // Show again after 72 hours have elapsed
   static const String _changelogShownVersionKey = 'changelog_shown_version';
   static const String _changelogBannerShownAtKey = 'changelog_banner_shown_at';
   static const int _changelogBannerAutoDismissDays = 3;
@@ -144,8 +157,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   // Promo card keys
   static const String _docsPromoShownAtKey = 'welcomeDocsPromoShownAt';
   static const String _docsPromoDismissedKey = 'welcomeDocsPromoDismissed';
-  static const String _communityPromoShownAtKey = 'welcomeCommunityPromoShownAt';
-  static const String _communityPromoDismissedKey = 'welcomeCommunityPromoDismissed';
+  static const String _communityPromoShownAtKey =
+      'welcomeCommunityPromoShownAt';
+  static const String _communityPromoDismissedKey =
+      'welcomeCommunityPromoDismissed';
   static const int _promoCardAutoDismissDays = 7;
   static const int _millisecondsPerDay = 86400000;
   static const String _userGuideAssetPath = 'assets/docs/en/USER_GUIDE_en.md';
@@ -174,7 +189,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   // Welcome header visibility
   bool _hideWelcomeHeader = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -194,7 +209,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Check if we should show the changelog dialog (once per version)
     _checkShowChangelogDialog();
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -208,7 +223,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final stored = prefs.getString(_hiddenFeaturesKey) ?? '';
       if (stored.isNotEmpty) {
         setState(() {
-          _hiddenFeatures = stored.split(',').where((s) => s.isNotEmpty).toSet();
+          _hiddenFeatures = stored
+              .split(',')
+              .where((s) => s.isNotEmpty)
+              .toSet();
         });
       }
       final showCard = prefs.getBool(_showCommunityCardKey) ?? false;
@@ -269,7 +287,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
 
       // ── Community promo card ─────────────────────────────────────────────
-      final communityDismissed = prefs.getBool(_communityPromoDismissedKey) ?? false;
+      final communityDismissed =
+          prefs.getBool(_communityPromoDismissedKey) ?? false;
       if (!communityDismissed) {
         int shownAt = prefs.getInt(_communityPromoShownAtKey) ?? 0;
         if (shownAt == 0) {
@@ -317,7 +336,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
   }
 
-  void _showCardFilterSheet(BuildContext context, List<FeatureInfo> allFeatures, bool adsRemoved) {
+  void _showCardFilterSheet(
+    BuildContext context,
+    List<FeatureInfo> allFeatures,
+    bool adsRemoved,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
@@ -330,7 +353,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(l10n.visibleCards, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    l10n.visibleCards,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   // Community card toggle (always first)
                   CheckboxListTile(
@@ -351,18 +379,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       value: !isHidden,
                       title: Text(f.title),
                       enabled: !isDisabled,
-                      subtitle: isDisabled ? Text(l10n.purchaseToHideCard) : null,
-                      onChanged: isDisabled ? null : (val) {
-                        setState(() {
-                          if (val == true) {
-                            _hiddenFeatures = {..._hiddenFeatures}..remove(f.id);
-                          } else {
-                            _hiddenFeatures = {..._hiddenFeatures, f.id};
-                          }
-                        });
-                        setSheetState(() {});
-                        _saveHiddenFeatures();
-                      },
+                      subtitle: isDisabled
+                          ? Text(l10n.purchaseToHideCard)
+                          : null,
+                      onChanged: isDisabled
+                          ? null
+                          : (val) {
+                              setState(() {
+                                if (val == true) {
+                                  _hiddenFeatures = {..._hiddenFeatures}
+                                    ..remove(f.id);
+                                } else {
+                                  _hiddenFeatures = {..._hiddenFeatures, f.id};
+                                }
+                              });
+                              setSheetState(() {});
+                              _saveHiddenFeatures();
+                            },
                     );
                   }),
                 ],
@@ -379,17 +412,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // Check if user has chosen to never show the dialog again
       final shouldShow = await AppPromotionDialog.shouldShowDialog();
       if (!shouldShow) {
-        debugPrint('Promotion dialog will not be shown (user selected never show again)');
+        debugPrint(
+          'Promotion dialog will not be shown (user selected never show again)',
+        );
         return;
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp = prefs.getInt(_promotionDialogTimestampKey) ?? 0;
+      final lastShownTimestamp =
+          prefs.getInt(_promotionDialogTimestampKey) ?? 0;
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-      
-      debugPrint('Promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_promotionDialogCooldownHours hours');
-      
+      final hoursSinceLastShown =
+          (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
+
+      debugPrint(
+        'Promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_promotionDialogCooldownHours hours',
+      );
+
       // Show the dialog if it has never been shown or if 48 hours have passed
       if (hoursSinceLastShown >= _promotionDialogCooldownHours && mounted) {
         debugPrint('Promotion dialog will be shown (cooldown period elapsed)');
@@ -400,7 +439,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           }
         });
       } else {
-        debugPrint('Promotion dialog will not be shown (cooldown period not elapsed)');
+        debugPrint(
+          'Promotion dialog will not be shown (cooldown period not elapsed)',
+        );
       }
     } catch (e) {
       // If there's an error with SharedPreferences, silently continue
@@ -416,13 +457,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
       await prefs.setInt(_promotionDialogTimestampKey, currentTimestamp);
       debugPrint('Promotion dialog shown, timestamp saved: $currentTimestamp');
-      
+
       // Log app promotion dialog shown
       AnalyticsService.logAppPromotion(
         action: 'dialog_shown',
         source: 'welcome_screen_auto',
       );
-      
+
       if (!ctx.mounted) return;
       showDialog(
         context: ctx,
@@ -439,20 +480,29 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // Check if user has chosen to never show the dialog again
       final shouldShow = await AquaPiPromotionDialog.shouldShowDialog();
       if (!shouldShow) {
-        debugPrint('AquaPi promotion dialog will not be shown (user selected never show again)');
+        debugPrint(
+          'AquaPi promotion dialog will not be shown (user selected never show again)',
+        );
         return;
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp = prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
+      final lastShownTimestamp =
+          prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown = (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-      
-      debugPrint('AquaPi promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_aquapiPromotionDialogCooldownHours hours');
-      
+      final hoursSinceLastShown =
+          (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
+
+      debugPrint(
+        'AquaPi promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_aquapiPromotionDialogCooldownHours hours',
+      );
+
       // Show the dialog if it has never been shown or if cooldown period has passed
-      if (hoursSinceLastShown >= _aquapiPromotionDialogCooldownHours && mounted) {
-        debugPrint('AquaPi promotion dialog will be shown (cooldown period elapsed)');
+      if (hoursSinceLastShown >= _aquapiPromotionDialogCooldownHours &&
+          mounted) {
+        debugPrint(
+          'AquaPi promotion dialog will be shown (cooldown period elapsed)',
+        );
         // Show the popup after a delay to allow the screen to load
         // Use a longer delay to avoid showing both popups at once
         Timer(const Duration(seconds: 3), () {
@@ -461,7 +511,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           }
         });
       } else {
-        debugPrint('AquaPi promotion dialog will not be shown (cooldown period not elapsed)');
+        debugPrint(
+          'AquaPi promotion dialog will not be shown (cooldown period not elapsed)',
+        );
       }
     } catch (e) {
       // If there's an error with SharedPreferences, silently continue
@@ -476,14 +528,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // Store the current timestamp when showing the dialog
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
       await prefs.setInt(_aquapiPromotionDialogTimestampKey, currentTimestamp);
-      debugPrint('AquaPi promotion dialog shown, timestamp saved: $currentTimestamp');
-      
+      debugPrint(
+        'AquaPi promotion dialog shown, timestamp saved: $currentTimestamp',
+      );
+
       // Log AquaPi promotion dialog shown
       AnalyticsService.logAppPromotion(
         action: 'aquapi_dialog_shown',
         source: 'welcome_screen_auto',
       );
-      
+
       if (!ctx.mounted) return;
       showDialog(
         context: ctx,
@@ -513,7 +567,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       final currentVersion = info.version;
       final prefs = await SharedPreferences.getInstance();
       final lastShownVersion = prefs.getString(_changelogShownVersionKey);
-      debugPrint('Changelog banner check: current=$currentVersion, lastShown=$lastShownVersion');
+      debugPrint(
+        'Changelog banner check: current=$currentVersion, lastShown=$lastShownVersion',
+      );
 
       if (lastShownVersion == currentVersion) {
         // Same version – show banner only if still within the 3-day auto-dismiss window
@@ -521,7 +577,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         if (shownAt == null) return; // Already dismissed by user
         final daysSinceShown =
             (DateTime.now().millisecondsSinceEpoch - shownAt) /
-                (1000 * 60 * 60 * 24);
+            (1000 * 60 * 60 * 24);
         if (daysSinceShown >= _changelogBannerAutoDismissDays) {
           // Auto-dismiss: clean up the timestamp and don't show
           await prefs.remove(_changelogBannerShownAtKey);
@@ -539,7 +595,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // New version detected – save version + timestamp and show the banner
       await prefs.setString(_changelogShownVersionKey, currentVersion);
       await prefs.setInt(
-          _changelogBannerShownAtKey, DateTime.now().millisecondsSinceEpoch);
+        _changelogBannerShownAtKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
       if (mounted) {
         setState(() {
           _showChangelogBanner = true;
@@ -615,13 +673,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   if (!ctx.mounted) return;
                   Navigator.push(
                     ctx,
-                    MaterialPageRoute(
-                      builder: (c) => const ChangelogScreen(),
-                    ),
+                    MaterialPageRoute(builder: (c) => const ChangelogScreen()),
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
                   child: Row(
                     children: [
                       Icon(Icons.new_releases, color: cs.primary, size: 26),
@@ -629,14 +688,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       Expanded(
                         child: Text(
                           '${l10n.changelog} · v$_changelogBannerVersion',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
                                 color: cs.onPrimaryContainer,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
                       ),
-                      Icon(Icons.arrow_forward_ios,
-                          color: cs.onPrimaryContainer.withOpacity(0.7), size: 16),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: cs.onPrimaryContainer.withOpacity(0.7),
+                        size: 16,
+                      ),
                     ],
                   ),
                 ),
@@ -645,8 +708,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             // Dismiss button – only closes the banner
             IconButton(
               key: const Key('changelog_banner_dismiss'),
-              icon: Icon(Icons.close,
-                  color: cs.onPrimaryContainer.withOpacity(0.7), size: 22),
+              icon: Icon(
+                Icons.close,
+                color: cs.onPrimaryContainer.withOpacity(0.7),
+                size: 22,
+              ),
               onPressed: _dismissChangelogBanner,
               tooltip: l10n.close,
             ),
@@ -666,7 +732,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Listen to the provider for changes.
     ref.listen<ModelState>(modelProvider, (previous, next) async {
       // Show the API key dialog once loading completes if:
@@ -675,21 +741,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       //     for any provider, AND
       //   • AI features are enabled, AND
       //   • the 1-week cooldown has elapsed (or the user hasn't seen it before)
-      final noOwnKey = next.geminiApiKey.isEmpty &&
+      final noOwnKey =
+          next.geminiApiKey.isEmpty &&
           next.openAIApiKey.isEmpty &&
           next.groqApiKey.isEmpty;
       final usingDeveloperGroqKeyForAny = next.usingDeveloperGroqKeyForAny;
-      if (previous!.isLoading && !next.isLoading &&
+      if (previous!.isLoading &&
+          !next.isLoading &&
           (noOwnKey || usingDeveloperGroqKeyForAny) &&
           ref.read(appSettingsProvider).enableAI) {
         final ctx = context;
         final shouldShow = await ApiKeyDialog.shouldShowDialog();
         if (!shouldShow) return;
         if (!ctx.mounted) return;
-        showDialog(
-          context: ctx,
-          builder: (context) => const ApiKeyDialog(),
-        );
+        showDialog(context: ctx, builder: (context) => const ApiKeyDialog());
         // Record after showDialog so the cooldown only starts when the dialog
         // is actually presented to the user.
         ApiKeyDialog.recordDialogShown();
@@ -698,15 +763,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
     final modelState = ref.watch(modelProvider);
     final isLoading = ref.watch(modelProviderLoading);
-    
+
     // Watch tank state for My Tanks section
     final tankState = ref.watch(tankProvider);
     final tankCount = tankState.tanks.length;
-    
+
     // Get fish data for harmony calculation
     final fishCompatibilityState = ref.watch(fishCompatibilityProvider);
     final fishData = fishCompatibilityState.fishData.value;
-    
+
     // Watch app settings for AI toggle
     final appSettings = ref.watch(appSettingsProvider);
 
@@ -848,7 +913,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         delay: const Duration(milliseconds: 520),
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Documentation & Guides promo card (first launch, auto-dismissed after 7 days)
                       if (_showDocsPromoCard) ...[
                         _buildDocsPromoCard(context),
@@ -862,88 +927,134 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ],
 
                       // Prominent My Tanks Section
-                      _buildMyTanksSection(context, tankState, tankCount, fishData),
-                      
+                      _buildMyTanksSection(
+                        context,
+                        tankState,
+                        tankCount,
+                        fishData,
+                      ),
+
                       // Remove Ads hint below My Tanks
                       _buildRemoveAdsHint(context),
-                      
+
                       // Community Card (shown above feature cards when enabled)
                       if (_showCommunityCard) ...[
                         const SizedBox(height: 16),
                         _buildCommunityCard(context),
                         _buildCommunityCardAd(),
                       ],
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Feature Cards section header with layout toggle
-                      Builder(builder: (context) {
-                        final useGrid = appSettings.welcomeGridLayout;
-                        final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+                      Builder(
+                        builder: (context) {
+                          final useGrid = appSettings.welcomeGridLayout;
+                          final adsRemoved = ref
+                              .watch(purchaseProvider)
+                              .adsRemoved;
 
-                        // Apply hidden features filter
-                        final visibleFeatures = features.where((f) => !_hiddenFeatures.contains(f.id)).toList();
+                          // Apply hidden features filter
+                          final visibleFeatures = features
+                              .where((f) => !_hiddenFeatures.contains(f.id))
+                              .toList();
 
-                        // Separate full-width cards (e.g. AquaPi Store) from grid cards
-                        final gridFeatures = visibleFeatures.where((f) => !f.fullWidth).toList();
-                        final fullWidthFeatures = visibleFeatures.where((f) => f.fullWidth).toList();
+                          // Separate full-width cards (e.g. AquaPi Store) from grid cards
+                          final gridFeatures = visibleFeatures
+                              .where((f) => !f.fullWidth)
+                              .toList();
+                          final fullWidthFeatures = visibleFeatures
+                              .where((f) => f.fullWidth)
+                              .toList();
 
-                        // Split point for the native ad (between AI tools and calculators)
-                        final splitIndex = gridFeatures.indexWhere(
-                          (f) => f.routeName == '/calculators',
-                        );
-                        final topFeatures = splitIndex > 0
-                            ? gridFeatures.sublist(0, splitIndex)
-                            : (splitIndex < 0 ? gridFeatures : <FeatureInfo>[]);
-                        final bottomFeatures = splitIndex >= 0 ? gridFeatures.sublist(splitIndex) : <FeatureInfo>[];
+                          // Split point for the native ad (between AI tools and calculators)
+                          final splitIndex = gridFeatures.indexWhere(
+                            (f) => f.routeName == '/calculators',
+                          );
+                          final topFeatures = splitIndex > 0
+                              ? gridFeatures.sublist(0, splitIndex)
+                              : (splitIndex < 0
+                                    ? gridFeatures
+                                    : <FeatureInfo>[]);
+                          final bottomFeatures = splitIndex >= 0
+                              ? gridFeatures.sublist(splitIndex)
+                              : <FeatureInfo>[];
 
-                        return Column(
-                          children: [
-                            // Layout toggle row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.tune, size: 20),
-                                  tooltip: l10n.filterCards,
-                                  onPressed: () => _showCardFilterSheet(context, features, adsRemoved),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    useGrid ? Icons.view_list : Icons.grid_view,
-                                    size: 20,
+                          return Column(
+                            children: [
+                              // Layout toggle row
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.tune, size: 20),
+                                    tooltip: l10n.filterCards,
+                                    onPressed: () => _showCardFilterSheet(
+                                      context,
+                                      features,
+                                      adsRemoved,
+                                    ),
                                   ),
-                                  tooltip: useGrid ? l10n.switchToListView : l10n.switchToGridView,
-                                  onPressed: () {
-                                    ref.read(appSettingsProvider.notifier).setWelcomeGridLayout(!useGrid);
-                                  },
+                                  IconButton(
+                                    icon: Icon(
+                                      useGrid
+                                          ? Icons.view_list
+                                          : Icons.grid_view,
+                                      size: 20,
+                                    ),
+                                    tooltip: useGrid
+                                        ? l10n.switchToListView
+                                        : l10n.switchToGridView,
+                                    onPressed: () {
+                                      ref
+                                          .read(appSettingsProvider.notifier)
+                                          .setWelcomeGridLayout(!useGrid);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              if (adsRemoved) ...[
+                                // No ad break — render all grid features as one continuous mosaic
+                                if (gridFeatures.isNotEmpty)
+                                  _buildFeatureGrid(
+                                    context,
+                                    gridFeatures,
+                                    useGrid: useGrid,
+                                  ),
+                              ] else ...[
+                                // Show ad between top and bottom feature groups
+                                if (topFeatures.isNotEmpty) ...[
+                                  _buildFeatureGrid(
+                                    context,
+                                    topFeatures,
+                                    useGrid: useGrid,
+                                  ),
+                                ],
+                                _buildWelcomeNativeAd(),
+                                if (bottomFeatures.isNotEmpty) ...[
+                                  const SizedBox(height: 16),
+                                  _buildFeatureGrid(
+                                    context,
+                                    bottomFeatures,
+                                    useGrid: useGrid,
+                                  ),
+                                ],
+                              ],
+                              // Full-width cards (e.g. AquaPi Store) always rendered single-column
+                              if (fullWidthFeatures.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                _buildFeatureGrid(
+                                  context,
+                                  fullWidthFeatures,
+                                  useGrid: useGrid,
+                                  forceSingleColumn: true,
                                 ),
                               ],
-                            ),
-                            if (adsRemoved) ...[
-                              // No ad break — render all grid features as one continuous mosaic
-                              if (gridFeatures.isNotEmpty)
-                                _buildFeatureGrid(context, gridFeatures, useGrid: useGrid),
-                            ] else ...[
-                              // Show ad between top and bottom feature groups
-                              if (topFeatures.isNotEmpty) ...[
-                                _buildFeatureGrid(context, topFeatures, useGrid: useGrid),
-                              ],
-                              _buildWelcomeNativeAd(),
-                              if (bottomFeatures.isNotEmpty) ...[
-                                const SizedBox(height: 16),
-                                _buildFeatureGrid(context, bottomFeatures, useGrid: useGrid),
-                              ],
                             ],
-                            // Full-width cards (e.g. AquaPi Store) always rendered single-column
-                            if (fullWidthFeatures.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              _buildFeatureGrid(context, fullWidthFeatures, useGrid: useGrid, forceSingleColumn: true),
-                            ],
-                          ],
-                        );
-                      }),
-                      
+                          );
+                        },
+                      ),
+
                       const SizedBox(height: 48),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -966,9 +1077,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             if (_version.isNotEmpty)
                               Text(
                                 l10n.versionNumber(_version),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(fontWeight: FontWeight.w500),
                               ),
                             if (!kIsWeb && Platform.isAndroid) ...[
                               const SizedBox(height: 8),
@@ -977,16 +1087,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                     ? const SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
-                                    : const Icon(Icons.system_update_outlined, size: 18),
+                                    : const Icon(
+                                        Icons.system_update_outlined,
+                                        size: 18,
+                                      ),
                                 label: Text(l10n.checkForUpdate),
-                                onPressed: _checkingUpdate ? null : _checkForUpdate,
+                                onPressed: _checkingUpdate
+                                    ? null
+                                    : _checkForUpdate,
                               ),
                             ],
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -994,7 +1111,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             ),
     );
   }
-  
+
   String _getTextModelName(ModelState modelState) {
     switch (modelState.activeTextProvider) {
       case AIProvider.gemini:
@@ -1093,7 +1210,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       icon: const Icon(Icons.menu_book_outlined, size: 16),
                       label: Text(l10n.welcomeDocsCardButton),
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         textStyle: Theme.of(context).textTheme.labelMedium,
                       ),
                     ),
@@ -1174,11 +1294,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     FilledButton.tonalIcon(
-                      onPressed: () => Navigator.pushNamed(context, '/community'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/community'),
                       icon: const Icon(Icons.people_outline, size: 16),
                       label: Text(l10n.welcomeCommunityPromoButton),
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         textStyle: Theme.of(context).textTheme.labelMedium,
                       ),
                     ),
@@ -1197,10 +1321,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildMyTanksSection(BuildContext context, TankState tankState, int tankCount, Map<String, List<dynamic>>? fishData) {
+  Widget _buildMyTanksSection(
+    BuildContext context,
+    TankState tankState,
+    int tankCount,
+    Map<String, List<dynamic>>? fishData,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    
+
     // Select a random tank if available, but persist selection across rebuilds
     Tank? randomTank;
     if (tankCount > 0) {
@@ -1212,7 +1341,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     } else {
       _selectedTankIndex = null;
     }
-    
+
     // Get custom background photo if set
     TankPhoto? backgroundPhoto;
     if (randomTank != null && randomTank.customBackgroundPhotoId != null) {
@@ -1224,7 +1353,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         // Photo not found, use default
       }
     }
-    
+
     // Determine gradient colors based on tank type (matching tank management style)
     List<Color> gradientColors;
     if (randomTank != null && randomTank.type == 'freshwater') {
@@ -1248,27 +1377,32 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         cs.primaryContainer.withOpacity(0.8),
       ];
     }
-    
+
     return AnimatedFeatureCard(
       delay: const Duration(milliseconds: 600),
       child: Container(
         decoration: BoxDecoration(
-          gradient: backgroundPhoto == null ? LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ) : null,
-          image: backgroundPhoto != null ? DecorationImage(
-            image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
-                ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!) as ImageProvider
-                : FileImage(File(backgroundPhoto.imagePath!)),
-            fit: BoxFit.cover,
-            opacity: 0.8,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
-              BlendMode.darken,
-            ),
-          ) : null,
+          gradient: backgroundPhoto == null
+              ? LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          image: backgroundPhoto != null
+              ? DecorationImage(
+                  image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
+                      ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!)
+                            as ImageProvider
+                      : FileImage(File(backgroundPhoto.imagePath!)),
+                  fit: BoxFit.cover,
+                  opacity: 0.8,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.3),
+                    BlendMode.darken,
+                  ),
+                )
+              : null,
           color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -1325,19 +1459,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           children: [
                             Text(
                               l10n.myTanks,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: cs.onSurface,
                                   ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              tankCount == 0 
-                                  ? l10n.noTanksYet 
+                              tankCount == 0
+                                  ? l10n.noTanksYet
                                   : '$tankCount ${tankCount == 1 ? l10n.tank : l10n.tanks}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: cs.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: cs.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -1370,7 +1504,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         icon: const Icon(Icons.add),
                         label: Text(l10n.createFirstTank),
                         style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 24,
+                          ),
                         ),
                       ),
                     ),
@@ -1385,7 +1522,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       ),
     );
   }
-  
+
   // List of available tank icons (same as in tank_management_screen.dart)
   static const List<IconData> _tankIcons = [
     Icons.water_drop,
@@ -1414,7 +1551,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+        gradient:
+            tank.customIconCodePoint == null && tank.customIconPhotoId == null
             ? LinearGradient(
                 colors: tank.type == 'freshwater'
                     ? [Colors.blue.shade300, Colors.cyan.shade400]
@@ -1423,15 +1561,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 end: Alignment.bottomRight,
               )
             : null,
-        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+        color:
+            tank.customIconCodePoint == null && tank.customIconPhotoId != null
             ? Colors.grey.shade300
             : null,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: (tank.type == 'freshwater' 
-                ? Colors.blue 
-                : Colors.purple).withOpacity(0.2),
+            color: (tank.type == 'freshwater' ? Colors.blue : Colors.purple)
+                .withOpacity(0.2),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -1451,62 +1589,76 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
-                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                _getIconFromCodePoint(tank.customIconCodePoint) ??
+                    (tank.type == 'freshwater'
+                        ? Icons.water_drop
+                        : Icons.waves),
                 size: 20,
                 color: Colors.white,
               ),
             )
           : (tank.customIconPhotoId != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: () {
-                    try {
-                      final photo = tank.photos.firstWhere(
-                        (p) => p.id == tank.customIconPhotoId,
-                      );
-                      final imageUrl = photo.imageUrl ?? photo.imagePath;
-                      return imageUrl != null
-                          ? (imageUrl.startsWith('http')
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl, 
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, url, error) => Icon(
-                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Image.file(File(imageUrl), fit: BoxFit.cover))
-                          : Icon(
-                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                              size: 20,
-                              color: Colors.white,
-                            );
-                    } catch (e) {
-                      return Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                        size: 20,
-                        color: Colors.white,
-                      );
-                    }
-                  }(),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                )),
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: () {
+                      try {
+                        final photo = tank.photos.firstWhere(
+                          (p) => p.id == tank.customIconPhotoId,
+                        );
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return imageUrl != null
+                            ? (imageUrl.startsWith('http')
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (context, url, error) =>
+                                          Icon(
+                                            tank.type == 'freshwater'
+                                                ? Icons.water_drop
+                                                : Icons.waves,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
+                                    )
+                                  : Image.file(
+                                      File(imageUrl),
+                                      fit: BoxFit.cover,
+                                    ))
+                            : Icon(
+                                tank.type == 'freshwater'
+                                    ? Icons.water_drop
+                                    : Icons.waves,
+                                size: 20,
+                                color: Colors.white,
+                              );
+                      } catch (e) {
+                        return Icon(
+                          tank.type == 'freshwater'
+                              ? Icons.water_drop
+                              : Icons.waves,
+                          size: 20,
+                          color: Colors.white,
+                        );
+                      }
+                    }(),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      tank.type == 'freshwater'
+                          ? Icons.water_drop
+                          : Icons.waves,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  )),
     );
   }
 
   Widget _buildTankPreview(BuildContext context, Tank tank, ColorScheme cs) {
     // Use cached harmony score from tank object
     final harmonyScore = tank.harmonyScore;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1522,31 +1674,34 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   Text(
                     tank.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: cs.onSurface,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     tank.type == 'freshwater' ? 'Freshwater' : 'Saltwater',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
             if (tank.sizeGallons != null || tank.sizeLiters != null)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: cs.secondary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  tank.sizeGallons != null 
+                  tank.sizeGallons != null
                       ? '${tank.sizeGallons!.toStringAsFixed(0)} gal'
                       : '${tank.sizeLiters!.toStringAsFixed(0)} L',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1561,22 +1716,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         if (tank.inhabitants.isNotEmpty) ...[
           Row(
             children: [
-              Icon(
-                Icons.pets,
-                size: 16,
-                color: cs.onSurfaceVariant,
-              ),
+              Icon(Icons.pets, size: 16, color: cs.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
                 '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
               ),
               if (harmonyScore != null) ...[
                 const SizedBox(width: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getHarmonyColor(harmonyScore).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -1621,9 +1775,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           const SizedBox(height: 8),
           Text(
             tank.notes!,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1631,26 +1785,31 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       ],
     );
   }
-  
+
   Color _getHarmonyColor(double score) {
     if (score >= 0.8) return Colors.green;
     if (score >= 0.6) return Colors.yellow.shade700;
     if (score >= 0.4) return Colors.orange;
     return Colors.red;
   }
-  
+
   IconData _getHarmonyIcon(double score) {
     if (score >= 0.8) return Icons.check_circle;
     if (score >= 0.6) return Icons.info;
     if (score >= 0.4) return Icons.warning;
     return Icons.error;
   }
-  
+
   int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
-    return inhabitants.fold(0, (total, inhabitant) => total + inhabitant.quantity);
+    return inhabitants.fold(
+      0,
+      (total, inhabitant) => total + inhabitant.quantity,
+    );
   }
 
-  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
+  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(
+    List<TankInhabitant> inhabitants,
+  ) {
     final grouped = <String, List<TankInhabitant>>{};
     for (final inhabitant in inhabitants) {
       final fishType = inhabitant.fishUnit;
@@ -1661,7 +1820,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
     return grouped;
   }
-  
+
   Widget _buildRemoveAdsHint(BuildContext context) {
     if (kIsWeb) return const SizedBox.shrink();
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
@@ -1678,13 +1837,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             Icon(
               Icons.block,
               size: 13,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withOpacity(0.6),
             ),
             const SizedBox(width: 4),
             Text(
               l10n.removeAds,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -1697,7 +1860,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget _buildCommunityCard(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final postsAsync = ref.watch(welcomeCommunityPostsProvider(_communityCardFilterType));
+    final postsAsync = ref.watch(
+      welcomeCommunityPostsProvider(_communityCardFilterType),
+    );
 
     return AnimatedFeatureCard(
       delay: const Duration(milliseconds: 580),
@@ -1750,21 +1915,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         children: [
                           Text(
                             l10n.communityTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             l10n.communityCardLatestPosts,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
                           ),
                         ],
                       ),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/community'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/community'),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1782,13 +1946,33 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _communityFilterChip(context, Icons.all_inclusive, l10n.communityFilterAll, null),
+                      _communityFilterChip(
+                        context,
+                        Icons.all_inclusive,
+                        l10n.communityFilterAll,
+                        null,
+                      ),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, Icons.waves, l10n.communityPostTypeTankShowcase, PostType.tankShowcase),
+                      _communityFilterChip(
+                        context,
+                        Icons.waves,
+                        l10n.communityPostTypeTankShowcase,
+                        PostType.tankShowcase,
+                      ),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, Icons.lightbulb_outline, l10n.communityPostTypeTip, PostType.tip),
+                      _communityFilterChip(
+                        context,
+                        Icons.lightbulb_outline,
+                        l10n.communityPostTypeTip,
+                        PostType.tip,
+                      ),
                       const SizedBox(width: 8),
-                      _communityFilterChip(context, Icons.help_outline, l10n.communityPostTypeQuestion, PostType.question),
+                      _communityFilterChip(
+                        context,
+                        Icons.help_outline,
+                        l10n.communityPostTypeQuestion,
+                        PostType.question,
+                      ),
                     ],
                   ),
                 ),
@@ -1802,9 +1986,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         child: Center(
                           child: Text(
                             l10n.communityCardNoPostsYet,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: cs.onSurfaceVariant),
                           ),
                         ),
                       );
@@ -1812,7 +1995,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     return Column(
                       children: posts
                           .take(5)
-                          .map((post) => _buildCommunityPostTile(context, post, cs))
+                          .map(
+                            (post) =>
+                                _buildCommunityPostTile(context, post, cs),
+                          )
                           .toList(),
                     );
                   },
@@ -1830,7 +2016,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _communityFilterChip(BuildContext context, IconData icon, String tooltip, PostType? type) {
+  Widget _communityFilterChip(
+    BuildContext context,
+    IconData icon,
+    String tooltip,
+    PostType? type,
+  ) {
     final isSelected = _communityCardFilterType == type;
     final cs = Theme.of(context).colorScheme;
     return Tooltip(
@@ -1853,14 +2044,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildCommunityPostTile(BuildContext context, CommunityPost post, ColorScheme cs) {
+  Widget _buildCommunityPostTile(
+    BuildContext context,
+    CommunityPost post,
+    ColorScheme cs,
+  ) {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => CommunityPostScreen(post: post),
-        ),
+        MaterialPageRoute(builder: (_) => CommunityPostScreen(post: post)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1899,7 +2092,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const Spacer(),
-                      Icon(Icons.favorite_outline, size: 12, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.favorite_outline,
+                        size: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         '${post.likes}',
@@ -1908,7 +2105,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(Icons.comment_outlined, size: 12, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         '${post.commentCount}',
@@ -1956,14 +2157,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _buildFeatureGrid(BuildContext context, List<FeatureInfo> features, {bool useGrid = true, bool forceSingleColumn = false}) {
+  Widget _buildFeatureGrid(
+    BuildContext context,
+    List<FeatureInfo> features, {
+    bool useGrid = true,
+    bool forceSingleColumn = false,
+  }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
     final isMediumScreen = screenWidth > 800;
-    
+
     // Determine column count based on screen size and layout preference
-    final crossAxisCount = forceSingleColumn ? 1 : (isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1)));
-    
+    final crossAxisCount = forceSingleColumn
+        ? 1
+        : (isLargeScreen ? 3 : (isMediumScreen ? 2 : (useGrid ? 2 : 1)));
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return MasonryGridView.count(
@@ -1988,13 +2196,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 onTap: () {
                   // Log feature usage
                   AnalyticsService.logFeatureUsed(
-                    featureName: feature.title.toLowerCase().replaceAll(' ', '_'),
+                    featureName: feature.title.toLowerCase().replaceAll(
+                      ' ',
+                      '_',
+                    ),
                     parameters: {
                       'source': 'welcome_screen',
                       'route': feature.routeName,
                     },
                   );
-                  
+
                   if (feature.url != null) {
                     _launchURL(feature.url!);
                   } else if (feature.openPhotoAnalyzer) {
@@ -2050,14 +2261,13 @@ class AnimatedHeaderState extends State<AnimatedHeader> {
           const SizedBox(width: 16),
           GradientText(
             'Aquarium\nAI',
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
+            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
             ),
-            gradient: LinearGradient(colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-            ]),
           ),
         ],
       ),
@@ -2109,8 +2319,11 @@ class AnimatedFeatureCard extends StatefulWidget {
   final Widget child;
   final Duration delay;
 
-  const AnimatedFeatureCard(
-      {super.key, required this.child, required this.delay});
+  const AnimatedFeatureCard({
+    super.key,
+    required this.child,
+    required this.delay,
+  });
 
   @override
   AnimatedFeatureCardState createState() => AnimatedFeatureCardState();
@@ -2148,6 +2361,7 @@ class AnimatedFeatureCardState extends State<AnimatedFeatureCard> {
 /// Wraps a changelog banner child and slides it up from below when first built.
 class _ChangelogBannerSlide extends StatefulWidget {
   final Widget child;
+
   const _ChangelogBannerSlide({required this.child});
 
   @override
@@ -2203,7 +2417,7 @@ class FeatureCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final themeState = ref.watch(themeProviderNotifierProvider);
     final isMaterialYou = themeState.useMaterialYou;
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: isMaterialYou ? 3 : 2,
@@ -2211,16 +2425,13 @@ class FeatureCard extends ConsumerWidget {
       color: isMaterialYou ? cs.surface : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: cs.primary.withOpacity(0.3),
-          width: 1.5,
-        ),
+        side: BorderSide(color: cs.primary.withOpacity(0.3), width: 1.5),
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: isMaterialYou 
+            colors: isMaterialYou
                 ? [
                     cs.primaryContainer.withOpacity(0.3),
                     cs.secondaryContainer.withOpacity(0.2),
@@ -2241,7 +2452,9 @@ class FeatureCard extends ConsumerWidget {
             padding: EdgeInsets.all(compact ? 14.0 : 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+              crossAxisAlignment: compact
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
               children: [
                 if (compact) ...[
                   // Compact (grid on mobile): icon centered, title below
@@ -2264,9 +2477,9 @@ class FeatureCard extends ConsumerWidget {
                     title,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isMaterialYou ? cs.onSurface : cs.primary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: isMaterialYou ? cs.onSurface : cs.primary,
+                    ),
                   ),
                 ] else ...[
                   // Default (list / large screen): icon + title in a row
@@ -2288,9 +2501,12 @@ class FeatureCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: isMaterialYou ? cs.onSurface : cs.primary,
+                                color: isMaterialYou
+                                    ? cs.onSurface
+                                    : cs.primary,
                               ),
                         ),
                       ),
@@ -2316,22 +2532,34 @@ class FeatureCard extends ConsumerWidget {
                   if (compact)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: toolChips!.map((chip) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: InkWell(
-                          onTap: chip.onTap,
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: cs.primary.withOpacity(0.3)),
+                      children: toolChips!
+                          .map(
+                            (chip) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: InkWell(
+                                onTap: chip.onTap,
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: cs.primaryContainer.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: cs.primary.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    chip.icon,
+                                    size: 16,
+                                    color: cs.primary,
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: Icon(chip.icon, size: 16, color: cs.primary),
-                          ),
-                        ),
-                      )).toList(),
+                          )
+                          .toList(),
                     )
                   else
                     Wrap(
@@ -2342,7 +2570,8 @@ class FeatureCard extends ConsumerWidget {
                           avatar: Icon(chip.icon, size: 16, color: cs.primary),
                           label: Text(
                             chip.label,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: cs.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2361,53 +2590,56 @@ class FeatureCard extends ConsumerWidget {
                 ],
                 if (imagePath != null) ...[
                   const SizedBox(height: 16),
-                  Builder(builder: (context) {
-                    final path = imagePath!;
-                    final isNetworkImage =
-                        Uri.tryParse(path)?.hasAbsolutePath == true &&
-                        (path.startsWith('http://') ||
-                            path.startsWith('https://'));
-                    final errorPlaceholder = Container(
-                      height: 300,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceVariant,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.image_not_supported,
-                        color: cs.onSurfaceVariant,
-                        size: 48,
-                      ),
-                    );
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
+                  Builder(
+                    builder: (context) {
+                      final path = imagePath!;
+                      final isNetworkImage =
+                          Uri.tryParse(path)?.hasAbsolutePath == true &&
+                          (path.startsWith('http://') ||
+                              path.startsWith('https://'));
+                      final errorPlaceholder = Container(
                         height: 300,
                         width: double.infinity,
-                        child: isNetworkImage
-                            ? CachedNetworkImage(
-                                imageUrl: path,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.center,
-                                placeholder: (context, url) => const SizedBox(
-                                  height: 300,
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceVariant,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: cs.onSurfaceVariant,
+                          size: 48,
+                        ),
+                      );
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          height: 300,
+                          width: double.infinity,
+                          child: isNetworkImage
+                              ? CachedNetworkImage(
+                                  imageUrl: path,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  placeholder: (context, url) => const SizedBox(
+                                    height: 300,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      errorPlaceholder,
+                                )
+                              : Image.asset(
+                                  path,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      errorPlaceholder,
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    errorPlaceholder,
-                              )
-                            : Image.asset(
-                                path,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.center,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    errorPlaceholder,
-                              ),
-                      ),
-                    );
-                  }),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ],
             ),

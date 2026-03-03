@@ -1,8 +1,10 @@
 import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../models/fish.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/species_tags_provider.dart';
@@ -37,7 +39,7 @@ class FishCard extends ConsumerWidget {
     final themeState = ref.watch(themeProviderNotifierProvider);
     final isMaterialYou = themeState.useMaterialYou;
     final notifier = ref.read(fishCompatibilityProvider.notifier);
-    
+
     // Different background colors for Material You vs standard themes
     Color? getCardColor() {
       if (isSelected) return null; // Use gradient for selected
@@ -46,27 +48,27 @@ class FishCard extends ConsumerWidget {
       }
       return Theme.of(context).cardColor;
     }
-    
+
     // Enhanced border for Material You
     BorderSide getBorder() {
       if (isSelected) {
         return BorderSide(color: cs.primary, width: 3);
       }
       if (isMaterialYou) {
-        return BorderSide(color: cs.outlineVariant.withOpacity(0.6), width: 1.5);
+        return BorderSide(
+          color: cs.outlineVariant.withOpacity(0.6),
+          width: 1.5,
+        );
       }
       return BorderSide(color: cs.outlineVariant.withOpacity(0.25), width: 1.2);
     }
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: getBorder().color,
-          width: getBorder().width,
-        ),
+        border: Border.all(color: getBorder().color, width: getBorder().width),
         boxShadow: [
           if (isSelected)
             BoxShadow(
@@ -78,7 +80,7 @@ class FishCard extends ConsumerWidget {
             color: Colors.black.withOpacity(isMaterialYou ? 0.08 : 0.05),
             blurRadius: isMaterialYou ? 8 : 6,
             offset: const Offset(0, 3),
-          )
+          ),
         ],
         gradient: isSelected
             ? LinearGradient(
@@ -89,7 +91,8 @@ class FishCard extends ConsumerWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
-            : isMaterialYou && !isSelected ? LinearGradient(
+            : isMaterialYou && !isSelected
+            ? LinearGradient(
                 colors: [
                   cs.surfaceContainer,
                   cs.primaryContainer.withOpacity(0.9),
@@ -110,8 +113,9 @@ class FishCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(18)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(18),
+                  ),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -143,12 +147,20 @@ class FishCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                               child: IconButton(
-                                icon: const Icon(Icons.search, color: Colors.white),
+                                icon: const Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                ),
                                 onPressed: () {
-                                  final categoryLabel = category == 'marine' ? 'saltwater' : category;
-                                  final query = Uri.encodeComponent('${fish.name} $categoryLabel');
+                                  final categoryLabel = category == 'marine'
+                                      ? 'saltwater'
+                                      : category;
+                                  final query = Uri.encodeComponent(
+                                    '${fish.name} $categoryLabel',
+                                  );
                                   _launchURL(
-                                      'https://www.google.com/search?q=$query');
+                                    'https://www.google.com/search?q=$query',
+                                  );
                                 },
                                 tooltip: 'Search for ${fish.name} on Google',
                               ),
@@ -166,22 +178,25 @@ class FishCard extends ConsumerWidget {
                               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 2),
+                                  horizontal: 5,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: (fish.reefSafe == 'Yes'
-                                          ? Colors.green
-                                          : fish.reefSafe == 'Caution'
+                                  color:
+                                      (fish.reefSafe == 'Yes'
+                                              ? Colors.green
+                                              : fish.reefSafe == 'Caution'
                                               ? Colors.orange
                                               : Colors.red)
-                                      .withOpacity(0.75),
+                                          .withOpacity(0.75),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   fish.reefSafe == 'Yes'
                                       ? '🪸 Safe'
                                       : fish.reefSafe == 'Caution'
-                                          ? '⚠️ Caution'
-                                          : '✗ Unsafe',
+                                      ? '⚠️ Caution'
+                                      : '✗ Unsafe',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 9,
@@ -198,23 +213,22 @@ class FishCard extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 12,
+                ),
                 child: Column(
                   children: [
                     Text(
                       fish.name,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: isSelected 
-                              ? cs.primary 
-                              : (isMaterialYou ? cs.onSurfaceVariant : null),
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: isSelected
+                            ? cs.primary
+                            : (isMaterialYou ? cs.onSurfaceVariant : null),
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                     ),
@@ -222,31 +236,40 @@ class FishCard extends ConsumerWidget {
                       Builder(
                         builder: (context) {
                           // Get species tags if showing them
-                          List<String> displayNames = List.from(fish.commonNames);
-                          
+                          List<String> displayNames = List.from(
+                            fish.commonNames,
+                          );
+
                           if (showSpeciesTags) {
-                            final speciesTags = ref.read(speciesTagsProvider.notifier)
+                            final speciesTags = ref
+                                .read(speciesTagsProvider.notifier)
                                 .getTagsForFishType(fish.name);
-                            
+
                             // Add tags that aren't already in commonNames (case-insensitive)
                             final commonNamesLower = fish.commonNames
                                 .map((name) => name.toLowerCase())
                                 .toSet();
-                            
+
                             for (final tag in speciesTags) {
-                              if (!commonNamesLower.contains(tag.toLowerCase())) {
+                              if (!commonNamesLower.contains(
+                                tag.toLowerCase(),
+                              )) {
                                 displayNames.add(tag);
                               }
                             }
                           }
-                          
-                          if (displayNames.isEmpty) return const SizedBox.shrink();
-                          
+
+                          if (displayNames.isEmpty)
+                            return const SizedBox.shrink();
+
                           return Text(
                             displayNames.join(', '),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: isMaterialYou ? cs.onSurfaceVariant.withOpacity(0.8) : null,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: isMaterialYou
+                                      ? cs.onSurfaceVariant.withOpacity(0.8)
+                                      : null,
+                                ),
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -262,4 +285,4 @@ class FishCard extends ConsumerWidget {
       ),
     );
   }
-} 
+}

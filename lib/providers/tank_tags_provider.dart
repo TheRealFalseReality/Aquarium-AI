@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/tank.dart';
 
 /// Notifier that maintains a global library of user-created [TankTag]
@@ -79,8 +81,7 @@ class TankTagsNotifier extends StateNotifier<List<TankTag>> {
 }
 
 /// Provider for the global TankTag library.
-final tankTagsProvider =
-    StateNotifierProvider<TankTagsNotifier, List<TankTag>>(
+final tankTagsProvider = StateNotifierProvider<TankTagsNotifier, List<TankTag>>(
   (ref) => TankTagsNotifier(),
 );
 

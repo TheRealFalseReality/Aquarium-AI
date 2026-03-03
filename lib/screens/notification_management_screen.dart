@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../l10n/app_localizations.dart';
+import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
-import '../models/notification_log.dart';
 import '../providers/tank_provider.dart';
+import '../services/analytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_schedule_option_dialog.dart';
-import '../services/analytics_service.dart';
-import '../l10n/app_localizations.dart';
 
 class NotificationManagementScreen extends ConsumerStatefulWidget {
   final Tank tank;
 
-  const NotificationManagementScreen({
-    super.key,
-    required this.tank,
-  });
+  const NotificationManagementScreen({super.key, required this.tank});
 
   @override
   ConsumerState<NotificationManagementScreen> createState() =>
@@ -35,18 +33,20 @@ class _NotificationManagementScreenState
   }
 
   /// Get the current tank state from the provider to avoid race conditions.
-  /// 
+  ///
   /// This method always fetches the latest tank state from the provider rather than
   /// using widget.tank, which is a snapshot from when the widget was created.
   /// This prevents race conditions where concurrent notification operations could
   /// overwrite each other's changes.
-  /// 
+  ///
   /// Falls back to widget.tank if the tank is not found in the provider, which could
   /// happen if the tank was deleted while this screen is still open. In practice,
   /// this fallback ensures the app doesn't crash, though the subsequent update
   /// operation would fail gracefully since the tank doesn't exist.
   Tank _getCurrentTank() {
-    return ref.read(tankProvider).tanks
+    return ref
+        .read(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
   }
 
@@ -92,9 +92,11 @@ class _NotificationManagementScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Watch the tank provider to get real-time updates
-    final currentTank = ref.watch(tankProvider).tanks
+    final currentTank = ref
+        .watch(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
     final notifications = currentTank.notifications;
 
@@ -103,11 +105,9 @@ class _NotificationManagementScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(currentTank.name),
             Text(
-              currentTank.name,
-            ),
-            Text(
-                AppLocalizations.of(context)!.notificationsExperimental,
+              AppLocalizations.of(context)!.notificationsExperimental,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -170,7 +170,7 @@ class _NotificationManagementScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
-    
+
     // Use the single source of truth: getImmediateNextDate()
     // This returns scheduledNextDate if set, otherwise notificationDateTime
     final DateTime displayDate = notification.getImmediateNextDate();
@@ -198,7 +198,8 @@ class _NotificationManagementScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          notification.customTitle ?? notification.getDisplayName(),
+                          notification.customTitle ??
+                              notification.getDisplayName(),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -217,7 +218,8 @@ class _NotificationManagementScreenState
                   ),
                   Switch(
                     value: notification.enabled,
-                    onChanged: (value) => _toggleNotification(notification, value),
+                    onChanged: (value) =>
+                        _toggleNotification(notification, value),
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
@@ -225,91 +227,99 @@ class _NotificationManagementScreenState
                   ),
                 ],
               ),
-            if (notification.notes != null && notification.notes!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
+              if (notification.notes != null &&
+                  notification.notes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    notification.notes!,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
-                child: Text(
-                  notification.notes!,
-                  style: theme.textTheme.bodyMedium,
+              ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  if (notification.repeatFrequency != RepeatFrequency.none)
+                    Chip(
+                      label: Text(
+                        _getRepeatText(notification),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  if (notification.enabled)
+                    Builder(
+                      builder: (context) {
+                        // Use the dynamically calculated displayDate for the "time from now" chip
+                        // This shows when the notification will actually fire
+                        final DateTime? nextDate;
+                        if (displayDate.isAfter(DateTime.now())) {
+                          nextDate = displayDate;
+                        } else {
+                          // If the display time is in the past, don't show the chip
+                          nextDate = null;
+                        }
+
+                        if (nextDate == null) return const SizedBox.shrink();
+
+                        return Chip(
+                          label: Text(
+                            _getTimeFromNow(nextDate),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          avatar: const Icon(Icons.schedule, size: 16),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.secondaryContainer,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        );
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Quick Log button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _quickLogActivity(notification),
+                  icon: const Icon(Icons.add_task, size: 18),
+                  label: Text(AppLocalizations.of(context)!.quickLog),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _getNotificationColor(notification.type),
+                    side: BorderSide(
+                      color: _getNotificationColor(
+                        notification.type,
+                      ).withOpacity(0.5),
+                    ),
+                  ),
                 ),
               ),
             ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                if (notification.repeatFrequency != RepeatFrequency.none)
-                  Chip(
-                    label: Text(
-                      _getRepeatText(notification),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                if (notification.enabled)
-                  Builder(
-                    builder: (context) {
-                      // Use the dynamically calculated displayDate for the "time from now" chip
-                      // This shows when the notification will actually fire
-                      final DateTime? nextDate;
-                      if (displayDate.isAfter(DateTime.now())) {
-                        nextDate = displayDate;
-                      } else {
-                        // If the display time is in the past, don't show the chip
-                        nextDate = null;
-                      }
-                      
-                      if (nextDate == null) return const SizedBox.shrink();
-                      
-                      return Chip(
-                        label: Text(
-                          _getTimeFromNow(nextDate),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        avatar: const Icon(Icons.schedule, size: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      );
-                    },
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Quick Log button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _quickLogActivity(notification),
-                icon: const Icon(Icons.add_task, size: 18),
-                label: Text(AppLocalizations.of(context)!.quickLog),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _getNotificationColor(notification.type),
-                  side: BorderSide(color: _getNotificationColor(notification.type).withOpacity(0.5)),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
 
   String _getRepeatText(TankNotification notification) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (notification.repeatInterval == 1) {
       return notification.repeatFrequency.displayName;
     }
-    
+
     // Get the appropriate unit name based on frequency
     final String unitName;
     switch (notification.repeatFrequency) {
@@ -328,7 +338,7 @@ class _NotificationManagementScreenState
       default:
         return notification.repeatFrequency.displayName;
     }
-    
+
     return l10n.everyXDays(notification.repeatInterval, unitName);
   }
 
@@ -336,15 +346,15 @@ class _NotificationManagementScreenState
     final now = DateTime.now();
     final difference = dateTime.difference(now);
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (difference.isNegative) {
       return l10n.overdue;
     }
-    
+
     final days = difference.inDays;
     final hours = difference.inHours;
     final minutes = difference.inMinutes;
-    
+
     if (days > 0) {
       if (days == 1) {
         return l10n.inLessThan2Days;
@@ -399,9 +409,12 @@ class _NotificationManagementScreenState
     }
   }
 
-  Future<void> _toggleNotification(TankNotification notification, bool enabled) async {
+  Future<void> _toggleNotification(
+    TankNotification notification,
+    bool enabled,
+  ) async {
     final currentTank = _getCurrentTank();
-    
+
     final updatedNotification = notification.copyWith(
       enabled: enabled,
       updatedAt: DateTime.now(),
@@ -447,7 +460,7 @@ class _NotificationManagementScreenState
   /// Quick log an activity based on a notification
   Future<void> _quickLogActivity(TankNotification notification) async {
     final currentTank = _getCurrentTank();
-    
+
     // Create a new log entry based on the notification type and custom category
     final log = NotificationLog.create(
       type: notification.type,
@@ -457,25 +470,26 @@ class _NotificationManagementScreenState
       notes: notification.notes,
       notificationId: notification.id,
     );
-    
+
     final updatedLogs = [...currentTank.notificationLogs, log];
-    
+
     // Reschedule matching notifications based on the new activity
-    final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
-      tankId: currentTank.id,
-      tankName: currentTank.name,
-      notifications: currentTank.notifications,
-      activityLogs: updatedLogs,
-      activityType: log.type,
-      activityCustomCategory: log.customCategory,
-    );
-    
+    final updatedNotifications = await _notificationService
+        .rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+
     // Update the tank with new activity logs and updated notifications
     var updatedTank = currentTank.copyWith(
       notificationLogs: updatedLogs,
       updatedAt: DateTime.now(),
     );
-    
+
     // Apply the updated notifications with new scheduledNextDate
     if (updatedNotifications.isNotEmpty) {
       final notificationsList = updatedTank.notifications.map((n) {
@@ -487,22 +501,24 @@ class _NotificationManagementScreenState
       }).toList();
       updatedTank = updatedTank.copyWith(notifications: notificationsList);
     }
-    
+
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(l10n.activityLogged);
     }
-    
+
     AnalyticsService.logFeatureUsed(
       featureName: 'quick_log_activity',
       parameters: {
         'type': notification.type.name,
-        'has_custom_category': notification.customCategory != null ? 'true' : 'false',
+        'has_custom_category': notification.customCategory != null
+            ? 'true'
+            : 'false',
       },
     );
-    
+
     AnalyticsService.logTankAction(
       action: 'quick_log_activity',
       tankType: currentTank.type,
@@ -534,7 +550,10 @@ class _NotificationManagementScreenState
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+              title: Text(
+                AppLocalizations.of(context)!.delete,
+                style: const TextStyle(color: Colors.red),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteNotification(notification);
@@ -572,7 +591,7 @@ class _NotificationManagementScreenState
 
   Future<void> _deleteNotification(TankNotification notification) async {
     final currentTank = _getCurrentTank();
-    
+
     final updatedNotifications = currentTank.notifications
         .where((n) => n.id != notification.id)
         .toList();
@@ -586,7 +605,9 @@ class _NotificationManagementScreenState
     await _notificationService.cancelNotification(notification);
 
     if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.notificationDeleted);
+      context.showAccessibleMessage(
+        AppLocalizations.of(context)!.notificationDeleted,
+      );
     }
 
     AnalyticsService.logFeatureUsed(
@@ -605,7 +626,9 @@ class _NotificationManagementScreenState
     );
 
     if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+      context.showAccessibleMessage(
+        AppLocalizations.of(context)!.testNotificationSent,
+      );
     }
 
     AnalyticsService.logFeatureUsed(
@@ -664,30 +687,36 @@ class _NotificationFormScreenState
   late bool _enabled;
 
   /// Get the current tank state from the provider to avoid race conditions.
-  /// 
+  ///
   /// This method always fetches the latest tank state from the provider rather than
   /// using widget.tank, which is a snapshot from when the widget was created.
   /// This prevents race conditions where concurrent notification operations could
   /// overwrite each other's changes.
-  /// 
+  ///
   /// Falls back to widget.tank if the tank is not found in the provider, which could
   /// happen if the tank was deleted while this screen is still open. In practice,
   /// this fallback ensures the app doesn't crash, though the subsequent update
   /// operation would fail gracefully since the tank doesn't exist.
   Tank _getCurrentTank() {
-    return ref.read(tankProvider).tanks
+    return ref
+        .read(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
   }
 
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.existingNotification != null) {
       // When editing, use the existing notification's date and time
       final notif = widget.existingNotification!;
       final notifDateTime = notif.notificationDateTime;
-      _selectedDate = DateTime(notifDateTime.year, notifDateTime.month, notifDateTime.day);
+      _selectedDate = DateTime(
+        notifDateTime.year,
+        notifDateTime.month,
+        notifDateTime.day,
+      );
       _selectedTime = TimeOfDay.fromDateTime(notifDateTime);
       _selectedType = notif.type;
       _repeatFrequency = notif.repeatFrequency;
@@ -724,7 +753,11 @@ class _NotificationFormScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? AppLocalizations.of(context)!.editNotification : AppLocalizations.of(context)!.addNotification),
+        title: Text(
+          isEditing
+              ? AppLocalizations.of(context)!.editNotification
+              : AppLocalizations.of(context)!.addNotification,
+        ),
         actions: [
           TextButton(
             onPressed: _saveNotification,
@@ -779,9 +812,15 @@ class _NotificationFormScreenState
                       TextFormField(
                         controller: _customCategoryController,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.customCategoryOptional,
-                          hintText: AppLocalizations.of(context)!.customCategoryHint,
-                          helperText: AppLocalizations.of(context)!.customCategoryHelper,
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.customCategoryOptional,
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.customCategoryHint,
+                          helperText: AppLocalizations.of(
+                            context,
+                          )!.customCategoryHelper,
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.category),
                         ),
@@ -883,7 +922,9 @@ class _NotificationFormScreenState
                           }
                           final number = int.tryParse(value);
                           if (number == null || number < 1) {
-                            return AppLocalizations.of(context)!.enterValidNumber;
+                            return AppLocalizations.of(
+                              context,
+                            )!.enterValidNumber;
                           }
                           return null;
                         },
@@ -916,7 +957,9 @@ class _NotificationFormScreenState
                       controller: _titleController,
                       decoration: InputDecoration(
                         hintText: AppLocalizations.of(context)!.customTitleHint,
-                        helperText: AppLocalizations.of(context)!.customTitleHelper,
+                        helperText: AppLocalizations.of(
+                          context,
+                        )!.customTitleHelper,
                         border: const OutlineInputBorder(),
                       ),
                       maxLength: 50,
@@ -944,7 +987,9 @@ class _NotificationFormScreenState
                     TextFormField(
                       controller: _notesController,
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.addNotesPlaceholder,
+                        hintText: AppLocalizations.of(
+                          context,
+                        )!.addNotesPlaceholder,
                         border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
@@ -992,7 +1037,9 @@ class _NotificationFormScreenState
                     ElevatedButton.icon(
                       onPressed: _sendTestNotificationForPreview,
                       icon: const Icon(Icons.send),
-                      label: Text(AppLocalizations.of(context)!.sendTestNotification),
+                      label: Text(
+                        AppLocalizations.of(context)!.sendTestNotification,
+                      ),
                     ),
                   ],
                 ),
@@ -1008,11 +1055,11 @@ class _NotificationFormScreenState
     // Use the start of today (midnight) as firstDate to allow selecting any time today
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     // Ensure initialDate is not before firstDate
     // Use today if _selectedDate is in the past, otherwise use _selectedDate
     final initialDate = _selectedDate.isBefore(today) ? today : _selectedDate;
-    
+
     final date = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -1042,12 +1089,18 @@ class _NotificationFormScreenState
     await _notificationService.sendTestNotification(
       tankName: widget.tank.name,
       type: _selectedType,
-      customTitle: _titleController.text.isNotEmpty ? _titleController.text : null,
-      customBody: _notesController.text.isNotEmpty ? _notesController.text : null,
+      customTitle: _titleController.text.isNotEmpty
+          ? _titleController.text
+          : null,
+      customBody: _notesController.text.isNotEmpty
+          ? _notesController.text
+          : null,
     );
 
     if (mounted) {
-      context.showAccessibleMessage(AppLocalizations.of(context)!.testNotificationSent);
+      context.showAccessibleMessage(
+        AppLocalizations.of(context)!.testNotificationSent,
+      );
     }
 
     AnalyticsService.logFeatureUsed(
@@ -1064,7 +1117,7 @@ class _NotificationFormScreenState
     _formKey.currentState!.save();
 
     final currentTank = _getCurrentTank();
-    
+
     // Capture current time once to avoid race conditions
     final now = DateTime.now();
 
@@ -1092,19 +1145,19 @@ class _NotificationFormScreenState
     }
 
     final TankNotification notification;
-    
+
     // Get custom category for 'other' type, defaulting to 'Other' if empty
     final trimmedCustomCategory = _customCategoryController.text.trim();
     final customCategory = _selectedType == NotificationType.other
         ? (trimmedCustomCategory.isNotEmpty ? trimmedCustomCategory : 'Other')
         : null;
-    
+
     if (widget.existingNotification != null) {
       // Update existing notification
       // Use clear flags to explicitly set notes/title to null when empty
       final notesIsEmpty = _notesController.text.isEmpty;
       final titleIsEmpty = _titleController.text.isEmpty;
-      
+
       notification = widget.existingNotification!.copyWith(
         type: _selectedType,
         notificationDateTime: notificationDateTime,
@@ -1116,7 +1169,8 @@ class _NotificationFormScreenState
         enabled: _enabled,
         updatedAt: DateTime.now(),
         clearNotes: notesIsEmpty && widget.existingNotification!.notes != null,
-        clearCustomTitle: titleIsEmpty && widget.existingNotification!.customTitle != null,
+        clearCustomTitle:
+            titleIsEmpty && widget.existingNotification!.customTitle != null,
       );
     } else {
       // Create new notification
@@ -1126,7 +1180,9 @@ class _NotificationFormScreenState
         repeatFrequency: _repeatFrequency,
         repeatInterval: _repeatInterval,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
-        customTitle: _titleController.text.isEmpty ? null : _titleController.text,
+        customTitle: _titleController.text.isEmpty
+            ? null
+            : _titleController.text,
         customCategory: customCategory,
         enabled: _enabled,
       );
@@ -1135,8 +1191,8 @@ class _NotificationFormScreenState
     // Update tank with new/updated notification using current tank state
     final updatedNotifications = widget.existingNotification != null
         ? currentTank.notifications
-            .map((n) => n.id == notification.id ? notification : n)
-            .toList()
+              .map((n) => n.id == notification.id ? notification : n)
+              .toList()
         : [...currentTank.notifications, notification];
 
     // Determine if we should show the schedule option dialog
@@ -1145,19 +1201,20 @@ class _NotificationFormScreenState
     // 2. Notification has a repeat frequency (not one-time)
     // 3. There are matching activity logs for this notification type
     bool useActivityLogs = false; // Default: use specified time
-    bool useExactDateTime = false; // Whether to use exact date/time (ignoring all calculations)
-    
+    bool useExactDateTime =
+        false; // Whether to use exact date/time (ignoring all calculations)
+
     if (_enabled && _repeatFrequency != RepeatFrequency.none) {
       // Check for matching activity logs
       final matchingLogs = currentTank.notificationLogs.where((log) {
         return notification.matchesActivityLog(log.type, log.customCategory);
       }).toList();
-      
+
       if (matchingLogs.isNotEmpty && mounted) {
         // Sort by date (newest first) and get the most recent activity log
         matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
         final lastActivityLog = matchingLogs.first;
-        
+
         // Show dialog to let user choose scheduling method BEFORE saving
         final scheduleOption = await NotificationScheduleOptionDialog.show(
           context,
@@ -1165,7 +1222,7 @@ class _NotificationFormScreenState
           lastActivityLog: lastActivityLog,
           specifiedDateTime: notificationDateTime,
         );
-        
+
         if (scheduleOption == ScheduleOption.useLastActivity) {
           // User chose to schedule from last activity
           useActivityLogs = true;
@@ -1175,7 +1232,8 @@ class _NotificationFormScreenState
         } else if (scheduleOption == ScheduleOption.goBackToEdit) {
           // User chose to go back to edit - do nothing and stay on the form
           return;
-        } else if (scheduleOption == ScheduleOption.discardChanges || scheduleOption == null) {
+        } else if (scheduleOption == ScheduleOption.discardChanges ||
+            scheduleOption == null) {
           // User chose to discard changes - go back to notification list without saving
           if (mounted) {
             Navigator.of(context).pop();
@@ -1204,23 +1262,23 @@ class _NotificationFormScreenState
         // Use exact date/time if user explicitly chose "Use Specified Time"
         useExactDateTime: useExactDateTime,
       );
-      
+
       // Update the notification with the calculated scheduledNextDate
       if (nextDate != null) {
         final notificationWithSchedule = notification.copyWith(
           scheduledNextDate: nextDate,
         );
-        
+
         // Update the tank with the notification that has scheduledNextDate set
         final finalNotifications = updatedNotifications.map((n) {
           return n.id == notification.id ? notificationWithSchedule : n;
         }).toList();
-        
+
         final tankWithSchedule = currentTank.copyWith(
           notifications: finalNotifications,
           updatedAt: DateTime.now(),
         );
-        
+
         await ref.read(tankProvider.notifier).updateTank(tankWithSchedule);
       }
     }
@@ -1246,4 +1304,3 @@ class _NotificationFormScreenState
     }
   }
 }
-

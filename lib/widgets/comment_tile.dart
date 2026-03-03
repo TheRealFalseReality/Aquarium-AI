@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/community_comment.dart';
 import '../utils/storage_image_utils.dart';
@@ -62,10 +63,7 @@ class CommentTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  comment.body,
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(comment.body, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
@@ -78,7 +76,8 @@ class CommentTile extends StatelessWidget {
     if (comment.avatarUrl != null) {
       return FutureBuilder<String>(
         future: resolveResizedStorageUrl(comment.avatarUrl!),
-        initialData: getCachedResizedUrl(comment.avatarUrl!) ?? comment.avatarUrl!,
+        initialData:
+            getCachedResizedUrl(comment.avatarUrl!) ?? comment.avatarUrl!,
         builder: (_, snap) => CircleAvatar(
           radius: 16,
           backgroundImage: CachedNetworkImageProvider(snap.data!),
@@ -112,9 +111,7 @@ class CommentTile extends StatelessWidget {
           : l10n.xMinutesAgo(diff.inMinutes);
     }
     if (diff.inHours < 24) {
-      return diff.inHours == 1
-          ? l10n.oneHourAgo
-          : l10n.xHoursAgo(diff.inHours);
+      return diff.inHours == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(diff.inHours);
     }
     if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';

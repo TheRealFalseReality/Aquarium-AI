@@ -17,7 +17,10 @@ class AppSpacing {
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
   static const EdgeInsets screenPadding = EdgeInsets.all(lg);
   static const EdgeInsets sectionPadding = EdgeInsets.symmetric(vertical: md);
-  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(vertical: 14, horizontal: xl);
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
+    vertical: 14,
+    horizontal: xl,
+  );
 
   // Spacing widgets for convenience
   static const Widget verticalSpaceXS = SizedBox(height: xs);
@@ -48,15 +51,13 @@ class FlexibleSpacer extends StatelessWidget {
     this.direction = Axis.vertical,
   });
 
-  const FlexibleSpacer.vertical({
-    super.key,
-    this.height,
-  }) : width = null, direction = Axis.vertical;
+  const FlexibleSpacer.vertical({super.key, this.height})
+    : width = null,
+      direction = Axis.vertical;
 
-  const FlexibleSpacer.horizontal({
-    super.key,
-    this.width,
-  }) : height = null, direction = Axis.horizontal;
+  const FlexibleSpacer.horizontal({super.key, this.width})
+    : height = null,
+      direction = Axis.horizontal;
 
   @override
   Widget build(BuildContext context) {

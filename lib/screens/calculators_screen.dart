@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
-import '../services/analytics_service.dart';
 
 class CalculatorsScreen extends StatefulWidget {
   const CalculatorsScreen({super.key});
@@ -37,9 +39,9 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
         textAlign: TextAlign.center,
       ),
     );
@@ -52,7 +54,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
       'Salinity',
       'CO2',
       'Alkalinity',
-      'Temperature'
+      'Temperature',
     ];
     final Map<String, String> calcTypeLabels = {
       'Salinity': l10n.salinity,
@@ -72,10 +74,9 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
             children: [
               Text(
                 l10n.aquariumCalculators,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -97,8 +98,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                         spacing: 14.0,
                         runSpacing: 12.0,
                         children: calculatorTypes.map((typeName) {
-                          final bool isSelected =
-                              _activeCalculator == typeName;
+                          final bool isSelected = _activeCalculator == typeName;
                           return ModernSelectableChip(
                             label: calcTypeLabels[typeName]!,
                             selected: isSelected,
@@ -134,9 +134,9 @@ Widget _buildSubSectionTitle(BuildContext context, String title) {
     padding: const EdgeInsets.only(bottom: 12.0, top: 6),
     child: Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       textAlign: TextAlign.center,
     ),
   );
@@ -182,7 +182,7 @@ class SalinityConverterState extends State<SalinityConverter> {
         'has_temperature': _tempController.text.isNotEmpty ? 'true' : 'false',
       },
     );
-    
+
     final double inputValue = double.tryParse(_valueController.text) ?? 0.0;
     final double temp = double.tryParse(_tempController.text) ?? 25.0;
     if (inputValue <= 0) {
@@ -190,7 +190,10 @@ class SalinityConverterState extends State<SalinityConverter> {
       return;
     }
     final logic = SalinityMethods(
-        fromUnit: _fromUnit, inputValue: inputValue, temperature: temp);
+      fromUnit: _fromUnit,
+      inputValue: inputValue,
+      temperature: temp,
+    );
     setState(() => _results = logic.calculate());
   }
 
@@ -215,7 +218,7 @@ class SalinityConverterState extends State<SalinityConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-          const BannerAdWidget(),
+        const BannerAdWidget(),
         _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
@@ -246,10 +249,12 @@ class SalinityConverterState extends State<SalinityConverter> {
                 decoration: InputDecoration(
                   labelText: l10n.valueWithUnit(_unitAbbreviation),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
             ),
             SizedBox(
@@ -259,10 +264,12 @@ class SalinityConverterState extends State<SalinityConverter> {
                 decoration: InputDecoration(
                   labelText: l10n.tempInCelsius,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
             ),
           ],
@@ -273,8 +280,10 @@ class SalinityConverterState extends State<SalinityConverter> {
           icon: const Icon(Icons.science_outlined),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           label: Text(l10n.convertSalinity),
         ),
@@ -293,14 +302,26 @@ class SalinityConverterState extends State<SalinityConverter> {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 14,
                   children: [
-                    _buildResultColumn(l10n.salinity,
-                        '${_results['salinity']} ppt', Colors.teal),
-                    _buildResultColumn(l10n.specificGravity,
-                        '${_results['specificGravity']}', Colors.orange),
-                    _buildResultColumn(l10n.density,
-                        '${_results['density']} kg/L', Colors.purple),
-                    _buildResultColumn(l10n.conductivity,
-                        '${_results['conductivity']} mS/cm', Colors.green),
+                    _buildResultColumn(
+                      l10n.salinity,
+                      '${_results['salinity']} ppt',
+                      Colors.teal,
+                    ),
+                    _buildResultColumn(
+                      l10n.specificGravity,
+                      '${_results['specificGravity']}',
+                      Colors.orange,
+                    ),
+                    _buildResultColumn(
+                      l10n.density,
+                      '${_results['density']} kg/L',
+                      Colors.purple,
+                    ),
+                    _buildResultColumn(
+                      l10n.conductivity,
+                      '${_results['conductivity']} mS/cm',
+                      Colors.green,
+                    ),
                   ],
                 ),
               ),
@@ -314,18 +335,20 @@ class SalinityConverterState extends State<SalinityConverter> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(label,
-            style: Theme.of(context).textTheme.titleSmall,
-            textAlign: TextAlign.center),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall,
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 4),
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
             maxLines: 1,
           ),
         ),
@@ -339,8 +362,7 @@ class CarbonDioxideCalculator extends StatefulWidget {
   const CarbonDioxideCalculator({super.key});
 
   @override
-  CarbonDioxideCalculatorState createState() =>
-      CarbonDioxideCalculatorState();
+  CarbonDioxideCalculatorState createState() => CarbonDioxideCalculatorState();
 }
 
 class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
@@ -358,7 +380,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
         'has_dkh_value': _dkhController.text.isNotEmpty ? 'true' : 'false',
       },
     );
-    
+
     final phValue = double.tryParse(_phController.text) ?? 0;
     final dkhValue = double.tryParse(_dkhController.text) ?? 0;
     if (phValue > 0 && dkhValue > 0) {
@@ -396,10 +418,12 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
                 decoration: InputDecoration(
                   labelText: l10n.labelPH,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
             ),
             SizedBox(
@@ -409,10 +433,12 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
                 decoration: InputDecoration(
                   labelText: l10n.labelDKH,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
             ),
           ],
@@ -423,8 +449,10 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
           icon: const Icon(Icons.bubble_chart_outlined),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           label: Text(l10n.calculateCO2),
         ),
@@ -435,25 +463,29 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 22.0, vertical: 26.0),
+                  horizontal: 22.0,
+                  vertical: 26.0,
+                ),
                 child: Column(
                   children: [
-                    Text(l10n.estimatedCO2Level,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      l10n.estimatedCO2Level,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 10),
-                    Text('$_result ppm',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                                color:
-                                    Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold)),
+                    Text(
+                      '$_result ppm',
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
       ],
     );
   }
@@ -482,7 +514,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
         'has_value': _inputValueController.text.isNotEmpty ? 'true' : 'false',
       },
     );
-    
+
     final value = double.tryParse(_inputValueController.text) ?? 0;
     double dkh = 0, ppm = 0, meq = 0;
 
@@ -501,7 +533,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
         case 'meq/L':
           meq = value;
           dkh = value * 2.8;
-            ppm = value * 50.0;
+          ppm = value * 50.0;
           break;
       }
       setState(() {
@@ -561,11 +593,13 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
               controller: _inputValueController,
               decoration: InputDecoration(
                 labelText: l10n.valueWithUnit(_fromUnit),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
           ),
         ),
@@ -575,8 +609,10 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
           icon: const Icon(Icons.auto_fix_high_outlined),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           label: Text(l10n.convertAlkalinity),
         ),
@@ -586,22 +622,33 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
             child: Card(
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 22,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildResultColumn(l10n.labelDKH, _results['dkh']!,
-                        Theme.of(context).colorScheme.primary),
-                    _buildResultColumn(l10n.labelPPM, _results['ppm']!,
-                        Theme.of(context).colorScheme.secondary),
                     _buildResultColumn(
-                        l10n.labelMeqL, _results['meq']!, Colors.green),
+                      l10n.labelDKH,
+                      _results['dkh']!,
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                    _buildResultColumn(
+                      l10n.labelPPM,
+                      _results['ppm']!,
+                      Theme.of(context).colorScheme.secondary,
+                    ),
+                    _buildResultColumn(
+                      l10n.labelMeqL,
+                      _results['meq']!,
+                      Colors.green,
+                    ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
       ],
     );
   }
@@ -610,17 +657,19 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
     return Flexible(
       child: Column(
         children: [
-          Text(label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 4),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -652,7 +701,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
         'has_value': _inputValueController.text.isNotEmpty ? 'true' : 'false',
       },
     );
-    
+
     final temp = double.tryParse(_inputValueController.text);
     if (temp == null) {
       setState(() => _results = {'toValue': '', 'kelvin': ''});
@@ -715,12 +764,17 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             child: TextField(
               controller: _inputValueController,
               decoration: InputDecoration(
-                labelText: l10n.tempFieldLabel(_fromUnit == 'Fahrenheit' ? 'F' : 'C'),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                labelText: l10n.tempFieldLabel(
+                  _fromUnit == 'Fahrenheit' ? 'F' : 'C',
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true, signed: true),
+                decimal: true,
+                signed: true,
+              ),
             ),
           ),
         ),
@@ -730,8 +784,10 @@ class TemperatureConverterState extends State<TemperatureConverter> {
           icon: const Icon(Icons.thermostat_auto_outlined),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           label: Text(l10n.convertTemperature),
         ),
@@ -741,22 +797,30 @@ class TemperatureConverterState extends State<TemperatureConverter> {
             child: Card(
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 26,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildResultColumn(
-                        _fromUnit == 'Fahrenheit' ? l10n.celsius : l10n.fahrenheit,
-                        '${_results['toValue']} ${_fromUnit == 'Fahrenheit' ? '°C' : '°F'}',
-                        Theme.of(context).colorScheme.primary),
-                    _buildResultColumn(l10n.kelvin, '${_results['kelvin']} K',
-                        Theme.of(context).colorScheme.secondary),
+                      _fromUnit == 'Fahrenheit'
+                          ? l10n.celsius
+                          : l10n.fahrenheit,
+                      '${_results['toValue']} ${_fromUnit == 'Fahrenheit' ? '°C' : '°F'}',
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                    _buildResultColumn(
+                      l10n.kelvin,
+                      '${_results['kelvin']} K',
+                      Theme.of(context).colorScheme.secondary,
+                    ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
       ],
     );
   }
@@ -765,17 +829,19 @@ class TemperatureConverterState extends State<TemperatureConverter> {
     return Flexible(
       child: Column(
         children: [
-          Text(label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 4),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -820,10 +886,9 @@ class SalinityMethods {
       7.6438e-5 * pow(temperature, 2) -
       8.2467e-7 * pow(temperature, 3) +
       5.3875e-9 * pow(temperature, 4);
+
   double _getB() =>
-      -5.72466e-3 +
-      1.0227e-4 * temperature -
-      1.6546e-6 * pow(temperature, 2);
+      -5.72466e-3 + 1.0227e-4 * temperature - 1.6546e-6 * pow(temperature, 2);
   final double _c = 4.8314e-4;
 
   double _getPureWaterDensity(double temp) =>
@@ -840,7 +905,8 @@ class SalinityMethods {
         return inputValue;
       case 'Specific Gravity':
         return _solveForSalinityFromDensity(
-            inputValue * _getPureWaterDensity(temperature));
+          inputValue * _getPureWaterDensity(temperature),
+        );
       case 'Density (kg/L)':
         return _solveForSalinityFromDensity(inputValue);
       case 'Conductivity (mS/cm)':
@@ -887,12 +953,14 @@ class SalinityMethods {
     final c2 = 0.0001104259;
     final c3 = -0.00000069698;
     final c4 = 0.0000000010031;
-    final gt = c0 +
+    final gt =
+        c0 +
         c1 * temperature +
         c2 * pow(temperature, 2) +
         c3 * pow(temperature, 3) +
         c4 * pow(temperature, 4);
-    final rp = 1.0 +
+    final rp =
+        1.0 +
         (2.07e-5 * p - 6.37e-10 * p + 3.989e-15 * p) /
             (1.0 +
                 (3.426e-2 * temperature +
@@ -902,12 +970,12 @@ class SalinityMethods {
     final rt = r / (gt * rp);
     final salCorrection =
         ((temperature - 15) / (1 + 0.0162 * (temperature - 15))) *
-            (0.0005 -
-                0.0056 * sqrt(rt) -
-                0.0066 * rt -
-                0.0375 * pow(rt, 1.5) +
-                0.0636 * pow(rt, 2) -
-                0.0144 * pow(rt, 2.5));
+        (0.0005 -
+            0.0056 * sqrt(rt) -
+            0.0066 * rt -
+            0.0375 * pow(rt, 1.5) +
+            0.0636 * pow(rt, 2) -
+            0.0144 * pow(rt, 2.5));
     return 0.008 -
         0.1692 * sqrt(rt) +
         25.3851 * rt +

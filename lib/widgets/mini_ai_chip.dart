@@ -22,8 +22,10 @@ class MiniAIChip extends StatefulWidget {
     this.tooltip,
     this.dense = false,
     this.customGradient,
-  }) : assert(icon == null || customIcon == null,
-            'Cannot provide both an icon and a customIcon');
+  }) : assert(
+         icon == null || customIcon == null,
+         'Cannot provide both an icon and a customIcon',
+       );
 
   @override
   State<MiniAIChip> createState() => _MiniAIChipState();
@@ -40,10 +42,12 @@ class _MiniAIChipState extends State<MiniAIChip> {
 
     final Color textColor = isSelected ? cs.onPrimary : cs.onSurfaceVariant;
     final double scale = _isTapped ? 0.95 : (_isHovering ? 1.05 : 1.0);
-    final double elevation =
-        isSelected ? 8 : (_isHovering || _isTapped ? 6 : 2);
+    final double elevation = isSelected
+        ? 8
+        : (_isHovering || _isTapped ? 6 : 2);
 
-    final gradient = widget.customGradient ??
+    final gradient =
+        widget.customGradient ??
         LinearGradient(
           colors: isSelected
               ? [cs.primary, cs.secondary]
@@ -52,8 +56,9 @@ class _MiniAIChipState extends State<MiniAIChip> {
           end: Alignment.bottomRight,
         );
 
-    final double horizontalPadding =
-        widget.iconOnly ? (widget.dense ? 8 : 12) : (widget.dense ? 12 : 16);
+    final double horizontalPadding = widget.iconOnly
+        ? (widget.dense ? 8 : 12)
+        : (widget.dense ? 12 : 16);
     final double verticalPadding = widget.dense ? 6 : 10;
     final double iconSize = widget.dense ? 16 : 20;
 
@@ -80,14 +85,15 @@ class _MiniAIChipState extends State<MiniAIChip> {
               Flexible(
                 child: Text(
                   widget.label,
-                  style: (widget.dense
-                          ? Theme.of(context).textTheme.bodySmall
-                          : Theme.of(context).textTheme.labelLarge)
-                      ?.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
-                  ),
+                  style:
+                      (widget.dense
+                              ? Theme.of(context).textTheme.bodySmall
+                              : Theme.of(context).textTheme.labelLarge)
+                          ?.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
                 ),
               ),
             ],
@@ -112,7 +118,7 @@ class _MiniAIChipState extends State<MiniAIChip> {
                 color: Colors.black.withOpacity(isSelected ? 0.2 : 0.1),
                 blurRadius: elevation,
                 offset: Offset(0, elevation / 4),
-              )
+              ),
             ],
             border: Border.all(
               color: isSelected

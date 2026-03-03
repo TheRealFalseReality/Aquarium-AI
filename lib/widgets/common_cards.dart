@@ -59,10 +59,11 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: backgroundColor ?? cs.surfaceVariant.withOpacity(0.25),
@@ -73,18 +74,18 @@ class InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.end,
             ),
           ),
@@ -115,25 +116,21 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final sectionColor = color ?? cs.primary;
-    
+
     return Container(
       margin: margin ?? const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: sectionColor.withOpacity(0.08),
-        border: Border.all(
-          color: sectionColor.withOpacity(0.4),
-          width: 1.1,
-        ),
+        border: Border.all(color: sectionColor.withOpacity(0.4), width: 1.1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              if (icon != null)
-                Icon(icon, size: 18, color: sectionColor),
+              if (icon != null) Icon(icon, size: 18, color: sectionColor),
               if (icon != null) const SizedBox(width: 6),
               Text(
                 title,
@@ -145,29 +142,31 @@ class SectionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          ...items.map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 4,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 8, right: 8),
-                  decoration: BoxDecoration(
-                    color: sectionColor.withOpacity(0.7),
-                    shape: BoxShape.circle,
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 8, right: 8),
+                    decoration: BoxDecoration(
+                      color: sectionColor.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -196,7 +195,8 @@ class SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: titleStyle ?? 
+            style:
+                titleStyle ??
                 Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

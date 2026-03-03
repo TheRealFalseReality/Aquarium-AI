@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/tank_notification.dart';
-import '../providers/app_settings_provider.dart' show getRememberedRescheduleOptionKey;
+import '../providers/app_settings_provider.dart'
+    show getRememberedRescheduleOptionKey;
 
 /// Options for rescheduling a notification after logging an activity
 enum RescheduleOption {
   /// Reschedule Date Only - same date as rescheduleFromNow but keeps original time
   keepOriginal,
+
   /// Reschedule from the current time/date - both date and time are based on now
   rescheduleFromNow,
+
   /// Don't reschedule - log the activity but keep existing notification schedule
   doNothing,
+
   /// Cancel - don't log the activity and don't reschedule
   cancelAll,
 }
@@ -22,10 +27,7 @@ class RescheduleDialogResult {
   final RescheduleOption option;
   final bool rememberChoice;
 
-  RescheduleDialogResult({
-    required this.option,
-    required this.rememberChoice,
-  });
+  RescheduleDialogResult({required this.option, required this.rememberChoice});
 }
 
 /// Dialog to ask the user how they want to update a notification
@@ -33,10 +35,7 @@ class RescheduleDialogResult {
 class NotificationRescheduleDialog extends StatefulWidget {
   final TankNotification notification;
 
-  const NotificationRescheduleDialog({
-    super.key,
-    required this.notification,
-  });
+  const NotificationRescheduleDialog({super.key, required this.notification});
 
   /// Show the dialog and return the selected option
   /// If the user has a remembered preference for this notification, returns that directly
@@ -48,40 +47,39 @@ class NotificationRescheduleDialog extends StatefulWidget {
     final prefs = await SharedPreferences.getInstance();
     final key = getRememberedRescheduleOptionKey(notification.id);
     final rememberedOptionIndex = prefs.getInt(key);
-    
-    if (rememberedOptionIndex != null && 
-        rememberedOptionIndex >= 0 && 
+
+    if (rememberedOptionIndex != null &&
+        rememberedOptionIndex >= 0 &&
         rememberedOptionIndex < RescheduleOption.values.length) {
       // User has a remembered preference for this notification, return it directly
       return RescheduleOption.values[rememberedOptionIndex];
     }
-    
+
     // No remembered preference, show the dialog
     if (!context.mounted) return null;
-    
+
     final result = await showDialog<RescheduleDialogResult>(
       context: context,
-      builder: (context) => NotificationRescheduleDialog(
-        notification: notification,
-      ),
+      builder: (context) =>
+          NotificationRescheduleDialog(notification: notification),
     );
-    
+
     if (result == null) return null;
-    
+
     // Save the preference for this notification if requested
     if (result.rememberChoice) {
       await prefs.setInt(key, result.option.index);
     }
-    
+
     return result.option;
   }
-  
+
   /// Clear the remembered reschedule option preference for a specific notification
   static Future<void> clearRememberedOption(String notificationId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(getRememberedRescheduleOptionKey(notificationId));
   }
-  
+
   /// Check if a reschedule option is currently remembered for a specific notification
   static Future<bool> hasRememberedOption(String notificationId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -89,12 +87,14 @@ class NotificationRescheduleDialog extends StatefulWidget {
   }
 
   @override
-  State<NotificationRescheduleDialog> createState() => _NotificationRescheduleDialogState();
+  State<NotificationRescheduleDialog> createState() =>
+      _NotificationRescheduleDialogState();
 }
 
-class _NotificationRescheduleDialogState extends State<NotificationRescheduleDialog> {
+class _NotificationRescheduleDialogState
+    extends State<NotificationRescheduleDialog> {
   bool _rememberChoice = false;
-  
+
   /// Get a formatted date and time string
   String _getFormattedDateTime(DateTime dateTime) {
     final dateFormat = DateFormat('MMM d, y'); // e.g., "Dec 15, 2024"
@@ -103,10 +103,9 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
   }
 
   void _selectOption(RescheduleOption option) {
-    Navigator.of(context).pop(RescheduleDialogResult(
-      option: option,
-      rememberChoice: _rememberChoice,
-    ));
+    Navigator.of(context).pop(
+      RescheduleDialogResult(option: option, rememberChoice: _rememberChoice),
+    );
   }
 
   @override
@@ -114,35 +113,39 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final notificationName = widget.notification.getDisplayName();
-    
+
     // Calculate the actual next dates for each option using the model's methods
     // "Reschedule Date Only" uses getNextNotificationDateFromBase with useCurrentTime: false
     //   → same date as "Reschedule Time & Date" but keeps original notification time
     // "Reschedule Time & Date" uses getNextNotificationDateFromBase with useCurrentTime: true
     //   → both date and time are based on now
-    final nextDateWithOriginalTime = widget.notification.getNextNotificationDateFromBase(
-      DateTime.now(), 
-      useCurrentTime: false,  // Preserve original time
-    );
-    final nextDateWithCurrentTime = widget.notification.getNextNotificationDateFromBase(
-      DateTime.now(), 
-      useCurrentTime: true,   // Use current time
-    );
-    
+    final nextDateWithOriginalTime = widget.notification
+        .getNextNotificationDateFromBase(
+          DateTime.now(),
+          useCurrentTime: false, // Preserve original time
+        );
+    final nextDateWithCurrentTime = widget.notification
+        .getNextNotificationDateFromBase(
+          DateTime.now(),
+          useCurrentTime: true, // Use current time
+        );
+
     // Format dates with full date and time
-    final originalTimeDateTime = nextDateWithOriginalTime != null 
+    final originalTimeDateTime = nextDateWithOriginalTime != null
         ? _getFormattedDateTime(nextDateWithOriginalTime)
         : l10n.rescheduleFromOriginalDescription;
-    final currentDateTime = nextDateWithCurrentTime != null 
+    final currentDateTime = nextDateWithCurrentTime != null
         ? _getFormattedDateTime(nextDateWithCurrentTime)
         : l10n.rescheduleFromNowDescription;
-    
+
     // Build the description strings with the actual calculated dates
-    final rescheduleTimeAndDateDesc = widget.notification.repeatFrequency != RepeatFrequency.none
+    final rescheduleTimeAndDateDesc =
+        widget.notification.repeatFrequency != RepeatFrequency.none
         ? currentDateTime
         : l10n.rescheduleFromNowDescription;
-    
-    final rescheduleDateOnlyDesc = widget.notification.repeatFrequency != RepeatFrequency.none
+
+    final rescheduleDateOnlyDesc =
+        widget.notification.repeatFrequency != RepeatFrequency.none
         ? originalTimeDateTime
         : l10n.rescheduleFromOriginalDescription;
 
@@ -169,7 +172,7 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
-            
+
             // Option 1: Reschedule Time & Date (uses current time)
             _buildOption(
               context,
@@ -180,7 +183,7 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
               onTap: () => _selectOption(RescheduleOption.rescheduleFromNow),
             ),
             const SizedBox(height: 12),
-            
+
             // Option 2: Reschedule Date Only (keeps original time)
             _buildOption(
               context,
@@ -191,7 +194,7 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
               onTap: () => _selectOption(RescheduleOption.keepOriginal),
             ),
             const SizedBox(height: 12),
-            
+
             // Option 3: Don't Reschedule (log activity but keep existing schedule)
             _buildOption(
               context,
@@ -202,7 +205,7 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
               onTap: () => _selectOption(RescheduleOption.doNothing),
             ),
             const SizedBox(height: 12),
-            
+
             // Option 4: Cancel (don't log activity and don't reschedule)
             _buildOption(
               context,
@@ -212,9 +215,9 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
               description: l10n.cancelActivityLogDescription,
               onTap: () => _selectOption(RescheduleOption.cancelAll),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Remember my choice checkbox
             InkWell(
               onTap: () {
@@ -245,16 +248,14 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
                 ),
               ),
             ),
-            
+
             // Settings hint text
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: cs.outlineVariant.withOpacity(0.3),
-                ),
+                border: Border.all(color: cs.outlineVariant.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
@@ -290,7 +291,7 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
     required VoidCallback onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -341,4 +342,3 @@ class _NotificationRescheduleDialogState extends State<NotificationRescheduleDia
     );
   }
 }
-

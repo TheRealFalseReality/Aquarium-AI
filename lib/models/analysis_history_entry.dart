@@ -81,9 +81,7 @@ class AnalysisHistoryEntry {
     );
   }
 
-  AnalysisHistoryEntry copyWith({
-    bool? isFavorite,
-  }) {
+  AnalysisHistoryEntry copyWith({bool? isFavorite}) {
     return AnalysisHistoryEntry(
       id: id,
       type: type,

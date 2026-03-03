@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../services/analytics_service.dart';
 
 class AppPromotionDialog extends StatelessWidget {
@@ -21,13 +22,13 @@ class AppPromotionDialog extends StatelessWidget {
   Future<void> _launchPlayStore() async {
     const url = 'https://play.google.com/store/apps/details?id=com.cca.fishai';
     final Uri uri = Uri.parse(url);
-    
+
     // Log app promotion click
     AnalyticsService.logAppPromotion(
       action: 'play_store_click',
       source: 'promotion_dialog',
     );
-    
+
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
@@ -36,18 +37,12 @@ class AppPromotionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(
-            Icons.phone_android,
-            color: colorScheme.primary,
-            size: 28,
-          ),
+          Icon(Icons.phone_android, color: colorScheme.primary, size: 28),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -166,15 +161,11 @@ class AppPromotionDialog extends StatelessWidget {
     String description,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          color: colorScheme.primary,
-          size: 20,
-        ),
+        Icon(icon, color: colorScheme.primary, size: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

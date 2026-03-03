@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import '../models/community_post.dart';
+
 import '../models/community_comment.dart';
+import '../models/community_post.dart';
 import 'auth_service.dart';
 
 class CommunityService {
@@ -23,21 +25,27 @@ class CommunityService {
         .orderBy('createdAt', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList(),
+        );
   }
 
   /// Returns a stream of community posts filtered by type.
-  static Stream<List<CommunityPost>> postsByTypeStream(PostType type,
-      {int limit = 30}) {
+  static Stream<List<CommunityPost>> postsByTypeStream(
+    PostType type, {
+    int limit = 30,
+  }) {
     return _firestore
         .collection(_postsCollection)
         .where('type', isEqualTo: type.value)
         .orderBy('createdAt', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList(),
+        );
   }
 
   /// Creates a new community post. Returns the created [CommunityPost] or null
@@ -104,10 +112,7 @@ class CommunityService {
       if (post.imageUrl != null) {
         await _deleteImageByUrl(post.imageUrl!);
       }
-      await _firestore
-          .collection(_postsCollection)
-          .doc(post.id)
-          .delete();
+      await _firestore.collection(_postsCollection).doc(post.id).delete();
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -222,8 +227,10 @@ class CommunityService {
         .collection(_commentsCollection)
         .orderBy('createdAt', descending: false)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
+        );
   }
 
   /// Creates a comment on a post. Returns the created [CommunityComment] or
@@ -256,10 +263,9 @@ class CommunityService {
       await commentRef.set(comment.toFirestore());
 
       // Increment the comment count on the post
-      await _firestore
-          .collection(_postsCollection)
-          .doc(postId)
-          .update({'commentCount': FieldValue.increment(1)});
+      await _firestore.collection(_postsCollection).doc(postId).update({
+        'commentCount': FieldValue.increment(1),
+      });
 
       return comment;
     } catch (e) {
@@ -272,7 +278,9 @@ class CommunityService {
 
   /// Deletes a comment from a post.
   static Future<bool> deleteComment(
-      String postId, CommunityComment comment) async {
+    String postId,
+    CommunityComment comment,
+  ) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != comment.userId) return false;
 
@@ -284,10 +292,9 @@ class CommunityService {
           .doc(comment.id)
           .delete();
 
-      await _firestore
-          .collection(_postsCollection)
-          .doc(postId)
-          .update({'commentCount': FieldValue.increment(-1)});
+      await _firestore.collection(_postsCollection).doc(postId).update({
+        'commentCount': FieldValue.increment(-1),
+      });
 
       return true;
     } catch (e) {
@@ -307,8 +314,7 @@ class CommunityService {
       final file = File(filePath);
       final fileName =
           '${DateTime.now().millisecondsSinceEpoch}_${file.uri.pathSegments.last}';
-      final ref =
-          _storage.ref().child('community_posts/$userId/$fileName');
+      final ref = _storage.ref().child('community_posts/$userId/$fileName');
       final uploadTask = await ref.putFile(file);
       return await uploadTask.ref.getDownloadURL();
     } catch (e) {

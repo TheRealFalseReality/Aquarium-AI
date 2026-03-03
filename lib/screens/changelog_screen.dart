@@ -56,14 +56,15 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       if (languageCode != 'en') {
         try {
           content = await rootBundle.loadString(
-              'assets/docs/$languageCode/CHANGELOG_$languageCode.md');
+            'assets/docs/$languageCode/CHANGELOG_$languageCode.md',
+          );
         } catch (_) {
-          content =
-              await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
+          content = await rootBundle.loadString(
+            'assets/docs/en/CHANGELOG_en.md',
+          );
         }
       } else {
-        content =
-            await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
+        content = await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
       }
       setState(() {
         _markdownContent = content;
@@ -80,8 +81,10 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   Future<void> _launchUrl(String url) async {
     try {
       final uri = Uri.parse(url);
-      final launched =
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
       if (!launched && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -127,8 +130,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
             InkWell(
               onTap: () => Navigator.of(context).pop(),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: Row(
                   children: [
                     Icon(
@@ -139,11 +141,10 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                     const SizedBox(width: 4),
                     Text(
                       widget.breadcrumbTitle ?? '',
-                      style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -160,9 +161,9 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
             Text(
               l10n.changelog,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -181,13 +182,11 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
           if (widget.breadcrumbTitle != null) _buildBreadcrumb(context),
           // Action buttons row
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceVariant
-                  .withOpacity(0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withOpacity(0.3),
               border: Border(
                 bottom: BorderSide(
                   color: Theme.of(context).colorScheme.outlineVariant,
@@ -204,7 +203,9 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                     label: Text(l10n.changelogLatestRelease),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -216,7 +217,9 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                     label: Text(l10n.changelogAllReleases),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -228,102 +231,80 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _error!,
-                                style:
-                                    Theme.of(context).textTheme.bodyLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton.icon(
-                                onPressed: () =>
-                                    _launchUrl(_latestReleaseUrl),
-                                icon: const Icon(Icons.open_in_new),
-                                label:
-                                    Text(l10n.changelogLatestRelease),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.all(16.0),
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          MarkdownBody(
-                            data: _markdownContent,
-                            selectable: true,
-                            onTapLink: _handleLink,
-                            styleSheet: MarkdownStyleSheet(
-                              h1: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                  ),
-                              h2: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                  ),
-                              h3: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary,
-                                  ),
-                              p: Theme.of(context).textTheme.bodyLarge,
-                              code: TextStyle(
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceVariant,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                                fontFamily: 'monospace',
-                              ),
-                              codeblockDecoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceVariant,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outline,
-                                ),
-                              ),
-                              a: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _error!,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: () => _launchUrl(_latestReleaseUrl),
+                            icon: const Icon(Icons.open_in_new),
+                            label: Text(l10n.changelogLatestRelease),
                           ),
                         ],
                       ),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      MarkdownBody(
+                        data: _markdownContent,
+                        selectable: true,
+                        onTapLink: _handleLink,
+                        styleSheet: MarkdownStyleSheet(
+                          h1: Theme.of(context).textTheme.headlineLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                          h2: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                          h3: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          p: Theme.of(context).textTheme.bodyLarge,
+                          code: TextStyle(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            fontFamily: 'monospace',
+                          ),
+                          codeblockDecoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                          a: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),

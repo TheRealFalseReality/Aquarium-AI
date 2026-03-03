@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import '../providers/model_provider.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
@@ -52,16 +53,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.initState();
     final models = ref.read(modelProvider);
     _geminiModelController = TextEditingController(text: models.geminiModel);
-    _geminiImageModelController =
-        TextEditingController(text: models.geminiImageModel);
+    _geminiImageModelController = TextEditingController(
+      text: models.geminiImageModel,
+    );
     _geminiApiKeyController = TextEditingController(text: models.geminiApiKey);
     _chatGPTModelController = TextEditingController(text: models.chatGPTModel);
-    _chatGPTImageModelController =
-        TextEditingController(text: models.chatGPTImageModel);
+    _chatGPTImageModelController = TextEditingController(
+      text: models.chatGPTImageModel,
+    );
     _openAIApiKeyController = TextEditingController(text: models.openAIApiKey);
     _groqModelController = TextEditingController(text: models.groqModel);
-    _groqImageModelController =
-        TextEditingController(text: models.groqImageModel);
+    _groqImageModelController = TextEditingController(
+      text: models.groqImageModel,
+    );
     _groqApiKeyController = TextEditingController(text: models.groqApiKey);
     _selectedTextProvider = models.activeTextProvider;
     _selectedImageProvider = models.activeImageProvider;
@@ -115,7 +119,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -134,9 +138,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   // Header with close button
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: Theme.of(dialogContext).colorScheme.primaryContainer.withOpacity(0.3),
+                      color: Theme.of(
+                        dialogContext,
+                      ).colorScheme.primaryContainer.withOpacity(0.3),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(28),
                         topRight: Radius.circular(28),
@@ -152,23 +161,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Expanded(
                           child: Text(
                             l10n.aiProvider,
-                            style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(dialogContext).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => _handleDialogClose(dialogContext, setDialogState),
+                          onPressed: () =>
+                              _handleDialogClose(dialogContext, setDialogState),
                           tooltip: l10n.close,
                         ),
                       ],
                     ),
                   ),
                   // Content
-                  Expanded(
-                    child: _buildAIProviderContent(setDialogState),
-                  ),
+                  Expanded(child: _buildAIProviderContent(setDialogState)),
                 ],
               ),
             ),
@@ -180,7 +187,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showAppSettingsDialog() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -193,9 +200,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 // Header with close button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer.withOpacity(0.3),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(28),
                       topRight: Radius.circular(28),
@@ -211,9 +223,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Expanded(
                         child: Text(
                           l10n.appSettings,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       IconButton(
@@ -225,9 +236,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 // Content
-                Expanded(
-                  child: _buildAppSettingsContent(setDialogState),
-                ),
+                Expanded(child: _buildAppSettingsContent(setDialogState)),
               ],
             ),
           ),
@@ -238,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showDataManagementDialog() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -251,9 +260,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 // Header with close button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.tertiaryContainer.withOpacity(0.3),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(28),
                       topRight: Radius.circular(28),
@@ -269,9 +283,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Expanded(
                         child: Text(
                           l10n.dataManagement,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       IconButton(
@@ -283,9 +296,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 // Content
-                Expanded(
-                  child: _buildDataManagementContent(),
-                ),
+                Expanded(child: _buildDataManagementContent()),
               ],
             ),
           ),
@@ -306,7 +317,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
     );
 
-    ref.read(modelProvider.notifier).setModels(
+    ref
+        .read(modelProvider.notifier)
+        .setModels(
           newGeminiModel: _geminiModelController.text,
           newGeminiImageModel: _geminiImageModelController.text,
           newGeminiApiKey: _geminiApiKeyController.text,
@@ -345,7 +358,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
     );
 
-    ref.read(modelProvider.notifier).setModels(
+    ref
+        .read(modelProvider.notifier)
+        .setModels(
           newGeminiModel: _geminiModelController.text,
           newGeminiImageModel: _geminiImageModelController.text,
           newGeminiApiKey: _geminiApiKeyController.text,
@@ -375,24 +390,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   /// Returns the display name for an [AIProvider].
   String _providerName(AIProvider p) => switch (p) {
-        AIProvider.gemini => 'Gemini',
-        AIProvider.openAI => 'OpenAI',
-        AIProvider.groq => 'Groq',
-      };
+    AIProvider.gemini => 'Gemini',
+    AIProvider.openAI => 'OpenAI',
+    AIProvider.groq => 'Groq',
+  };
 
   /// Returns the current (unsaved) API key for [p] from the controller text.
   String _keyForProvider(AIProvider p) => switch (p) {
-        AIProvider.gemini => _geminiApiKeyController.text.trim(),
-        AIProvider.openAI => _openAIApiKeyController.text.trim(),
-        AIProvider.groq => _groqApiKeyController.text.trim(),
-      };
+    AIProvider.gemini => _geminiApiKeyController.text.trim(),
+    AIProvider.openAI => _openAIApiKeyController.text.trim(),
+    AIProvider.groq => _groqApiKeyController.text.trim(),
+  };
 
   /// Returns the best provider to default to based on currently entered keys
   /// (in order: Gemini → OpenAI → Groq → default). Used when Free AI is
   /// toggled OFF to immediately reflect the correct provider in the UI.
   AIProvider _bestProviderFromControllers() {
-    if (_geminiApiKeyController.text.trim().isNotEmpty) return AIProvider.gemini;
-    if (_openAIApiKeyController.text.trim().isNotEmpty) return AIProvider.openAI;
+    if (_geminiApiKeyController.text.trim().isNotEmpty)
+      return AIProvider.gemini;
+    if (_openAIApiKeyController.text.trim().isNotEmpty)
+      return AIProvider.openAI;
     if (_groqApiKeyController.text.trim().isNotEmpty) return AIProvider.groq;
     return defaultAIProvider;
   }
@@ -401,16 +418,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// These warnings do NOT block saves; they are shown on dialog exit.
   List<String> _getMismatchWarnings() {
     final warnings = <String>[];
-    final effectiveFreeText = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
-    final effectiveFreeImage = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
+    final effectiveFreeText =
+        RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
+    final effectiveFreeImage =
+        RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage;
 
     if (!effectiveFreeText && _keyForProvider(_selectedTextProvider).isEmpty) {
       final name = _providerName(_selectedTextProvider);
-      warnings.add('$name is set as the Text provider, but no $name API key is provided.');
+      warnings.add(
+        '$name is set as the Text provider, but no $name API key is provided.',
+      );
     }
-    if (!effectiveFreeImage && _keyForProvider(_selectedImageProvider).isEmpty) {
+    if (!effectiveFreeImage &&
+        _keyForProvider(_selectedImageProvider).isEmpty) {
       final name = _providerName(_selectedImageProvider);
-      warnings.add('$name is set as the Image provider, but no $name API key is provided.');
+      warnings.add(
+        '$name is set as the Image provider, but no $name API key is provided.',
+      );
     }
 
     return warnings;
@@ -431,8 +455,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded,
-                  color: Colors.amber.shade700, size: 22),
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber.shade700,
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(l10n.providerMismatch),
             ],
@@ -443,11 +470,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               Text(l10n.providerMismatchMessage),
               const SizedBox(height: 8),
-              ...warnings.map((w) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text('  • $w',
-                        style: const TextStyle(fontSize: 13)),
-                  )),
+              ...warnings.map(
+                (w) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('  • $w', style: const TextStyle(fontSize: 13)),
+                ),
+              ),
               const SizedBox(height: 8),
               Text(l10n.providerMismatchHint),
             ],
@@ -475,7 +503,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// mismatches are reported via [_getMismatchWarnings] when the dialog closes.
   bool _saveApiKeys(BuildContext context, [StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
-    ref.read(modelProvider.notifier).setModels(
+    ref
+        .read(modelProvider.notifier)
+        .setModels(
           newGeminiModel: _geminiModelController.text,
           newGeminiImageModel: _geminiImageModelController.text,
           newGeminiApiKey: _geminiApiKeyController.text,
@@ -565,12 +595,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// Shows an "Unsaved Changes" alert if there are pending changes, or a
   /// provider-mismatch warning if there are no unsaved changes but the active
   /// provider has no key configured.  Otherwise simply pops the dialog.
-  void _handleDialogClose(BuildContext dialogContext, [StateSetter? setDialogState]) {
+  void _handleDialogClose(
+    BuildContext dialogContext, [
+    StateSetter? setDialogState,
+  ]) {
     final mismatchWarnings = _getMismatchWarnings();
 
     if (!_hasUnsavedChanges()) {
       if (mismatchWarnings.isNotEmpty) {
-        _showProviderMismatchDialog(dialogContext, setDialogState, mismatchWarnings);
+        _showProviderMismatchDialog(
+          dialogContext,
+          setDialogState,
+          mismatchWarnings,
+        );
       } else {
         Navigator.of(dialogContext).pop();
       }
@@ -579,14 +616,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final saved = ref.read(modelProvider);
     final providerChanged = _selectedTextProvider != saved.activeTextProvider;
-    final imageProviderChanged = _selectedImageProvider != saved.activeImageProvider;
-    final textModelChanged = _geminiModelController.text != saved.geminiModel ||
+    final imageProviderChanged =
+        _selectedImageProvider != saved.activeImageProvider;
+    final textModelChanged =
+        _geminiModelController.text != saved.geminiModel ||
         _chatGPTModelController.text != saved.chatGPTModel ||
         _groqModelController.text != saved.groqModel;
-    final imageModelChanged = _geminiImageModelController.text != saved.geminiImageModel ||
+    final imageModelChanged =
+        _geminiImageModelController.text != saved.geminiImageModel ||
         _chatGPTImageModelController.text != saved.chatGPTImageModel ||
         _groqImageModelController.text != saved.groqImageModel;
-    final keysChanged = _geminiApiKeyController.text != saved.geminiApiKey ||
+    final keysChanged =
+        _geminiApiKeyController.text != saved.geminiApiKey ||
         _openAIApiKeyController.text != saved.openAIApiKey ||
         _groqApiKeyController.text != saved.groqApiKey;
 
@@ -607,20 +648,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (keysChanged) Text('• ${l10n.apiKeysUpdated}'),
               if (mismatchWarnings.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Row(children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: Colors.amber.shade700, size: 16),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(l10n.providerKeyMismatchWarning,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.amber.shade700,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.providerKeyMismatchWarning,
                         style: TextStyle(
-                            color: Colors.amber.shade800,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12)),
+                          color: Colors.amber.shade800,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                ...mismatchWarnings.map(
+                  (w) => Text(
+                    '  • $w',
+                    style: TextStyle(
+                      color: Colors.amber.shade900,
+                      fontSize: 12,
+                    ),
                   ),
-                ]),
-                ...mismatchWarnings.map((w) => Text('  • $w',
-                    style: TextStyle(color: Colors.amber.shade900, fontSize: 12))),
+                ),
               ],
             ],
           ),
@@ -653,17 +709,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   // Helper method to handle stocking button toggle
-  void _handleStockingButtonToggle(bool value, StateSetter? setDialogState, AppSettingsState appSettings) {
+  void _handleStockingButtonToggle(
+    bool value,
+    StateSetter? setDialogState,
+    AppSettingsState appSettings,
+  ) {
     // Log settings change
     AnalyticsService.logSettingsChange(
       settingName: 'show_stocking_button',
       newValue: value.toString(),
       oldValue: appSettings.showStockingButton.toString(),
     );
-    
+
     // Update the provider - this triggers ref.watch to rebuild
     ref.read(appSettingsProvider.notifier).setShowStockingButton(value);
-    
+
     // Only call setDialogState if we're in a dialog, otherwise call setState
     // This prevents double updates that cause the double-tap behavior on mobile
     if (setDialogState != null) {
@@ -676,7 +736,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     ref.listen<ModelState>(modelProvider, (previous, next) {
       // Update text controllers if the state changes from outside.
       if (_geminiModelController.text != next.geminiModel) {
@@ -730,26 +790,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     });
 
-    return MainLayout(
-      title: l10n.settings,
-      child: _buildMainMenu(),
-    );
+    return MainLayout(title: l10n.settings, child: _buildMainMenu());
   }
 
   Widget _buildMainMenu() {
     final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.watch(appSettingsProvider);
     final models = ref.watch(modelProvider);
-    
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         Text(
           l10n.settings,
-          style: Theme.of(context)
-              .textTheme
-              .headlineLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
@@ -808,54 +864,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // Indicator: show when the app is using the built-in dev API key
         if (appSettings.enableAI && models.usingDeveloperGroqKeyForAny) ...[
           const SizedBox(height: 8),
-          Builder(builder: (context) {
-            final isFounder = ref.watch(isFounderProvider);
-            final maxPerMin = isFounder
-                ? RemoteConfigService.founderMaxRequestsPerMinute
-                : RemoteConfigService.maxRequestsPerMinute;
-            final maxPerDay = isFounder
-                ? RemoteConfigService.founderMaxRequestsPerDay
-                : RemoteConfigService.maxRequestsPerDay;
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isFounder
-                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
-                    : Colors.amber.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isFounder
-                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
-                      : Colors.amber.withOpacity(0.4),
+          Builder(
+            builder: (context) {
+              final isFounder = ref.watch(isFounderProvider);
+              final maxPerMin = isFounder
+                  ? RemoteConfigService.founderMaxRequestsPerMinute
+                  : RemoteConfigService.maxRequestsPerMinute;
+              final maxPerDay = isFounder
+                  ? RemoteConfigService.founderMaxRequestsPerDay
+                  : RemoteConfigService.maxRequestsPerDay;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    isFounder ? Icons.diamond : Icons.info_outline,
+                decoration: BoxDecoration(
+                  color: isFounder
+                      ? AquaThemeColors.founderColor(context).withOpacity(0.08)
+                      : Colors.amber.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
                     color: isFounder
-                        ? AquaThemeColors.founderColor(context)
-                        : Colors.amber,
-                    size: 16,
+                        ? AquaThemeColors.founderColor(context).withOpacity(0.4)
+                        : Colors.amber.withOpacity(0.4),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      isFounder
-                          ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
-                          : 'Using App\'s Built-in Dev API Key (free tier). '
-                              'Add your own API key in AI Provider settings for dedicated limits.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isFounder
-                            ? AquaThemeColors.founderColor(context)
-                            : Colors.amber.shade900,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isFounder ? Icons.diamond : Icons.info_outline,
+                      color: isFounder
+                          ? AquaThemeColors.founderColor(context)
+                          : Colors.amber,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        isFounder
+                            ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
+                            : 'Using App\'s Built-in Dev API Key (free tier). '
+                                  'Add your own API key in AI Provider settings for dedicated limits.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isFounder
+                              ? AquaThemeColors.founderColor(context)
+                              : Colors.amber.shade900,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
         // Warning: shown when the free AI tier is disabled server-side but the
         // user has no own Groq key configured.
@@ -868,9 +929,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             decoration: BoxDecoration(
               color: Colors.red.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.red.withOpacity(0.4),
-              ),
+              border: Border.all(color: Colors.red.withOpacity(0.4)),
             ),
             child: Row(
               children: [
@@ -880,9 +939,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Text(
                     'The free AI tier is currently unavailable. '
                     'Please add your own Groq API key in AI Provider settings to continue using AI features.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.red.shade700,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.red.shade700),
                   ),
                 ),
               ],
@@ -957,9 +1016,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           iconColor: Theme.of(context).colorScheme.primary,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ChangelogScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const ChangelogScreen()),
           ),
         ),
         const SizedBox(height: 16),
@@ -1044,7 +1101,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   gradient: LinearGradient(
                     colors: [
                       Colors.green.withOpacity(0.25),
-                      Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                      Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainer.withOpacity(0.3),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -1074,11 +1133,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
               ),
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 24,
-              ),
+              Icon(Icons.check_circle, color: Colors.green, size: 24),
             ],
           ),
         ),
@@ -1136,15 +1191,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: Text(l10n.debugHideAdsDesc),
                   value: appSettings.debugHideAds,
                   onChanged: (value) {
-                    ref.read(appSettingsProvider.notifier).setDebugHideAds(value);
+                    ref
+                        .read(appSettingsProvider.notifier)
+                        .setDebugHideAds(value);
                     setDialogState(() {});
                   },
                 ),
                 const Divider(),
                 // Simulate Founder Tier toggle
                 SwitchListTile(
-                  secondary: Icon(Icons.diamond,
-                      color: AquaThemeColors.founderColor(context)),
+                  secondary: Icon(
+                    Icons.diamond,
+                    color: AquaThemeColors.founderColor(context),
+                  ),
                   title: const Text('Simulate Founder Tier'),
                   subtitle: Text(
                     ref.read(debugForceFounderProvider)
@@ -1181,9 +1240,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(),
                 // Clear all SharedPreferences
                 ListTile(
-                  leading: const Icon(Icons.delete_sweep_outlined, color: Colors.orange),
+                  leading: const Icon(
+                    Icons.delete_sweep_outlined,
+                    color: Colors.orange,
+                  ),
                   title: const Text('Clear All Preferences'),
-                  subtitle: const Text('Wipe all SharedPreferences (restart required)'),
+                  subtitle: const Text(
+                    'Wipe all SharedPreferences (restart required)',
+                  ),
                   onTap: () async {
                     final confirmed = await showDialog<bool>(
                       context: ctx,
@@ -1212,7 +1276,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Navigator.of(ctx).pop();
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           const SnackBar(
-                            content: Text('All preferences cleared. Please restart the app.'),
+                            content: Text(
+                              'All preferences cleared. Please restart the app.',
+                            ),
                           ),
                         );
                       }
@@ -1262,12 +1328,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(ctx).pop();
               final urlString = RemoteConfigService.buyMeACoffeeUrl;
               final uri = Uri.tryParse(urlString);
-              if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+              if (uri == null ||
+                  !(uri.isScheme('http') || uri.isScheme('https'))) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.unableToOpenLink),
-                    ),
+                    SnackBar(content: Text(l10n.unableToOpenLink)),
                   );
                 }
                 return;
@@ -1277,11 +1342,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 mode: LaunchMode.externalApplication,
               );
               if (!launched && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.unableToOpenLink),
-                  ),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(l10n.unableToOpenLink)));
               }
             },
           ),
@@ -1297,23 +1360,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (!available) {
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.storeNotAvailable),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.storeNotAvailable)));
         }
         return;
       }
       final response = await iap.queryProductDetails({buyMeACoffeeProductId});
       if (response.error != null) {
-        debugPrint('IAP query error for $buyMeACoffeeProductId: ${response.error}');
+        debugPrint(
+          'IAP query error for $buyMeACoffeeProductId: ${response.error}',
+        );
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.storeError(response.error!.message)),
-            ),
+            SnackBar(content: Text(l10n.storeError(response.error!.message))),
           );
         }
         return;
@@ -1323,11 +1384,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         debugPrint('IAP product not found: $buyMeACoffeeProductId');
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.productNotFound),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.productNotFound)));
         }
         return;
       }
@@ -1338,15 +1397,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.productNotFound),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.productNotFound)));
         }
         return;
       }
-      final param = PurchaseParam(productDetails: response.productDetails.first);
+      final param = PurchaseParam(
+        productDetails: response.productDetails.first,
+      );
       final purchaseStarted = await iap.buyConsumable(purchaseParam: param);
       if (!purchaseStarted) {
         debugPrint(
@@ -1355,9 +1414,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.unableToInitiatePurchase),
-            ),
+            SnackBar(content: Text(l10n.unableToInitiatePurchase)),
           );
         }
       }
@@ -1399,11 +1456,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     gradient: gradient,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 32,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 32),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -1463,56 +1516,65 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       required ValueChanged<Set<AIProvider>> onChanged,
       Color? selectedBg,
       Color? selectedFg,
-    }) =>
-        SegmentedButton<AIProvider>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-            selectedBackgroundColor:
-                selectedBg ?? Theme.of(context).colorScheme.tertiaryContainer,
-            selectedForegroundColor:
-                selectedFg ?? Theme.of(context).colorScheme.onTertiaryContainer,
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-              width: 1,
-            ),
+    }) => SegmentedButton<AIProvider>(
+      showSelectedIcon: false,
+      style: SegmentedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        selectedBackgroundColor:
+            selectedBg ?? Theme.of(context).colorScheme.tertiaryContainer,
+        selectedForegroundColor:
+            selectedFg ?? Theme.of(context).colorScheme.onTertiaryContainer,
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      segments: [
+        ButtonSegment(
+          value: AIProvider.gemini,
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.auto_awesome, size: 16),
+              const SizedBox(width: 4),
+              Text(l10n.gemini),
+            ],
           ),
-          segments: [
-            ButtonSegment(
-              value: AIProvider.gemini,
-              label: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.auto_awesome, size: 16),
-                const SizedBox(width: 4),
-                Text(l10n.gemini),
-              ]),
-            ),
-            ButtonSegment(
-              value: AIProvider.groq,
-              label: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.flash_on, size: 16),
-                const SizedBox(width: 4),
-                Text(l10n.groq),
-              ]),
-            ),
-            ButtonSegment(
-              value: AIProvider.openAI,
-              label: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.psychology, size: 16),
-                const SizedBox(width: 4),
-                Text(l10n.openAI),
-              ]),
-            ),
-          ],
-          selected: selected,
-          onSelectionChanged: onChanged,
-        );
+        ),
+        ButtonSegment(
+          value: AIProvider.groq,
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.flash_on, size: 16),
+              const SizedBox(width: 4),
+              Text(l10n.groq),
+            ],
+          ),
+        ),
+        ButtonSegment(
+          value: AIProvider.openAI,
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.psychology, size: 16),
+              const SizedBox(width: 4),
+              Text(l10n.openAI),
+            ],
+          ),
+        ),
+      ],
+      selected: selected,
+      onSelectionChanged: onChanged,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         // ─── Limits notice (collapsible; always shown when a dev key is available) ──
-        if (RemoteConfigService.freeAiEnabled) Theme(
+        if (RemoteConfigService.freeAiEnabled)
+          Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -1530,11 +1592,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: RemoteConfigService.freeAiEnabled
                   ? ExpansionTile(
                       leading: isFounder
-                          ? Icon(Icons.diamond, color: AquaThemeColors.founderColor(context), size: 20)
-                          : const Icon(Icons.speed, color: Colors.amber, size: 20),
+                          ? Icon(
+                              Icons.diamond,
+                              color: AquaThemeColors.founderColor(context),
+                              size: 20,
+                            )
+                          : const Icon(
+                              Icons.speed,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
                       title: Text(
-                        isFounder ? l10n.founderAquaristTitle : l10n.freeTierLimits,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        isFounder
+                            ? l10n.founderAquaristTitle
+                            : l10n.freeTierLimits,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
                               color: isFounder
                                   ? AquaThemeColors.founderColor(context)
                                   : Colors.amber.shade800,
@@ -1543,15 +1616,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       // Collapsed subtitle: just the key numbers
                       subtitle: Text(
-                        l10n.freeTierLimitsSubtitle(limitPerDay, limitPerMin, limitPhotos),
+                        l10n.freeTierLimitsSubtitle(
+                          limitPerDay,
+                          limitPerMin,
+                          limitPhotos,
+                        ),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: isFounder
-                                  ? AquaThemeColors.founderColor(context).withOpacity(0.8)
-                                  : Colors.amber.shade700,
-                            ),
+                          color: isFounder
+                              ? AquaThemeColors.founderColor(
+                                  context,
+                                ).withOpacity(0.8)
+                              : Colors.amber.shade700,
+                        ),
                       ),
                       initiallyExpanded: false,
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      tilePadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1560,7 +1642,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
                           '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
                           '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: isFounder
                                     ? AquaThemeColors.founderColor(context)
                                     : Colors.amber.shade900,
@@ -1570,14 +1653,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         if (!isFounder) ...[
                           Text(
                             l10n.freeTierModelNote,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.amber.shade900,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.amber.shade900),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             l10n.freeTierRecommendation,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: Colors.amber.shade800,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -1585,7 +1668,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(height: 8),
                           Text(
                             l10n.freeTierDisclaimer,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: Colors.amber.shade800,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -1594,10 +1678,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     )
                   : ListTile(
-                      leading: const Icon(Icons.block, color: Colors.red, size: 20),
+                      leading: const Icon(
+                        Icons.block,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       title: Text(
                         l10n.freeTierUnavailable,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
                               color: Colors.red.shade700,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1605,8 +1694,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: Text(
                         l10n.freeTierUnavailableDesc,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.red.shade700,
-                            ),
+                          color: Colors.red.shade700,
+                        ),
                       ),
                     ),
             ),
@@ -1619,36 +1708,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(children: [
-                  Icon(Icons.bolt, size: 20, color: Colors.amber.shade700),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.freeAI,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade700,
-                        ),
-                  ),
-                ]),
+                Row(
+                  children: [
+                    Icon(Icons.bolt, size: 20, color: Colors.amber.shade700),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.freeAI,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber.shade700,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.freeAIDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _buildDevKeyToggle(
                   label: l10n.useFreeAIForText,
-                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText,
+                  value:
+                      RemoteConfigService.freeAiEnabled &&
+                      _useDevGroqKeyForText,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
                           // When turning ON: force Groq. When turning OFF: switch
                           // immediately to whichever provider has a key entered in
                           // the controllers so the segmented button reflects the
                           // correct selection without waiting for ref.listen.
-                          final best =
-                              v ? AIProvider.groq : _bestProviderFromControllers();
+                          final best = v
+                              ? AIProvider.groq
+                              : _bestProviderFromControllers();
                           setState(() {
                             _useDevGroqKeyForText = v;
                             _selectedTextProvider = best;
@@ -1658,7 +1752,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             _selectedTextProvider = best;
                           });
                           // Auto-save immediately so root menu and providers reflect state.
-                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                          ref
+                              .read(modelProvider.notifier)
+                              .setDevGroqKeyToggles(
                                 forText: v,
                                 forImage: _useDevGroqKeyForImage,
                               );
@@ -1668,11 +1764,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
                 _buildDevKeyToggle(
                   label: l10n.useFreeAIForImage,
-                  value: RemoteConfigService.freeAiEnabled && _useDevGroqKeyForImage,
+                  value:
+                      RemoteConfigService.freeAiEnabled &&
+                      _useDevGroqKeyForImage,
                   onChanged: RemoteConfigService.freeAiEnabled
                       ? (v) {
-                          final best =
-                              v ? AIProvider.groq : _bestProviderFromControllers();
+                          final best = v
+                              ? AIProvider.groq
+                              : _bestProviderFromControllers();
                           setState(() {
                             _useDevGroqKeyForImage = v;
                             _selectedImageProvider = best;
@@ -1682,7 +1781,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             _selectedImageProvider = best;
                           });
                           // Auto-save immediately so root menu and providers reflect state.
-                          ref.read(modelProvider.notifier).setDevGroqKeyToggles(
+                          ref
+                              .read(modelProvider.notifier)
+                              .setDevGroqKeyToggles(
                                 forText: _useDevGroqKeyForText,
                                 forImage: v,
                               );
@@ -1695,258 +1796,313 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 16),
         // ─── Consolidated API Keys ────────────────────────────────────────
-        if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
+        if (!_useDevGroqKeyForText ||
+            !_useDevGroqKeyForImage ||
+            !RemoteConfigService.freeAiEnabled) ...[
           _buildApiKeysSection(setDialogState),
           const SizedBox(height: 16),
         ],
         // ─── Text / Chat ─────────────────────────────────────────────────────
         if (!_useDevGroqKeyForText || !RemoteConfigService.freeAiEnabled) ...[
           Card(
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Section header
-                Row(children: [
-                  Icon(Icons.chat_bubble_outline,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.textProvider,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ]),
-                const SizedBox(height: 8),
-                // Gemini recommended hint
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Section header
+                  Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.green, size: 14),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          l10n.geminiRecommended,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.textProvider,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                // Provider selector
-                providerButton(
-                  selected: {_selectedTextProvider},
-                  onChanged: (s) {
-                    final p = s.first;
-                    AnalyticsService.logSettingsChange(
-                      settingName: 'ai_text_provider',
-                      newValue: p.toString(),
-                      oldValue: _selectedTextProvider.toString(),
-                    );
-                    setState(() => _selectedTextProvider = p);
-                    if (setDialogState != null) {
-                      setDialogState(() => _selectedTextProvider = p);
-                    }
-                  },
-                ),
-                // Provider-specific model settings for text
-                switch (_selectedTextProvider) {
-                  AIProvider.gemini => _buildGeminiSettings(setDialogState, true),
-                  AIProvider.openAI => _buildOpenAISettings(setDialogState, true),
-                  AIProvider.groq   => _buildGroqSettings(setDialogState, true),
-                },
-                // Chat History Limit — collapsible, defaults collapsed
-                const SizedBox(height: 8),
-                Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    leading: Icon(Icons.history,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary),
-                    title: Text(
-                      l10n.chatHistoryLimit,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                  const SizedBox(height: 8),
+                  // Gemini recommended hint
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
                     ),
-                    initiallyExpanded: false,
-                    tilePadding: EdgeInsets.zero,
-                    childrenPadding: const EdgeInsets.only(bottom: 8),
-                    children: [_buildChatHistoryLimitSection(setDialogState)],
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: Colors.green, size: 14),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            l10n.geminiRecommended,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.green.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // Reset (hidden when using free provider) + Save (always shown)
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
+                  const SizedBox(height: 12),
+                  // Provider selector
+                  providerButton(
+                    selected: {_selectedTextProvider},
+                    onChanged: (s) {
+                      final p = s.first;
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'ai_text_provider',
+                        newValue: p.toString(),
+                        oldValue: _selectedTextProvider.toString(),
+                      );
+                      setState(() => _selectedTextProvider = p);
+                      if (setDialogState != null) {
+                        setDialogState(() => _selectedTextProvider = p);
+                      }
+                    },
+                  ),
+                  // Provider-specific model settings for text
+                  switch (_selectedTextProvider) {
+                    AIProvider.gemini => _buildGeminiSettings(
+                      setDialogState,
+                      true,
+                    ),
+                    AIProvider.openAI => _buildOpenAISettings(
+                      setDialogState,
+                      true,
+                    ),
+                    AIProvider.groq => _buildGroqSettings(setDialogState, true),
+                  },
+                  // Chat History Limit — collapsible, defaults collapsed
+                  const SizedBox(height: 8),
+                  Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: Icon(
+                        Icons.history,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: Text(
+                        l10n.chatHistoryLimit,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      initiallyExpanded: false,
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: const EdgeInsets.only(bottom: 8),
+                      children: [_buildChatHistoryLimitSection(setDialogState)],
+                    ),
+                  ),
+                  // Reset (hidden when using free provider) + Save (always shown)
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
                           onPressed: () {
                             switch (_selectedTextProvider) {
                               case AIProvider.gemini:
-                                _geminiModelController.text = RemoteConfigService.defaultGeminiModel;
+                                _geminiModelController.text =
+                                    RemoteConfigService.defaultGeminiModel;
                               case AIProvider.openAI:
-                                _chatGPTModelController.text = RemoteConfigService.defaultOpenAIModel;
+                                _chatGPTModelController.text =
+                                    RemoteConfigService.defaultOpenAIModel;
                               case AIProvider.groq:
-                                _groqModelController.text = RemoteConfigService.defaultGroqModel;
+                                _groqModelController.text =
+                                    RemoteConfigService.defaultGroqModel;
                             }
                             if (setDialogState != null) setDialogState(() {});
-                            context.showAccessibleMessage(l10n.modelsResetDefault);
+                            context.showAccessibleMessage(
+                              l10n.modelsResetDefault,
+                            );
                           },
                           icon: const Icon(Icons.refresh, size: 18),
                           label: Text(l10n.resetModels),
                         ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _saveTextSettings(context),
-                        icon: const Icon(Icons.save, size: 18),
-                        label: Text(l10n.save),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        ], // end if (!_useDevGroqKeyForText)
-        // ─── Image / Photo ────────────────────────────────────────────────────
-        if (!_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
-          Card(
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Section header
-                Row(children: [
-                  Icon(Icons.image_outlined,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.secondary),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.imageProvider,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                  ),
-                ]),
-                const SizedBox(height: 8),
-                // Gemini recommended hint
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.star, color: Colors.green, size: 14),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          l10n.geminiRecommended,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        child: ElevatedButton.icon(
+                          onPressed: () => _saveTextSettings(context),
+                          icon: const Icon(Icons.save, size: 18),
+                          label: Text(l10n.save),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                // Provider selector
-                providerButton(
-                  selected: {_selectedImageProvider},
-                  selectedBg:
-                      Theme.of(context).colorScheme.secondaryContainer,
-                  selectedFg:
-                      Theme.of(context).colorScheme.onSecondaryContainer,
-                  onChanged: (s) {
-                    final p = s.first;
-                    AnalyticsService.logSettingsChange(
-                      settingName: 'ai_image_provider',
-                      newValue: p.toString(),
-                      oldValue: _selectedImageProvider.toString(),
-                    );
-                    setState(() => _selectedImageProvider = p);
-                    if (setDialogState != null) {
-                      setDialogState(() => _selectedImageProvider = p);
-                    }
+                ],
+              ),
+            ),
+          ),
+        ],
+        // end if (!_useDevGroqKeyForText)
+        // ─── Image / Photo ────────────────────────────────────────────────────
+        if (!_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Section header
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.image_outlined,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.imageProvider,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Gemini recommended hint
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: Colors.green, size: 14),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            l10n.geminiRecommended,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.green.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Provider selector
+                  providerButton(
+                    selected: {_selectedImageProvider},
+                    selectedBg: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer,
+                    selectedFg: Theme.of(
+                      context,
+                    ).colorScheme.onSecondaryContainer,
+                    onChanged: (s) {
+                      final p = s.first;
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'ai_image_provider',
+                        newValue: p.toString(),
+                        oldValue: _selectedImageProvider.toString(),
+                      );
+                      setState(() => _selectedImageProvider = p);
+                      if (setDialogState != null) {
+                        setDialogState(() => _selectedImageProvider = p);
+                      }
+                    },
+                  ),
+                  // Provider-specific model settings for image
+                  switch (_selectedImageProvider) {
+                    AIProvider.gemini => _buildGeminiSettings(
+                      setDialogState,
+                      false,
+                    ),
+                    AIProvider.openAI => _buildOpenAISettings(
+                      setDialogState,
+                      false,
+                    ),
+                    AIProvider.groq => _buildGroqSettings(
+                      setDialogState,
+                      false,
+                    ),
                   },
-                ),
-                // Provider-specific model settings for image
-                switch (_selectedImageProvider) {
-                  AIProvider.gemini => _buildGeminiSettings(setDialogState, false),
-                  AIProvider.openAI => _buildOpenAISettings(setDialogState, false),
-                  AIProvider.groq   => _buildGroqSettings(setDialogState, false),
-                },
-                // Reset (hidden when using free provider) + Save (always shown)
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
+                  // Reset (hidden when using free provider) + Save (always shown)
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
                           onPressed: () {
                             switch (_selectedImageProvider) {
                               case AIProvider.gemini:
-                                _geminiImageModelController.text = RemoteConfigService.defaultGeminiImageModel;
+                                _geminiImageModelController.text =
+                                    RemoteConfigService.defaultGeminiImageModel;
                               case AIProvider.openAI:
-                                _chatGPTImageModelController.text = RemoteConfigService.defaultOpenAIImageModel;
+                                _chatGPTImageModelController.text =
+                                    RemoteConfigService.defaultOpenAIImageModel;
                               case AIProvider.groq:
-                                _groqImageModelController.text = RemoteConfigService.defaultGroqImageModel;
+                                _groqImageModelController.text =
+                                    RemoteConfigService.defaultGroqImageModel;
                             }
                             if (setDialogState != null) setDialogState(() {});
-                            context.showAccessibleMessage(l10n.modelsResetDefault);
+                            context.showAccessibleMessage(
+                              l10n.modelsResetDefault,
+                            );
                           },
                           icon: const Icon(Icons.refresh, size: 18),
                           label: Text(l10n.resetModels),
                         ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _saveImageSettings(context),
-                        icon: const Icon(Icons.save, size: 18),
-                        label: Text(l10n.save),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _saveImageSettings(context),
+                          icon: const Icon(Icons.save, size: 18),
+                          label: Text(l10n.save),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        ], // end if (!_useDevGroqKeyForImage)
+        ],
+        // end if (!_useDevGroqKeyForImage)
         const SizedBox(height: 16),
         // ─── Note: calculators work without an AI key ─────────────────────────
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceVariant.withOpacity(0.7),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
@@ -1955,17 +2111,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.info_outline,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   l10n.aiKeysNotRequired,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -1978,262 +2136,302 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildAppSettingsContent([StateSetter? setDialogState]) {
     final appSettings = ref.watch(appSettingsProvider);
     final l10n = AppLocalizations.of(context)!;
-    
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         // App Settings Section
         Card(
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.settings_applications,
-                          color: Theme.of(context).colorScheme.secondary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            l10n.appSettings,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                          ),
-                        ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(
+                          context,
+                        ).colorScheme.secondaryContainer.withOpacity(0.3),
+                        Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainer.withOpacity(0.3),
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Language Selection
-                  ListTile(
-                    leading: Icon(
-                      Icons.language,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(l10n.language),
-                    subtitle: Text(_getLanguageDisplayName(appSettings.localeCode)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _showLanguageDialog(setDialogState),
-                  ),
-                  const Divider(height: 24),
-
-                  // AI Response Language
-                  ListTile(
-                    leading: Icon(
-                      Icons.translate,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(l10n.aiResponseLanguage),
-                    subtitle: Text(_getAiResponseLanguageDisplayName(appSettings.aiResponseLanguage)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _showAiResponseLanguageDialog(setDialogState),
-                  ),
-                  const Divider(height: 24),
-                  
-                  // Appearance shortcut
-                  ListTile(
-                    leading: Icon(
-                      Icons.palette_outlined,
-                      color: Theme.of(context).colorScheme.tertiary,
-                    ),
-                    title: Text(l10n.appearance),
-                    subtitle: Text(l10n.appearanceDesc),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      Navigator.pushNamed(context, '/appearance');
-                    },
-                  ),
-                  const Divider(height: 24),
-                  
-                  SwitchListTile(
-                    title: Text(l10n.showAIStockingButton),
-                    subtitle: Text(l10n.showAIStockingButtonDesc),
-                    value: appSettings.showStockingButton,
-                    // Disable the toggle when AI is disabled
-                    onChanged: appSettings.enableAI 
-                      ? (value) => _handleStockingButtonToggle(value, setDialogState, appSettings)
-                      : null,
-                  ),
-                  const Divider(height: 24),
-                  ListTile(
-                    leading: Icon(
-                      Icons.label,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(l10n.speciesTags),
-                    subtitle: Text(l10n.speciesTagsDesc),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/species-tags');
-                    },
-                  ),
-                  const Divider(height: 24),
-                  ListTile(
-                    leading: Icon(
-                      Icons.history,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(l10n.analysisHistory),
-                    subtitle: Text(l10n.analysisHistoryDesc),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/analysis-history');
-                    },
-                  ),
-                  const Divider(height: 24),
-                  
-                  // Reset Remembered Reschedule Options
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ListTile(
-                        leading: Icon(
-                          Icons.notifications_active,
-                          color: appSettings.hasRememberedRescheduleOptions
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        title: Text(l10n.resetReschedulePreference),
-                        subtitle: Text(
-                          appSettings.hasRememberedRescheduleOptions
-                              ? l10n.resetReschedulePreferenceDescActive
-                              : l10n.resetReschedulePreferenceDescInactive,
+                      Icon(
+                        Icons.settings_applications,
+                        color: Theme.of(context).colorScheme.secondary,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.appSettings,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
                         ),
                       ),
-                      if (appSettings.hasRememberedRescheduleOptions)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                // Log settings change
-                                AnalyticsService.logSettingsChange(
-                                  settingName: 'reset_reschedule_preference',
-                                  newValue: 'cleared',
-                                  oldValue: 'set',
-                                );
-                                
-                                await ref.read(appSettingsProvider.notifier).clearAllRememberedRescheduleOptions();
-                                
-                                if (mounted) {
-                                  context.showAccessibleMessage(l10n.reschedulePreferenceCleared);
-                                }
-                                
-                                if (setDialogState != null) {
-                                  setDialogState(() {});
-                                } else {
-                                  setState(() {});
-                                }
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: Text(l10n.resetAll),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
-                  
-                  // Translation Community Section
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.2),
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.translate,
-                              color: Theme.of(context).colorScheme.tertiary,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                l10n.translationCommunityTitle,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.translationCommunityMessage,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            launchUrl(Uri.parse('https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/TRANSLATION_GUIDE.md'));
-                          },
-                          icon: const Icon(Icons.open_in_new, size: 18),
-                          label: Text(l10n.visitGitHub),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.tertiary,
-                            foregroundColor: Theme.of(context).colorScheme.onTertiary,
-                          ),
-                        ),
-                      ],
+                ),
+                const SizedBox(height: 16),
+
+                // Language Selection
+                ListTile(
+                  leading: Icon(
+                    Icons.language,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.language),
+                  subtitle: Text(
+                    _getLanguageDisplayName(appSettings.localeCode),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () => _showLanguageDialog(setDialogState),
+                ),
+                const Divider(height: 24),
+
+                // AI Response Language
+                ListTile(
+                  leading: Icon(
+                    Icons.translate,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.aiResponseLanguage),
+                  subtitle: Text(
+                    _getAiResponseLanguageDisplayName(
+                      appSettings.aiResponseLanguage,
                     ),
                   ),
-                ],
-              ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () => _showAiResponseLanguageDialog(setDialogState),
+                ),
+                const Divider(height: 24),
+
+                // Appearance shortcut
+                ListTile(
+                  leading: Icon(
+                    Icons.palette_outlined,
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  title: Text(l10n.appearance),
+                  subtitle: Text(l10n.appearanceDesc),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(context, '/appearance');
+                  },
+                ),
+                const Divider(height: 24),
+
+                SwitchListTile(
+                  title: Text(l10n.showAIStockingButton),
+                  subtitle: Text(l10n.showAIStockingButtonDesc),
+                  value: appSettings.showStockingButton,
+                  // Disable the toggle when AI is disabled
+                  onChanged: appSettings.enableAI
+                      ? (value) => _handleStockingButtonToggle(
+                          value,
+                          setDialogState,
+                          appSettings,
+                        )
+                      : null,
+                ),
+                const Divider(height: 24),
+                ListTile(
+                  leading: Icon(
+                    Icons.label,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.speciesTags),
+                  subtitle: Text(l10n.speciesTagsDesc),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/species-tags');
+                  },
+                ),
+                const Divider(height: 24),
+                ListTile(
+                  leading: Icon(
+                    Icons.history,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.analysisHistory),
+                  subtitle: Text(l10n.analysisHistoryDesc),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/analysis-history');
+                  },
+                ),
+                const Divider(height: 24),
+
+                // Reset Remembered Reschedule Options
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        Icons.notifications_active,
+                        color: appSettings.hasRememberedRescheduleOptions
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      title: Text(l10n.resetReschedulePreference),
+                      subtitle: Text(
+                        appSettings.hasRememberedRescheduleOptions
+                            ? l10n.resetReschedulePreferenceDescActive
+                            : l10n.resetReschedulePreferenceDescInactive,
+                      ),
+                    ),
+                    if (appSettings.hasRememberedRescheduleOptions)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 8,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              // Log settings change
+                              AnalyticsService.logSettingsChange(
+                                settingName: 'reset_reschedule_preference',
+                                newValue: 'cleared',
+                                oldValue: 'set',
+                              );
+
+                              await ref
+                                  .read(appSettingsProvider.notifier)
+                                  .clearAllRememberedRescheduleOptions();
+
+                              if (mounted) {
+                                context.showAccessibleMessage(
+                                  l10n.reschedulePreferenceCleared,
+                                );
+                              }
+
+                              if (setDialogState != null) {
+                                setDialogState(() {});
+                              } else {
+                                setState(() {});
+                              }
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: Text(l10n.resetAll),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                // Translation Community Section
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(
+                          context,
+                        ).colorScheme.tertiaryContainer.withOpacity(0.2),
+                        Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withOpacity(0.2),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.translate,
+                            color: Theme.of(context).colorScheme.tertiary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              l10n.translationCommunityTitle,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.tertiary,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.translationCommunityMessage,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          launchUrl(
+                            Uri.parse(
+                              'https://github.com/TheRealFalseReality/Aquarium-AI/blob/main/TRANSLATION_GUIDE.md',
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.open_in_new, size: 18),
+                        label: Text(l10n.visitGitHub),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.tertiary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 
   Widget _buildDataManagementContent() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return FutureBuilder<Map<String, dynamic>>(
       future: _loadBackupStatistics(),
       builder: (context, snapshot) {
         final stats = snapshot.data ?? {};
-        
+
         return ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
@@ -2250,8 +2448,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
-                            Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+                            Theme.of(
+                              context,
+                            ).colorScheme.tertiaryContainer.withOpacity(0.3),
+                            Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer.withOpacity(0.3),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -2269,25 +2471,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(width: 8),
                           Text(
                             l10n.dataManagement,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.tertiary,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                ),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     // Backup Statistics
                     if (stats.isNotEmpty) ...[
                       const SizedBox(height: 20),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withOpacity(0.3),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withOpacity(0.2),
                           ),
                         ),
                         child: Column(
@@ -2303,10 +2511,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   l10n.backupStatistics,
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
                                 ),
                               ],
                             ),
@@ -2331,7 +2542,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ],
                             ],
                             if (stats['lastRestoreTime'] != null) ...[
-                              if (stats['lastBackupTime'] != null) const SizedBox(height: 8),
+                              if (stats['lastBackupTime'] != null)
+                                const SizedBox(height: 8),
                               _buildStatRow(
                                 context,
                                 Icons.restore,
@@ -2340,19 +2552,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 Colors.green,
                               ),
                             ],
-                            if (stats['lastBackupTime'] == null && stats['lastRestoreTime'] == null)
+                            if (stats['lastBackupTime'] == null &&
+                                stats['lastRestoreTime'] == null)
                               Text(
                                 l10n.noBackupHistory,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      fontStyle: FontStyle.italic,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
                               ),
                           ],
                         ),
                       ),
                     ],
-                    
+
                     const SizedBox(height: 16),
                     ListTile(
                       leading: Container(
@@ -2363,16 +2579,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.blue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
-                          Icons.backup,
-                          color: Colors.blue,
-                        ),
+                        child: const Icon(Icons.backup, color: Colors.blue),
                       ),
                       title: Text(l10n.backupData),
                       subtitle: Text(l10n.backupDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
-                        await BackupRestoreUtils.exportData(context, ref, source: 'settings');
+                        await BackupRestoreUtils.exportData(
+                          context,
+                          ref,
+                          source: 'settings',
+                        );
                         // Rebuild to refresh statistics
                         if (mounted) setState(() {});
                       },
@@ -2387,16 +2604,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Colors.green.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
-                          Icons.restore,
-                          color: Colors.green,
-                        ),
+                        child: const Icon(Icons.restore, color: Colors.green),
                       ),
                       title: Text(l10n.restoreData),
                       subtitle: Text(l10n.restoreDataDesc),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () async {
-                        await BackupRestoreUtils.importData(context, ref, source: 'settings');
+                        await BackupRestoreUtils.importData(
+                          context,
+                          ref,
+                          source: 'settings',
+                        );
                         // Rebuild to refresh statistics
                         if (mounted) setState(() {});
                       },
@@ -2411,7 +2629,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildStatRow(BuildContext context, IconData icon, String label, String value, Color color) {
+  Widget _buildStatRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Row(
       children: [
         Icon(icon, size: 16, color: color),
@@ -2428,9 +2652,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -2443,24 +2667,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final stats = <String, dynamic>{};
-      
+
       final lastBackupTimeStr = prefs.getString('last_backup_time');
       if (lastBackupTimeStr != null) {
         final lastBackupTime = DateTime.parse(lastBackupTimeStr);
         stats['lastBackupTime'] = _formatDateTime(lastBackupTime);
-        
+
         final lastBackupTankCount = prefs.getInt('last_backup_tank_count');
         if (lastBackupTankCount != null) {
           stats['lastBackupTankCount'] = lastBackupTankCount;
         }
       }
-      
+
       final lastRestoreTimeStr = prefs.getString('last_restore_time');
       if (lastRestoreTimeStr != null) {
         final lastRestoreTime = DateTime.parse(lastRestoreTimeStr);
         stats['lastRestoreTime'] = _formatDateTime(lastRestoreTime);
       }
-      
+
       return stats;
     } catch (e) {
       return {};
@@ -2470,7 +2694,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _formatDateTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) {
       return 'Just now';
     } else if (difference.inHours < 1) {
@@ -2491,16 +2715,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-
   Widget _buildChatHistoryLimitSection([StateSetter? setDialogState]) {
     final l10n = AppLocalizations.of(context)!;
     // Locked on free tier (dev key in use for text)
-    final onFreeTier = RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
+    final onFreeTier =
+        RemoteConfigService.freeAiEnabled && _useDevGroqKeyForText;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
@@ -2511,16 +2737,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.history, color: Theme.of(context).colorScheme.primary, size: 20),
+              Icon(
+                Icons.history,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 l10n.chatHistoryLimit,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
               if (onFreeTier)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(12),
@@ -2539,7 +2774,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Text(
             !onFreeTier
                 ? l10n.chatHistoryLimitDesc
-                : l10n.chatHistoryFreeTierDesc(RemoteConfigService.freeTierChatHistoryLimit, maxChatHistoryLimit),
+                : l10n.chatHistoryFreeTierDesc(
+                    RemoteConfigService.freeTierChatHistoryLimit,
+                    maxChatHistoryLimit,
+                  ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -2568,7 +2806,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Container(
                   width: 48,
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
@@ -2586,8 +2827,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('$minChatHistoryLimit msg', style: Theme.of(context).textTheme.labelSmall),
-                Text('$maxChatHistoryLimit msgs', style: Theme.of(context).textTheme.labelSmall),
+                Text(
+                  '$minChatHistoryLimit msg',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                Text(
+                  '$maxChatHistoryLimit msgs',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
               ],
             ),
           ] else ...[
@@ -2607,9 +2854,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Container(
                   width: 48,
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -2630,7 +2882,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   /// [forTextUseCase]: null = show all fields (legacy combined view),
   /// true = show text model only, false = show image model only.
-  Widget _buildGeminiSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
+  Widget _buildGeminiSettings([
+    StateSetter? setDialogState,
+    bool? forTextUseCase,
+  ]) {
     final l10n = AppLocalizations.of(context)!;
 
     // When called from the text/image provider section, only show the model
@@ -2650,7 +2905,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 4),
             _buildModelRateLimitsLink(
               modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
-              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+              rateLimitsUrl:
+                  'https://ai.google.dev/gemini-api/docs/rate-limits',
             ),
             const SizedBox(height: 12),
           ],
@@ -2665,7 +2921,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 4),
             _buildModelRateLimitsLink(
               modelsUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
-              rateLimitsUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits',
+              rateLimitsUrl:
+                  'https://ai.google.dev/gemini-api/docs/rate-limits',
             ),
             const SizedBox(height: 12),
           ],
@@ -2691,10 +2948,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.blue.withOpacity(0.3),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
           ),
           child: Row(
             children: [
@@ -2766,12 +3020,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: OutlinedButton.icon(
-              icon: Icon(Icons.clear, size: 18,
-                  color: Theme.of(context).colorScheme.error),
-              label: Text(l10n.clearKey,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              icon: Icon(
+                Icons.clear,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              label: Text(
+                l10n.clearKey,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               onPressed: () => _clearApiKey(
-                  context, 'geminiApiKey', l10n.googleAIApiKey, setDialogState),
+                context,
+                'geminiApiKey',
+                l10n.googleAIApiKey,
+                setDialogState,
+              ),
             ),
           ),
         ],
@@ -2797,30 +3060,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Text(l10n.googleAIStudioStep1),
             InkWell(
-              onTap: () =>
-                  launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
+              onTap: () => launchUrl(
+                Uri.parse('https://aistudio.google.com/app/apikey'),
+              ),
               child: Text(
                 'https://aistudio.google.com/app/apikey',
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Text(l10n.googleAIStudioStep2),
             Text(l10n.googleAIStudioStep3),
             Text(l10n.googleAIStudioStep4),
             InkWell(
-              onTap: () =>
-                  launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
+              onTap: () => launchUrl(
+                Uri.parse('https://www.merge.dev/blog/gemini-api-key'),
+              ),
               child: Text(
                 l10n.seeGuide,
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -2831,7 +3096,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Text(l10n.viewModelsRateLimits),
             InkWell(
-              onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
+              onTap: () => launchUrl(
+                Uri.parse(
+                  'https://ai.google.dev/gemini-api/docs/models/gemini',
+                ),
+              ),
               child: Text(
                 'ai.google.dev/gemini-api/docs/models/gemini',
                 style: TextStyle(
@@ -2842,7 +3111,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             InkWell(
-              onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
+              onTap: () => launchUrl(
+                Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits'),
+              ),
               child: Text(
                 l10n.rateLimits,
                 style: TextStyle(
@@ -2858,7 +3129,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildOpenAISettings([StateSetter? setDialogState, bool? forTextUseCase]) {
+  Widget _buildOpenAISettings([
+    StateSetter? setDialogState,
+    bool? forTextUseCase,
+  ]) {
     final l10n = AppLocalizations.of(context)!;
 
     // When called from the text/image provider section, only show the model
@@ -2879,7 +3153,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 4),
             _buildModelRateLimitsLink(
               modelsUrl: 'https://platform.openai.com/docs/models',
-              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+              rateLimitsUrl:
+                  'https://platform.openai.com/docs/guides/rate-limits',
             ),
             const SizedBox(height: 12),
           ],
@@ -2895,7 +3170,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 4),
             _buildModelRateLimitsLink(
               modelsUrl: 'https://platform.openai.com/docs/models',
-              rateLimitsUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+              rateLimitsUrl:
+                  'https://platform.openai.com/docs/guides/rate-limits',
             ),
             const SizedBox(height: 12),
           ],
@@ -2921,10 +3197,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.green.withOpacity(0.3),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.green.withOpacity(0.3), width: 1),
           ),
           child: Row(
             children: [
@@ -2997,12 +3270,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: OutlinedButton.icon(
-              icon: Icon(Icons.clear, size: 18,
-                  color: Theme.of(context).colorScheme.error),
-              label: Text(l10n.clearKey,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              icon: Icon(
+                Icons.clear,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              label: Text(
+                l10n.clearKey,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               onPressed: () => _clearApiKey(
-                  context, 'openAIApiKey', l10n.openAIApiKeyLabel, setDialogState),
+                context,
+                'openAIApiKey',
+                l10n.openAIApiKeyLabel,
+                setDialogState,
+              ),
             ),
           ),
         ],
@@ -3044,14 +3326,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(l10n.openAIStep2),
             Text(l10n.openAIStep3),
             InkWell(
-              onTap: () =>
-                  launchUrl(Uri.parse('https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
+              onTap: () => launchUrl(
+                Uri.parse(
+                  'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327',
+                ),
+              ),
               child: Text(
                 l10n.seeGuide,
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold),
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -3062,7 +3348,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Text(l10n.viewModelsUsageLimits),
             InkWell(
-              onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
+              onTap: () => launchUrl(
+                Uri.parse('https://platform.openai.com/docs/models'),
+              ),
               child: Text(
                 'platform.openai.com/docs/models',
                 style: TextStyle(
@@ -3073,7 +3361,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             InkWell(
-              onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
+              onTap: () => launchUrl(
+                Uri.parse(
+                  'https://platform.openai.com/docs/guides/rate-limits',
+                ),
+              ),
               child: Text(
                 l10n.rateLimits,
                 style: TextStyle(
@@ -3089,13 +3381,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGroqSettings([StateSetter? setDialogState, bool? forTextUseCase]) {
+  Widget _buildGroqSettings([
+    StateSetter? setDialogState,
+    bool? forTextUseCase,
+  ]) {
     final l10n = AppLocalizations.of(context)!;
     // When used in a sub-section, check the per-use-case free key toggle.
     // When freeAiEnabled is false, treat free key as OFF.
-    final usingFreeKey = RemoteConfigService.freeAiEnabled && (forTextUseCase == true
-        ? _useDevGroqKeyForText
-        : forTextUseCase == false
+    final usingFreeKey =
+        RemoteConfigService.freeAiEnabled &&
+        (forTextUseCase == true
+            ? _useDevGroqKeyForText
+            : forTextUseCase == false
             ? _useDevGroqKeyForImage
             : false); // legacy combined view always shows API key field
 
@@ -3112,7 +3409,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               decoration: InputDecoration(
                 labelText: l10n.groqTextModel,
                 border: const OutlineInputBorder(),
-                helperText: usingFreeKey ? l10n.fixedWhenUsingFreeProvider : null,
+                helperText: usingFreeKey
+                    ? l10n.fixedWhenUsingFreeProvider
+                    : null,
               ),
             ),
             const SizedBox(height: 4),
@@ -3164,10 +3463,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.orange.withOpacity(0.3),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.orange.withOpacity(0.3), width: 1),
           ),
           child: Row(
             children: [
@@ -3244,12 +3540,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: OutlinedButton.icon(
-              icon: Icon(Icons.clear, size: 18,
-                  color: Theme.of(context).colorScheme.error),
-              label: Text(l10n.clearKey,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              icon: Icon(
+                Icons.clear,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              label: Text(
+                l10n.clearKey,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               onPressed: () => _clearApiKey(
-                  context, 'groqApiKey', l10n.groqApiKeyLabel, setDialogState),
+                context,
+                'groqApiKey',
+                l10n.groqApiKeyLabel,
+                setDialogState,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -3289,24 +3594,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Text(
                   'https://console.groq.com/keys',
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Text(l10n.groqCloudStep2),
               Text(l10n.groqCloudStep3),
               Text(l10n.groqCloudStep4),
               InkWell(
-                onTap: () =>
-                    launchUrl(Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
+                onTap: () => launchUrl(
+                  Uri.parse(
+                    'https://docs.aicontentlabs.com/articles/groq-api-key/',
+                  ),
+                ),
                 child: Text(
                   l10n.seeGuide,
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                      fontWeight: FontWeight.bold),
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -3317,7 +3626,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               Text(l10n.viewModelsRateLimits),
               InkWell(
-                onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
+                onTap: () => launchUrl(
+                  Uri.parse('https://console.groq.com/docs/models'),
+                ),
                 child: Text(
                   'console.groq.com/docs/models',
                   style: TextStyle(
@@ -3328,7 +3639,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
+                onTap: () => launchUrl(
+                  Uri.parse('https://console.groq.com/docs/rate-limits'),
+                ),
                 child: Text(
                   l10n.rateLimits,
                   style: TextStyle(
@@ -3340,7 +3653,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ],
           ),
-        ], // end if (!usingFreeKey)
+        ],
+        // end if (!usingFreeKey)
       ],
     );
   }
@@ -3358,29 +3672,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Section header
-            Row(children: [
-              Icon(Icons.key, size: 20, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                l10n.apiKeys,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-            ]),
+            Row(
+              children: [
+                Icon(
+                  Icons.key,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.apiKeys,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text(
               l10n.apiKeysDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
 
             // ── Google Gemini ──────────────────────────────────────────────
             Theme(
-              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
                   width: 30,
@@ -3390,18 +3712,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Colors.blue.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: Colors.blue,
+                    size: 18,
+                  ),
                 ),
-                title: Text('Google Gemini',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        )),
+                title: Text(
+                  'Google Gemini',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
                 subtitle: Text(
                   l10n.geminiDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 trailing: Icon(
                   _geminiApiKeyController.text.isNotEmpty
@@ -3426,12 +3754,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isGeminiApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                          _isGeminiApiKeyVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
                           final v = !_isGeminiApiKeyVisible;
                           setState(() => _isGeminiApiKeyVisible = v);
-                          setDialogState?.call(() => _isGeminiApiKeyVisible = v);
+                          setDialogState?.call(
+                            () => _isGeminiApiKeyVisible = v,
+                          );
                         },
                       ),
                     ),
@@ -3442,14 +3774,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       if (_geminiApiKeyController.text.isNotEmpty)
                         OutlinedButton.icon(
-                          icon: Icon(Icons.clear, size: 18,
-                              color: Theme.of(context).colorScheme.error),
-                          label: Text(l10n.clear,
-                              style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error)),
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          label: Text(
+                            l10n.clear,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
                           onPressed: () => _clearApiKey(
-                              context, 'geminiApiKey', l10n.googleAIApiKey,
-                              setDialogState),
+                            context,
+                            'geminiApiKey',
+                            l10n.googleAIApiKey,
+                            setDialogState,
+                          ),
                         ),
                       if (_geminiApiKeyController.text.isNotEmpty &&
                           _geminiApiKeyController.text !=
@@ -3460,7 +3801,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: const Icon(Icons.save, size: 18),
                           label: Text(l10n.saveKey),
-                          onPressed: () => _saveApiKeys(context, setDialogState),
+                          onPressed: () =>
+                              _saveApiKeys(context, setDialogState),
                         ),
                     ],
                   ),
@@ -3469,23 +3811,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.googleAIStudioStep1),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
-                        child: Text('https://aistudio.google.com/app/apikey',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse('https://aistudio.google.com/app/apikey'),
+                        ),
+                        child: Text(
+                          'https://aistudio.google.com/app/apikey',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       Text(l10n.googleAIStudioStep2),
                       Text(l10n.googleAIStudioStep3),
                       Text(l10n.googleAIStudioStep4),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://www.merge.dev/blog/gemini-api-key')),
-                        child: Text(l10n.seeGuide,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://www.merge.dev/blog/gemini-api-key',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.seeGuide,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3494,20 +3848,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.viewModelsRateLimits),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/models/gemini')),
-                        child: Text('ai.google.dev/gemini-api/docs/models/gemini',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://ai.google.dev/gemini-api/docs/models/gemini',
+                          ),
+                        ),
+                        child: Text(
+                          'ai.google.dev/gemini-api/docs/models/gemini',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://ai.google.dev/gemini-api/docs/rate-limits')),
-                        child: Text(l10n.rateLimits,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://ai.google.dev/gemini-api/docs/rate-limits',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.rateLimits,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3519,7 +3887,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
             // ── Groq ──────────────────────────────────────────────────────
             Theme(
-              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
                   width: 30,
@@ -3529,42 +3899,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Colors.orange.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.flash_on, color: Colors.orange, size: 18),
+                  child: const Icon(
+                    Icons.flash_on,
+                    color: Colors.orange,
+                    size: 18,
+                  ),
                 ),
-                title: Text('Groq',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        )),
+                title: Text(
+                  'Groq',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
                 subtitle: Text(
                   l10n.groqDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-                trailing: Builder(builder: (context) {
-                  final usingFreeAi = RemoteConfigService.freeAiEnabled && (_useDevGroqKeyForText || _useDevGroqKeyForImage);
-                  final hasKey = _groqApiKeyController.text.isNotEmpty;
-                  return Icon(
-                    usingFreeAi
-                        ? Icons.bolt
-                        : hasKey
-                            ? Icons.check_circle_outline
-                            : Icons.warning_amber_rounded,
-                    color: usingFreeAi
-                        ? Colors.amber.shade700
-                        : hasKey
-                            ? Colors.green.shade600
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                    size: 18,
-                  );
-                }),
+                trailing: Builder(
+                  builder: (context) {
+                    final usingFreeAi =
+                        RemoteConfigService.freeAiEnabled &&
+                        (_useDevGroqKeyForText || _useDevGroqKeyForImage);
+                    final hasKey = _groqApiKeyController.text.isNotEmpty;
+                    return Icon(
+                      usingFreeAi
+                          ? Icons.bolt
+                          : hasKey
+                          ? Icons.check_circle_outline
+                          : Icons.warning_amber_rounded,
+                      color: usingFreeAi
+                          ? Colors.amber.shade700
+                          : hasKey
+                          ? Colors.green.shade600
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 18,
+                    );
+                  },
+                ),
                 initiallyExpanded: false,
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 children: [
                   // Show the API key field only when at least one operation needs a user key
-                  if (!_useDevGroqKeyForText || !_useDevGroqKeyForImage || !RemoteConfigService.freeAiEnabled) ...[
+                  if (!_useDevGroqKeyForText ||
+                      !_useDevGroqKeyForImage ||
+                      !RemoteConfigService.freeAiEnabled) ...[
                     TextField(
                       controller: _groqApiKeyController,
                       obscureText: !_isGroqApiKeyVisible,
@@ -3575,12 +3957,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                            _isGroqApiKeyVisible
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                           onPressed: () {
                             final v = !_isGroqApiKeyVisible;
                             setState(() => _isGroqApiKeyVisible = v);
-                            setDialogState?.call(() => _isGroqApiKeyVisible = v);
+                            setDialogState?.call(
+                              () => _isGroqApiKeyVisible = v,
+                            );
                           },
                         ),
                       ),
@@ -3591,14 +3977,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         if (_groqApiKeyController.text.isNotEmpty)
                           OutlinedButton.icon(
-                            icon: Icon(Icons.clear, size: 18,
-                                color: Theme.of(context).colorScheme.error),
-                            label: Text(l10n.clear,
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error)),
+                            icon: Icon(
+                              Icons.clear,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            label: Text(
+                              l10n.clear,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
                             onPressed: () => _clearApiKey(
-                                context, 'groqApiKey', l10n.groqApiKeyLabel,
-                                setDialogState),
+                              context,
+                              'groqApiKey',
+                              l10n.groqApiKeyLabel,
+                              setDialogState,
+                            ),
                           ),
                         if (_groqApiKeyController.text.isNotEmpty &&
                             _groqApiKeyController.text !=
@@ -3609,7 +4004,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           OutlinedButton.icon(
                             icon: const Icon(Icons.save, size: 18),
                             label: Text(l10n.saveKey),
-                            onPressed: () => _saveApiKeys(context, setDialogState),
+                            onPressed: () =>
+                                _saveApiKeys(context, setDialogState),
                           ),
                       ],
                     ),
@@ -3619,24 +4015,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.groqCloudStep1),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/keys')),
-                        child: Text('https://console.groq.com/keys',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse('https://console.groq.com/keys'),
+                        ),
+                        child: Text(
+                          'https://console.groq.com/keys',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       Text(l10n.groqCloudStep2),
                       Text(l10n.groqCloudStep3),
                       Text(l10n.groqCloudStep4),
                       InkWell(
                         onTap: () => launchUrl(
-                            Uri.parse('https://docs.aicontentlabs.com/articles/groq-api-key/')),
-                        child: Text(l10n.seeGuide,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                          Uri.parse(
+                            'https://docs.aicontentlabs.com/articles/groq-api-key/',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.seeGuide,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3645,20 +4052,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.viewModelsRateLimits),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/models')),
-                        child: Text('console.groq.com/docs/models',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse('https://console.groq.com/docs/models'),
+                        ),
+                        child: Text(
+                          'console.groq.com/docs/models',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://console.groq.com/docs/rate-limits')),
-                        child: Text(l10n.rateLimits,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://console.groq.com/docs/rate-limits',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.rateLimits,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3670,7 +4089,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
             // ── OpenAI ────────────────────────────────────────────────────
             Theme(
-              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 leading: Container(
                   width: 30,
@@ -3680,18 +4101,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Colors.green.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.psychology, color: Colors.green, size: 18),
+                  child: const Icon(
+                    Icons.psychology,
+                    color: Colors.green,
+                    size: 18,
+                  ),
                 ),
-                title: Text('OpenAI',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        )),
+                title: Text(
+                  'OpenAI',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
                 subtitle: Text(
                   l10n.openAIDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 trailing: Icon(
                   _openAIApiKeyController.text.isNotEmpty
@@ -3716,12 +4143,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isOpenAIApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                          _isOpenAIApiKeyVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
                           final v = !_isOpenAIApiKeyVisible;
                           setState(() => _isOpenAIApiKeyVisible = v);
-                          setDialogState?.call(() => _isOpenAIApiKeyVisible = v);
+                          setDialogState?.call(
+                            () => _isOpenAIApiKeyVisible = v,
+                          );
                         },
                       ),
                     ),
@@ -3732,14 +4163,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       if (_openAIApiKeyController.text.isNotEmpty)
                         OutlinedButton.icon(
-                          icon: Icon(Icons.clear, size: 18,
-                              color: Theme.of(context).colorScheme.error),
-                          label: Text(l10n.clear,
-                              style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error)),
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          label: Text(
+                            l10n.clear,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
                           onPressed: () => _clearApiKey(
-                              context, 'openAIApiKey', l10n.openAIApiKeyLabel,
-                              setDialogState),
+                            context,
+                            'openAIApiKey',
+                            l10n.openAIApiKeyLabel,
+                            setDialogState,
+                          ),
                         ),
                       if (_openAIApiKeyController.text.isNotEmpty &&
                           _openAIApiKeyController.text !=
@@ -3750,7 +4190,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: const Icon(Icons.save, size: 18),
                           label: Text(l10n.saveKey),
-                          onPressed: () => _saveApiKeys(context, setDialogState),
+                          onPressed: () =>
+                              _saveApiKeys(context, setDialogState),
                         ),
                     ],
                   ),
@@ -3759,23 +4200,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.openAIStep1),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/api-keys')),
-                        child: Text('https://platform.openai.com/api-keys',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse('https://platform.openai.com/api-keys'),
+                        ),
+                        child: Text(
+                          'https://platform.openai.com/api-keys',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       Text(l10n.openAIStep2),
                       Text(l10n.openAIStep3),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse(
-                            'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327')),
-                        child: Text(l10n.seeGuide,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.seeGuide,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3784,20 +4236,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(l10n.viewModelsUsageLimits),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/models')),
-                        child: Text('platform.openai.com/docs/models',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse('https://platform.openai.com/docs/models'),
+                        ),
+                        child: Text(
+                          'platform.openai.com/docs/models',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       InkWell(
-                        onTap: () => launchUrl(Uri.parse('https://platform.openai.com/docs/guides/rate-limits')),
-                        child: Text(l10n.rateLimits,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.bold)),
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://platform.openai.com/docs/guides/rate-limits',
+                          ),
+                        ),
+                        child: Text(
+                          l10n.rateLimits,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -3809,7 +4273,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
-
 
   /// Modern inline toggle tile for the "Use Free Provider" dev key option.
   Widget _buildDevKeyToggle({
@@ -3844,19 +4307,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: value ? scheme.primary : scheme.onSurface,
-              ),
+            fontWeight: FontWeight.w600,
+            color: value ? scheme.primary : scheme.onSurface,
+          ),
         ),
         subtitle: Text(
           onChanged == null
               ? l10n.freeAIUnavailable
-              : value ? l10n.usingFreeProvider : l10n.useYourOwnKey,
+              : value
+              ? l10n.usingFreeProvider
+              : l10n.useYourOwnKey,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: value
-                    ? scheme.primary.withOpacity(0.8)
-                    : scheme.onSurfaceVariant,
-              ),
+            color: value
+                ? scheme.primary.withOpacity(0.8)
+                : scheme.onSurfaceVariant,
+          ),
         ),
         value: value,
         onChanged: onChanged,
@@ -3877,18 +4342,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Expanded(
             child: FilledButton.tonalIcon(
               onPressed: () => launchUrl(Uri.parse(modelsUrl)),
-              icon: Icon(Icons.auto_awesome_outlined,
-                  size: 16, color: cs.onSecondaryContainer),
-              label: Text(l10n.modelsButton,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSecondaryContainer)),
+              icon: Icon(
+                Icons.auto_awesome_outlined,
+                size: 16,
+                color: cs.onSecondaryContainer,
+              ),
+              label: Text(
+                l10n.modelsButton,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSecondaryContainer,
+                ),
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: cs.secondaryContainer,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
@@ -3896,18 +4368,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Expanded(
             child: FilledButton.tonalIcon(
               onPressed: () => launchUrl(Uri.parse(rateLimitsUrl)),
-              icon: Icon(Icons.speed_outlined,
-                  size: 16, color: cs.onTertiaryContainer),
-              label: Text(l10n.rateLimits,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onTertiaryContainer)),
+              icon: Icon(
+                Icons.speed_outlined,
+                size: 16,
+                color: cs.onTertiaryContainer,
+              ),
+              label: Text(
+                l10n.rateLimits,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onTertiaryContainer,
+                ),
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: cs.tertiaryContainer,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
@@ -3916,18 +4395,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildApiKeyGuide(
-      {required String title, required List<Widget> children}) {
+  Widget _buildApiKeyGuide({
+    required String title,
+    required List<Widget> children,
+  }) {
     return ExpansionTile(
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       children: children.map((child) {
         return Padding(
           padding: const EdgeInsets.only(
-              left: 16.0, top: 4.0, bottom: 4.0, right: 16.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: child,
+            left: 16.0,
+            top: 4.0,
+            bottom: 4.0,
+            right: 16.0,
           ),
+          child: Align(alignment: Alignment.centerLeft, child: child),
         );
       }).toList(),
     );
@@ -3935,11 +4417,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String _getLanguageDisplayName(String? localeCode) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (localeCode == null) {
       return l10n.languageSystemDefault;
     }
-    
+
     switch (localeCode) {
       case 'en':
         return l10n.languageEnglish;
@@ -3977,10 +4459,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return _localeToLanguageMap[localeCode]; // null for unrecognized codes
   }
 
-  void _applyLocaleChange(String? newLocale, String oldLocale, [StateSetter? parentSetDialogState]) {
+  void _applyLocaleChange(
+    String? newLocale,
+    String oldLocale, [
+    StateSetter? parentSetDialogState,
+  ]) {
     ref.read(appSettingsProvider.notifier).setLocale(newLocale);
     // Sync AI response language to match the new app locale
-    ref.read(appSettingsProvider.notifier).setAiResponseLanguage(_localeToAiLanguage(newLocale));
+    ref
+        .read(appSettingsProvider.notifier)
+        .setAiResponseLanguage(_localeToAiLanguage(newLocale));
     CrashlyticsService.setLocale(newLocale);
     AnalyticsService.logSettingsChange(
       settingName: 'language',
@@ -3996,7 +4484,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showLanguageDialog([StateSetter? parentSetDialogState]) {
     final l10n = AppLocalizations.of(context)!;
     final appSettings = ref.read(appSettingsProvider);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -4009,7 +4497,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: null,
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
+                _applyLocaleChange(
+                  value,
+                  appSettings.localeCode ?? 'system',
+                  parentSetDialogState,
+                );
               },
             ),
             RadioListTile<String?>(
@@ -4017,7 +4509,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'en',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
+                _applyLocaleChange(
+                  value,
+                  appSettings.localeCode ?? 'system',
+                  parentSetDialogState,
+                );
               },
             ),
             RadioListTile<String?>(
@@ -4025,7 +4521,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'es',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
+                _applyLocaleChange(
+                  value,
+                  appSettings.localeCode ?? 'system',
+                  parentSetDialogState,
+                );
               },
             ),
             RadioListTile<String?>(
@@ -4033,7 +4533,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'fr',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
+                _applyLocaleChange(
+                  value,
+                  appSettings.localeCode ?? 'system',
+                  parentSetDialogState,
+                );
               },
             ),
             RadioListTile<String?>(
@@ -4041,7 +4545,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: 'de',
               groupValue: appSettings.localeCode,
               onChanged: (value) {
-                _applyLocaleChange(value, appSettings.localeCode ?? 'system', parentSetDialogState);
+                _applyLocaleChange(
+                  value,
+                  appSettings.localeCode ?? 'system',
+                  parentSetDialogState,
+                );
               },
             ),
           ],
@@ -4067,19 +4575,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// Falls back to the raw [lang] value for custom languages.
   static String _localizedLanguageName(String lang, AppLocalizations l10n) {
     switch (lang) {
-      case 'English': return l10n.aiResponseLanguageNameEnglish;
-      case 'German': return l10n.aiResponseLanguageNameGerman;
-      case 'Spanish': return l10n.aiResponseLanguageNameSpanish;
-      case 'French': return l10n.aiResponseLanguageNameFrench;
-      case 'Portuguese': return l10n.aiResponseLanguageNamePortuguese;
-      case 'Italian': return l10n.aiResponseLanguageNameItalian;
-      case 'Japanese': return l10n.aiResponseLanguageNameJapanese;
-      case 'Chinese': return l10n.aiResponseLanguageNameChinese;
-      case 'Korean': return l10n.aiResponseLanguageNameKorean;
-      case 'Dutch': return l10n.aiResponseLanguageNameDutch;
-      case 'Russian': return l10n.aiResponseLanguageNameRussian;
-      case 'Arabic': return l10n.aiResponseLanguageNameArabic;
-      default: return lang;
+      case 'English':
+        return l10n.aiResponseLanguageNameEnglish;
+      case 'German':
+        return l10n.aiResponseLanguageNameGerman;
+      case 'Spanish':
+        return l10n.aiResponseLanguageNameSpanish;
+      case 'French':
+        return l10n.aiResponseLanguageNameFrench;
+      case 'Portuguese':
+        return l10n.aiResponseLanguageNamePortuguese;
+      case 'Italian':
+        return l10n.aiResponseLanguageNameItalian;
+      case 'Japanese':
+        return l10n.aiResponseLanguageNameJapanese;
+      case 'Chinese':
+        return l10n.aiResponseLanguageNameChinese;
+      case 'Korean':
+        return l10n.aiResponseLanguageNameKorean;
+      case 'Dutch':
+        return l10n.aiResponseLanguageNameDutch;
+      case 'Russian':
+        return l10n.aiResponseLanguageNameRussian;
+      case 'Arabic':
+        return l10n.aiResponseLanguageNameArabic;
+      default:
+        return lang;
     }
   }
 
@@ -4107,10 +4628,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     // Determine initial dropdown value.
     // Use the special sentinel 'custom' when the stored value is not in presets.
-    final isCustom = appSettings.aiResponseLanguage != null &&
+    final isCustom =
+        appSettings.aiResponseLanguage != null &&
         appSettings.aiResponseLanguage!.isNotEmpty &&
         !presets.contains(appSettings.aiResponseLanguage);
-    String? selectedPreset = isCustom ? 'custom' : appSettings.aiResponseLanguage;
+    String? selectedPreset = isCustom
+        ? 'custom'
+        : appSettings.aiResponseLanguage;
     final customController = TextEditingController(
       text: isCustom ? appSettings.aiResponseLanguage : '',
     );
@@ -4120,7 +4644,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           void applyChange(String? newValue) {
-            ref.read(appSettingsProvider.notifier).setAiResponseLanguage(newValue);
+            ref
+                .read(appSettingsProvider.notifier)
+                .setAiResponseLanguage(newValue);
             // Sync app locale when the selected AI language is null (follow app)
             // or maps to one of the 4 supported locale codes.
             if (newValue == null) {
@@ -4155,7 +4681,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: selectedPreset,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     items: [
                       DropdownMenuItem<String?>(
@@ -4166,8 +4695,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         value: '',
                         child: Text(l10n.aiResponseLanguageNone),
                       ),
-                      ...presets.whereType<String>().where((p) => p.isNotEmpty).map(
-                            (lang) => DropdownMenuItem<String?>(value: lang, child: Text(_localizedLanguageName(lang, l10n))),
+                      ...presets
+                          .whereType<String>()
+                          .where((p) => p.isNotEmpty)
+                          .map(
+                            (lang) => DropdownMenuItem<String?>(
+                              value: lang,
+                              child: Text(_localizedLanguageName(lang, l10n)),
+                            ),
                           ),
                       DropdownMenuItem<String?>(
                         value: 'custom',
@@ -4219,10 +4754,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.chat_bubble_outline, size: 36),
         iconColor: Colors.orange.shade700,
-        title: Text(
-          l10n.contactUs,
-          textAlign: TextAlign.center,
-        ),
+        title: Text(l10n.contactUs, textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -4259,7 +4791,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Navigator.of(ctx).pop();
                 launchUrl(
                   Uri.parse(
-                      'https://github.com/TheRealFalseReality/Aquarium-AI/issues'),
+                    'https://github.com/TheRealFalseReality/Aquarium-AI/issues',
+                  ),
                   mode: LaunchMode.externalApplication,
                 ).catchError((e) {
                   debugPrint('Could not open GitHub issues: $e');
@@ -4337,5 +4870,4 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
-
 }

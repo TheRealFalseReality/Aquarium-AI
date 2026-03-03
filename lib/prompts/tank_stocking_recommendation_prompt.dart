@@ -1,19 +1,22 @@
 import 'dart:convert';
+
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
 
 String buildTankStockingRecommendationPrompt(
-    Tank tank,
-    List<Fish> allFish,
-    List<Fish> existingFish,
-    double currentHarmonyScore, {
-    String additionalNotes = '',
-  }) {
+  Tank tank,
+  List<Fish> allFish,
+  List<Fish> existingFish,
+  double currentHarmonyScore, {
+  String additionalNotes = '',
+}) {
   final availableFishNames = allFish.map((f) => f.name).toList();
 
   final existingFishNames = existingFish.map((f) => f.name).toList();
   final tankSizeText = _formatTankSize(tank);
-  final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(1);
+  final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(
+    1,
+  );
 
   // Build species tags info from inhabitants' selected species tags
   String speciesTagsInfo = '';
@@ -24,7 +27,8 @@ String buildTankStockingRecommendationPrompt(
     }
   }
   if (speciesTagsMap.isNotEmpty) {
-    speciesTagsInfo = '''
+    speciesTagsInfo =
+        '''
 
     Species Tags (user-specified species for each fish type):
     ${json.encode(speciesTagsMap)}
@@ -34,7 +38,8 @@ String buildTankStockingRecommendationPrompt(
   // Build additional notes section if provided
   String additionalNotesSection = '';
   if (additionalNotes.isNotEmpty) {
-    additionalNotesSection = '''
+    additionalNotesSection =
+        '''
 
     User's Additional Requests/Preferences:
     "$additionalNotes"

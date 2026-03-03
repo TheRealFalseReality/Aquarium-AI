@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
-import '../services/analytics_service.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
   const TankVolumeCalculator({super.key});
@@ -59,11 +61,11 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
   void _showDimensionImage(BuildContext context, String imagePath) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkTheme 
+    final backgroundColor = isDarkTheme
         ? Colors.black.withOpacity(0.95)
         : Colors.white.withOpacity(0.95);
     final iconColor = isDarkTheme ? Colors.white : Colors.black;
-    
+
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -82,7 +84,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                         padding: const EdgeInsets.all(16),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isDarkTheme 
+                            color: isDarkTheme
                                 ? Colors.white.withOpacity(0.9)
                                 : Colors.grey[100],
                             borderRadius: BorderRadius.circular(16),
@@ -103,7 +105,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                                 width: 300,
                                 height: 300,
                                 decoration: BoxDecoration(
-                                  color: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+                                  color: isDarkTheme
+                                      ? Colors.grey[800]
+                                      : Colors.grey[200],
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Column(
@@ -112,13 +116,17 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                                     Icon(
                                       Icons.broken_image_outlined,
                                       size: 64,
-                                      color: isDarkTheme ? Colors.grey[400] : Colors.grey[600],
+                                      color: isDarkTheme
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
                                       'Image not available',
                                       style: TextStyle(
-                                        color: isDarkTheme ? Colors.grey[400] : Colors.grey[600],
+                                        color: isDarkTheme
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600],
                                         fontSize: 16,
                                       ),
                                     ),
@@ -126,7 +134,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                                     Text(
                                       'Path: $imagePath',
                                       style: TextStyle(
-                                        color: isDarkTheme ? Colors.grey[600] : Colors.grey[500],
+                                        color: isDarkTheme
+                                            ? Colors.grey[600]
+                                            : Colors.grey[500],
                                         fontSize: 12,
                                       ),
                                       textAlign: TextAlign.center,
@@ -153,7 +163,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -178,7 +188,10 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
         'shape': _shape,
         'units': _units,
         'cylinder_type': _cylinderType,
-        'has_dimensions': (length > 0 || width > 0 || height > 0 || diameter > 0 || edge > 0) ? 'true' : 'false',
+        'has_dimensions':
+            (length > 0 || width > 0 || height > 0 || diameter > 0 || edge > 0)
+            ? 'true'
+            : 'false',
       },
     );
 
@@ -268,9 +281,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           Text(
             l10n.tankVolumeCalculator,
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             textAlign: TextAlign.center,
           ),
           _buildSectionTitle(context, l10n.shape),
@@ -305,33 +318,37 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           if (_shape == 'Cylinder') ...[
             const SizedBox(height: 16),
             _buildSectionTitle(context, l10n.cylinderType),
-            Builder(builder: (context) {
-              final cylinderTypeLabels = {
-                'Full': l10n.cylinderFull,
-                'Half': l10n.cylinderHalf,
-                'Corner': l10n.cylinderCorner,
-              };
-              return Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12.0,
-                runSpacing: 10.0,
-                children: ['Full', 'Half', 'Corner'].map((typeName) {
-                  final selected = _cylinderType == typeName;
-                  return ModernSelectableChip(
-                    label: cylinderTypeLabels[typeName]!,
-                    selected: selected,
-                    dense: true,
-                    selectedColor: Theme.of(context).colorScheme.tertiary,
-                    selectedTextColor: Theme.of(context).colorScheme.onTertiary,
-                    onTap: () {
-                      setState(() {
-                        _cylinderType = typeName;
-                      });
-                    },
-                  );
-                }).toList(),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final cylinderTypeLabels = {
+                  'Full': l10n.cylinderFull,
+                  'Half': l10n.cylinderHalf,
+                  'Corner': l10n.cylinderCorner,
+                };
+                return Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12.0,
+                  runSpacing: 10.0,
+                  children: ['Full', 'Half', 'Corner'].map((typeName) {
+                    final selected = _cylinderType == typeName;
+                    return ModernSelectableChip(
+                      label: cylinderTypeLabels[typeName]!,
+                      selected: selected,
+                      dense: true,
+                      selectedColor: Theme.of(context).colorScheme.tertiary,
+                      selectedTextColor: Theme.of(
+                        context,
+                      ).colorScheme.onTertiary,
+                      onTap: () {
+                        setState(() {
+                          _cylinderType = typeName;
+                        });
+                      },
+                    );
+                  }).toList(),
+                );
+              },
+            ),
           ],
           const SizedBox(height: 12),
           _buildSectionTitle(context, l10n.units),
@@ -368,7 +385,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             elevation: 4,
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0, vertical: 22.0),
+                horizontal: 16.0,
+                vertical: 22.0,
+              ),
               child: _renderInputs(),
             ),
           ),
@@ -380,12 +399,15 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                 onPressed: _calculateVolume,
                 icon: const Icon(Icons.calculate_outlined),
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 18,
+                    horizontal: 28,
+                  ),
                   textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.4),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.4,
+                  ),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -394,7 +416,10 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
               if (shapeDimensionImages.containsKey(_shape)) ...[
                 const SizedBox(width: 16),
                 GestureDetector(
-                  onTap: () => _showDimensionImage(context, shapeDimensionImages[_shape]!),
+                  onTap: () => _showDimensionImage(
+                    context,
+                    shapeDimensionImages[_shape]!,
+                  ),
                   child: Tooltip(
                     message: 'View $_shape dimensions',
                     child: Container(
@@ -403,7 +428,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.6),
                           width: 2,
                         ),
                         boxShadow: [
@@ -418,7 +445,8 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white.withOpacity(0.9)
                                 : Colors.grey[100],
                           ),
@@ -436,12 +464,16 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                                       width: 42,
                                       height: 42,
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.surfaceVariant,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceVariant,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
                                         Icons.image_outlined,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                         size: 20,
                                       ),
                                     );
@@ -454,13 +486,17 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
                                 child: Container(
                                   padding: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.8),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Icon(
                                     Icons.zoom_in,
                                     size: 12,
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
@@ -522,10 +558,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       runSpacing: 16.0,
       alignment: WrapAlignment.center,
       children: fields.map((field) {
-        return SizedBox(
-          width: 190,
-          child: field,
-        );
+        return SizedBox(width: 190, child: field);
       }).toList(),
     );
   }
@@ -547,9 +580,9 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
-            ),
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
+        ),
         textAlign: TextAlign.center,
       ),
     );
@@ -583,30 +616,36 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   }
 
   Widget _buildResultColumn(
-      String label, String value1, String value2, Color color) {
+    String label,
+    String value1,
+    String value2,
+    Color color,
+  ) {
     return Flexible(
       child: Column(
         children: [
-          Text(label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Text(
             value1,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
           Text(
             value2,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ],

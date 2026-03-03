@@ -1,18 +1,25 @@
-String buildFishCompatibilityPrompt(String category, List<String> fishNames, double harmonyScore, {String? additionalNotes}) {
+String buildFishCompatibilityPrompt(
+  String category,
+  List<String> fishNames,
+  double harmonyScore, {
+  String? additionalNotes,
+}) {
   final fishList = fishNames.join(', ');
   final harmonyPercentage = (harmonyScore * 100).toStringAsFixed(0);
 
-  String prompt = '''
+  String prompt =
+      '''
       You are an aquarium expert. A user has selected a group of fish. Your task is to generate a tailored care guide and compatibility summary.
       Selected Fish: $fishList
       Fish Type: $category
       Group Harmony Score: $harmonyPercentage%''';
-  
+
   if (additionalNotes != null && additionalNotes.isNotEmpty) {
     prompt += '\n      Additional Context: $additionalNotes';
   }
-  
-  prompt += '''
+
+  prompt +=
+      '''
 
       Please provide a JSON object with the following:
       1. "harmonyLabel": "Based on the Group Harmony Score of $harmonyPercentage%, provide a one-word label (e.g., Excellent, Good, Fair, Poor).",
@@ -24,6 +31,6 @@ String buildFishCompatibilityPrompt(String category, List<String> fishNames, dou
       7. "tankMatesSummary": "A short summary of the best tank mates for the selected fish.",
       8. "compatibleFish": [{"name": "Fish Name 1"}, {"name": "Fish Name 2"}, {"name": "Fish Name 3"}] - Array of objects where each object has a 'name' property. List common fish names that are compatible with ALL selected fish. If the selected fish are community fish, include at least 10 compatible fish.
       ''';
-  
+
   return prompt;
 }

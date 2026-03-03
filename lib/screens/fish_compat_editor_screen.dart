@@ -35,26 +35,26 @@ class _FishEntry {
   });
 
   factory _FishEntry.fromJson(Map<String, dynamic> j) => _FishEntry(
-        name: j['name'] as String? ?? '',
-        imageURL: j['imageURL'] as String? ?? '',
-        commonNames: List<String>.from(j['commonNames'] ?? []),
-        reefSafe: j['reefSafe'] as String?,
-        compatible: List<String>.from(j['compatible'] ?? []),
-        notRecommended: List<String>.from(j['notRecommended'] ?? []),
-        notCompatible: List<String>.from(j['notCompatible'] ?? []),
-        withCaution: List<String>.from(j['withCaution'] ?? []),
-      );
+    name: j['name'] as String? ?? '',
+    imageURL: j['imageURL'] as String? ?? '',
+    commonNames: List<String>.from(j['commonNames'] ?? []),
+    reefSafe: j['reefSafe'] as String?,
+    compatible: List<String>.from(j['compatible'] ?? []),
+    notRecommended: List<String>.from(j['notRecommended'] ?? []),
+    notCompatible: List<String>.from(j['notCompatible'] ?? []),
+    withCaution: List<String>.from(j['withCaution'] ?? []),
+  );
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'commonNames': commonNames,
-        'imageURL': imageURL,
-        if (reefSafe != null) 'reefSafe': reefSafe,
-        'compatible': compatible,
-        'notRecommended': notRecommended,
-        'notCompatible': notCompatible,
-        'withCaution': withCaution,
-      };
+    'name': name,
+    'commonNames': commonNames,
+    'imageURL': imageURL,
+    if (reefSafe != null) 'reefSafe': reefSafe,
+    'compatible': compatible,
+    'notRecommended': notRecommended,
+    'notCompatible': notCompatible,
+    'withCaution': withCaution,
+  };
 
   _FishEntry copy() => _FishEntry.fromJson(toJson());
 }
@@ -96,10 +96,12 @@ List<String> _validateData(Map<String, List<_FishEntry>> data) {
 
         if (count == 0) {
           errors.add(
-              '$prefix: "$other" is missing from all compatibility sub-categories.');
+            '$prefix: "$other" is missing from all compatibility sub-categories.',
+          );
         } else if (count > 1) {
           errors.add(
-              '$prefix: "$other" appears in $count sub-categories (must be exactly 1).');
+            '$prefix: "$other" appears in $count sub-categories (must be exactly 1).',
+          );
         }
       }
     }
@@ -124,6 +126,7 @@ class FishCompatEditorScreen extends StatefulWidget {
 class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   // Working copy of loaded data
   Map<String, List<_FishEntry>> _data = {};
+
   // Last explicitly-saved snapshot (used for dirty tracking and undo)
   Map<String, List<_FishEntry>> _savedData = {};
   bool _isLoading = true;
@@ -148,7 +151,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     super.initState();
     _loadData();
     _searchCtrl.addListener(
-      () => setState(() => _searchQuery = _searchCtrl.text.trim().toLowerCase()),
+      () =>
+          setState(() => _searchQuery = _searchCtrl.text.trim().toLowerCase()),
     );
   }
 
@@ -191,8 +195,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   Future<void> _loadData() async {
     try {
-      final jsonString =
-          await rootBundle.loadString('assets/data/fishcompat.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/data/fishcompat.json',
+      );
       final raw = json.decode(jsonString) as Map<String, dynamic>;
       final result = <String, List<_FishEntry>>{};
       for (final category in ['freshwater', 'marine']) {
@@ -200,7 +205,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           final list = (raw[category] as List)
               .map((e) => _FishEntry.fromJson(e as Map<String, dynamic>))
               .toList();
-          list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          list.sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
           result[category] = list;
         }
       }
@@ -233,7 +240,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       builder: (_) => AlertDialog(
         title: const Text('Undo Changes'),
         content: const Text(
-            'Revert all unsaved changes to the last saved state?'),
+          'Revert all unsaved changes to the last saved state?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -262,7 +270,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       builder: (_) => AlertDialog(
         title: const Text('Unsaved Changes'),
         content: const Text(
-            'You have unsaved changes. Save or discard before leaving?'),
+          'You have unsaved changes. Save or discard before leaving?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'discard'),
@@ -311,8 +320,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 child: Text(
                   _validationErrors[i],
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontSize: 13),
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
@@ -340,16 +350,15 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           output[cat] = _data[cat]!.map((f) => f.toJson()).toList();
         }
       }
-      final jsonString =
-          const JsonEncoder.withIndent('  ').convert(output);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(output);
       final bytes = Uint8List.fromList(utf8.encode(jsonString));
       const fileName = 'fishcompat.json';
 
       if (kIsWeb) {
         downloadFile(bytes, fileName);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Download started.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Download started.')));
       } else {
         final path = await FilePicker.platform.saveFile(
           dialogTitle: 'Save fishcompat.json',
@@ -359,9 +368,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           bytes: bytes,
         );
         if (path != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Saved to $path')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Saved to $path')));
         }
       }
     } catch (e) {
@@ -413,23 +422,23 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   reefSafe: f.reefSafe,
                   compatible: inCompatible
                       ? f.compatible
-                          .map((n) => n == oldName ? updated.name : n)
-                          .toList()
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
                       : f.compatible,
                   notRecommended: inNotRecommended
                       ? f.notRecommended
-                          .map((n) => n == oldName ? updated.name : n)
-                          .toList()
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
                       : f.notRecommended,
                   notCompatible: inNotCompatible
                       ? f.notCompatible
-                          .map((n) => n == oldName ? updated.name : n)
-                          .toList()
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
                       : f.notCompatible,
                   withCaution: inWithCaution
                       ? f.withCaution
-                          .map((n) => n == oldName ? updated.name : n)
-                          .toList()
+                            .map((n) => n == oldName ? updated.name : n)
+                            .toList()
                       : f.withCaution,
                 );
                 // Mirror name change in _savedData so propagated fish
@@ -444,23 +453,23 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     reefSafe: sf.reefSafe,
                     compatible: inCompatible
                         ? sf.compatible
-                            .map((n) => n == oldName ? updated.name : n)
-                            .toList()
+                              .map((n) => n == oldName ? updated.name : n)
+                              .toList()
                         : sf.compatible,
                     notRecommended: inNotRecommended
                         ? sf.notRecommended
-                            .map((n) => n == oldName ? updated.name : n)
-                            .toList()
+                              .map((n) => n == oldName ? updated.name : n)
+                              .toList()
                         : sf.notRecommended,
                     notCompatible: inNotCompatible
                         ? sf.notCompatible
-                            .map((n) => n == oldName ? updated.name : n)
-                            .toList()
+                              .map((n) => n == oldName ? updated.name : n)
+                              .toList()
                         : sf.notCompatible,
                     withCaution: inWithCaution
                         ? sf.withCaution
-                            .map((n) => n == oldName ? updated.name : n)
-                            .toList()
+                              .map((n) => n == oldName ? updated.name : n)
+                              .toList()
                         : sf.withCaution,
                   );
                 }
@@ -518,8 +527,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           setState(() {
             final categoryFish = _data[category]!;
             // All existing fish names default to notCompatible with the new fish
-            final existingNames =
-                categoryFish.map((f) => f.name).toList();
+            final existingNames = categoryFish.map((f) => f.name).toList();
             final newEntry = _FishEntry(
               name: newFish.name,
               imageURL: newFish.imageURL,
@@ -586,9 +594,15 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               // _propagateCompatChange uses a "remove-from-all / add-to-one"
               // pattern so any previous entry in the complementary fish is
               // cleaned up automatically.
-              for (final addedFishName
-                  in newList.where((n) => !oldList.contains(n))) {
-                _propagateCompatChange(categoryFish, addedFishName, fish.name, catKey);
+              for (final addedFishName in newList.where(
+                (n) => !oldList.contains(n),
+              )) {
+                _propagateCompatChange(
+                  categoryFish,
+                  addedFishName,
+                  fish.name,
+                  catKey,
+                );
               }
             }
             _validationRun = false;
@@ -616,8 +630,12 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   /// Updates [targetName]'s entry for [editedName] in [categoryFish] so that
   /// [editedName] appears in [newKey] (and nowhere else).
-  void _propagateCompatChange(List<_FishEntry> categoryFish, String targetName,
-      String editedName, String newKey) {
+  void _propagateCompatChange(
+    List<_FishEntry> categoryFish,
+    String targetName,
+    String editedName,
+    String newKey,
+  ) {
     final targetIndex = categoryFish.indexWhere((f) => f.name == targetName);
     if (targetIndex == -1) return;
     final f = categoryFish[targetIndex];
@@ -699,8 +717,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     label: const Text('Validate'),
                     backgroundColor: _validationRun
                         ? (_validationErrors.isEmpty
-                            ? Colors.green
-                            : colorScheme.error)
+                              ? Colors.green
+                              : colorScheme.error)
                         : colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,
                   ),
@@ -742,8 +760,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     );
   }
 
-  Widget _buildEditor(ColorScheme colorScheme, int changedCount,
-      Map<String, Set<int>> modifiedIndices) {
+  Widget _buildEditor(
+    ColorScheme colorScheme,
+    int changedCount,
+    Map<String, Set<int>> modifiedIndices,
+  ) {
     return DefaultTabController(
       length: _data.length,
       child: Column(
@@ -752,8 +773,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           Container(
             width: double.infinity,
             color: Colors.amber.shade700,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: Row(
               children: [
                 const Icon(Icons.bug_report, color: Colors.white, size: 16),
@@ -761,15 +781,18 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 const Text(
                   'DEBUG TOOL – not visible in release builds',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
                 const Spacer(),
                 if (changedCount > 0) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange.shade800,
                       borderRadius: BorderRadius.circular(12),
@@ -777,9 +800,10 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     child: Text(
                       '$changedCount unsaved',
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -816,8 +840,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                           : null,
                       border: const OutlineInputBorder(),
                       isDense: true,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
                 ),
@@ -841,24 +864,24 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             ),
           ),
           TabBar(
-            tabs: _data.keys
-                .map((cat) {
-                  final filtered = _filteredFish(cat);
-                  final total = _data[cat]!.length;
-                  final label = _capitalize(cat);
-                  return Tab(
-                    text: _searchQuery.isEmpty
-                        ? '$label ($total)'
-                        : '$label (${filtered.length}/$total)',
-                  );
-                })
-                .toList(),
+            tabs: _data.keys.map((cat) {
+              final filtered = _filteredFish(cat);
+              final total = _data[cat]!.length;
+              final label = _capitalize(cat);
+              return Tab(
+                text: _searchQuery.isEmpty
+                    ? '$label ($total)'
+                    : '$label (${filtered.length}/$total)',
+              );
+            }).toList(),
           ),
           Expanded(
             child: TabBarView(
               children: _data.keys
-                  .map((cat) =>
-                      _buildCategoryTab(cat, colorScheme, modifiedIndices))
+                  .map(
+                    (cat) =>
+                        _buildCategoryTab(cat, colorScheme, modifiedIndices),
+                  )
                   .toList(),
             ),
           ),
@@ -872,15 +895,21 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     final entries = _data[category]!.asMap().entries;
     if (_searchQuery.isEmpty) return entries.toList();
     return entries
-        .where((e) =>
-            e.value.name.toLowerCase().contains(_searchQuery) ||
-            e.value.commonNames
-                .any((n) => n.toLowerCase().contains(_searchQuery)))
+        .where(
+          (e) =>
+              e.value.name.toLowerCase().contains(_searchQuery) ||
+              e.value.commonNames.any(
+                (n) => n.toLowerCase().contains(_searchQuery),
+              ),
+        )
         .toList();
   }
 
-  Widget _buildCategoryTab(String category, ColorScheme colorScheme,
-      Map<String, Set<int>> modifiedIndices) {
+  Widget _buildCategoryTab(
+    String category,
+    ColorScheme colorScheme,
+    Map<String, Set<int>> modifiedIndices,
+  ) {
     final filtered = _filteredFish(category);
     if (filtered.isEmpty) {
       return const Center(child: Text('No fish match your search.'));
@@ -929,94 +958,94 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     ColorScheme colorScheme,
     Set<int> categoryModified,
   ) {
-        // Determine if this fish has validation errors
-        final hasError = _validationRun &&
-            _validationErrors
-                .any((e) => e.startsWith('[$category] "${f.name}"'));
-        final isModified = categoryModified.contains(dataIdx);
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: hasError
-                ? BorderSide(color: colorScheme.error, width: 1.5)
-                : BorderSide.none,
+    // Determine if this fish has validation errors
+    final hasError =
+        _validationRun &&
+        _validationErrors.any((e) => e.startsWith('[$category] "${f.name}"'));
+    final isModified = categoryModified.contains(dataIdx);
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: hasError
+            ? BorderSide(color: colorScheme.error, width: 1.5)
+            : BorderSide.none,
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            f.imageURL,
+            width: 56,
+            height: 56,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Container(
+              width: 56,
+              height: 56,
+              color: colorScheme.surfaceVariant,
+              child: const Icon(Icons.broken_image),
+            ),
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                f.imageURL,
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  width: 56,
-                  height: 56,
-                  color: colorScheme.surfaceVariant,
-                  child: const Icon(Icons.broken_image),
-                ),
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                f.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    f.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                if (isModified)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: Icon(Icons.edit, color: Colors.orange, size: 14),
-                  ),
-              ],
+            if (isModified)
+              const Padding(
+                padding: EdgeInsets.only(left: 4),
+                child: Icon(Icons.edit, color: Colors.orange, size: 14),
+              ),
+          ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              f.commonNames.join(', '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  f.commonNames.join(', '),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
+            if (f.reefSafe != null)
+              Text(
+                'Reef Safe: ${f.reefSafe}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: f.reefSafe == 'Yes'
+                      ? Colors.green.shade700
+                      : f.reefSafe == 'Caution'
+                      ? Colors.orange.shade700
+                      : Colors.red.shade700,
+                  fontWeight: FontWeight.w500,
                 ),
-                if (f.reefSafe != null)
-                  Text(
-                    'Reef Safe: ${f.reefSafe}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: f.reefSafe == 'Yes'
-                          ? Colors.green.shade700
-                          : f.reefSafe == 'Caution'
-                              ? Colors.orange.shade700
-                              : Colors.red.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-              ],
+              ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hasError)
+              Icon(Icons.warning_amber, color: colorScheme.error, size: 18),
+            IconButton(
+              icon: const Icon(Icons.compare_arrows),
+              tooltip: 'Edit Compatibility',
+              onPressed: () => _editCompatibility(category, dataIdx),
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (hasError)
-                  Icon(Icons.warning_amber, color: colorScheme.error, size: 18),
-                IconButton(
-                  icon: const Icon(Icons.compare_arrows),
-                  tooltip: 'Edit Compatibility',
-                  onPressed: () => _editCompatibility(category, dataIdx),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: 'Edit',
-                  onPressed: () => _editFish(category, dataIdx),
-                ),
-              ],
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit',
+              onPressed: () => _editFish(category, dataIdx),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1096,15 +1125,15 @@ class _FishEditDialogState extends State<_FishEditDialog> {
 
     // Inline validation — catch the most critical field errors before saving
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name is required.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Name is required.')));
       return;
     }
     if (imageURL.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image URL is required.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Image URL is required.')));
       return;
     }
     if (commonNames.isEmpty) {
@@ -1161,8 +1190,10 @@ class _FishEditDialogState extends State<_FishEditDialog> {
               const SizedBox(height: 12),
               // Reef Safe (marine only)
               if (isMarine) ...[
-                Text('Reef Safe',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  'Reef Safe',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
                   value: _kReefSafeOptions.contains(_reefSafe)
@@ -1180,43 +1211,47 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                 const SizedBox(height: 12),
               ],
               // Common Names
-              Text('Common Names *',
-                  style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Common Names *',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 6),
               if (_commonNameCtrls.isEmpty)
                 Text(
                   'No common names – at least 1 required.',
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontSize: 12),
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
                 ),
-              ..._commonNameCtrls.asMap().entries.map((e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: e.value,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                            ),
-                            style: const TextStyle(fontSize: 13),
+              ..._commonNameCtrls.asMap().entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: e.value,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
                           ),
+                          style: const TextStyle(fontSize: 13),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline,
-                              size: 20),
-                          tooltip: 'Remove',
-                          onPressed: () {
-                            final ctrl = e.value;
-                            setState(() => _commonNameCtrls.removeAt(e.key));
-                            ctrl.dispose();
-                          },
-                        ),
-                      ],
-                    ),
-                  )),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline, size: 20),
+                        tooltip: 'Remove',
+                        onPressed: () {
+                          final ctrl = e.value;
+                          setState(() => _commonNameCtrls.removeAt(e.key));
+                          ctrl.dispose();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 4),
               Row(
                 children: [
@@ -1248,10 +1283,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        FilledButton(
-          onPressed: _save,
-          child: const Text('Save'),
-        ),
+        FilledButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
@@ -1314,10 +1346,7 @@ class _FishCompatibilityDialog extends StatefulWidget {
   final _FishEntry fish;
   final void Function(Map<String, List<String>> updatedLists) onSave;
 
-  const _FishCompatibilityDialog({
-    required this.fish,
-    required this.onSave,
-  });
+  const _FishCompatibilityDialog({required this.fish, required this.onSave});
 
   @override
   State<_FishCompatibilityDialog> createState() =>
@@ -1348,8 +1377,7 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
     });
   }
 
-  int get _totalFish =>
-      _lists.values.fold(0, (sum, list) => sum + list.length);
+  int get _totalFish => _lists.values.fold(0, (sum, list) => sum + list.length);
 
   @override
   Widget build(BuildContext context) {
@@ -1377,20 +1405,17 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
                         ),
                         Text(
                           widget.fish.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.primary),
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                       ],
                     ),
                   ),
                   Text(
                     '$_totalFish fish',
-                    style: TextStyle(
-                        fontSize: 12, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
@@ -1414,8 +1439,11 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
-                  Icon(Icons.drag_indicator,
-                      size: 14, color: Colors.grey.shade500),
+                  Icon(
+                    Icons.drag_indicator,
+                    size: 14,
+                    color: Colors.grey.shade500,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Drag chips between columns, or use the menu button (⋮) on each chip.',
@@ -1438,7 +1466,9 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
                           right: isLast
                               ? BorderSide.none
                               : BorderSide(
-                                  color: Colors.grey.shade300, width: 1),
+                                  color: Colors.grey.shade300,
+                                  width: 1,
+                                ),
                         ),
                       ),
                       child: _buildColumn(entry.value),
@@ -1470,7 +1500,9 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
                 color: cat.headerBg,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Column(
                     children: [
                       Text(
@@ -1486,7 +1518,9 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
                         '${items.length}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600),
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -1517,8 +1551,7 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
           borderRadius: BorderRadius.circular(6),
           elevation: 6,
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: cat.chipBorder,
               borderRadius: BorderRadius.circular(6),
@@ -1526,9 +1559,10 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
             child: Text(
               name,
               style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500),
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -1552,13 +1586,14 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
         padding: const EdgeInsets.only(left: 6, top: 2, bottom: 2, right: 2),
         child: Row(
           children: [
-            Icon(Icons.drag_indicator,
-                size: 14, color: Colors.grey.shade400),
+            Icon(Icons.drag_indicator, size: 14, color: Colors.grey.shade400),
             const SizedBox(width: 4),
             Expanded(
-              child: Text(name,
-                  style: const TextStyle(fontSize: 12),
-                  overflow: TextOverflow.ellipsis),
+              child: Text(
+                name,
+                style: const TextStyle(fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             PopupMenuButton<String>(
               iconSize: 16,
@@ -1581,8 +1616,7 @@ class _FishCompatibilityDialogState extends State<_FishCompatibilityDialog> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(c.label,
-                              style: const TextStyle(fontSize: 13)),
+                          Text(c.label, style: const TextStyle(fontSize: 13)),
                         ],
                       ),
                     ),

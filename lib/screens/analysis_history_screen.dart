@@ -62,7 +62,9 @@ class AnalysisHistoryScreen extends ConsumerWidget {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];
@@ -97,18 +99,17 @@ class AnalysisHistoryScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               l10n.noAnalysisHistory,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(color: cs.onSurface.withOpacity(0.7)),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: cs.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.noAnalysisHistoryDesc,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface.withOpacity(0.5),
-                  ),
+                color: cs.onSurface.withOpacity(0.5),
+              ),
             ),
           ],
         ),
@@ -129,11 +130,13 @@ class AnalysisHistoryScreen extends ConsumerWidget {
               content: Text(l10n.clearHistoryConfirm),
               actions: [
                 TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(l10n.cancel)),
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(l10n.cancel),
+                ),
                 TextButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(l10n.clearAll)),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(l10n.clearAll),
+                ),
               ],
             ),
           );
@@ -209,7 +212,8 @@ class _HistoryEntryTile extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (_) => AnalysisResultScreen(result: result)),
+              builder: (_) => AnalysisResultScreen(result: result),
+            ),
           );
           break;
 
@@ -237,7 +241,8 @@ class _HistoryEntryTile extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (_) => FishInfoResultScreen(result: result)),
+              builder: (_) => FishInfoResultScreen(result: result),
+            ),
           );
           break;
 
@@ -246,8 +251,8 @@ class _HistoryEntryTile extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (_) =>
-                    AutomationScriptResultScreen(script: script)),
+              builder: (_) => AutomationScriptResultScreen(script: script),
+            ),
           );
           break;
 
@@ -256,11 +261,17 @@ class _HistoryEntryTile extends ConsumerWidget {
             entry.resultData['report'] as Map<String, dynamic>? ?? {},
           );
           final fishType = entry.resultData['fishType'] as String?;
-          showReportDialog(context, report, fromHistory: true, fishType: fishType);
+          showReportDialog(
+            context,
+            report,
+            fromHistory: true,
+            fishType: fishType,
+          );
           break;
 
         case AnalysisType.stockingRecommendation:
-          final recsRaw = entry.resultData['recommendations'] as List<dynamic>? ?? [];
+          final recsRaw =
+              entry.resultData['recommendations'] as List<dynamic>? ?? [];
           final recs = recsRaw
               .whereType<Map<String, dynamic>>()
               .map(StockingRecommendation.fromJson)
@@ -323,7 +334,9 @@ class _HistoryEntryTile extends ConsumerWidget {
       try {
         photoBytes = base64Decode(entry.photoBase64!);
       } catch (e) {
-        debugPrint('Failed to decode photo base64 for history entry ${entry.id}: $e');
+        debugPrint(
+          'Failed to decode photo base64 for history entry ${entry.id}: $e',
+        );
       }
     }
 
@@ -375,10 +388,9 @@ class _HistoryEntryTile extends ConsumerWidget {
                   children: [
                     Text(
                       entry.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -386,17 +398,18 @@ class _HistoryEntryTile extends ConsumerWidget {
                     Text(
                       _localizedTypeName(entry.type, l10n),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    if (entry.modelName != null && entry.modelName!.isNotEmpty) ...[
+                    if (entry.modelName != null &&
+                        entry.modelName!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         entry.modelName!,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: cs.onSurface.withOpacity(0.5),
-                            ),
+                          color: cs.onSurface.withOpacity(0.5),
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -405,8 +418,8 @@ class _HistoryEntryTile extends ConsumerWidget {
                     Text(
                       dateStr,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurface.withOpacity(0.55),
-                          ),
+                        color: cs.onSurface.withOpacity(0.55),
+                      ),
                     ),
                   ],
                 ),
@@ -418,7 +431,9 @@ class _HistoryEntryTile extends ConsumerWidget {
                     : l10n.addToFavorites,
                 icon: Icon(
                   entry.isFavorite ? Icons.star : Icons.star_border,
-                  color: entry.isFavorite ? Colors.amber : cs.onSurface.withOpacity(0.4),
+                  color: entry.isFavorite
+                      ? Colors.amber
+                      : cs.onSurface.withOpacity(0.4),
                 ),
                 onPressed: () {
                   ref
@@ -429,8 +444,10 @@ class _HistoryEntryTile extends ConsumerWidget {
               // Delete button
               IconButton(
                 tooltip: l10n.delete,
-                icon: Icon(Icons.delete_outline,
-                    color: cs.onSurface.withOpacity(0.4)),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: cs.onSurface.withOpacity(0.4),
+                ),
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
@@ -439,11 +456,13 @@ class _HistoryEntryTile extends ConsumerWidget {
                       content: Text(l10n.deleteEntryConfirm),
                       actions: [
                         TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: Text(l10n.cancel)),
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: Text(l10n.cancel),
+                        ),
                         TextButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(l10n.delete)),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: Text(l10n.delete),
+                        ),
                       ],
                     ),
                   );

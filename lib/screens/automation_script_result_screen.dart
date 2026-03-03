@@ -3,10 +3,11 @@ import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import '../l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/automation_script.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/automation_script.dart';
 import '../widgets/common_cards.dart';
 
 class AutomationScriptResultScreen extends StatelessWidget {
@@ -22,10 +23,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          SectionHeader(
-            title: script.title,
-            showCloseButton: true,
-          ),
+          SectionHeader(title: script.title, showCloseButton: true),
           const SizedBox(height: 16),
           _buildCodeBlock(context, script.code),
           const SizedBox(height: 16),

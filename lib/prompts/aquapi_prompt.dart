@@ -123,4 +123,3 @@ bool isAquapiRelated(String message) {
 String effectiveSystemPrompt(String message) {
   return isAquapiRelated(message) ? _aquapiSystemPrompt : systemPrompt;
 }
-

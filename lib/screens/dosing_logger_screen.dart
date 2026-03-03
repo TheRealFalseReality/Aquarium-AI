@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../l10n/app_localizations.dart';
-import '../models/tank.dart';
-import '../models/dosing_entry.dart';
-import '../providers/tank_provider.dart';
 import '../main_layout.dart';
+import '../models/dosing_entry.dart';
+import '../models/tank.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 
 class DosingLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final bool openAddDialog;
 
-  const DosingLoggerScreen({super.key, required this.tank, this.openAddDialog = false});
+  const DosingLoggerScreen({
+    super.key,
+    required this.tank,
+    this.openAddDialog = false,
+  });
 
   @override
   DosingLoggerScreenState createState() => DosingLoggerScreenState();
@@ -54,10 +59,8 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddDosingEntrySheet(
-        tank: currentTank,
-        existingEntry: entry,
-      ),
+      builder: (context) =>
+          _AddDosingEntrySheet(tank: currentTank, existingEntry: entry),
     );
   }
 
@@ -71,7 +74,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
       updatedAt: DateTime.now(),
     );
     ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     // Log dosing entry deletion
     AnalyticsService.logFeatureUsed(
       featureName: 'dosing_entry_deleted',
@@ -81,7 +84,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
         'remaining_entries': updatedEntries.length,
       },
     );
-    
+
     AnalyticsService.logTankAction(
       action: 'dosing_entry_deleted',
       tankType: currentTank.type,
@@ -139,21 +142,21 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                   Text(
                     'Dosing Diary',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Track treatments and supplements added to your aquarium',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withOpacity(0.7),
-                        ),
+                      color: cs.onSurface.withOpacity(0.7),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   // Summary card
                   _buildSummaryCard(context, tank),
                   const SizedBox(height: 16),
-                  
+
                   // Grouped entries
                   ...groupedEntries.entries.map((entry) {
                     final treatmentName = entry.key;
@@ -180,20 +183,32 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                             ),
                             title: Text(
                               treatmentName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            subtitle: Text('${entries.length} ${entries.length == 1 ? l10n.dose : l10n.doses}'),
+                            subtitle: Text(
+                              '${entries.length} ${entries.length == 1 ? l10n.dose : l10n.doses}',
+                            ),
                             trailing: IconButton(
-                              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                              icon: Icon(
+                                isExpanded
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                              ),
                               onPressed: () {
                                 setState(() {
-                                  _expandedTreatment = isExpanded ? null : treatmentName;
+                                  _expandedTreatment = isExpanded
+                                      ? null
+                                      : treatmentName;
                                 });
                               },
                             ),
                             onTap: () {
                               setState(() {
-                                _expandedTreatment = isExpanded ? null : treatmentName;
+                                _expandedTreatment = isExpanded
+                                    ? null
+                                    : treatmentName;
                               });
                             },
                           ),
@@ -201,7 +216,9 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                             Column(
                               children: [
                                 const Divider(height: 1),
-                                ...entries.map((entry) => _buildDosingItem(context, entry)),
+                                ...entries.map(
+                                  (entry) => _buildDosingItem(context, entry),
+                                ),
                               ],
                             ),
                         ],
@@ -235,19 +252,16 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
             const SizedBox(height: 24),
             Text(
               'No Dosing Records Yet',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               'Start tracking treatments and supplements\nadded to your aquarium',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -277,8 +291,9 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
         .length;
     final totalDoses = tank.dosingEntries.length;
     final lastDose = tank.dosingEntries.isNotEmpty
-        ? tank.dosingEntries.reduce((a, b) => 
-            a.dateDosed.isAfter(b.dateDosed) ? a : b)
+        ? tank.dosingEntries.reduce(
+            (a, b) => a.dateDosed.isAfter(b.dateDosed) ? a : b,
+          )
         : null;
 
     return Card(
@@ -294,8 +309,8 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                 Text(
                   l10n.dosingSum,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -330,9 +345,9 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                   const SizedBox(width: 8),
                   Text(
                     'Last dose: ${DateFormat('MMM d, yyyy').format(lastDose.dateDosed)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -363,16 +378,16 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: cs.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: cs.primary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -464,13 +479,11 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
   final Tank tank;
   final DosingEntry? existingEntry;
 
-  const _AddDosingEntrySheet({
-    required this.tank,
-    this.existingEntry,
-  });
+  const _AddDosingEntrySheet({required this.tank, this.existingEntry});
 
   @override
-  ConsumerState<_AddDosingEntrySheet> createState() => _AddDosingEntrySheetState();
+  ConsumerState<_AddDosingEntrySheet> createState() =>
+      _AddDosingEntrySheetState();
 }
 
 // Volume units for dosing entries
@@ -588,7 +601,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       final DosingEntry entry;
       final isEditing = widget.existingEntry != null;
       final treatmentName = _getTreatmentName();
-      
+
       if (isEditing) {
         // Update existing entry
         entry = widget.existingEntry!.copyWith(
@@ -600,19 +613,19 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
               ? _notesController.text.trim()
               : null,
         );
-        
+
         // Replace the existing entry in the list
         final updatedEntries = widget.tank.dosingEntries.map((e) {
           return e.id == entry.id ? entry : e;
         }).toList();
-        
+
         final updatedTank = widget.tank.copyWith(
           dosingEntries: updatedEntries,
           updatedAt: DateTime.now(),
         );
-        
+
         ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log dosing entry update
         AnalyticsService.logFeatureUsed(
           featureName: 'dosing_entry_updated',
@@ -633,15 +646,15 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
               ? _notesController.text.trim()
               : null,
         );
-        
+
         final updatedEntries = [...widget.tank.dosingEntries, entry];
         final updatedTank = widget.tank.copyWith(
           dosingEntries: updatedEntries,
           updatedAt: DateTime.now(),
         );
-        
+
         ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log dosing entry addition
         AnalyticsService.logFeatureUsed(
           featureName: 'dosing_entry_added',
@@ -652,13 +665,13 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
             'has_notes': entry.notes != null ? 'true' : 'false',
           },
         );
-        
+
         AnalyticsService.logTankAction(
           action: 'dosing_entry_added',
           tankType: widget.tank.type,
         );
       }
-      
+
       Navigator.pop(context);
     }
   }
@@ -688,8 +701,8 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   Text(
                     isEditing ? 'Edit Dose' : 'Add Dose',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -698,7 +711,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Treatment dropdown
               DropdownButtonFormField<String>(
                 value: _selectedTreatment,
@@ -732,7 +745,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Custom treatment name (shown only when "Other" is selected)
               if (_selectedTreatment == 'Other (Custom)') ...[
                 TextFormField(
@@ -747,7 +760,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   ),
                   textCapitalization: TextCapitalization.words,
                   validator: (value) {
-                    if (_selectedTreatment == 'Other (Custom)' && 
+                    if (_selectedTreatment == 'Other (Custom)' &&
                         (value == null || value.trim().isEmpty)) {
                       return 'Please enter a treatment name';
                     }
@@ -756,7 +769,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Amount and unit
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +785,9 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                         filled: true,
                         fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Required';
@@ -798,10 +813,12 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                         fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                       ),
                       items: kVolumeUnits
-                          .map((unit) => DropdownMenuItem(
-                                value: unit,
-                                child: Text(unit),
-                              ))
+                          .map(
+                            (unit) => DropdownMenuItem(
+                              value: unit,
+                              child: Text(unit),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -815,7 +832,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Date selection
               InkWell(
                 onTap: () => _selectDate(),
@@ -833,7 +850,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -849,7 +866,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 24),
-              
+
               // Save button
               SizedBox(
                 width: double.infinity,
@@ -873,11 +890,15 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
 /// Shows the dosing add/edit bottom sheet.
 /// [existingEntry] – pass to edit an existing entry.
-void showDosingSheet(BuildContext context, Tank tank, {DosingEntry? existingEntry}) {
+void showDosingSheet(
+  BuildContext context,
+  Tank tank, {
+  DosingEntry? existingEntry,
+}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (context) => _AddDosingEntrySheet(tank: tank, existingEntry: existingEntry),
+    builder: (context) =>
+        _AddDosingEntrySheet(tank: tank, existingEntry: existingEntry),
   );
 }
-

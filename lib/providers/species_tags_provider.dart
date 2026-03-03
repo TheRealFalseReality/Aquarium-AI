@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/fish_data_service.dart';
 
 /// State class for species tags
 class SpeciesTagsState {
   final Map<String, List<String>> tags; // fishType -> list of tags
-  final Map<String, List<String>> defaultTags; // fishType -> list of default (system) tags
+  final Map<String, List<String>>
+  defaultTags; // fishType -> list of default (system) tags
   final bool isLoading;
 
   SpeciesTagsState({
@@ -44,10 +47,7 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
     }
   }
 
-  SpeciesTagsNotifier()
-      : super(SpeciesTagsState(
-          tags: {},
-        )) {
+  SpeciesTagsNotifier() : super(SpeciesTagsState(tags: {})) {
     _loadTags();
   }
 
@@ -67,21 +67,12 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
           loadedTags[key] = List<String>.from(value);
         });
 
-        state = SpeciesTagsState(
-          tags: loadedTags,
-          isLoading: false,
-        );
+        state = SpeciesTagsState(tags: loadedTags, isLoading: false);
       } else {
-        state = SpeciesTagsState(
-          tags: {},
-          isLoading: false,
-        );
+        state = SpeciesTagsState(tags: {}, isLoading: false);
       }
     } catch (e) {
-      state = SpeciesTagsState(
-        tags: {},
-        isLoading: false,
-      );
+      state = SpeciesTagsState(tags: {}, isLoading: false);
     }
   }
 
@@ -149,25 +140,25 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
   List<String> searchByTag(String tag) {
     final lowerTag = tag.toLowerCase();
     return state.tags.entries
-        .where((entry) =>
-            entry.value.any((t) => t.toLowerCase().contains(lowerTag)))
+        .where(
+          (entry) => entry.value.any((t) => t.toLowerCase().contains(lowerTag)),
+        )
         .map((entry) => entry.key)
         .toList();
   }
 
   /// Clear all tags
   Future<void> clearAllTags() async {
-    state = SpeciesTagsState(
-      tags: {},
-      isLoading: false,
-    );
+    state = SpeciesTagsState(tags: {}, isLoading: false);
     await _saveTags();
   }
 
   /// Initialize default tags from fish data common names.
   /// Merges new default tags into existing tag lists so additions to
   /// commonNames are always reflected without removing user-added tags.
-  Future<void> initializeDefaultTags(Map<String, List<dynamic>> fishData) async {
+  Future<void> initializeDefaultTags(
+    Map<String, List<dynamic>> fishData,
+  ) async {
     final newTags = Map<String, List<String>>.from(state.tags);
     final newDefaultTags = <String, List<String>>{};
     bool hasChanges = false;
@@ -182,13 +173,17 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
         final commonNames = fishJson['commonNames'] as List<dynamic>?;
 
         if (commonNames != null && commonNames.isNotEmpty) {
-          final defaultTagsList = commonNames.map((name) => name.toString()).toList();
+          final defaultTagsList = commonNames
+              .map((name) => name.toString())
+              .toList();
           newDefaultTags[fishName] = defaultTagsList;
 
           // Merge any new default tags that are not yet in the user's tag list,
           // preserving existing user-added custom tags.
           final existingTags = newTags[fishName] ?? [];
-          final tagsToAdd = defaultTagsList.where((t) => !existingTags.contains(t)).toList();
+          final tagsToAdd = defaultTagsList
+              .where((t) => !existingTags.contains(t))
+              .toList();
           if (tagsToAdd.isNotEmpty) {
             newTags[fishName] = List.from(existingTags)..addAll(tagsToAdd);
             hasChanges = true;
@@ -207,7 +202,7 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
       await _saveTags();
     }
   }
-  
+
   /// Check if a tag is a default (system) tag
   bool isDefaultTag(String fishType, String tag) {
     return state.defaultTags[fishType]?.contains(tag) ?? false;
@@ -230,23 +225,22 @@ class SpeciesTagsNotifier extends StateNotifier<SpeciesTagsState> {
 
 /// Provider for species tags
 final speciesTagsProvider =
-    StateNotifierProvider<SpeciesTagsNotifier, SpeciesTagsState>(
-  (ref) {
-    final notifier = SpeciesTagsNotifier();
-    // Initialize default tags when provider is created.
-    _initializeDefaultTagsAsync(ref, notifier);
-    return notifier;
-  },
-);
+    StateNotifierProvider<SpeciesTagsNotifier, SpeciesTagsState>((ref) {
+      final notifier = SpeciesTagsNotifier();
+      // Initialize default tags when provider is created.
+      _initializeDefaultTagsAsync(ref, notifier);
+      return notifier;
+    });
 
 /// Helper function to initialize default tags asynchronously
 Future<void> _initializeDefaultTagsAsync(
-    Ref ref,
-    SpeciesTagsNotifier notifier) async {
+  Ref ref,
+  SpeciesTagsNotifier notifier,
+) async {
   try {
     // Wait a bit for the notifier to load existing tags first
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     final fishDataService = ref.read(fishDataServiceProvider);
     final rawFishData = await fishDataService.loadRawFishData();
     await notifier.initializeDefaultTags(rawFishData);
@@ -256,4 +250,3 @@ Future<void> _initializeDefaultTagsAsync(
     notifier._completeInitialization();
   }
 }
-

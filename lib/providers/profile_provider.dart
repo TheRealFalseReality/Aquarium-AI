@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import '../models/user_profile.dart';
+
 import '../models/tank.dart';
+import '../models/user_profile.dart';
 import '../services/profile_service.dart';
 import 'community_provider.dart';
 
@@ -18,8 +19,10 @@ final currentUserProfileProvider = StreamProvider<UserProfile?>((ref) {
 });
 
 /// Streams any user's profile by uid.
-final userProfileProvider =
-    StreamProvider.family<UserProfile?, String>((ref, uid) {
+final userProfileProvider = StreamProvider.family<UserProfile?, String>((
+  ref,
+  uid,
+) {
   return ProfileService.userProfileStream(uid);
 });
 
@@ -56,16 +59,22 @@ class SaveProfileNotifier extends StateNotifier<SaveProfileState> {
   Future<bool> save(UserProfile profile) async {
     state = state.copyWith(isSaving: true, clearError: true, success: false);
     final ok = await ProfileService.saveProfile(profile);
-    state = state.copyWith(isSaving: false, success: ok,
-        error: ok ? null : 'save_failed');
+    state = state.copyWith(
+      isSaving: false,
+      success: ok,
+      error: ok ? null : 'save_failed',
+    );
     return ok;
   }
 
   Future<bool> updateFields(Map<String, dynamic> data) async {
     state = state.copyWith(isSaving: true, clearError: true, success: false);
     final ok = await ProfileService.updateProfile(data);
-    state = state.copyWith(isSaving: false, success: ok,
-        error: ok ? null : 'save_failed');
+    state = state.copyWith(
+      isSaving: false,
+      success: ok,
+      error: ok ? null : 'save_failed',
+    );
     return ok;
   }
 
@@ -80,5 +89,5 @@ class SaveProfileNotifier extends StateNotifier<SaveProfileState> {
 
 final saveProfileProvider =
     StateNotifierProvider<SaveProfileNotifier, SaveProfileState>(
-  (_) => SaveProfileNotifier(),
-);
+      (_) => SaveProfileNotifier(),
+    );

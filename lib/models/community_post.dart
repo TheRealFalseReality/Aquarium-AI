@@ -38,10 +38,12 @@ class CommunityPost {
   final String body;
   final String? imageUrl;
   final Map<String, dynamic>? tankInfo;
+
   /// Snapshot of the author's profile signature at posting time.
   /// Keys: location, tankCount, fishCount, yearsExperience, memberSince,
   /// experienceLevel — only enabled + non-empty fields are present.
   final Map<String, String>? postSignature;
+
   /// Whether the author was a Founder Aquarist at the time of posting.
   /// When `true`, the post card shows a deep-purple border and founder badge.
   final bool isFounderPost;
@@ -80,8 +82,7 @@ class CommunityPost {
       body: data['body'] as String? ?? '',
       imageUrl: data['imageUrl'] as String?,
       tankInfo: data['tankInfo'] as Map<String, dynamic>?,
-      postSignature: (data['postSignature'] as Map?)
-          ?.cast<String, String>(),
+      postSignature: (data['postSignature'] as Map?)?.cast<String, String>(),
       isFounderPost: data['isFounderPost'] as bool? ?? false,
       likes: data['likes'] as int? ?? 0,
       commentCount: data['commentCount'] as int? ?? 0,

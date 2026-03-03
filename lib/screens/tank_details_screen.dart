@@ -1,28 +1,30 @@
 import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import '../models/tank.dart';
 import '../models/fish.dart';
+import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
-import '../services/fish_data_service.dart';
 import '../services/analytics_service.dart';
-import '../l10n/app_localizations.dart';
+import '../services/fish_data_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
-import 'tank_creation_screen.dart';
-import 'notification_management_screen.dart';
-import 'parameter_logger_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
+import 'notification_management_screen.dart';
+import 'parameter_logger_screen.dart';
+import 'tank_creation_screen.dart';
 
 /// Dedicated screen for displaying tank details with tabbed navigation
-/// 
+///
 /// This replaces the previous modal dialog implementation while maintaining
 /// backwards compatibility with existing tank data.
 class TankDetailsScreen extends ConsumerStatefulWidget {
@@ -43,14 +45,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
-    
+
     // Add listener to rebuild when tab changes
     _tabController.addListener(() {
       if (mounted) {
         setState(() {});
       }
     });
-    
+
     // Log screen view
     AnalyticsService.logScreenView(screenName: 'tank_details_screen');
   }
@@ -75,7 +77,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final tank = _getCurrentTank();
     final cs = Theme.of(context).colorScheme;
-    
+
     // Watch the centralized fish data provider
     final fishDataAsync = ref.watch(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -92,7 +94,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         bannerPhoto = null;
       }
     }
-    final hasBanner = bannerPhoto != null && (bannerPhoto.imageUrl != null || bannerPhoto.imagePath != null);
+    final hasBanner =
+        bannerPhoto != null &&
+        (bannerPhoto.imageUrl != null || bannerPhoto.imagePath != null);
 
     // Gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
@@ -129,10 +133,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     )
                   : null,
             ),
-            backgroundColor: hasBanner ? Colors.transparent : cs.surface.withOpacity(0.95),
+            backgroundColor: hasBanner
+                ? Colors.transparent
+                : cs.surface.withOpacity(0.95),
             elevation: 0,
-            iconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
-            actionsIconTheme: hasBanner ? const IconThemeData(color: Colors.white) : null,
+            iconTheme: hasBanner
+                ? const IconThemeData(color: Colors.white)
+                : null,
+            actionsIconTheme: hasBanner
+                ? const IconThemeData(color: Colors.white)
+                : null,
             flexibleSpace: bannerPhoto != null
                 ? _buildBannerFlexibleSpace(bannerPhoto)
                 : null,
@@ -210,7 +220,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => TankCreationScreen(existingTank: tank),
+                      builder: (context) =>
+                          TankCreationScreen(existingTank: tank),
                     ),
                   );
                 },
@@ -222,7 +233,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => NotificationManagementScreen(tank: tank),
+                      builder: (context) =>
+                          NotificationManagementScreen(tank: tank),
                     ),
                   );
                 },
@@ -295,10 +307,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0x99000000),
-                Color(0xBB000000),
-              ],
+              colors: [Color(0x99000000), Color(0xBB000000)],
             ),
           ),
         ),
@@ -374,7 +383,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               );
               ref.read(tankProvider.notifier).updateTank(updatedTank);
             },
-            child: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -409,9 +421,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline, size: 20, color: Theme.of(context).colorScheme.error),
+              Icon(
+                Icons.delete_outline,
+                size: 20,
+                color: Theme.of(context).colorScheme.error,
+              ),
               const SizedBox(width: 8),
-              Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                l10n.delete,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ],
           ),
         ),
@@ -437,7 +456,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               Navigator.pop(context);
               onConfirm();
             },
-            child: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -460,7 +482,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           heroTag: 'fab_parameters',
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ParameterLoggerScreen(tank: tank, openAddDialog: true),
+              builder: (context) =>
+                  ParameterLoggerScreen(tank: tank, openAddDialog: true),
             ),
           ),
           icon: const Icon(Icons.add),
@@ -471,7 +494,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           heroTag: 'fab_dosing',
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => DosingLoggerScreen(tank: tank, openAddDialog: true),
+              builder: (context) =>
+                  DosingLoggerScreen(tank: tank, openAddDialog: true),
             ),
           ),
           icon: const Icon(Icons.add),
@@ -513,7 +537,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   /// Overview tab - Tank info, harmony score, inhabitants, action buttons
-  Widget _buildOverviewTab(BuildContext context, Tank tank, Map<String, List<Fish>>? fishData) {
+  Widget _buildOverviewTab(
+    BuildContext context,
+    Tank tank,
+    Map<String, List<Fish>>? fishData,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
@@ -542,16 +570,20 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: (tank.type == 'freshwater' 
-                                ? cs.primary 
-                                : cs.secondary).withOpacity(0.3),
+                            color:
+                                (tank.type == 'freshwater'
+                                        ? cs.primary
+                                        : cs.secondary)
+                                    .withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                       child: Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
+                        tank.type == 'freshwater'
+                            ? Icons.water_drop
+                            : Icons.waves,
                         size: 28,
                         color: Colors.white,
                       ),
@@ -563,18 +595,20 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         children: [
                           Text(
                             tank.name,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            tank.type == 'freshwater' 
+                            tank.type == 'freshwater'
                                 ? l10n.freshwaterTank
-                                : (tank.isReef ? l10n.reefTank : l10n.saltwaterTank),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: cs.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                                : (tank.isReef
+                                      ? l10n.reefTank
+                                      : l10n.saltwaterTank),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ],
                       ),
@@ -588,9 +622,17 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   runSpacing: 8,
                   children: [
                     if (tank.sizeGallons != null || tank.sizeLiters != null)
-                      _buildStatChip(context, Icons.straighten, _formatTankSize(tank)),
+                      _buildStatChip(
+                        context,
+                        Icons.straighten,
+                        _formatTankSize(tank),
+                      ),
                     if (tank.sizeGallons != null || tank.sizeLiters != null)
-                      _buildStatChip(context, Icons.line_weight, _formatWaterWeight(tank)),
+                      _buildStatChip(
+                        context,
+                        Icons.line_weight,
+                        _formatWaterWeight(tank),
+                      ),
                     if (tank.inhabitants.isNotEmpty && fishData != null)
                       _buildHarmonyScoreChip(tank),
                   ],
@@ -599,23 +641,23 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Inhabitants section
         if (tank.inhabitants.isNotEmpty && fishData != null) ...[
           _buildInhabitantsSection(context, tank, fishData),
           const SizedBox(height: 16),
         ],
-        
+
         // Compatibility calculation breakdown
-        if (tank.inhabitants.isNotEmpty && 
-            fishData != null && 
+        if (tank.inhabitants.isNotEmpty &&
+            fishData != null &&
             tank.calculationBreakdown != null) ...[
           _buildCompatibilitySection(context, tank),
           const SizedBox(height: 16),
         ],
-        
+
         // Timestamps
         _buildTimestampsCard(context, tank),
       ],
@@ -632,7 +674,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.photo_library_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
+            Icon(
+              Icons.photo_library_outlined,
+              size: 64,
+              color: cs.onSurface.withOpacity(0.3),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.noPhotos,
@@ -657,7 +703,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       itemBuilder: (context, index) {
         final photo = tank.photos[index];
         final imageUrl = photo.imageUrl ?? photo.imagePath;
-        
+
         return GestureDetector(
           onTap: () => _showPhotoMaximized(context, photo, tank),
           child: Card(
@@ -670,10 +716,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       ? CachedNetworkImage(
                           imageUrl: imageUrl,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                          placeholder: (context, url) =>
+                              const Center(child: CircularProgressIndicator()),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
                         )
                       : Image.file(
                           File(imageUrl),
@@ -740,14 +786,21 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(16),
                     child: PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white, size: 16),
+                      icon: const Icon(
+                        Icons.more_vert,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       iconSize: 16,
                       padding: const EdgeInsets.all(4),
                       onSelected: (value) {
                         if (value == 'edit') _editPhoto(context, tank, photo);
-                        if (value == 'delete') _deletePhoto(context, tank, photo);
-                        if (value == 'set_banner') _setBannerPhoto(tank, photo.id);
-                        if (value == 'remove_banner') _setBannerPhoto(tank, null);
+                        if (value == 'delete')
+                          _deletePhoto(context, tank, photo);
+                        if (value == 'set_banner')
+                          _setBannerPhoto(tank, photo.id);
+                        if (value == 'remove_banner')
+                          _setBannerPhoto(tank, null);
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(
@@ -786,9 +839,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline, size: 18, color: cs.error),
+                              Icon(
+                                Icons.delete_outline,
+                                size: 18,
+                                color: cs.error,
+                              ),
                               const SizedBox(width: 8),
-                              Text(l10n.delete, style: TextStyle(color: cs.error)),
+                              Text(
+                                l10n.delete,
+                                style: TextStyle(color: cs.error),
+                              ),
                             ],
                           ),
                         ),
@@ -814,7 +874,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.science_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
+            Icon(
+              Icons.science_outlined,
+              size: 64,
+              color: cs.onSurface.withOpacity(0.3),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.noParameters,
@@ -830,18 +894,18 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     // Sort parameters by date and group by type
     final sortedParams = List<WaterParameter>.from(tank.waterParameters)
       ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
-    
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(
           l10n.latestWaterParameters,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        
+
         // Show all parameters as cards
         ...sortedParams.map((param) {
           return Card(
@@ -881,12 +945,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ),
               trailing: _buildEditDeleteMenu(
                 context: context,
-                onEdit: () => showParameterSheet(context, tank, existingParameter: param),
+                onEdit: () =>
+                    showParameterSheet(context, tank, existingParameter: param),
                 onDelete: () => _confirmDelete(
                   context,
                   onConfirm: () {
                     final updatedTank = tank.copyWith(
-                      waterParameters: tank.waterParameters.where((p) => p.id != param.id).toList(),
+                      waterParameters: tank.waterParameters
+                          .where((p) => p.id != param.id)
+                          .toList(),
                       updatedAt: DateTime.now(),
                     );
                     ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -910,7 +977,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.medication_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
+            Icon(
+              Icons.medication_outlined,
+              size: 64,
+              color: cs.onSurface.withOpacity(0.3),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.noDosing,
@@ -931,9 +1002,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       children: [
         Text(
           '${l10n.recentDosing} (${recentEntries.length}/${tank.dosingEntries.length})',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         ...recentEntries.map((entry) {
@@ -956,12 +1027,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ),
               trailing: _buildEditDeleteMenu(
                 context: context,
-                onEdit: () => showDosingSheet(context, tank, existingEntry: entry),
+                onEdit: () =>
+                    showDosingSheet(context, tank, existingEntry: entry),
                 onDelete: () => _confirmDelete(
                   context,
                   onConfirm: () {
                     final updatedTank = tank.copyWith(
-                      dosingEntries: tank.dosingEntries.where((e) => e.id != entry.id).toList(),
+                      dosingEntries: tank.dosingEntries
+                          .where((e) => e.id != entry.id)
+                          .toList(),
                       updatedAt: DateTime.now(),
                     );
                     ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -1006,16 +1080,18 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       children: [
         Text(
           '${l10n.recentActivity} (${recentLogs.length}/${tank.notificationLogs.length})',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         ...recentLogs.map((log) {
           return Card(
             child: ListTile(
               leading: Icon(_getActivityIcon(log.type), color: cs.primary),
-              title: Text(log.customCategory ?? log.type.toString().split('.').last),
+              title: Text(
+                log.customCategory ?? log.type.toString().split('.').last,
+              ),
               subtitle: Text(
                 DateFormat.yMMMd().add_jm().format(log.loggedAt),
                 style: TextStyle(
@@ -1025,12 +1101,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               ),
               trailing: _buildEditDeleteMenu(
                 context: context,
-                onEdit: () => showLogEntrySheet(context, tank, existingEntry: log),
+                onEdit: () =>
+                    showLogEntrySheet(context, tank, existingEntry: log),
                 onDelete: () => _confirmDelete(
                   context,
                   onConfirm: () {
                     final updatedTank = tank.copyWith(
-                      notificationLogs: tank.notificationLogs.where((l) => l.id != log.id).toList(),
+                      notificationLogs: tank.notificationLogs
+                          .where((l) => l.id != log.id)
+                          .toList(),
                       updatedAt: DateTime.now(),
                     );
                     ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -1054,7 +1133,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.note_outlined, size: 64, color: cs.onSurface.withOpacity(0.3)),
+            Icon(
+              Icons.note_outlined,
+              size: 64,
+              color: cs.onSurface.withOpacity(0.3),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.noNotes,
@@ -1084,9 +1167,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       const SizedBox(width: 8),
                       Text(
                         l10n.tankNotes,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -1098,14 +1180,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           ),
           const SizedBox(height: 16),
         ],
-        
+
         // Tank notes list
         if (tank.tankNotes.isNotEmpty) ...[
           Text(
             l10n.notesSection,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ...tank.tankNotes.reversed.map((note) {
@@ -1121,12 +1203,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 ),
                 trailing: _buildEditDeleteMenu(
                   context: context,
-                  onEdit: () => showNoteSheet(context, tank, existingNote: note),
+                  onEdit: () =>
+                      showNoteSheet(context, tank, existingNote: note),
                   onDelete: () => _confirmDelete(
                     context,
                     onConfirm: () {
                       final updatedTank = tank.copyWith(
-                        tankNotes: tank.tankNotes.where((n) => n.id != note.id).toList(),
+                        tankNotes: tank.tankNotes
+                            .where((n) => n.id != note.id)
+                            .toList(),
                         updatedAt: DateTime.now(),
                       );
                       ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -1142,7 +1227,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   // Helper methods
-  
+
   Widget _buildStatChip(BuildContext context, IconData icon, String label) {
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -1150,9 +1235,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withOpacity(0.6),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.4),
-        ),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1161,9 +1244,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           const SizedBox(width: 6),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -1174,7 +1257,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final score = tank.harmonyScore ?? 0.0;
     final percentage = (score * 100).toInt();
-    
+
     Color scoreColor;
     if (score >= 0.8) {
       scoreColor = Colors.green;
@@ -1189,9 +1272,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       decoration: BoxDecoration(
         color: scoreColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: scoreColor.withOpacity(0.4),
-        ),
+        border: Border.all(color: scoreColor.withOpacity(0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1231,7 +1312,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return 'N/A';
   }
 
-  Widget _buildInhabitantsSection(BuildContext context, Tank tank, Map<String, List<Fish>> fishData) {
+  Widget _buildInhabitantsSection(
+    BuildContext context,
+    Tank tank,
+    Map<String, List<Fish>> fishData,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
@@ -1249,20 +1334,29 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     color: cs.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.pets, color: cs.onSecondaryContainer, size: 20),
+                  child: Icon(
+                    Icons.pets,
+                    color: cs.onSecondaryContainer,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   l10n.inhabitantsLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             ...tank.inhabitants.map((inhabitant) {
-              final fishImageUrl = _getFishImageUrl(tank.type, inhabitant.fishUnit, fishData, inhabitant: inhabitant);
+              final fishImageUrl = _getFishImageUrl(
+                tank.type,
+                inhabitant.fishUnit,
+                fishData,
+                inhabitant: inhabitant,
+              );
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
@@ -1271,21 +1365,22 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       children: [
                         CircleAvatar(
                           radius: 22,
-                          backgroundImage: fishImageUrl != null 
-                            ? (fishImageUrl.startsWith('http')
-                                ? CachedNetworkImageProvider(fishImageUrl)
-                                : FileImage(File(fishImageUrl)) as ImageProvider)
-                            : null,
-                          backgroundColor: fishImageUrl == null 
-                            ? cs.primaryContainer 
-                            : null,
-                          child: fishImageUrl == null 
-                            ? Icon(
-                                Icons.shape_line,
-                                color: cs.onPrimaryContainer,
-                                size: 22,
-                              ) 
-                            : null,
+                          backgroundImage: fishImageUrl != null
+                              ? (fishImageUrl.startsWith('http')
+                                    ? CachedNetworkImageProvider(fishImageUrl)
+                                    : FileImage(File(fishImageUrl))
+                                          as ImageProvider)
+                              : null,
+                          backgroundColor: fishImageUrl == null
+                              ? cs.primaryContainer
+                              : null,
+                          child: fishImageUrl == null
+                              ? Icon(
+                                  Icons.shape_line,
+                                  color: cs.onPrimaryContainer,
+                                  size: 22,
+                                )
+                              : null,
                         ),
                         // Quantity badge
                         if (inhabitant.quantity > 1)
@@ -1293,7 +1388,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             bottom: 0,
                             right: 0,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: cs.primary,
                                 borderRadius: BorderRadius.circular(10),
@@ -1340,29 +1438,43 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                               child: Wrap(
                                 spacing: 4,
                                 runSpacing: 2,
-                                children: inhabitant.speciesTags.map((tag) => Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: cs.secondaryContainer.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontSize: 10,
-                                      color: cs.onSecondaryContainer,
-                                    ),
-                                  ),
-                                )).toList(),
+                                children: inhabitant.speciesTags
+                                    .map(
+                                      (tag) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: cs.secondaryContainer
+                                              .withOpacity(0.6),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          tag,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                fontSize: 10,
+                                                color: cs.onSecondaryContainer,
+                                              ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
                               ),
                             ),
                           if (inhabitant.dateAdded != null)
                             Text(
                               'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: cs.onSurfaceVariant.withOpacity(0.7),
-                                fontSize: 11,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                                    fontSize: 11,
+                                  ),
                             ),
                         ],
                       ),
@@ -1378,20 +1490,27 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   }
 
   /// Helper method to get fish image URL (prioritizes custom images)
-  String? _getFishImageUrl(String tankType, String fishName, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
+  String? _getFishImageUrl(
+    String tankType,
+    String fishName,
+    Map<String, List<Fish>>? fishData, {
+    TankInhabitant? inhabitant,
+  }) {
     // Prioritize custom images if inhabitant is provided
     if (inhabitant != null) {
-      if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+      if (inhabitant.customImageUrl != null &&
+          inhabitant.customImageUrl!.isNotEmpty) {
         return inhabitant.customImageUrl;
       }
-      if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+      if (inhabitant.customImagePath != null &&
+          inhabitant.customImagePath!.isNotEmpty) {
         return inhabitant.customImagePath;
       }
     }
-    
+
     // Fall back to default fish image
     if (fishData == null) return null;
-    
+
     final categoryFish = fishData[tankType] ?? [];
     final fish = categoryFish.firstWhere(
       (f) => f.name == fishName,
@@ -1405,7 +1524,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         withCaution: [],
       ),
     );
-    
+
     return fish.imageURL.isNotEmpty ? fish.imageURL : null;
   }
 
@@ -1433,7 +1552,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       color: cs.tertiaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.calculate, color: cs.onTertiaryContainer, size: 20),
+                    child: Icon(
+                      Icons.calculate,
+                      color: cs.onTertiaryContainer,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1445,7 +1568,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     ),
                   ),
                   Icon(
-                    _showCalculationBreakdown ? Icons.expand_less : Icons.expand_more,
+                    _showCalculationBreakdown
+                        ? Icons.expand_less
+                        : Icons.expand_more,
                     color: cs.onSurface.withOpacity(0.6),
                   ),
                 ],
@@ -1455,9 +1580,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               const SizedBox(height: 12),
               Text(
                 tank.calculationBreakdown ?? '',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
               ),
             ],
           ],
@@ -1507,7 +1632,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   IconData _getActivityIcon(dynamic type) {
     // Handle both NotificationType enum and string
     final typeStr = type.toString().split('.').last.toLowerCase();
-    
+
     switch (typeStr) {
       case 'feeding':
         return Icons.restaurant;
@@ -1569,10 +1694,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       ? CachedNetworkImage(
                           imageUrl: imageUrl,
                           fit: BoxFit.contain,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                          placeholder: (context, url) =>
+                              const Center(child: CircularProgressIndicator()),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
                         )
                       : Image.file(
                           File(imageUrl),
@@ -1595,10 +1720,7 @@ class _TankPhotoDialog extends StatefulWidget {
   final TankPhoto? existingPhoto;
   final Function(TankPhoto) onSave;
 
-  const _TankPhotoDialog({
-    this.existingPhoto,
-    required this.onSave,
-  });
+  const _TankPhotoDialog({this.existingPhoto, required this.onSave});
 
   @override
   State<_TankPhotoDialog> createState() => _TankPhotoDialogState();
@@ -1687,8 +1809,10 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
   }
 
   String? _getDisplayImageUrl() {
-    if (_customImageUrl != null && _customImageUrl!.isNotEmpty) return _customImageUrl;
-    if (_customImagePath != null && _customImagePath!.isNotEmpty) return _customImagePath;
+    if (_customImageUrl != null && _customImageUrl!.isNotEmpty)
+      return _customImageUrl;
+    if (_customImagePath != null && _customImagePath!.isNotEmpty)
+      return _customImagePath;
     return null;
   }
 
@@ -1745,13 +1869,20 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.image_outlined, size: 48, color: cs.onSurfaceVariant),
+                                    Icon(
+                                      Icons.image_outlined,
+                                      size: 48,
+                                      color: cs.onSurfaceVariant,
+                                    ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'No image selected',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: cs.onSurfaceVariant,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -1764,7 +1895,8 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                                         fit: BoxFit.cover,
                                         width: double.infinity,
                                         height: double.infinity,
-                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
                                       )
                                     : Image.file(
                                         File(_customImagePath!),
@@ -1783,12 +1915,18 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: _pickImageFromGallery,
-                            icon: const Icon(Icons.photo_library_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.photo_library_outlined,
+                              size: 18,
+                            ),
                             label: Text(l10n.gallery),
                           ),
                           ElevatedButton.icon(
                             onPressed: _pickImageFromCamera,
-                            icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.camera_alt_outlined,
+                              size: 18,
+                            ),
                             label: Text(l10n.camera),
                           ),
                           if (_getDisplayImageUrl() != null)
@@ -1831,9 +1969,8 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                       // Date Taken
                       Text(
                         'Date Taken',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       InkWell(
@@ -1876,7 +2013,9 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _save,
-                      child: Text(widget.existingPhoto != null ? 'Update' : l10n.add),
+                      child: Text(
+                        widget.existingPhoto != null ? 'Update' : l10n.add,
+                      ),
                     ),
                   ),
                 ],

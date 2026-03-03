@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/community_post.dart';
+
 import '../models/community_comment.dart';
+import '../models/community_post.dart';
 import '../services/auth_service.dart';
 import '../services/community_service.dart';
 
@@ -48,23 +49,18 @@ class CommunityFeedNotifier extends Notifier<CommunityFeedState> {
   CommunityFeedState build() => const CommunityFeedState();
 
   void setSelectedType(PostType? type) {
-    state = state.copyWith(
-      selectedType: type,
-      clearType: type == null,
-    );
+    state = state.copyWith(selectedType: type, clearType: type == null);
   }
 }
 
 final communityFeedProvider =
     NotifierProvider<CommunityFeedNotifier, CommunityFeedState>(
-  CommunityFeedNotifier.new,
-);
+      CommunityFeedNotifier.new,
+    );
 
 /// Live stream of all posts (most recent first).
-final communityPostsStreamProvider =
-    StreamProvider<List<CommunityPost>>((ref) {
-  final selectedType =
-      ref.watch(communityFeedProvider).selectedType;
+final communityPostsStreamProvider = StreamProvider<List<CommunityPost>>((ref) {
+  final selectedType = ref.watch(communityFeedProvider).selectedType;
   if (selectedType != null) {
     return CommunityService.postsByTypeStream(selectedType);
   }
@@ -75,20 +71,20 @@ final communityPostsStreamProvider =
 /// Welcome Screen community card. Uses a separate provider so it doesn't
 /// interfere with the main community feed filter state.
 /// Pass a [PostType] to filter by type, or `null` for all types.
-final welcomeCommunityPostsProvider =
-    StreamProvider.autoDispose.family<List<CommunityPost>, PostType?>(
-  (ref, type) => type != null
-      ? CommunityService.postsByTypeStream(type, limit: 5)
-      : CommunityService.postsStream(limit: 5),
-);
+final welcomeCommunityPostsProvider = StreamProvider.autoDispose
+    .family<List<CommunityPost>, PostType?>(
+      (ref, type) => type != null
+          ? CommunityService.postsByTypeStream(type, limit: 5)
+          : CommunityService.postsStream(limit: 5),
+    );
 
 // ─── Comments Provider ────────────────────────────────────────────────────────
 
 /// Live stream of comments for a given post.
 final communityCommentsStreamProvider =
     StreamProvider.family<List<CommunityComment>, String>((ref, postId) {
-  return CommunityService.commentsStream(postId);
-});
+      return CommunityService.commentsStream(postId);
+    });
 
 // ─── Create Post State ────────────────────────────────────────────────────────
 
@@ -130,7 +126,11 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     Map<String, String>? postSignature,
     bool isFounderPost = false,
   }) async {
-    state = state.copyWith(isSubmitting: true, clearError: true, success: false);
+    state = state.copyWith(
+      isSubmitting: true,
+      clearError: true,
+      success: false,
+    );
     final post = await CommunityService.createPost(
       type: type,
       title: title,
@@ -143,7 +143,10 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     if (post != null) {
       state = state.copyWith(isSubmitting: false, success: true);
     } else {
-      state = state.copyWith(isSubmitting: false, error: 'post_creation_failed');
+      state = state.copyWith(
+        isSubmitting: false,
+        error: 'post_creation_failed',
+      );
     }
     return post;
   }
@@ -154,7 +157,11 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     required String body,
     String? newImageFilePath,
   }) async {
-    state = state.copyWith(isSubmitting: true, clearError: true, success: false);
+    state = state.copyWith(
+      isSubmitting: true,
+      clearError: true,
+      success: false,
+    );
     final updated = await CommunityService.updatePost(
       post: post,
       title: title,
@@ -172,5 +179,5 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
 
 final createPostProvider =
     NotifierProvider.autoDispose<CreatePostNotifier, CreatePostState>(
-  CreatePostNotifier.new,
-);
+      CreatePostNotifier.new,
+    );

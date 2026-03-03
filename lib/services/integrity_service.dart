@@ -32,10 +32,9 @@ class IntegrityService {
 
     final nonce = _generateNonce();
     try {
-      final token = await _channel.invokeMethod<String>(
-        'getIntegrityToken',
-        {'nonce': nonce},
-      );
+      final token = await _channel.invokeMethod<String>('getIntegrityToken', {
+        'nonce': nonce,
+      });
       if (token == null) return null;
       return IntegrityResult(token: token, nonce: nonce);
     } on PlatformException catch (e) {

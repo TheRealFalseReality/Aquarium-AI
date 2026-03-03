@@ -52,9 +52,7 @@ class _AiErrorDialog extends StatelessWidget {
           // Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            decoration: BoxDecoration(
-              color: cs.errorContainer,
-            ),
+            decoration: BoxDecoration(color: cs.errorContainer),
             child: Row(
               children: [
                 Icon(Icons.error_rounded, color: cs.onErrorContainer, size: 28),
@@ -72,7 +70,10 @@ class _AiErrorDialog extends StatelessWidget {
                   icon: Icon(Icons.close, color: cs.onErrorContainer),
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: 'Dismiss',
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                   padding: EdgeInsets.zero,
                 ),
               ],
@@ -84,9 +85,9 @@ class _AiErrorDialog extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
               child: MarkdownBody(
                 data: errorMessage,
-                styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                  p: tt.bodyMedium,
-                ),
+                styleSheet: MarkdownStyleSheet.fromTheme(
+                  Theme.of(context),
+                ).copyWith(p: tt.bodyMedium),
               ),
             ),
           ),

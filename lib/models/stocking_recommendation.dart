@@ -48,8 +48,9 @@ class StockingRecommendation {
           .map(Fish.fromJson)
           .toList(),
       aiTankMatesSummary: json['aiTankMatesSummary'] as String? ?? '',
-      aiRecommendedTankMates:
-          List<String>.from(json['aiRecommendedTankMates'] as List? ?? []),
+      aiRecommendedTankMates: List<String>.from(
+        json['aiRecommendedTankMates'] as List? ?? [],
+      ),
       harmonyScore: (json['harmonyScore'] as num?)?.toDouble() ?? 0.0,
       compatibilityNotes: json['compatibilityNotes'] as String?,
       isAdditionRecommendation:

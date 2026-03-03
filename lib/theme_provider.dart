@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import './services/analytics_service.dart';
 import './theme_colors.dart';
 
 final themeProviderNotifierProvider =
     StateNotifierProvider<ThemeProviderNotifier, ThemeProviderState>((ref) {
-  return ThemeProviderNotifier();
-});
+      return ThemeProviderNotifier();
+    });
 
 /// Default display name used for the [AppColorTheme.custom] theme before the
 /// user assigns their own name.
@@ -140,7 +141,8 @@ extension AppColorThemeExt on AppColorTheme {
       case AppColorTheme.defaultTheme:
         return AquaThemeColors.defaultSeed;
       case AppColorTheme.materialYou:
-        return AquaThemeColors.defaultSeed; // fallback; overridden by dynamic color
+        return AquaThemeColors
+            .defaultSeed; // fallback; overridden by dynamic color
       case AppColorTheme.oceanBlue:
         return AquaThemeColors.oceanBlueSeed;
       case AppColorTheme.iceBlue:
@@ -175,15 +177,19 @@ extension AppColorThemeExt on AppColorTheme {
 
 class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
   ThemeProviderNotifier()
-      : super(ThemeProviderState(
-            themeMode: ThemeMode.system,
-            useMaterialYou: false,
-            colorTheme: AppColorTheme.defaultTheme)) {
+    : super(
+        ThemeProviderState(
+          themeMode: ThemeMode.system,
+          useMaterialYou: false,
+          colorTheme: AppColorTheme.defaultTheme,
+        ),
+      ) {
     _loadTheme();
   }
 
   ThemeData getLightTheme(ColorScheme? lightDynamic) {
-    final colorScheme = lightDynamic ??
+    final colorScheme =
+        lightDynamic ??
         ColorScheme.fromSeed(
           seedColor: const Color(0xFF3498DB),
           brightness: Brightness.light,
@@ -198,7 +204,8 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
   }
 
   ThemeData getDarkTheme(ColorScheme? darkDynamic) {
-    final colorScheme = darkDynamic ??
+    final colorScheme =
+        darkDynamic ??
         ColorScheme.fromSeed(
           seedColor: const Color(0xFF3498DB),
           brightness: Brightness.dark,
@@ -277,12 +284,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
         : AppFont.poppins;
 
     state = ThemeProviderState(
-        themeMode: ThemeMode.values[themeIndex],
-        useMaterialYou: useMaterialYou,
-        colorTheme: colorTheme,
-        customSeedColor: customSeedColor,
-        customThemeName: customThemeName,
-        font: appFont);
+      themeMode: ThemeMode.values[themeIndex],
+      useMaterialYou: useMaterialYou,
+      colorTheme: colorTheme,
+      customSeedColor: customSeedColor,
+      customThemeName: customThemeName,
+      font: appFont,
+    );
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -290,12 +298,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('themeMode', mode.index);
     state = ThemeProviderState(
-        themeMode: mode,
-        useMaterialYou: state.useMaterialYou,
-        colorTheme: state.colorTheme,
-        customSeedColor: state.customSeedColor,
-        customThemeName: state.customThemeName,
-        font: state.font);
+      themeMode: mode,
+      useMaterialYou: state.useMaterialYou,
+      colorTheme: state.colorTheme,
+      customSeedColor: state.customSeedColor,
+      customThemeName: state.customThemeName,
+      font: state.font,
+    );
 
     // Log theme change
     AnalyticsService.logSettingsChange(
@@ -320,12 +329,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     await prefs.setInt('colorTheme', newColorTheme.index);
     await prefs.setString('colorThemeName', newColorTheme.name);
     state = ThemeProviderState(
-        themeMode: state.themeMode,
-        useMaterialYou: value,
-        colorTheme: newColorTheme,
-        customSeedColor: state.customSeedColor,
-        customThemeName: state.customThemeName,
-        font: state.font);
+      themeMode: state.themeMode,
+      useMaterialYou: value,
+      colorTheme: newColorTheme,
+      customSeedColor: state.customSeedColor,
+      customThemeName: state.customThemeName,
+      font: state.font,
+    );
 
     // Log Material You toggle
     AnalyticsService.logSettingsChange(
@@ -345,12 +355,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final useMaterialYou = theme == AppColorTheme.materialYou;
     await prefs.setBool('useMaterialYou', useMaterialYou);
     state = ThemeProviderState(
-        themeMode: state.themeMode,
-        useMaterialYou: useMaterialYou,
-        colorTheme: theme,
-        customSeedColor: state.customSeedColor,
-        customThemeName: state.customThemeName,
-        font: state.font);
+      themeMode: state.themeMode,
+      useMaterialYou: useMaterialYou,
+      colorTheme: theme,
+      customSeedColor: state.customSeedColor,
+      customThemeName: state.customThemeName,
+      font: state.font,
+    );
 
     AnalyticsService.logSettingsChange(
       settingName: 'color_theme',
@@ -368,16 +379,18 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     await prefs.setString('colorThemeName', AppColorTheme.custom.name);
     await prefs.setBool('useMaterialYou', false);
     await prefs.setInt('customSeedColor', seed.value);
-    final trimmedName =
-        name.trim().isEmpty ? kDefaultCustomThemeName : name.trim();
+    final trimmedName = name.trim().isEmpty
+        ? kDefaultCustomThemeName
+        : name.trim();
     await prefs.setString('customThemeName', trimmedName);
     state = ThemeProviderState(
-        themeMode: state.themeMode,
-        useMaterialYou: false,
-        colorTheme: AppColorTheme.custom,
-        customSeedColor: seed,
-        customThemeName: trimmedName,
-        font: state.font);
+      themeMode: state.themeMode,
+      useMaterialYou: false,
+      colorTheme: AppColorTheme.custom,
+      customSeedColor: seed,
+      customThemeName: trimmedName,
+      font: state.font,
+    );
 
     AnalyticsService.logSettingsChange(
       settingName: 'color_theme',
@@ -392,12 +405,13 @@ class ThemeProviderNotifier extends StateNotifier<ThemeProviderState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('appFont', font.name);
     state = ThemeProviderState(
-        themeMode: state.themeMode,
-        useMaterialYou: state.useMaterialYou,
-        colorTheme: state.colorTheme,
-        customSeedColor: state.customSeedColor,
-        customThemeName: state.customThemeName,
-        font: font);
+      themeMode: state.themeMode,
+      useMaterialYou: state.useMaterialYou,
+      colorTheme: state.colorTheme,
+      customSeedColor: state.customSeedColor,
+      customThemeName: state.customThemeName,
+      font: font,
+    );
 
     AnalyticsService.logSettingsChange(
       settingName: 'app_font',

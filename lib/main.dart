@@ -1,45 +1,46 @@
 import 'dart:async';
 import 'dart:io';
+
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import './theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+import '../l10n/app_localizations.dart';
+import './constants.dart' show reCaptchaV3SiteKey;
 import './providers/app_settings_provider.dart';
-import './screens/welcome_screen.dart';
 import './screens/about_screen.dart';
-import './screens/information_screen.dart';
-import './screens/tank_volume_calculator.dart';
+import './screens/analysis_history_screen.dart';
+import './screens/appearance_screen.dart';
+import './screens/auth_screen.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import './widgets/transitions.dart';
+import './screens/community_screen.dart';
+import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/information_screen.dart';
 import './screens/photo_analysis_screen.dart';
-import './screens/tank_management_screen.dart';
+import './screens/profile_screen.dart';
 import './screens/species_tags_screen.dart';
-import './screens/analysis_history_screen.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import './constants.dart' show reCaptchaV3SiteKey;
+import './screens/tank_management_screen.dart';
+import './screens/tank_volume_calculator.dart';
+import './screens/welcome_screen.dart';
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
 import './services/device_id_service.dart';
 import './services/notification_service.dart';
 import './services/remote_config_service.dart';
-import '../l10n/app_localizations.dart';
-import './screens/fish_compat_editor_screen.dart';
-import './screens/appearance_screen.dart';
-import './screens/community_screen.dart';
-import './screens/auth_screen.dart';
-import './screens/profile_screen.dart';
+import './theme_provider.dart';
+import './widgets/transitions.dart';
+import 'firebase_options.dart';
 
 /// Global navigator key for app-wide navigation from services like notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -48,13 +49,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 bool _firebaseInitialized = false;
 
 /// Initialize Firebase with retry logic and error handling
-/// 
+///
 /// Handles TLS/SSL handshake exceptions and other connection issues gracefully
 /// Returns true if initialization was successful, false otherwise
 Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
   int retries = 0;
   int retryDelayMs = 1000; // Initial delay in milliseconds
-  
+
   while (retries < maxRetries) {
     try {
       await Firebase.initializeApp(
@@ -65,34 +66,42 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
     } on HandshakeException catch (e) {
       retries++;
       if (kDebugMode) {
-        debugPrint('Firebase initialization HandshakeException (attempt $retries/$maxRetries): $e');
+        debugPrint(
+          'Firebase initialization HandshakeException (attempt $retries/$maxRetries): $e',
+        );
       }
-      
+
       if (retries >= maxRetries) {
         if (kDebugMode) {
-          debugPrint('Firebase initialization failed after $maxRetries attempts due to handshake error');
+          debugPrint(
+            'Firebase initialization failed after $maxRetries attempts due to handshake error',
+          );
           debugPrint('The app will continue without Firebase features');
         }
         return false;
       }
-      
+
       // Exponential backoff
       await Future.delayed(Duration(milliseconds: retryDelayMs));
       retryDelayMs *= 2;
     } on SocketException catch (e) {
       retries++;
       if (kDebugMode) {
-        debugPrint('Firebase initialization SocketException (attempt $retries/$maxRetries): $e');
+        debugPrint(
+          'Firebase initialization SocketException (attempt $retries/$maxRetries): $e',
+        );
       }
-      
+
       if (retries >= maxRetries) {
         if (kDebugMode) {
-          debugPrint('Firebase initialization failed after $maxRetries attempts due to network error');
+          debugPrint(
+            'Firebase initialization failed after $maxRetries attempts due to network error',
+          );
           debugPrint('The app will continue without Firebase features');
         }
         return false;
       }
-      
+
       await Future.delayed(Duration(milliseconds: retryDelayMs));
       retryDelayMs *= 2;
     } catch (e) {
@@ -104,7 +113,7 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
       return false;
     }
   }
-  
+
   return false;
 }
 
@@ -153,9 +162,7 @@ Future<void> _initializeAppCheck() async {
       // App Attest requires iOS 14+ / macOS 14+.  For older OS targets
       // you can use AppleProvider.deviceCheckWithFallbackToAppAttest.
       // ---------------------------------------------------------------
-      appleProvider: kDebugMode
-          ? AppleProvider.debug
-          : AppleProvider.appAttest,
+      appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
 
       // ---------------------------------------------------------------
       // Web: reCAPTCHA v3.
@@ -201,10 +208,10 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  
+
   // Initialize Firebase with retry logic and error handling
   _firebaseInitialized = await _initializeFirebaseWithRetry();
-  
+
   // Only initialize Firebase-dependent services if Firebase initialized successfully
   if (_firebaseInitialized) {
     // Activate Firebase App Check to prevent unauthorized access to Firebase
@@ -230,7 +237,9 @@ void main() async {
     });
 
     // Initialize notification service with navigator key (non-blocking)
-    NotificationService().initialize(navigatorKey: navigatorKey).catchError((error) {
+    NotificationService().initialize(navigatorKey: navigatorKey).catchError((
+      error,
+    ) {
       if (kDebugMode) {
         debugPrint('Notification service initialization error: $error');
       }
@@ -270,7 +279,7 @@ void main() async {
       // ignore: avoid_print
       print('Stack trace: ${errorDetails.stack}');
     }
-    
+
     // Only record to Crashlytics if Firebase is initialized
     if (_firebaseInitialized) {
       CrashlyticsService.recordError(
@@ -280,7 +289,7 @@ void main() async {
         fatal: true,
         information: errorDetails.informationCollector?.call() ?? [],
       );
-      
+
       // Also log to Analytics (non-blocking)
       AnalyticsService.logError(
         errorType: 'flutter_fatal_error',
@@ -301,11 +310,11 @@ void main() async {
       // ignore: avoid_print
       print('Stack trace: $stack');
     }
-    
+
     // Only record to Crashlytics if Firebase is initialized
     if (_firebaseInitialized) {
       CrashlyticsService.recordError(error, stack, fatal: true);
-      
+
       // Also log to Analytics (non-blocking)
       AnalyticsService.logError(
         errorType: 'platform_error',
@@ -322,9 +331,7 @@ void main() async {
   if (!kIsWeb) {
     unawaited(MobileAds.instance.initialize());
   }
-  runApp(
-    const ProviderScope(child: MyApp()),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -336,7 +343,7 @@ class MyApp extends ConsumerWidget {
     if (!_firebaseInitialized) {
       return [];
     }
-    
+
     try {
       return [AnalyticsService.observer];
     } catch (e) {
@@ -348,16 +355,27 @@ class MyApp extends ConsumerWidget {
   }
 
   // Helper method to update system UI overlay based on theme
-  void _updateSystemUIOverlay(ThemeMode themeMode, ColorScheme lightColorScheme, ColorScheme darkColorScheme) {
-    final isDarkMode = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system && WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
-    
+  void _updateSystemUIOverlay(
+    ThemeMode themeMode,
+    ColorScheme lightColorScheme,
+    ColorScheme darkColorScheme,
+  ) {
+    final isDarkMode =
+        themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+                Brightness.dark);
+
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         systemNavigationBarColor: Colors.transparent,
-        statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
-        systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: isDarkMode
+            ? Brightness.light
+            : Brightness.dark,
+        systemNavigationBarIconBrightness: isDarkMode
+            ? Brightness.light
+            : Brightness.dark,
       ),
     );
   }
@@ -478,7 +496,10 @@ class MyApp extends ConsumerWidget {
 
         // Update system UI overlay based on current theme
         _updateSystemUIOverlay(
-            themeProvider.themeMode, lightTheme.colorScheme, darkTheme.colorScheme);
+          themeProvider.themeMode,
+          lightTheme.colorScheme,
+          darkTheme.colorScheme,
+        );
 
         return MaterialApp(
           navigatorKey: navigatorKey,
@@ -486,9 +507,10 @@ class MyApp extends ConsumerWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
-          locale: appSettings.localeCode != null 
-              ? Locale(appSettings.localeCode!) 
-              : null, // null means use system locale
+          locale: appSettings.localeCode != null
+              ? Locale(appSettings.localeCode!)
+              : null,
+          // null means use system locale
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -508,7 +530,7 @@ class MyApp extends ConsumerWidget {
             final args = settings.arguments;
             Widget page;
             String screenName;
-            
+
             switch (settings.name) {
               case '/':
                 page = const WelcomeScreen();
@@ -540,7 +562,8 @@ class MyApp extends ConsumerWidget {
                 bool autoOpenFishInfo = false;
                 if (args is Map) {
                   if (args['openPhotoAnalyzer'] == true) autoOpen = true;
-                  if (args['openWaterAnalysis'] == true) autoOpenWaterAnalysis = true;
+                  if (args['openWaterAnalysis'] == true)
+                    autoOpenWaterAnalysis = true;
                   if (args['openFishInfo'] == true) autoOpenFishInfo = true;
                 }
                 page = ChatbotScreen(
@@ -605,19 +628,21 @@ class MyApp extends ConsumerWidget {
                 page = const WelcomeScreen();
                 screenName = 'welcome_screen';
             }
-            
+
             // Log screen view (non-blocking) only if Firebase is initialized
             if (_firebaseInitialized) {
-              AnalyticsService.logScreenView(screenName: screenName).catchError((error) {
-                if (kDebugMode) {
-                  print('Analytics screen view error: $error');
-                }
-              });
+              AnalyticsService.logScreenView(screenName: screenName).catchError(
+                (error) {
+                  if (kDebugMode) {
+                    print('Analytics screen view error: $error');
+                  }
+                },
+              );
               // Update Crashlytics current_screen key so crash reports include
               // the screen the user was on at the time of the crash.
               CrashlyticsService.setCurrentScreen(screenName);
             }
-            
+
             return FadeSlideRoute(page: page);
           },
         );

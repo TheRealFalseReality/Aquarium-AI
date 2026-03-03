@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 /// Extracts JSON content from a markdown code block or returns the raw text
-/// 
+///
 /// This utility function handles AI responses that may wrap JSON in markdown
 /// code blocks (```json ... ```) or return raw JSON.
-/// 
+///
 /// Example:
 /// ```dart
 /// final response = '```json\n{"key": "value"}\n```';
@@ -16,7 +16,7 @@ String extractJson(String text) {
   if (match != null) {
     return match.group(1) ?? text.trim();
   }
-  
+
   // Check if the text is already valid JSON
   try {
     json.decode(text);
@@ -25,4 +25,3 @@ String extractJson(String text) {
     return text;
   }
 }
-

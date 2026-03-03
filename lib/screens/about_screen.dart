@@ -1,12 +1,13 @@
 import 'dart:io';
+
 import 'package:fish_ai/widgets/gradient_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_update/in_app_update.dart';
-
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../services/in_app_update_service.dart';
@@ -44,17 +45,17 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
       final l10n = AppLocalizations.of(context)!;
       if (info == null) {
         // Check failed (e.g. not distributed via Play or network error)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.unableToCheckUpdates)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.unableToCheckUpdates)));
         return;
       }
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         await InAppUpdateService.startFlexibleUpdate();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.alreadyLatestVersion)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.alreadyLatestVersion)));
       }
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
@@ -102,11 +103,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
   Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-          size: 24,
-        ),
+        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
         const SizedBox(width: 12),
         Text(
           title,
@@ -124,8 +121,9 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
     final l10n = AppLocalizations.of(context)!;
     // Only show "Get the Mobile App" section on non-mobile platforms (web, desktop)
     // Hide on Android/iOS as it's redundant when already using the mobile app
-    final shouldShowMobileAppSection = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
-    
+    final shouldShowMobileAppSection =
+        kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+
     return MainLayout(
       title: l10n.about,
       bottomNavigationBar: const AdBanner(),
@@ -134,17 +132,16 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
         children: <Widget>[
           // Header Section
           const SizedBox(height: 16),
-              GradientText(
-                l10n.appTitle,
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                ),
-                gradient: LinearGradient(colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.secondary,
-                ]),
-              ),
+          GradientText(
+            l10n.appTitle,
+            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             l10n.aboutSubtitle,
@@ -154,7 +151,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          
+
           // Get the App Section
           if (shouldShowMobileAppSection) ...[
             Card(
@@ -164,7 +161,11 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(context, l10n.getMobileApp, Icons.phone_android),
+                    _buildSectionTitle(
+                      context,
+                      l10n.getMobileApp,
+                      Icons.phone_android,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.getMobileAppDescription,
@@ -173,7 +174,9 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
-                        onTap: () => _launchURL('https://play.google.com/store/apps/details?id=com.cca.fishai'),
+                        onTap: () => _launchURL(
+                          'https://play.google.com/store/apps/details?id=com.cca.fishai',
+                        ),
                         child: Image.asset(
                           'assets/images/system/google_play_badge.png',
                           height: 60,
@@ -195,7 +198,11 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(context, l10n.bringYourOwnApiKey, Icons.key),
+                  _buildSectionTitle(
+                    context,
+                    l10n.bringYourOwnApiKey,
+                    Icons.key,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.byokDescription,
@@ -243,10 +250,14 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceVariant.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.3),
                       ),
                     ),
                     child: Text(
@@ -262,7 +273,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Contact & Feedback Section
           Card(
             elevation: 2,
@@ -271,7 +282,11 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(context, l10n.contactFeedback, Icons.contact_support),
+                  _buildSectionTitle(
+                    context,
+                    l10n.contactFeedback,
+                    Icons.contact_support,
+                  ),
                   const SizedBox(height: 16),
                   Text.rich(
                     TextSpan(
@@ -282,7 +297,8 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                           alignment: PlaceholderAlignment.middle,
                           child: InkWell(
                             onTap: () => _launchURL(
-                                'https://www.capitalcityaquatics.com/'),
+                              'https://www.capitalcityaquatics.com/',
+                            ),
                             child: Text(
                               'Capital City Aquatics',
                               style: _getLocalKarlaFont(
@@ -298,17 +314,15 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    l10n.feedbackDescription,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(l10n.feedbackDescription, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
                   ListTile(
                     leading: const Icon(Icons.bug_report),
                     title: Text(l10n.createIssueOnGitHub),
                     subtitle: Text(l10n.createIssueSubtitle),
                     onTap: () => _launchURL(
-                        'https://github.com/TheRealFalseReality/aquarium-ai/issues'),
+                      'https://github.com/TheRealFalseReality/aquarium-ai/issues',
+                    ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.email),
@@ -321,7 +335,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Source Code Section
           Card(
             elevation: 2,
@@ -341,9 +355,13 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     icon: const Icon(Icons.code),
                     label: const Text('TheRealFalseReality/Aquarium-AI'),
                     onPressed: () => _launchURL(
-                        'https://github.com/TheRealFalseReality/aquarium-ai'),
+                      'https://github.com/TheRealFalseReality/aquarium-ai',
+                    ),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -351,20 +369,22 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Version
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 l10n.versionDisplay(_version),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
           ),

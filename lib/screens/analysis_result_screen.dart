@@ -2,9 +2,10 @@ import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../l10n/app_localizations.dart';
-import '../models/analysis_result.dart';
 import '../main_layout.dart';
+import '../models/analysis_result.dart';
 import '../utils/share_utils.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
@@ -92,9 +93,9 @@ class AnalysisResultScreen extends StatelessWidget {
             Text(
               summary.status,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -146,15 +147,16 @@ class AnalysisResultScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     param.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(24),
@@ -163,9 +165,10 @@ class AnalysisResultScreen extends StatelessWidget {
                   child: Text(
                     param.value,
                     style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13),
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
@@ -174,9 +177,9 @@ class AnalysisResultScreen extends StatelessWidget {
             Text(
               'Ideal: ${param.idealRange}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurface.withOpacity(0.75),
-                  ),
+                fontWeight: FontWeight.w500,
+                color: cs.onSurface.withOpacity(0.75),
+              ),
             ),
             const Divider(height: 18),
             // Markdown to render **bold** inside advice
@@ -186,14 +189,18 @@ class AnalysisResultScreen extends StatelessWidget {
               onTapLink: (text, href, title) {
                 if (href != null) launchUrl(Uri.parse(href));
               },
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _howAquaPiHelpsCard(BuildContext context, AppLocalizations l10n, String markdownText) {
+  Widget _howAquaPiHelpsCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    String markdownText,
+  ) {
     final cs = Theme.of(context).colorScheme;
     return Card(
       elevation: 3,
@@ -214,11 +221,12 @@ class AnalysisResultScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BannerAdWidget(),
-            Text(l10n.howAquaPiCanHelp,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              l10n.howAquaPiCanHelp,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 10),
             MarkdownBody(
               data: markdownText,

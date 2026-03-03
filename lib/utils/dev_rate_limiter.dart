@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/device_id_service.dart';
 import '../services/remote_config_service.dart';
 
@@ -53,8 +54,9 @@ class DevRateLimiter {
   ///
   /// On success, records the timestamp and increments the daily counter, then
   /// returns [DevRateLimitResult.allowed].
-  static Future<DevRateLimitResult> checkAndRecordRequest(
-      {bool isFounder = false}) async {
+  static Future<DevRateLimitResult> checkAndRecordRequest({
+    bool isFounder = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
@@ -117,7 +119,8 @@ class DevRateLimiter {
     final now = DateTime.now();
     final windowStart = now.subtract(const Duration(minutes: 1));
 
-    final raw = prefs.getStringList(_key(deviceId, _requestTimestampsSuffix)) ?? [];
+    final raw =
+        prefs.getStringList(_key(deviceId, _requestTimestampsSuffix)) ?? [];
     final recent = raw
         .map((s) => DateTime.tryParse(s))
         .whereType<DateTime>()
@@ -144,7 +147,8 @@ class DevRateLimiter {
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_key(deviceId, _requestDailyDateSuffix)) ?? '';
+    final storedDate =
+        prefs.getString(_key(deviceId, _requestDailyDateSuffix)) ?? '';
     final count = storedDate == todayStr
         ? (prefs.getInt(_key(deviceId, _requestDailyCountSuffix)) ?? 0)
         : 0;
@@ -166,7 +170,9 @@ class DevRateLimiter {
   ///
   /// Returns `true` and increments the counter if allowed.
   /// Returns `false` (without incrementing) if the limit is exceeded.
-  static Future<bool> checkAndRecordPhotoAnalysis({bool isFounder = false}) async {
+  static Future<bool> checkAndRecordPhotoAnalysis({
+    bool isFounder = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
@@ -194,12 +200,15 @@ class DevRateLimiter {
   /// Returns the number of photo analyses remaining for today.
   ///
   /// When [isFounder] is `true`, the Founder photo-analyses cap is used.
-  static Future<int> remainingPhotoAnalysesToday({bool isFounder = false}) async {
+  static Future<int> remainingPhotoAnalysesToday({
+    bool isFounder = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
 
-    final storedDate = prefs.getString(_key(deviceId, _photoDailyDateSuffix)) ?? '';
+    final storedDate =
+        prefs.getString(_key(deviceId, _photoDailyDateSuffix)) ?? '';
     final count = storedDate == todayStr
         ? (prefs.getInt(_key(deviceId, _photoDailyCountSuffix)) ?? 0)
         : 0;

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/analytics_service.dart';
 
 mixin AnalyticsMixin<T extends StatefulWidget> on State<T> {
   late DateTime _screenEntryTime;
+
   String get screenName;
 
   @override
@@ -16,7 +18,7 @@ mixin AnalyticsMixin<T extends StatefulWidget> on State<T> {
     // Calculate time spent on screen
     final timeSpent = DateTime.now().difference(_screenEntryTime);
     final durationSeconds = timeSpent.inSeconds;
-    
+
     // Only log if user spent meaningful time on screen (more than 1 second)
     if (durationSeconds > 1) {
       AnalyticsService.logTimeSpent(
@@ -24,7 +26,7 @@ mixin AnalyticsMixin<T extends StatefulWidget> on State<T> {
         durationSeconds: durationSeconds,
       );
     }
-    
+
     super.dispose();
   }
 
@@ -40,10 +42,7 @@ mixin AnalyticsMixin<T extends StatefulWidget> on State<T> {
   void logFeatureUsed(String featureName, {Map<String, Object>? parameters}) {
     AnalyticsService.logFeatureUsed(
       featureName: featureName,
-      parameters: {
-        'screen': screenName,
-        ...?parameters,
-      },
+      parameters: {'screen': screenName, ...?parameters},
     );
   }
 }

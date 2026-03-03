@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../models/tank.dart';
+
 import '../l10n/app_localizations.dart';
+import '../models/tank.dart';
 
 /// Preset colour options shown as swatches in the tag colour picker.
 enum _TagColorPreset { primary, secondary, tertiary, custom }
@@ -160,9 +161,9 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
     final suggestions = widget.allExistingTags
         .where((t) => !selectedNames.contains(t.name))
         .fold<List<TankTag>>([], (acc, t) {
-      if (acc.every((a) => a.name != t.name)) acc.add(t);
-      return acc;
-    });
+          if (acc.every((a) => a.name != t.name)) acc.add(t);
+          return acc;
+        });
 
     return AlertDialog(
       title: Text(l10n.manageTags),
@@ -179,23 +180,26 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
                 Text(
                   l10n.currentTags,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                      ),
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
                   runSpacing: 4,
                   children: _selected.map((tag) {
-                    final tagColor =
-                        tag.color != null ? Color(tag.color!) : cs.secondary;
+                    final tagColor = tag.color != null
+                        ? Color(tag.color!)
+                        : cs.secondary;
                     final onTagColor = tagColor.computeLuminance() > 0.4
                         ? Colors.black87
                         : Colors.white;
                     return Chip(
-                      label: Text(tag.name,
-                          style: TextStyle(fontSize: 12, color: onTagColor)),
+                      label: Text(
+                        tag.name,
+                        style: TextStyle(fontSize: 12, color: onTagColor),
+                      ),
                       backgroundColor: tagColor.withOpacity(0.85),
                       side: BorderSide(color: tagColor, width: 1),
                       deleteIconColor: onTagColor.withOpacity(0.7),
@@ -213,24 +217,27 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
                 Text(
                   l10n.existingTags,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                      ),
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
                   runSpacing: 4,
                   children: suggestions.map((tag) {
-                    final tagColor =
-                        tag.color != null ? Color(tag.color!) : cs.secondary;
+                    final tagColor = tag.color != null
+                        ? Color(tag.color!)
+                        : cs.secondary;
                     final onTagColor = tagColor.computeLuminance() > 0.4
                         ? Colors.black87
                         : Colors.white;
                     return ActionChip(
                       avatar: Icon(Icons.add, size: 14, color: onTagColor),
-                      label: Text(tag.name,
-                          style: TextStyle(fontSize: 12, color: onTagColor)),
+                      label: Text(
+                        tag.name,
+                        style: TextStyle(fontSize: 12, color: onTagColor),
+                      ),
                       backgroundColor: tagColor.withOpacity(0.7),
                       side: BorderSide(color: tagColor, width: 1),
                       onPressed: () => _toggleExisting(tag),
@@ -246,9 +253,9 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
               Text(
                 l10n.addTag,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 8),
 
@@ -268,15 +275,16 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
                     label: l10n.colorSecondary,
                     selected: _colorPreset == _TagColorPreset.secondary,
                     onTap: () => setState(
-                        () => _colorPreset = _TagColorPreset.secondary),
+                      () => _colorPreset = _TagColorPreset.secondary,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   _ColorSwatch(
                     color: cs.tertiary,
                     label: l10n.colorTertiary,
                     selected: _colorPreset == _TagColorPreset.tertiary,
-                    onTap: () => setState(
-                        () => _colorPreset = _TagColorPreset.tertiary),
+                    onTap: () =>
+                        setState(() => _colorPreset = _TagColorPreset.tertiary),
                   ),
                   const SizedBox(width: 6),
                   _CustomColorSwatch(
@@ -299,20 +307,23 @@ class _TagPickerDialogState extends State<TagPickerDialog> {
                       decoration: InputDecoration(
                         hintText: l10n.addTagHint,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20)),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         isDense: true,
                         prefixIcon: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: CircleAvatar(
                             radius: 7,
                             backgroundColor: _previewColor(context),
                           ),
                         ),
-                        prefixIconConstraints:
-                            const BoxConstraints(minWidth: 32),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 32,
+                        ),
                       ),
                       style: const TextStyle(fontSize: 13),
                       textCapitalization: TextCapitalization.words,
@@ -432,13 +443,16 @@ class _CustomColorSwatch extends StatelessWidget {
             color: displayColor,
             shape: BoxShape.circle,
             border: Border.all(
-              color: selected
-                  ? cs.onSurface
-                  : cs.outline.withOpacity(0.5),
+              color: selected ? cs.onSurface : cs.outline.withOpacity(0.5),
               width: selected ? 2.5 : 1.5,
             ),
             boxShadow: selected
-                ? [BoxShadow(color: displayColor.withOpacity(0.5), blurRadius: 6)]
+                ? [
+                    BoxShadow(
+                      color: displayColor.withOpacity(0.5),
+                      blurRadius: 6,
+                    ),
+                  ]
                 : null,
           ),
           child: Icon(
@@ -446,8 +460,8 @@ class _CustomColorSwatch extends StatelessWidget {
             size: 13,
             color: color != null
                 ? (displayColor.computeLuminance() > 0.4
-                    ? Colors.black87
-                    : Colors.white)
+                      ? Colors.black87
+                      : Colors.white)
                 : cs.onSurfaceVariant,
           ),
         ),

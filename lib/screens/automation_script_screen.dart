@@ -1,9 +1,10 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
-import '../providers/chat_provider.dart';
 import '../main_layout.dart';
+import '../providers/chat_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/api_key_checker.dart';
 
@@ -30,23 +31,25 @@ class AutomationScriptScreenState
     if (!checkApiKey(context, ref)) return;
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      
+
       // Log actual feature usage
       AnalyticsService.logFeatureUsed(
         featureName: 'automation_script',
         parameters: {
           'description_length': _descriptionController.text.length,
-          'has_description': _descriptionController.text.isNotEmpty ? 'true' : 'false',
+          'has_description': _descriptionController.text.isNotEmpty
+              ? 'true'
+              : 'false',
         },
       );
-      
+
       // Start the script generation
       await ref
           .read(chatProvider.notifier)
           .generateAutomationScript(_descriptionController.text);
-      
+
       setState(() => _isSubmitting = false);
-          
+
       // Close the form after submission
       if (mounted) {
         Navigator.pop(context);
@@ -68,63 +71,63 @@ class AutomationScriptScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.aiAutomationScriptGenerator,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.aiAutomationScriptGenerator,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.automationDescription,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: l10n.automationDescriptionLabel,
+                      hintText: l10n.automationDescriptionHint,
+                      border: const OutlineInputBorder(),
                     ),
+                    maxLines: 5,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? l10n.pleaseEnterDescription
+                        : null,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                  const SizedBox(height: 24),
+                  const BannerAdWidget(),
+                  const SizedBox(height: 14),
+                  ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submitScriptRequest,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Text(l10n.generateScript),
                   ),
+
+                  const SizedBox(height: 14),
+                  const NativeAdWidget(),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.automationDescription,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.automationDescriptionLabel,
-                  hintText: l10n.automationDescriptionHint,
-                  border: const OutlineInputBorder(),
-                ),
-                maxLines: 5,
-                validator: (value) => (value == null || value.isEmpty)
-                    ? l10n.pleaseEnterDescription
-                    : null,
-              ),
-              const SizedBox(height: 24),
-              const BannerAdWidget(),
-            const SizedBox(height: 14),
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitScriptRequest,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                child: Text(l10n.generateScript),
-              ),
-              
-            const SizedBox(height: 14),
-            const NativeAdWidget(),
-            ],
+            ),
           ),
-        ),
-      ),
           if (_isSubmitting)
             Positioned.fill(
               child: AbsorbPointer(
@@ -137,7 +140,9 @@ class AutomationScriptScreenState
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 24),
+                          horizontal: 32,
+                          vertical: 24,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

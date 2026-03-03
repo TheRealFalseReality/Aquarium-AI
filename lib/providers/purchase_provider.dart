@@ -86,8 +86,8 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   Timer? _restoreTimer;
 
   PurchaseNotifier({PurchaseService? service})
-      : _service = service ?? const PurchaseService(),
-        super(const PurchaseState()) {
+    : _service = service ?? const PurchaseService(),
+      super(const PurchaseState()) {
     _init();
   }
 
@@ -112,17 +112,19 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   }
 
   Future<void> _handlePurchaseUpdates(
-      List<PurchaseDetails> purchaseDetailsList) async {
+    List<PurchaseDetails> purchaseDetailsList,
+  ) async {
     for (final details in purchaseDetailsList) {
       PurchaseService.log(
-          'Purchase update: ${details.productID} status=${details.status}');
+        'Purchase update: ${details.productID} status=${details.status}',
+      );
 
       if (details.productID.contains('remove_ads')) {
         if (details.status == PurchaseStatus.purchased ||
             details.status == PurchaseStatus.restored) {
           // Persist and update state. For a restore, also record the outcome.
-          final isRestore = _pendingRestore &&
-              details.status == PurchaseStatus.restored;
+          final isRestore =
+              _pendingRestore && details.status == PurchaseStatus.restored;
           if (isRestore) {
             _pendingRestore = false;
             _restoreTimer?.cancel();
@@ -175,9 +177,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     final response = await _service.queryRemoveAdsProduct();
     if (response.error != null) {
       PurchaseService.log(
-          'queryProductDetails error: code=${response.error!.code} '
-          'message=${response.error!.message} '
-          'details=${response.error!.details}');
+        'queryProductDetails error: code=${response.error!.code} '
+        'message=${response.error!.message} '
+        'details=${response.error!.details}',
+      );
     }
 
     if (response.productDetails.isEmpty) {
@@ -193,10 +196,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       // Purchase result arrives via the stream; keep isPurchasing = true.
     } catch (e) {
       PurchaseService.log('buyNonConsumable error: $e');
-      state = state.copyWith(
-        isPurchasing: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isPurchasing: false, errorMessage: e.toString());
     }
   }
 
@@ -231,10 +231,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       PurchaseService.log('restorePurchases error: $e');
       _pendingRestore = false;
       _restoreTimer?.cancel();
-      state = state.copyWith(
-        isPurchasing: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isPurchasing: false, errorMessage: e.toString());
     }
   }
 
@@ -253,8 +250,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
 }
 
 /// Global provider for the in-app purchase state.
-final purchaseProvider =
-    StateNotifierProvider<PurchaseNotifier, PurchaseState>(
+final purchaseProvider = StateNotifierProvider<PurchaseNotifier, PurchaseState>(
   (ref) => PurchaseNotifier(),
 );
 

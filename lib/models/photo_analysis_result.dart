@@ -104,7 +104,8 @@ class PhotoAnalysisResult {
             ? json['waterQualityGuesses']
             : <String, dynamic>{},
       ),
-      howAquaPiHelps: json['howAquaPiHelps'] ??
+      howAquaPiHelps:
+          json['howAquaPiHelps'] ??
           'AquaPi helps automate monitoring. [Shop AquaPi](https://www.capitalcityaquatics.com/store)',
       raw: json,
     );
@@ -125,6 +126,7 @@ class PhotoAnalysisResult {
 
 /// Optional helpers if you later store images as base64.
 String encodeBytes(Uint8List bytes) => base64Encode(bytes);
+
 Uint8List? decodeBytes(String? base64Str) {
   if (base64Str == null || base64Str.isEmpty) return null;
   try {

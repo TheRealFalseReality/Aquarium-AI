@@ -14,7 +14,8 @@ You are an expert aquarist and marine biologist. The user wants comprehensive in
     prompt += '\nAdditional notes: $additionalNotes.';
   }
 
-  prompt += '''
+  prompt +=
+      '''
 
 Return a single valid JSON object with the following structure. Do not include any text outside the JSON.
 
@@ -54,4 +55,3 @@ Be accurate and thorough.
 
   return prompt;
 }
-

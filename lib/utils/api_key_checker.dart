@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/model_provider.dart';
 import '../widgets/api_key_dialog.dart';
 
@@ -24,7 +25,8 @@ bool checkApiKey(BuildContext context, WidgetRef ref) {
   }
 
   // Check image provider key (only if different from text provider)
-  if (hasKey && modelState.activeImageProvider != modelState.activeTextProvider) {
+  if (hasKey &&
+      modelState.activeImageProvider != modelState.activeTextProvider) {
     switch (modelState.activeImageProvider) {
       case AIProvider.gemini:
         if (modelState.geminiApiKey.isEmpty) hasKey = false;
@@ -39,10 +41,7 @@ bool checkApiKey(BuildContext context, WidgetRef ref) {
   }
 
   if (!hasKey) {
-    showDialog(
-      context: context,
-      builder: (_) => const ApiKeyDialog(),
-    );
+    showDialog(context: context, builder: (_) => const ApiKeyDialog());
     return false;
   }
   return true;

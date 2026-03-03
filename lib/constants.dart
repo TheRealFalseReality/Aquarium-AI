@@ -2,8 +2,10 @@
 //   flutter build ... --dart-define=DEVELOPER_GROQ_API_KEY=<your-key>
 // Used as a free fallback when the user has not provided their own Groq key.
 // Leave empty to disable the fallback (users must supply their own key).
-const String developerGroqApiKey =
-    String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
+const String developerGroqApiKey = String.fromEnvironment(
+  'DEVELOPER_GROQ_API_KEY',
+  defaultValue: '',
+);
 
 // reCAPTCHA v3 site key – injected at build time via:
 //   flutter build ... --dart-define=RECAPTCHA_V3_SITE_KEY=<your-key>
@@ -11,8 +13,10 @@ const String developerGroqApiKey =
 // Obtain your key at https://www.google.com/recaptcha/admin and register it
 // in Firebase Console → Build → App Check → Web app → reCAPTCHA v3.
 // Leave the default empty; App Check will fail gracefully on web if not set.
-const String reCaptchaV3SiteKey =
-    String.fromEnvironment('RECAPTCHA_V3_SITE_KEY', defaultValue: '');
+const String reCaptchaV3SiteKey = String.fromEnvironment(
+  'RECAPTCHA_V3_SITE_KEY',
+  defaultValue: '',
+);
 
 // AdMob constants
 const String admobAppId = 'ca-app-pub-5701077439648731~1582287080';
@@ -20,17 +24,24 @@ const String admobAppId = 'ca-app-pub-5701077439648731~1582287080';
 // Test IDs from Google
 const String admobAppIdTest = 'ca-app-pub-3940256099942544~3347511713';
 
-const String admobBannerAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/9214589741';
-const String admobNativeAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/2247696110';
-const String admobInterstitialAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/1033173712';
-const String admobBannerAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/2435281174';
-const String admobNativeAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/3986624511';
-const String admobInterstitialAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/4411468910';
+const String admobBannerAdUnitIdAndroidTest =
+    'ca-app-pub-3940256099942544/9214589741';
+const String admobNativeAdUnitIdAndroidTest =
+    'ca-app-pub-3940256099942544/2247696110';
+const String admobInterstitialAdUnitIdAndroidTest =
+    'ca-app-pub-3940256099942544/1033173712';
+const String admobBannerAdUnitIdIOSTest =
+    'ca-app-pub-3940256099942544/2435281174';
+const String admobNativeAdUnitIdIOSTest =
+    'ca-app-pub-3940256099942544/3986624511';
+const String admobInterstitialAdUnitIdIOSTest =
+    'ca-app-pub-3940256099942544/4411468910';
 
 // Real AdMob IDs
 const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/8630162735';
 const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
-const String admobInterstitialAdUnitId = 'ca-app-pub-5701077439648731/4488121170';
+const String admobInterstitialAdUnitId =
+    'ca-app-pub-5701077439648731/4488121170';
 
 // Interstitial ad cooldown: once every N hours for free-tier AI users.
 // This is the in-app fallback default; the actual value is controlled via
@@ -42,15 +53,14 @@ const String adSenseAppId = 'ca-pub-5701077439648731';
 const String adSenseAdUnitId = '9994371406';
 
 // In-app purchase product IDs
-const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';
+const String earlySupporterLifetimeProductId =
+    'remove_ads_early_supporter_lifetime';
 const String buyMeACoffeeProductId = 'buy_me_a_coffee';
 
 /// Product IDs that grant "Founder Aquarist" status.
 /// Add new founder product IDs here as they are introduced — every entry in
 /// this list will be treated as a Founder Aquarist purchase.
-const List<String> founderProductIds = [
-  earlySupporterLifetimeProductId,
-];
+const List<String> founderProductIds = [earlySupporterLifetimeProductId];
 
 // ---------------------------------------------------------------------------
 // Remote Config in-app fallback defaults
@@ -71,7 +81,8 @@ const String rcDefaultGeminiImageModel = 'gemini-flash-latest';
 const String rcDefaultOpenAIModel = 'gpt-4o';
 const String rcDefaultOpenAIImageModel = 'gpt-4-vision-preview';
 const String rcDefaultGroqModel = 'llama-3.1-8b-instant';
-const String rcDefaultGroqImageModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+const String rcDefaultGroqImageModel =
+    'meta-llama/llama-4-scout-17b-16e-instruct';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
@@ -84,7 +95,8 @@ const String rcDefaultFishcompatJson = '';
 const double rcDefaultEarlySupporterPrice = 0.99;
 
 // Buy Me a Coffee URL
-const String rcDefaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
+const String rcDefaultBuyMeACoffeeUrl =
+    'https://buymeacoffee.com/capitalcityaquatics';
 
 // Changelog (empty = use bundled assets/docs/en/CHANGELOG_en.md)
 const String rcDefaultChangelog = '';
@@ -127,11 +139,13 @@ class RemoteConfigKeys {
   static const String devMaxRequestsPerDay = 'dev_max_requests_per_day';
 
   /// Integer — per-day photo-analysis cap for the free (developer-key) tier.
-  static const String devMaxPhotoAnalysesPerDay = 'dev_max_photo_analyses_per_day';
+  static const String devMaxPhotoAnalysesPerDay =
+      'dev_max_photo_analyses_per_day';
 
   /// Integer — chat-history window (past messages per request) applied to
   /// free-tier users. Users with their own API key can configure this freely.
-  static const String devDefaultChatHistoryLimit = 'dev_default_chat_history_limit';
+  static const String devDefaultChatHistoryLimit =
+      'dev_default_chat_history_limit';
 
   // ── Model defaults ──────────────────────────────────────────────────────
   /// String — default Gemini text/chat model name.
@@ -210,16 +224,20 @@ class RemoteConfigKeys {
   // ── Ads ───────────────────────────────────────────────────────────────────
   /// Integer — minimum hours between interstitial ad impressions for
   /// free-tier users.  Defaults to [rcDefaultInterstitialCooldownHours] (6).
-  static const String interstitialCooldownHours = 'admob_interstitial_cooldown_hours';
+  static const String interstitialCooldownHours =
+      'admob_interstitial_cooldown_hours';
+
   // ── Founder Aquarist AI limits ──────────────────────────────────────────────
   /// Integer — per-minute request cap for Founder Aquarist users.
-  static const String founderMaxRequestsPerMinute = 'founder_max_requests_per_minute';
+  static const String founderMaxRequestsPerMinute =
+      'founder_max_requests_per_minute';
 
   /// Integer — per-day request cap for Founder Aquarist users.
   static const String founderMaxRequestsPerDay = 'founder_max_requests_per_day';
 
   /// Integer — per-day photo-analysis cap for Founder Aquarist users.
-  static const String founderMaxPhotoAnalysesPerDay = 'founder_max_photo_analyses_per_day';
+  static const String founderMaxPhotoAnalysesPerDay =
+      'founder_max_photo_analyses_per_day';
 
   /// Integer — chat-history window for Founder Aquarist users.
   static const String founderChatHistoryLimit = 'founder_chat_history_limit';

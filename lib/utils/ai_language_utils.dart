@@ -24,8 +24,7 @@ String? resolveAiLanguage({
   }
 
   // null → follow app locale
-  final code = localeCode ??
-      PlatformDispatcher.instance.locale.languageCode;
+  final code = localeCode ?? PlatformDispatcher.instance.locale.languageCode;
   return _languageName(code);
 }
 

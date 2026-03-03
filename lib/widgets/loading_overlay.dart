@@ -62,12 +62,7 @@ class LoadingIndicator extends StatelessWidget {
   final double? size;
   final EdgeInsetsGeometry? padding;
 
-  const LoadingIndicator({
-    super.key,
-    this.text,
-    this.size,
-    this.padding,
-  });
+  const LoadingIndicator({super.key, this.text, this.size, this.padding});
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,10 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
-import '../providers/chat_provider.dart';
 import '../main_layout.dart';
+import '../providers/chat_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/api_key_checker.dart';
 import './fish_info_result_screen.dart';
@@ -41,12 +42,18 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
           'fish_names': _fishNamesController.text.length > 100
               ? _fishNamesController.text.substring(0, 100)
               : _fishNamesController.text,
-          'has_tank_size': _tankSizeController.text.isNotEmpty ? 'true' : 'false',
-          'has_notes': _additionalNotesController.text.isNotEmpty ? 'true' : 'false',
+          'has_tank_size': _tankSizeController.text.isNotEmpty
+              ? 'true'
+              : 'false',
+          'has_notes': _additionalNotesController.text.isNotEmpty
+              ? 'true'
+              : 'false',
         },
       );
 
-      final result = await ref.read(chatProvider.notifier).getFishInfo(
+      final result = await ref
+          .read(chatProvider.notifier)
+          .getFishInfo(
             fishNames: _fishNamesController.text,
             tankSize: _tankSizeController.text.trim().isEmpty
                 ? null
@@ -88,85 +95,86 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Text(
-                      l10n.aiFishInfoLookup,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.aiFishInfoLookup,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.fishInfoDescription,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _fishNamesController,
+                    decoration: InputDecoration(
+                      labelText: l10n.fishNamesLabel,
+                      hintText: l10n.fishNamesHint,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.manage_search_outlined),
+                    ),
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty)
+                        ? l10n.pleaseEnterFishName
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _tankSizeController,
+                    decoration: InputDecoration(
+                      labelText: l10n.tankSizeOptional,
+                      hintText: l10n.tankSizeHint,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.water_outlined),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _additionalNotesController,
+                    decoration: InputDecoration(
+                      labelText: l10n.additionalInfoOptional,
+                      hintText: l10n.fishInfoAdditionalNotesHint,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.notes_outlined),
+                    ),
+                    maxLines: 3,
                   ),
+                  const SizedBox(height: 24),
+                  const BannerAdWidget(),
+                  const SizedBox(height: 14),
+                  ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submitFishInfoRequest,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Text(l10n.lookUpFishInfo),
+                  ),
+                  const SizedBox(height: 14),
+                  const NativeAdWidget(),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.fishInfoDescription,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _fishNamesController,
-                decoration: InputDecoration(
-                  labelText: l10n.fishNamesLabel,
-                  hintText: l10n.fishNamesHint,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.manage_search_outlined),
-                ),
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.pleaseEnterFishName
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _tankSizeController,
-                decoration: InputDecoration(
-                  labelText: l10n.tankSizeOptional,
-                  hintText: l10n.tankSizeHint,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.water_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _additionalNotesController,
-                decoration: InputDecoration(
-                  labelText: l10n.additionalInfoOptional,
-                  hintText: l10n.fishInfoAdditionalNotesHint,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.notes_outlined),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              const BannerAdWidget(),
-              const SizedBox(height: 14),
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitFishInfoRequest,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                child: Text(l10n.lookUpFishInfo),
-              ),
-              const SizedBox(height: 14),
-              const NativeAdWidget(),
-            ],
+            ),
           ),
-        ),
-      ),
           if (_isSubmitting)
             Positioned.fill(
               child: AbsorbPointer(
@@ -179,7 +187,9 @@ class FishInfoScreenState extends ConsumerState<FishInfoScreen> {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 24),
+                          horizontal: 32,
+                          vertical: 24,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

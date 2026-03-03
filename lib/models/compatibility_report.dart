@@ -11,8 +11,10 @@ class CompatibilityReport {
   final double groupHarmonyScore;
   final List<Fish> selectedFish;
   final String tankMatesSummary;
+
   // ADDED: New field for the calculation breakdown.
   final String calculationBreakdown;
+
   // ADDED: Species selected by the user per fish type (e.g. {"Tetras": ["Black Skirt Tetra"]}).
   final Map<String, List<String>> selectedSpecies;
 
@@ -55,8 +57,7 @@ class CompatibilityReport {
       decorations: json['decorations'] as String? ?? '',
       careGuide: json['careGuide'] as String? ?? '',
       compatibleFish: List<String>.from(json['compatibleFish'] as List? ?? []),
-      groupHarmonyScore:
-          (json['groupHarmonyScore'] as num?)?.toDouble() ?? 0.0,
+      groupHarmonyScore: (json['groupHarmonyScore'] as num?)?.toDouble() ?? 0.0,
       selectedFish: (json['selectedFish'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
           .map(Fish.fromJson)

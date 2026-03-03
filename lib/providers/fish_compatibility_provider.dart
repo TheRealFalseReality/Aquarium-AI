@@ -1,31 +1,33 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import '../models/analysis_history_entry.dart';
+import '../prompts/fish_compatibility_prompt.dart';
+import '../services/fish_data_service.dart';
+import '../services/groq_proxy_service.dart';
+import '../services/remote_config_service.dart';
+import '../utils/ai_language_utils.dart';
+import '../utils/api_error_handler.dart';
+import '../utils/cancellable_completer.dart';
+import '../utils/dev_rate_limiter.dart';
+import '../utils/groq_helper.dart';
+import '../utils/json_utils.dart';
+import '../utils/openai_retry_helper.dart';
+import '../utils/tank_harmony_calculator.dart';
+import 'analysis_history_provider.dart';
 import 'app_settings_provider.dart';
 import 'model_provider.dart';
-import '../models/analysis_history_entry.dart';
-import 'analysis_history_provider.dart';
 import 'purchase_provider.dart' show isFounderProvider;
-import '../prompts/fish_compatibility_prompt.dart';
-import '../utils/ai_language_utils.dart';
-import '../utils/tank_harmony_calculator.dart';
-import '../utils/json_utils.dart';
-import '../services/fish_data_service.dart';
-import '../utils/cancellable_completer.dart';
-import '../utils/openai_retry_helper.dart';
-import '../utils/api_error_handler.dart';
-import '../utils/groq_helper.dart';
-import '../utils/dev_rate_limiter.dart';
-import '../services/remote_config_service.dart';
-import '../services/groq_proxy_service.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
   if (compatibleFishData == null) return [];
-  
+
   if (compatibleFishData is List) {
     return compatibleFishData.map((item) {
       if (item is String) {
@@ -46,12 +48,14 @@ List<String> parseCompatibleFish(dynamic compatibleFishData) {
     }
     return [compatibleFishData];
   }
-  
+
   return [];
 }
 
-final fishCompatibilityProvider = NotifierProvider<FishCompatibilityNotifier,
-    FishCompatibilityState>(FishCompatibilityNotifier.new);
+final fishCompatibilityProvider =
+    NotifierProvider<FishCompatibilityNotifier, FishCompatibilityState>(
+      FishCompatibilityNotifier.new,
+    );
 
 class FishCompatibilityState {
   final AsyncValue<Map<String, List<Fish>>> fishData;
@@ -111,10 +115,8 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   FishCompatibilityState build() {
     // Use the centralized fish data provider instead of loading data directly
     final fishDataAsync = ref.watch(fishDataProvider);
-    
-    return FishCompatibilityState(
-      fishData: fishDataAsync,
-    );
+
+    return FishCompatibilityState(fishData: fishDataAsync);
   }
 
   void selectFish(Fish fish) {
@@ -132,7 +134,11 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
   }
 
   void clearError() {
-    state = state.copyWith(clearError: true, isRetryable: false, isApiKeyError: false);
+    state = state.copyWith(
+      clearError: true,
+      isRetryable: false,
+      isApiKeyError: false,
+    );
   }
 
   void clearLastReport() {
@@ -149,10 +155,12 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       await getCompatibilityReport(state.lastCategory!);
     }
   }
-      
 
-
-  Future<void> getCompatibilityReport(String category, {String? additionalNotes, Map<String, List<String>>? selectedSpecies}) async {
+  Future<void> getCompatibilityReport(
+    String category, {
+    String? additionalNotes,
+    Map<String, List<String>>? selectedSpecies,
+  }) async {
     if (state.selectedFish.isEmpty) return;
 
     state = state.copyWith(
@@ -164,11 +172,18 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
 
     final models = ref.read(modelProvider);
     final settings = ref.read(appSettingsProvider);
-    final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(state.selectedFish);
+    final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(
+      state.selectedFish,
+    );
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = appendLanguageInstruction(
-      buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes),
+      buildFishCompatibilityPrompt(
+        category,
+        fishNames,
+        harmonyScore,
+        additionalNotes: additionalNotes,
+      ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
     );
@@ -182,17 +197,23 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       final maxPerDay = isFounder
           ? RemoteConfigService.founderMaxRequestsPerDay
           : RemoteConfigService.maxRequestsPerDay;
-      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: isFounder);
+      final result = await DevRateLimiter.checkAndRecordRequest(
+        isFounder: isFounder,
+      );
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: isFounder);
+        final secs = await DevRateLimiter.secondsUntilNextSlot(
+          isFounder: isFounder,
+        );
         state = state.copyWith(
-          error: '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          error:
+              '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         state = state.copyWith(
-          error: '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          error:
+              '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
@@ -205,15 +226,24 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       String? responseText;
       if (models.activeProvider == AIProvider.gemini) {
         if (models.geminiApiKey.isEmpty) {
-          throw Exception('Gemini API Key not set. Please go to settings to add your API key.');
+          throw Exception(
+            'Gemini API Key not set. Please go to settings to add your API key.',
+          );
         }
-        final model = GenerativeModel(model: models.geminiModel, apiKey: models.geminiApiKey);
-        final response = await model.generateContent([Content.text(prompt)]).timeout(const Duration(seconds: 30));
+        final model = GenerativeModel(
+          model: models.geminiModel,
+          apiKey: models.geminiApiKey,
+        );
+        final response = await model
+            .generateContent([Content.text(prompt)])
+            .timeout(const Duration(seconds: 30));
         _cancellableCompleter?.complete(response);
         responseText = response.text;
       } else if (models.activeProvider == AIProvider.groq) {
         if (!models.hasGroqKey) {
-          throw Exception('Groq API Key not set. Please go to settings to add your API key.');
+          throw Exception(
+            'Groq API Key not set. Please go to settings to add your API key.',
+          );
         }
         if (models.usingDeveloperGroqKeyForText) {
           responseText = await GroqProxyService.sendMessage(
@@ -226,13 +256,17 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
             apiKey: models.effectiveGroqApiKey,
             model: models.groqModel,
           );
-          final response = await groq.sendMessage(prompt).timeout(const Duration(seconds: 30));
+          final response = await groq
+              .sendMessage(prompt)
+              .timeout(const Duration(seconds: 30));
           _cancellableCompleter?.complete(response);
           responseText = response.choices.first.message.content;
         }
       } else {
         if (models.openAIApiKey.isEmpty) {
-          throw Exception('OpenAI API Key not set. Please go to settings to add your API key.');
+          throw Exception(
+            'OpenAI API Key not set. Please go to settings to add your API key.',
+          );
         }
         final response = await OpenAIRetryHelper.generateWithRetry(
           modelName: models.chatGPTModel,
@@ -244,14 +278,19 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       }
 
       if (responseText == null) {
-        throw Exception('Received no response from the AI service after multiple retries.');
+        throw Exception(
+          'Received no response from the AI service after multiple retries.',
+        );
       }
 
       final cleanedResponse = extractJson(responseText);
       final reportJson = json.decode(cleanedResponse);
-      
+
       // EDITED: Generate the calculation breakdown string here.
-      final calculationBreakdown = TankHarmonyCalculator.generateCalculationBreakdown(state.selectedFish);
+      final calculationBreakdown =
+          TankHarmonyCalculator.generateCalculationBreakdown(
+            state.selectedFish,
+          );
 
       final report = CompatibilityReport(
         harmonyLabel: reportJson['harmonyLabel']?.toString() ?? 'Unknown',
@@ -264,25 +303,28 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         groupHarmonyScore: harmonyScore,
         selectedFish: state.selectedFish,
         tankMatesSummary: reportJson['tankMatesSummary']?.toString() ?? '',
-        calculationBreakdown: calculationBreakdown, // Use the generated string.
+        calculationBreakdown: calculationBreakdown,
+        // Use the generated string.
         selectedSpecies: selectedSpecies ?? const {},
       );
       state = state.copyWith(
-          report: report, lastReport: report, isLoading: false);
+        report: report,
+        lastReport: report,
+        isLoading: false,
+      );
       // Save to analysis history
       final fishNames = state.selectedFish.isNotEmpty
           ? state.selectedFish.map((f) => f.name).join(', ')
           : 'Selected Fish';
-      ref.read(analysisHistoryProvider.notifier).addEntry(
-        AnalysisHistoryEntry.create(
-          type: AnalysisType.compatibilityReport,
-          title: 'Compatibility – $fishNames',
-          resultData: {
-            'report': report.toJson(),
-            'fishType': category,
-          },
-        ),
-      );
+      ref
+          .read(analysisHistoryProvider.notifier)
+          .addEntry(
+            AnalysisHistoryEntry.create(
+              type: AnalysisType.compatibilityReport,
+              title: 'Compatibility – $fishNames',
+              resultData: {'report': report.toJson(), 'fishType': category},
+            ),
+          );
     } catch (e) {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
         final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());

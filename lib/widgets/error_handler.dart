@@ -25,7 +25,7 @@ class ErrorHandlerWidget extends ConsumerWidget {
     }
 
     final cs = Theme.of(context).colorScheme;
-    
+
     return Card(
       color: cs.errorContainer.withOpacity(0.1),
       margin: const EdgeInsets.all(16),
@@ -34,11 +34,7 @@ class ErrorHandlerWidget extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              color: cs.error,
-              size: 48,
-            ),
+            Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 16),
             Text(
               'Something went wrong',
@@ -78,11 +74,7 @@ class LoadingIndicatorWidget extends StatelessWidget {
   final String? message;
   final double? size;
 
-  const LoadingIndicatorWidget({
-    super.key,
-    this.message,
-    this.size,
-  });
+  const LoadingIndicatorWidget({super.key, this.message, this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -157,10 +149,10 @@ extension AsyncValueErrorHandling<T> on AsyncValue<T> {
   }) {
     return when(
       data: data,
-      error: error ?? (err, stack) => ErrorHandlerWidget(
-        error: err.toString(),
-        onRetry: onRetry,
-      ),
+      error:
+          error ??
+          (err, stack) =>
+              ErrorHandlerWidget(error: err.toString(), onRetry: onRetry),
       loading: loading ?? () => LoadingIndicatorWidget(message: loadingMessage),
     );
   }

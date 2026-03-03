@@ -3,7 +3,11 @@ class AnalysisSummary {
   final String title;
   final String message;
 
-  AnalysisSummary({required this.status, required this.title, required this.message});
+  AnalysisSummary({
+    required this.status,
+    required this.title,
+    required this.message,
+  });
 
   // Factory constructor to create an AnalysisSummary from a JSON object.
   factory AnalysisSummary.fromJson(Map<String, dynamic> json) {
@@ -73,13 +77,16 @@ class WaterAnalysisResult {
   factory WaterAnalysisResult.fromJson(Map<String, dynamic> json) {
     var summaryData = json['summary'] as Map<String, dynamic>? ?? {};
     var paramsList = json['parameters'] as List<dynamic>? ?? [];
-    List<ParameterAnalysis> parameters =
-        paramsList.map((p) => ParameterAnalysis.fromJson(p)).toList();
+    List<ParameterAnalysis> parameters = paramsList
+        .map((p) => ParameterAnalysis.fromJson(p))
+        .toList();
 
     return WaterAnalysisResult(
       summary: AnalysisSummary.fromJson(summaryData),
       parameters: parameters,
-      howAquaPiHelps: json['howAquaPiHelps'] ?? 'AquaPi can help maintain stable water conditions.',
+      howAquaPiHelps:
+          json['howAquaPiHelps'] ??
+          'AquaPi can help maintain stable water conditions.',
     );
   }
 

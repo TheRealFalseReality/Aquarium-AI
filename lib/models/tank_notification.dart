@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+
 import 'notification_log.dart';
 
 /// Enum for notification types
@@ -11,6 +12,7 @@ enum NotificationType {
   other('Other');
 
   final String displayName;
+
   const NotificationType(this.displayName);
 
   /// Convert string to enum
@@ -31,6 +33,7 @@ enum RepeatFrequency {
   yearly('Yearly');
 
   final String displayName;
+
   const RepeatFrequency(this.displayName);
 
   /// Convert string to enum
@@ -45,16 +48,19 @@ enum RepeatFrequency {
 class TankNotification {
   final String id;
   final NotificationType type;
-  final DateTime notificationDateTime; // The base/original notification time set by user
+  final DateTime
+  notificationDateTime; // The base/original notification time set by user
   final RepeatFrequency repeatFrequency; // How often to repeat
-  final int repeatInterval; // Interval value (e.g., every X days/weeks/months/years)
+  final int
+  repeatInterval; // Interval value (e.g., every X days/weeks/months/years)
   final String? notes; // Optional user notes
   final String? customTitle; // Optional custom notification title
   final String? customCategory; // For 'other' type - custom category name
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool enabled; // Whether the notification is active
-  final DateTime? scheduledNextDate; // The actual next scheduled notification date (single source of truth)
+  final DateTime?
+  scheduledNextDate; // The actual next scheduled notification date (single source of truth)
 
   TankNotification({
     required this.id,
@@ -128,14 +134,18 @@ class TankNotification {
 
   /// Deserialize from JSON
   factory TankNotification.fromJson(Map<String, dynamic> json) {
-    final notificationDateTime = DateTime.parse(json['notificationDateTime'] as String);
+    final notificationDateTime = DateTime.parse(
+      json['notificationDateTime'] as String,
+    );
     final scheduledNextDateStr = json['scheduledNextDate'] as String?;
-    
+
     return TankNotification(
       id: json['id'] as String,
       type: NotificationType.fromString(json['type'] as String),
       notificationDateTime: notificationDateTime,
-      repeatFrequency: RepeatFrequency.fromString(json['repeatFrequency'] as String),
+      repeatFrequency: RepeatFrequency.fromString(
+        json['repeatFrequency'] as String,
+      ),
       repeatInterval: json['repeatInterval'] as int? ?? 1,
       notes: json['notes'] as String?,
       customTitle: json['customTitle'] as String?,
@@ -144,15 +154,15 @@ class TankNotification {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
       // For backwards compatibility: if scheduledNextDate is not in JSON, use notificationDateTime
-      scheduledNextDate: scheduledNextDateStr != null 
-          ? DateTime.parse(scheduledNextDateStr) 
+      scheduledNextDate: scheduledNextDateStr != null
+          ? DateTime.parse(scheduledNextDateStr)
           : notificationDateTime,
     );
   }
 
   /// Create a copy with modified fields
-  /// 
-  /// For nullable fields (notes, customTitle, customCategory, scheduledNextDate), 
+  ///
+  /// For nullable fields (notes, customTitle, customCategory, scheduledNextDate),
   /// set the corresponding clear flag to true to explicitly set them to null.
   TankNotification copyWith({
     String? id,
@@ -180,11 +190,15 @@ class TankNotification {
       repeatInterval: repeatInterval ?? this.repeatInterval,
       notes: clearNotes ? null : (notes ?? this.notes),
       customTitle: clearCustomTitle ? null : (customTitle ?? this.customTitle),
-      customCategory: clearCustomCategory ? null : (customCategory ?? this.customCategory),
+      customCategory: clearCustomCategory
+          ? null
+          : (customCategory ?? this.customCategory),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enabled: enabled ?? this.enabled,
-      scheduledNextDate: clearScheduledNextDate ? null : (scheduledNextDate ?? this.scheduledNextDate),
+      scheduledNextDate: clearScheduledNextDate
+          ? null
+          : (scheduledNextDate ?? this.scheduledNextDate),
     );
   }
 
@@ -196,7 +210,7 @@ class TankNotification {
     }
 
     final now = DateTime.now();
-    
+
     // If notification is in the future, return it
     if (!notificationDateTime.isBefore(now)) {
       return notificationDateTime;
@@ -219,20 +233,23 @@ class TankNotification {
 
   /// Calculate the next notification date based on a specific base date
   /// (typically the last logged activity date).
-  /// 
+  ///
   /// This allows the notification schedule to be relative to when the user
   /// actually completed the task, rather than the original notification time.
-  /// 
+  ///
   /// For example, if a notification is set for "every 2 days" and the user
   /// logs an activity today, the next notification will be 2 days from today.
-  /// 
+  ///
   /// [baseDate] - The date to calculate the next occurrence from (e.g., last activity date)
   /// [useCurrentTime] - If true, uses the time from baseDate instead of preserving
   ///                    the original notification time. Defaults to false.
-  /// 
+  ///
   /// Returns the next notification date, or null if the notification is disabled
   /// or non-repeating.
-  DateTime? getNextNotificationDateFromBase(DateTime baseDate, {bool useCurrentTime = false}) {
+  DateTime? getNextNotificationDateFromBase(
+    DateTime baseDate, {
+    bool useCurrentTime = false,
+  }) {
     if (!enabled || repeatFrequency == RepeatFrequency.none) {
       return null;
     }
@@ -272,28 +289,31 @@ class TankNotification {
   }
 
   /// Calculate the next notification date considering activity logs.
-  /// 
+  ///
   /// This is the primary method for determining when the next notification
   /// should occur, as it considers the user's actual logged activities.
-  /// 
+  ///
   /// Priority order:
   /// 1. If matching activities exist, calculate from most recent activity
   /// 2. If notificationDateTime is in the future, return it directly
   /// 3. Otherwise, fall back to standard calculation from notificationDateTime
-  /// 
+  ///
   /// [activityLogs] - The list of activity logs to consider
   /// [useCurrentTime] - If true, uses the time from the activity log instead of
   ///                    preserving the original notification time. Defaults to false.
-  /// 
+  ///
   /// Returns the next notification date, or null if the notification is disabled
   /// or non-repeating.
-  DateTime? getNextNotificationDateWithActivity(List<NotificationLog> activityLogs, {bool useCurrentTime = false}) {
+  DateTime? getNextNotificationDateWithActivity(
+    List<NotificationLog> activityLogs, {
+    bool useCurrentTime = false,
+  }) {
     if (!enabled || repeatFrequency == RepeatFrequency.none) {
       return null;
     }
 
     final now = DateTime.now();
-    
+
     // Find matching activity logs first - these take priority
     final matchingLogs = activityLogs.where((log) {
       return matchesActivityLog(log.type, log.customCategory);
@@ -303,9 +323,12 @@ class TankNotification {
       // Sort by date (newest first) and get the most recent
       matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
       final lastActivity = matchingLogs.first;
-      
+
       // Calculate next date from the last activity
-      return getNextNotificationDateFromBase(lastActivity.loggedAt, useCurrentTime: useCurrentTime);
+      return getNextNotificationDateFromBase(
+        lastActivity.loggedAt,
+        useCurrentTime: useCurrentTime,
+      );
     }
 
     // No matching activity logs - use the original notification date
@@ -319,20 +342,20 @@ class TankNotification {
   }
 
   /// Check if an activity log matches this notification's category.
-  /// 
+  ///
   /// For 'other' type notifications, matches are based on the custom category name.
   /// For standard types, matches are based on the notification type.
-  /// 
+  ///
   /// [logType] - The type of the activity log
   /// [logCustomCategory] - The custom category of the activity log (for 'other' type)
-  /// 
+  ///
   /// Returns true if the activity log matches this notification's category.
   bool matchesActivityLog(NotificationType logType, String? logCustomCategory) {
     // Types must match
     if (type != logType) {
       return false;
     }
-    
+
     // For 'other' type, also match custom category
     if (type == NotificationType.other) {
       // Both must have a custom category, or both must not have one
@@ -340,7 +363,7 @@ class TankNotification {
       final logCategory = logCustomCategory?.toLowerCase().trim() ?? '';
       return thisCategory == logCategory;
     }
-    
+
     // For standard types, type match is sufficient
     return true;
   }
@@ -350,7 +373,9 @@ class TankNotification {
     final daysSinceStart = now.difference(notificationDateTime).inDays;
     final intervalsPassed = (daysSinceStart / repeatInterval).floor();
     final nextInterval = intervalsPassed + 1;
-    return notificationDateTime.add(Duration(days: repeatInterval * nextInterval));
+    return notificationDateTime.add(
+      Duration(days: repeatInterval * nextInterval),
+    );
   }
 
   /// Calculate next weekly occurrence using optimized math
@@ -359,24 +384,33 @@ class TankNotification {
     final weeksSinceStart = (daysSinceStart / 7).floor();
     final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
     final nextInterval = intervalsPassed + 1;
-    return notificationDateTime.add(Duration(days: 7 * repeatInterval * nextInterval));
+    return notificationDateTime.add(
+      Duration(days: 7 * repeatInterval * nextInterval),
+    );
   }
 
   /// Calculate next monthly occurrence
   DateTime _getNextMonthlyDate(DateTime now) {
     // Calculate how many months have passed
-    int monthsSinceStart = (now.year - notificationDateTime.year) * 12 + 
-                           (now.month - notificationDateTime.month);
-    
+    int monthsSinceStart =
+        (now.year - notificationDateTime.year) * 12 +
+        (now.month - notificationDateTime.month);
+
     // Calculate the next interval
     int intervalsPassed = (monthsSinceStart / repeatInterval).floor();
-    DateTime candidate = _addMonths(notificationDateTime, repeatInterval * intervalsPassed);
-    
+    DateTime candidate = _addMonths(
+      notificationDateTime,
+      repeatInterval * intervalsPassed,
+    );
+
     // If candidate is still before now, add one more interval
     if (candidate.isBefore(now)) {
-      candidate = _addMonths(notificationDateTime, repeatInterval * (intervalsPassed + 1));
+      candidate = _addMonths(
+        notificationDateTime,
+        repeatInterval * (intervalsPassed + 1),
+      );
     }
-    
+
     return candidate;
   }
 
@@ -384,16 +418,22 @@ class TankNotification {
   DateTime _getNextYearlyDate(DateTime now) {
     // Calculate how many years have passed
     int yearsSinceStart = now.year - notificationDateTime.year;
-    
+
     // Calculate the next interval
     int intervalsPassed = (yearsSinceStart / repeatInterval).floor();
-    DateTime candidate = _addYears(notificationDateTime, repeatInterval * intervalsPassed);
-    
+    DateTime candidate = _addYears(
+      notificationDateTime,
+      repeatInterval * intervalsPassed,
+    );
+
     // If candidate is still before now, add one more interval
     if (candidate.isBefore(now)) {
-      candidate = _addYears(notificationDateTime, repeatInterval * (intervalsPassed + 1));
+      candidate = _addYears(
+        notificationDateTime,
+        repeatInterval * (intervalsPassed + 1),
+      );
     }
-    
+
     return candidate;
   }
 
@@ -401,57 +441,58 @@ class TankNotification {
   /// For repeating notifications, checks if we're at or past a scheduled occurrence
   bool shouldTrigger({DateTime? referenceTime}) {
     if (!enabled) return false;
-    
+
     final now = referenceTime ?? DateTime.now();
-    
+
     // For non-repeating notifications, just check if time has passed
     if (repeatFrequency == RepeatFrequency.none) {
-      return notificationDateTime.isBefore(now) || 
-             notificationDateTime.isAtSameMomentAs(now);
+      return notificationDateTime.isBefore(now) ||
+          notificationDateTime.isAtSameMomentAs(now);
     }
-    
+
     // For repeating notifications, check if the original time has passed
     // (meaning at least one occurrence should have happened)
     if (notificationDateTime.isAfter(now)) {
       return false; // First occurrence hasn't happened yet
     }
-    
+
     // Calculate how long since the last scheduled occurrence
     switch (repeatFrequency) {
       case RepeatFrequency.daily:
         final daysSinceStart = now.difference(notificationDateTime).inDays;
         final intervalsPassed = (daysSinceStart / repeatInterval).floor();
         final lastOccurrence = notificationDateTime.add(
-          Duration(days: repeatInterval * intervalsPassed)
+          Duration(days: repeatInterval * intervalsPassed),
         );
         // Trigger if we're at or past the last occurrence time
         return !now.isBefore(lastOccurrence);
-        
+
       case RepeatFrequency.weekly:
         final daysSinceStart = now.difference(notificationDateTime).inDays;
         final weeksSinceStart = (daysSinceStart / 7).floor();
         final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
         final lastOccurrence = notificationDateTime.add(
-          Duration(days: 7 * repeatInterval * intervalsPassed)
+          Duration(days: 7 * repeatInterval * intervalsPassed),
         );
         return !now.isBefore(lastOccurrence);
-        
+
       case RepeatFrequency.monthly:
         // For monthly, we need to check if we've reached the day-of-month
-        int monthsSinceStart = (now.year - notificationDateTime.year) * 12 + 
-                               (now.month - notificationDateTime.month);
+        int monthsSinceStart =
+            (now.year - notificationDateTime.year) * 12 +
+            (now.month - notificationDateTime.month);
         if (monthsSinceStart >= 0 && (monthsSinceStart % repeatInterval == 0)) {
           // We're in a trigger month, check if we've passed the trigger day
           if (now.day > notificationDateTime.day) {
             return true;
           } else if (now.day == notificationDateTime.day) {
             // Same day, check time
-            return now.hour >= notificationDateTime.hour && 
-                   now.minute >= notificationDateTime.minute;
+            return now.hour >= notificationDateTime.hour &&
+                now.minute >= notificationDateTime.minute;
           }
         }
         return false;
-        
+
       case RepeatFrequency.yearly:
         // For yearly, check if we've reached the month and day
         int yearsSinceStart = now.year - notificationDateTime.year;
@@ -463,13 +504,13 @@ class TankNotification {
             if (now.day > notificationDateTime.day) {
               return true;
             } else if (now.day == notificationDateTime.day) {
-              return now.hour >= notificationDateTime.hour && 
-                     now.minute >= notificationDateTime.minute;
+              return now.hour >= notificationDateTime.hour &&
+                  now.minute >= notificationDateTime.minute;
             }
           }
         }
         return false;
-        
+
       case RepeatFrequency.none:
         return false;
     }
@@ -479,7 +520,7 @@ class TankNotification {
   static DateTime _addMonths(DateTime date, int months) {
     int newYear = date.year;
     int newMonth = date.month + months;
-    
+
     // Handle month overflow
     while (newMonth > 12) {
       newMonth -= 12;
@@ -489,14 +530,14 @@ class TankNotification {
       newMonth += 12;
       newYear -= 1;
     }
-    
+
     // Handle day overflow (e.g., Jan 31 + 1 month = Feb 28/29)
     int newDay = date.day;
     int maxDaysInMonth = DateTime(newYear, newMonth + 1, 0).day;
     if (newDay > maxDaysInMonth) {
       newDay = maxDaysInMonth;
     }
-    
+
     return DateTime(
       newYear,
       newMonth,
@@ -514,17 +555,17 @@ class TankNotification {
     int newYear = date.year + years;
     int newMonth = date.month;
     int newDay = date.day;
-    
+
     // Handle Feb 29 on leap year -> non-leap year
     if (newMonth == 2 && newDay == 29) {
       // Check if the target year is a leap year
-      bool isLeapYear = (newYear % 4 == 0) && 
-                        ((newYear % 100 != 0) || (newYear % 400 == 0));
+      bool isLeapYear =
+          (newYear % 4 == 0) && ((newYear % 100 != 0) || (newYear % 400 == 0));
       if (!isLeapYear) {
         newDay = 28; // Adjust to Feb 28
       }
     }
-    
+
     return DateTime(
       newYear,
       newMonth,
@@ -540,10 +581,11 @@ class TankNotification {
   /// Get display name for the notification
   /// Shows custom category for 'other' type if available
   String getDisplayName() {
-    if (type == NotificationType.other && customCategory != null && customCategory!.isNotEmpty) {
+    if (type == NotificationType.other &&
+        customCategory != null &&
+        customCategory!.isNotEmpty) {
       return customCategory!;
     }
     return type.displayName;
   }
 }
-

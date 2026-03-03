@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+
 import 'tank_notification.dart';
 
 /// Model for notification log entries
@@ -9,7 +10,8 @@ class NotificationLog {
   final String? customCategory; // For 'other' type notifications
   final DateTime loggedAt;
   final String? notes;
-  final String? notificationId; // Reference to the notification that triggered this log
+  final String?
+  notificationId; // Reference to the notification that triggered this log
 
   NotificationLog({
     required this.id,
@@ -75,7 +77,9 @@ class NotificationLog {
     return NotificationLog(
       id: id ?? this.id,
       type: type ?? this.type,
-      customCategory: clearCustomCategory ? null : (customCategory ?? this.customCategory),
+      customCategory: clearCustomCategory
+          ? null
+          : (customCategory ?? this.customCategory),
       loggedAt: loggedAt ?? this.loggedAt,
       notes: notes ?? this.notes,
       notificationId: notificationId ?? this.notificationId,
@@ -84,10 +88,11 @@ class NotificationLog {
 
   /// Get display name for the log entry
   String getDisplayName() {
-    if (type == NotificationType.other && customCategory != null && customCategory!.isNotEmpty) {
+    if (type == NotificationType.other &&
+        customCategory != null &&
+        customCategory!.isNotEmpty) {
       return customCategory!;
     }
     return type.displayName;
   }
 }
-

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/fish.dart';
-import '../widgets/fish_card.dart';
 import '../services/fish_data_service.dart';
+import '../widgets/fish_card.dart';
 
 /// Dialog for selecting fish to include in stocking recommendations
 class FishSelectionDialog extends ConsumerStatefulWidget {
   final String category;
   final List<Fish> initialSelectedFish;
-  
+
   const FishSelectionDialog({
     super.key,
     required this.category,
@@ -51,9 +52,12 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
           if (fish.reefSafe != _reefSafeFilter) return false;
         }
         if (query.isEmpty) return true;
-        final nameMatches = fish.name.toLowerCase().contains(query.toLowerCase());
-        final commonNamesMatch = fish.commonNames
-            .any((name) => name.toLowerCase().contains(query.toLowerCase()));
+        final nameMatches = fish.name.toLowerCase().contains(
+          query.toLowerCase(),
+        );
+        final commonNamesMatch = fish.commonNames.any(
+          (name) => name.toLowerCase().contains(query.toLowerCase()),
+        );
         return nameMatches || commonNamesMatch;
       }).toList();
     });
@@ -76,13 +80,11 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: 800, 
+          maxWidth: 800,
           maxHeight: screenHeight * 0.85,
         ),
         child: Column(
@@ -175,8 +177,9 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
             // Reef safe filter (marine only)
             fishDataAsync.maybeWhen(
               data: (fishData) {
-                final hasMarine = (fishData[widget.category] ?? [])
-                    .any((f) => f.reefSafe != null);
+                final hasMarine = (fishData[widget.category] ?? []).any(
+                  (f) => f.reefSafe != null,
+                );
                 if (!hasMarine) return const SizedBox.shrink();
                 const options = ['Yes', 'No', 'Caution'];
                 final colors = {
@@ -208,13 +211,17 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                           labelStyle: TextStyle(
                             color: selected ? color : null,
                             fontSize: 12,
-                            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: selected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                           side: BorderSide(
                             color: selected ? color : theme.colorScheme.outline,
                           ),
                           onSelected: (_) {
-                            setState(() => _reefSafeFilter = selected ? null : opt);
+                            setState(
+                              () => _reefSafeFilter = selected ? null : opt,
+                            );
                             _filterFishList();
                           },
                           visualDensity: VisualDensity.compact,
@@ -240,10 +247,12 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                   ),
                 ),
                 data: (fishData) {
-                  if (_filteredFishList.isEmpty && _searchController.text.isEmpty && _reefSafeFilter == null) {
+                  if (_filteredFishList.isEmpty &&
+                      _searchController.text.isEmpty &&
+                      _reefSafeFilter == null) {
                     _filteredFishList = fishData[widget.category] ?? [];
                   }
-                  
+
                   if (_filteredFishList.isEmpty) {
                     return Center(
                       child: Text(
@@ -255,12 +264,13 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
 
                   return GridView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 180,
-                      childAspectRatio: 3 / 4,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          childAspectRatio: 3 / 4,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
                     itemCount: _filteredFishList.length,
                     itemBuilder: (context, index) {
                       final fish = _filteredFishList[index];
@@ -311,7 +321,11 @@ class FishSelectionDialogState extends ConsumerState<FishSelectionDialog> {
                       Navigator.of(context).pop(_selectedFish);
                     },
                     icon: const Icon(Icons.check, size: 18),
-                    label: Text(_selectedFish.isEmpty ? 'Done' : 'Confirm (${_selectedFish.length})'),
+                    label: Text(
+                      _selectedFish.isEmpty
+                          ? 'Done'
+                          : 'Confirm (${_selectedFish.length})',
+                    ),
                   ),
                 ],
               ),

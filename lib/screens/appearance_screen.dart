@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
+
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
 
@@ -25,18 +27,17 @@ class AppearanceScreen extends ConsumerWidget {
         children: [
           Text(
             l10n.appearance,
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             l10n.appearanceSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -49,8 +50,12 @@ class AppearanceScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionHeader(context, Icons.brightness_6_outlined,
-                      l10n.brightnessMode, cs.primary),
+                  _sectionHeader(
+                    context,
+                    Icons.brightness_6_outlined,
+                    l10n.brightnessMode,
+                    cs.primary,
+                  ),
                   const SizedBox(height: 12),
                   Center(
                     child: SegmentedButton<ThemeMode>(
@@ -92,14 +97,18 @@ class AppearanceScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionHeader(context, Icons.palette_outlined,
-                      l10n.colourTheme, cs.primary),
+                  _sectionHeader(
+                    context,
+                    Icons.palette_outlined,
+                    l10n.colourTheme,
+                    cs.primary,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     l10n.chooseColourPalette,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   _ThemeGrid(
@@ -130,14 +139,18 @@ class AppearanceScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionHeader(context, Icons.font_download_outlined,
-                      l10n.font, cs.primary),
+                  _sectionHeader(
+                    context,
+                    Icons.font_download_outlined,
+                    l10n.font,
+                    cs.primary,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     l10n.chooseFontDesc,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   _FontSelector(
@@ -148,14 +161,17 @@ class AppearanceScreen extends ConsumerWidget {
               ),
             ),
           ),
-
         ],
       ),
     );
   }
 
   Widget _sectionHeader(
-      BuildContext context, IconData icon, String title, Color color) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    Color color,
+  ) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
@@ -163,9 +179,9 @@ class AppearanceScreen extends ConsumerWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ],
     );
@@ -194,10 +210,7 @@ class AppearanceScreen extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 
 class _FontSelector extends StatelessWidget {
-  const _FontSelector({
-    required this.selected,
-    required this.onSelected,
-  });
+  const _FontSelector({required this.selected, required this.onSelected});
 
   final AppFont selected;
   final ValueChanged<AppFont> onSelected;
@@ -216,13 +229,11 @@ class _FontSelector extends StatelessWidget {
             onTap: () => onSelected(font),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color:
-                      isSelected ? cs.primary : cs.outline.withOpacity(0.3),
+                  color: isSelected ? cs.primary : cs.outline.withOpacity(0.3),
                   width: isSelected ? 2 : 1,
                 ),
                 color: isSelected
@@ -241,9 +252,7 @@ class _FontSelector extends StatelessWidget {
                             fontFamily: font.fontFamily,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? cs.primary
-                                : cs.onSurface,
+                            color: isSelected ? cs.primary : cs.onSurface,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -301,19 +310,20 @@ class _ThemeGrid extends StatelessWidget {
       spacing: 10,
       runSpacing: 10,
       children: themes
-          .map((t) => _ThemeChip(
-                theme: t,
-                isSelected: selected == t,
-                customSeedColor: customSeedColor,
-                customThemeName: customThemeName,
-                // Custom chip: open the picker; setCustomTheme handles selection.
-                // Other chips: directly select the theme.
-                onTap: t == AppColorTheme.custom
-                    ? onCustomEdit
-                    : () => onSelected(t),
-                onCustomEdit:
-                    t == AppColorTheme.custom ? onCustomEdit : null,
-              ))
+          .map(
+            (t) => _ThemeChip(
+              theme: t,
+              isSelected: selected == t,
+              customSeedColor: customSeedColor,
+              customThemeName: customThemeName,
+              // Custom chip: open the picker; setCustomTheme handles selection.
+              // Other chips: directly select the theme.
+              onTap: t == AppColorTheme.custom
+                  ? onCustomEdit
+                  : () => onSelected(t),
+              onCustomEdit: t == AppColorTheme.custom ? onCustomEdit : null,
+            ),
+          )
           .toList(),
     );
   }
@@ -418,18 +428,22 @@ class _ThemeChip extends StatelessWidget {
     final isCustom = theme == AppColorTheme.custom;
 
     // Swatch colours: custom theme uses the user-defined seed colour.
-    final Color primary =
-        isCustom ? customSeedColor : (_swatchPrimary[theme] ?? Colors.grey);
+    final Color primary = isCustom
+        ? customSeedColor
+        : (_swatchPrimary[theme] ?? Colors.grey);
     final Color secondary;
     if (isCustom) {
       final hsl = HSLColor.fromColor(customSeedColor);
-      secondary =
-          hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+      secondary = hsl
+          .withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0))
+          .toColor();
     } else {
       secondary = _swatchSecondary[theme] ?? Colors.grey.shade700;
     }
 
-    final String label = isCustom ? customThemeName : _themeLocalizedName(theme, AppLocalizations.of(context)!);
+    final String label = isCustom
+        ? customThemeName
+        : _themeLocalizedName(theme, AppLocalizations.of(context)!);
 
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -479,8 +493,11 @@ class _ThemeChip extends StatelessWidget {
                       color: Colors.black38,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.edit_outlined,
-                        color: Colors.white, size: 12),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: Colors.white,
+                      size: 12,
+                    ),
                   ),
                 ),
               ),
@@ -488,8 +505,7 @@ class _ThemeChip extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               child: Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.black.withOpacity(0.5)
@@ -502,10 +518,11 @@ class _ThemeChip extends StatelessWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                 ),

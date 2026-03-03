@@ -51,7 +51,8 @@ Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
     for (final fish in result.identifiedFish) {
       final confidence = (fish.confidence * 100).toStringAsFixed(1);
       buffer.writeln(
-          '• ${fish.commonName} (${fish.scientificName}) – $confidence% confidence');
+        '• ${fish.commonName} (${fish.scientificName}) – $confidence% confidence',
+      );
       if (fish.notes.isNotEmpty) {
         buffer.writeln('  ${fish.notes}');
       }
@@ -92,10 +93,7 @@ Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
   buffer.writeln(result.howAquaPiHelps);
   buffer.write(_appFooter);
 
-  await Share.share(
-    buffer.toString(),
-    subject: 'Aquarium AI – Photo Analysis',
-  );
+  await Share.share(buffer.toString(), subject: 'Aquarium AI – Photo Analysis');
 }
 
 /// Converts a [CompatibilityReport] to a plain-text summary and shares it.
@@ -104,7 +102,8 @@ Future<void> shareCompatibilityReport(CompatibilityReport report) async {
   buffer.writeln('🐠 Aquarium AI – Fish Compatibility Report');
   buffer.writeln();
   buffer.writeln(
-      'Group Harmony: ${report.harmonyLabel} (${(report.groupHarmonyScore * 100).toStringAsFixed(0)}%)');
+    'Group Harmony: ${report.harmonyLabel} (${(report.groupHarmonyScore * 100).toStringAsFixed(0)}%)',
+  );
   buffer.writeln(report.harmonySummary);
   buffer.writeln();
 
@@ -182,10 +181,7 @@ Future<void> shareChatResponse(String text) async {
   buffer.write(text);
   buffer.write(_appFooter);
 
-  await Share.share(
-    buffer.toString(),
-    subject: 'Aquarium AI – Chat Response',
-  );
+  await Share.share(buffer.toString(), subject: 'Aquarium AI – Chat Response');
 }
 
 /// Converts a [FishInfoResult] to a plain-text summary and shares it.
@@ -253,8 +249,5 @@ Future<void> shareFishInfoResult(FishInfoResult result) async {
   }
   buffer.write(_appFooter);
 
-  await Share.share(
-    buffer.toString(),
-    subject: 'Aquarium AI – Fish Info',
-  );
+  await Share.share(buffer.toString(), subject: 'Aquarium AI – Fish Info');
 }

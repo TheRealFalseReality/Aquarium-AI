@@ -2,33 +2,35 @@ import 'dart:typed_data';
 
 import 'package:fish_ai/models/analysis_result.dart';
 import 'package:fish_ai/models/automation_script.dart';
-import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:fish_ai/models/fish_info_result.dart';
+import 'package:fish_ai/models/photo_analysis_result.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import '../l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../providers/chat_provider.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import './water_parameter_analysis_screen.dart';
-import './automation_script_screen.dart';
-import './analysis_result_screen.dart';
-import './automation_script_result_screen.dart';
-import './photo_analysis_screen.dart';
-import './photo_analysis_result_screen.dart';
-import './fish_info_screen.dart';
-import './fish_info_result_screen.dart';
-import '../widgets/ad_component.dart';
-import '../widgets/mini_ai_chip.dart';
-import '../widgets/ai_error_dialog.dart';
+import '../providers/chat_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
+import '../widgets/ad_component.dart';
+import '../widgets/ai_error_dialog.dart';
+import '../widgets/mini_ai_chip.dart';
+import './analysis_result_screen.dart';
+import './automation_script_result_screen.dart';
+import './automation_script_screen.dart';
+import './fish_info_result_screen.dart';
+import './fish_info_screen.dart';
+import './photo_analysis_result_screen.dart';
+import './photo_analysis_screen.dart';
+import './water_parameter_analysis_screen.dart';
 
 class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
   final bool autoOpenWaterAnalysis;
   final bool autoOpenFishInfo;
+
   const ChatbotScreen({
     super.key,
     this.autoOpenPhotoAnalyzer = false,
@@ -77,7 +79,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           _autoOpened = true;
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const WaterParameterAnalysisScreen()),
+            MaterialPageRoute(
+              builder: (_) => const WaterParameterAnalysisScreen(),
+            ),
           );
         }
       });
@@ -105,7 +109,8 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   }
 
   void _scrollListener() {
-    final shouldShow = _scrollController.position.pixels <
+    final shouldShow =
+        _scrollController.position.pixels <
         _scrollController.position.maxScrollExtent - 100;
     if (shouldShow != _showScrollButton) {
       setState(() => _showScrollButton = shouldShow);
@@ -126,7 +131,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     final chatNotifier = ref.read(chatProvider.notifier);
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
-    
+
     // Log AI interaction
     AnalyticsService.logAIInteraction(
       interactionType: 'chat_message',
@@ -136,7 +141,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         'has_question_mark': text.contains('?') ? 'true' : 'false',
       },
     );
-    
+
     setState(() => _sending = true);
     _sendIconController.forward(from: 0);
     chatNotifier.sendMessage(text);
@@ -166,9 +171,13 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 VoidCallback? retryCallback;
                 if (last.isRetryable) {
                   if (last.photoBytes != null) {
-                    retryCallback = () => ref.read(chatProvider.notifier).regeneratePhotoAnalysis();
+                    retryCallback = () => ref
+                        .read(chatProvider.notifier)
+                        .regeneratePhotoAnalysis();
                   } else if (last.originalMessage != null) {
-                    retryCallback = () => ref.read(chatProvider.notifier).retryMessage(last.originalMessage!);
+                    retryCallback = () => ref
+                        .read(chatProvider.notifier)
+                        .retryMessage(last.originalMessage!);
                   }
                 }
                 showAiErrorDialog(
@@ -201,7 +210,8 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 context,
                 MaterialPageRoute(
                   builder: (_) => AutomationScriptResultScreen(
-                      script: last.automationScript!),
+                    script: last.automationScript!,
+                  ),
                 ),
               );
             }
@@ -228,7 +238,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
         }
       });
     });
-
 
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
@@ -298,8 +307,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     final focused = _inputFocusNode.hasFocus;
     final loading = chatState.isLoading;
 
-    final gradient =
-        LinearGradient(colors: [cs.primary, cs.secondary, cs.tertiary]);
+    final gradient = LinearGradient(
+      colors: [cs.primary, cs.secondary, cs.tertiary],
+    );
 
     return Positioned(
       bottom: 0,
@@ -321,7 +331,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 color: Colors.black.withOpacity(0.08),
                 blurRadius: 12,
                 offset: const Offset(0, -2),
-              )
+              ),
             ],
           ),
           child: Column(
@@ -348,8 +358,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                 ),
               _suggestionMenu(context),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -367,22 +379,22 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                                     blurRadius: 18,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 4),
-                                  )
+                                  ),
                                 ]
                               : [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
-                                  )
+                                  ),
                                 ],
                         ),
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color:
-                                Theme.of(context).colorScheme.surfaceVariant
-                                    .withOpacity(0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceVariant.withOpacity(0.6),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: TextField(
@@ -423,7 +435,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     );
   }
 
-Widget _suggestionMenu(BuildContext context) {
+  Widget _suggestionMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final expanded = _expandedMenu != null;
@@ -444,8 +456,9 @@ Widget _suggestionMenu(BuildContext context) {
                 selected: _expandedMenu == 'aquarium',
                 onTap: () {
                   setState(() {
-                    _expandedMenu =
-                        _expandedMenu == 'aquarium' ? null : 'aquarium';
+                    _expandedMenu = _expandedMenu == 'aquarium'
+                        ? null
+                        : 'aquarium';
                   });
                 },
               ),
@@ -476,8 +489,9 @@ Widget _suggestionMenu(BuildContext context) {
                 selected: _expandedMenu == 'ai_tools',
                 onTap: () {
                   setState(() {
-                    _expandedMenu =
-                        _expandedMenu == 'ai_tools' ? null : 'ai_tools';
+                    _expandedMenu = _expandedMenu == 'ai_tools'
+                        ? null
+                        : 'ai_tools';
                   });
                 },
               ),
@@ -485,8 +499,12 @@ Widget _suggestionMenu(BuildContext context) {
           ),
           if (expanded)
             Padding(
-              padding:
-                  const EdgeInsets.only(bottom: 6, top: 4, left: 12, right: 12),
+              padding: const EdgeInsets.only(
+                bottom: 6,
+                top: 4,
+                left: 12,
+                right: 12,
+              ),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: cs.surface.withOpacity(0.75),
@@ -497,11 +515,16 @@ Widget _suggestionMenu(BuildContext context) {
                   ),
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   child: Column(
                     children: [
-                      _menuTitle(_getMenuTitle(_expandedMenu!, context), context),
+                      _menuTitle(
+                        _getMenuTitle(_expandedMenu!, context),
+                        context,
+                      ),
                       const SizedBox(height: 8),
                       _menuContent(_expandedMenu!, context),
                     ],
@@ -532,9 +555,9 @@ Widget _suggestionMenu(BuildContext context) {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 
@@ -586,7 +609,7 @@ Widget _suggestionMenu(BuildContext context) {
               engagementType: 'suggested_question_click',
               content: questionText,
             );
-            
+
             chatNotifier.sendMessage(q);
             setState(() => _expandedMenu = null);
           },
@@ -627,9 +650,7 @@ Widget _suggestionMenu(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const AutomationScriptScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const AutomationScriptScreen()),
             );
             setState(() => _expandedMenu = null);
           },
@@ -643,9 +664,7 @@ Widget _suggestionMenu(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const FishInfoScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const FishInfoScreen()),
             );
             setState(() => _expandedMenu = null);
           },
@@ -654,15 +673,16 @@ Widget _suggestionMenu(BuildContext context) {
           label: l10n.photoAnalyzer,
           icon: Icons.camera_alt_outlined,
           customGradient: LinearGradient(
-            colors: [Colors.deepOrange.shade400, const Color.fromARGB(255, 160, 88, 6)],
+            colors: [
+              Colors.deepOrange.shade400,
+              const Color.fromARGB(255, 160, 88, 6),
+            ],
           ),
           onTap: () {
             // Already in chatbot; just open analyzer
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const PhotoAnalysisScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const PhotoAnalysisScreen()),
             );
             setState(() => _expandedMenu = null);
           },
@@ -695,22 +715,22 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final gradient =
-        LinearGradient(colors: [cs.primary, cs.secondary, cs.tertiary]);
+    final gradient = LinearGradient(
+      colors: [cs.primary, cs.secondary, cs.tertiary],
+    );
 
     final scale = _pressed
         ? 0.9
         : _hover
-            ? 1.08
-            : 1.0;
+        ? 1.08
+        : 1.0;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) =>
-          setState(() {
-            _hover = false;
-            _pressed = false;
-          }),
+      onExit: (_) => setState(() {
+        _hover = false;
+        _pressed = false;
+      }),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) {
@@ -739,7 +759,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                     color: cs.primary.withOpacity(0.45),
                     blurRadius: 18,
                     offset: const Offset(0, 6),
-                  )
+                  ),
                 ],
               ),
               child: Center(
@@ -756,8 +776,7 @@ class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
                           height: 26,
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
-                            valueColor:
-                                AlwaysStoppedAnimation(cs.onPrimary),
+                            valueColor: AlwaysStoppedAnimation(cs.onPrimary),
                           ),
                         )
                       : RotationTransition(
@@ -832,9 +851,14 @@ class MessageBubble extends ConsumerWidget {
                       maxScale: 5,
                       child: Image.memory(
                         photoBytes!,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
                       ),
                     ),
                   ),
@@ -845,7 +869,7 @@ class MessageBubble extends ConsumerWidget {
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -866,13 +890,15 @@ class MessageBubble extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment:
-                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             children: [
               if (!isUser)
                 CircleAvatar(
@@ -886,20 +912,21 @@ class MessageBubble extends ConsumerWidget {
               if (!isUser) const SizedBox(width: 8),
               Flexible(
                 child: Column(
-                  crossAxisAlignment:
-                      isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: isUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
                   children: [
                     Text(
                       isUser
                           ? l10n.chatbotYou
                           : isError
-                              ? l10n.chatbotAIError(l10n.appTitle)
-                              : l10n.appTitle,
+                          ? l10n.chatbotAIError(l10n.appTitle)
+                          : l10n.appTitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.3,
-                            color: isError ? cs.error : null,
-                          ),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                        color: isError ? cs.error : null,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Container(
@@ -942,30 +969,41 @@ class MessageBubble extends ConsumerWidget {
                                       height: 120,
                                       width: 180,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => const SizedBox(
-                                        height: 120,
-                                        width: 180,
-                                        child: Center(
-                                          child: Icon(Icons.broken_image_outlined, size: 40),
-                                        ),
-                                      ),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const SizedBox(
+                                                height: 120,
+                                                width: 180,
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.broken_image_outlined,
+                                                    size: 40,
+                                                  ),
+                                                ),
+                                              ),
                                     ),
                                     Positioned(
                                       bottom: 4,
                                       right: 4,
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 6, vertical: 3),
+                                          horizontal: 6,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.black54,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.zoom_in,
-                                                size: 12, color: Colors.white),
+                                            Icon(
+                                              Icons.zoom_in,
+                                              size: 12,
+                                              color: Colors.white,
+                                            ),
                                             SizedBox(width: 4),
                                             Text(
                                               'View',
@@ -978,12 +1016,12 @@ class MessageBubble extends ConsumerWidget {
                                           ],
                                         ),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                          ]
+                          ],
                         ],
                       ),
                     ),
@@ -1010,7 +1048,9 @@ class MessageBubble extends ConsumerWidget {
                 if (photoBytes != null) {
                   ref.read(chatProvider.notifier).regeneratePhotoAnalysis();
                 } else if (originalMessage != null) {
-                  ref.read(chatProvider.notifier).retryMessage(originalMessage!);
+                  ref
+                      .read(chatProvider.notifier)
+                      .retryMessage(originalMessage!);
                 }
               },
             ),
@@ -1038,9 +1078,8 @@ class MessageBubble extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AutomationScriptResultScreen(
-                      script: automationScript!,
-                    ),
+                    builder: (_) =>
+                        AutomationScriptResultScreen(script: automationScript!),
                   ),
                 );
               },
@@ -1085,7 +1124,9 @@ class MessageBubble extends ConsumerWidget {
                     dense: true,
                     onTap: () {
                       // Log follow-up question usage with safer parameters
-                      final questionText = q.length > 100 ? q.substring(0, 100) : q;
+                      final questionText = q.length > 100
+                          ? q.substring(0, 100)
+                          : q;
                       AnalyticsService.logFeatureUsed(
                         featureName: 'followup_question',
                         parameters: {
@@ -1097,7 +1138,7 @@ class MessageBubble extends ConsumerWidget {
                         engagementType: 'followup_question_click',
                         content: questionText,
                       );
-                      
+
                       ref.read(chatProvider.notifier).sendMessage(q);
                     },
                   );
@@ -1146,7 +1187,7 @@ class _RetryButtonState extends State<_RetryButton> {
                       color: cs.error.withOpacity(0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
           ),
           transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
@@ -1158,9 +1199,9 @@ class _RetryButtonState extends State<_RetryButton> {
               Text(
                 'Retry',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: cs.onError,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: cs.onError,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -1206,7 +1247,7 @@ class _SettingsButtonState extends State<_SettingsButton> {
                       color: cs.primary.withOpacity(0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
           ),
           transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
@@ -1218,9 +1259,9 @@ class _SettingsButtonState extends State<_SettingsButton> {
               Text(
                 'AI Provider Settings',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: cs.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: cs.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -1256,14 +1297,10 @@ class _ResultButtonState extends State<_ResultButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                cs.primary,
-                cs.secondary,
-              ],
+              colors: [cs.primary, cs.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -1275,22 +1312,21 @@ class _ResultButtonState extends State<_ResultButton> {
                       color: cs.primary.withOpacity(0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
           ),
           transform: Matrix4.identity()..scale(_pressed ? 0.94 : 1.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.visibility_rounded,
-                  size: 18, color: cs.onPrimary),
+              Icon(Icons.visibility_rounded, size: 18, color: cs.onPrimary),
               const SizedBox(width: 8),
               Text(
                 widget.label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: cs.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: cs.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

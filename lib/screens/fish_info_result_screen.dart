@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../l10n/app_localizations.dart';
-import '../models/fish_info_result.dart';
 import '../main_layout.dart';
+import '../models/fish_info_result.dart';
 import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/common_buttons.dart';
@@ -72,10 +73,9 @@ class FishInfoResultScreen extends StatelessWidget {
         Expanded(
           child: Text(
             l10n.aiFishInfoLookup,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ),
@@ -113,9 +113,9 @@ class FishInfoResultScreen extends StatelessWidget {
                 Text(
                   fish.commonName,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: cs.onPrimaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: cs.onPrimaryContainer,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 if (fish.scientificName.isNotEmpty) ...[
@@ -123,9 +123,9 @@ class FishInfoResultScreen extends StatelessWidget {
                   Text(
                     fish.scientificName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: cs.onSurface.withOpacity(0.75),
-                        ),
+                      fontStyle: FontStyle.italic,
+                      color: cs.onSurface.withOpacity(0.75),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -160,10 +160,13 @@ class FishInfoResultScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('• ',
-                              style: TextStyle(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            '• ',
+                            style: TextStyle(
+                              color: cs.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Expanded(child: Text(fact)),
                         ],
                       ),
@@ -187,10 +190,13 @@ class FishInfoResultScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('• ',
-                              style: TextStyle(
-                                  color: cs.tertiary,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            '• ',
+                            style: TextStyle(
+                              color: cs.tertiary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Expanded(child: Text(fact)),
                         ],
                       ),
@@ -208,16 +214,21 @@ class FishInfoResultScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (fish.care.minimumTankSize.isNotEmpty)
-                _careRow(context, 'Minimum Tank Size:', fish.care.minimumTankSize),
+                _careRow(
+                  context,
+                  'Minimum Tank Size:',
+                  fish.care.minimumTankSize,
+                ),
               if (fish.care.difficultyLevel.isNotEmpty)
                 _careRow(context, 'Difficulty:', fish.care.difficultyLevel),
               if (fish.care.waterParameters.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                Text('Water Parameters:',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  'Water Parameters:',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 2),
                 MarkdownBody(
                   data: fish.care.waterParameters,
@@ -229,11 +240,12 @@ class FishInfoResultScreen extends StatelessWidget {
               ],
               if (fish.care.tankSetup.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                Text('Tank Setup:',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  'Tank Setup:',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 2),
                 MarkdownBody(
                   data: fish.care.tankSetup,
@@ -268,9 +280,13 @@ class FishInfoResultScreen extends StatelessWidget {
                       dense: true,
                       onTap: () async {
                         final url = Uri.parse(
-                            'https://www.google.com/search?q=${Uri.encodeComponent('$mate fish')}');
+                          'https://www.google.com/search?q=${Uri.encodeComponent('$mate fish')}',
+                        );
                         if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
                         }
                       },
                     );
@@ -279,9 +295,9 @@ class FishInfoResultScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '(Tap a name to search)',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
                 ),
               ],
             ),
@@ -303,13 +319,21 @@ class FishInfoResultScreen extends StatelessWidget {
                       label: species,
                       selected: false,
                       dense: true,
-                      selectedColor: Theme.of(context).colorScheme.errorContainer,
-                      selectedTextColor: Theme.of(context).colorScheme.onErrorContainer,
+                      selectedColor: Theme.of(
+                        context,
+                      ).colorScheme.errorContainer,
+                      selectedTextColor: Theme.of(
+                        context,
+                      ).colorScheme.onErrorContainer,
                       onTap: () async {
                         final url = Uri.parse(
-                            'https://www.google.com/search?q=${Uri.encodeComponent('$species fish')}');
+                          'https://www.google.com/search?q=${Uri.encodeComponent('$species fish')}',
+                        );
                         if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
                         }
                       },
                     );
@@ -318,9 +342,9 @@ class FishInfoResultScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '(Tap a name to search)',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
                 ),
               ],
             ),
@@ -332,9 +356,9 @@ class FishInfoResultScreen extends StatelessWidget {
         Text(
           'Disclaimer: AI may occasionally provide inaccurate information. Always verify critical care details with trusted sources.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-                fontStyle: FontStyle.italic,
-              ),
+            color: Theme.of(context).colorScheme.error,
+            fontStyle: FontStyle.italic,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
@@ -342,18 +366,18 @@ class FishInfoResultScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoSection(BuildContext context,
-      {required String title, required Widget child}) {
+  Widget _infoSection(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.4),
-          width: 0.8,
-        ),
+        side: BorderSide(color: cs.outlineVariant.withOpacity(0.4), width: 0.8),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -362,10 +386,9 @@ class FishInfoResultScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             child,

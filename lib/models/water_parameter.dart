@@ -2,7 +2,8 @@ import 'package:uuid/uuid.dart';
 
 class WaterParameter {
   final String id;
-  final String parameterType; // 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity'
+  final String
+  parameterType; // 'ammonia', 'nitrite', 'nitrate', 'phosphate', 'salinity'
   final double value;
   final String? unit; // Optional unit like 'ppm', 'ppt', etc.
   final DateTime dateRecorded;
@@ -74,4 +75,3 @@ class WaterParameter {
     );
   }
 }
-

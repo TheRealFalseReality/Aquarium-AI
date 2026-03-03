@@ -49,7 +49,7 @@ class InAppReviewService {
 
       final daysSinceFirstLaunch =
           (DateTime.now().millisecondsSinceEpoch - firstLaunchTimestamp) /
-              (1000 * 60 * 60 * 24);
+          (1000 * 60 * 60 * 24);
 
       debugPrint(
         'InAppReviewService: days since first launch: '
@@ -58,9 +58,7 @@ class InAppReviewService {
       );
 
       if (daysSinceFirstLaunch < _minDaysSinceFirstLaunch) {
-        debugPrint(
-          'InAppReviewService: minimum days not elapsed, skipping',
-        );
+        debugPrint('InAppReviewService: minimum days not elapsed, skipping');
         return;
       }
 

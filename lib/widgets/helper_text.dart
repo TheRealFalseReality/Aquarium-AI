@@ -21,7 +21,7 @@ class TipText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: padding ?? EdgeInsets.zero,
       child: Text(
@@ -54,7 +54,7 @@ class DisclaimerText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: padding ?? EdgeInsets.zero,
       child: Text(
@@ -88,9 +88,9 @@ class InstructionText extends StatelessWidget {
       padding: padding ?? EdgeInsets.zero,
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontStyle: FontStyle.italic,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
         textAlign: textAlign ?? TextAlign.center,
       ),
     );

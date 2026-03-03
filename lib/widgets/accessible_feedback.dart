@@ -42,7 +42,7 @@ class AccessibleFeedback {
     final overlay = Overlay.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Create overlay entry with semantic live region
     _currentEntry = OverlayEntry(
       builder: (context) => _AccessibleFeedbackWidget(
@@ -92,7 +92,8 @@ class _AccessibleFeedbackWidget extends StatefulWidget {
   });
 
   @override
-  State<_AccessibleFeedbackWidget> createState() => _AccessibleFeedbackWidgetState();
+  State<_AccessibleFeedbackWidget> createState() =>
+      _AccessibleFeedbackWidgetState();
 }
 
 class _AccessibleFeedbackWidgetState extends State<_AccessibleFeedbackWidget>
@@ -156,13 +157,11 @@ class _AccessibleFeedbackWidgetState extends State<_AccessibleFeedbackWidget>
                     Expanded(
                       child: Text(
                         widget.message,
-                        style: TextStyle(
-                          color: widget.textColor,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: widget.textColor, fontSize: 14),
                       ),
                     ),
-                    if (widget.onAction != null && widget.actionLabel != null) ...[
+                    if (widget.onAction != null &&
+                        widget.actionLabel != null) ...[
                       const SizedBox(width: 12),
                       TextButton(
                         onPressed: () {

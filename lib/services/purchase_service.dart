@@ -1,6 +1,6 @@
+import 'package:fish_ai/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:fish_ai/constants.dart';
 
 /// Wraps the [InAppPurchase] plugin and exposes a thin API used by
 /// [PurchaseNotifier].

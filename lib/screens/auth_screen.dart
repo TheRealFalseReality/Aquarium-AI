@@ -1,12 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:math' show pi;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
-import '../services/auth_service.dart';
 import '../services/analytics_service.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -112,8 +114,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Future<void> _forgotPassword() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() =>
-          _errorMessage = AppLocalizations.of(context)!.authEmailRequired);
+      setState(
+        () => _errorMessage = AppLocalizations.of(context)!.authEmailRequired,
+      );
       return;
     }
     setState(() {
@@ -125,8 +128,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                AppLocalizations.of(context)!.authPasswordResetSent),
+            content: Text(AppLocalizations.of(context)!.authPasswordResetSent),
           ),
         );
       }
@@ -181,8 +183,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Icon
-                    Icon(Icons.set_meal,
-                        size: 64, color: colorScheme.primary),
+                    Icon(Icons.set_meal, size: 64, color: colorScheme.primary),
                     const SizedBox(height: 16),
                     Text(
                       _isSignUp ? l10n.authSignUpTitle : l10n.authSignInTitle,
@@ -195,10 +196,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       _isSignUp
                           ? l10n.authSignUpSubtitle
                           : l10n.authSignInSubtitle,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -215,8 +215,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const SizedBox(height: 8),
                     _SocialSignInButton(
                       label: l10n.authSignInWithFacebook,
-                      icon: const Icon(Icons.facebook,
-                          color: Color(0xFF1877F2), size: 22),
+                      icon: const Icon(
+                        Icons.facebook,
+                        color: Color(0xFF1877F2),
+                        size: 22,
+                      ),
                       isLoading: _isSocialLoading,
                       onPressed: _isSocialLoading || _isLoading
                           ? null
@@ -230,11 +233,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         children: [
                           const Expanded(child: Divider()),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(l10n.authOrDivider,
-                                style: TextStyle(
-                                    color: colorScheme.onSurfaceVariant)),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              l10n.authOrDivider,
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
                           const Expanded(child: Divider()),
                         ],
@@ -271,7 +276,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           return l10n.authEmailRequired;
                         }
                         final emailRegex = RegExp(
-                            r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$');
+                          r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
+                        );
                         if (!emailRegex.hasMatch(v.trim())) {
                           return l10n.authErrorInvalidEmail;
                         }
@@ -288,11 +294,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
                           onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                       obscureText: _obscurePassword,
@@ -343,8 +352,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white),
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                           : Text(_isSignUp ? l10n.authSignUp : l10n.authSignIn),
                     ),
@@ -354,16 +364,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(_isSignUp
-                            ? l10n.authAlreadyHaveAccount
-                            : l10n.authDontHaveAccount),
+                        Text(
+                          _isSignUp
+                              ? l10n.authAlreadyHaveAccount
+                              : l10n.authDontHaveAccount,
+                        ),
                         TextButton(
                           onPressed: () => setState(() {
                             _isSignUp = !_isSignUp;
                             _errorMessage = null;
                           }),
                           child: Text(
-                              _isSignUp ? l10n.authSignIn : l10n.authSignUp),
+                            _isSignUp ? l10n.authSignIn : l10n.authSignUp,
+                          ),
                         ),
                       ],
                     ),
@@ -380,8 +393,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               await AuthService.signInAnonymously();
                               if (mounted) {
                                 setState(() => _isLoading = false);
-                                Navigator.of(context)
-                                    .pushReplacementNamed('/profile');
+                                Navigator.of(
+                                  context,
+                                ).pushReplacementNamed('/profile');
                               }
                             },
                     ),
@@ -439,10 +453,7 @@ class _GoogleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(22, 22),
-      painter: _GoogleLogoPainter(),
-    );
+    return CustomPaint(size: const Size(22, 22), painter: _GoogleLogoPainter());
   }
 }
 
@@ -481,8 +492,12 @@ class _GoogleLogoPainter extends CustomPainter {
       ..color = const Color(0xFF4285F4)
       ..style = PaintingStyle.fill;
     canvas.drawRect(
-      Rect.fromLTWH(center.dx, center.dy - size.height * 0.12,
-          r * 0.72, size.height * 0.24),
+      Rect.fromLTWH(
+        center.dx,
+        center.dy - size.height * 0.12,
+        r * 0.72,
+        size.height * 0.24,
+      ),
       barPaint,
     );
   }
@@ -490,4 +505,3 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

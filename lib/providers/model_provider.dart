@@ -2,6 +2,7 @@ import 'package:fish_ai/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/remote_config_service.dart';
 
 export 'package:fish_ai/constants.dart' show developerGroqApiKey;
@@ -27,19 +28,24 @@ class ModelState {
   final String groqModel;
   final String groqImageModel;
   final String groqApiKey;
+
   /// Number of past messages sent to the AI on each chat request.
   /// Users who supply their own API key can configure this (1–20); the free
   /// service tier always uses [defaultChatHistoryLimit].
   final int chatHistoryLimit;
+
   /// Provider used for text/chat operations
   final AIProvider activeTextProvider;
+
   /// Provider used for image/multimedia analysis operations
   final AIProvider activeImageProvider;
   final bool isLoading;
+
   /// When true, the app's built-in developer Groq key is used for **text/chat**
   /// operations even if the user has stored their own Groq key.
   /// The user's key is preserved so they can re-enable it at any time.
   final bool useDevGroqKeyForText;
+
   /// When true, the app's built-in developer Groq key is used for **image/photo**
   /// operations even if the user has stored their own Groq key.
   /// The user's key is preserved so they can re-enable it at any time.
@@ -124,7 +130,8 @@ class ModelState {
 // 2. Create the Notifier
 class ModelNotifier extends StateNotifier<ModelState> {
   ModelNotifier()
-      : super(ModelState(
+    : super(
+        ModelState(
           geminiModel: RemoteConfigService.defaultGeminiModel,
           geminiImageModel: RemoteConfigService.defaultGeminiImageModel,
           geminiApiKey: '',
@@ -138,7 +145,8 @@ class ModelNotifier extends StateNotifier<ModelState> {
           activeImageProvider: defaultAIProvider,
           useDevGroqKeyForText: true,
           useDevGroqKeyForImage: true,
-        )) {
+        ),
+      ) {
     _loadModels();
   }
 
@@ -178,17 +186,25 @@ class ModelNotifier extends StateNotifier<ModelState> {
 
   Future<void> _loadModels() async {
     final prefs = await SharedPreferences.getInstance();
-    final geminiModel = prefs.getString('geminiModel') ?? RemoteConfigService.defaultGeminiModel;
+    final geminiModel =
+        prefs.getString('geminiModel') ??
+        RemoteConfigService.defaultGeminiModel;
     final geminiImageModel =
-        prefs.getString('geminiImageModel') ?? RemoteConfigService.defaultGeminiImageModel;
+        prefs.getString('geminiImageModel') ??
+        RemoteConfigService.defaultGeminiImageModel;
     final geminiApiKey = prefs.getString('geminiApiKey') ?? '';
-    final chatGPTModel = prefs.getString('chatGPTModel') ?? RemoteConfigService.defaultOpenAIModel;
+    final chatGPTModel =
+        prefs.getString('chatGPTModel') ??
+        RemoteConfigService.defaultOpenAIModel;
     final chatGPTImageModel =
-        prefs.getString('chatGPTImageModel') ?? RemoteConfigService.defaultOpenAIImageModel;
+        prefs.getString('chatGPTImageModel') ??
+        RemoteConfigService.defaultOpenAIImageModel;
     final openAIApiKey = prefs.getString('openAIApiKey') ?? '';
-    final groqModel = prefs.getString('groqModel') ?? RemoteConfigService.defaultGroqModel;
+    final groqModel =
+        prefs.getString('groqModel') ?? RemoteConfigService.defaultGroqModel;
     final groqImageModel =
-        prefs.getString('groqImageModel') ?? RemoteConfigService.defaultGroqImageModel;
+        prefs.getString('groqImageModel') ??
+        RemoteConfigService.defaultGroqImageModel;
     final groqApiKey = prefs.getString('groqApiKey') ?? '';
     // Migrate legacy single useDevGroqKey → per-operation flags.
     // New users (no stored keys) default to ON (true = free AI).
@@ -196,20 +212,29 @@ class ModelNotifier extends StateNotifier<ModelState> {
     // key continues to work after an app upgrade without interruption.
     final legacyDevKey = prefs.getBool('useDevGroqKey');
     final hasAnyStoredKey =
-        geminiApiKey.isNotEmpty || openAIApiKey.isNotEmpty || groqApiKey.isNotEmpty;
+        geminiApiKey.isNotEmpty ||
+        openAIApiKey.isNotEmpty ||
+        groqApiKey.isNotEmpty;
     final freeAiDefault = !hasAnyStoredKey;
     final useDevGroqKeyForText =
         prefs.getBool('useDevGroqKeyForText') ?? legacyDevKey ?? freeAiDefault;
     final useDevGroqKeyForImage =
         prefs.getBool('useDevGroqKeyForImage') ?? legacyDevKey ?? freeAiDefault;
-    final chatHistoryLimit = (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit)
-        .clamp(minChatHistoryLimit, maxChatHistoryLimit);
+    final chatHistoryLimit =
+        (prefs.getInt('chatHistoryLimit') ?? defaultChatHistoryLimit).clamp(
+          minChatHistoryLimit,
+          maxChatHistoryLimit,
+        );
     // Migrate legacy 'activeProvider' to both text and image providers if new keys are absent
     final legacyProviderIndex = prefs.getInt('activeProvider');
-    var activeTextProvider = AIProvider.values[
-        prefs.getInt('activeTextProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
-    var activeImageProvider = AIProvider.values[
-        prefs.getInt('activeImageProvider') ?? legacyProviderIndex ?? defaultAIProvider.index];
+    var activeTextProvider =
+        AIProvider.values[prefs.getInt('activeTextProvider') ??
+            legacyProviderIndex ??
+            defaultAIProvider.index];
+    var activeImageProvider =
+        AIProvider.values[prefs.getInt('activeImageProvider') ??
+            legacyProviderIndex ??
+            defaultAIProvider.index];
 
     // When Free AI is ON, ensure the active provider is Groq so the free
     // tier is actually used rather than the previously selected provider.
@@ -225,10 +250,22 @@ class ModelNotifier extends StateNotifier<ModelState> {
       openAIApiKey: openAIApiKey,
       groqApiKey: groqApiKey,
     );
-    if (!useDevGroqKeyForText && _providerKeyIsEmpty(activeTextProvider, geminiApiKey, openAIApiKey, groqApiKey)) {
+    if (!useDevGroqKeyForText &&
+        _providerKeyIsEmpty(
+          activeTextProvider,
+          geminiApiKey,
+          openAIApiKey,
+          groqApiKey,
+        )) {
       activeTextProvider = bestProvider;
     }
-    if (!useDevGroqKeyForImage && _providerKeyIsEmpty(activeImageProvider, geminiApiKey, openAIApiKey, groqApiKey)) {
+    if (!useDevGroqKeyForImage &&
+        _providerKeyIsEmpty(
+          activeImageProvider,
+          geminiApiKey,
+          openAIApiKey,
+          groqApiKey,
+        )) {
       activeImageProvider = bestProvider;
     }
 
@@ -278,10 +315,12 @@ class ModelNotifier extends StateNotifier<ModelState> {
 
     final prefs = await SharedPreferences.getInstance();
     // When Free AI is ON, ensure the active provider is Groq.
-    final effectiveTextProvider =
-        newUseDevGroqKeyForText ? AIProvider.groq : newActiveTextProvider;
-    final effectiveImageProvider =
-        newUseDevGroqKeyForImage ? AIProvider.groq : newActiveImageProvider;
+    final effectiveTextProvider = newUseDevGroqKeyForText
+        ? AIProvider.groq
+        : newActiveTextProvider;
+    final effectiveImageProvider = newUseDevGroqKeyForImage
+        ? AIProvider.groq
+        : newActiveImageProvider;
     await prefs.setString('geminiModel', newGeminiModel);
     await prefs.setString('geminiImageModel', newGeminiImageModel);
     await prefs.setString('geminiApiKey', newGeminiApiKey);
@@ -291,7 +330,10 @@ class ModelNotifier extends StateNotifier<ModelState> {
     await prefs.setString('groqModel', newGroqModel);
     await prefs.setString('groqImageModel', newGroqImageModel);
     await prefs.setString('groqApiKey', newGroqApiKey);
-    await prefs.setInt('chatHistoryLimit', newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit));
+    await prefs.setInt(
+      'chatHistoryLimit',
+      newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
+    );
     await prefs.setInt('activeTextProvider', effectiveTextProvider.index);
     await prefs.setInt('activeImageProvider', effectiveImageProvider.index);
     await prefs.setBool('useDevGroqKeyForText', newUseDevGroqKeyForText);
@@ -307,7 +349,10 @@ class ModelNotifier extends StateNotifier<ModelState> {
       groqModel: newGroqModel,
       groqImageModel: newGroqImageModel,
       groqApiKey: newGroqApiKey,
-      chatHistoryLimit: newChatHistoryLimit.clamp(minChatHistoryLimit, maxChatHistoryLimit),
+      chatHistoryLimit: newChatHistoryLimit.clamp(
+        minChatHistoryLimit,
+        maxChatHistoryLimit,
+      ),
       activeTextProvider: effectiveTextProvider,
       activeImageProvider: effectiveImageProvider,
       useDevGroqKeyForText: newUseDevGroqKeyForText,

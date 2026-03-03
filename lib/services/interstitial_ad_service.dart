@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'ad_helper.dart';
 import 'remote_config_service.dart';
 
@@ -43,15 +44,15 @@ class InterstitialAdService {
   Future<bool> _canShow() async {
     final prefs = await SharedPreferences.getInstance();
     final lastShownMs = prefs.getInt(_lastShownKey) ?? 0;
-    final cooldownMs =
-        Duration(hours: RemoteConfigService.interstitialCooldownHours).inMilliseconds;
+    final cooldownMs = Duration(
+      hours: RemoteConfigService.interstitialCooldownHours,
+    ).inMilliseconds;
     return DateTime.now().millisecondsSinceEpoch - lastShownMs >= cooldownMs;
   }
 
   Future<void> _recordShown() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-        _lastShownKey, DateTime.now().millisecondsSinceEpoch);
+    await prefs.setInt(_lastShownKey, DateTime.now().millisecondsSinceEpoch);
   }
 
   /// Shows the interstitial ad if:

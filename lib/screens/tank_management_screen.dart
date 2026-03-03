@@ -1,48 +1,45 @@
 import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
-import '../models/tank.dart';
 import '../models/fish.dart';
-import '../models/tank_notification.dart';
 import '../models/notification_log.dart';
-import '../providers/tank_provider.dart';
+import '../models/tank.dart';
+import '../models/tank_notification.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
-import '../providers/app_settings_provider.dart';
-import '../providers/purchase_provider.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/tank_provider.dart';
+import '../providers/tank_tags_provider.dart';
+import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../services/interstitial_ad_service.dart';
 import '../services/notification_service.dart';
-import '../utils/tank_harmony_calculator.dart';
 import '../utils/backup_restore_utils.dart';
+import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/notification_reschedule_dialog.dart';
-import '../services/analytics_service.dart';
-import '../services/interstitial_ad_service.dart';
-import '../l10n/app_localizations.dart';
+import '../widgets/stocking_recommendation_options_dialog.dart';
+import '../widgets/tag_picker_dialog.dart';
+import 'compatibility_report.dart';
+import 'notification_logger_screen.dart';
+import 'notification_management_screen.dart';
+import 'photo_analysis_screen.dart';
 import 'tank_creation_screen.dart';
 import 'tank_details_screen.dart';
 import 'tank_stocking_report_screen.dart';
-import 'photo_analysis_screen.dart';
-import 'notification_management_screen.dart';
-import 'notification_logger_screen.dart';
-import 'compatibility_report.dart';
-import '../widgets/stocking_recommendation_options_dialog.dart';
-import '../widgets/tag_picker_dialog.dart';
-import '../providers/tank_tags_provider.dart';
 
-enum TankSortOption {
-  name,
-  type,
-  size,
-  date,
-}
+enum TankSortOption { name, type, size, date }
 
 class TankManagementScreen extends ConsumerStatefulWidget {
   const TankManagementScreen({super.key});
@@ -54,17 +51,22 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
-  Tank? _currentTankForRecommendations; // Track current tank for recommendations
+  Tank?
+  _currentTankForRecommendations; // Track current tank for recommendations
   List<Fish>? _currentExistingFish; // Track existing fish for recommendations
   bool _isSortMenuExpanded = false; // Track sort menu expansion
   String _additionalNotes = ''; // Track additional notes
-  Tank? _currentTankForCompatibility; // Track current tank for compatibility analysis
-  bool _isCompatibilityLoading = false; // Track if compatibility analysis is in progress
+  Tank?
+  _currentTankForCompatibility; // Track current tank for compatibility analysis
+  bool _isCompatibilityLoading =
+      false; // Track if compatibility analysis is in progress
   String? _filterByType; // Filter by tank type ('freshwater' or 'marine')
-  bool _filterByReef = false; // Filter to reef tanks only (only applies when _filterByType == 'marine')
+  bool _filterByReef =
+      false; // Filter to reef tanks only (only applies when _filterByType == 'marine')
   Set<String> _filterByTags = {}; // Filter by selected tank tags
   bool _showSortFilterAttention = false; // First-launch animation flag
-  static const String _sortFilterAttentionKey = 'tank_sort_filter_attention_shown';
+  static const String _sortFilterAttentionKey =
+      'tank_sort_filter_attention_shown';
   final InterstitialAdService _interstitialAdService = InterstitialAdService();
 
   @override
@@ -107,7 +109,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_sortFilterAttentionKey, true);
-      if (mounted) setState(() { _showSortFilterAttention = false; });
+      if (mounted)
+        setState(() {
+          _showSortFilterAttention = false;
+        });
     } catch (e) {
       // ignore
     }
@@ -141,22 +146,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // Listen for stocking recommendations globally
-    ref.listen<AquariumStockingState>(aquariumStockingProvider, (previous, next) {
+    ref.listen<AquariumStockingState>(aquariumStockingProvider, (
+      previous,
+      next,
+    ) {
       if (!context.mounted) return;
       if (next.recommendations != null && next.recommendations!.isNotEmpty) {
         // Hide loading dialog if it's showing
         if (Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
         }
-        
+
         // Check if we have the required data
         final tank = _currentTankForRecommendations;
         final fish = _currentExistingFish;
-        
+
         if (tank != null && fish != null) {
           // Capture values before clearing to ensure they're available in the builder
           final capturedAdditionalNotes = _additionalNotes;
-          
+
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TankStockingReportScreen(
@@ -173,7 +181,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           _additionalNotes = '';
         } else {
           context.showAccessibleMessage(
-            'Error: Missing tank data. Please try again.'
+            'Error: Missing tank data. Please try again.',
           );
         }
       }
@@ -182,7 +190,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         if (Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
         }
-        
+
         // Show error with appropriate action
         context.showAccessibleMessage(
           'Error: ${next.error}',
@@ -197,31 +205,42 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     });
 
     // Listen for compatibility analysis reports
-    ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (previous, next) {
+    ref.listen<FishCompatibilityState>(fishCompatibilityProvider, (
+      previous,
+      next,
+    ) {
       if (!context.mounted) return;
-      if (next.report != null && previous?.report != next.report && _currentTankForCompatibility != null) {
+      if (next.report != null &&
+          previous?.report != next.report &&
+          _currentTankForCompatibility != null) {
         // Hide loading dialog if it's showing
         if (_isCompatibilityLoading && Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
           _isCompatibilityLoading = false;
         }
-        
+
         // Show the compatibility report
         if (context.mounted) {
-          showReportDialog(context, next.report!, fishType: _currentTankForCompatibility!.type);
+          showReportDialog(
+            context,
+            next.report!,
+            fishType: _currentTankForCompatibility!.type,
+          );
         }
-        
+
         // Clear the current tank reference
         _currentTankForCompatibility = null;
       }
-      
-      if (next.error != null && previous?.error != next.error && _currentTankForCompatibility != null) {
+
+      if (next.error != null &&
+          previous?.error != next.error &&
+          _currentTankForCompatibility != null) {
         // Hide loading dialog if it's showing
         if (_isCompatibilityLoading && Navigator.canPop(context)) {
           Navigator.of(context).pop(); // Close loading dialog
           _isCompatibilityLoading = false;
         }
-        
+
         // Show error with appropriate action
         if (context.mounted) {
           context.showAccessibleMessage(
@@ -235,7 +254,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           );
           ref.read(fishCompatibilityProvider.notifier).clearError();
         }
-        
+
         // Clear the current tank reference
         _currentTankForCompatibility = null;
       }
@@ -247,9 +266,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const TankCreationScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const TankCreationScreen()),
           );
         },
         icon: const Icon(Icons.add),
@@ -258,16 +275,22 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: tankState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : tankState.error != null
-              ? _buildErrorState(context, ref, tankState.error!)
-              : tankState.tanks.isEmpty
-                  ? _buildEmptyState(context, ref)
-                  : _buildTankListWithFloatingMenu(context, ref, tankState.tanks, fishData, appSettings),
+          ? _buildErrorState(context, ref, tankState.error!)
+          : tankState.tanks.isEmpty
+          ? _buildEmptyState(context, ref)
+          : _buildTankListWithFloatingMenu(
+              context,
+              ref,
+              tankState.tanks,
+              fishData,
+              appSettings,
+            ),
     );
   }
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, String error) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -309,7 +332,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -325,9 +348,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             const SizedBox(height: 24),
             Text(
               l10n.noTanksYetTitle,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -337,7 +360,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            
+
             // Action buttons
             Column(
               children: [
@@ -369,7 +392,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
-                      onPressed: () => BackupRestoreUtils.importData(context, ref, source: 'tank_management'),
+                      onPressed: () => BackupRestoreUtils.importData(
+                        context,
+                        ref,
+                        source: 'tank_management',
+                      ),
                       icon: const Icon(Icons.restore, size: 18),
                       label: Text(l10n.restore),
                       style: OutlinedButton.styleFrom(
@@ -385,7 +412,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: () => BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management_empty'),
+                  onPressed: () => BackupRestoreUtils.importTankShare(
+                    context,
+                    ref,
+                    source: 'tank_management_empty',
+                  ),
                   icon: const Icon(Icons.download, size: 18),
                   label: Text(l10n.importTank),
                   style: OutlinedButton.styleFrom(
@@ -405,11 +436,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankListWithFloatingMenu(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+  Widget _buildTankListWithFloatingMenu(
+    BuildContext context,
+    WidgetRef ref,
+    List<Tank> tanks,
+    Map<String, List<Fish>>? fishData,
+    AppSettingsState appSettings,
+  ) {
     return Stack(
       children: [
         _buildTankList(context, ref, tanks, fishData, appSettings),
-        if (_isSortMenuExpanded) 
+        if (_isSortMenuExpanded)
           GestureDetector(
             onTap: () {
               setState(() {
@@ -427,47 +464,79 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankList(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+  Widget _buildTankList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Tank> tanks,
+    Map<String, List<Fish>>? fishData,
+    AppSettingsState appSettings,
+  ) {
     final filteredTanks = _filterTanks(tanks);
     final sortedTanks = _sortTanks(filteredTanks);
     final screenWidth = MediaQuery.of(context).size.width;
     final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    
+
     // Use grid layout for larger screens (tablets and desktops) OR when user enables grid on mobile
     final useGridLayout = screenWidth >= 900 || appSettings.tankGridLayout;
-    
+
     if (useGridLayout) {
       // Column count: 3 for large screens, 2 otherwise
       final int columnCount = screenWidth >= 1400 ? 3 : 2;
-      
+
       return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildHeader(context, ref, sortedTanks.length, appSettings),
+              child: _buildHeader(
+                context,
+                ref,
+                sortedTanks.length,
+                appSettings,
+              ),
             ),
           ),
           // Masonry grid layout with native ads
-          ..._buildTankGridWithAds(context, ref, sortedTanks, fishData, appSettings, columnCount, adsRemoved: adsRemoved),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 16),
+          ..._buildTankGridWithAds(
+            context,
+            ref,
+            sortedTanks,
+            fishData,
+            appSettings,
+            columnCount,
+            adsRemoved: adsRemoved,
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
       );
     }
-    
+
     // Use list layout for mobile devices with native ads
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: _calculateListItemCount(sortedTanks.length),
       itemBuilder: (context, index) {
-        return _buildListItem(context, ref, index, sortedTanks, fishData, appSettings);
+        return _buildListItem(
+          context,
+          ref,
+          index,
+          sortedTanks,
+          fishData,
+          appSettings,
+        );
       },
     );
   }
 
-  List<Widget> _buildTankGridWithAds(BuildContext context, WidgetRef ref, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings, int columnCount, {bool adsRemoved = false}) {
+  List<Widget> _buildTankGridWithAds(
+    BuildContext context,
+    WidgetRef ref,
+    List<Tank> tanks,
+    Map<String, List<Fish>>? fishData,
+    AppSettingsState appSettings,
+    int columnCount, {
+    bool adsRemoved = false,
+  }) {
     // If ads are removed, render all tanks in a single unbroken masonry grid
     if (adsRemoved) {
       return [
@@ -479,7 +548,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             crossAxisSpacing: 16,
             childCount: tanks.length,
             itemBuilder: (context, index) {
-              return _buildTankCard(context, ref, tanks[index], fishData, appSettings);
+              return _buildTankCard(
+                context,
+                ref,
+                tanks[index],
+                fishData,
+                appSettings,
+              );
             },
           ),
         ),
@@ -489,15 +564,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Configuration for ad placement
     const int tanksBeforeFirstAd = 4; // Show ad after first 4 tanks
     const int tanksBetweenAds = 6; // Show ad every 6 tanks thereafter
-    
+
     List<Widget> slivers = [];
     int tankIndex = 0;
-    
+
     while (tankIndex < tanks.length) {
       // Determine how many tanks to show before the next ad
       int tanksToShow;
       bool shouldShowAd = false;
-      
+
       if (tankIndex == 0) {
         // First batch of tanks
         tanksToShow = tanksBeforeFirstAd.clamp(0, tanks.length - tankIndex);
@@ -507,19 +582,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         tanksToShow = tanksBetweenAds.clamp(0, tanks.length - tankIndex);
         shouldShowAd = tankIndex + tanksToShow < tanks.length;
       }
-      
+
       // Capture the starting index for this section
       final int startIndex = tankIndex;
-      
+
       // Add a grid section with N tanks
       slivers.add(
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            startIndex == 0 ? 0 : 16,
-            16,
-            0,
-          ),
+          padding: EdgeInsets.fromLTRB(16, startIndex == 0 ? 0 : 16, 16, 0),
           sliver: SliverMasonryGrid.count(
             crossAxisCount: columnCount,
             mainAxisSpacing: 16,
@@ -530,27 +600,31 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               if (actualIndex >= tanks.length) {
                 return const SizedBox.shrink();
               }
-              return _buildTankCard(context, ref, tanks[actualIndex], fishData, appSettings);
+              return _buildTankCard(
+                context,
+                ref,
+                tanks[actualIndex],
+                fishData,
+                appSettings,
+              );
             },
           ),
         ),
       );
-      
+
       tankIndex += tanksToShow;
-      
+
       // Add native ad if needed
       if (shouldShowAd) {
         slivers.add(
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-            sliver: SliverToBoxAdapter(
-              child: _buildNativeAdCard(context),
-            ),
+            sliver: SliverToBoxAdapter(child: _buildNativeAdCard(context)),
           ),
         );
       }
     }
-    
+
     return slivers;
   }
 
@@ -558,81 +632,100 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // Configuration for ad placement
     const int tanksBeforeFirstAd = 4;
     const int tanksBetweenAds = 6;
-    
+
     int itemCount = 1; // Start with header
     int remainingTanks = tankCount;
-    
+
     if (remainingTanks <= tanksBeforeFirstAd) {
       return itemCount + remainingTanks;
     }
-    
+
     // Add first batch
     itemCount += tanksBeforeFirstAd;
     remainingTanks -= tanksBeforeFirstAd;
-    
+
     // Add ad after first batch
     if (remainingTanks > 0) {
       itemCount++; // Native ad
     }
-    
+
     // Add remaining batches with ads
     while (remainingTanks > 0) {
       final batch = tanksBetweenAds.clamp(0, remainingTanks);
       itemCount += batch;
       remainingTanks -= batch;
-      
+
       if (remainingTanks > 0) {
         itemCount++; // Native ad
       }
     }
-    
+
     return itemCount;
   }
 
-  Widget _buildListItem(BuildContext context, WidgetRef ref, int index, List<Tank> tanks, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+  Widget _buildListItem(
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+    List<Tank> tanks,
+    Map<String, List<Fish>>? fishData,
+    AppSettingsState appSettings,
+  ) {
     // Configuration for ad placement
     const int tanksBeforeFirstAd = 4;
     const int tanksBetweenAds = 6;
-    
+
     // Header is always at index 0
     if (index == 0) {
       return _buildHeader(context, ref, tanks.length, appSettings);
     }
-    
+
     // Calculate actual tank index and whether this should be an ad
     int adjustedIndex = index - 1; // Subtract header
     int tanksSeen = 0;
-    
+
     // Determine position
     if (adjustedIndex < tanksBeforeFirstAd) {
       // First batch, no ads yet
-      return _buildTankCard(context, ref, tanks[adjustedIndex], fishData, appSettings);
+      return _buildTankCard(
+        context,
+        ref,
+        tanks[adjustedIndex],
+        fishData,
+        appSettings,
+      );
     }
-    
+
     adjustedIndex -= tanksBeforeFirstAd;
     tanksSeen = tanksBeforeFirstAd;
-    
+
     // Check if we should show first ad
     if (adjustedIndex == 0 && tanks.length > tanksBeforeFirstAd) {
       return _buildNativeAdCard(context);
     }
-    
+
     if (adjustedIndex > 0) {
       adjustedIndex -= 1; // Account for first ad
     }
-    
+
     // Remaining items alternate between tank batches and ads
     final batchSize = tanksBetweenAds + 1; // tanks + ad
     final batchNumber = adjustedIndex ~/ batchSize;
     final positionInBatch = adjustedIndex % batchSize;
-    
+
     tanksSeen += batchNumber * tanksBetweenAds;
-    
+
     if (positionInBatch < tanksBetweenAds) {
       // Tank position
       final tankIndex = tanksSeen + positionInBatch;
       if (tankIndex < tanks.length) {
-        return _buildTankCard(context, ref, tanks[tankIndex], fishData, appSettings);
+        return _buildTankCard(
+          context,
+          ref,
+          tanks[tankIndex],
+          fishData,
+          appSettings,
+        );
       }
     } else {
       // Ad position
@@ -641,7 +734,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         return _buildNativeAdCard(context);
       }
     }
-    
+
     return const SizedBox.shrink();
   }
 
@@ -649,7 +742,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
       ),
       child: const ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -679,11 +774,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   List<Tank> _sortTanks(List<Tank> tanks) {
     final sortedTanks = List<Tank>.from(tanks);
-    
+
     switch (_currentSortOption) {
       case TankSortOption.name:
         sortedTanks.sort((a, b) {
-          final comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          final comparison = a.name.toLowerCase().compareTo(
+            b.name.toLowerCase(),
+          );
           return _isSortAscending ? comparison : -comparison;
         });
         break;
@@ -696,7 +793,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             final comparison = aOrder.compareTo(bOrder);
             return _isSortAscending ? comparison : -comparison;
           }
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
+          return a.name.toLowerCase().compareTo(
+            b.name.toLowerCase(),
+          ); // Secondary sort by name
         });
         break;
       case TankSortOption.size:
@@ -707,7 +806,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             final comparison = bSize.compareTo(aSize); // Default largest first
             return _isSortAscending ? comparison : -comparison;
           }
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase()); // Secondary sort by name
+          return a.name.toLowerCase().compareTo(
+            b.name.toLowerCase(),
+          ); // Secondary sort by name
         });
         break;
       case TankSortOption.date:
@@ -718,19 +819,23 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         });
         break;
     }
-    
+
     return sortedTanks;
   }
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref, int tankCount, AppSettingsState appSettings) {
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    int tankCount,
+    AppSettingsState appSettings,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           // Header with 3-dot menu
           Row(
             children: [
@@ -742,7 +847,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ),
                 ),
               ),
-              
+
               // Sort & Filter & View menu (with optional first-launch pulse animation)
               _showSortFilterAttention
                   ? _PulseRingWidget(
@@ -757,10 +862,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           clipBehavior: Clip.none,
                           children: [
                             Icon(
-                              _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                              _isSortMenuExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
                               size: 18,
                             ),
-                            if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                            if (_filterByType != null ||
+                                _filterByReef ||
+                                _filterByTags.isNotEmpty)
                               Positioned(
                                 top: -4,
                                 right: -4,
@@ -778,20 +887,34 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                            Icon(
+                              _getSortOptionIcon(_currentSortOption),
+                              size: 16,
+                            ),
                             const SizedBox(width: 4),
                             Text(_getSortOptionLabel(_currentSortOption)),
                             const SizedBox(width: 4),
                             Icon(
-                              _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                              _isSortAscending
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward,
                               size: 14,
                             ),
                           ],
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
-                              ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          side:
+                              (_filterByType != null ||
+                                  _filterByReef ||
+                                  _filterByTags.isNotEmpty)
+                              ? BorderSide(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  width: 2,
+                                )
                               : null,
                         ),
                       ),
@@ -806,10 +929,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         clipBehavior: Clip.none,
                         children: [
                           Icon(
-                            _isSortMenuExpanded ? Icons.expand_less : Icons.expand_more,
+                            _isSortMenuExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
                             size: 18,
                           ),
-                          if (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
+                          if (_filterByType != null ||
+                              _filterByReef ||
+                              _filterByTags.isNotEmpty)
                             Positioned(
                               top: -4,
                               right: -4,
@@ -827,38 +954,64 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(_getSortOptionIcon(_currentSortOption), size: 16),
+                          Icon(
+                            _getSortOptionIcon(_currentSortOption),
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Text(_getSortOptionLabel(_currentSortOption)),
                           const SizedBox(width: 4),
                           Icon(
-                            _isSortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                            _isSortAscending
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
                             size: 14,
                           ),
                         ],
                       ),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        side: (_filterByType != null || _filterByReef || _filterByTags.isNotEmpty)
-                            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        side:
+                            (_filterByType != null ||
+                                _filterByReef ||
+                                _filterByTags.isNotEmpty)
+                            ? BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 2,
+                              )
                             : null,
                       ),
                     ),
               const SizedBox(width: 8),
-              
+
               // 3-dot menu for backup/restore/import
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
                   switch (value) {
                     case 'backup':
-                      BackupRestoreUtils.exportData(context, ref, source: 'tank_management');
+                      BackupRestoreUtils.exportData(
+                        context,
+                        ref,
+                        source: 'tank_management',
+                      );
                       break;
                     case 'restore':
-                      BackupRestoreUtils.importData(context, ref, source: 'tank_management');
+                      BackupRestoreUtils.importData(
+                        context,
+                        ref,
+                        source: 'tank_management',
+                      );
                       break;
                     case 'import_tank':
-                      BackupRestoreUtils.importTankShare(context, ref, source: 'tank_management');
+                      BackupRestoreUtils.importTankShare(
+                        context,
+                        ref,
+                        source: 'tank_management',
+                      );
                       break;
                   }
                 },
@@ -897,7 +1050,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
         ],
       ),
@@ -906,7 +1059,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   String _getSortOptionLabel(TankSortOption option) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     switch (option) {
       case TankSortOption.name:
         return l10n.sortByName;
@@ -943,7 +1096,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
     final sortedAllTags = tagsByName.values.toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    final hasActiveFilters = _filterByType != null || _filterByReef || _filterByTags.isNotEmpty;
+    final hasActiveFilters =
+        _filterByType != null || _filterByReef || _filterByTags.isNotEmpty;
 
     return Positioned(
       top: 100, // Position below the header
@@ -962,7 +1116,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withOpacity(0.5),
                 width: 1,
               ),
               boxShadow: [
@@ -988,9 +1144,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     children: [
                       Text(
                         l10n.sortAndFilter,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1005,10 +1160,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 });
                               },
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
+                              child: Text(
+                                l10n.clearFilters,
+                                style: const TextStyle(fontSize: 12),
+                              ),
                             ),
                           IconButton(
                             onPressed: () {
@@ -1056,7 +1216,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           color: isSelected
                               ? Theme.of(context).colorScheme.onPrimary
                               : Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                         onPressed: () {
                           setState(() {
@@ -1090,7 +1252,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     runSpacing: 8,
                     children: [
                       FilterChip(
-                        avatar: const Text('🐟', style: TextStyle(fontSize: 14)),
+                        avatar: const Text(
+                          '🐟',
+                          style: TextStyle(fontSize: 14),
+                        ),
                         label: Text(l10n.freshwater),
                         selected: _filterByType == 'freshwater',
                         onSelected: (selected) {
@@ -1101,7 +1266,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         },
                       ),
                       FilterChip(
-                        avatar: const Text('🪼', style: TextStyle(fontSize: 14)),
+                        avatar: const Text(
+                          '🪼',
+                          style: TextStyle(fontSize: 14),
+                        ),
                         label: Text(l10n.saltwater),
                         selected: _filterByType == 'marine',
                         onSelected: (selected) {
@@ -1113,7 +1281,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       ),
                       if (_filterByType == 'marine')
                         FilterChip(
-                          avatar: const Text('🪸', style: TextStyle(fontSize: 14)),
+                          avatar: const Text(
+                            '🪸',
+                            style: TextStyle(fontSize: 14),
+                          ),
                           label: Text(l10n.filterByReef),
                           selected: _filterByReef,
                           onSelected: (selected) {
@@ -1147,10 +1318,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             ? Colors.black87
                             : Colors.white;
                         return FilterChip(
-                          label: Text(tag.name,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: isSelected ? onTagColor : null)),
+                          label: Text(
+                            tag.name,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isSelected ? onTagColor : null,
+                            ),
+                          ),
                           selected: isSelected,
                           selectedColor: tagColor.withOpacity(0.85),
                           checkmarkColor: onTagColor,
@@ -1162,8 +1336,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               if (selected) {
                                 _filterByTags = {..._filterByTags, tag.name};
                               } else {
-                                _filterByTags =
-                                    _filterByTags.where((n) => n != tag.name).toSet();
+                                _filterByTags = _filterByTags
+                                    .where((n) => n != tag.name)
+                                    .toSet();
                               }
                             });
                           },
@@ -1180,60 +1355,130 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     children: [
                       Text(
                         l10n.viewSection,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Builder(builder: (context) {
-                    final appSettings = ref.watch(appSettingsProvider);
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SwitchListTile.adaptive(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            appSettings.tankGridLayout ? l10n.switchToListView : l10n.switchToGridView,
-                            style: Theme.of(context).textTheme.bodySmall,
+                  Builder(
+                    builder: (context) {
+                      final appSettings = ref.watch(appSettingsProvider);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile.adaptive(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              appSettings.tankGridLayout
+                                  ? l10n.switchToListView
+                                  : l10n.switchToGridView,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            secondary: Icon(
+                              appSettings.tankGridLayout
+                                  ? Icons.view_list
+                                  : Icons.grid_view,
+                              size: 20,
+                            ),
+                            value: appSettings.tankGridLayout,
+                            onChanged: (val) {
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setTankGridLayout(val);
+                            },
                           ),
-                          secondary: Icon(
-                            appSettings.tankGridLayout ? Icons.view_list : Icons.grid_view,
-                            size: 20,
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.cardContent,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
-                          value: appSettings.tankGridLayout,
-                          onChanged: (val) {
-                            ref.read(appSettingsProvider.notifier).setTankGridLayout(val);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.cardContent,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              _buildVisibilityChip(
+                                context,
+                                Icons.image_outlined,
+                                l10n.tankIconLabel,
+                                appSettings.tankHideIcon,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideIcon(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.bar_chart,
+                                l10n.metricsLabel,
+                                appSettings.tankHideMetrics,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideMetrics(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.pets,
+                                l10n.inhabitantsLabel,
+                                appSettings.tankHideInhabitants,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideInhabitants(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.note_outlined,
+                                l10n.notes,
+                                appSettings.tankHideNotes,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideNotes(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.bolt_outlined,
+                                l10n.quickLogs,
+                                appSettings.tankHideQuickLogs,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideQuickLogs(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.history,
+                                l10n.activityHistory,
+                                appSettings.tankHideActivity,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideActivity(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.photo_library_outlined,
+                                l10n.photos,
+                                appSettings.tankHidePhotos,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHidePhotos(v),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: [
-                            _buildVisibilityChip(context, Icons.image_outlined, l10n.tankIconLabel, appSettings.tankHideIcon, (v) => ref.read(appSettingsProvider.notifier).setTankHideIcon(v)),
-                            _buildVisibilityChip(context, Icons.bar_chart, l10n.metricsLabel, appSettings.tankHideMetrics, (v) => ref.read(appSettingsProvider.notifier).setTankHideMetrics(v)),
-                            _buildVisibilityChip(context, Icons.pets, l10n.inhabitantsLabel, appSettings.tankHideInhabitants, (v) => ref.read(appSettingsProvider.notifier).setTankHideInhabitants(v)),
-                            _buildVisibilityChip(context, Icons.note_outlined, l10n.notes, appSettings.tankHideNotes, (v) => ref.read(appSettingsProvider.notifier).setTankHideNotes(v)),
-                            _buildVisibilityChip(context, Icons.bolt_outlined, l10n.quickLogs, appSettings.tankHideQuickLogs, (v) => ref.read(appSettingsProvider.notifier).setTankHideQuickLogs(v)),
-                            _buildVisibilityChip(context, Icons.history, l10n.activityHistory, appSettings.tankHideActivity, (v) => ref.read(appSettingsProvider.notifier).setTankHideActivity(v)),
-                            _buildVisibilityChip(context, Icons.photo_library_outlined, l10n.photos, appSettings.tankHidePhotos, (v) => ref.read(appSettingsProvider.notifier).setTankHidePhotos(v)),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -1243,12 +1488,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildVisibilityChip(BuildContext context, IconData icon, String label, bool isHidden, void Function(bool) onToggle) {
+  Widget _buildVisibilityChip(
+    BuildContext context,
+    IconData icon,
+    String label,
+    bool isHidden,
+    void Function(bool) onToggle,
+  ) {
     final isVisible = !isHidden;
     final cs = Theme.of(context).colorScheme;
     return FilterChip(
-      avatar: Icon(icon, size: 14, color: isVisible ? cs.onPrimary : cs.onSurfaceVariant),
-      label: Text(label, style: TextStyle(fontSize: 11, color: isVisible ? cs.onPrimary : cs.onSurfaceVariant)),
+      avatar: Icon(
+        icon,
+        size: 14,
+        color: isVisible ? cs.onPrimary : cs.onSurfaceVariant,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: isVisible ? cs.onPrimary : cs.onSurfaceVariant,
+        ),
+      ),
       selected: isVisible,
       selectedColor: cs.primary,
       backgroundColor: cs.surfaceVariant,
@@ -1257,13 +1518,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  Widget _buildTankCard(BuildContext context, WidgetRef ref, Tank tank, Map<String, List<Fish>>? fishData, AppSettingsState appSettings) {
+  Widget _buildTankCard(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    Map<String, List<Fish>>? fishData,
+    AppSettingsState appSettings,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 900;
     // Grid mode: mobile grid (not tablet/desktop which always uses the masonry grid)
     final isGridMode = appSettings.tankGridLayout && !isLargeScreen;
-    
+
     // Get custom background photo if set
     TankPhoto? backgroundPhoto;
     if (tank.customBackgroundPhotoId != null) {
@@ -1275,7 +1542,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         // Photo not found, use default
       }
     }
-    
+
     // AI-inspired gradient colors based on tank type
     final gradientColors = tank.type == 'freshwater'
         ? [
@@ -1294,7 +1561,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        gradient: tank.customIconCodePoint == null && tank.customIconPhotoId == null
+        gradient:
+            tank.customIconCodePoint == null && tank.customIconPhotoId == null
             ? LinearGradient(
                 colors: tank.type == 'freshwater'
                     ? [Colors.blue.shade300, Colors.cyan.shade400]
@@ -1303,15 +1571,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 end: Alignment.bottomRight,
               )
             : null,
-        color: tank.customIconCodePoint == null && tank.customIconPhotoId != null
+        color:
+            tank.customIconCodePoint == null && tank.customIconPhotoId != null
             ? Colors.grey.shade300
             : null,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: (tank.type == 'freshwater' 
-                ? Colors.blue 
-                : Colors.purple).withOpacity(0.3),
+            color: (tank.type == 'freshwater' ? Colors.blue : Colors.purple)
+                .withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1331,55 +1599,69 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
-                _getIconFromCodePoint(tank.customIconCodePoint) ?? 
-                    (tank.type == 'freshwater' ? Icons.water_drop : Icons.waves),
+                _getIconFromCodePoint(tank.customIconCodePoint) ??
+                    (tank.type == 'freshwater'
+                        ? Icons.water_drop
+                        : Icons.waves),
                 size: 24,
                 color: Colors.white,
               ),
             )
           : (tank.customIconPhotoId != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: () {
-                    try {
-                      final photo = tank.photos.firstWhere(
-                        (p) => p.id == tank.customIconPhotoId,
-                      );
-                      final imageUrl = photo.imageUrl ?? photo.imagePath;
-                      return imageUrl != null
-                          ? (imageUrl.startsWith('http')
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl, 
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, url, error) => Icon(
-                                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                                    size: 24,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Image.file(File(imageUrl), fit: BoxFit.cover))
-                          : Icon(
-                              tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                              size: 24,
-                              color: Colors.white,
-                            );
-                    } catch (e) {
-                      return Icon(
-                        tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                        size: 24,
-                        color: Colors.white,
-                      );
-                    }
-                  }(),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    tank.type == 'freshwater' ? Icons.water_drop : Icons.waves,
-                    size: 24,
-                    color: Colors.white,
-                  ),
-                )),
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: () {
+                      try {
+                        final photo = tank.photos.firstWhere(
+                          (p) => p.id == tank.customIconPhotoId,
+                        );
+                        final imageUrl = photo.imageUrl ?? photo.imagePath;
+                        return imageUrl != null
+                            ? (imageUrl.startsWith('http')
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (context, url, error) =>
+                                          Icon(
+                                            tank.type == 'freshwater'
+                                                ? Icons.water_drop
+                                                : Icons.waves,
+                                            size: 24,
+                                            color: Colors.white,
+                                          ),
+                                    )
+                                  : Image.file(
+                                      File(imageUrl),
+                                      fit: BoxFit.cover,
+                                    ))
+                            : Icon(
+                                tank.type == 'freshwater'
+                                    ? Icons.water_drop
+                                    : Icons.waves,
+                                size: 24,
+                                color: Colors.white,
+                              );
+                      } catch (e) {
+                        return Icon(
+                          tank.type == 'freshwater'
+                              ? Icons.water_drop
+                              : Icons.waves,
+                          size: 24,
+                          color: Colors.white,
+                        );
+                      }
+                    }(),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      tank.type == 'freshwater'
+                          ? Icons.water_drop
+                          : Icons.waves,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  )),
     );
 
     // Build the 3-dot popup menu (shared between list/grid)
@@ -1473,7 +1755,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.notifications, color: Colors.orange, size: 18),
                 const SizedBox(width: 8),
-                Flexible(child: Text(l10n.notificationsExperimental, style: const TextStyle(color: Colors.orange))),
+                Flexible(
+                  child: Text(
+                    l10n.notificationsExperimental,
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1483,7 +1770,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.history, color: Colors.green, size: 18),
                 const SizedBox(width: 8),
-                Flexible(child: Text(l10n.activityLog, style: const TextStyle(color: Colors.green))),
+                Flexible(
+                  child: Text(
+                    l10n.activityLog,
+                    style: const TextStyle(color: Colors.green),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1526,7 +1818,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.auto_awesome, color: Colors.blue, size: 18),
                   const SizedBox(width: 8),
-                  Flexible(child: Text(l10n.getStockingIdeas, style: const TextStyle(color: Colors.blue))),
+                  Flexible(
+                    child: Text(
+                      l10n.getStockingIdeas,
+                      style: const TextStyle(color: Colors.blue),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1537,7 +1834,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 children: [
                   const Icon(Icons.biotech, color: Colors.teal, size: 18),
                   const SizedBox(width: 8),
-                  Flexible(child: Text(l10n.compatibilityAnalysis, style: const TextStyle(color: Colors.teal))),
+                  Flexible(
+                    child: Text(
+                      l10n.compatibilityAnalysis,
+                      style: const TextStyle(color: Colors.teal),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1557,7 +1859,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.share, color: Colors.teal, size: 18),
                 const SizedBox(width: 8),
-                Flexible(child: Text(l10n.shareTank, style: const TextStyle(color: Colors.teal))),
+                Flexible(
+                  child: Text(
+                    l10n.shareTank,
+                    style: const TextStyle(color: Colors.teal),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1567,33 +1874,45 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               children: [
                 const Icon(Icons.delete, color: Colors.red, size: 18),
                 const SizedBox(width: 8),
-                Flexible(child: Text(l10n.deleteTank, style: const TextStyle(color: Colors.red))),
+                Flexible(
+                  child: Text(
+                    l10n.deleteTank,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               ],
             ),
           ),
         ];
       },
     );
-    
+
     return Container(
-      margin: (isLargeScreen || appSettings.tankGridLayout) ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12.0),
+      margin: (isLargeScreen || appSettings.tankGridLayout)
+          ? EdgeInsets.zero
+          : const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
-        gradient: backgroundPhoto == null ? LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ) : null,
-        image: backgroundPhoto != null ? DecorationImage(
-          image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
-              ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!) as ImageProvider
-              : FileImage(File(backgroundPhoto.imagePath!)),
-          fit: BoxFit.cover,
-          opacity: 0.8,
-          colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.3),
-            BlendMode.darken,
-          ),
-        ) : null,
+        gradient: backgroundPhoto == null
+            ? LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        image: backgroundPhoto != null
+            ? DecorationImage(
+                image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
+                    ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!)
+                          as ImageProvider
+                    : FileImage(File(backgroundPhoto.imagePath!)),
+                fit: BoxFit.cover,
+                opacity: 0.8,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.3),
+                  BlendMode.darken,
+                ),
+              )
+            : null,
         color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -1622,77 +1941,91 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 );
               },
               child: Padding(
-                padding: isGridMode ? const EdgeInsets.all(12.0) : const EdgeInsets.all(18.0),
+                padding: isGridMode
+                    ? const EdgeInsets.all(12.0)
+                    : const EdgeInsets.all(18.0),
                 child: Column(
-                  crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                  crossAxisAlignment: isGridMode
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
                   children: [
                     // Header: grid mode = icon centered + name below;
                     //         list mode = icon + name side-by-side + menu
                     if (isGridMode) ...[
-                      if (!appSettings.tankHideIcon) Center(child: tankIconWidget),
+                      if (!appSettings.tankHideIcon)
+                        Center(child: tankIconWidget),
                       if (!appSettings.tankHideIcon) const SizedBox(height: 8),
-                      Builder(builder: (context) {
-                        final l10n = AppLocalizations.of(context)!;
-                        String typeLabel;
-                        if (tank.type == 'freshwater') {
-                          typeLabel = l10n.freshwater;
-                        } else if (tank.isReef) {
-                          typeLabel = l10n.reefTank;
-                        } else {
-                          typeLabel = l10n.saltwater;
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              tank.name,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
+                      Builder(
+                        builder: (context) {
+                          final l10n = AppLocalizations.of(context)!;
+                          String typeLabel;
+                          if (tank.type == 'freshwater') {
+                            typeLabel = l10n.freshwater;
+                          } else if (tank.isReef) {
+                            typeLabel = l10n.reefTank;
+                          } else {
+                            typeLabel = l10n.saltwater;
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                tank.name,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (tank.type == 'marine' && tank.isReef)
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 4),
-                                    child: Text('🪸', style: TextStyle(fontSize: 12)),
+                              const SizedBox(height: 2),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (tank.type == 'marine' && tank.isReef)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🪸',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  Text(
+                                    typeLabel,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: cs.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
-                                Text(
-                                  typeLabel,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: cs.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      }),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ] else ...[
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (!appSettings.tankHideIcon) tankIconWidget,
-                          if (!appSettings.tankHideIcon) const SizedBox(width: 12),
+                          if (!appSettings.tankHideIcon)
+                            const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   tank.name,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: -0.5,
+                                      ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -1711,17 +2044,24 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     return Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        if (tank.type == 'marine' && tank.isReef)
+                                        if (tank.type == 'marine' &&
+                                            tank.isReef)
                                           const Padding(
                                             padding: EdgeInsets.only(right: 4),
-                                            child: Text('🪸', style: TextStyle(fontSize: 12)),
+                                            child: Text(
+                                              '🪸',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
                                           ),
                                         Text(
                                           typeLabel,
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: cs.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: cs.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                       ],
                                     );
@@ -1734,399 +2074,469 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ],
                       ),
                     ],
-                
-                const SizedBox(height: 14),
-                
-                // Tank stats row
-                if (!appSettings.tankHideMetrics) ...[
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      if (tank.sizeGallons != null || tank.sizeLiters != null)
-                        _buildStatChip(
-                          context,
-                          Icons.straighten,
-                          _formatTankSize(tank),
-                        ),
-                      if (tank.inhabitants.isNotEmpty && fishData != null)
-                        _buildHarmonyScoreChip(tank),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Inhabitants section with modern styling
-                if (!appSettings.tankHideInhabitants) ...[
-                if (tank.inhabitants.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: cs.outlineVariant.withOpacity(0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.pets,
-                          color: cs.onSurfaceVariant,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Builder(builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Text(
-                              l10n.noInhabitantsYet,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: cs.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: isGridMode ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: cs.primaryContainer.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.pets,
-                              size: 14,
-                              color: cs.onPrimaryContainer,
+
+                    const SizedBox(height: 14),
+
+                    // Tank stats row
+                    if (!appSettings.tankHideMetrics) ...[
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [
+                          if (tank.sizeGallons != null ||
+                              tank.sizeLiters != null)
+                            _buildStatChip(
+                              context,
+                              Icons.straighten,
+                              _formatTankSize(tank),
                             ),
-                            const SizedBox(width: 6),
-                            if (isGridMode) ...[
-                              // 2-line layout in grid mode
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ],
+                          if (tank.inhabitants.isNotEmpty && fishData != null)
+                            _buildHarmonyScoreChip(tank),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
+                    // Inhabitants section with modern styling
+                    if (!appSettings.tankHideInhabitants) ...[
+                      if (tank.inhabitants.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHigh.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: cs.outlineVariant.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.pets,
+                                color: cs.onSurfaceVariant,
+                                size: 18,
                               ),
-                            ] else ...[
-                              Text(
-                                '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onPrimaryContainer,
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Builder(
+                                  builder: (context) {
+                                    final l10n = AppLocalizations.of(context)!;
+                                    return Text(
+                                      l10n.noInhabitantsYet,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                    );
+                                  },
                                 ),
                               ),
                             ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ..._buildFishGroupDisplay(tank, fishData),
-                    ],
-                  ),
-                ], // end tankHideInhabitants
-                
-                const SizedBox(height: 14),
-                
-                // Tank photos section (if photos exist)
-                if (!appSettings.tankHidePhotos && tank.photos.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.photo_library_outlined,
-                        size: 14,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Tank Photos (${tank.photos.length})',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 60,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: tank.photos.length,
-                      itemBuilder: (context, index) {
-                        final photo = tank.photos[index];
-                        final imageUrl = photo.imageUrl ?? photo.imagePath;
-                        return GestureDetector(
-                          onTap: () => _showPhotoMaximized(context, photo, tank: tank, ref: ref),
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: cs.outline,
-                                width: 1,
+                          ),
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: isGridMode
+                              ? CrossAxisAlignment.center
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: cs.primaryContainer.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.pets,
+                                    size: 14,
+                                    color: cs.onPrimaryContainer,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  if (isGridMode) ...[
+                                    // 2-line layout in grid mode
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: cs.onPrimaryContainer,
+                                              ),
+                                        ),
+                                        Text(
+                                          '${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: cs.onPrimaryContainer,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ] else ...[
+                                    Text(
+                                      '${_getTotalInhabitantCount(tank.inhabitants)} inhabitant${_getTotalInhabitantCount(tank.inhabitants) == 1 ? '' : 's'}, ${_groupInhabitantsByFishType(tank.inhabitants).length} type${_groupInhabitantsByFishType(tank.inhabitants).length == 1 ? '' : 's'}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: cs.onPrimaryContainer,
+                                          ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(7),
-                              child: imageUrl != null
-                                  ? (imageUrl.startsWith('http')
-                                      ? CachedNetworkImage(
-                                          imageUrl: imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorWidget: (context, url, error) => Container(
-                                            color: cs.errorContainer,
-                                            child: Icon(
-                                              Icons.error_outline,
-                                              size: 20,
-                                              color: cs.onErrorContainer,
-                                            ),
-                                          ),
-                                        )
-                                      : Image.file(
-                                          File(imageUrl),
-                                          fit: BoxFit.cover,
-                                        ))
-                                  : Container(
-                                      color: cs.surfaceVariant,
-                                      child: Icon(
-                                        Icons.image_outlined,
-                                        size: 20,
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                    ),
-                            ),
+                            const SizedBox(height: 10),
+                            ..._buildFishGroupDisplay(tank, fishData),
+                          ],
+                        ),
+                    ],
+
+                    // end tankHideInhabitants
+                    const SizedBox(height: 14),
+
+                    // Tank photos section (if photos exist)
+                    if (!appSettings.tankHidePhotos &&
+                        tank.photos.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.photo_library_outlined,
+                            size: 14,
+                            color: cs.onSurfaceVariant,
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Tank notes section (if notes exist)
-                if (!appSettings.tankHideNotes && tank.notes != null && tank.notes!.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: cs.outlineVariant.withOpacity(0.4),
-                        width: 1,
+                          const SizedBox(width: 6),
+                          Text(
+                            'Tank Photos (${tank.photos.length})',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.note_outlined,
-                          size: 16,
-                          color: cs.onSurfaceVariant,
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 60,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: tank.photos.length,
+                          itemBuilder: (context, index) {
+                            final photo = tank.photos[index];
+                            final imageUrl = photo.imageUrl ?? photo.imagePath;
+                            return GestureDetector(
+                              onTap: () => _showPhotoMaximized(
+                                context,
+                                photo,
+                                tank: tank,
+                                ref: ref,
+                              ),
+                              child: Container(
+                                width: 60,
+                                height: 60,
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: cs.outline,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(7),
+                                  child: imageUrl != null
+                                      ? (imageUrl.startsWith('http')
+                                            ? CachedNetworkImage(
+                                                imageUrl: imageUrl,
+                                                fit: BoxFit.cover,
+                                                errorWidget:
+                                                    (
+                                                      context,
+                                                      url,
+                                                      error,
+                                                    ) => Container(
+                                                      color: cs.errorContainer,
+                                                      child: Icon(
+                                                        Icons.error_outline,
+                                                        size: 20,
+                                                        color:
+                                                            cs.onErrorContainer,
+                                                      ),
+                                                    ),
+                                              )
+                                            : Image.file(
+                                                File(imageUrl),
+                                                fit: BoxFit.cover,
+                                              ))
+                                      : Container(
+                                          color: cs.surfaceVariant,
+                                          child: Icon(
+                                            Icons.image_outlined,
+                                            size: 20,
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            tank.notes!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                              height: 1.4,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Tank tags section (if tags exist)
-                if (tank.tags.isNotEmpty) ...[
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: tank.tags.map((tag) {
-                      final tagColor = tag.color != null
-                          ? Color(tag.color!)
-                          : cs.secondary;
-                      final onTagColor = tagColor.computeLuminance() > 0.4
-                          ? Colors.black87
-                          : Colors.white;
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
+                    // Tank notes section (if notes exist)
+                    if (!appSettings.tankHideNotes &&
+                        tank.notes != null &&
+                        tank.notes!.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: tagColor.withOpacity(0.85),
+                          color: cs.surfaceContainerHigh.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: tagColor, width: 1),
+                          border: Border.all(
+                            color: cs.outlineVariant.withOpacity(0.4),
+                            width: 1,
+                          ),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.label_outline, size: 12, color: onTagColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              tag.name,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: onTagColor,
-                                fontWeight: FontWeight.w500,
+                            Icon(
+                              Icons.note_outlined,
+                              size: 16,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                tank.notes!,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      height: 1.4,
+                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                
-                // Activity Log and Upcoming Notifications section
-                _buildActivitySection(context, ref, tank, cs, inGridMode: isGridMode, hideActivity: appSettings.tankHideActivity, hideQuickLogs: appSettings.tankHideQuickLogs),
-                
-                // Action buttons - hidden in grid mode (accessible via 3-dot menu)
-                if (!isGridMode) ...[
-                  Row(
-                    children: [
-                      // AI stocking button - conditionally shown based on app settings
-                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
-                        Expanded(
-                          child: Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.purple.shade400,
-                                  Colors.blue.shade500,
-                                  Colors.cyan.shade400,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.purple.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: () => _getTankStockingRecommendations(tank),
-                              icon: const Icon(Icons.auto_awesome, size: 16),
-                              label: Text(
-                                'Stocking Ideas',
-                                style: TextStyle(
-                                  fontSize: isLargeScreen ? 13 : 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                shadowColor: Colors.transparent,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton) const SizedBox(width: 8),
-                      // AI compatibility analysis button
-                      if (tank.inhabitants.isNotEmpty && appSettings.enableAI && appSettings.showStockingButton)
-                        Expanded(
-                          child: Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.teal.shade400,
-                                  Colors.green.shade500,
-                                  Colors.cyan.shade300,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.teal.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: () => _getTankCompatibilityAnalysis(tank),
-                              icon: const Icon(Icons.biotech, size: 16),
-                              label: Text(
-                                'Compatibility',
-                                style: TextStyle(
-                                  fontSize: isLargeScreen ? 13 : 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                shadowColor: Colors.transparent,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      ),
+                      const SizedBox(height: 14),
                     ],
-                  ),
-                ],
-                
-                const SizedBox(height: 10),
-                
-                // Footer with date
-                Text(
-                  'Created ${_formatDate(tank.createdAt)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant.withOpacity(0.7),
-                    fontSize: 11,
-                  ),
+
+                    // Tank tags section (if tags exist)
+                    if (tank.tags.isNotEmpty) ...[
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: tank.tags.map((tag) {
+                          final tagColor = tag.color != null
+                              ? Color(tag.color!)
+                              : cs.secondary;
+                          final onTagColor = tagColor.computeLuminance() > 0.4
+                              ? Colors.black87
+                              : Colors.white;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: tagColor.withOpacity(0.85),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: tagColor, width: 1),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.label_outline,
+                                  size: 12,
+                                  color: onTagColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  tag.name,
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: onTagColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
+                    // Activity Log and Upcoming Notifications section
+                    _buildActivitySection(
+                      context,
+                      ref,
+                      tank,
+                      cs,
+                      inGridMode: isGridMode,
+                      hideActivity: appSettings.tankHideActivity,
+                      hideQuickLogs: appSettings.tankHideQuickLogs,
+                    ),
+
+                    // Action buttons - hidden in grid mode (accessible via 3-dot menu)
+                    if (!isGridMode) ...[
+                      Row(
+                        children: [
+                          // AI stocking button - conditionally shown based on app settings
+                          if (tank.inhabitants.isNotEmpty &&
+                              appSettings.enableAI &&
+                              appSettings.showStockingButton)
+                            Expanded(
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.purple.shade400,
+                                      Colors.blue.shade500,
+                                      Colors.cyan.shade400,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.purple.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      _getTankStockingRecommendations(tank),
+                                  icon: const Icon(
+                                    Icons.auto_awesome,
+                                    size: 16,
+                                  ),
+                                  label: Text(
+                                    'Stocking Ideas',
+                                    style: TextStyle(
+                                      fontSize: isLargeScreen ? 13 : 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    foregroundColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (tank.inhabitants.isNotEmpty &&
+                              appSettings.enableAI &&
+                              appSettings.showStockingButton)
+                            const SizedBox(width: 8),
+                          // AI compatibility analysis button
+                          if (tank.inhabitants.isNotEmpty &&
+                              appSettings.enableAI &&
+                              appSettings.showStockingButton)
+                            Expanded(
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.teal.shade400,
+                                      Colors.green.shade500,
+                                      Colors.cyan.shade300,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.teal.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      _getTankCompatibilityAnalysis(tank),
+                                  icon: const Icon(Icons.biotech, size: 16),
+                                  label: Text(
+                                    'Compatibility',
+                                    style: TextStyle(
+                                      fontSize: isLargeScreen ? 13 : 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    foregroundColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+
+                    const SizedBox(height: 10),
+
+                    // Footer with date
+                    Text(
+                      'Created ${_formatDate(tank.createdAt)}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant.withOpacity(0.7),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
             ),
             if (isGridMode) Positioned(top: 4, right: 4, child: menuButton),
           ],
@@ -2134,7 +2544,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
     );
   }
-  
+
   Widget _buildStatChip(BuildContext context, IconData icon, String label) {
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -2142,10 +2552,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh.withOpacity(0.6),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.4),
-          width: 1,
-        ),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.4), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2170,31 +2577,41 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   ///    - Shows time until next occurrence
   ///    - Highlights notifications within 12 hours
   ///    - Tapping logs the activity instantly
-  Widget _buildActivitySection(BuildContext context, WidgetRef ref, Tank tank, ColorScheme cs, {bool inGridMode = false, bool hideActivity = false, bool hideQuickLogs = false}) {
+  Widget _buildActivitySection(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    ColorScheme cs, {
+    bool inGridMode = false,
+    bool hideActivity = false,
+    bool hideQuickLogs = false,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final List<Widget> recentActivityItems = [];
     final List<Widget> notificationItems = [];
-    
+
     // Get most recent activity log
     if (!hideActivity && tank.notificationLogs.isNotEmpty) {
       final sortedLogs = List.from(tank.notificationLogs)
         ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
       final recentLog = sortedLogs.first;
-      
+
       // Calculate time ago in hours/minutes for today, otherwise days
       final now = DateTime.now();
       final difference = now.difference(recentLog.loggedAt);
       final hoursAgo = difference.inHours;
       final minutesAgo = difference.inMinutes % 60;
       final daysSince = difference.inDays;
-      
+
       String timeAgo;
       if (daysSince == 0) {
         // Today - show hours/minutes ago
         if (hoursAgo > 0) {
           timeAgo = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
         } else if (minutesAgo > 0) {
-          timeAgo = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+          timeAgo = minutesAgo == 1
+              ? l10n.oneMinuteAgo
+              : l10n.xMinutesAgo(minutesAgo);
         } else {
           timeAgo = l10n.justNow;
         }
@@ -2203,9 +2620,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       } else if (daysSince < 7) {
         timeAgo = l10n.daysAgo(daysSince);
       } else {
-        timeAgo = '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
+        timeAgo =
+            '${recentLog.loggedAt.month}/${recentLog.loggedAt.day}/${recentLog.loggedAt.year}';
       }
-      
+
       recentActivityItems.add(
         Container(
           padding: const EdgeInsets.all(10),
@@ -2251,7 +2669,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       );
     }
-    
+
     // Show ALL configured notifications as quick log buttons (2 per row)
     // Quick log cards are shown regardless of whether the notification is enabled
     // because activity logging is separate from receiving device notifications
@@ -2262,35 +2680,45 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       // Calculate next notification date for display
       DateTime? nextDate;
       if (notification.repeatFrequency != RepeatFrequency.none) {
-        nextDate = notification.getNextNotificationDateWithActivity(tank.notificationLogs);
+        nextDate = notification.getNextNotificationDateWithActivity(
+          tank.notificationLogs,
+        );
       } else {
         nextDate = notification.notificationDateTime;
       }
-      
+
       // Calculate time display for the next occurrence
       String timeDisplay;
       bool isPast = false;
       bool isWithin12Hours = false;
-      
+
       if (nextDate != null) {
         isPast = nextDate.isBefore(now);
         final twelveHoursFromNow = now.add(const Duration(hours: 12));
         final twelveHoursAgo = now.subtract(const Duration(hours: 12));
-        isWithin12Hours = nextDate.isBefore(twelveHoursFromNow) && nextDate.isAfter(twelveHoursAgo);
-        
+        isWithin12Hours =
+            nextDate.isBefore(twelveHoursFromNow) &&
+            nextDate.isAfter(twelveHoursAgo);
+
         if (isPast) {
           // Past - show how long ago
           final difference = now.difference(nextDate);
           final hoursAgo = difference.inHours;
           final minutesAgo = difference.inMinutes % 60;
           final daysSince = difference.inDays;
-          
+
           if (daysSince > 0) {
-            timeDisplay = daysSince == 1 ? l10n.yesterday : l10n.daysAgo(daysSince);
+            timeDisplay = daysSince == 1
+                ? l10n.yesterday
+                : l10n.daysAgo(daysSince);
           } else if (hoursAgo > 0) {
-            timeDisplay = hoursAgo == 1 ? l10n.oneHourAgo : l10n.xHoursAgo(hoursAgo);
+            timeDisplay = hoursAgo == 1
+                ? l10n.oneHourAgo
+                : l10n.xHoursAgo(hoursAgo);
           } else if (minutesAgo > 0) {
-            timeDisplay = minutesAgo == 1 ? l10n.oneMinuteAgo : l10n.xMinutesAgo(minutesAgo);
+            timeDisplay = minutesAgo == 1
+                ? l10n.oneMinuteAgo
+                : l10n.xMinutesAgo(minutesAgo);
           } else {
             timeDisplay = l10n.justNow;
           }
@@ -2299,7 +2727,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           final hoursUntil = nextDate.difference(now).inHours;
           final minutesUntil = nextDate.difference(now).inMinutes % 60;
           final daysUntil = nextDate.difference(now).inDays;
-          
+
           if (daysUntil > 0) {
             if (daysUntil == 1) {
               timeDisplay = l10n.inLessThan2Days;
@@ -2313,7 +2741,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               timeDisplay = l10n.inXHours(hoursUntil);
             }
           } else if (minutesUntil > 0) {
-            timeDisplay = minutesUntil == 1 ? l10n.inOneMinute : l10n.inXMinutes(minutesUntil);
+            timeDisplay = minutesUntil == 1
+                ? l10n.inOneMinute
+                : l10n.inXMinutes(minutesUntil);
           } else {
             timeDisplay = l10n.inLessThanAMinute;
           }
@@ -2321,31 +2751,31 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       } else {
         timeDisplay = notification.repeatFrequency.displayName;
       }
-      
+
       notificationItems.add(
         _buildNotificationQuickLogItem(
-          context, 
-          ref, 
-          tank, 
-          notification, 
-          cs, 
-          timeDisplay, 
+          context,
+          ref,
+          tank,
+          notification,
+          cs,
+          timeDisplay,
           isPast,
           isWithin12Hours,
         ),
       );
     }
-    
+
     if (recentActivityItems.isEmpty && notificationItems.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Recent activity section
         ...recentActivityItems,
-        
+
         // Notifications section (1 per row in grid mode, 2 per row otherwise)
         if (notificationItems.isNotEmpty) ...[
           if (recentActivityItems.isNotEmpty) const SizedBox(height: 10),
@@ -2354,16 +2784,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           LayoutBuilder(
             builder: (context, constraints) {
               // In grid mode use full width (1 per row), otherwise 2 per row
-              final itemWidth = inGridMode ? constraints.maxWidth : (constraints.maxWidth - 8) / 2;
+              final itemWidth = inGridMode
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth - 8) / 2;
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: notificationItems.map((item) => 
-                  SizedBox(
-                    width: itemWidth,
-                    child: item,
-                  ),
-                ).toList(),
+                children: notificationItems
+                    .map((item) => SizedBox(width: itemWidth, child: item))
+                    .toList(),
               );
             },
           ),
@@ -2372,20 +2801,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ],
     );
   }
-  
+
   /// Build a compact notification quick log item for 2-per-row layout
   Widget _buildNotificationQuickLogItem(
-    BuildContext context, 
-    WidgetRef ref, 
-    Tank tank, 
-    TankNotification notification, 
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    TankNotification notification,
     ColorScheme cs,
     String timeDisplay,
     bool isPast,
     bool isWithin12Hours,
   ) {
     final activityColor = _getActivityColor(notification.type);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -2427,9 +2856,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     Text(
                       timeDisplay,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isPast && isWithin12Hours ? Colors.red : activityColor,
+                        color: isPast && isWithin12Hours
+                            ? Colors.red
+                            : activityColor,
                         fontSize: 10,
-                        fontWeight: isWithin12Hours ? FontWeight.w500 : FontWeight.normal,
+                        fontWeight: isWithin12Hours
+                            ? FontWeight.w500
+                            : FontWeight.normal,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -2443,11 +2876,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   color: activityColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.add,
-                  size: 12,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, size: 12, color: Colors.white),
               ),
             ],
           ),
@@ -2490,11 +2919,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  Future<void> _quickLogFromCard(Tank tank, TankNotification notification) async {
+  Future<void> _quickLogFromCard(
+    Tank tank,
+    TankNotification notification,
+  ) async {
     // Get the latest tank state from the provider
-    final currentTank = ref.read(tankProvider).tanks
+    final currentTank = ref
+        .read(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == tank.id, orElse: () => tank);
-    
+
     // Create a new log entry based on the notification type and custom category
     final log = NotificationLog.create(
       type: notification.type,
@@ -2504,37 +2938,44 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       notes: notification.notes,
       notificationId: notification.id,
     );
-    
+
     // Check if this notification has a repeat frequency (only repeating notifications need rescheduling dialog)
     RescheduleOption? rescheduleOption;
     if (notification.repeatFrequency != RepeatFrequency.none && mounted) {
       // Ask user how they want to update the notification schedule BEFORE saving
-      rescheduleOption = await NotificationRescheduleDialog.show(context, notification);
-      
+      rescheduleOption = await NotificationRescheduleDialog.show(
+        context,
+        notification,
+      );
+
       // Refresh the app settings state to reflect any newly remembered preference
-      await ref.read(appSettingsProvider.notifier).refreshRememberedRescheduleOptions();
-      
+      await ref
+          .read(appSettingsProvider.notifier)
+          .refreshRememberedRescheduleOptions();
+
       // If user cancelled (null) or chose cancelAll, don't log the activity
-      if (rescheduleOption == null || rescheduleOption == RescheduleOption.cancelAll) {
+      if (rescheduleOption == null ||
+          rescheduleOption == RescheduleOption.cancelAll) {
         return; // Exit early - don't log or reschedule
       }
     }
-    
+
     // Now save the activity log
     final updatedLogs = [...currentTank.notificationLogs, log];
     final updatedTank = currentTank.copyWith(
       notificationLogs: updatedLogs,
       updatedAt: DateTime.now(),
     );
-    
+
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(l10n.activityLogged);
-      
+
       // Handle the reschedule option if one was selected
-      if (rescheduleOption != null && rescheduleOption != RescheduleOption.doNothing) {
+      if (rescheduleOption != null &&
+          rescheduleOption != RescheduleOption.doNothing) {
         await _handleRescheduleOption(
           currentTank,
           notification,
@@ -2544,15 +2985,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         );
       }
     }
-    
+
     AnalyticsService.logFeatureUsed(
       featureName: 'quick_log_from_card',
       parameters: {
         'type': notification.type.name,
-        'has_custom_category': notification.customCategory != null ? 'true' : 'false',
+        'has_custom_category': notification.customCategory != null
+            ? 'true'
+            : 'false',
       },
     );
-    
+
     AnalyticsService.logTankAction(
       action: 'quick_log_from_card',
       tankType: currentTank.type,
@@ -2569,24 +3012,27 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   ) async {
     final notificationService = NotificationService();
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Get the latest tank state
-    final currentTank = ref.read(tankProvider).tanks
+    final currentTank = ref
+        .read(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == tank.id, orElse: () => tank);
-    
+
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
         // Reschedule based on the activity log date (which is now), using current time
-        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
-          tankId: currentTank.id,
-          tankName: currentTank.name,
-          notifications: currentTank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
-          useCurrentTime: true,
-        );
-        
+        final updatedNotifications = await notificationService
+            .rescheduleMatchingNotifications(
+              tankId: currentTank.id,
+              tankName: currentTank.name,
+              notifications: currentTank.notifications,
+              activityLogs: updatedLogs,
+              activityType: log.type,
+              activityCustomCategory: log.customCategory,
+              useCurrentTime: true,
+            );
+
         // Persist the updated notifications
         if (updatedNotifications.isNotEmpty) {
           final notificationsList = currentTank.notifications.map((n) {
@@ -2602,24 +3048,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           );
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
-        
+
         if (mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
-        
+
       case RescheduleOption.keepOriginal:
         // Reschedule to same date as rescheduleFromNow but keep original notification time
-        final updatedNotifications = await notificationService.rescheduleMatchingNotifications(
-          tankId: currentTank.id,
-          tankName: currentTank.name,
-          notifications: currentTank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
-          useCurrentTime: false,  // Keep original time
-        );
-        
+        final updatedNotifications = await notificationService
+            .rescheduleMatchingNotifications(
+              tankId: currentTank.id,
+              tankName: currentTank.name,
+              notifications: currentTank.notifications,
+              activityLogs: updatedLogs,
+              activityType: log.type,
+              activityCustomCategory: log.customCategory,
+              useCurrentTime: false, // Keep original time
+            );
+
         // Persist the updated notifications
         if (updatedNotifications.isNotEmpty) {
           final notificationsList = currentTank.notifications.map((n) {
@@ -2635,20 +3082,22 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           );
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
-        
+
         if (mounted) {
           context.showAccessibleMessage(l10n.notificationUpdated);
         }
         break;
-        
+
       case RescheduleOption.doNothing:
         // Don't reschedule - activity is already logged, just keep existing schedule
         break;
-        
+
       case RescheduleOption.cancelAll:
         // Cancel - don't log activity and don't reschedule
         // Remove the log that was just added
-        final logsWithoutNew = updatedLogs.where((l) => l.id != log.id).toList();
+        final logsWithoutNew = updatedLogs
+            .where((l) => l.id != log.id)
+            .toList();
         final updatedTank = currentTank.copyWith(
           notificationLogs: logsWithoutNew,
           updatedAt: DateTime.now(),
@@ -2656,7 +3105,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
         break;
     }
-    
+
     AnalyticsService.logFeatureUsed(
       featureName: 'notification_reschedule_option',
       parameters: {
@@ -2666,12 +3115,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-
-  void _showPhotoMaximized(BuildContext context, TankPhoto photo, {Tank? tank, WidgetRef? ref}) {
+  void _showPhotoMaximized(
+    BuildContext context,
+    TankPhoto photo, {
+    Tank? tank,
+    WidgetRef? ref,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -2708,17 +3161,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                       )
-                    : Image.file(
-                        File(imageUrl),
-                        fit: BoxFit.contain,
-                      ),
+                    : Image.file(File(imageUrl), fit: BoxFit.contain),
               ),
             ),
             Positioned(
               top: 40,
               left: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(16),
@@ -2741,7 +3194,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 child: InkWell(
                   onTap: () async {
                     Navigator.of(context).pop(); // Close maximized view first
-                    
+
                     // Load image bytes
                     Uint8List? imageBytes;
                     try {
@@ -2751,7 +3204,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(l10n.aiAnalysisNotSupportedForCloudImages),
+                              content: Text(
+                                l10n.aiAnalysisNotSupportedForCloudImages,
+                              ),
                               duration: Duration(seconds: 3),
                             ),
                           );
@@ -2773,7 +3228,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       }
                       return;
                     }
-                    
+
                     if (context.mounted) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -2877,11 +3332,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     color: Colors.black.withOpacity(0.7),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 24),
                 ),
               ),
             ),
@@ -2891,7 +3342,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _showManageTagsDialog(BuildContext context, WidgetRef ref, Tank tank) async {
+  void _showManageTagsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+  ) async {
     final allExistingTags = mergeTagSuggestions(
       globalTags: ref.read(tankTagsProvider),
       tanks: ref.read(tankProvider).tanks,
@@ -2911,10 +3366,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  void _showSetBackgroundDialog(BuildContext context, WidgetRef ref, Tank tank) {
+  void _showSetBackgroundDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     if (tank.photos.isEmpty) {
-      context.showAccessibleMessage('No photos available. Add photos to your tank first.');
+      context.showAccessibleMessage(
+        'No photos available. Add photos to your tank first.',
+      );
       return;
     }
 
@@ -2936,7 +3397,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               final photo = tank.photos[index];
               final imageUrl = photo.imageUrl ?? photo.imagePath;
               final isSelected = tank.customBackgroundPhotoId == photo.id;
-              
+
               return GestureDetector(
                 onTap: () {
                   _setTankBackground(context, ref, tank, photo.id);
@@ -2945,7 +3406,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
                       width: isSelected ? 3 : 1,
                     ),
                     borderRadius: BorderRadius.circular(8),
@@ -2954,15 +3417,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     borderRadius: BorderRadius.circular(7),
                     child: imageUrl != null
                         ? (imageUrl.startsWith('http')
-                            ? CachedNetworkImage(
-                                imageUrl: imageUrl, 
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => Container(
-                                  color: Colors.grey,
-                                  child: const Icon(Icons.error_outline, color: Colors.white),
-                                ),
-                              )
-                            : Image.file(File(imageUrl), fit: BoxFit.cover))
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: Colors.grey,
+                                        child: const Icon(
+                                          Icons.error_outline,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                )
+                              : Image.file(File(imageUrl), fit: BoxFit.cover))
                         : Container(color: Colors.grey),
                   ),
                 ),
@@ -2980,7 +3447,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _setTankBackground(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+  void _setTankBackground(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    String photoId,
+  ) async {
     try {
       final updatedTank = tank.copyWith(customBackgroundPhotoId: photoId);
       await ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -3051,17 +3523,18 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
                     itemCount: tank.photos.length,
                     itemBuilder: (context, index) {
                       final photo = tank.photos[index];
                       final imageUrl = photo.imageUrl ?? photo.imagePath;
                       final isSelected = tank.customIconPhotoId == photo.id;
-                      
+
                       return GestureDetector(
                         onTap: () {
                           _setTankIconFromPhoto(context, ref, tank, photo.id);
@@ -3070,8 +3543,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: isSelected 
-                                  ? Theme.of(context).colorScheme.primary 
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
                                   : Colors.grey,
                               width: isSelected ? 3 : 1,
                             ),
@@ -3081,15 +3554,22 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             borderRadius: BorderRadius.circular(7),
                             child: imageUrl != null
                                 ? (imageUrl.startsWith('http')
-                                    ? CachedNetworkImage(
-                                        imageUrl: imageUrl, 
-                                        fit: BoxFit.cover,
-                                        errorWidget: (context, url, error) => Container(
-                                          color: Colors.grey,
-                                          child: const Icon(Icons.error_outline, color: Colors.white),
-                                        ),
-                                      )
-                                    : Image.file(File(imageUrl), fit: BoxFit.cover))
+                                      ? CachedNetworkImage(
+                                          imageUrl: imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                                color: Colors.grey,
+                                                child: const Icon(
+                                                  Icons.error_outline,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                        )
+                                      : Image.file(
+                                          File(imageUrl),
+                                          fit: BoxFit.cover,
+                                        ))
                                 : Container(color: Colors.grey),
                           ),
                         ),
@@ -3101,9 +3581,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 // Material icons section
                 Text(
                   'Material Icons',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 GridView.builder(
@@ -3117,8 +3597,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   itemCount: icons.length,
                   itemBuilder: (context, index) {
                     final icon = icons[index];
-                    final isSelected = tank.customIconCodePoint == icon.codePoint;
-                    
+                    final isSelected =
+                        tank.customIconCodePoint == icon.codePoint;
+
                     return GestureDetector(
                       onTap: () {
                         _setTankIcon(context, ref, tank, icon.codePoint);
@@ -3126,12 +3607,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected 
+                          color: isSelected
                               ? Theme.of(context).colorScheme.primaryContainer
                               : Theme.of(context).colorScheme.surfaceVariant,
                           border: Border.all(
-                            color: isSelected 
-                                ? Theme.of(context).colorScheme.primary 
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
                                 : Colors.grey,
                             width: isSelected ? 2 : 1,
                           ),
@@ -3147,7 +3628,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ),
         actions: [
-          if (tank.customIconCodePoint != null || tank.customIconPhotoId != null)
+          if (tank.customIconCodePoint != null ||
+              tank.customIconPhotoId != null)
             TextButton(
               onPressed: () {
                 _resetTankIcon(context, ref, tank);
@@ -3164,7 +3646,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  void _setTankIcon(BuildContext context, WidgetRef ref, Tank tank, int codePoint) async {
+  void _setTankIcon(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    int codePoint,
+  ) async {
     try {
       final updatedTank = tank.copyWith(customIconCodePoint: codePoint);
       await ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -3178,7 +3665,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  void _setTankIconFromPhoto(BuildContext context, WidgetRef ref, Tank tank, String photoId) async {
+  void _setTankIconFromPhoto(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+    String photoId,
+  ) async {
     try {
       // Set the icon photo and clear custom icon code point to use photo as icon
       final updatedTank = tank.copyWith(
@@ -3213,7 +3705,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
   }
 
-  void _resetTankBackground(BuildContext context, WidgetRef ref, Tank tank) async {
+  void _resetTankBackground(
+    BuildContext context,
+    WidgetRef ref,
+    Tank tank,
+  ) async {
     try {
       final updatedTank = tank.copyWith(clearCustomBackgroundPhotoId: true);
       await ref.read(tankProvider.notifier).updateTank(updatedTank);
@@ -3240,11 +3736,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         calculationBreakdown: tank.calculationBreakdown,
         tags: List.from(tank.tags),
       );
-      
+
       await ref.read(tankProvider.notifier).addTank(duplicatedTank);
-      
+
       if (context.mounted) {
-        context.showAccessibleMessage('Tank "${tank.name}" duplicated successfully');
+        context.showAccessibleMessage(
+          'Tank "${tank.name}" duplicated successfully',
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -3272,14 +3770,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              
+
               // Log tank deletion
               AnalyticsService.logTankAction(
                 action: 'delete_tank',
                 tankType: tank.type,
                 tankSize: tank.sizeGallons?.toInt() ?? 0,
               );
-              
+
               await ref.read(tankProvider.notifier).deleteTank(tank.id);
               if (context.mounted) {
                 context.showAccessibleMessage('Tank "${tank.name}" deleted');
@@ -3299,7 +3797,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'today';
     } else if (difference.inDays == 1) {
@@ -3322,17 +3820,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return '';
   }
 
-
-
-
-
   Widget _buildHarmonyScoreChip(Tank tank) {
     final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
 
     final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
     final percentage = (harmonyScore * 100).toStringAsFixed(0);
-    
+
     Color chipColor;
     Color textColor;
     if (harmonyScore >= 0.8) {
@@ -3358,11 +3852,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.shape_line,
-            size: 14,
-            color: textColor,
-          ),
+          Icon(Icons.shape_line, size: 14, color: textColor),
           const SizedBox(width: 4),
           Text(
             '$label ($percentage%)',
@@ -3376,20 +3866,27 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
-  String? _getFishImageUrl(String tankType, String fishName, Map<String, List<Fish>>? fishData, {TankInhabitant? inhabitant}) {
+  String? _getFishImageUrl(
+    String tankType,
+    String fishName,
+    Map<String, List<Fish>>? fishData, {
+    TankInhabitant? inhabitant,
+  }) {
     // Prioritize custom images if inhabitant is provided
     if (inhabitant != null) {
-      if (inhabitant.customImageUrl != null && inhabitant.customImageUrl!.isNotEmpty) {
+      if (inhabitant.customImageUrl != null &&
+          inhabitant.customImageUrl!.isNotEmpty) {
         return inhabitant.customImageUrl;
       }
-      if (inhabitant.customImagePath != null && inhabitant.customImagePath!.isNotEmpty) {
+      if (inhabitant.customImagePath != null &&
+          inhabitant.customImagePath!.isNotEmpty) {
         return inhabitant.customImagePath;
       }
     }
-    
+
     // Fall back to default fish image
     if (fishData == null) return null;
-    
+
     final categoryFish = fishData[tankType] ?? [];
     final fish = categoryFish.firstWhere(
       (f) => f.name == fishName,
@@ -3403,15 +3900,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         withCaution: [],
       ),
     );
-    
+
     return fish.imageURL.isNotEmpty ? fish.imageURL : null;
   }
 
   int _getTotalInhabitantCount(List<TankInhabitant> inhabitants) {
-    return inhabitants.fold(0, (total, inhabitant) => total + inhabitant.quantity);
+    return inhabitants.fold(
+      0,
+      (total, inhabitant) => total + inhabitant.quantity,
+    );
   }
 
-  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(List<TankInhabitant> inhabitants) {
+  Map<String, List<TankInhabitant>> _groupInhabitantsByFishType(
+    List<TankInhabitant> inhabitants,
+  ) {
     final grouped = <String, List<TankInhabitant>>{};
     for (final inhabitant in inhabitants) {
       final fishType = inhabitant.fishUnit;
@@ -3423,23 +3925,34 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return grouped;
   }
 
-  List<Widget> _buildFishGroupDisplay(Tank tank, Map<String, List<Fish>>? fishData) {
+  List<Widget> _buildFishGroupDisplay(
+    Tank tank,
+    Map<String, List<Fish>>? fishData,
+  ) {
     final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
     final widgets = <Widget>[];
-    
+
     int displayedGroups = 0;
     const maxGroups = 3; // Limit to 3 fish types to keep card compact
-    
+
     for (final entry in groupedFish.entries) {
       if (displayedGroups >= maxGroups) break;
-      
+
       final fishType = entry.key;
       final inhabitants = entry.value;
-      final fishImageUrl = _getFishImageUrl(tank.type, fishType, fishData, inhabitant: inhabitants.first);
-      
+      final fishImageUrl = _getFishImageUrl(
+        tank.type,
+        fishType,
+        fishData,
+        inhabitant: inhabitants.first,
+      );
+
       // Calculate total quantity for this fish type
-      final totalQuantity = inhabitants.fold<int>(0, (sum, inhabitant) => sum + inhabitant.quantity);
-      
+      final totalQuantity = inhabitants.fold<int>(
+        0,
+        (sum, inhabitant) => sum + inhabitant.quantity,
+      );
+
       widgets.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
@@ -3448,21 +3961,21 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
               // Fish image
               CircleAvatar(
                 radius: 12,
-                backgroundImage: fishImageUrl != null 
-                  ? (fishImageUrl.startsWith('http')
-                      ? CachedNetworkImageProvider(fishImageUrl)
-                      : FileImage(File(fishImageUrl)) as ImageProvider)
-                  : null,
-                backgroundColor: fishImageUrl == null 
-                  ? Theme.of(context).colorScheme.primaryContainer 
-                  : null,
-                child: fishImageUrl == null 
-                  ? Icon(
-                      Icons.pets,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      size: 12,
-                    ) 
-                  : null,
+                backgroundImage: fishImageUrl != null
+                    ? (fishImageUrl.startsWith('http')
+                          ? CachedNetworkImageProvider(fishImageUrl)
+                          : FileImage(File(fishImageUrl)) as ImageProvider)
+                    : null,
+                backgroundColor: fishImageUrl == null
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                child: fishImageUrl == null
+                    ? Icon(
+                        Icons.pets,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: 12,
+                      )
+                    : null,
               ),
               const SizedBox(width: 8),
               // Fish type and names
@@ -3480,7 +3993,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
                     Text(
                       '${totalQuantity}x $fishType',
-                  
+
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,
@@ -3495,10 +4008,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ),
       );
-      
+
       displayedGroups++;
     }
-    
+
     // Add "more fish types" indicator if needed
     if (groupedFish.length > maxGroups) {
       widgets.add(
@@ -3514,7 +4027,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         ),
       );
     }
-    
+
     return widgets;
   }
 
@@ -3522,7 +4035,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
-        'Tank must have existing inhabitants to get stocking recommendations.'
+        'Tank must have existing inhabitants to get stocking recommendations.',
       );
       return;
     }
@@ -3533,11 +4046,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       data: (data) => data,
       orElse: () => null,
     );
-    
+
     // Check if fish data is available
     if (fishData == null) {
       context.showAccessibleMessage(
-        'Fish data is not available. Please try again later.'
+        'Fish data is not available. Please try again later.',
       );
       return;
     }
@@ -3552,13 +4065,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     if (options == null || !mounted) {
       return;
     }
-    
+
     // Show interstitial ad for eligible free-tier users when the stocking
     // analysis is requested from the tank card.
     final modelState = ref.read(modelProvider);
     final adsRemoved = ref.read(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
-    final interstitialEligible = !kIsWeb &&
+    final debugHideAds =
+        kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+    final interstitialEligible =
+        !kIsWeb &&
         modelState.usingDeveloperGroqKeyForText &&
         !adsRemoved &&
         !debugHideAds;
@@ -3579,14 +4094,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
     // Store the options for the listener
     _additionalNotes = options.additionalNotes;
-    
+
     // Store the current tank for the listener
     _currentTankForRecommendations = tank;
-    
+
     // Calculate and store existing fish for the listener
     final categoryFish = fishData[tank.type] ?? [];
     final existingFish = <Fish>[];
-    
+
     for (final inhabitant in tank.inhabitants) {
       final fish = categoryFish.firstWhere(
         (f) => f.name == inhabitant.fishUnit,
@@ -3657,7 +4172,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'existing_inhabitants_count': tank.inhabitants.length,
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
-        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty
+            ? 'true'
+            : 'false',
       },
     );
     AnalyticsService.logTankAction(
@@ -3667,17 +4184,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     // Get recommendations for this tank
-    ref.read(aquariumStockingProvider.notifier).getTankStockingRecommendations(
-      tank: tank,
-      additionalNotes: options.additionalNotes,
-    );
+    ref
+        .read(aquariumStockingProvider.notifier)
+        .getTankStockingRecommendations(
+          tank: tank,
+          additionalNotes: options.additionalNotes,
+        );
   }
 
   Future<void> _getTankCompatibilityAnalysis(Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
     if (tank.inhabitants.isEmpty) {
       context.showAccessibleMessage(
-        l10n.tankMustHaveInhabitantsForCompatibility
+        l10n.tankMustHaveInhabitantsForCompatibility,
       );
       return;
     }
@@ -3688,19 +4207,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       data: (data) => data,
       orElse: () => null,
     );
-    
+
     // Check if fish data is available
     if (fishData == null) {
-      context.showAccessibleMessage(
-        l10n.fishDataNotAvailable
-      );
+      context.showAccessibleMessage(l10n.fishDataNotAvailable);
       return;
     }
 
     // Show options dialog first
     final options = await showDialog<StockingRecommendationOptions>(
       context: context,
-      builder: (context) => const StockingRecommendationOptionsDialog(isCompatibilityAnalysis: true),
+      builder: (context) => const StockingRecommendationOptionsDialog(
+        isCompatibilityAnalysis: true,
+      ),
     );
 
     // User cancelled the dialog
@@ -3712,8 +4231,10 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     // analysis is requested from the tank card.
     final modelState = ref.read(modelProvider);
     final adsRemoved = ref.read(purchaseProvider).adsRemoved;
-    final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
-    final interstitialEligible = !kIsWeb &&
+    final debugHideAds =
+        kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+    final interstitialEligible =
+        !kIsWeb &&
         modelState.usingDeveloperGroqKeyForText &&
         !adsRemoved &&
         !debugHideAds;
@@ -3731,20 +4252,21 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         },
       );
     }
-    
+
     // Get the fish from the tank inhabitants
     final categoryFish = fishData[tank.type] ?? [];
     final tankFishList = <Fish>[];
-    final addedSpecies = <String>{}; // Track species by their fishUnit to avoid duplicates
+    final addedSpecies =
+        <String>{}; // Track species by their fishUnit to avoid duplicates
     // Build species tags map from inhabitants for granular AI analysis
     final Map<String, List<String>> selectedSpecies = {};
-    
+
     for (final inhabitant in tank.inhabitants) {
       // Skip if we've already added this species
       if (addedSpecies.contains(inhabitant.fishUnit)) {
         continue;
       }
-      
+
       // Use the database fish name
       final fish = categoryFish.firstWhere(
         (f) => f.name == inhabitant.fishUnit,
@@ -3758,7 +4280,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           withCaution: [],
         ),
       );
-      
+
       // Collect species tags for this inhabitant
       if (inhabitant.speciesTags.isNotEmpty) {
         selectedSpecies[inhabitant.fishUnit] = inhabitant.speciesTags;
@@ -3834,7 +4356,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
         'existing_inhabitants_count': tank.inhabitants.length,
         'source': 'tank_management',
-        'has_additional_notes': options.additionalNotes.isNotEmpty ? 'true' : 'false',
+        'has_additional_notes': options.additionalNotes.isNotEmpty
+            ? 'true'
+            : 'false',
       },
     );
     AnalyticsService.logTankAction(
@@ -3854,25 +4378,27 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     }
 
     // Get the compatibility report, passing species tags as selected species
-    ref.read(fishCompatibilityProvider.notifier).getCompatibilityReport(
-      tank.type,
-      additionalNotes: compatibilityNotes,
-      selectedSpecies: selectedSpecies.isNotEmpty ? selectedSpecies : null,
-    );
+    ref
+        .read(fishCompatibilityProvider.notifier)
+        .getCompatibilityReport(
+          tank.type,
+          additionalNotes: compatibilityNotes,
+          selectedSpecies: selectedSpecies.isNotEmpty ? selectedSpecies : null,
+        );
   }
-
-
-
 }
 
 class _PulseRingWidget extends StatefulWidget {
   const _PulseRingWidget({required this.child});
+
   final Widget child;
+
   @override
   State<_PulseRingWidget> createState() => _PulseRingWidgetState();
 }
 
-class _PulseRingWidgetState extends State<_PulseRingWidget> with SingleTickerProviderStateMixin {
+class _PulseRingWidgetState extends State<_PulseRingWidget>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _scale;
   late final Animation<double> _opacity;
@@ -3880,14 +4406,18 @@ class _PulseRingWidgetState extends State<_PulseRingWidget> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))
-      ..repeat();
-    _scale = Tween<double>(begin: 1.0, end: 1.6).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
-    _opacity = Tween<double>(begin: 0.7, end: 0.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.6,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _opacity = Tween<double>(
+      begin: 0.7,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override

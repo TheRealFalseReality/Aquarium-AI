@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 import '../services/remote_config_service.dart';
@@ -82,8 +83,11 @@ class RemoveAdsDialog extends ConsumerWidget {
     });
 
     return AlertDialog(
-      icon: Icon(Icons.diamond,
-          size: 36, color: AquaThemeColors.founderColor(context)),
+      icon: Icon(
+        Icons.diamond,
+        size: 36,
+        color: AquaThemeColors.founderColor(context),
+      ),
       title: Text(l10n.removeAds),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -103,9 +107,11 @@ class RemoveAdsDialog extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.diamond,
-                        size: 16,
-                        color: AquaThemeColors.founderColor(context)),
+                    Icon(
+                      Icons.diamond,
+                      size: 16,
+                      color: AquaThemeColors.founderColor(context),
+                    ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -122,12 +128,14 @@ class RemoveAdsDialog extends ConsumerWidget {
                 _PerkRow(icon: Icons.block, label: l10n.founderPerkAdsRemoved),
                 const SizedBox(height: 4),
                 _PerkRow(
-                    icon: Icons.auto_awesome,
-                    label: l10n.founderPerkIncreasedAILimits),
+                  icon: Icons.auto_awesome,
+                  label: l10n.founderPerkIncreasedAILimits,
+                ),
                 const SizedBox(height: 4),
                 _PerkRow(
-                    icon: Icons.border_outer,
-                    label: l10n.founderPerkPostBorder),
+                  icon: Icons.border_outer,
+                  label: l10n.founderPerkPostBorder,
+                ),
                 const SizedBox(height: 4),
                 _PerkRow(icon: Icons.diamond, label: l10n.founderPerkBadge),
               ],
@@ -160,41 +168,50 @@ class RemoveAdsDialog extends ConsumerWidget {
       ),
       actions: [
         TextButton(
-          onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).restorePurchases(),
+          onPressed: busy
+              ? null
+              : () => ref.read(purchaseProvider.notifier).restorePurchases(),
           child: Text(l10n.restore),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.cancel),
         ),
-        Builder(builder: (context) {
-          final price = RemoteConfigService.getEarlySupporterPrice(
-                    locale: Localizations.localeOf(context).toString(),
-                  );
-          if (price.isEmpty) {
-            return ElevatedButton(
-              onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
-              child: Text(l10n.removeAds),
+        Builder(
+          builder: (context) {
+            final price = RemoteConfigService.getEarlySupporterPrice(
+              locale: Localizations.localeOf(context).toString(),
             );
-          }
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                price,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: busy ? null : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
+            if (price.isEmpty) {
+              return ElevatedButton(
+                onPressed: busy
+                    ? null
+                    : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
                 child: Text(l10n.removeAds),
-              ),
-            ],
-          );
-        }),
+              );
+            }
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  price,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: busy
+                      ? null
+                      : () =>
+                            ref.read(purchaseProvider.notifier).buyRemoveAds(),
+                  child: Text(l10n.removeAds),
+                ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
@@ -204,6 +221,7 @@ class RemoveAdsDialog extends ConsumerWidget {
 class _PerkRow extends StatelessWidget {
   final IconData icon;
   final String label;
+
   const _PerkRow({required this.icon, required this.label});
 
   @override

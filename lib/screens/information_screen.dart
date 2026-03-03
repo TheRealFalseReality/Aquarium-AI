@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
@@ -11,7 +12,7 @@ class InformationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return MainLayout(
       title: l10n.information,
       bottomNavigationBar: const AdBanner(),
@@ -22,19 +23,19 @@ class InformationScreen extends StatelessWidget {
           Text(
             l10n.informationDescription,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.informationSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 24),
-          
+
           // What's New Card
           Card(
             elevation: 2,
@@ -44,9 +45,8 @@ class InformationScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChangelogScreen(
-                      breadcrumbTitle: l10n.information,
-                    ),
+                    builder: (context) =>
+                        ChangelogScreen(breadcrumbTitle: l10n.information),
                   ),
                 );
               },
@@ -73,15 +73,17 @@ class InformationScreen extends StatelessWidget {
                         children: [
                           Text(
                             l10n.changelog,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             l10n.changelogDesc,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -97,7 +99,7 @@ class InformationScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // User Guide Card
           Card(
             elevation: 2,
@@ -128,7 +130,9 @@ class InformationScreen extends StatelessWidget {
                       child: Icon(
                         Icons.menu_book,
                         size: 32,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -138,15 +142,17 @@ class InformationScreen extends StatelessWidget {
                         children: [
                           Text(
                             l10n.userGuideCardTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             l10n.userGuideCardSubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -162,7 +168,7 @@ class InformationScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Help Wanted Card
           Card(
             elevation: 2,
@@ -203,15 +209,17 @@ class InformationScreen extends StatelessWidget {
                         children: [
                           Text(
                             l10n.helpWantedCardTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             l10n.helpWantedCardSubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -227,7 +235,7 @@ class InformationScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // i18n Documentation Card
           Card(
             elevation: 2,
@@ -240,7 +248,8 @@ class InformationScreen extends StatelessWidget {
                     builder: (context) => const MarkdownViewerScreen(
                       assetPath: 'assets/docs/en/START_HERE_I18N_en.md',
                       title: 'Internationalization Guide',
-                      breadcrumbs: [], // Start with empty breadcrumbs from Information screen
+                      breadcrumbs:
+                          [], // Start with empty breadcrumbs from Information screen
                     ),
                   ),
                 );
@@ -268,15 +277,17 @@ class InformationScreen extends StatelessWidget {
                         children: [
                           Text(
                             l10n.i18nCardTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             l10n.i18nCardSubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -292,12 +303,14 @@ class InformationScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Info Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
@@ -316,8 +329,8 @@ class InformationScreen extends StatelessWidget {
                   child: Text(
                     l10n.i18nGuideInfo,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],

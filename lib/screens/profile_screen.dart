@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/user_profile.dart';
@@ -58,8 +59,7 @@ const _kAllProfileIcons = [..._kPersonIcons, ..._kAquariumIcons];
 IconData _iconFromCodePoint(int? codePoint) {
   if (codePoint == null) return Icons.person;
   try {
-    return _kAllProfileIcons
-        .firstWhere((i) => i.codePoint == codePoint);
+    return _kAllProfileIcons.firstWhere((i) => i.codePoint == codePoint);
   } catch (_) {
     return Icons.person;
   }
@@ -184,10 +184,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _navigateToEdit(
-      BuildContext context, UserProfile profile) async {
+    BuildContext context,
+    UserProfile profile,
+  ) async {
     await Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (_) => _EditProfileScreen(profile: profile)),
+      MaterialPageRoute(builder: (_) => _EditProfileScreen(profile: profile)),
     );
   }
 
@@ -219,8 +220,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (profileData == null) {
             return Center(child: Text(l10n.profileNotFound));
           }
-          return _buildProfile(
-              context, l10n, profileData, currentUser?.uid);
+          return _buildProfile(context, l10n, profileData, currentUser?.uid);
         },
       ),
     );
@@ -233,17 +233,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.account_circle_outlined,
-                size: 72, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.account_circle_outlined,
+              size: 72,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(height: 16),
-            Text(l10n.profileSignInPromptTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center),
+            Text(
+              l10n.profileSignInPromptTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            Text(l10n.profileSignInPromptSubtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(
+              l10n.profileSignInPromptSubtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 24),
             FilledButton.icon(
               icon: const Icon(Icons.login),
@@ -256,8 +264,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildProfile(BuildContext context, AppLocalizations l10n,
-      UserProfile profile, String? currentUid) {
+  Widget _buildProfile(
+    BuildContext context,
+    AppLocalizations l10n,
+    UserProfile profile,
+    String? currentUid,
+  ) {
     final isOwner = _isOwnProfile || currentUid == profile.uid;
     // Founder badge is shown when the current user views their own profile
     // and has Founder Aquarist status.
@@ -274,13 +286,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: _buildHeader(context, l10n, profile, isOwner, isFounder),
           ),
           // ── Stats row ────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _buildStatsRow(context, l10n, profile),
-          ),
+          SliverToBoxAdapter(child: _buildStatsRow(context, l10n, profile)),
           // ── Details ──────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _buildDetailsCard(context, l10n, profile),
-          ),
+          SliverToBoxAdapter(child: _buildDetailsCard(context, l10n, profile)),
           // ── Tanks ────────────────────────────────────────────────────────
           if (profile.tanks.isNotEmpty) ...[
             SliverToBoxAdapter(
@@ -288,10 +296,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
                   l10n.profileTanksSection,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -303,9 +310,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
           // ── Sign-out (owner only) ─────────────────────────────────────────
           if (isOwner && _isOwnProfile)
-            SliverToBoxAdapter(
-              child: _buildSignOutButton(context, l10n),
-            ),
+            SliverToBoxAdapter(child: _buildSignOutButton(context, l10n)),
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
@@ -313,8 +318,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildHeader(
-      BuildContext context, AppLocalizations l10n, UserProfile profile,
-      bool isOwner, bool isFounder) {
+    BuildContext context,
+    AppLocalizations l10n,
+    UserProfile profile,
+    bool isOwner,
+    bool isFounder,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     const double avatarRadius = 48;
     return Stack(
@@ -330,8 +339,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  _buildAvatarWidget(context, profile, colorScheme,
-                      radius: avatarRadius, isFounder: isFounder),
+                  _buildAvatarWidget(
+                    context,
+                    profile,
+                    colorScheme,
+                    radius: avatarRadius,
+                    isFounder: isFounder,
+                  ),
                   if (isOwner)
                     Positioned(
                       bottom: 0,
@@ -350,10 +364,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // Display name — centered
               Text(
                 profile.displayName,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               // Founder Aquarist badge
@@ -361,20 +374,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AquaThemeColors.founderColor(context).withOpacity(0.12),
+                    color: AquaThemeColors.founderColor(
+                      context,
+                    ).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AquaThemeColors.founderColor(context).withOpacity(0.5),
+                      color: AquaThemeColors.founderColor(
+                        context,
+                      ).withOpacity(0.5),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.diamond,
-                          size: 13,
-                          color: AquaThemeColors.founderColor(context)),
+                      Icon(
+                        Icons.diamond,
+                        size: 13,
+                        color: AquaThemeColors.founderColor(context),
+                      ),
                       const SizedBox(width: 5),
                       Text(
                         l10n.founderAquaristTitle,
@@ -392,8 +413,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (profile.isAnonymous) ...[
                 const SizedBox(height: 4),
                 Chip(
-                  label: Text(l10n.profileAnonymous,
-                      style: const TextStyle(fontSize: 12)),
+                  label: Text(
+                    l10n.profileAnonymous,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   padding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
                 ),
@@ -405,21 +428,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 14, color: colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 2),
-                    Text(profile.location!,
-                        style: TextStyle(
-                            color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                    Text(
+                      profile.location!,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ],
               // Bio — centered
               if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(profile.bio!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                Text(
+                  profile.bio!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
               ],
             ],
           ),
@@ -442,8 +474,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// Builds the circular avatar widget respecting the icon > photo > default
   /// priority. When [isFounder] is true a deep-purple ring is added around
   /// the avatar.
-  Widget _buildAvatarWidget(BuildContext context, UserProfile profile, ColorScheme colorScheme,
-      {double radius = 48, bool isFounder = false}) {
+  Widget _buildAvatarWidget(
+    BuildContext context,
+    UserProfile profile,
+    ColorScheme colorScheme, {
+    double radius = 48,
+    bool isFounder = false,
+  }) {
     Widget avatar;
     if (profile.avatarIconCodePoint != null) {
       avatar = CircleAvatar(
@@ -472,12 +509,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-              color: AquaThemeColors.founderColor(context), width: 2.5),
+            color: AquaThemeColors.founderColor(context),
+            width: 2.5,
+          ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(2),
-          child: avatarWidget,
-        ),
+        child: Padding(padding: const EdgeInsets.all(2), child: avatarWidget),
       );
     } else {
       avatar = CircleAvatar(
@@ -492,42 +528,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-            color: AquaThemeColors.founderColor(context), width: 2.5),
+          color: AquaThemeColors.founderColor(context),
+          width: 2.5,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: avatar,
-      ),
+      child: Padding(padding: const EdgeInsets.all(2), child: avatar),
     );
   }
 
   Widget _buildStatsRow(
-      BuildContext context, AppLocalizations l10n, UserProfile profile) {
+    BuildContext context,
+    AppLocalizations l10n,
+    UserProfile profile,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           _StatChip(
-              icon: Icons.water_drop,
-              value: '${profile.tankCount}',
-              label: l10n.profileStatTanks),
+            icon: Icons.water_drop,
+            value: '${profile.tankCount}',
+            label: l10n.profileStatTanks,
+          ),
           const SizedBox(width: 8),
           _StatChip(
-              icon: Icons.set_meal,
-              value: '${profile.totalFishCount}',
-              label: l10n.profileStatFish),
+            icon: Icons.set_meal,
+            value: '${profile.totalFishCount}',
+            label: l10n.profileStatFish,
+          ),
           const SizedBox(width: 8),
           _StatChip(
-              icon: Icons.star_outline,
-              value: '${profile.yearsOfExperience}',
-              label: l10n.profileStatYears),
+            icon: Icons.star_outline,
+            value: '${profile.yearsOfExperience}',
+            label: l10n.profileStatYears,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDetailsCard(
-      BuildContext context, AppLocalizations l10n, UserProfile profile) {
+    BuildContext context,
+    AppLocalizations l10n,
+    UserProfile profile,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     return Card(
       margin: const EdgeInsets.all(16),
@@ -536,11 +580,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.profileDetailsSection,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.profileDetailsSection,
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             _DetailRow(
               icon: _levelIcon(profile.experienceLevel),
@@ -554,8 +599,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             if (profile.preferredTankTypes.isNotEmpty)
               _DetailRow(
-                icon: _tankTypeIcon(
-                    profile.preferredTankTypes.first),
+                icon: _tankTypeIcon(profile.preferredTankTypes.first),
                 label: l10n.profilePreferredTankTypes,
                 value: profile.preferredTankTypes
                     .map((t) => _tankTypeLabel(l10n, t))
@@ -581,11 +625,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  profile.isPublic
-                      ? l10n.profilePublic
-                      : l10n.profilePrivate,
+                  profile.isPublic ? l10n.profilePublic : l10n.profilePrivate,
                   style: TextStyle(
-                      color: colorScheme.onSurfaceVariant, fontSize: 13),
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -595,13 +639,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildTankTile(BuildContext context, AppLocalizations l10n,
-      ProfileTankSummary tank) {
+  Widget _buildTankTile(
+    BuildContext context,
+    AppLocalizations l10n,
+    ProfileTankSummary tank,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final isMarine = tank.type == 'marine';
     final color = isMarine ? colorScheme.secondary : colorScheme.primary;
-    final icon = _tankIconFromCodePoint(tank.customIconCodePoint,
-        isMarine: isMarine);
+    final icon = _tankIconFromCodePoint(
+      tank.customIconCodePoint,
+      isMarine: isMarine,
+    );
 
     return ListTile(
       leading: SizedBox(
@@ -616,8 +665,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       subtitle: Text(_tankSubtitle(l10n, tank)),
       trailing: tank.inhabitantCount > 0
           ? Chip(
-              label: Text('${tank.inhabitantCount}',
-                  style: const TextStyle(fontSize: 12)),
+              label: Text(
+                '${tank.inhabitantCount}',
+                style: const TextStyle(fontSize: 12),
+              ),
               avatar: const Icon(Icons.set_meal, size: 14),
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
@@ -633,8 +684,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: OutlinedButton.icon(
         icon: Icon(Icons.logout, color: colorScheme.error),
-        label: Text(l10n.authSignOut,
-            style: TextStyle(color: colorScheme.error)),
+        label: Text(
+          l10n.authSignOut,
+          style: TextStyle(color: colorScheme.error),
+        ),
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: colorScheme.error.withOpacity(0.5)),
           foregroundColor: colorScheme.error,
@@ -647,8 +700,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   String _tankSubtitle(AppLocalizations l10n, ProfileTankSummary tank) {
-    final type =
-        tank.isReef ? l10n.profileTankTypeReef : _tankTypeLabel(l10n, tank.type);
+    final type = tank.isReef
+        ? l10n.profileTankTypeReef
+        : _tankTypeLabel(l10n, tank.type);
     if (tank.sizeGallons != null) {
       return '$type • ${tank.sizeGallons!.toStringAsFixed(0)} gal';
     }
@@ -693,8 +747,11 @@ class _StatChip extends StatelessWidget {
   final String value;
   final String label;
 
-  const _StatChip(
-      {required this.icon, required this.value, required this.label});
+  const _StatChip({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -710,14 +767,18 @@ class _StatChip extends StatelessWidget {
           children: [
             Icon(icon, size: 20, color: colorScheme.primary),
             const SizedBox(height: 4),
-            Text(value,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-            Text(label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant)),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
@@ -732,8 +793,11 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow(
-      {required this.icon, required this.label, required this.value});
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -747,13 +811,20 @@ class _DetailRow extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             width: 130,
-            child: Text(label,
-                style: TextStyle(
-                    color: colorScheme.onSurfaceVariant, fontSize: 13)),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              ),
+            ),
           ),
           Expanded(
-              child: Text(value,
-                  style: const TextStyle(fontWeight: FontWeight.w500))),
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ],
       ),
     );
@@ -768,8 +839,7 @@ class _EditProfileScreen extends ConsumerStatefulWidget {
   const _EditProfileScreen({required this.profile});
 
   @override
-  ConsumerState<_EditProfileScreen> createState() =>
-      _EditProfileScreenState();
+  ConsumerState<_EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
@@ -891,9 +961,9 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     if (mounted) {
       if (ok) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.profileSaved)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.profileSaved)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -950,10 +1020,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
               ),
             )
           else
-            TextButton(
-              onPressed: () => _save(l10n),
-              child: Text(l10n.save),
-            ),
+            TextButton(onPressed: () => _save(l10n), child: Text(l10n.save)),
         ],
       ),
       body: Form(
@@ -963,7 +1030,12 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
           children: [
             // ── Avatar section ─────────────────────────────────────────────
             _buildAvatarSection(
-                context, l10n, colorScheme, _providerPhotoUrl, hasProviderPhoto),
+              context,
+              l10n,
+              colorScheme,
+              _providerPhotoUrl,
+              hasProviderPhoto,
+            ),
             const SizedBox(height: 24),
 
             // ── Display name ───────────────────────────────────────────────
@@ -1034,15 +1106,16 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
               children: ExperienceLevel.values.map((level) {
                 final selected = _experienceLevel == level;
                 return ChoiceChip(
-                  avatar: Icon(_levelIcon(level),
-                      size: 16,
-                      color: selected
-                          ? colorScheme.onSecondaryContainer
-                          : colorScheme.onSurfaceVariant),
+                  avatar: Icon(
+                    _levelIcon(level),
+                    size: 16,
+                    color: selected
+                        ? colorScheme.onSecondaryContainer
+                        : colorScheme.onSurfaceVariant,
+                  ),
                   label: Text(_levelLabelFor(l10n, level)),
                   selected: selected,
-                  onSelected: (_) =>
-                      setState(() => _experienceLevel = level),
+                  onSelected: (_) => setState(() => _experienceLevel = level),
                 );
               }).toList(),
             ),
@@ -1055,11 +1128,13 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
               children: _tankTypeOptions.map((type) {
                 final selected = _preferredTankTypes.contains(type);
                 return FilterChip(
-                  avatar: Icon(_tankTypeIcon(type),
-                      size: 16,
-                      color: selected
-                          ? colorScheme.onSecondaryContainer
-                          : colorScheme.onSurfaceVariant),
+                  avatar: Icon(
+                    _tankTypeIcon(type),
+                    size: 16,
+                    color: selected
+                        ? colorScheme.onSecondaryContainer
+                        : colorScheme.onSurfaceVariant,
+                  ),
                   label: Text(_tankTypeLabelFor(l10n, type)),
                   selected: selected,
                   onSelected: (v) => setState(() {
@@ -1099,9 +1174,11 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
             // ── Public toggle ──────────────────────────────────────────────
             SwitchListTile(
               title: Text(l10n.profilePublicToggle),
-              subtitle: Text(_isPublic
-                  ? l10n.profilePublicDescription
-                  : l10n.profilePrivateDescription),
+              subtitle: Text(
+                _isPublic
+                    ? l10n.profilePublicDescription
+                    : l10n.profilePrivateDescription,
+              ),
               value: _isPublic,
               onChanged: (v) => setState(() => _isPublic = v),
               secondary: Icon(_isPublic ? Icons.public : Icons.lock_outline),
@@ -1110,57 +1187,72 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
 
             // ── Post signature settings ────────────────────────────────────
             _SectionHeader(l10n.profileSignatureSection),
-            Text(l10n.profileSignatureDescription,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(
+              l10n.profileSignatureDescription,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 8),
             _buildSigSwitch(
               l10n.profileSignatureShowExpLevel,
               Icons.school_outlined,
               _signatureSettings.showExperienceLevel,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showExperienceLevel: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showExperienceLevel: v,
+                ),
+              ),
             ),
             _buildSigSwitch(
               l10n.profileSignatureShowLocation,
               Icons.location_on_outlined,
               _signatureSettings.showLocation,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showLocation: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showLocation: v,
+                ),
+              ),
             ),
             _buildSigSwitch(
               l10n.profileSignatureShowTankCount,
               Icons.water_drop,
               _signatureSettings.showTankCount,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showTankCount: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showTankCount: v,
+                ),
+              ),
             ),
             _buildSigSwitch(
               l10n.profileSignatureShowFishCount,
               Icons.set_meal,
               _signatureSettings.showFishCount,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showFishCount: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showFishCount: v,
+                ),
+              ),
             ),
             _buildSigSwitch(
               l10n.profileSignatureShowYearsExp,
               Icons.calendar_today_outlined,
               _signatureSettings.showYearsExperience,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showYearsExperience: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showYearsExperience: v,
+                ),
+              ),
             ),
             _buildSigSwitch(
               l10n.profileSignatureShowMemberSince,
               Icons.access_time_outlined,
               _signatureSettings.showMemberSince,
-              (v) => setState(() =>
-                  _signatureSettings =
-                      _signatureSettings.copyWith(showMemberSince: v)),
+              (v) => setState(
+                () => _signatureSettings = _signatureSettings.copyWith(
+                  showMemberSince: v,
+                ),
+              ),
             ),
             const SizedBox(height: 32),
           ],
@@ -1204,7 +1296,11 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
                 radius: 18,
                 backgroundColor: colorScheme.primary,
                 child: IconButton(
-                  icon: Icon(Icons.edit, size: 18, color: colorScheme.onPrimary),
+                  icon: Icon(
+                    Icons.edit,
+                    size: 18,
+                    color: colorScheme.onPrimary,
+                  ),
                   tooltip: l10n.profileSelectIcon,
                   onPressed: () => _showIconPicker(l10n),
                   padding: EdgeInsets.zero,
@@ -1231,18 +1327,21 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
                 ActionChip(
                   avatar: const Icon(Icons.account_circle, size: 16),
                   label: Text(l10n.profileRestoreProviderPhoto),
-                  onPressed: () =>
-                      setState(() => _useProviderPhoto = true),
+                  onPressed: () => setState(() => _useProviderPhoto = true),
                   visualDensity: VisualDensity.compact,
                 ),
               // Remove / default
               if (_selectedIconCodePoint != null || _useProviderPhoto)
                 ActionChip(
-                  avatar: Icon(Icons.person_outline,
-                      size: 16, color: colorScheme.onSurfaceVariant),
-                  label: Text(l10n.profileAvatarRemove,
-                      style:
-                          TextStyle(color: colorScheme.onSurfaceVariant)),
+                  avatar: Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  label: Text(
+                    l10n.profileAvatarRemove,
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
                   onPressed: () => setState(() {
                     _selectedIconCodePoint = null;
                     _useProviderPhoto = false;
@@ -1283,8 +1382,12 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
     }
   }
 
-  Widget _buildSigSwitch(String label, IconData icon, bool value,
-      void Function(bool) onChanged) {
+  Widget _buildSigSwitch(
+    String label,
+    IconData icon,
+    bool value,
+    void Function(bool) onChanged,
+  ) {
     return SwitchListTile(
       title: Text(label, style: const TextStyle(fontSize: 14)),
       secondary: Icon(icon, size: 20),
@@ -1314,45 +1417,44 @@ class _IconPickerSheet extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     Widget iconGrid(List<IconData> icons) => GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 6,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: icons.length,
-          itemBuilder: (context, index) {
-            final icon = icons[index];
-            final isSelected = icon.codePoint == selectedCodePoint;
-            return GestureDetector(
-              onTap: () {
-                onSelected(isSelected ? null : icon.codePoint);
-                Navigator.of(context).pop();
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? colorScheme.primaryContainer
-                      : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: isSelected
-                      ? Border.all(
-                          color: colorScheme.primary, width: 2)
-                      : null,
-                ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                ),
-              ),
-            );
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 6,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: icons.length,
+      itemBuilder: (context, index) {
+        final icon = icons[index];
+        final isSelected = icon.codePoint == selectedCodePoint;
+        return GestureDetector(
+          onTap: () {
+            onSelected(isSelected ? null : icon.codePoint);
+            Navigator.of(context).pop();
           },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              border: isSelected
+                  ? Border.all(color: colorScheme.primary, width: 2)
+                  : null,
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
         );
+      },
+    );
 
     return DraggableScrollableSheet(
       initialChildSize: 0.55,
@@ -1375,21 +1477,30 @@ class _IconPickerSheet extends StatelessWidget {
               ),
             ),
           ),
-          Text(l10n.profileSelectIcon,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.profileSelectIcon,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
-          Text(l10n.profilePersonIcons,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.primary, fontWeight: FontWeight.bold)),
+          Text(
+            l10n.profilePersonIcons,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           iconGrid(_kPersonIcons),
           const SizedBox(height: 16),
-          Text(l10n.profileAquariumIcons,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.primary, fontWeight: FontWeight.bold)),
+          Text(
+            l10n.profileAquariumIcons,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           iconGrid(_kAquariumIcons),
         ],
@@ -1402,17 +1513,19 @@ class _IconPickerSheet extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String text;
+
   const _SectionHeader(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text,
-          style: Theme.of(context)
-              .textTheme
-              .titleSmall
-              ?.copyWith(fontWeight: FontWeight.bold)),
+      child: Text(
+        text,
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
@@ -1425,8 +1538,10 @@ class _ActionIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
+
   /// Container size in logical pixels (default 36).
   final double size;
+
   /// Icon size in logical pixels (default 18).
   final double iconSize;
 

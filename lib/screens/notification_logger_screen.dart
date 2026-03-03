@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/tank.dart';
-import '../models/notification_log.dart';
-import '../models/tank_notification.dart';
-import '../models/tank_note.dart';
-import '../providers/tank_provider.dart';
+
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/notification_log.dart';
+import '../models/tank.dart';
+import '../models/tank_note.dart';
+import '../models/tank_notification.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/notification_reschedule_dialog.dart';
-import '../l10n/app_localizations.dart';
 
 class NotificationLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -25,10 +26,13 @@ class NotificationLoggerScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  NotificationLoggerScreenState createState() => NotificationLoggerScreenState();
+  NotificationLoggerScreenState createState() =>
+      NotificationLoggerScreenState();
 }
 
-class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScreen> with SingleTickerProviderStateMixin {
+class NotificationLoggerScreenState
+    extends ConsumerState<NotificationLoggerScreen>
+    with SingleTickerProviderStateMixin {
   String? _expandedCategory;
   final NotificationService _notificationService = NotificationService();
   late TabController _tabController;
@@ -36,7 +40,11 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTabIndex);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
     if (widget.openAddDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -79,10 +87,8 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddNoteSheet(
-        tank: currentTank,
-        existingNote: note,
-      ),
+      builder: (context) =>
+          _AddNoteSheet(tank: currentTank, existingNote: note),
     );
   }
 
@@ -91,14 +97,14 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final updatedNotes = currentTank.tankNotes
         .where((n) => n.id != note.id)
         .toList();
-    
+
     final updatedTank = currentTank.copyWith(
       tankNotes: updatedNotes,
       updatedAt: DateTime.now(),
     );
-    
+
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     // Log note deletion
     AnalyticsService.logFeatureUsed(
       featureName: 'tank_note_deleted',
@@ -123,10 +129,8 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddLogEntrySheet(
-        tank: currentTank,
-        existingEntry: entry,
-      ),
+      builder: (context) =>
+          _AddLogEntrySheet(tank: currentTank, existingEntry: entry),
     );
   }
 
@@ -135,24 +139,25 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final updatedLogs = currentTank.notificationLogs
         .where((e) => e.id != entry.id)
         .toList();
-    
+
     // Reschedule matching notifications based on remaining activity logs
     // (next most recent activity becomes the base)
-    final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
-      tankId: currentTank.id,
-      tankName: currentTank.name,
-      notifications: currentTank.notifications,
-      activityLogs: updatedLogs,
-      activityType: entry.type,
-      activityCustomCategory: entry.customCategory,
-    );
-    
+    final updatedNotifications = await _notificationService
+        .rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: entry.type,
+          activityCustomCategory: entry.customCategory,
+        );
+
     // Update the tank with updated logs and notifications
     var updatedTank = currentTank.copyWith(
       notificationLogs: updatedLogs,
       updatedAt: DateTime.now(),
     );
-    
+
     // Apply the updated notifications with new scheduledNextDate
     if (updatedNotifications.isNotEmpty) {
       final notificationsList = updatedTank.notifications.map((n) {
@@ -164,9 +169,9 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
       }).toList();
       updatedTank = updatedTank.copyWith(notifications: notificationsList);
     }
-    
+
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
-    
+
     // Log notification log entry deletion
     AnalyticsService.logFeatureUsed(
       featureName: 'notification_log_deleted',
@@ -176,7 +181,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
         'remaining_logs': updatedLogs.length,
       },
     );
-    
+
     AnalyticsService.logTankAction(
       action: 'notification_log_deleted',
       tankType: currentTank.type,
@@ -276,7 +281,9 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
           label: AnimatedBuilder(
             animation: _tabController,
             builder: (context, child) {
-              return Text(_tabController.index == 0 ? l10n.addNote : l10n.addLogEntry);
+              return Text(
+                _tabController.index == 0 ? l10n.addNote : l10n.addLogEntry,
+              );
             },
           ),
         ),
@@ -297,25 +304,20 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return ListView(
-      padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 100,
-      ),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
       children: [
         Text(
           l10n.notesSection,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.noNotesDescription,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface.withOpacity(0.7),
-              ),
+            color: cs.onSurface.withOpacity(0.7),
+          ),
         ),
         const SizedBox(height: 24),
         // Notes summary card
@@ -329,7 +331,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
 
   Widget _buildNotesEmptyState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -344,19 +346,16 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
             const SizedBox(height: 24),
             Text(
               l10n.noNotesYet,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               l10n.noNotesDescription,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -383,7 +382,9 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final totalNotes = tank.tankNotes.length;
     // Get the most recent note using reduce for cleaner code
     final lastNote = tank.tankNotes.isNotEmpty
-        ? tank.tankNotes.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b)
+        ? tank.tankNotes.reduce(
+            (a, b) => a.createdAt.isAfter(b.createdAt) ? a : b,
+          )
         : null;
 
     return Card(
@@ -393,11 +394,13 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
         leading: Icon(Icons.summarize, color: cs.primary),
         title: Text(
           l10n.notesSection,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text('$totalNotes ${totalNotes == 1 ? l10n.entry : l10n.entries}'),
+        subtitle: Text(
+          '$totalNotes ${totalNotes == 1 ? l10n.entry : l10n.entries}',
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -422,13 +425,17 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         '${l10n.lastNote}: ${DateFormat('MMM d, yyyy').format(lastNote.createdAt)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -476,8 +483,8 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
                       Text(
                         dateFormat.format(note.createdAt),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -513,7 +520,10 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
                         children: [
                           const Icon(Icons.delete, size: 20, color: Colors.red),
                           const SizedBox(width: 8),
-                          Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                          Text(
+                            l10n.delete,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -529,7 +539,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
 
   void _showDeleteNoteDialog(BuildContext context, TankNote note) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -563,31 +573,26 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     }
 
     return ListView(
-      padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 100,
-      ),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
       children: [
         Text(
           l10n.activitiesSection,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.activityLogDescription,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface.withOpacity(0.7),
-              ),
+            color: cs.onSurface.withOpacity(0.7),
+          ),
         ),
         const SizedBox(height: 24),
         // Summary card
         _buildSummaryCard(context, tank),
         const SizedBox(height: 16),
-        
+
         // Grouped entries
         ...groupedLogs.entries.map((entry) {
           final categoryName = entry.key;
@@ -617,9 +622,13 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
                     categoryName,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${logs.length} ${logs.length == 1 ? l10n.entry : l10n.entries}'),
+                  subtitle: Text(
+                    '${logs.length} ${logs.length == 1 ? l10n.entry : l10n.entries}',
+                  ),
                   trailing: IconButton(
-                    icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                    icon: Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    ),
                     onPressed: () {
                       setState(() {
                         _expandedCategory = isExpanded ? null : categoryName;
@@ -649,7 +658,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
 
   Widget _buildActivitiesEmptyState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -664,19 +673,16 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
             const SizedBox(height: 24),
             Text(
               l10n.noActivityLogsYet,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               l10n.noActivityLogsDescription,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -703,8 +709,9 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
     final groupedLogs = _groupLogsByCategory(tank);
     final totalLogs = tank.notificationLogs.length;
     final lastLog = tank.notificationLogs.isNotEmpty
-        ? tank.notificationLogs.reduce((a, b) => 
-            a.loggedAt.isAfter(b.loggedAt) ? a : b)
+        ? tank.notificationLogs.reduce(
+            (a, b) => a.loggedAt.isAfter(b.loggedAt) ? a : b,
+          )
         : null;
 
     return Card(
@@ -714,11 +721,13 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
         leading: Icon(Icons.summarize, color: cs.primary),
         title: Text(
           l10n.activitySummary,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text('$totalLogs ${totalLogs == 1 ? l10n.entry : l10n.entries}'),
+        subtitle: Text(
+          '$totalLogs ${totalLogs == 1 ? l10n.entry : l10n.entries}',
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -752,13 +761,17 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         '${l10n.lastActivity}: ${DateFormat('MMM d, yyyy').format(lastLog.loggedAt)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -791,16 +804,16 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: cs.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: cs.primary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -863,7 +876,7 @@ class NotificationLoggerScreenState extends ConsumerState<NotificationLoggerScre
 
   void _showDeleteDialog(BuildContext context, NotificationLog entry) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -892,10 +905,7 @@ class _AddLogEntrySheet extends ConsumerStatefulWidget {
   final Tank tank;
   final NotificationLog? existingEntry;
 
-  const _AddLogEntrySheet({
-    required this.tank,
-    this.existingEntry,
-  });
+  const _AddLogEntrySheet({required this.tank, this.existingEntry});
 
   @override
   ConsumerState<_AddLogEntrySheet> createState() => _AddLogEntrySheetState();
@@ -915,7 +925,8 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     if (widget.existingEntry != null) {
       // Initialize with existing entry data
       _selectedType = widget.existingEntry!.type;
-      _customCategoryController.text = widget.existingEntry!.customCategory ?? '';
+      _customCategoryController.text =
+          widget.existingEntry!.customCategory ?? '';
       _notesController.text = widget.existingEntry!.notes ?? '';
       _selectedDate = widget.existingEntry!.loggedAt;
     } else {
@@ -962,21 +973,21 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     if (_formKey.currentState!.validate()) {
       final NotificationLog entry;
       final isEditing = widget.existingEntry != null;
-      
+
       // Extract trimmed values to avoid calling trim() multiple times
       final trimmedCustomCategory = _customCategoryController.text.trim();
       final trimmedNotes = _notesController.text.trim();
-      
+
       // For 'other' type, use custom category or default to 'Other'
       final customCategory = _selectedType == NotificationType.other
           ? (trimmedCustomCategory.isNotEmpty ? trimmedCustomCategory : 'Other')
           : null;
-      
+
       // Determine if we need to clear custom category (when switching from 'other' to another type)
       final shouldClearCustomCategory = _selectedType != NotificationType.other;
-      
+
       List<NotificationLog> updatedLogs;
-      
+
       if (isEditing) {
         // Update existing entry - loggedAt is included to allow users to correct/adjust the date
         entry = widget.existingEntry!.copyWith(
@@ -986,19 +997,19 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           notes: trimmedNotes.isNotEmpty ? trimmedNotes : null,
           clearCustomCategory: shouldClearCustomCategory,
         );
-        
+
         // Replace the existing entry in the list
         updatedLogs = widget.tank.notificationLogs.map((e) {
           return e.id == entry.id ? entry : e;
         }).toList();
-        
+
         final updatedTank = widget.tank.copyWith(
           notificationLogs: updatedLogs,
           updatedAt: DateTime.now(),
         );
-        
+
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log notification log entry update
         AnalyticsService.logFeatureUsed(
           featureName: 'notification_log_updated',
@@ -1014,15 +1025,15 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           customCategory: customCategory,
           notes: trimmedNotes.isNotEmpty ? trimmedNotes : null,
         );
-        
+
         updatedLogs = [...widget.tank.notificationLogs, entry];
         final updatedTank = widget.tank.copyWith(
           notificationLogs: updatedLogs,
           updatedAt: DateTime.now(),
         );
-        
+
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log notification log entry addition
         AnalyticsService.logFeatureUsed(
           featureName: 'notification_log_added',
@@ -1032,25 +1043,27 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
             'has_notes': entry.notes != null ? 'true' : 'false',
           },
         );
-        
+
         AnalyticsService.logTankAction(
           action: 'notification_log_added',
           tankType: widget.tank.type,
         );
       }
-      
+
       // Find matching notifications for this activity type
-      final matchingNotifications = widget.tank.notifications.where((notification) {
+      final matchingNotifications = widget.tank.notifications.where((
+        notification,
+      ) {
         return notification.enabled &&
-               notification.repeatFrequency != RepeatFrequency.none &&
-               notification.matchesActivityLog(entry.type, entry.customCategory);
+            notification.repeatFrequency != RepeatFrequency.none &&
+            notification.matchesActivityLog(entry.type, entry.customCategory);
       }).toList();
-      
+
       // Close the bottom sheet first
       if (mounted) {
         Navigator.pop(context);
       }
-      
+
       // If there are matching notifications, ask user how to handle rescheduling
       if (matchingNotifications.isNotEmpty && mounted) {
         // Show dialog for the first matching notification
@@ -1060,7 +1073,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           context,
           matchingNotification,
         );
-        
+
         if (rescheduleOption != null && mounted) {
           await _handleRescheduleOption(
             matchingNotification,
@@ -1081,24 +1094,27 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
     RescheduleOption option,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Get the latest tank state
-    final currentTank = ref.read(tankProvider).tanks
+    final currentTank = ref
+        .read(tankProvider)
+        .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
-    
+
     switch (option) {
       case RescheduleOption.rescheduleFromNow:
         // Reschedule based on the activity log date, using current time
-        final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
-          tankId: currentTank.id,
-          tankName: currentTank.name,
-          notifications: currentTank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
-          useCurrentTime: true,
-        );
-        
+        final updatedNotifications = await _notificationService
+            .rescheduleMatchingNotifications(
+              tankId: currentTank.id,
+              tankName: currentTank.name,
+              notifications: currentTank.notifications,
+              activityLogs: updatedLogs,
+              activityType: log.type,
+              activityCustomCategory: log.customCategory,
+              useCurrentTime: true,
+            );
+
         // Persist the updated notifications
         if (updatedNotifications.isNotEmpty) {
           final notificationsList = currentTank.notifications.map((n) {
@@ -1114,26 +1130,27 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           );
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.notificationUpdated)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.notificationUpdated)));
         }
         break;
-        
+
       case RescheduleOption.keepOriginal:
         // Reschedule to same date as rescheduleFromNow but keep original notification time
-        final updatedNotifications = await _notificationService.rescheduleMatchingNotifications(
-          tankId: currentTank.id,
-          tankName: currentTank.name,
-          notifications: currentTank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
-          useCurrentTime: false,  // Keep original time
-        );
-        
+        final updatedNotifications = await _notificationService
+            .rescheduleMatchingNotifications(
+              tankId: currentTank.id,
+              tankName: currentTank.name,
+              notifications: currentTank.notifications,
+              activityLogs: updatedLogs,
+              activityType: log.type,
+              activityCustomCategory: log.customCategory,
+              useCurrentTime: false, // Keep original time
+            );
+
         // Persist the updated notifications
         if (updatedNotifications.isNotEmpty) {
           final notificationsList = currentTank.notifications.map((n) {
@@ -1149,22 +1166,24 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
           );
           await ref.read(tankProvider.notifier).updateTank(updatedTank);
         }
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.notificationUpdated)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.notificationUpdated)));
         }
         break;
-        
+
       case RescheduleOption.doNothing:
         // Don't reschedule - activity is already logged, just keep existing schedule
         break;
-        
+
       case RescheduleOption.cancelAll:
         // Cancel - don't log activity and don't reschedule
         // Remove the log that was just added
-        final logsWithoutNew = updatedLogs.where((l) => l.id != log.id).toList();
+        final logsWithoutNew = updatedLogs
+            .where((l) => l.id != log.id)
+            .toList();
         final updatedTank = currentTank.copyWith(
           notificationLogs: logsWithoutNew,
           updatedAt: DateTime.now(),
@@ -1172,7 +1191,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
         break;
     }
-    
+
     AnalyticsService.logFeatureUsed(
       featureName: 'notification_reschedule_option',
       parameters: {
@@ -1209,8 +1228,8 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                   Text(
                     isEditing ? l10n.editLogEntry : l10n.addLogEntry,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -1219,7 +1238,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Category dropdown
               DropdownButtonFormField<NotificationType>(
                 value: _selectedType,
@@ -1255,7 +1274,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Custom category name (shown only when "Other" is selected)
               if (_selectedType == NotificationType.other) ...[
                 TextFormField(
@@ -1273,7 +1292,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Date selection
               InkWell(
                 onTap: () => _selectDate(),
@@ -1291,7 +1310,7 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -1307,14 +1326,16 @@ class _AddLogEntrySheetState extends ConsumerState<_AddLogEntrySheet> {
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 24),
-              
+
               // Save button
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _saveEntry,
                   icon: const Icon(Icons.save),
-                  label: Text(isEditing ? l10n.updateLogEntry : l10n.saveLogEntry),
+                  label: Text(
+                    isEditing ? l10n.updateLogEntry : l10n.saveLogEntry,
+                  ),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -1333,10 +1354,7 @@ class _AddNoteSheet extends ConsumerStatefulWidget {
   final Tank tank;
   final TankNote? existingNote;
 
-  const _AddNoteSheet({
-    required this.tank,
-    this.existingNote,
-  });
+  const _AddNoteSheet({required this.tank, this.existingNote});
 
   @override
   ConsumerState<_AddNoteSheet> createState() => _AddNoteSheetState();
@@ -1394,9 +1412,9 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
     if (_formKey.currentState!.validate()) {
       final trimmedContent = _contentController.text.trim();
       final isEditing = widget.existingNote != null;
-      
+
       List<TankNote> updatedNotes;
-      
+
       if (isEditing) {
         // Update existing note - createdAt is included to allow users to correct/adjust the date
         final updatedNote = widget.existingNote!.copyWith(
@@ -1404,25 +1422,23 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
           createdAt: _selectedDate,
           updatedAt: DateTime.now(),
         );
-        
+
         // Replace the existing note in the list
         updatedNotes = widget.tank.tankNotes.map((n) {
           return n.id == updatedNote.id ? updatedNote : n;
         }).toList();
-        
+
         final updatedTank = widget.tank.copyWith(
           tankNotes: updatedNotes,
           updatedAt: DateTime.now(),
         );
-        
+
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log note update
         AnalyticsService.logFeatureUsed(
           featureName: 'tank_note_updated',
-          parameters: {
-            'tank_type': widget.tank.type,
-          },
+          parameters: {'tank_type': widget.tank.type},
         );
       } else {
         // Create new note with selected date
@@ -1430,15 +1446,15 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
           content: trimmedContent,
           createdAt: _selectedDate,
         );
-        
+
         updatedNotes = [...widget.tank.tankNotes, note];
         final updatedTank = widget.tank.copyWith(
           tankNotes: updatedNotes,
           updatedAt: DateTime.now(),
         );
-        
+
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
-        
+
         // Log note addition
         AnalyticsService.logFeatureUsed(
           featureName: 'tank_note_added',
@@ -1447,13 +1463,13 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
             'total_notes': updatedNotes.length,
           },
         );
-        
+
         AnalyticsService.logTankAction(
           action: 'tank_note_added',
           tankType: widget.tank.type,
         );
       }
-      
+
       if (mounted) {
         Navigator.pop(context);
       }
@@ -1486,8 +1502,8 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                   Text(
                     isEditing ? l10n.editNote : l10n.addNote,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -1496,7 +1512,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Note content
               TextFormField(
                 controller: _contentController,
@@ -1518,7 +1534,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Date selection
               InkWell(
                 onTap: () => _selectDate(),
@@ -1536,7 +1552,7 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Save button
               SizedBox(
                 width: double.infinity,
@@ -1558,14 +1574,18 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
   }
 }
 
-
 /// Shows the activity log add/edit bottom sheet.
 /// [existingEntry] – pass to edit an existing log entry.
-void showLogEntrySheet(BuildContext context, Tank tank, {NotificationLog? existingEntry}) {
+void showLogEntrySheet(
+  BuildContext context,
+  Tank tank, {
+  NotificationLog? existingEntry,
+}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (context) => _AddLogEntrySheet(tank: tank, existingEntry: existingEntry),
+    builder: (context) =>
+        _AddLogEntrySheet(tank: tank, existingEntry: existingEntry),
   );
 }
 

@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
+
   factory NotificationService() => _instance;
+
   NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
-  
+
   /// Navigator key for app-wide navigation from notification taps
   GlobalKey<NavigatorState>? _navigatorKey;
 
@@ -25,14 +28,16 @@ class NotificationService {
   /// preserving the originally set navigatorKey.
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) return;
-    
+
     _navigatorKey = navigatorKey;
 
     // Initialize timezone data
     tz.initializeTimeZones();
 
     // Android initialization settings
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     // iOS initialization settings
     const iosSettings = DarwinInitializationSettings(
@@ -72,8 +77,10 @@ class NotificationService {
     }
 
     // Request permissions for iOS
-    final iosPlugin = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final iosPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     final granted = await iosPlugin?.requestPermissions(
       alert: true,
       badge: true,
@@ -81,29 +88,32 @@ class NotificationService {
     );
 
     // Request permissions for Android 13+
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    final androidGranted = await androidPlugin?.requestNotificationsPermission();
+    final androidPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final androidGranted = await androidPlugin
+        ?.requestNotificationsPermission();
 
     return granted ?? androidGranted ?? true;
   }
 
   /// Schedule a notification from a TankNotification
-  /// 
+  ///
   /// If [activityLogs] is provided, the next notification date will be
   /// calculated based on the last matching activity log, making the
   /// notification schedule relative to when the user actually completed
   /// the task.
-  /// 
+  ///
   /// If [useExactDateTime] is true, the notification will be scheduled for
   /// exactly [notification.notificationDateTime], ignoring any activity logs
   /// or repeat frequency calculations. This is useful when the user explicitly
   /// wants to schedule for a specific date/time.
-  /// 
+  ///
   /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
   /// will use the time from the activity log instead of the original notification
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
-  /// 
+  ///
   /// Returns the calculated next notification date, or null if the notification
   /// is disabled. This can be used to update the notification model's scheduledNextDate field.
   Future<DateTime?> scheduleNotification({
@@ -143,27 +153,33 @@ class NotificationService {
     );
 
     // Get notification title and body
-    final title = notification.customTitle ?? _getNotificationTitle(notification.type, tankName);
+    final title =
+        notification.customTitle ??
+        _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
     // Determine the next notification date
     DateTime? nextDate;
-    if (useExactDateTime || notification.repeatFrequency == RepeatFrequency.none) {
+    if (useExactDateTime ||
+        notification.repeatFrequency == RepeatFrequency.none) {
       // Use the exact date/time specified in the notification for:
       // - useExactDateTime flag (user explicitly chose the specified time)
       // - Non-repeating notifications (getNextNotificationDate returns null for these)
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
       // Calculate based on activity logs, optionally using current time
-      nextDate = notification.getNextNotificationDateWithActivity(activityLogs, useCurrentTime: useCurrentTime);
+      nextDate = notification.getNextNotificationDateWithActivity(
+        activityLogs,
+        useCurrentTime: useCurrentTime,
+      );
     } else {
       // Fall back to standard calculation
       nextDate = notification.getNextNotificationDate();
     }
-    
+
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
-      
+
       await _notifications.zonedSchedule(
         id: notificationId,
         title: title,
@@ -174,7 +190,7 @@ class NotificationService {
         payload: '${tankId}_${notification.id}',
       );
     }
-    
+
     // Return the calculated next date so callers can update the model
     return nextDate;
   }
@@ -186,7 +202,10 @@ class NotificationService {
   }
 
   /// Cancel all notifications for a tank
-  Future<void> cancelTankNotifications(String tankId, List<TankNotification> notifications) async {
+  Future<void> cancelTankNotifications(
+    String tankId,
+    List<TankNotification> notifications,
+  ) async {
     for (final notification in notifications) {
       await cancelNotification(notification);
     }
@@ -198,7 +217,7 @@ class NotificationService {
   }
 
   /// Reschedule all tank notifications (useful after a notification fires)
-  /// 
+  ///
   /// If [activityLogs] is provided, notifications will be scheduled based on
   /// the last matching activity log for each notification type.
   Future<void> rescheduleTankNotifications({
@@ -209,7 +228,7 @@ class NotificationService {
   }) async {
     // Cancel existing notifications first
     await cancelTankNotifications(tankId, notifications);
-    
+
     // Schedule active notifications
     for (final notification in notifications) {
       if (notification.enabled) {
@@ -224,13 +243,13 @@ class NotificationService {
   }
 
   /// Reschedule notifications that match a specific activity type.
-  /// 
+  ///
   /// This is called when an activity is logged to update the schedule
   /// of matching notifications based on the new activity.
-  /// 
+  ///
   /// If [useCurrentTime] is true, the notification will use the time from the
   /// activity log instead of the original notification time.
-  /// 
+  ///
   /// Returns a list of updated notifications with their scheduledNextDate set.
   /// Callers should persist these updated notifications to the tank.
   Future<List<TankNotification>> rescheduleMatchingNotifications({
@@ -243,11 +262,17 @@ class NotificationService {
     bool useCurrentTime = false,
   }) async {
     // Filter to only enabled, repeating notifications that match the activity type
-    final matchingNotifications = notifications.where((notification) => 
-      notification.enabled && 
-      notification.repeatFrequency != RepeatFrequency.none &&
-      notification.matchesActivityLog(activityType, activityCustomCategory)
-    ).toList();
+    final matchingNotifications = notifications
+        .where(
+          (notification) =>
+              notification.enabled &&
+              notification.repeatFrequency != RepeatFrequency.none &&
+              notification.matchesActivityLog(
+                activityType,
+                activityCustomCategory,
+              ),
+        )
+        .toList();
 
     // Early return if no notifications match
     if (matchingNotifications.isEmpty) {
@@ -266,16 +291,18 @@ class NotificationService {
         activityLogs: activityLogs,
         useCurrentTime: useCurrentTime,
       );
-      
+
       // Create updated notification with the new scheduledNextDate
       if (nextDate != null) {
-        updatedNotifications.add(notification.copyWith(
-          scheduledNextDate: nextDate,
-          updatedAt: DateTime.now(),
-        ));
+        updatedNotifications.add(
+          notification.copyWith(
+            scheduledNextDate: nextDate,
+            updatedAt: DateTime.now(),
+          ),
+        );
       }
     }
-    
+
     return updatedNotifications;
   }
 
@@ -321,9 +348,12 @@ class NotificationService {
       await initialize();
     }
 
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    final androidEnabled = await androidPlugin?.areNotificationsEnabled() ?? false;
+    final androidPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final androidEnabled =
+        await androidPlugin?.areNotificationsEnabled() ?? false;
 
     return androidEnabled;
   }
@@ -378,4 +408,3 @@ class NotificationService {
     );
   }
 }
-

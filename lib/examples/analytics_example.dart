@@ -2,6 +2,7 @@
 // This is for documentation purposes only
 
 import 'package:flutter/material.dart';
+
 import '../mixins/analytics_mixin.dart';
 
 class ExampleScreen extends StatefulWidget {
@@ -17,13 +18,11 @@ class _ExampleScreenState extends State<ExampleScreen> with AnalyticsMixin {
 
   void _onButtonPressed() {
     // Log feature usage with the mixin helper
-    logFeatureUsed('example_button', parameters: {
-      'button_type': 'primary',
-    });
-    
+    logFeatureUsed('example_button', parameters: {'button_type': 'primary'});
+
     // Log user engagement
     logEngagement('button_click', content: 'example_action');
-    
+
     // Your button logic here...
   }
 
@@ -32,7 +31,7 @@ class _ExampleScreenState extends State<ExampleScreen> with AnalyticsMixin {
     // Screen time tracking is handled automatically by the mixin
     // - initState() records entry time
     // - dispose() calculates and logs time spent
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text('Example Screen')),
       body: Center(

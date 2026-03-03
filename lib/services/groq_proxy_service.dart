@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 /// Client for the Firebase `groqProxy` Cloud Function.
@@ -25,15 +26,18 @@ class GroqProxyService {
     Map<String, dynamic> data, {
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    final response = await http.post(
-      Uri.parse(_endpoint),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'data': data}),
-    ).timeout(timeout);
+    final response = await http
+        .post(
+          Uri.parse(_endpoint),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'data': data}),
+        )
+        .timeout(timeout);
 
     if (response.statusCode != 200) {
       throw Exception(
-          'Groq proxy error (${response.statusCode}): ${response.body}');
+        'Groq proxy error (${response.statusCode}): ${response.body}',
+      );
     }
 
     final Map<String, dynamic> decoded;
@@ -41,7 +45,8 @@ class GroqProxyService {
       decoded = jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
       throw Exception(
-          'Groq proxy returned non-JSON response (${response.statusCode})');
+        'Groq proxy returned non-JSON response (${response.statusCode})',
+      );
     }
     if (decoded.containsKey('error')) {
       final error = decoded['error'] as Map<String, dynamic>;
@@ -63,16 +68,12 @@ class GroqProxyService {
     required String systemPrompt,
     required List<Map<String, String>> messages,
     Duration timeout = const Duration(seconds: 30),
-  }) =>
-      _call(
-        {
-          'type': 'chat',
-          'model': model,
-          'systemPrompt': systemPrompt,
-          'messages': messages,
-        },
-        timeout: timeout,
-      );
+  }) => _call({
+    'type': 'chat',
+    'model': model,
+    'systemPrompt': systemPrompt,
+    'messages': messages,
+  }, timeout: timeout);
 
   /// Sends a vision (image + text) completion request via the server-side proxy.
   ///
@@ -86,17 +87,13 @@ class GroqProxyService {
     required String base64Image,
     required String mimeType,
     Duration timeout = const Duration(seconds: 70),
-  }) =>
-      _call(
-        {
-          'type': 'vision',
-          'model': model,
-          'prompt': prompt,
-          'base64Image': base64Image,
-          'mimeType': mimeType,
-        },
-        timeout: timeout,
-      );
+  }) => _call({
+    'type': 'vision',
+    'model': model,
+    'prompt': prompt,
+    'base64Image': base64Image,
+    'mimeType': mimeType,
+  }, timeout: timeout);
 
   /// Sends a single prompt to the model via the server-side proxy.
   ///
@@ -108,15 +105,11 @@ class GroqProxyService {
     required String model,
     required String prompt,
     Duration timeout = const Duration(seconds: 30),
-  }) =>
-      _call(
-        {
-          'type': 'chat',
-          'model': model,
-          'messages': [
-            {'role': 'user', 'content': prompt},
-          ],
-        },
-        timeout: timeout,
-      );
+  }) => _call({
+    'type': 'chat',
+    'model': model,
+    'messages': [
+      {'role': 'user', 'content': prompt},
+    ],
+  }, timeout: timeout);
 }

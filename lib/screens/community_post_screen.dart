@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
@@ -27,6 +28,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   bool _isSubmitting = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
+
   // Tracks which inhabitant chip indices are tapped-open.
   final Set<int> _expandedInhabitants = {};
 
@@ -34,12 +36,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   void initState() {
     super.initState();
     if (widget.post.imageUrl != null) {
-      _resolvedPostImageUrl =
-          resolveResizedStorageUrl(widget.post.imageUrl!);
+      _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
     if (widget.post.avatarUrl != null) {
-      _resolvedAvatarUrl =
-          resolveResizedStorageUrl(widget.post.avatarUrl!);
+      _resolvedAvatarUrl = resolveResizedStorageUrl(widget.post.avatarUrl!);
     }
   }
 
@@ -63,9 +63,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       if (comment != null) {
         _commentController.clear();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.communityCommentError)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.communityCommentError)));
       }
     }
   }
@@ -99,8 +99,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     if (confirmed != true) return;
 
     // Create a lightweight comment object just to pass userId
-    final commentsAsync =
-        ref.read(communityCommentsStreamProvider(widget.post.id));
+    final commentsAsync = ref.read(
+      communityCommentsStreamProvider(widget.post.id),
+    );
     final comments = commentsAsync.asData?.value ?? [];
     final comment = comments.firstWhere(
       (c) => c.id == commentId,
@@ -114,15 +115,14 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
-    final commentsAsync =
-        ref.watch(communityCommentsStreamProvider(widget.post.id));
+    final commentsAsync = ref.watch(
+      communityCommentsStreamProvider(widget.post.id),
+    );
     final isFounder = widget.post.isFounderPost;
     final isTankShowcase = widget.post.type == PostType.tankShowcase;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.communityPostDetail),
-      ),
+      appBar: AppBar(title: Text(l10n.communityPostDetail)),
       body: Column(
         children: [
           Expanded(
@@ -146,9 +146,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       // Title
                       Text(
                         widget.post.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
@@ -171,14 +169,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       ],
                       const SizedBox(height: 16),
                       Divider(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outlineVariant),
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                       Text(
                         l10n.communityComments,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
+                        style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -198,16 +193,17 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     if (comments.isEmpty) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Text(
                           l10n.communityNoComments,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       );
                     }
@@ -216,8 +212,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         return CommentTile(
                           comment: c,
                           currentUserId: currentUserId,
-                          onDelete: () =>
-                              _deleteComment(c.id, c.userId),
+                          onDelete: () => _deleteComment(c.id, c.userId),
                         );
                       }).toList(),
                     );
@@ -238,8 +233,12 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   /// with a gradient scrim and the author row overlaid at the bottom.
   /// For all other post types this is a plain 240 px cover image followed by
   /// the author row in the body section.
-  Widget _buildImageHeader(BuildContext context, AppLocalizations l10n,
-      bool isTankShowcase, bool isFounder) {
+  Widget _buildImageHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isTankShowcase,
+    bool isFounder,
+  ) {
     final theme = Theme.of(context);
     final height = isTankShowcase ? 320.0 : 240.0;
 
@@ -273,10 +272,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.7),
-                ],
+                colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 stops: const [0.4, 1.0],
@@ -307,7 +303,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                                 shadows: [
-                                  Shadow(blurRadius: 4, color: Colors.black54)
+                                  Shadow(blurRadius: 4, color: Colors.black54),
                                 ],
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -317,9 +313,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                             const SizedBox(width: 4),
                             Tooltip(
                               message: l10n.founderAquaristTitle,
-                              child: Icon(Icons.diamond,
-                                  size: 14,
-                                  color: AquaThemeColors.founderColor(context)),
+                              child: Icon(
+                                Icons.diamond,
+                                size: 14,
+                                color: AquaThemeColors.founderColor(context),
+                              ),
                             ),
                           ],
                         ],
@@ -330,7 +328,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                           color: Colors.white70,
                           fontSize: 12,
                           shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54)
+                            Shadow(blurRadius: 4, color: Colors.black54),
                           ],
                         ),
                       ),
@@ -347,7 +345,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   /// Standalone author row used for non-showcase posts (below the image).
   Widget _buildAuthorRow(
-      BuildContext context, AppLocalizations l10n, bool isFounder) {
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isFounder,
+  ) {
     return Row(
       children: [
         _buildAvatar(context),
@@ -361,10 +362,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                   Flexible(
                     child: Text(
                       widget.post.displayName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -372,9 +372,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     const SizedBox(width: 4),
                     Tooltip(
                       message: l10n.founderAquaristTitle,
-                      child: Icon(Icons.diamond,
-                          size: 14,
-                          color: AquaThemeColors.founderColor(context)),
+                      child: Icon(
+                        Icons.diamond,
+                        size: 14,
+                        color: AquaThemeColors.founderColor(context),
+                      ),
                     ),
                   ],
                 ],
@@ -382,7 +384,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               Text(
                 _formatDate(widget.post.createdAt),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -399,7 +402,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
         builder: (_, snap) => CircleAvatar(
           radius: 20,
           backgroundImage: CachedNetworkImageProvider(
-              snap.data ?? widget.post.avatarUrl!),
+            snap.data ?? widget.post.avatarUrl!,
+          ),
           backgroundColor: theme.colorScheme.primaryContainer,
         ),
       );
@@ -412,55 +416,88 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             ? widget.post.displayName[0].toUpperCase()
             : 'A',
         style: TextStyle(
-            color: theme.colorScheme.onPrimaryContainer,
-            fontWeight: FontWeight.bold),
+          color: theme.colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
   Widget _buildTankInfo(
-      BuildContext context, AppLocalizations l10n, Map<String, dynamic> info) {
+    BuildContext context,
+    AppLocalizations l10n,
+    Map<String, dynamic> info,
+  ) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
     // Map raw Firestore keys to icon + label pairs.
     final fields = <_TankField>[];
     if (info['name'] != null) {
-      fields.add(_TankField(Icons.water_drop_outlined, l10n.communityTankFieldName, '${info['name']}'));
+      fields.add(
+        _TankField(
+          Icons.water_drop_outlined,
+          l10n.communityTankFieldName,
+          '${info['name']}',
+        ),
+      );
     }
     if (info['type'] != null) {
-      fields.add(_TankField(Icons.category_outlined, l10n.communityTankFieldType, '${info['type']}'));
+      fields.add(
+        _TankField(
+          Icons.category_outlined,
+          l10n.communityTankFieldType,
+          '${info['type']}',
+        ),
+      );
     }
     if (info['sizeGallons'] != null) {
-      fields.add(_TankField(Icons.straighten, l10n.communityTankFieldSize, '${info['sizeGallons']} gal'));
+      fields.add(
+        _TankField(
+          Icons.straighten,
+          l10n.communityTankFieldSize,
+          '${info['sizeGallons']} gal',
+        ),
+      );
     } else if (info['sizeLiters'] != null) {
-      fields.add(_TankField(Icons.straighten, l10n.communityTankFieldSize, '${info['sizeLiters']} L'));
+      fields.add(
+        _TankField(
+          Icons.straighten,
+          l10n.communityTankFieldSize,
+          '${info['sizeLiters']} L',
+        ),
+      );
     }
 
     // Parse detailed inhabitant list (stored since the new post format).
     final rawList = info['inhabitantsList'];
     final List<Map<String, dynamic>> inhabitantsList = rawList is List
-        ? rawList
-            .whereType<Map<String, dynamic>>()
-            .toList()
+        ? rawList.whereType<Map<String, dynamic>>().toList()
         : [];
     final totalInhabitants = inhabitantsList.fold<int>(
-        0, (sum, inh) => sum + ((inh['quantity'] as int?) ?? 1));
+      0,
+      (sum, inh) => sum + ((inh['quantity'] as int?) ?? 1),
+    );
 
     // Fall back to simple count if no detailed list is available.
     if (inhabitantsList.isEmpty && info['inhabitants'] != null) {
-      fields.add(_TankField(Icons.set_meal_outlined, l10n.communityTankFieldInhabitants, '${info['inhabitants']}'));
+      fields.add(
+        _TankField(
+          Icons.set_meal_outlined,
+          l10n.communityTankFieldInhabitants,
+          '${info['inhabitants']}',
+        ),
+      );
     }
 
-    if (fields.isEmpty && inhabitantsList.isEmpty) return const SizedBox.shrink();
+    if (fields.isEmpty && inhabitantsList.isEmpty)
+      return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
         color: cs.secondaryContainer.withOpacity(0.45),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.secondary.withOpacity(0.25),
-        ),
+        border: Border.all(color: cs.secondary.withOpacity(0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,7 +553,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                   const SizedBox(width: 6),
                   // Total inhabitants count badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.secondary.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
@@ -539,8 +579,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                 spacing: 10,
                 runSpacing: 10,
                 alignment: WrapAlignment.center,
-                children: inhabitantsList.asMap().entries.map(
-                    (e) => _buildInhabitantChip(context, e.value, e.key)).toList(),
+                children: inhabitantsList
+                    .asMap()
+                    .entries
+                    .map((e) => _buildInhabitantChip(context, e.value, e.key))
+                    .toList(),
               ),
             ),
           ],
@@ -552,14 +595,17 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   /// Renders a compact avatar + name + quantity chip for one inhabitant.
   /// Tapping the chip toggles an expanded view that also shows the species name.
   Widget _buildInhabitantChip(
-      BuildContext context, Map<String, dynamic> inh, int index) {
+    BuildContext context,
+    Map<String, dynamic> inh,
+    int index,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final name = (inh['name'] as String?)?.isNotEmpty == true
         ? inh['name'] as String
         : (inh['fishUnit'] as String?)?.isNotEmpty == true
-            ? inh['fishUnit'] as String
-            : '?';
+        ? inh['fishUnit'] as String
+        : '?';
     final species = (inh['fishUnit'] as String?)?.isNotEmpty == true
         ? inh['fishUnit'] as String
         : null;
@@ -597,7 +643,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             children: [
               // Avatar
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(9),
+                ),
                 child: imageUrl != null
                     ? CachedNetworkImage(
                         imageUrl: imageUrl,
@@ -698,7 +746,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   }
 
   Widget _buildCommentBar(
-      BuildContext context, AppLocalizations l10n, String currentUserId) {
+    BuildContext context,
+    AppLocalizations l10n,
+    String currentUserId,
+  ) {
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.only(
@@ -727,7 +778,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 isDense: true,
               ),
               textInputAction: TextInputAction.send,
@@ -763,5 +816,6 @@ class _TankField {
   final IconData icon;
   final String label;
   final String value;
+
   const _TankField(this.icon, this.label, this.value);
 }

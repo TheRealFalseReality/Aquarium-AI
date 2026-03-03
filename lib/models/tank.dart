@@ -1,9 +1,10 @@
 import 'package:uuid/uuid.dart';
-import 'water_parameter.dart';
+
 import 'dosing_entry.dart';
-import 'tank_notification.dart';
 import 'notification_log.dart';
 import 'tank_note.dart';
+import 'tank_notification.dart';
+import 'water_parameter.dart';
 
 /// A user-created label for a tank.
 ///
@@ -17,9 +18,9 @@ class TankTag {
   const TankTag({required this.name, this.color});
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        if (color != null) 'color': color,
-      };
+    'name': name,
+    if (color != null) 'color': color,
+  };
 
   /// Accepts both the new object format `{"name":"…","color":…}` and the
   /// legacy plain-string format that was used before this class existed.
@@ -28,10 +29,7 @@ class TankTag {
       return TankTag(name: json);
     }
     final map = json as Map<String, dynamic>;
-    return TankTag(
-      name: map['name'] as String,
-      color: map['color'] as int?,
-    );
+    return TankTag(name: map['name'] as String, color: map['color'] as int?);
   }
 
   TankTag copyWith({String? name, int? color, bool clearColor = false}) {
@@ -102,9 +100,11 @@ class TankInhabitant {
   final String fishUnit; // Matches fish name from fishcompat.json
   final int quantity;
   final String? customImageUrl; // User-provided image URL
-  final String? customImagePath; // User-provided image file path (for local images)
+  final String?
+  customImagePath; // User-provided image file path (for local images)
   final DateTime? dateAdded; // Date when inhabitant was added to tank
-  final List<String> speciesTags; // Selected species tags for more granular identification
+  final List<String>
+  speciesTags; // Selected species tags for more granular identification
 
   TankInhabitant({
     required this.id,
@@ -125,7 +125,8 @@ class TankInhabitant {
       'quantity': quantity,
       'customImageUrl': customImageUrl,
       // Exclude customImagePath from backup to prevent restore errors
-      if (includeLocalPaths && customImagePath != null) 'customImagePath': customImagePath,
+      if (includeLocalPaths && customImagePath != null)
+        'customImagePath': customImagePath,
       'dateAdded': dateAdded?.toIso8601String(),
       'speciesTags': speciesTags,
     };
@@ -139,12 +140,12 @@ class TankInhabitant {
       quantity: json['quantity'] as int,
       customImageUrl: json['customImageUrl'] as String?,
       customImagePath: json['customImagePath'] as String?,
-      dateAdded: json['dateAdded'] != null 
+      dateAdded: json['dateAdded'] != null
           ? DateTime.parse(json['dateAdded'] as String)
           : null,
-      speciesTags: (json['speciesTags'] as List?)
-          ?.map((t) => t.toString())
-          .toList() ?? [],
+      speciesTags:
+          (json['speciesTags'] as List?)?.map((t) => t.toString()).toList() ??
+          [],
     );
   }
 
@@ -178,16 +179,18 @@ class Tank {
   final bool isReef; // Only relevant when type == 'marine'
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
-  final double? sizeLiters;  // Tank size in liters
+  final double? sizeLiters; // Tank size in liters
   final String? notes; // User notes about the tank
   final double? harmonyScore; // Cached harmony score (0.0 to 1.0)
   final String? calculationBreakdown; // Cached calculation breakdown string
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<TankPhoto> photos; // Photos of the tank (not fish)
-  final String? customBackgroundPhotoId; // ID of photo to use as card background
+  final String?
+  customBackgroundPhotoId; // ID of photo to use as card background
   final String? customIconPhotoId; // ID of photo to use as tank icon
-  final String? bannerPhotoId; // ID of photo to use as banner in tank details screen
+  final String?
+  bannerPhotoId; // ID of photo to use as banner in tank details screen
   final int? customIconCodePoint; // Custom icon code point for tank card
   final List<WaterParameter> waterParameters; // Water parameter logs
   final List<DosingEntry> dosingEntries; // Dosing diary entries
@@ -285,7 +288,9 @@ class Tank {
       'name': name,
       'type': type,
       'isReef': isReef,
-      'inhabitants': inhabitants.map((i) => i.toJson(includeLocalPaths: includeLocalPaths)).toList(),
+      'inhabitants': inhabitants
+          .map((i) => i.toJson(includeLocalPaths: includeLocalPaths))
+          .toList(),
       'sizeGallons': sizeGallons,
       'sizeLiters': sizeLiters,
       'notes': notes,
@@ -293,7 +298,9 @@ class Tank {
       'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      'photos': photos.map((p) => p.toJson(includeLocalPaths: includeLocalPaths)).toList(),
+      'photos': photos
+          .map((p) => p.toJson(includeLocalPaths: includeLocalPaths))
+          .toList(),
       'customBackgroundPhotoId': customBackgroundPhotoId,
       'customIconPhotoId': customIconPhotoId,
       'bannerPhotoId': bannerPhotoId,
@@ -323,31 +330,43 @@ class Tank {
       calculationBreakdown: json['calculationBreakdown'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      photos: (json['photos'] as List?)
-          ?.map((p) => TankPhoto.fromJson(p))
-          .toList() ?? [],
+      photos:
+          (json['photos'] as List?)
+              ?.map((p) => TankPhoto.fromJson(p))
+              .toList() ??
+          [],
       customBackgroundPhotoId: json['customBackgroundPhotoId'] as String?,
       customIconPhotoId: json['customIconPhotoId'] as String?,
       bannerPhotoId: json['bannerPhotoId'] as String?,
       customIconCodePoint: json['customIconCodePoint'] as int?,
-      waterParameters: (json['waterParameters'] as List?)
-          ?.map((wp) => WaterParameter.fromJson(wp))
-          .toList() ?? [],
-      dosingEntries: (json['dosingEntries'] as List?)
-          ?.map((de) => DosingEntry.fromJson(de))
-          .toList() ?? [],
-      notifications: (json['notifications'] as List?)
-          ?.map((n) => TankNotification.fromJson(n))
-          .toList() ?? [],
-      notificationLogs: (json['notificationLogs'] as List?)
-          ?.map((nl) => NotificationLog.fromJson(nl))
-          .toList() ?? [],
-      tankNotes: (json['tankNotes'] as List?)
-          ?.map((tn) => TankNote.fromJson(tn))
-          .toList() ?? [],
-      tags: (json['tags'] as List?)
-          ?.map((t) => TankTag.fromJson(t))
-          .toList() ?? [],
+      waterParameters:
+          (json['waterParameters'] as List?)
+              ?.map((wp) => WaterParameter.fromJson(wp))
+              .toList() ??
+          [],
+      dosingEntries:
+          (json['dosingEntries'] as List?)
+              ?.map((de) => DosingEntry.fromJson(de))
+              .toList() ??
+          [],
+      notifications:
+          (json['notifications'] as List?)
+              ?.map((n) => TankNotification.fromJson(n))
+              .toList() ??
+          [],
+      notificationLogs:
+          (json['notificationLogs'] as List?)
+              ?.map((nl) => NotificationLog.fromJson(nl))
+              .toList() ??
+          [],
+      tankNotes:
+          (json['tankNotes'] as List?)
+              ?.map((tn) => TankNote.fromJson(tn))
+              .toList() ??
+          [],
+      tags:
+          (json['tags'] as List?)?.map((t) => TankTag.fromJson(t)).toList() ??
+          [],
     );
   }
 
@@ -394,10 +413,18 @@ class Tank {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       photos: photos ?? this.photos,
-      customBackgroundPhotoId: clearCustomBackgroundPhotoId ? null : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
-      customIconPhotoId: clearCustomIconPhotoId ? null : (customIconPhotoId ?? this.customIconPhotoId),
-      bannerPhotoId: clearBannerPhotoId ? null : (bannerPhotoId ?? this.bannerPhotoId),
-      customIconCodePoint: clearCustomIconCodePoint ? null : (customIconCodePoint ?? this.customIconCodePoint),
+      customBackgroundPhotoId: clearCustomBackgroundPhotoId
+          ? null
+          : (customBackgroundPhotoId ?? this.customBackgroundPhotoId),
+      customIconPhotoId: clearCustomIconPhotoId
+          ? null
+          : (customIconPhotoId ?? this.customIconPhotoId),
+      bannerPhotoId: clearBannerPhotoId
+          ? null
+          : (bannerPhotoId ?? this.bannerPhotoId),
+      customIconCodePoint: clearCustomIconCodePoint
+          ? null
+          : (customIconCodePoint ?? this.customIconCodePoint),
       waterParameters: waterParameters ?? this.waterParameters,
       dosingEntries: dosingEntries ?? this.dosingEntries,
       notifications: notifications ?? this.notifications,

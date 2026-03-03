@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/analytics_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
   const AquaPiPromotionDialog({super.key});
@@ -23,13 +24,13 @@ class AquaPiPromotionDialog extends StatelessWidget {
   Future<void> _launchAquaPiStore() async {
     const url = 'https://www.capitalcityaquatics.com/store/p/aquapi-wmgdj';
     final Uri uri = Uri.parse(url);
-    
+
     // Log AquaPi promotion click
     AnalyticsService.logAppPromotion(
       action: 'aquapi_store_click',
       source: 'aquapi_promotion_dialog',
     );
-    
+
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (kDebugMode) {
         print('Could not launch $url');
@@ -43,11 +44,9 @@ class AquaPiPromotionDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       contentPadding: EdgeInsets.all(isSmallScreen ? 16 : 24),
       title: Row(
         children: [
@@ -55,10 +54,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
             padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  colorScheme.primary,
-                  colorScheme.secondary,
-                ],
+                colors: [colorScheme.primary, colorScheme.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -108,7 +104,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalLayout(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
+  Widget _buildVerticalLayout(
+    BuildContext context,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,9 +118,9 @@ class AquaPiPromotionDialog extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           l10n.aquaPiPromoDescription,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 12),
         _buildFeatureItem(
@@ -163,17 +163,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.3),
-            ),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.star,
-                color: colorScheme.primary,
-                size: 16,
-              ),
+              Icon(Icons.star, color: colorScheme.primary, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -192,7 +186,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontalLayout(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
+  Widget _buildHorizontalLayout(
+    BuildContext context,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,9 +205,9 @@ class AquaPiPromotionDialog extends StatelessWidget {
             children: [
               Text(
                 l10n.aquaPiPromoDescription,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
               _buildFeatureItem(
@@ -258,11 +256,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.star,
-                      color: colorScheme.primary,
-                      size: 18,
-                    ),
+                    Icon(Icons.star, color: colorScheme.primary, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -284,7 +278,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMobileActions(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
+  List<Widget> _buildMobileActions(
+    BuildContext context,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return [
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -340,7 +338,11 @@ class AquaPiPromotionDialog extends StatelessWidget {
     ];
   }
 
-  List<Widget> _buildDesktopActions(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
+  List<Widget> _buildDesktopActions(
+    BuildContext context,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return [
       TextButton(
         onPressed: () {
@@ -394,7 +396,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -438,4 +440,3 @@ class AquaPiPromotionDialog extends StatelessWidget {
     );
   }
 }
-

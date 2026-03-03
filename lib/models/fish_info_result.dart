@@ -63,10 +63,12 @@ class FishInfoEntry {
             ? json['care'] as Map<String, dynamic>
             : <String, dynamic>{},
       ),
-      compatibleTankMates:
-          List<String>.from(json['compatibleTankMates'] as List? ?? []),
-      incompatibleSpecies:
-          List<String>.from(json['incompatibleSpecies'] as List? ?? []),
+      compatibleTankMates: List<String>.from(
+        json['compatibleTankMates'] as List? ?? [],
+      ),
+      incompatibleSpecies: List<String>.from(
+        json['incompatibleSpecies'] as List? ?? [],
+      ),
     );
   }
 

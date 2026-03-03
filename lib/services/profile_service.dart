@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import '../models/user_profile.dart';
+
 import '../models/tank.dart';
+import '../models/user_profile.dart';
 
 class ProfileService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -37,8 +39,7 @@ class ProfileService {
   /// Fetch a profile once (returns null if not found).
   static Future<UserProfile?> getProfile(String uid) async {
     try {
-      final snap =
-          await _firestore.collection(_usersCollection).doc(uid).get();
+      final snap = await _firestore.collection(_usersCollection).doc(uid).get();
       return snap.exists ? UserProfile.fromFirestore(snap) : null;
     } catch (e) {
       if (kDebugMode) debugPrint('ProfileService getProfile error: $e');
@@ -79,26 +80,26 @@ class ProfileService {
     if (user == null) return;
     try {
       final summaries = tanks
-          .map((t) => ProfileTankSummary(
-                id: t.id,
-                name: t.name,
-                type: t.type,
-                isReef: t.isReef,
-                sizeGallons: t.sizeGallons,
-                sizeLiters: t.sizeLiters,
-                inhabitantCount: t.inhabitants
-                    .fold(0, (acc, i) => acc + i.quantity),
-                customIconCodePoint: t.customIconCodePoint,
-              ))
+          .map(
+            (t) => ProfileTankSummary(
+              id: t.id,
+              name: t.name,
+              type: t.type,
+              isReef: t.isReef,
+              sizeGallons: t.sizeGallons,
+              sizeLiters: t.sizeLiters,
+              inhabitantCount: t.inhabitants.fold(
+                0,
+                (acc, i) => acc + i.quantity,
+              ),
+              customIconCodePoint: t.customIconCodePoint,
+            ),
+          )
           .toList();
 
-      final totalFish =
-          summaries.fold(0, (acc, s) => acc + s.inhabitantCount);
+      final totalFish = summaries.fold(0, (acc, s) => acc + s.inhabitantCount);
 
-      await _firestore
-          .collection(_usersCollection)
-          .doc(user.uid)
-          .set({
+      await _firestore.collection(_usersCollection).doc(user.uid).set({
         'tankCount': tanks.length,
         'totalFishCount': totalFish,
         'tanks': summaries.map((s) => s.toMap()).toList(),
@@ -125,18 +126,16 @@ class ProfileService {
       final fileName = file.uri.pathSegments.last;
       final dotIndex = fileName.lastIndexOf('.');
       final ext = dotIndex >= 0 ? fileName.substring(dotIndex + 1) : 'jpg';
-      final uploadName =
-          'avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
-      final ref = _storage
-          .ref()
-          .child('profile_avatars/${user.uid}/$uploadName');
+      final uploadName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final ref = _storage.ref().child(
+        'profile_avatars/${user.uid}/$uploadName',
+      );
       final uploadTask = await ref.putFile(file);
       final url = await uploadTask.ref.getDownloadURL();
       // Persist the new avatar URL in the Firestore profile document
-      await _firestore
-          .collection(_usersCollection)
-          .doc(user.uid)
-          .set({'avatarUrl': url}, SetOptions(merge: true));
+      await _firestore.collection(_usersCollection).doc(user.uid).set({
+        'avatarUrl': url,
+      }, SetOptions(merge: true));
       return url;
     } catch (e) {
       if (kDebugMode) debugPrint('ProfileService uploadAvatar error: $e');
@@ -161,8 +160,11 @@ class ProfileService {
       buf.writeln(profile.bio);
     }
     buf.writeln(
-        'Experience: ${_levelLabel(profile.experienceLevel)} (${profile.yearsOfExperience} yr${profile.yearsOfExperience == 1 ? '' : 's'})');
-    buf.writeln('Tanks: ${profile.tankCount}  •  Fish: ${profile.totalFishCount}');
+      'Experience: ${_levelLabel(profile.experienceLevel)} (${profile.yearsOfExperience} yr${profile.yearsOfExperience == 1 ? '' : 's'})',
+    );
+    buf.writeln(
+      'Tanks: ${profile.tankCount}  •  Fish: ${profile.totalFishCount}',
+    );
     if (profile.location != null && profile.location!.isNotEmpty) {
       buf.writeln('📍 ${profile.location}');
     }

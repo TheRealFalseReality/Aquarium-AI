@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -36,11 +36,12 @@ class AuthService {
   ///
   /// Returns the signed-in [User] on success, or null on failure.
   /// Throws [FirebaseAuthException] so callers can show user-friendly messages.
-  static Future<User?> signInWithEmail(
-      String email, String password) async {
+  static Future<User?> signInWithEmail(String email, String password) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
-          email: email.trim(), password: password);
+        email: email.trim(),
+        password: password,
+      );
       final user = credential.user;
       if (user != null) {
         await _ensureUserDocument(user);
@@ -60,12 +61,17 @@ class AuthService {
   /// that the user's community activity is preserved. Falls back to plain
   /// createUserWithEmailAndPassword if linking fails.
   static Future<User?> signUpWithEmail(
-      String email, String password, {String? displayName}) async {
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
     try {
       User? user;
       final current = _auth.currentUser;
-      final credential =
-          EmailAuthProvider.credential(email: email.trim(), password: password);
+      final credential = EmailAuthProvider.credential(
+        email: email.trim(),
+        password: password,
+      );
 
       if (current != null && current.isAnonymous) {
         // Try to upgrade the anonymous account
@@ -77,7 +83,9 @@ class AuthService {
               e.code == 'credential-already-in-use') {
             // Fall back: sign in to the existing account
             final cred = await _auth.signInWithEmailAndPassword(
-                email: email.trim(), password: password);
+              email: email.trim(),
+              password: password,
+            );
             user = cred.user;
           } else {
             rethrow;
@@ -85,7 +93,9 @@ class AuthService {
         }
       } else {
         final cred = await _auth.createUserWithEmailAndPassword(
-            email: email.trim(), password: password);
+          email: email.trim(),
+          password: password,
+        );
         user = cred.user;
       }
 
@@ -161,8 +171,7 @@ class AuthService {
         } on FirebaseAuthException catch (e) {
           if (e.code == 'credential-already-in-use' ||
               e.code == 'account-exists-with-different-credential') {
-            final cred =
-                await _auth.signInWithCredential(credential);
+            final cred = await _auth.signInWithCredential(credential);
             user = cred.user;
           } else {
             rethrow;
@@ -296,8 +305,9 @@ class AuthService {
         // Only update isAnonymous if it has changed (avoids unnecessary write)
         final storedAnon = snapshot.data()?['isAnonymous'] as bool?;
         if (storedAnon != user.isAnonymous) {
-          await ref.set({'isAnonymous': user.isAnonymous},
-              SetOptions(merge: true));
+          await ref.set({
+            'isAnonymous': user.isAnonymous,
+          }, SetOptions(merge: true));
         }
       }
     } catch (e) {
@@ -309,7 +319,9 @@ class AuthService {
 
   /// Update fields in the user's Firestore document.
   static Future<void> _updateUserDocument(
-      String uid, Map<String, dynamic> data) async {
+    String uid,
+    Map<String, dynamic> data,
+  ) async {
     try {
       await _firestore
           .collection('users')

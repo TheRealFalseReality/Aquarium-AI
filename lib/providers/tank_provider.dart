@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -7,12 +9,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
-import 'species_tags_provider.dart';
 import 'app_settings_provider.dart';
+import 'species_tags_provider.dart';
 import 'tank_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
@@ -25,11 +27,7 @@ class TankState {
   final bool isLoading;
   final String? error;
 
-  TankState({
-    this.tanks = const [],
-    this.isLoading = false,
-    this.error,
-  });
+  TankState({this.tanks = const [], this.isLoading = false, this.error});
 
   TankState copyWith({
     List<Tank>? tanks,
@@ -57,10 +55,12 @@ class TankNotifier extends StateNotifier<TankState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final tanksJson = prefs.getString(_tanksKey);
-      
+
       if (tanksJson != null) {
         final tanksList = json.decode(tanksJson) as List;
-        final tanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+        final tanks = tanksList
+            .map((tankData) => Tank.fromJson(tankData))
+            .toList();
         state = state.copyWith(tanks: tanks, isLoading: false);
       } else {
         state = state.copyWith(tanks: [], isLoading: false);
@@ -76,7 +76,9 @@ class TankNotifier extends StateNotifier<TankState> {
   Future<void> _saveTanks() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final tanksJson = json.encode(state.tanks.map((tank) => tank.toJson()).toList());
+      final tanksJson = json.encode(
+        state.tanks.map((tank) => tank.toJson()).toList(),
+      );
       await prefs.setString(_tanksKey, tanksJson);
       // Keep the global TankTag registry in sync with the current tanks.
       await _ref.read(tankTagsProvider.notifier).syncFromTanks(state.tanks);
@@ -87,25 +89,21 @@ class TankNotifier extends StateNotifier<TankState> {
 
   Future<void> addTank(Tank tank) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
       final updatedTanks = [...state.tanks, tank];
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
-      
+
       // Log tank creation
       AnalyticsService.logTankAction(
         action: 'tank_created',
         tankType: tank.type,
         tankSize: tank.sizeGallons?.round(),
       );
-      
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to add tank: $e',
-      );
-      
+      state = state.copyWith(isLoading: false, error: 'Failed to add tank: $e');
+
       AnalyticsService.logError(
         errorType: 'tank_creation_error',
         errorMessage: e.toString(),
@@ -116,14 +114,14 @@ class TankNotifier extends StateNotifier<TankState> {
 
   Future<void> updateTank(Tank updatedTank) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
       final updatedTanks = state.tanks.map((tank) {
-        return tank.id == updatedTank.id 
+        return tank.id == updatedTank.id
             ? updatedTank.copyWith(updatedAt: DateTime.now())
             : tank;
       }).toList();
-      
+
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
     } catch (e) {
@@ -136,26 +134,27 @@ class TankNotifier extends StateNotifier<TankState> {
 
   Future<void> deleteTank(String tankId) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
       final tankToDelete = state.tanks.firstWhere((tank) => tank.id == tankId);
-      final updatedTanks = state.tanks.where((tank) => tank.id != tankId).toList();
+      final updatedTanks = state.tanks
+          .where((tank) => tank.id != tankId)
+          .toList();
       state = state.copyWith(tanks: updatedTanks, isLoading: false);
       await _saveTanks();
-      
+
       // Log tank deletion
       AnalyticsService.logTankAction(
         action: 'tank_deleted',
         tankType: tankToDelete.type,
         tankSize: tankToDelete.sizeGallons?.round(),
       );
-      
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to delete tank: $e',
       );
-      
+
       AnalyticsService.logError(
         errorType: 'tank_deletion_error',
         errorMessage: e.toString(),
@@ -197,7 +196,8 @@ class TankNotifier extends StateNotifier<TankState> {
 
       // Get reschedule preferences for backup
       final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
-      final reschedulePreferences = await appSettingsNotifier.exportReschedulePreferences();
+      final reschedulePreferences = await appSettingsNotifier
+          .exportReschedulePreferences();
 
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
@@ -208,7 +208,9 @@ class TankNotifier extends StateNotifier<TankState> {
         'appName': 'Aquarium AI',
         'exportDate': DateTime.now().toIso8601String(),
         'tankCount': state.tanks.length,
-        'tanks': state.tanks.map((tank) => tank.toJson(includeLocalPaths: false)).toList(),
+        'tanks': state.tanks
+            .map((tank) => tank.toJson(includeLocalPaths: false))
+            .toList(),
         'speciesTags': speciesTags,
         'tankTags': tankTags,
         'reschedulePreferences': reschedulePreferences,
@@ -216,20 +218,23 @@ class TankNotifier extends StateNotifier<TankState> {
 
       // Convert to formatted JSON
       final jsonString = const JsonEncoder.withIndent('  ').convert(backupData);
-      
+
       // Convert string to bytes for mobile platforms
       final bytes = Uint8List.fromList(utf8.encode(jsonString));
 
       // Create filename with timestamp
-      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
+      final timestamp = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .split('.')[0];
       final fileName = 'aquarium_ai_backup_$timestamp.json';
 
       String? outputPath;
-      
+
       if (kIsWeb) {
         // On web, trigger direct browser download
         downloadFile(bytes, fileName);
-        
+
         // For web, we return the filename since there's no file path
         outputPath = fileName;
       } else {
@@ -245,13 +250,13 @@ class TankNotifier extends StateNotifier<TankState> {
 
       if (outputPath != null) {
         state = state.copyWith(isLoading: false);
-        
+
         // Log successful backup
         AnalyticsService.logTankAction(
           action: 'backup_success',
           tankSize: state.tanks.length,
         );
-        
+
         // Log feature usage
         AnalyticsService.logFeatureUsed(
           featureName: 'tank_backup',
@@ -261,18 +266,18 @@ class TankNotifier extends StateNotifier<TankState> {
             'file_size_kb': (bytes.length / 1024).round(),
           },
         );
-        
+
         return outputPath;
       } else {
         // User cancelled
         state = state.copyWith(isLoading: false);
-        
+
         // Log backup cancellation
         AnalyticsService.logTankAction(
           action: 'backup_cancelled',
           tankSize: state.tanks.length,
         );
-        
+
         return null;
       }
     } catch (e) {
@@ -280,19 +285,19 @@ class TankNotifier extends StateNotifier<TankState> {
         isLoading: false,
         error: 'Failed to export tanks: $e',
       );
-      
+
       // Log backup failure
       AnalyticsService.logTankAction(
         action: 'backup_failed',
         tankSize: state.tanks.length,
       );
-      
+
       AnalyticsService.logError(
         errorType: 'backup_error',
         errorMessage: e.toString(),
         screen: 'tank_management',
       );
-      
+
       return null;
     }
   }
@@ -316,13 +321,13 @@ class TankNotifier extends StateNotifier<TankState> {
 
       if (result == null || result.files.isEmpty) {
         state = state.copyWith(isLoading: false);
-        
+
         // Log restore cancellation
         AnalyticsService.logTankAction(
           action: 'restore_cancelled',
           tankSize: state.tanks.length,
         );
-        
+
         return false;
       }
 
@@ -349,17 +354,21 @@ class TankNotifier extends StateNotifier<TankState> {
       final backupData = json.decode(jsonString) as Map<String, dynamic>;
 
       // Validate backup format
-      if (!backupData.containsKey('tanks') || !backupData.containsKey('version')) {
+      if (!backupData.containsKey('tanks') ||
+          !backupData.containsKey('version')) {
         throw const FormatException('Invalid backup file format');
       }
 
       // Parse tanks
       final tanksList = backupData['tanks'] as List;
-      final importedTanks = tanksList.map((tankData) => Tank.fromJson(tankData)).toList();
+      final importedTanks = tanksList
+          .map((tankData) => Tank.fromJson(tankData))
+          .toList();
 
       // Restore species tags if present in backup
       if (backupData.containsKey('speciesTags')) {
-        final speciesTagsData = backupData['speciesTags'] as Map<String, dynamic>;
+        final speciesTagsData =
+            backupData['speciesTags'] as Map<String, dynamic>;
         final speciesTagsMap = speciesTagsData.map(
           (key, value) => MapEntry(key, List<String>.from(value)),
         );
@@ -370,24 +379,28 @@ class TankNotifier extends StateNotifier<TankState> {
       // Restore global tank tag library if present in backup
       if (backupData.containsKey('tankTags')) {
         final tankTagsList = backupData['tankTags'] as List;
-        final restoredTankTags =
-            tankTagsList.map((e) => TankTag.fromJson(e)).toList();
+        final restoredTankTags = tankTagsList
+            .map((e) => TankTag.fromJson(e))
+            .toList();
         final tankTagsNotifier = _ref.read(tankTagsProvider.notifier);
         await tankTagsNotifier.importTags(restoredTankTags);
       }
 
       // Restore reschedule preferences if present in backup
       if (backupData.containsKey('reschedulePreferences')) {
-        final rescheduleData = backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final rescheduleData =
+            backupData['reschedulePreferences'] as Map<String, dynamic>;
         final reschedulePreferences = rescheduleData.map(
           (key, value) => MapEntry(key, value as int),
         );
         final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
-        await appSettingsNotifier.importReschedulePreferences(reschedulePreferences);
+        await appSettingsNotifier.importReschedulePreferences(
+          reschedulePreferences,
+        );
       }
 
       final previousTankCount = state.tanks.length;
-      
+
       // For now, replace all tanks (we could add merge options later)
       state = state.copyWith(tanks: importedTanks, isLoading: false);
       await _saveTanks();
@@ -397,7 +410,7 @@ class TankNotifier extends StateNotifier<TankState> {
         action: 'restore_success',
         tankSize: importedTanks.length,
       );
-      
+
       // Log feature usage with detailed metrics
       AnalyticsService.logFeatureUsed(
         featureName: 'tank_restore',
@@ -416,19 +429,19 @@ class TankNotifier extends StateNotifier<TankState> {
         isLoading: false,
         error: 'Failed to import tanks: $e',
       );
-      
+
       // Log restore failure
       AnalyticsService.logTankAction(
         action: 'restore_failed',
         tankSize: state.tanks.length,
       );
-      
+
       AnalyticsService.logError(
         errorType: 'restore_error',
         errorMessage: e.toString(),
         screen: 'tank_management',
       );
-      
+
       return false;
     }
   }
@@ -483,10 +496,9 @@ class TankNotifier extends StateNotifier<TankState> {
         final tempDir = await getTemporaryDirectory();
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(bytes);
-        final result = await Share.shareXFiles(
-          [XFile(tempFile.path, mimeType: 'application/json', name: fileName)],
-          subject: 'Aquarium AI – Tank Share: ${tank.name}',
-        );
+        final result = await Share.shareXFiles([
+          XFile(tempFile.path, mimeType: 'application/json', name: fileName),
+        ], subject: 'Aquarium AI – Tank Share: ${tank.name}');
         AnalyticsService.logFeatureUsed(
           featureName: 'tank_share_export',
           parameters: {'platform': 'mobile', 'status': result.status.name},

@@ -57,7 +57,10 @@ class AnalyticsService {
   }
 
   // Helper method to safely execute analytics calls
-  static Future<void> _safeAnalyticsCall(Future<void> Function() analyticsCall, String eventName) async {
+  static Future<void> _safeAnalyticsCall(
+    Future<void> Function() analyticsCall,
+    String eventName,
+  ) async {
     try {
       await analyticsCall();
     } catch (e) {
@@ -76,10 +79,10 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Screen view - $screenName');
     }
-    
+
     // Update current screen tracker
     setCurrentScreen(screenName);
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logScreenView(
         screenName: screenName,
@@ -97,7 +100,7 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Navigation from $from to $to');
     }
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
         name: 'navigation',
@@ -118,14 +121,11 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Feature used - $featureName');
     }
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
         name: 'feature_used',
-        parameters: {
-          'feature_name': featureName,
-          ...?parameters,
-        },
+        parameters: {'feature_name': featureName, ...?parameters},
       );
     }, 'logFeatureUsed');
   }
@@ -140,7 +140,7 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: AI interaction - $interactionType');
     }
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
         name: 'ai_interaction',
@@ -162,13 +162,10 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Calculator used - $calculatorType');
     }
-    
+
     await _analytics.logEvent(
       name: 'calculator_used',
-      parameters: {
-        'calculator_type': calculatorType,
-        ...?inputData,
-      },
+      parameters: {'calculator_type': calculatorType, ...?inputData},
     );
   }
 
@@ -181,19 +178,19 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: User engagement - $engagementType');
     }
-    
+
     await _safeAnalyticsCall(() async {
-      final parameters = <String, Object>{
-        'engagement_type': engagementType,
-      };
-      
+      final parameters = <String, Object>{'engagement_type': engagementType};
+
       // Truncate content if too long to prevent Firebase parameter issues
       if (content != null) {
-        final truncatedContent = content.length > 100 ? content.substring(0, 100) : content;
+        final truncatedContent = content.length > 100
+            ? content.substring(0, 100)
+            : content;
         parameters['content'] = truncatedContent;
       }
       if (duration != null) parameters['duration_seconds'] = duration;
-      
+
       await _analytics.logEvent(
         name: 'app_user_engagement',
         parameters: parameters,
@@ -210,18 +207,15 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Settings change - $settingName to $newValue');
     }
-    
+
     final parameters = <String, Object>{
       'setting_name': settingName,
       'new_value': newValue,
     };
-    
+
     if (oldValue != null) parameters['old_value'] = oldValue;
-    
-    await _analytics.logEvent(
-      name: 'settings_change',
-      parameters: parameters,
-    );
+
+    await _analytics.logEvent(name: 'settings_change', parameters: parameters);
   }
 
   // Photo analysis
@@ -233,19 +227,14 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Photo analysis - $analysisType');
     }
-    
-    final parameters = <String, Object>{
-      'analysis_type': analysisType,
-    };
-    
+
+    final parameters = <String, Object>{'analysis_type': analysisType};
+
     if (success != null) parameters['success'] = success ? 'true' : 'false';
     if (errorType != null) parameters['error_type'] = errorType;
-    
+
     await _safeAnalyticsCall(() async {
-      await _analytics.logEvent(
-        name: 'photo_analysis',
-        parameters: parameters,
-      );
+      await _analytics.logEvent(name: 'photo_analysis', parameters: parameters);
     }, 'logPhotoAnalysis');
   }
 
@@ -258,18 +247,13 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Tank action - $action');
     }
-    
-    final parameters = <String, Object>{
-      'action': action,
-    };
-    
+
+    final parameters = <String, Object>{'action': action};
+
     if (tankType != null) parameters['tank_type'] = tankType;
     if (tankSize != null) parameters['tank_size'] = tankSize;
-    
-    await _analytics.logEvent(
-      name: 'tank_action',
-      parameters: parameters,
-    );
+
+    await _analytics.logEvent(name: 'tank_action', parameters: parameters);
   }
 
   // App promotion
@@ -280,13 +264,10 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: App promotion - $action');
     }
-    
+
     await _analytics.logEvent(
       name: 'app_promotion',
-      parameters: {
-        'action': action,
-        'source': source ?? 'unknown',
-      },
+      parameters: {'action': action, 'source': source ?? 'unknown'},
     );
   }
 
@@ -298,13 +279,10 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Time spent on $screen - ${durationSeconds}s');
     }
-    
+
     await _analytics.logEvent(
       name: 'time_spent',
-      parameters: {
-        'screen': screen,
-        'duration_seconds': durationSeconds,
-      },
+      parameters: {'screen': screen, 'duration_seconds': durationSeconds},
     );
   }
 
@@ -313,13 +291,11 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Session start');
     }
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
         name: 'app_session_start',
-        parameters: {
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        },
+        parameters: {'timestamp': DateTime.now().millisecondsSinceEpoch},
       );
     }, 'logSessionStart');
   }
@@ -328,7 +304,7 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Session end - ${durationSeconds}s');
     }
-    
+
     await _safeAnalyticsCall(() async {
       await _analytics.logEvent(
         name: 'app_session_end',
@@ -349,19 +325,14 @@ class AnalyticsService {
     if (kDebugMode) {
       print('Analytics: Error - $errorType');
     }
-    
-    final parameters = <String, Object>{
-      'error_type': errorType,
-    };
-    
+
+    final parameters = <String, Object>{'error_type': errorType};
+
     if (errorMessage != null) parameters['error_message'] = errorMessage;
     if (screen != null) parameters['screen'] = screen;
-    
+
     await _safeAnalyticsCall(() async {
-      await _analytics.logEvent(
-        name: 'app_error',
-        parameters: parameters,
-      );
+      await _analytics.logEvent(name: 'app_error', parameters: parameters);
     }, 'logError');
   }
 }

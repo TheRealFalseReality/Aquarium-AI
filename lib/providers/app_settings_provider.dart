@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Prefix used to store the remembered reschedule option per notification in SharedPreferences
-const String rememberedRescheduleOptionKeyPrefix = 'remembered_reschedule_option_';
+const String rememberedRescheduleOptionKeyPrefix =
+    'remembered_reschedule_option_';
 
 /// Get the SharedPreferences key for a specific notification's remembered reschedule option
 String getRememberedRescheduleOptionKey(String notificationId) {
@@ -22,9 +23,12 @@ class AppSettingsState {
   final String? aiResponseLanguage;
   final bool isLoading;
   final bool hasRememberedRescheduleOptions;
-  final bool welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
-  final bool tankGridLayout; // Controls grid (true) vs list (false) on tank management screen
-  final bool debugHideAds; // Debug-only: hides ads and references to removing them
+  final bool
+  welcomeGridLayout; // Controls grid (true) vs list (false) on welcome screen
+  final bool
+  tankGridLayout; // Controls grid (true) vs list (false) on tank management screen
+  final bool
+  debugHideAds; // Debug-only: hides ads and references to removing them
   final bool tankHideIcon;
   final bool tankHideMetrics;
   final bool tankHideInhabitants;
@@ -56,12 +60,14 @@ class AppSettingsState {
 // Notifier for app settings
 class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   AppSettingsNotifier()
-      : super(AppSettingsState(
+    : super(
+        AppSettingsState(
           showStockingButton: true, // Default to true (show button)
           enableAI: true, // Default to true (AI enabled)
           welcomeGridLayout: false, // Default to list layout
           tankGridLayout: false, // Default to list layout for tanks
-        )) {
+        ),
+      ) {
     _loadSettings();
   }
 
@@ -69,15 +75,21 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final prefs = await SharedPreferences.getInstance();
     final showStockingButton = prefs.getBool('showStockingButton') ?? true;
     final enableAI = prefs.getBool('enableAI') ?? true; // Default to true
-    final localeCode = prefs.getString('localeCode'); // null means system default
+    final localeCode = prefs.getString(
+      'localeCode',
+    ); // null means system default
     // aiResponseLanguage: not present in prefs = null (follow app language)
     // stored as empty string = no instruction
     final aiResponseLanguage = prefs.containsKey('aiResponseLanguage')
         ? prefs.getString('aiResponseLanguage')
         : null;
-    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
-    final welcomeGridLayout = prefs.getBool('welcomeGridLayout') ?? false; // Default to list
-    final tankGridLayout = prefs.getBool('tankGridLayout') ?? false; // Default to list
+    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(
+      prefs,
+    );
+    final welcomeGridLayout =
+        prefs.getBool('welcomeGridLayout') ?? false; // Default to list
+    final tankGridLayout =
+        prefs.getBool('tankGridLayout') ?? false; // Default to list
     final debugHideAds = prefs.getBool('debugHideAds') ?? kDebugMode;
     final tankHideIcon = prefs.getBool('tankHideIcon') ?? false;
     final tankHideMetrics = prefs.getBool('tankHideMetrics') ?? false;
@@ -110,7 +122,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   /// Check if any remembered reschedule options exist
   bool _hasAnyRememberedRescheduleOptions(SharedPreferences prefs) {
     final keys = prefs.getKeys();
-    return keys.any((key) => key.startsWith(rememberedRescheduleOptionKeyPrefix));
+    return keys.any(
+      (key) => key.startsWith(rememberedRescheduleOptionKeyPrefix),
+    );
   }
 
   Future<void> setShowStockingButton(bool value) async {
@@ -452,7 +466,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   Future<void> clearAllRememberedRescheduleOptions() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().toList();
-    
+
     // Remove all keys that start with the prefix
     for (final key in keys) {
       if (key.startsWith(rememberedRescheduleOptionKeyPrefix)) {
@@ -483,7 +497,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   /// Refresh the state to check if any remembered reschedule options exist
   Future<void> refreshRememberedRescheduleOptions() async {
     final prefs = await SharedPreferences.getInstance();
-    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(prefs);
+    final hasRememberedRescheduleOptions = _hasAnyRememberedRescheduleOptions(
+      prefs,
+    );
 
     state = AppSettingsState(
       showStockingButton: state.showStockingButton,
@@ -510,17 +526,19 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   Future<Map<String, int>> exportReschedulePreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final preferences = <String, int>{};
-    
+
     for (final key in prefs.getKeys()) {
       if (key.startsWith(rememberedRescheduleOptionKeyPrefix)) {
-        final notificationId = key.substring(rememberedRescheduleOptionKeyPrefix.length);
+        final notificationId = key.substring(
+          rememberedRescheduleOptionKeyPrefix.length,
+        );
         final value = prefs.getInt(key);
         if (value != null) {
           preferences[notificationId] = value;
         }
       }
     }
-    
+
     return preferences;
   }
 
@@ -528,7 +546,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   /// Takes a map of notification ID to reschedule option index
   Future<void> importReschedulePreferences(Map<String, int> preferences) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Clear existing preferences first
     final keys = prefs.getKeys().toList();
     for (final key in keys) {
@@ -536,13 +554,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
         await prefs.remove(key);
       }
     }
-    
+
     // Import new preferences
     for (final entry in preferences.entries) {
       final key = getRememberedRescheduleOptionKey(entry.key);
       await prefs.setInt(key, entry.value);
     }
-    
+
     // Update state
     state = AppSettingsState(
       showStockingButton: state.showStockingButton,
@@ -566,7 +584,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
 }
 
 // Provider for app settings
-final appSettingsProvider = StateNotifierProvider<AppSettingsNotifier, AppSettingsState>(
-  (ref) => AppSettingsNotifier(),
-);
-
+final appSettingsProvider =
+    StateNotifierProvider<AppSettingsNotifier, AppSettingsState>(
+      (ref) => AppSettingsNotifier(),
+    );

@@ -1,8 +1,8 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import '../constants.dart';
 
+import '../constants.dart';
 
 /// Thin wrapper around [FirebaseRemoteConfig] that provides server-side
 /// control over the in-app free AI (developer Groq key) feature.
@@ -27,16 +27,20 @@ class RemoteConfigService {
         RemoteConfigKeys.freeAiEnabled: true,
         RemoteConfigKeys.devMaxRequestsPerMinute: rcDefaultMaxRequestsPerMinute,
         RemoteConfigKeys.devMaxRequestsPerDay: rcDefaultMaxRequestsPerDay,
-        RemoteConfigKeys.devMaxPhotoAnalysesPerDay: rcDefaultMaxPhotoAnalysesPerDay,
-        RemoteConfigKeys.devDefaultChatHistoryLimit: rcDefaultFreeTierChatHistoryLimit,
+        RemoteConfigKeys.devMaxPhotoAnalysesPerDay:
+            rcDefaultMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.devDefaultChatHistoryLimit:
+            rcDefaultFreeTierChatHistoryLimit,
         RemoteConfigKeys.defaultGeminiModel: rcDefaultGeminiModel,
         RemoteConfigKeys.defaultGeminiImageModel: rcDefaultGeminiImageModel,
         RemoteConfigKeys.defaultOpenAIModel: rcDefaultOpenAIModel,
         RemoteConfigKeys.defaultOpenAIImageModel: rcDefaultOpenAIImageModel,
         RemoteConfigKeys.defaultGroqModel: rcDefaultGroqModel,
         RemoteConfigKeys.defaultGroqImageModel: rcDefaultGroqImageModel,
-        RemoteConfigKeys.aquapiOriginalImageUrl: rcDefaultAquapiOriginalImageUrl,
-        RemoteConfigKeys.aquapiEssentialImageUrl: rcDefaultAquapiEssentialImageUrl,
+        RemoteConfigKeys.aquapiOriginalImageUrl:
+            rcDefaultAquapiOriginalImageUrl,
+        RemoteConfigKeys.aquapiEssentialImageUrl:
+            rcDefaultAquapiEssentialImageUrl,
         RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
@@ -46,20 +50,29 @@ class RemoteConfigService {
         RemoteConfigKeys.changelogFr: rcDefaultChangelogFr,
         RemoteConfigKeys.communityImageUpload: rcDefaultCommunityImageUpload,
         RemoteConfigKeys.freeFishCompatEnabled: rcDefaultFreeFishCompatEnabled,
-        RemoteConfigKeys.freePhotoAnalysisEnabled: rcDefaultFreePhotoAnalysisEnabled,
-        RemoteConfigKeys.interstitialCooldownHours: rcDefaultInterstitialCooldownHours,
-        RemoteConfigKeys.founderMaxRequestsPerMinute: rcDefaultFounderMaxRequestsPerMinute,
-        RemoteConfigKeys.founderMaxRequestsPerDay: rcDefaultFounderMaxRequestsPerDay,
-        RemoteConfigKeys.founderMaxPhotoAnalysesPerDay: rcDefaultFounderMaxPhotoAnalysesPerDay,
-        RemoteConfigKeys.founderChatHistoryLimit: rcDefaultFounderChatHistoryLimit,
+        RemoteConfigKeys.freePhotoAnalysisEnabled:
+            rcDefaultFreePhotoAnalysisEnabled,
+        RemoteConfigKeys.interstitialCooldownHours:
+            rcDefaultInterstitialCooldownHours,
+        RemoteConfigKeys.founderMaxRequestsPerMinute:
+            rcDefaultFounderMaxRequestsPerMinute,
+        RemoteConfigKeys.founderMaxRequestsPerDay:
+            rcDefaultFounderMaxRequestsPerDay,
+        RemoteConfigKeys.founderMaxPhotoAnalysesPerDay:
+            rcDefaultFounderMaxPhotoAnalysesPerDay,
+        RemoteConfigKeys.founderChatHistoryLimit:
+            rcDefaultFounderChatHistoryLimit,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 10),
-        minimumFetchInterval:
-            kDebugMode ? Duration.zero : const Duration(hours: 1),
-      ));
+      await remoteConfig.setConfigSettings(
+        RemoteConfigSettings(
+          fetchTimeout: const Duration(seconds: 10),
+          minimumFetchInterval: kDebugMode
+              ? Duration.zero
+              : const Duration(hours: 1),
+        ),
+      );
 
       // Fetch and activate in one step; ignore errors (e.g. no network).
       await remoteConfig.fetchAndActivate();
@@ -133,38 +146,48 @@ class RemoteConfigService {
       _modelString(RemoteConfigKeys.defaultGeminiModel, rcDefaultGeminiModel);
 
   /// Default Gemini image-analysis model name.
-  static String get defaultGeminiImageModel =>
-      _modelString(RemoteConfigKeys.defaultGeminiImageModel, rcDefaultGeminiImageModel);
+  static String get defaultGeminiImageModel => _modelString(
+    RemoteConfigKeys.defaultGeminiImageModel,
+    rcDefaultGeminiImageModel,
+  );
 
   /// Default OpenAI (ChatGPT) text/chat model name.
   static String get defaultOpenAIModel =>
       _modelString(RemoteConfigKeys.defaultOpenAIModel, rcDefaultOpenAIModel);
 
   /// Default OpenAI image-analysis model name.
-  static String get defaultOpenAIImageModel =>
-      _modelString(RemoteConfigKeys.defaultOpenAIImageModel, rcDefaultOpenAIImageModel);
+  static String get defaultOpenAIImageModel => _modelString(
+    RemoteConfigKeys.defaultOpenAIImageModel,
+    rcDefaultOpenAIImageModel,
+  );
 
   /// Default Groq text/chat model name.
   static String get defaultGroqModel =>
       _modelString(RemoteConfigKeys.defaultGroqModel, rcDefaultGroqModel);
 
   /// Default Groq image-analysis model name.
-  static String get defaultGroqImageModel =>
-      _modelString(RemoteConfigKeys.defaultGroqImageModel, rcDefaultGroqImageModel);
+  static String get defaultGroqImageModel => _modelString(
+    RemoteConfigKeys.defaultGroqImageModel,
+    rcDefaultGroqImageModel,
+  );
 
   // ── Promotion images ────────────────────────────────────────────────────────
 
   /// URL for the "original" AquaPi promotion image (shown in the dialog).
   /// Returns an empty string when no URL is set in Remote Config,
   /// signalling that the bundled `assets/images/system/AquaPiMainSmaller.jpg` should be used.
-  static String get aquapiOriginalImageUrl =>
-      _modelString(RemoteConfigKeys.aquapiOriginalImageUrl, rcDefaultAquapiOriginalImageUrl);
+  static String get aquapiOriginalImageUrl => _modelString(
+    RemoteConfigKeys.aquapiOriginalImageUrl,
+    rcDefaultAquapiOriginalImageUrl,
+  );
 
   /// URL for the "essential" AquaPi promotion image (shown on the welcome screen).
   /// Returns an empty string when no URL is set in Remote Config,
   /// signalling that the bundled `assets/images/system/AquaPiEssentials.jpg` should be used.
-  static String get aquapiEssentialImageUrl =>
-      _modelString(RemoteConfigKeys.aquapiEssentialImageUrl, rcDefaultAquapiEssentialImageUrl);
+  static String get aquapiEssentialImageUrl => _modelString(
+    RemoteConfigKeys.aquapiEssentialImageUrl,
+    rcDefaultAquapiEssentialImageUrl,
+  );
 
   // ── Fish compatibility data ─────────────────────────────────────────────────
 
@@ -184,8 +207,9 @@ class RemoteConfigService {
   /// format the number according to the user's locale while keeping the USD
   /// currency symbol.
   static String getEarlySupporterPrice({String? locale}) {
-    final raw = _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice)
-        ?? rcDefaultEarlySupporterPrice;
+    final raw =
+        _instance?.getDouble(RemoteConfigKeys.earlySupporterPrice) ??
+        rcDefaultEarlySupporterPrice;
     if (raw <= 0) return '';
     return NumberFormat.currency(
       locale: locale ?? 'en_US',
@@ -272,6 +296,7 @@ class RemoteConfigService {
   static int get interstitialCooldownHours =>
       _instance?.getInt(RemoteConfigKeys.interstitialCooldownHours) ??
       rcDefaultInterstitialCooldownHours;
+
   // ── Founder Aquarist AI limits ──────────────────────────────────────────────
 
   /// Per-minute request limit for Founder Aquarist users.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../main_layout.dart';
 import '../widgets/ad_component.dart';
 
@@ -101,7 +102,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
         } catch (_) {
           // 3. If assetPath is already locale-specific (e.g. a cross-doc link
           //    to an untranslated file), fall back to the English equivalent.
-          content = await rootBundle.loadString(_englishFallbackPath(widget.assetPath));
+          content = await rootBundle.loadString(
+            _englishFallbackPath(widget.assetPath),
+          );
         }
       }
       final sections = _buildSections(content);
@@ -132,7 +135,8 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   /// The text of the heading that opens a section is included at the top of
   /// that section's [content] so it renders correctly.
   static List<({String? anchorId, String content})> _buildSections(
-      String markdown) {
+    String markdown,
+  ) {
     final lines = markdown.split('\n');
     final sections = <({String? anchorId, String content})>[];
     var buffer = StringBuffer();
@@ -171,8 +175,14 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   static String _toAnchorId(String heading) {
     return heading
         .toLowerCase()
-        .replaceAll(RegExp(r'[^\w\s-]'), '') // strip non-word, non-space, non-hyphen chars
-        .replaceAll(' ', '-'); // each space → one hyphen (consecutive spaces → consecutive hyphens)
+        .replaceAll(
+          RegExp(r'[^\w\s-]'),
+          '',
+        ) // strip non-word, non-space, non-hyphen chars
+        .replaceAll(
+          ' ',
+          '-',
+        ); // each space → one hyphen (consecutive spaces → consecutive hyphens)
   }
 
   Future<void> _handleLink(String text, String? href, String title) async {
@@ -233,7 +243,10 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
     // ── External link: open in browser ───────────────────────────────────
     try {
       final uri = Uri.parse(href);
-      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
       if (!launched && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -291,7 +304,11 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                 // Pop all the way back to Information screen
                 // We need to pop breadcrumbs.length + 1 times (all breadcrumbs + current page)
                 final popCount = widget.breadcrumbs.length + 1;
-                for (int i = 0; i < popCount && Navigator.of(context).canPop(); i++) {
+                for (
+                  int i = 0;
+                  i < popCount && Navigator.of(context).canPop();
+                  i++
+                ) {
                   Navigator.of(context).pop();
                 }
               },
@@ -308,9 +325,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                     Text(
                       'Information',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -341,19 +358,31 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
                         // popCount = 3 - 1 = 2 (pop D and C to reach B)
                         final popCount = widget.breadcrumbs.length - index;
                         final navigator = Navigator.of(context);
-                        for (int i = 0; i < popCount && navigator.canPop(); i++) {
+                        for (
+                          int i = 0;
+                          i < popCount && navigator.canPop();
+                          i++
+                        ) {
                           navigator.pop();
                         }
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
                         child: Text(
                           breadcrumb.title,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 color: isLast
-                                    ? Theme.of(context).colorScheme.onSurfaceVariant
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant
                                     : Theme.of(context).colorScheme.primary,
-                                fontWeight: isLast ? FontWeight.normal : FontWeight.w500,
+                                fontWeight: isLast
+                                    ? FontWeight.normal
+                                    : FontWeight.w500,
                               ),
                         ),
                       ),
@@ -374,9 +403,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
             Text(
               widget.title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -387,17 +416,17 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
   MarkdownStyleSheet _buildStyleSheet(BuildContext context) {
     return MarkdownStyleSheet(
       h1: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.secondary,
-          ),
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.secondary,
+      ),
       p: Theme.of(context).textTheme.bodyLarge,
       code: TextStyle(
         backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
@@ -407,14 +436,12 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
       codeblockDecoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontStyle: FontStyle.italic,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+        fontStyle: FontStyle.italic,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       blockquoteDecoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
         borderRadius: BorderRadius.circular(4),
@@ -425,9 +452,9 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
           ),
         ),
       ),
-      tableHead: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      tableHead: Theme.of(
+        context,
+      ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
       tableBody: Theme.of(context).textTheme.bodyMedium,
       tableBorder: TableBorder.all(
         color: Theme.of(context).colorScheme.outline,
@@ -451,45 +478,45 @@ class _MarkdownViewerScreenState extends State<MarkdownViewerScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _error!,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
                           ),
-                        ),
-                      )
-                    : ListView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16.0),
-                        children: _sections.map((section) {
-                          final key = section.anchorId != null
-                              ? _anchorKeys[section.anchorId!]
-                              : null;
-                          return Container(
-                            key: key,
-                            child: MarkdownBody(
-                              data: section.content,
-                              selectable: true,
-                              onTapLink: _handleLink,
-                              styleSheet: _buildStyleSheet(context),
-                            ),
-                          );
-                        }).toList(),
+                          const SizedBox(height: 16),
+                          Text(
+                            _error!,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
+                    ),
+                  )
+                : ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16.0),
+                    children: _sections.map((section) {
+                      final key = section.anchorId != null
+                          ? _anchorKeys[section.anchorId!]
+                          : null;
+                      return Container(
+                        key: key,
+                        child: MarkdownBody(
+                          data: section.content,
+                          selectable: true,
+                          onTapLink: _handleLink,
+                          styleSheet: _buildStyleSheet(context),
+                        ),
+                      );
+                    }).toList(),
+                  ),
           ),
         ],
       ),

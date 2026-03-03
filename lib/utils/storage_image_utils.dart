@@ -35,19 +35,24 @@ Future<String> resolveResizedStorageUrl(
     return _resizedUrlCache[originalUrl]!;
   }
 
-  final resizedPath =
-      deriveResizedStoragePath(originalUrl, resizeWidth, resizeHeight);
+  final resizedPath = deriveResizedStoragePath(
+    originalUrl,
+    resizeWidth,
+    resizeHeight,
+  );
   if (resizedPath == null) return originalUrl;
 
   try {
-    final resizedUrl =
-        await FirebaseStorage.instance.ref(resizedPath).getDownloadURL();
+    final resizedUrl = await FirebaseStorage.instance
+        .ref(resizedPath)
+        .getDownloadURL();
     _resizedUrlCache[originalUrl] = resizedUrl;
     return resizedUrl;
   } catch (e) {
     if (kDebugMode) {
       debugPrint(
-          'resolveResizedStorageUrl: resized file not available yet – $e');
+        'resolveResizedStorageUrl: resized file not available yet – $e',
+      );
     }
     return originalUrl;
   }
@@ -82,8 +87,9 @@ String? deriveResizedStoragePath(String url, int width, int height) {
 
     // Strip the file extension and append _{width}x{height}.webp
     final lastDot = storagePath.lastIndexOf('.');
-    final nameWithoutExt =
-        lastDot >= 0 ? storagePath.substring(0, lastDot) : storagePath;
+    final nameWithoutExt = lastDot >= 0
+        ? storagePath.substring(0, lastDot)
+        : storagePath;
     return '${nameWithoutExt}_${width}x$height.webp';
   } catch (_) {
     return null;

@@ -108,6 +108,6 @@ class AquaThemeColors {
   /// [BuildContext] is available.
   static Color founderColor(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-          ? founderPurpleLight
-          : founderPurple;
+      ? founderPurpleLight
+      : founderPurple;
 }

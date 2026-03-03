@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../theme_provider.dart';
 
 /// ModernSelectableChip
@@ -46,37 +47,48 @@ class ModernSelectableChip extends ConsumerWidget {
     Color finalIconColor;
 
     if (selected) {
-      finalBackgroundColor = selectedColor ?? (isMaterialYou ? cs.primary : cs.primary);
-      finalBorderColor = selectedColor?.withOpacity(0.5) ?? 
-          (isMaterialYou ? cs.outline.withOpacity(0.6) : cs.primary.withOpacity(0.75));
-      finalLabelColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
-      finalIconColor = selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
+      finalBackgroundColor =
+          selectedColor ?? (isMaterialYou ? cs.primary : cs.primary);
+      finalBorderColor =
+          selectedColor?.withOpacity(0.5) ??
+          (isMaterialYou
+              ? cs.outline.withOpacity(0.6)
+              : cs.primary.withOpacity(0.75));
+      finalLabelColor =
+          selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
+      finalIconColor =
+          selectedTextColor ?? (isMaterialYou ? cs.onPrimary : cs.onPrimary);
     } else {
-      finalBackgroundColor = isMaterialYou ? cs.surfaceVariant : cs.surfaceContainerHighest;
+      finalBackgroundColor = isMaterialYou
+          ? cs.surfaceVariant
+          : cs.surfaceContainerHighest;
       finalBorderColor = cs.outline.withOpacity(isMaterialYou ? 0.4 : 0.5);
-      finalLabelColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
-      finalIconColor = isMaterialYou ? cs.onSurfaceVariant : cs.onSurfaceVariant;
+      finalLabelColor = isMaterialYou
+          ? cs.onSurfaceVariant
+          : cs.onSurfaceVariant;
+      finalIconColor = isMaterialYou
+          ? cs.onSurfaceVariant
+          : cs.onSurfaceVariant;
     }
 
     Widget? leading;
     if (icon != null) {
       leading = Icon(icon, size: dense ? 18 : 22, color: finalIconColor);
     } else if (emoji != null) {
-      leading = Text(
-        emoji!,
-        style: TextStyle(fontSize: dense ? 20 : 26),
-      );
+      leading = Text(emoji!, style: TextStyle(fontSize: dense ? 20 : 26));
     }
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         // MODIFIED: Added constraints to allow the chip to have a max width, forcing text to wrap.
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.45),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.45,
+        ),
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: padding ??
+        padding:
+            padding ??
             (dense
                 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
                 : const EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
@@ -84,41 +96,42 @@ class ModernSelectableChip extends ConsumerWidget {
           color: finalBackgroundColor,
           gradient: finalGradient,
           borderRadius: BorderRadius.circular(baseRadius),
-          border: Border.all(
-            color: finalBorderColor,
-            width: selected ? 2 : 1,
-          ),
+          border: Border.all(color: finalBorderColor, width: selected ? 2 : 1),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: (selectedColor ?? (isMaterialYou ? cs.primaryContainer : cs.primary)).withOpacity(0.35),
+                    color:
+                        (selectedColor ??
+                                (isMaterialYou
+                                    ? cs.primaryContainer
+                                    : cs.primary))
+                            .withOpacity(0.35),
                     blurRadius: 14,
                     spreadRadius: 1,
                     offset: const Offset(0, 4),
-                  )
+                  ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isMaterialYou ? 0.08 : 0.05),
+                    color: Colors.black.withOpacity(
+                      isMaterialYou ? 0.08 : 0.05,
+                    ),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
-                  )
+                  ),
                 ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[
-              leading,
-              const SizedBox(width: 8),
-            ],
+            if (leading != null) ...[leading, const SizedBox(width: 8)],
             Flexible(
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                      color: finalLabelColor,
-                    ),
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  color: finalLabelColor,
+                ),
                 maxLines: 2,
                 textAlign: TextAlign.center,
               ),

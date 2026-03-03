@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'l10n/app_localizations.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/gradient_text.dart';
@@ -8,14 +9,14 @@ class MainLayout extends StatelessWidget {
   final String title;
   final List<Widget>? actions;
   final Widget? bottomNavigationBar;
-  final Widget? floatingActionButton; 
+  final Widget? floatingActionButton;
 
   const MainLayout({
     required this.title,
     required this.child,
     this.actions,
     this.bottomNavigationBar,
-    this.floatingActionButton, 
+    this.floatingActionButton,
     super.key,
   });
 
@@ -31,10 +32,7 @@ class MainLayout extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/system/AquaAi Logo.png',
-                height: 40,
-              ),
+              Image.asset('assets/images/system/AquaAi Logo.png', height: 40),
               const SizedBox(width: 12),
               Flexible(
                 child: GradientText(
@@ -43,10 +41,12 @@ class MainLayout extends StatelessWidget {
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                   ),
-                  gradient: LinearGradient(colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ]),
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
                 ),
               ),
             ],
