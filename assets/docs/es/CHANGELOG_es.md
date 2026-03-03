@@ -2,6 +2,29 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+## [3.1.00] - 2026-3-3 – Ventajas, funciones de comunidad y perfil
+
+### Añadido
+
+- **Sección de perfil de usuario con autenticación social**
+- **Nivel Fundador Acuarista, imagen héroe moderna del Escaparate de Acuarios, sistema de ventajas para fundadores, correcciones de publicaciones de la comunidad**
+- Familias de fuentes seleccionables por el usuario en la pantalla de apariencia
+- Subtipo de acuario de arrecife para acuarios de agua salada con soporte de filtrado
+- Clasificación de datos de peces y seguridad en arrecifes añadida
+- Registro global de TankTag con soporte explícito de copia de seguridad/restauración
+- Función de compartir/importar un solo acuario
+- Pantalla de bienvenida: cuadrícula de 2 columnas con alternancia lista/cuadrícula + modo cuadrícula/mosaico de gestión de acuarios y personalización de tarjetas
+- Foto de banner del acuario principal añadida a la pantalla de detalles del acuario
+- Permite el cierre permanente del encabezado de la pantalla de bienvenida
+
+### Modificado
+
+- Chips de sugerencias del chatbot localizados, configuración de idioma de respuesta de IA añadida
+- Localizados los idiomas de IA, calculadoras, pantallas de información y configuración del proveedor de IA
+- Cadenas de texto codificadas de forma fija localizadas en ajustes, cajón, pantalla de bienvenida, diálogo de promoción de AquaPi, pantalla de historial y más
+
+**Registro completo de cambios**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.10...v3.1.00>
+
 ## [3.0.10] - 2026-2-27 – Actualizaciones visuales, correcciones de la herramienta Stocking
 
 ### Añadido

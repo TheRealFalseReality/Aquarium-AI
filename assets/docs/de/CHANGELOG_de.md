@@ -2,6 +2,29 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+## [3.1.00] - 2026-3-3 – Vorteile, Community- und Profilfunktionen
+
+### Hinzugefügt
+
+- **Benutzerprofilbereich mit Social-Auth hinzugefügt**
+- **Gründer-Aquarist-Stufe, modernes Tank-Showcase-Heldenbild, Gründer-Vorteils-System, Community-Post-Korrekturen**
+- Vom Benutzer wählbare Schriftfamilien im Erscheinungsbild-Bildschirm
+- Riffbecken-Untertyp für Meerwasserbecken mit Filterunterstützung hinzugefügt
+- Fischdaten-Sortierung und Riffverträglichkeits-Klassifizierung hinzugefügt
+- Globale TankTag-Registrierung mit expliziter Sicherungs-/Wiederherstellungsunterstützung hinzugefügt
+- Einzeltank-Teilen/Importieren-Funktion hinzugefügt
+- Willkommensbildschirm: 2-Spalten-Raster mit Listen/Raster-Umschalter + Tank-Verwaltungsraster/Mosaik-Modus und Karten-Anpassung
+- Haupt-Tank-Bannerfoto zum Tank-Details-Bildschirm hinzugefügt
+- Dauerhafte Ausblendung des Willkommensbildschirm-Headers ermöglicht
+
+### Geändert
+
+- Chatbot-Vorschlagschips lokalisiert, KI-Antwortsprachen-Einstellung hinzugefügt
+- KI-Kompatibilität, Rechner, Info, Informations- und KI-Anbieter-Einstellungsbildschirme lokalisiert
+- Hartcodierte Zeichenketten in Einstellungen, Seitenleiste, Willkommensbildschirm, AquaPi-Promo-Dialog, Verlaufsbildschirm und mehr lokalisiert
+
+**Vollständiges Änderungsprotokoll**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.10...v3.1.00>
+
 ## [3.0.10] - 2026-2-27 – Visuelle Updates, Stocking-Tool-Korrekturen
 
 ### Hinzugefügt
