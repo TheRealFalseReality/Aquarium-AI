@@ -1952,6 +1952,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: () => _showLanguageDialog(setDialogState),
                   ),
                   const Divider(height: 24),
+
+                  // AI Response Language
+                  ListTile(
+                    leading: Icon(
+                      Icons.translate,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(l10n.aiResponseLanguage),
+                    subtitle: Text(_getAiResponseLanguageDisplayName(appSettings.aiResponseLanguage)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => _showAiResponseLanguageDialog(setDialogState),
+                  ),
+                  const Divider(height: 24),
                   
                   // Appearance shortcut
                   ListTile(
@@ -3850,8 +3863,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  /// Bidirectional map between app locale codes and AI response language names
+  /// for the four supported languages.
+  static const Map<String, String> _localeToLanguageMap = {
+    'en': 'English',
+    'de': 'German',
+    'es': 'Spanish',
+    'fr': 'French',
+  };
+
+  /// Reverse map (language name → locale code), derived from [_localeToLanguageMap]
+  /// to ensure a single source of truth when adding new languages.
+  static final Map<String, String> _languageToLocaleMap = Map.fromEntries(
+    _localeToLanguageMap.entries.map((e) => MapEntry(e.value, e.key)),
+  );
+
+  /// Returns the AI response language name for [localeCode], or null when
+  /// [localeCode] is null (system default → "Follow App Language") or
+  /// unrecognised.
+  static String? _localeToAiLanguage(String? localeCode) {
+    if (localeCode == null) return null; // system default → follow app
+    return _localeToLanguageMap[localeCode]; // null for unrecognized codes
+  }
+
   void _applyLocaleChange(String? newLocale, String oldLocale, [StateSetter? parentSetDialogState]) {
     ref.read(appSettingsProvider.notifier).setLocale(newLocale);
+    // Sync AI response language to match the new app locale
+    ref.read(appSettingsProvider.notifier).setAiResponseLanguage(_localeToAiLanguage(newLocale));
     CrashlyticsService.setLocale(newLocale);
     AnalyticsService.logSettingsChange(
       settingName: 'language',
@@ -3925,6 +3963,162 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  String _getAiResponseLanguageDisplayName(String? aiResponseLanguage) {
+    final l10n = AppLocalizations.of(context)!;
+    if (aiResponseLanguage == null) return l10n.aiResponseLanguageFollowApp;
+    if (aiResponseLanguage.isEmpty) return l10n.aiResponseLanguageNone;
+    return _localizedLanguageName(aiResponseLanguage, l10n);
+  }
+
+  /// Returns the localized display name for a preset AI response language.
+  /// Falls back to the raw [lang] value for custom languages.
+  static String _localizedLanguageName(String lang, AppLocalizations l10n) {
+    switch (lang) {
+      case 'English': return l10n.aiResponseLanguageNameEnglish;
+      case 'German': return l10n.aiResponseLanguageNameGerman;
+      case 'Spanish': return l10n.aiResponseLanguageNameSpanish;
+      case 'French': return l10n.aiResponseLanguageNameFrench;
+      case 'Portuguese': return l10n.aiResponseLanguageNamePortuguese;
+      case 'Italian': return l10n.aiResponseLanguageNameItalian;
+      case 'Japanese': return l10n.aiResponseLanguageNameJapanese;
+      case 'Chinese': return l10n.aiResponseLanguageNameChinese;
+      case 'Korean': return l10n.aiResponseLanguageNameKorean;
+      case 'Dutch': return l10n.aiResponseLanguageNameDutch;
+      case 'Russian': return l10n.aiResponseLanguageNameRussian;
+      case 'Arabic': return l10n.aiResponseLanguageNameArabic;
+      default: return lang;
+    }
+  }
+
+  void _showAiResponseLanguageDialog([StateSetter? parentSetDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+
+    // Preset options: null = follow app, '' = no instruction, named language otherwise.
+    const List<String?> presets = [
+      null, // Follow App Language
+      '', // No Instruction
+      'English',
+      'German',
+      'Spanish',
+      'French',
+      'Portuguese',
+      'Italian',
+      'Japanese',
+      'Chinese',
+      'Korean',
+      'Dutch',
+      'Russian',
+      'Arabic',
+    ];
+
+    // Determine initial dropdown value.
+    // Use the special sentinel 'custom' when the stored value is not in presets.
+    final isCustom = appSettings.aiResponseLanguage != null &&
+        appSettings.aiResponseLanguage!.isNotEmpty &&
+        !presets.contains(appSettings.aiResponseLanguage);
+    String? selectedPreset = isCustom ? 'custom' : appSettings.aiResponseLanguage;
+    final customController = TextEditingController(
+      text: isCustom ? appSettings.aiResponseLanguage : '',
+    );
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          void applyChange(String? newValue) {
+            ref.read(appSettingsProvider.notifier).setAiResponseLanguage(newValue);
+            // Sync app locale when the selected AI language is null (follow app)
+            // or maps to one of the 4 supported locale codes.
+            if (newValue == null) {
+              // "Follow App Language" → reset app locale to system default
+              ref.read(appSettingsProvider.notifier).setLocale(null);
+              CrashlyticsService.setLocale(null);
+            } else {
+              // O(1) reverse lookup: language name → locale code
+              final localeCode = _languageToLocaleMap[newValue];
+              if (localeCode != null) {
+                ref.read(appSettingsProvider.notifier).setLocale(localeCode);
+                CrashlyticsService.setLocale(localeCode);
+              }
+              // Custom language values: no app locale sync
+            }
+            AnalyticsService.logSettingsChange(
+              settingName: 'ai_response_language',
+              newValue: newValue ?? 'follow_app',
+              oldValue: appSettings.aiResponseLanguage ?? 'follow_app',
+            );
+            if (parentSetDialogState != null) parentSetDialogState(() {});
+          }
+
+          return AlertDialog(
+            title: Text(l10n.aiResponseLanguage),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<String?>(
+                    value: selectedPreset,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text(l10n.aiResponseLanguageFollowApp),
+                      ),
+                      DropdownMenuItem<String?>(
+                        value: '',
+                        child: Text(l10n.aiResponseLanguageNone),
+                      ),
+                      ...presets.whereType<String>().where((p) => p.isNotEmpty).map(
+                            (lang) => DropdownMenuItem<String?>(value: lang, child: Text(_localizedLanguageName(lang, l10n))),
+                          ),
+                      DropdownMenuItem<String?>(
+                        value: 'custom',
+                        child: Text(l10n.aiResponseLanguageCustom),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setDialogState(() => selectedPreset = value);
+                      if (value != 'custom') {
+                        applyChange(value);
+                      }
+                    },
+                  ),
+                  if (selectedPreset == 'custom') ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: customController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: l10n.aiResponseLanguageCustomHint,
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (text) {
+                        if (text.trim().isNotEmpty) {
+                          applyChange(text.trim());
+                        }
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.close),
+              ),
+            ],
+          );
+        },
+      ),
+    ).whenComplete(() => customController.dispose());
   }
 
   void _showFeedbackDialog() {

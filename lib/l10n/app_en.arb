@@ -311,6 +311,85 @@
     "description": "German language option"
   },
 
+  "aiResponseLanguage": "AI Response Language",
+  "@aiResponseLanguage": {
+    "description": "Label for the AI response language setting"
+  },
+
+  "aiResponseLanguageDesc": "Language the AI uses in its responses",
+  "@aiResponseLanguageDesc": {
+    "description": "Subtitle for the AI response language setting"
+  },
+
+  "aiResponseLanguageFollowApp": "Follow App Language",
+  "@aiResponseLanguageFollowApp": {
+    "description": "AI response language option: follow the app UI language"
+  },
+
+  "aiResponseLanguageNone": "No Instruction (AI Default)",
+  "@aiResponseLanguageNone": {
+    "description": "AI response language option: no language instruction, AI decides"
+  },
+
+  "aiResponseLanguageCustom": "Custom",
+  "@aiResponseLanguageCustom": {
+    "description": "AI response language option: enter a custom language"
+  },
+
+  "aiResponseLanguageCustomHint": "Enter a language (e.g. Portuguese)",
+  "@aiResponseLanguageCustomHint": {
+    "description": "Hint text for the custom AI response language text field"
+  },
+
+  "aiResponseLanguageNameEnglish": "English",
+  "@aiResponseLanguageNameEnglish": {
+    "description": "Language name: English"
+  },
+  "aiResponseLanguageNameGerman": "German",
+  "@aiResponseLanguageNameGerman": {
+    "description": "Language name: German"
+  },
+  "aiResponseLanguageNameSpanish": "Spanish",
+  "@aiResponseLanguageNameSpanish": {
+    "description": "Language name: Spanish"
+  },
+  "aiResponseLanguageNameFrench": "French",
+  "@aiResponseLanguageNameFrench": {
+    "description": "Language name: French"
+  },
+  "aiResponseLanguageNamePortuguese": "Portuguese",
+  "@aiResponseLanguageNamePortuguese": {
+    "description": "Language name: Portuguese"
+  },
+  "aiResponseLanguageNameItalian": "Italian",
+  "@aiResponseLanguageNameItalian": {
+    "description": "Language name: Italian"
+  },
+  "aiResponseLanguageNameJapanese": "Japanese",
+  "@aiResponseLanguageNameJapanese": {
+    "description": "Language name: Japanese"
+  },
+  "aiResponseLanguageNameChinese": "Chinese",
+  "@aiResponseLanguageNameChinese": {
+    "description": "Language name: Chinese"
+  },
+  "aiResponseLanguageNameKorean": "Korean",
+  "@aiResponseLanguageNameKorean": {
+    "description": "Language name: Korean"
+  },
+  "aiResponseLanguageNameDutch": "Dutch",
+  "@aiResponseLanguageNameDutch": {
+    "description": "Language name: Dutch"
+  },
+  "aiResponseLanguageNameRussian": "Russian",
+  "@aiResponseLanguageNameRussian": {
+    "description": "Language name: Russian"
+  },
+  "aiResponseLanguageNameArabic": "Arabic",
+  "@aiResponseLanguageNameArabic": {
+    "description": "Language name: Arabic"
+  },
+
   "translationCommunityTitle": "Help Translate",
   "@translationCommunityTitle": {
     "description": "Title for translation community section"
@@ -2488,6 +2567,41 @@
   "aiTools": "AI Tools",
   "@aiTools": {
     "description": "AI tools section label"
+  },
+
+  "chatSuggestionCycleAquarium": "How do I cycle my aquarium?",
+  "@chatSuggestionCycleAquarium": {
+    "description": "Suggested chat question: how to cycle an aquarium"
+  },
+
+  "chatSuggestionBeginnerFish": "What are the best beginner fish?",
+  "@chatSuggestionBeginnerFish": {
+    "description": "Suggested chat question: best beginner fish"
+  },
+
+  "chatSuggestionWaterChange": "How often should I change water?",
+  "@chatSuggestionWaterChange": {
+    "description": "Suggested chat question: water change frequency"
+  },
+
+  "chatSuggestionWhatIsAquaPi": "What is AquaPi?",
+  "@chatSuggestionWhatIsAquaPi": {
+    "description": "Suggested chat question: what is AquaPi"
+  },
+
+  "chatSuggestionCompareApexNeptune": "Compare to Apex Neptune",
+  "@chatSuggestionCompareApexNeptune": {
+    "description": "Suggested chat question: compare AquaPi to Apex Neptune"
+  },
+
+  "chatSuggestionAquaPiMonitor": "What can AquaPi monitor?",
+  "@chatSuggestionAquaPiMonitor": {
+    "description": "Suggested chat question: what AquaPi can monitor"
+  },
+
+  "chatSuggestionOwnSensors": "Can I use my own sensors?",
+  "@chatSuggestionOwnSensors": {
+    "description": "Suggested chat question: using own sensors with AquaPi"
   },
 
   "viewAnalysis": "View Analysis",

@@ -12,12 +12,14 @@ import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/fish_info_result.dart';
 import 'analysis_history_provider.dart';
+import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import '../prompts/aquapi_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/fish_info_prompt.dart';
+import '../utils/ai_language_utils.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
@@ -143,8 +145,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   /// Returns the effective system prompt for [message].
-  /// Appends the AquaPi supplement when the message is AquaPi-related.
-  String _effectiveSystemPrompt(String message) => effectiveSystemPrompt(message);
+  /// Appends the AquaPi supplement when the message is AquaPi-related,
+  /// and adds a language instruction based on the AI response language setting.
+  String _effectiveSystemPrompt(String message) {
+    final base = effectiveSystemPrompt(message);
+    final settings = _ref.read(appSettingsProvider);
+    return appendLanguageInstruction(
+      base,
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
+  }
 
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
@@ -322,14 +333,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${params['salinity']!.isNotEmpty ? ', Salinity: ${params['salinity']} ${params['salinityUnit']}' : ''}'
         '${params['additionalInfo']!.isNotEmpty ? ', Additional Info: ${params['additionalInfo']}' : ''}';
     _prepareForSending(userMsg);
-    final prompt = buildWaterAnalysisPrompt(
-      tankType: params['tankType']!,
-      ph: params['ph']!,
-      temp: params['temp']!,
-      salinity: params['salinity']!,
-      additionalInfo: params['additionalInfo']!,
-      tempUnit: params['tempUnit']!,
-      salinityUnit: params['salinityUnit']!,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildWaterAnalysisPrompt(
+        tankType: params['tankType']!,
+        ph: params['ph']!,
+        temp: params['temp']!,
+        salinity: params['salinity']!,
+        additionalInfo: params['additionalInfo']!,
+        tempUnit: params['tempUnit']!,
+        salinityUnit: params['salinityUnit']!,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -380,7 +396,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
-    final prompt = buildAutomationScriptPrompt(description);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildAutomationScriptPrompt(description),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
       final decoded = json.decode(extractJson(responseText));
@@ -435,10 +456,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
         '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
     _prepareForSending(userMsg);
-    final prompt = buildFishInfoPrompt(
-      fishNames: fishNames,
-      tankSize: tankSize,
-      additionalNotes: additionalNotes,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildFishInfoPrompt(
+        fishNames: fishNames,
+        tankSize: tankSize,
+        additionalNotes: additionalNotes,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -541,7 +567,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     } else {
       state = ChatState(messages: state.messages, isLoading: true);
     }
-    final prompt = buildPhotoAnalysisPrompt(note);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildPhotoAnalysisPrompt(note),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     final originalMessage = 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
     try {
       final responseText = await _generateContentWithImage(prompt, imageBytes, mimeType);
