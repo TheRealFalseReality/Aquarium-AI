@@ -627,6 +627,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildSearchBar(bool canShowLastReportFab) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       key: const ValueKey('search_bar'),
       elevation: 6,

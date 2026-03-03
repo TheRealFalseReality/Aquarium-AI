@@ -4145,11 +4145,6 @@
     "description": "Hint text in the add species text field"
   },
 
-  "clear": "Clear",
-  "@clear": {
-    "description": "Button to clear species selections in the dialog"
-  },
-
   "selectedFish": "Selected Fish",
   "@selectedFish": {
     "description": "Section title in the compatibility report for selected fish"
