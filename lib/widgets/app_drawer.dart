@@ -16,6 +16,7 @@ import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/storage_image_utils.dart';
 import '../services/analytics_service.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
@@ -926,17 +927,24 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                           SizedBox(
                             width: 26,
                             height: 26,
-                            child: CircleAvatar(
-                              backgroundColor:
-                                  colorScheme.primary.withOpacity(0.3),
-                              backgroundImage: avatarUrl != null
-                                  ? CachedNetworkImageProvider(avatarUrl)
-                                  : null,
-                              child: avatarUrl == null
-                                  ? Icon(avatarIcon,
-                                      size: 16, color: colorScheme.onSurface)
-                                  : null,
-                            ),
+                            child: avatarUrl != null
+                                ? FutureBuilder<String>(
+                                    future: resolveResizedStorageUrl(avatarUrl),
+                                    initialData: getCachedResizedUrl(avatarUrl) ?? avatarUrl!,
+                                    builder: (_, snap) => CircleAvatar(
+                                      backgroundColor:
+                                          colorScheme.primary.withOpacity(0.3),
+                                      backgroundImage:
+                                          CachedNetworkImageProvider(snap.data!),
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor:
+                                        colorScheme.primary.withOpacity(0.3),
+                                    child: Icon(avatarIcon,
+                                        size: 16,
+                                        color: colorScheme.onSurface),
+                                  ),
                           ),
                           const SizedBox(width: 8),
                           // Name
