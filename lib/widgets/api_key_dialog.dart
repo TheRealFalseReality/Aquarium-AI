@@ -199,84 +199,55 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                 final maxPhotos = isFounder
                     ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
                     : RemoteConfigService.maxPhotoAnalysesPerDay;
-                return Column(
-                  children: [
-                    if (isFounder)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color:
-                              AquaThemeColors.founderPurple.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AquaThemeColors.founderPurple
-                                .withOpacity(0.35),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.diamond,
-                                size: 16,
-                                color: AquaThemeColors.founderPurple),
-                            const SizedBox(width: 8),
-                            const Expanded(
-                              child: Text(
-                                'As a Founder Aquarist, you have increased AI limits on the built-in key. See below for your personal limits.',
-                                style: TextStyle(
-                                  color: AquaThemeColors.founderPurple,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isFounder
+                        ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                        : Theme.of(context)
                             .colorScheme
                             .tertiaryContainer
                             .withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context)
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isFounder
+                          ? AquaThemeColors.founderPurple.withOpacity(0.35)
+                          : Theme.of(context)
                               .colorScheme
                               .tertiary
                               .withOpacity(0.4),
-                        ),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        isFounder ? Icons.diamond : Icons.info_outline,
+                        size: 16,
+                        color: isFounder
+                            ? AquaThemeColors.founderPurple
+                            : Theme.of(context).colorScheme.tertiary,
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              isFounder
-                                  ? 'As a Founder Aquarist, your built-in key is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits entirely.'
-                                  : 'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own key in Settings to remove these limits.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                color: Theme.of(context)
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isFounder
+                              ? 'As a Founder Aquarist, your built-in key is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits entirely.'
+                              : 'No API key? No problem! You can still use Aquarium AI\'s free service tier powered by our built-in key. The free tier is limited to $maxPerMin AI requests per minute, $maxPerDay AI requests per day, and $maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} per day. Add your own API key in Settings to remove these limits.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                            color: isFounder
+                                ? AquaThemeColors.founderPurple
+                                : Theme.of(context)
                                     .colorScheme
                                     .onTertiaryContainer,
-                              ),
-                            ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),

@@ -110,6 +110,7 @@ class _PostCardState extends State<PostCard> {
     final isOwner = widget.currentUserId == widget.post.userId;
     final isFounder = widget.post.isFounderPost;
     final isTankShowcase = widget.post.type == PostType.tankShowcase;
+    final hasImage = widget.post.imageUrl != null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -125,49 +126,20 @@ class _PostCardState extends State<PostCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Post image — full hero for Tank Showcase, regular for others
-            if (isTankShowcase && widget.post.imageUrl != null)
-              _buildShowcaseHero(theme, l10n, isOwner, isFounder)
-            else if (widget.post.imageUrl != null)
-              FutureBuilder<String>(
-                future: _resolvedPostImageUrl,
-                builder: (_, snap) => CachedNetworkImage(
-                  imageUrl: snap.data ?? widget.post.imageUrl!,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, _, _) => Container(
-                    height: 200,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(Icons.broken_image,
-                        color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ),
-              ),
+            // ── Image section ─────────────────────────────────────────────
+            if (hasImage) _buildImageSection(theme, l10n, isTankShowcase, isOwner, isFounder),
+            // ── Card body ─────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header row: avatar + name + type badge
-                  // (skipped for showcase — it's overlaid on the hero image)
-                  if (!isTankShowcase || widget.post.imageUrl == null)
+                  // Header row — hidden for showcase when an image is present
+                  // (author info is already overlaid on the hero image).
+                  if (!isTankShowcase || !hasImage) ...[
                     _buildHeader(theme, l10n, isOwner, isFounder),
-                  if (!isTankShowcase || widget.post.imageUrl == null)
                     const SizedBox(height: 8),
-                  // For showcase without image, still show type badge inline
-                  if (isTankShowcase && widget.post.imageUrl == null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildHeader(
-                                theme, l10n, isOwner, isFounder),
-                          ),
-                        ],
-                      ),
-                    ),
+                  ],
                   // Title
                   Text(
                     widget.post.title,
@@ -184,12 +156,8 @@ class _PostCardState extends State<PostCard> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  // Post signature (aquarist metrics at time of posting)
-                  if (widget.post.postSignature != null &&
-                      widget.post.postSignature!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    PostSignatureFooter(sig: widget.post.postSignature!),
-                  ],
+                  // Signature is intentionally omitted from the preview card.
+                  // It appears only in the full post detail screen.
                   const SizedBox(height: 8),
                   // Footer: likes + comments
                   Row(
@@ -240,31 +208,54 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  /// Hero image for Tank Showcase posts — full-width with gradient overlay
-  /// and author info / type badge overlaid at the bottom.
-  Widget _buildShowcaseHero(ThemeData theme, AppLocalizations l10n,
-      bool isOwner, bool isFounder) {
-    return Stack(
-      children: [
-        // Full-width hero image
-        FutureBuilder<String>(
-          future: _resolvedPostImageUrl,
-          builder: (_, snap) => CachedNetworkImage(
-            imageUrl: snap.data ?? widget.post.imageUrl!,
-            width: double.infinity,
-            height: 280,
-            fit: BoxFit.cover,
-            errorWidget: (_, _, _) => Container(
-              height: 280,
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(Icons.broken_image,
-                  color: theme.colorScheme.onSurfaceVariant),
-            ),
+  /// Builds the image section of the card.
+  /// For Tank Showcase posts this is a 280 px hero with a gradient scrim and
+  /// the author row overlaid at the bottom.  All other post types show a plain
+  /// 200 px cover image.
+  Widget _buildImageSection(ThemeData theme, AppLocalizations l10n,
+      bool isTankShowcase, bool isOwner, bool isFounder) {
+    if (!isTankShowcase) {
+      return FutureBuilder<String>(
+        future: _resolvedPostImageUrl,
+        builder: (_, snap) => CachedNetworkImage(
+          imageUrl: snap.data ?? widget.post.imageUrl!,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorWidget: (_, _, _) => Container(
+            height: 200,
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Icon(Icons.broken_image,
+                color: theme.colorScheme.onSurfaceVariant),
           ),
         ),
-        // Gradient scrim so overlay text is readable
-        Positioned.fill(
-          child: DecoratedBox(
+      );
+    }
+
+    // ── Tank Showcase hero ─────────────────────────────────────────────────
+    return SizedBox(
+      height: 280,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Hero image
+          FutureBuilder<String>(
+            future: _resolvedPostImageUrl,
+            builder: (_, snap) => CachedNetworkImage(
+              imageUrl: snap.data ?? widget.post.imageUrl!,
+              width: double.infinity,
+              height: 280,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) => Container(
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(Icons.broken_image,
+                    color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+          // Gradient scrim
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -277,83 +268,81 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
           ),
-        ),
-        // Author row + badge overlaid at the bottom of the hero
-        Positioned(
-          left: 12,
-          right: 12,
-          bottom: 12,
-          child: Row(
-            children: [
-              _buildAvatar(theme, small: true),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            widget.post.displayName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              shadows: [
-                                Shadow(
-                                    blurRadius: 4,
-                                    color: Colors.black54)
-                              ],
+          // Author row + edit/delete overlaid at the bottom
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: Row(
+              children: [
+                _buildAvatar(theme, small: true),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.post.displayName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                shadows: [
+                                  Shadow(blurRadius: 4, color: Colors.black54)
+                                ],
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        if (isFounder) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.diamond,
-                              size: 13,
-                              color: AquaThemeColors.founderPurpleLight),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      _formatDate(widget.post.createdAt, l10n),
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
-                        shadows: [
-                          Shadow(blurRadius: 4, color: Colors.black54)
+                          if (isFounder) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.diamond,
+                                size: 13,
+                                color: AquaThemeColors.founderPurpleLight),
+                          ],
                         ],
                       ),
-                    ),
-                  ],
+                      Text(
+                        _formatDate(widget.post.createdAt, l10n),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          shadows: [
+                            Shadow(blurRadius: 4, color: Colors.black54)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _buildTypeBadge(context, l10n),
-              if (isOwner) ...[
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined,
-                      size: 18, color: Colors.white),
-                  tooltip: l10n.communityEditPost,
-                  onPressed: widget.onEdit,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline,
-                      size: 18, color: Colors.white70),
-                  tooltip: l10n.communityDeletePost,
-                  onPressed: widget.onDelete,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
+                _buildTypeBadge(context, l10n),
+                if (isOwner) ...[
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined,
+                        size: 18, color: Colors.white),
+                    tooltip: l10n.communityEditPost,
+                    onPressed: widget.onEdit,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline,
+                        size: 18, color: Colors.white70),
+                    tooltip: l10n.communityDeletePost,
+                    onPressed: widget.onDelete,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
