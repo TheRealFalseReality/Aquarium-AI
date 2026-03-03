@@ -3133,8 +3133,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               border: const OutlineInputBorder(),
               helperText: null,
               helperMaxLines: 2,
+              suffixIcon: IconButton(
                 icon: Icon(
-                  _isGroqApiKeyVisible ? Icons.visibility_off : Icons.visibility,
+                  _isGroqApiKeyVisible
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                 ),
                 onPressed: () {
                   final newVisibility = !_isGroqApiKeyVisible;
