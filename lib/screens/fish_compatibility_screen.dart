@@ -360,17 +360,10 @@ class FishCompatibilityScreenState
     final providerState = ref.watch(fishCompatibilityProvider);
     final notifier = ref.read(fishCompatibilityProvider.notifier);
     final modelState = ref.watch(modelProvider);
-    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
-    final debugHideAds =
-        kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
 
     // Disabled for free-tier users when the per-tool RC toggle is off.
     final isFishCompatDisabled = modelState.usingDeveloperGroqKeyForText &&
         !RemoteConfigService.freeFishCompatEnabled;
-
-    // Interstitial eligible: free-tier text user who hasn't removed ads.
-    final interstitialEligible =
-        !kIsWeb && modelState.usingDeveloperGroqKeyForText && !adsRemoved && !debugHideAds;
 
     ref.listen<FishCompatibilityState>(fishCompatibilityProvider,
         (previous, next) {
@@ -887,6 +880,11 @@ class FishCompatibilityScreenState
 
                           // Show interstitial ad for eligible free-tier users when
                           // the report is requested (not after analysis completes).
+                          final modelState = ref.read(modelProvider);
+                          final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+                          final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+                          final interstitialEligible =
+                              !kIsWeb && modelState.usingDeveloperGroqKeyForText && !adsRemoved && !debugHideAds;
                           if (interstitialEligible) {
                             _interstitialAdService.showIfEligible(
                               onWillShow: () {
