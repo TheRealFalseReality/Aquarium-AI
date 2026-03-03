@@ -92,4 +92,11 @@ class AquaThemeColors {
 
   static const Color crimsonSwatchPrimary = Color(0xFFDC143C);
   static const Color crimsonSwatchSecondary = Color(0xFFA00A28);
+
+  // ── Founder Aquarist ────────────────────────────────────────────────────────
+  /// Deep purple used for Founder Aquarist badges, borders, and accents.
+  static const Color founderPurple = Color(0xFF6A1B9A);
+
+  /// Lighter purple tint for Founder Aquarist diamond icons on dark backgrounds.
+  static const Color founderPurpleLight = Color(0xFFCE93D8);
 }

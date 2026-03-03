@@ -4,9 +4,10 @@ import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../services/community_service.dart';
+import '../theme_colors.dart';
 
 /// Deep purple used for Founder Aquarist post borders.
-const Color _kFounderBorderColor = Color(0xFF6A1B9A);
+const Color _kFounderBorderColor = AquaThemeColors.founderPurple;
 
 class PostCard extends StatefulWidget {
   final CommunityPost post;
@@ -267,7 +268,7 @@ class _PostCardState extends State<PostCard> {
                           const SizedBox(width: 4),
                           const Icon(Icons.diamond,
                               size: 13,
-                              color: Color(0xFFCE93D8)),
+                              color: AquaThemeColors.founderPurpleLight),
                         ],
                       ],
                     ),

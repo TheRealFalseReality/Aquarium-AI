@@ -17,6 +17,7 @@ import '../providers/profile_provider.dart';
 import '../models/tank.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../services/analytics_service.dart';
+import '../theme_colors.dart';
 import 'gradient_text.dart';
 import 'animated_drawer_item.dart';
 import 'remove_ads_dialog.dart';
@@ -645,12 +646,12 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         child: CircleAvatar(
           backgroundColor:
               isFounder
-                  ? const Color(0xFF6A1B9A).withOpacity(0.18)
+                  ? AquaThemeColors.founderPurple.withOpacity(0.18)
                   : Theme.of(context).colorScheme.tertiaryContainer,
           child: Icon(
             isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
             color: isFounder
-                ? const Color(0xFF6A1B9A)
+                ? AquaThemeColors.founderPurple
                 : Theme.of(context).colorScheme.tertiary,
             size: 22,
           ),
@@ -664,7 +665,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           ),
           if (isFounder) ...[
             const SizedBox(width: 4),
-            const Icon(Icons.diamond, size: 13, color: Color(0xFF6A1B9A)),
+            const Icon(Icons.diamond,
+                size: 13,
+                color: AquaThemeColors.founderPurple),
           ],
         ],
       ),
@@ -948,7 +951,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                 ? Container(
                                     decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Color(0xFF6A1B9A),
+                                      color: AquaThemeColors.founderPurple,
                                     ),
                                     padding: const EdgeInsets.all(1.5),
                                     child: CircleAvatar(
@@ -998,7 +1001,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                   const SizedBox(width: 4),
                                   const Icon(Icons.diamond,
                                       size: 11,
-                                      color: Color(0xFFCE93D8)),
+                                      color:
+                                          AquaThemeColors.founderPurpleLight),
                                 ],
                               ],
                             ),

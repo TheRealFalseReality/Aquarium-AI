@@ -16,6 +16,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+import '../theme_colors.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -361,22 +362,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6A1B9A).withOpacity(0.12),
+                    color: AquaThemeColors.founderPurple.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFF6A1B9A).withOpacity(0.5),
+                      color: AquaThemeColors.founderPurple.withOpacity(0.5),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.diamond,
-                          size: 13, color: Color(0xFF6A1B9A)),
+                          size: 13,
+                          color: AquaThemeColors.founderPurple),
                       const SizedBox(width: 5),
                       Text(
                         l10n.founderAquaristTitle,
                         style: const TextStyle(
-                          color: Color(0xFF6A1B9A),
+                          color: AquaThemeColors.founderPurple,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -470,7 +472,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF6A1B9A), width: 2.5),
+        border: Border.all(
+            color: AquaThemeColors.founderPurple, width: 2.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(2),

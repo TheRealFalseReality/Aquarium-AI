@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/community_service.dart';
+import '../theme_colors.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
@@ -154,11 +155,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                                     ),
                                     if (isFounder) ...[
                                       const SizedBox(width: 4),
-                                      const Tooltip(
-                                        message: 'Founder Aquarist',
-                                        child: Icon(Icons.diamond,
+                                      Tooltip(
+                                        message: l10n.founderAquaristTitle,
+                                        child: const Icon(Icons.diamond,
                                             size: 14,
-                                            color: Color(0xFF6A1B9A)),
+                                            color: AquaThemeColors.founderPurple),
                                       ),
                                     ],
                                   ],

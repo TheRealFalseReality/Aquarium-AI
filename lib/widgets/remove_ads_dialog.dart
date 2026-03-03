@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 import '../services/remote_config_service.dart';
+import '../theme_colors.dart';
 
 /// Shows the Remove Ads purchase dialog and, after it closes, the
 /// restore-outcome dialog when applicable.
@@ -81,7 +82,8 @@ class RemoveAdsDialog extends ConsumerWidget {
     });
 
     return AlertDialog(
-      icon: const Icon(Icons.diamond, size: 36, color: Color(0xFF6A1B9A)),
+      icon: const Icon(Icons.diamond,
+          size: 36, color: AquaThemeColors.founderPurple),
       title: Text(l10n.removeAds),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -90,10 +92,10 @@ class RemoveAdsDialog extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF6A1B9A).withOpacity(0.08),
+              color: AquaThemeColors.founderPurple.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: const Color(0xFF6A1B9A).withOpacity(0.35),
+                color: AquaThemeColors.founderPurple.withOpacity(0.35),
               ),
             ),
             child: Column(
@@ -102,13 +104,14 @@ class RemoveAdsDialog extends ConsumerWidget {
                 Row(
                   children: [
                     const Icon(Icons.diamond,
-                        size: 16, color: Color(0xFF6A1B9A)),
+                        size: 16,
+                        color: AquaThemeColors.founderPurple),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         l10n.founderAquaristPerksTitle,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: const Color(0xFF6A1B9A),
+                          color: AquaThemeColors.founderPurple,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -208,7 +211,7 @@ class _PerkRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: const Color(0xFF6A1B9A)),
+        Icon(icon, size: 14, color: AquaThemeColors.founderPurple),
         const SizedBox(width: 6),
         Flexible(
           child: Text(
