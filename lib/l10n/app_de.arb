@@ -777,7 +777,6 @@
   "neverShow": "Nie anzeigen",
   "neverShowAgain": "Nie wieder anzeigen",
 
-<<<<<<< copilot/translate-aquarium-calculators
   "calculators": "Rechner",
   "essentialToolsForAquarium": "Unverzichtbare Werkzeuge für Ihr Aquarium.",
   "calculatorType": "Rechnertyp",
@@ -928,7 +927,6 @@
   "appPromoBenefitPerformanceTitle": "Native Leistung",
   "appPromoBenefitPerformanceDesc": "Schnelleres, flüssigeres Erlebnis optimiert für Mobilgeräte",
   "getTheApp": "App herunterladen"
-=======
   "themeDefault": "Standard",
   "themeMaterialYou": "Material You",
   "themeOceanBlue": "Ozeanblau",
@@ -967,5 +965,4 @@
   "chatbotYou": "Sie",
   "chatbotAIError": "{appName} - Fehler",
   "moreThemeOptions": "Weitere Theme-Optionen"
->>>>>>> main
 }
