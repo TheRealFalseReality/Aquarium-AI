@@ -51,4 +51,21 @@ class AdHelper {
           : admobNativeAdUnitId;
     }
   }
+
+  static String get interstitialAdUnitId {
+    // Return an empty string on unsupported platforms.
+    if (!isSupportedPlatform) {
+      return '';
+    }
+
+    if (kDebugMode) {
+      // Use test ad unit IDs in debug mode
+      return Platform.isAndroid
+          ? admobInterstitialAdUnitIdAndroidTest
+          : admobInterstitialAdUnitIdIOSTest;
+    } else {
+      // Use real ad unit ID in release mode
+      return admobInterstitialAdUnitId;
+    }
+  }
 }

@@ -7,6 +7,8 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/species_tags_provider.dart';
 import '../models/fish.dart';
 import '../models/compatibility_report.dart';
@@ -17,6 +19,7 @@ import '../widgets/ai_error_dialog.dart';
 import 'compatibility_report.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/interstitial_ad_service.dart';
 
 class FishCompatibilityScreen extends ConsumerStatefulWidget {
   const FishCompatibilityScreen({super.key});
@@ -33,11 +36,13 @@ class FishCompatibilityScreenState
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
   String? _reefSafeFilter; // null = no filter, 'Yes'/'No'/'Caution' = filtered
+  final InterstitialAdService _interstitialAdService = InterstitialAdService();
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_filterFishList);
+    _interstitialAdService.load();
     // Initialize the list on the first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateAndFilterFishList();
@@ -49,6 +54,7 @@ class FishCompatibilityScreenState
     _loadingOverlayEntry?.remove();
     _searchController.removeListener(_filterFishList);
     _searchController.dispose();
+    _interstitialAdService.dispose();
     super.dispose();
   }
 
@@ -871,6 +877,28 @@ class FishCompatibilityScreenState
                           // Show species selection dialog if any fish have species tags
                           final speciesSelections = await _showSpeciesSelectionDialog(provider.selectedFish);
                           if (!mounted || speciesSelections == null) return;
+
+                          // Show interstitial ad for eligible free-tier users when
+                          // the report is requested (not after analysis completes).
+                          final modelState = ref.read(modelProvider);
+                          final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+                          final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+                          final interstitialEligible =
+                              !kIsWeb && modelState.usingDeveloperGroqKeyForText && !adsRemoved && !debugHideAds;
+                          if (interstitialEligible) {
+                            _interstitialAdService.showIfEligible(
+                              onWillShow: () {
+                                final l10n = AppLocalizations.of(context)!;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.freeTierAdNotice),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                            );
+                          }
 
                           // Build additional notes from species selections
                           String? additionalNotes;

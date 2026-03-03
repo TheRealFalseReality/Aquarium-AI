@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:fish_ai/widgets/ad_component.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
 import '../providers/model_provider.dart';
+import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/interstitial_ad_service.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
@@ -26,6 +30,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
+  final InterstitialAdService _interstitialAdService = InterstitialAdService();
 
   @override
   void initState() {
@@ -33,6 +38,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     if (widget.initialImageBytes != null) {
       _imageBytes = widget.initialImageBytes;
     }
+    _interstitialAdService.load();
   }
 
   Future<void> _pick(ImageSource source) async {
@@ -81,6 +87,30 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
       _error = null;
     });
 
+    // Show interstitial ad for eligible free-tier image users when they tap
+    // Analyze Photo (before the analysis starts).
+    final modelState = ref.read(modelProvider);
+    final adsRemoved = ref.read(purchaseProvider).adsRemoved;
+    final debugHideAds = kDebugMode && ref.read(appSettingsProvider).debugHideAds;
+    final interstitialEligible = !kIsWeb &&
+        modelState.usingDeveloperGroqKeyForImage &&
+        !adsRemoved &&
+        !debugHideAds;
+    if (interstitialEligible) {
+      _interstitialAdService.showIfEligible(
+        onWillShow: () {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.freeTierAdNotice),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+    }
+
     // Log photo analysis submission
     AnalyticsService.logPhotoAnalysis(
       analysisType: 'photo_analysis_submit',
@@ -116,6 +146,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   @override
   void dispose() {
     _noteController.dispose();
+    _interstitialAdService.dispose();
     super.dispose();
   }
 
@@ -130,7 +161,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
     // Disabled for free-tier users when the per-tool RC toggle is off.
     final isPhotoAnalysisDisabled = modelState.usingDeveloperGroqKeyForImage &&
         !RemoteConfigService.freePhotoAnalysisEnabled;
-    
+
     // Listen for photo analysis results
     ref.listen<ChatState>(chatProvider, (previous, next) {
       if (next.messages.isNotEmpty) {
