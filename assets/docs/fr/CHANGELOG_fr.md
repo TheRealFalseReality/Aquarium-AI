@@ -2,6 +2,29 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
+## [3.1.00] - 2026-3-3 – Avantages, fonctionnalités communauté et profil
+
+### Ajouté
+
+- **Ajout d'une section profil utilisateur avec authentification sociale**
+- **Niveau Fondateur Aquariste, image héro moderne du Tank Showcase, système d'avantages fondateur, corrections des publications communautaires**
+- Familles de polices sélectionnables par l'utilisateur dans l'écran d'apparence
+- Sous-type d'aquarium récifal pour les aquariums marins avec prise en charge du filtrage
+- Tri des données de poissons et classification de compatibilité récifale
+- Registre global de TankTag avec prise en charge explicite de la sauvegarde/restauration
+- Fonction de partage/importation d'un seul bac
+- Écran d'accueil : grille à 2 colonnes avec bascule liste/grille + mode grille/mosaïque de gestion des bacs et personnalisation des cartes
+- Ajout d'une photo de bannière principale du bac à l'écran des détails du bac
+- Permet le masquage permanent de l'en-tête de l'écran d'accueil
+
+### Modifié
+
+- Chips de suggestions du chatbot localisées, paramètre de langue de réponse IA ajouté
+- Localisation des écrans de compatibilité IA, calculateurs, à propos, informations et paramètres du fournisseur IA
+- Chaînes codées en dur localisées dans les paramètres, le tiroir, l'écran d'accueil, la boîte de dialogue de promotion AquaPi, l'écran d'historique et plus encore
+
+**Journal complet des modifications**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.10...v3.1.00>
+
 ## [3.0.10] - 2026-2-27 – Mises à jour visuelles, corrections de l'outil Stocking
 
 ### Ajouté
