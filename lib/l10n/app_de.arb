@@ -977,5 +977,15 @@
   "fahrenheit": "Fahrenheit",
   "celsius": "Celsius",
   "kelvin": "Kelvin",
-  "tempFieldLabel": "Temp (°{unit})"
+  "tempFieldLabel": "Temp (°{unit})",
+
+  "shapeRectangle": "Rechteck",
+  "shapeCube": "Würfel",
+  "shapeCylinder": "Zylinder",
+  "shapeHexagonal": "Sechseckig",
+  "shapeBowFront": "Gewölbte Front",
+  "unitInches": "Zoll",
+  "unitFeet": "Fuß",
+  "unitCm": "cm",
+  "unitMeters": "Meter"
 }

@@ -4833,5 +4833,50 @@
         "type": "String"
       }
     }
+  },
+
+  "shapeRectangle": "Rectangle",
+  "@shapeRectangle": {
+    "description": "Tank shape chip label: rectangular tank"
+  },
+
+  "shapeCube": "Cube",
+  "@shapeCube": {
+    "description": "Tank shape chip label: cube tank"
+  },
+
+  "shapeCylinder": "Cylinder",
+  "@shapeCylinder": {
+    "description": "Tank shape chip label: cylindrical tank"
+  },
+
+  "shapeHexagonal": "Hexagonal",
+  "@shapeHexagonal": {
+    "description": "Tank shape chip label: hexagonal tank"
+  },
+
+  "shapeBowFront": "Bow Front",
+  "@shapeBowFront": {
+    "description": "Tank shape chip label: bow-front tank"
+  },
+
+  "unitInches": "Inches",
+  "@unitInches": {
+    "description": "Unit chip label: inches"
+  },
+
+  "unitFeet": "Feet",
+  "@unitFeet": {
+    "description": "Unit chip label: feet"
+  },
+
+  "unitCm": "cm",
+  "@unitCm": {
+    "description": "Unit chip label: centimetres (universal abbreviation)"
+  },
+
+  "unitMeters": "Meters",
+  "@unitMeters": {
+    "description": "Unit chip label: meters"
   }
 }

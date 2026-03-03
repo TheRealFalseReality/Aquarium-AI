@@ -280,8 +280,15 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             runSpacing: 12.0,
             children: shapeIcons.keys.map((shapeName) {
               final selected = _shape == shapeName;
+              final shapeLabels = {
+                'Rectangle': l10n.shapeRectangle,
+                'Cube': l10n.shapeCube,
+                'Cylinder': l10n.shapeCylinder,
+                'Hexagonal': l10n.shapeHexagonal,
+                'BowFront': l10n.shapeBowFront,
+              };
               return ModernSelectableChip(
-                label: shapeName,
+                label: shapeLabels[shapeName] ?? shapeName,
                 icon: shapeIcons[shapeName],
                 selected: selected,
                 onTap: () {
@@ -334,8 +341,14 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
             runSpacing: 10.0,
             children: ['Inches', 'Feet', 'cm', 'Meters'].map((unitName) {
               final selected = _units == unitName;
+              final unitLabels = {
+                'Inches': l10n.unitInches,
+                'Feet': l10n.unitFeet,
+                'cm': l10n.unitCm,
+                'Meters': l10n.unitMeters,
+              };
               return ModernSelectableChip(
-                label: unitName,
+                label: unitLabels[unitName] ?? unitName,
                 selected: selected,
                 dense: true,
                 selectedColor: Theme.of(context).colorScheme.secondary,
