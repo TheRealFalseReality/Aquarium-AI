@@ -1,3 +1,4 @@
+import 'package:fish_ai/constants.dart';
 import 'package:fish_ai/services/remote_config_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,8 +74,8 @@ void main() {
         );
       });
 
-      test('changelog defaults to empty string (use local asset)', () {
-        expect(RemoteConfigService.changelog, equals(''));
+      test('changelogEn defaults to empty string (use local asset)', () {
+        expect(RemoteConfigService.changelogEn, equals(''));
       });
     });
 
@@ -109,8 +110,8 @@ void main() {
             equals('fishcompat_json'));
         expect(RemoteConfigKeys.buyMeACoffeeUrl,
             equals('buy_me_a_coffee_url'));
-        expect(RemoteConfigKeys.changelog,
-            equals('changelog'));
+        expect(RemoteConfigKeys.changelogEn,
+            equals('changelogEn'));
       });
     });
   });

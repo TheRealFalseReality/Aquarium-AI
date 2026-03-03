@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/gradient_text.dart';
 
@@ -20,6 +21,7 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: GestureDetector(
@@ -30,20 +32,22 @@ class MainLayout extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/AquaAi Logo.png',
+                'assets/images/system/AquaAi Logo.png',
                 height: 40,
               ),
               const SizedBox(width: 12),
-              GradientText(
-                'Aquarium AI',
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: GradientText(
+                  l10n.appTitle,
+                  style: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  gradient: LinearGradient(colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                  ]),
                 ),
-                gradient: LinearGradient(colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.secondary,
-                ]),
               ),
             ],
           ),

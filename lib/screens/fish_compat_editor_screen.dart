@@ -192,7 +192,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   Future<void> _loadData() async {
     try {
       final jsonString =
-          await rootBundle.loadString('assets/fishcompat.json');
+          await rootBundle.loadString('assets/data/fishcompat.json');
       final raw = json.decode(jsonString) as Map<String, dynamic>;
       final result = <String, List<_FishEntry>>{};
       for (final category in ['freshwater', 'marine']) {
