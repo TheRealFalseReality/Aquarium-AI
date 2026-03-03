@@ -81,7 +81,7 @@ class RemoveAdsDialog extends ConsumerWidget {
     });
 
     return AlertDialog(
-      icon: const Icon(Icons.block, size: 36),
+      icon: const Icon(Icons.diamond, size: 36, color: Color(0xFF6A1B9A)),
       title: Text(l10n.removeAds),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -90,10 +90,10 @@ class RemoveAdsDialog extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45),
+              color: const Color(0xFF6A1B9A).withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                color: const Color(0xFF6A1B9A).withOpacity(0.35),
               ),
             ),
             child: Column(
@@ -101,25 +101,32 @@ class RemoveAdsDialog extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Text('⭐', style: TextStyle(fontSize: 16)),
+                    const Icon(Icons.diamond,
+                        size: 16, color: Color(0xFF6A1B9A)),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.earlySupporterPerkTitle,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        l10n.founderAquaristPerksTitle,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: const Color(0xFF6A1B9A),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.earlySupporterPerkBody,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    height: 1.45,
-                  ),
-                ),
+                _PerkRow(icon: Icons.block, label: l10n.founderPerkAdsRemoved),
+                const SizedBox(height: 4),
+                _PerkRow(
+                    icon: Icons.auto_awesome,
+                    label: l10n.founderPerkIncreasedAILimits),
+                const SizedBox(height: 4),
+                _PerkRow(
+                    icon: Icons.border_outer,
+                    label: l10n.founderPerkPostBorder),
+                const SizedBox(height: 4),
+                _PerkRow(icon: Icons.diamond, label: l10n.founderPerkBadge),
               ],
             ),
           ),
@@ -185,6 +192,32 @@ class RemoveAdsDialog extends ConsumerWidget {
             ],
           );
         }),
+      ],
+    );
+  }
+}
+
+/// A single perk row shown inside the Remove Ads dialog.
+class _PerkRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _PerkRow({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: const Color(0xFF6A1B9A)),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
       ],
     );
   }

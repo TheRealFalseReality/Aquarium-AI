@@ -63,6 +63,13 @@ class PurchaseState {
       restoreOutcome: restoreOutcome ?? this.restoreOutcome,
     );
   }
+
+  /// Whether the user has Founder Aquarist status.
+  ///
+  /// Founder Aquarists have purchased any product in [founderProductIds] which
+  /// currently includes the "remove ads" lifetime purchase.  Add new product
+  /// IDs to [founderProductIds] in `constants.dart` to extend this status.
+  bool get isFounder => adsRemoved;
 }
 
 /// Manages the in-app purchase state for removing ads.

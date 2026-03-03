@@ -97,6 +97,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final currentUserId = authState.asData?.value?.uid ?? '';
     final commentsAsync =
         ref.watch(communityCommentsStreamProvider(widget.post.id));
+    final isFounder = widget.post.isFounderPost;
+    final isTankShowcase = widget.post.type == PostType.tankShowcase;
 
     return Scaffold(
       appBar: AppBar(
@@ -107,14 +109,15 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           Expanded(
             child: ListView(
               children: [
-                // Post header image
+                // Post header image — taller for Tank Showcase
                 if (widget.post.imageUrl != null)
                   CachedNetworkImage(
                     imageUrl: widget.post.imageUrl!,
                     width: double.infinity,
+                    height: isTankShowcase ? 320 : 240,
                     fit: BoxFit.cover,
                     placeholder: (_, _) => Container(
-                      height: 240,
+                      height: isTankShowcase ? 320 : 240,
                       color: Theme.of(context)
                           .colorScheme
                           .surfaceContainerHighest,
@@ -133,27 +136,45 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         children: [
                           _buildAvatar(context),
                           const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.post.displayName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              Text(
-                                _formatDate(widget.post.createdAt),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant),
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        widget.post.displayName,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(fontWeight: FontWeight.w600),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isFounder) ...[
+                                      const SizedBox(width: 4),
+                                      const Tooltip(
+                                        message: 'Founder Aquarist',
+                                        child: Icon(Icons.diamond,
+                                            size: 14,
+                                            color: Color(0xFF6A1B9A)),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                Text(
+                                  _formatDate(widget.post.createdAt),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

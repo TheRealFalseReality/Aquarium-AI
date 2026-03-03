@@ -42,6 +42,9 @@ class CommunityPost {
   /// Keys: location, tankCount, fishCount, yearsExperience, memberSince,
   /// experienceLevel — only enabled + non-empty fields are present.
   final Map<String, String>? postSignature;
+  /// Whether the author was a Founder Aquarist at the time of posting.
+  /// When `true`, the post card shows a deep-purple border and founder badge.
+  final bool isFounderPost;
   final int likes;
   final int commentCount;
   final DateTime createdAt;
@@ -58,6 +61,7 @@ class CommunityPost {
     this.imageUrl,
     this.tankInfo,
     this.postSignature,
+    this.isFounderPost = false,
     this.likes = 0,
     this.commentCount = 0,
     required this.createdAt,
@@ -78,6 +82,7 @@ class CommunityPost {
       tankInfo: data['tankInfo'] as Map<String, dynamic>?,
       postSignature: (data['postSignature'] as Map?)
           ?.cast<String, String>(),
+      isFounderPost: data['isFounderPost'] as bool? ?? false,
       likes: data['likes'] as int? ?? 0,
       commentCount: data['commentCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -96,6 +101,7 @@ class CommunityPost {
       if (imageUrl != null) 'imageUrl': imageUrl,
       if (tankInfo != null) 'tankInfo': tankInfo,
       if (postSignature != null) 'postSignature': postSignature,
+      if (isFounderPost) 'isFounderPost': true,
       'likes': likes,
       'commentCount': commentCount,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -114,6 +120,7 @@ class CommunityPost {
     String? imageUrl,
     Map<String, dynamic>? tankInfo,
     Map<String, String>? postSignature,
+    bool? isFounderPost,
     int? likes,
     int? commentCount,
     DateTime? createdAt,
@@ -130,6 +137,7 @@ class CommunityPost {
       imageUrl: imageUrl ?? this.imageUrl,
       tankInfo: tankInfo ?? this.tankInfo,
       postSignature: postSignature ?? this.postSignature,
+      isFounderPost: isFounderPost ?? this.isFounderPost,
       likes: likes ?? this.likes,
       commentCount: commentCount ?? this.commentCount,
       createdAt: createdAt ?? this.createdAt,

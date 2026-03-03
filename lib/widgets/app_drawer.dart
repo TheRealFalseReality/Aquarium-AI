@@ -619,6 +619,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       void Function(String) navigate) {
     final authAsync = ref.watch(authStateProvider);
     final user = authAsync.asData?.value;
+    final isFounder = ref.watch(purchaseProvider).isFounder;
 
     if (user == null) {
       return ListTile(
@@ -643,17 +644,33 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         height: 40,
         child: CircleAvatar(
           backgroundColor:
-              Theme.of(context).colorScheme.tertiaryContainer,
+              isFounder
+                  ? const Color(0xFF6A1B9A).withOpacity(0.18)
+                  : Theme.of(context).colorScheme.tertiaryContainer,
           child: Icon(
             isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: isFounder
+                ? const Color(0xFF6A1B9A)
+                : Theme.of(context).colorScheme.tertiary,
             size: 22,
           ),
         ),
       ),
-      title: Text(displayName,
-          overflow: TextOverflow.ellipsis, maxLines: 1),
-      subtitle: Text(l10n.profileDrawerDescription),
+      title: Row(
+        children: [
+          Flexible(
+            child: Text(displayName,
+                overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
+          if (isFounder) ...[
+            const SizedBox(width: 4),
+            const Icon(Icons.diamond, size: 13, color: Color(0xFF6A1B9A)),
+          ],
+        ],
+      ),
+      subtitle: Text(isFounder
+          ? l10n.founderAquaristTitle
+          : l10n.profileDrawerDescription),
       onTap: () => navigate('/profile'),
     );
   }
@@ -816,6 +833,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     // Observe auth + profile for the profile chip
     final user = ref.watch(authStateProvider).asData?.value;
     final profile = ref.watch(currentUserProfileProvider).asData?.value;
+    final isFounder = ref.watch(purchaseProvider).isFounder;
 
     String? displayName;
     IconData avatarIcon = Icons.account_circle;
@@ -922,34 +940,67 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Avatar
+                          // Avatar (with founder ring when applicable)
                           SizedBox(
                             width: 26,
                             height: 26,
-                            child: CircleAvatar(
-                              backgroundColor:
-                                  colorScheme.primary.withOpacity(0.3),
-                              backgroundImage: avatarUrl != null
-                                  ? CachedNetworkImageProvider(avatarUrl)
-                                  : null,
-                              child: avatarUrl == null
-                                  ? Icon(avatarIcon,
-                                      size: 16, color: colorScheme.onSurface)
-                                  : null,
-                            ),
+                            child: isFounder
+                                ? Container(
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color(0xFF6A1B9A),
+                                    ),
+                                    padding: const EdgeInsets.all(1.5),
+                                    child: CircleAvatar(
+                                      backgroundColor:
+                                          colorScheme.primary.withOpacity(0.3),
+                                      backgroundImage: avatarUrl != null
+                                          ? CachedNetworkImageProvider(avatarUrl)
+                                          : null,
+                                      child: avatarUrl == null
+                                          ? Icon(avatarIcon,
+                                              size: 14,
+                                              color: colorScheme.onSurface)
+                                          : null,
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor:
+                                        colorScheme.primary.withOpacity(0.3),
+                                    backgroundImage: avatarUrl != null
+                                        ? CachedNetworkImageProvider(avatarUrl)
+                                        : null,
+                                    child: avatarUrl == null
+                                        ? Icon(avatarIcon,
+                                            size: 16, color: colorScheme.onSurface)
+                                        : null,
+                                  ),
                           ),
                           const SizedBox(width: 8),
-                          // Name
+                          // Name + optional founder diamond
                           Flexible(
-                            child: Text(
-                              displayName ?? l10n.profileAnonymous,
-                              style: TextStyle(
-                                color: colorScheme.onSurface,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    displayName ?? l10n.profileAnonymous,
+                                    style: TextStyle(
+                                      color: colorScheme.onSurface,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                                if (isFounder) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.diamond,
+                                      size: 11,
+                                      color: Color(0xFFCE93D8)),
+                                ],
+                              ],
                             ),
                           ),
                           const SizedBox(width: 4),

@@ -3019,14 +3019,44 @@
     "description": "Subtitle shown on the Remove Ads entry in the app drawer"
   },
 
-  "earlySupporterPerkTitle": "Founders Supporter Perk",
+  "earlySupporterPerkTitle": "Founder Aquarist Perks",
   "@earlySupporterPerkTitle": {
     "description": "Title of the Early Supporter callout in the Remove Ads dialog"
   },
 
-  "earlySupporterPerkBody": "Remove ads forever with a single purchase and help fund the development of Aquarium AI. Your support keeps the app growing — and as a thank-you, early supporters may see increased AI usage limits when we're able to make that happen!",
+  "earlySupporterPerkBody": "Remove ads forever and unlock Founder Aquarist status with a single purchase. Founder Aquarists enjoy increased free AI usage limits, a distinctive deep-purple border on their community posts, and an exclusive badge on their profile and across the app.",
   "@earlySupporterPerkBody": {
     "description": "Body text of the Early Supporter callout in the Remove Ads dialog"
+  },
+
+  "founderAquaristTitle": "Founder Aquarist",
+  "@founderAquaristTitle": {
+    "description": "Badge/title label for users with Founder Aquarist status"
+  },
+
+  "founderAquaristPerksTitle": "Founder Aquarist Perks",
+  "@founderAquaristPerksTitle": {
+    "description": "Section heading for the list of Founder Aquarist perks"
+  },
+
+  "founderPerkAdsRemoved": "Ads permanently removed",
+  "@founderPerkAdsRemoved": {
+    "description": "Perk line: ads removed for Founder Aquarists"
+  },
+
+  "founderPerkIncreasedAILimits": "Increased free AI usage limits",
+  "@founderPerkIncreasedAILimits": {
+    "description": "Perk line: higher AI request caps for Founder Aquarists"
+  },
+
+  "founderPerkPostBorder": "Exclusive deep-purple post border",
+  "@founderPerkPostBorder": {
+    "description": "Perk line: purple border on community posts for Founder Aquarists"
+  },
+
+  "founderPerkBadge": "Exclusive Founder badge on profile and posts",
+  "@founderPerkBadge": {
+    "description": "Perk line: badge shown on profile and post cards for Founder Aquarists"
   },
 
   "removeAdsContentDesc": "Support Aquarium AI with a one-time purchase to remove all ads permanently.",

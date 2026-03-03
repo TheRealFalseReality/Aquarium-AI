@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
@@ -152,6 +153,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     }
 
     final profile = ref.read(currentUserProfileProvider).asData?.value;
+    final isFounder = ref.read(purchaseProvider).isFounder;
     final post = await notifier.submitPost(
       type: _selectedType,
       title: _titleController.text.trim(),
@@ -159,6 +161,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       imageFilePath: _imageFilePath,
       tankInfo: tankInfo,
       postSignature: profile?.buildPostSignature(),
+      isFounderPost: isFounder,
     );
 
     if (mounted) {

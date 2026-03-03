@@ -49,6 +49,7 @@ class CommunityService {
     String? imageFilePath,
     Map<String, dynamic>? tankInfo,
     Map<String, String>? postSignature,
+    bool isFounderPost = false,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -76,6 +77,7 @@ class CommunityService {
         imageUrl: imageUrl,
         tankInfo: tankInfo,
         postSignature: postSignature,
+        isFounderPost: isFounderPost,
         likes: 0,
         commentCount: 0,
         createdAt: now,
