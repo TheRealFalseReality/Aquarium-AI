@@ -4,10 +4,13 @@ import 'package:fish_ai/models/compatibility_report.dart';
 import 'package:fish_ai/models/fish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import '../models/analysis_history_entry.dart';
 import 'analysis_history_provider.dart';
+import 'purchase_provider.dart' show isFounderProvider;
 import '../prompts/fish_compatibility_prompt.dart';
+import '../utils/ai_language_utils.dart';
 import '../utils/tank_harmony_calculator.dart';
 import '../utils/json_utils.dart';
 import '../services/fish_data_service.dart';
@@ -160,24 +163,36 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     );
 
     final models = ref.read(modelProvider);
+    final settings = ref.read(appSettingsProvider);
     final harmonyScore = TankHarmonyCalculator.calculateHarmonyScore(state.selectedFish);
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
-    final prompt = buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes);
+    final prompt = appendLanguageInstruction(
+      buildFishCompatibilityPrompt(category, fishNames, harmonyScore, additionalNotes: additionalNotes),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
 
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final isFounder = ref.read(isFounderProvider);
+      final maxPerMin = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerMinute
+          : RemoteConfigService.maxRequestsPerMinute;
+      final maxPerDay = isFounder
+          ? RemoteConfigService.founderMaxRequestsPerDay
+          : RemoteConfigService.maxRequestsPerDay;
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: isFounder);
         state = state.copyWith(
-          error: '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          error: '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         state = state.copyWith(
-          error: '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          error: '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
         );
         return;

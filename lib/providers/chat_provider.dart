@@ -12,12 +12,15 @@ import '../models/automation_script.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/fish_info_result.dart';
 import 'analysis_history_provider.dart';
+import 'app_settings_provider.dart';
 import 'model_provider.dart';
+import 'purchase_provider.dart' show isFounderProvider;
 import '../prompts/aquapi_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../prompts/automation_script_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/fish_info_prompt.dart';
+import '../utils/ai_language_utils.dart';
 import '../utils/json_utils.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/groq_helper.dart';
@@ -100,15 +103,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// Returns the effective chat history limit.
   /// Users who supply their own API key for the active text provider use their
-  /// configured [ModelState.chatHistoryLimit]. Everyone on the free dev tier
-  /// is capped at [RemoteConfigService.freeTierChatHistoryLimit].
+  /// configured [ModelState.chatHistoryLimit]. Free-tier users are capped; 
+  /// Founder Aquarists get an increased cap over the standard free tier.
   int get _historyLimit {
     final usingDevKey = switch (_modelState.activeTextProvider) {
       AIProvider.gemini => false, // no dev key for Gemini
       AIProvider.openAI => false, // no dev key for OpenAI
       AIProvider.groq => _modelState.usingDeveloperGroqKeyForText,
     };
-    return usingDevKey ? RemoteConfigService.freeTierChatHistoryLimit : _modelState.chatHistoryLimit;
+    if (!usingDevKey) return _modelState.chatHistoryLimit;
+    final isFounder = _ref.read(isFounderProvider);
+    return isFounder
+        ? RemoteConfigService.founderChatHistoryLimit
+        : RemoteConfigService.freeTierChatHistoryLimit;
   }
 
   void _initializeProvider() {
@@ -119,6 +126,25 @@ class ChatNotifier extends StateNotifier<ChatState> {
       OpenAI.apiKey = _modelState.openAIApiKey;
     }
   }
+
+  /// Returns `true` when the current user has Founder Aquarist status
+  /// (real purchase or debug override).
+  bool get _isFounder => _ref.read(isFounderProvider);
+
+  /// Effective per-minute request cap for the current user tier.
+  int get _effectiveMaxPerMinute => _isFounder
+      ? RemoteConfigService.founderMaxRequestsPerMinute
+      : RemoteConfigService.maxRequestsPerMinute;
+
+  /// Effective per-day request cap for the current user tier.
+  int get _effectiveMaxPerDay => _isFounder
+      ? RemoteConfigService.founderMaxRequestsPerDay
+      : RemoteConfigService.maxRequestsPerDay;
+
+  /// Effective per-day photo analysis cap for the current user tier.
+  int get _effectiveMaxPhotosPerDay => _isFounder
+      ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+      : RemoteConfigService.maxPhotoAnalysesPerDay;
 
 
   void cancel() {
@@ -143,23 +169,32 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   /// Returns the effective system prompt for [message].
-  /// Appends the AquaPi supplement when the message is AquaPi-related.
-  String _effectiveSystemPrompt(String message) => effectiveSystemPrompt(message);
+  /// Appends the AquaPi supplement when the message is AquaPi-related,
+  /// and adds a language instruction based on the AI response language setting.
+  String _effectiveSystemPrompt(String message) {
+    final base = effectiveSystemPrompt(message);
+    final settings = _ref.read(appSettingsProvider);
+    return appendLanguageInstruction(
+      base,
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
+  }
 
   // ================== Generic Chat ==================
   Future<void> sendMessage(String message) async {
     if (_modelState.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: _isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: _isFounder);
         return _handleError(
-          '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           message,
           isRateLimitError: true,
         );
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         return _handleError(
-          '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          '📅 Daily free-tier limit reached ($_effectiveMaxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           message,
           isRateLimitError: true,
         );
@@ -296,12 +331,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: _isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: _isFounder);
         final userMsg = 'Please analyze my water parameters.';
         await _handleError(
-          '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           userMsg,
           isRateLimitError: true,
         );
@@ -309,7 +344,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         final userMsg = 'Please analyze my water parameters.';
         await _handleError(
-          '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          '📅 Daily free-tier limit reached ($_effectiveMaxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           userMsg,
           isRateLimitError: true,
         );
@@ -322,14 +357,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${params['salinity']!.isNotEmpty ? ', Salinity: ${params['salinity']} ${params['salinityUnit']}' : ''}'
         '${params['additionalInfo']!.isNotEmpty ? ', Additional Info: ${params['additionalInfo']}' : ''}';
     _prepareForSending(userMsg);
-    final prompt = buildWaterAnalysisPrompt(
-      tankType: params['tankType']!,
-      ph: params['ph']!,
-      temp: params['temp']!,
-      salinity: params['salinity']!,
-      additionalInfo: params['additionalInfo']!,
-      tempUnit: params['tempUnit']!,
-      salinityUnit: params['salinityUnit']!,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildWaterAnalysisPrompt(
+        tankType: params['tankType']!,
+        ph: params['ph']!,
+        temp: params['temp']!,
+        salinity: params['salinity']!,
+        additionalInfo: params['additionalInfo']!,
+        tempUnit: params['tempUnit']!,
+        salinityUnit: params['salinityUnit']!,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -360,18 +400,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: _isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: _isFounder);
         await _handleError(
-          '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           'Generate an automation script.',
           isRateLimitError: true,
         );
         return null;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         await _handleError(
-          '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          '📅 Daily free-tier limit reached ($_effectiveMaxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           'Generate an automation script.',
           isRateLimitError: true,
         );
@@ -380,7 +420,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
-    final prompt = buildAutomationScriptPrompt(description);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildAutomationScriptPrompt(description),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
       final decoded = json.decode(extractJson(responseText));
@@ -413,18 +458,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
       return null;
     }
     if (_modelState.usingDeveloperGroqKeyForText) {
-      final result = await DevRateLimiter.checkAndRecordRequest();
+      final result = await DevRateLimiter.checkAndRecordRequest(isFounder: _isFounder);
       if (result == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: _isFounder);
         await _handleError(
-          '⏱️ Free-tier limit reached (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+          '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           'Look up fish info: $fishNames.',
           isRateLimitError: true,
         );
         return null;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
         await _handleError(
-          '📅 Daily free-tier limit reached (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+          '📅 Daily free-tier limit reached ($_effectiveMaxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           'Look up fish info: $fishNames.',
           isRateLimitError: true,
         );
@@ -435,10 +480,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
         '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
     _prepareForSending(userMsg);
-    final prompt = buildFishInfoPrompt(
-      fishNames: fishNames,
-      tankSize: tankSize,
-      additionalNotes: additionalNotes,
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildFishInfoPrompt(
+        fishNames: fishNames,
+        tankSize: tankSize,
+        additionalNotes: additionalNotes,
+      ),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
     );
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
@@ -476,14 +526,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
     // error as a chat message rather than a silent failure.
     if (_modelState.usingDeveloperGroqKeyForImage) {
       // Per-minute + per-day request limit checked first — no quota consumed if this fails.
-      final reqResult = await DevRateLimiter.checkAndRecordRequest();
+      final reqResult = await DevRateLimiter.checkAndRecordRequest(isFounder: _isFounder);
       if (reqResult == DevRateLimitResult.minuteLimitReached) {
-        final secs = await DevRateLimiter.secondsUntilNextSlot();
+        final secs = await DevRateLimiter.secondsUntilNextSlot(isFounder: _isFounder);
         state = ChatState(
           messages: [
             ...state.messages,
             ChatMessage(
-              text: '⏱️ **Free-tier limit reached** (${RemoteConfigService.maxRequestsPerMinute} requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
+              text: '⏱️ **Free-tier limit reached** ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
               isUser: false,
               isError: true,
               isRetryable: true,
@@ -499,7 +549,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           messages: [
             ...state.messages,
             ChatMessage(
-              text: '📅 **Daily free-tier limit reached** (${RemoteConfigService.maxRequestsPerDay} requests/day). Come back tomorrow or add your own Groq API key in Settings.',
+              text: '📅 **Daily free-tier limit reached** ($_effectiveMaxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
               isUser: false,
               isError: true,
               isRetryable: false,
@@ -511,7 +561,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       }
       // Daily photo limit (only for new analyses, not regenerations)
       if (!isRegeneration) {
-        final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis();
+        final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis(isFounder: _isFounder);
         if (!photoAllowed) {
           // Rollback the per-minute slot we just recorded since the photo won't proceed.
           await DevRateLimiter.undoLastRequest();
@@ -519,7 +569,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
             messages: [
               ...state.messages,
               ChatMessage(
-                text: '📸 **Daily Photo Limit Reached**\n\nFree tier allows ${RemoteConfigService.maxPhotoAnalysesPerDay} photo ${RemoteConfigService.maxPhotoAnalysesPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own Groq API key in Settings for unlimited access.',
+                text: '📸 **Daily Photo Limit Reached**\n\nFree tier allows $_effectiveMaxPhotosPerDay photo ${_effectiveMaxPhotosPerDay == 1 ? 'analysis' : 'analyses'} per day. Add your own Groq API key in Settings for unlimited access.',
                 isUser: false,
                 isError: true,
                 isRetryable: false,
@@ -541,7 +591,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     } else {
       state = ChatState(messages: state.messages, isLoading: true);
     }
-    final prompt = buildPhotoAnalysisPrompt(note);
+    final settings = _ref.read(appSettingsProvider);
+    final prompt = appendLanguageInstruction(
+      buildPhotoAnalysisPrompt(note),
+      aiResponseLanguage: settings.aiResponseLanguage,
+      localeCode: settings.localeCode,
+    );
     final originalMessage = 'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
     try {
       final responseText = await _generateContentWithImage(prompt, imageBytes, mimeType);

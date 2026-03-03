@@ -5,6 +5,15 @@
 const String developerGroqApiKey =
     String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
 
+// reCAPTCHA v3 site key – injected at build time via:
+//   flutter build ... --dart-define=RECAPTCHA_V3_SITE_KEY=<your-key>
+// Required for Firebase App Check on the Web platform.
+// Obtain your key at https://www.google.com/recaptcha/admin and register it
+// in Firebase Console → Build → App Check → Web app → reCAPTCHA v3.
+// Leave the default empty; App Check will fail gracefully on web if not set.
+const String reCaptchaV3SiteKey =
+    String.fromEnvironment('RECAPTCHA_V3_SITE_KEY', defaultValue: '');
+
 // AdMob constants
 const String admobAppId = 'ca-app-pub-5701077439648731~1582287080';
 
@@ -13,12 +22,20 @@ const String admobAppIdTest = 'ca-app-pub-3940256099942544~3347511713';
 
 const String admobBannerAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/9214589741';
 const String admobNativeAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/2247696110';
+const String admobInterstitialAdUnitIdAndroidTest = 'ca-app-pub-3940256099942544/1033173712';
 const String admobBannerAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/2435281174';
 const String admobNativeAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/3986624511';
+const String admobInterstitialAdUnitIdIOSTest = 'ca-app-pub-3940256099942544/4411468910';
 
 // Real AdMob IDs
 const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/8630162735';
 const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
+const String admobInterstitialAdUnitId = 'ca-app-pub-5701077439648731/4488121170';
+
+// Interstitial ad cooldown: once every N hours for free-tier AI users.
+// This is the in-app fallback default; the actual value is controlled via
+// Firebase Remote Config (RemoteConfigKeys.interstitialCooldownHours).
+const int rcDefaultInterstitialCooldownHours = 6;
 
 // AdSense constants
 const String adSenseAppId = 'ca-pub-5701077439648731';
@@ -27,6 +44,13 @@ const String adSenseAdUnitId = '9994371406';
 // In-app purchase product IDs
 const String earlySupporterLifetimeProductId = 'remove_ads_early_supporter_lifetime';
 const String buyMeACoffeeProductId = 'buy_me_a_coffee';
+
+/// Product IDs that grant "Founder Aquarist" status.
+/// Add new founder product IDs here as they are introduced — every entry in
+/// this list will be treated as a Founder Aquarist purchase.
+const List<String> founderProductIds = [
+  earlySupporterLifetimeProductId,
+];
 
 // ---------------------------------------------------------------------------
 // Remote Config in-app fallback defaults
@@ -62,7 +86,7 @@ const double rcDefaultEarlySupporterPrice = 0.99;
 // Buy Me a Coffee URL
 const String rcDefaultBuyMeACoffeeUrl = 'https://buymeacoffee.com/capitalcityaquatics';
 
-// Changelog (empty = use bundled assets/docs/CHANGELOG.md)
+// Changelog (empty = use bundled assets/docs/en/CHANGELOG_en.md)
 const String rcDefaultChangelog = '';
 const String rcDefaultChangelogDe = '';
 const String rcDefaultChangelogEs = '';
@@ -74,6 +98,12 @@ const bool rcDefaultCommunityImageUpload = true;
 // Per-tool free-tier availability (true = enabled on free tier)
 const bool rcDefaultFreeFishCompatEnabled = true;
 const bool rcDefaultFreePhotoAnalysisEnabled = true;
+
+// Founder Aquarist tier limits (increased vs standard free tier)
+const int rcDefaultFounderMaxRequestsPerMinute = 10;
+const int rcDefaultFounderMaxRequestsPerDay = 150;
+const int rcDefaultFounderMaxPhotoAnalysesPerDay = 10;
+const int rcDefaultFounderChatHistoryLimit = 10;
 
 // ---------------------------------------------------------------------------
 // Firebase Remote Config key names
@@ -147,7 +177,7 @@ class RemoteConfigKeys {
 
   // ── Changelog ───────────────────────────────────────────────────────────
   /// String — full markdown content of the changelog (English).
-  /// Empty string (default) means use the bundled `assets/docs/CHANGELOG.md`.
+  /// Empty string (default) means use the bundled `assets/docs/en/CHANGELOG_en.md`.
   static const String changelogEn = 'changelog_en';
 
   /// String — full markdown content of the changelog (German).
@@ -176,4 +206,21 @@ class RemoteConfigKeys {
   /// Boolean — when `false` the Photo Analysis tool is disabled for
   /// free-tier (developer Groq key) users.  Defaults to `true`.
   static const String freePhotoAnalysisEnabled = 'free_photo_analysis_enabled';
+
+  // ── Ads ───────────────────────────────────────────────────────────────────
+  /// Integer — minimum hours between interstitial ad impressions for
+  /// free-tier users.  Defaults to [rcDefaultInterstitialCooldownHours] (6).
+  static const String interstitialCooldownHours = 'admob_interstitial_cooldown_hours';
+  // ── Founder Aquarist AI limits ──────────────────────────────────────────────
+  /// Integer — per-minute request cap for Founder Aquarist users.
+  static const String founderMaxRequestsPerMinute = 'founder_max_requests_per_minute';
+
+  /// Integer — per-day request cap for Founder Aquarist users.
+  static const String founderMaxRequestsPerDay = 'founder_max_requests_per_day';
+
+  /// Integer — per-day photo-analysis cap for Founder Aquarist users.
+  static const String founderMaxPhotoAnalysesPerDay = 'founder_max_photo_analyses_per_day';
+
+  /// Integer — chat-history window for Founder Aquarist users.
+  static const String founderChatHistoryLimit = 'founder_chat_history_limit';
 }

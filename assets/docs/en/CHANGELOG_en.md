@@ -81,11 +81,9 @@ All notable changes to this project will be documented in this file.
 - Stocking guides per tank  
 - Notifications & Events log in calendar view  
 - Expenses or P&L
-- Share and import tanks with friends  
 - Explore feed  
 - iOS ( in_app_update -> upgrader)
 - Make the parameter and dosing, well, all those screens better  
-- Customize welcome screen  
 - Allow user to edit prompts to further customize the app  
 - Backup Photos  
 - Add Sorting or global filters to fish types/species
@@ -94,6 +92,7 @@ All notable changes to this project will be documented in this file.
 - User rearrange features
 - User edited Prompts in your langauge
 - Let's Start a Community!
+- Allow tank info attachment for any post
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug  
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

@@ -8,8 +8,10 @@ import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/fish_data_service.dart';
 import '../services/remote_config_service.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
@@ -140,6 +142,43 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         (t) => t.id == _selectedTankId,
         orElse: () => tanks.first,
       );
+
+      // Build a flat lookup: fishUnit name → default imageURL from fishcompat.
+      // TankInhabitant.fishUnit is set from fish.name at selection time, so
+      // keys match exactly when the fish data source is the same.
+      Map<String, String> defaultImageLookup = {};
+      try {
+        final fishDataService = ref.read(fishDataServiceProvider);
+        final fishData = await fishDataService.loadFishData();
+        for (final fishList in fishData.values) {
+          for (final fish in fishList) {
+            defaultImageLookup[fish.name] = fish.imageURL;
+          }
+        }
+      } catch (_) {
+        // If fish data is unavailable, inhabitant images fall back to null.
+      }
+
+      // Serialize each inhabitant with name, fishUnit, quantity, and the
+      // best-available image URL (user URL > default from fishcompat).
+      final inhabitantsList = tank.inhabitants.map((i) {
+        // Use the user-provided URL when it's a real remote URL.
+        // If they only have a local file path (customImagePath non-null and
+        // customImageUrl is null/empty), fall back to the fishcompat default.
+        final String? imageUrl = (i.customImageUrl != null &&
+                i.customImageUrl!.isNotEmpty &&
+                (i.customImageUrl!.startsWith('http://') ||
+                    i.customImageUrl!.startsWith('https://')))
+            ? i.customImageUrl
+            : defaultImageLookup[i.fishUnit];
+        return {
+          'name': i.customName,
+          'fishUnit': i.fishUnit,
+          'quantity': i.quantity,
+          'imageUrl': ?imageUrl,
+        };
+      }).toList();
+
       tankInfo = {
         'name': tank.name,
         if (tank.sizeGallons != null)
@@ -148,10 +187,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           'sizeLiters': tank.sizeLiters,
         'type': tank.type,
         'inhabitants': tank.inhabitants.length,
+        if (inhabitantsList.isNotEmpty) 'inhabitantsList': inhabitantsList,
       };
     }
 
     final profile = ref.read(currentUserProfileProvider).asData?.value;
+    final isFounder = ref.read(isFounderProvider);
     final post = await notifier.submitPost(
       type: _selectedType,
       title: _titleController.text.trim(),
@@ -159,6 +200,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       imageFilePath: _imageFilePath,
       tankInfo: tankInfo,
       postSignature: profile?.buildPostSignature(),
+      isFounderPost: isFounder,
     );
 
     if (mounted) {
@@ -194,7 +236,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final createState = ref.watch(createPostProvider);
-    final tanks = ref.watch(tankProvider).tanks;
+    final tankState = ref.watch(tankProvider);
+    final tanks = tankState.tanks;
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
     final isAnonymous = authState.asData?.value?.isAnonymous ?? true;
@@ -320,34 +363,62 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ],
 
             // Attach tank info — only for Tank Showcase type
-            if (_selectedType == PostType.tankShowcase && tanks.isNotEmpty && !_isEditing) ...[
-              SwitchListTile(
-                title: Text(l10n.communityAttachTank),
-                value: _includeTankInfo,
-                onChanged: (v) => setState(() {
-                  _includeTankInfo = v;
-                  if (v && _selectedTankId == null) {
-                    _selectedTankId = tanks.first.id;
-                  }
-                }),
-                contentPadding: EdgeInsets.zero,
-              ),
-              if (_includeTankInfo) ...[
-                DropdownButtonFormField<String>(
-                  value: _selectedTankId,
-                  decoration: InputDecoration(
-                    labelText: l10n.communitySelectTank,
-                    border: const OutlineInputBorder(),
+            if (_selectedType == PostType.tankShowcase && !_isEditing) ...[
+              if (tankState.isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(),
+                )
+              else if (tanks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.communityNoTanksForShowcase,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  items: tanks
-                      .map((t) => DropdownMenuItem(
-                            value: t.id,
-                            child: Text(t.name),
-                          ))
-                      .toList(),
-                  onChanged: (v) => setState(() => _selectedTankId = v),
+                )
+              else ...[
+                SwitchListTile(
+                  title: Text(l10n.communityAttachTank),
+                  value: _includeTankInfo,
+                  onChanged: (v) => setState(() {
+                    _includeTankInfo = v;
+                    if (v && _selectedTankId == null) {
+                      _selectedTankId = tanks.first.id;
+                    }
+                  }),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SizedBox(height: 12),
+                if (_includeTankInfo) ...[
+                  DropdownButtonFormField<String>(
+                    value: _selectedTankId,
+                    decoration: InputDecoration(
+                      labelText: l10n.communitySelectTank,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: tanks
+                        .map((t) => DropdownMenuItem(
+                              value: t.id,
+                              child: Text(t.name),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedTankId = v),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ],
             ],
           ],

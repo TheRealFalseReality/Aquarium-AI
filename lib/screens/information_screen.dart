@@ -28,7 +28,7 @@ class InformationScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Learn how to contribute to Aquarium AI and help make it available in your language.',
+            l10n.informationSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -267,14 +267,14 @@ class InformationScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Internationalization (i18n)',
+                            l10n.i18nCardTitle,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Help translate Aquarium AI into your language',
+                            l10n.i18nCardSubtitle,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
@@ -314,7 +314,7 @@ class InformationScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.',
+                    l10n.i18nGuideInfo,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

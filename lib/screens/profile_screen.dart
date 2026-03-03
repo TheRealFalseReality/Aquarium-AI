@@ -11,10 +11,13 @@ import '../main_layout.dart';
 import '../models/user_profile.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+import '../theme_colors.dart';
+import '../utils/storage_image_utils.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -256,6 +259,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildProfile(BuildContext context, AppLocalizations l10n,
       UserProfile profile, String? currentUid) {
     final isOwner = _isOwnProfile || currentUid == profile.uid;
+    // Founder badge is shown when the current user views their own profile
+    // and has Founder Aquarist status.
+    final isFounder = _isOwnProfile && ref.watch(isFounderProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -265,7 +271,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         slivers: [
           // ── Header ──────────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: _buildHeader(context, l10n, profile, isOwner),
+            child: _buildHeader(context, l10n, profile, isOwner, isFounder),
           ),
           // ── Stats row ────────────────────────────────────────────────────
           SliverToBoxAdapter(
@@ -308,7 +314,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildHeader(
       BuildContext context, AppLocalizations l10n, UserProfile profile,
-      bool isOwner) {
+      bool isOwner, bool isFounder) {
     final colorScheme = Theme.of(context).colorScheme;
     const double avatarRadius = 48;
     return Stack(
@@ -324,8 +330,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  _buildAvatarWidget(profile, colorScheme,
-                      radius: avatarRadius),
+                  _buildAvatarWidget(context, profile, colorScheme,
+                      radius: avatarRadius, isFounder: isFounder),
                   if (isOwner)
                     Positioned(
                       bottom: 0,
@@ -350,6 +356,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
+              // Founder Aquarist badge
+              if (isFounder) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AquaThemeColors.founderColor(context).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AquaThemeColors.founderColor(context).withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.diamond,
+                          size: 13,
+                          color: AquaThemeColors.founderColor(context)),
+                      const SizedBox(width: 5),
+                      Text(
+                        l10n.founderAquaristTitle,
+                        style: TextStyle(
+                          color: AquaThemeColors.founderColor(context),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // Anonymous badge
               if (profile.isAnonymous) ...[
                 const SizedBox(height: 4),
@@ -402,11 +440,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   /// Builds the circular avatar widget respecting the icon > photo > default
-  /// priority.
-  Widget _buildAvatarWidget(UserProfile profile, ColorScheme colorScheme,
-      {double radius = 48}) {
+  /// priority. When [isFounder] is true a deep-purple ring is added around
+  /// the avatar.
+  Widget _buildAvatarWidget(BuildContext context, UserProfile profile, ColorScheme colorScheme,
+      {double radius = 48, bool isFounder = false}) {
+    Widget avatar;
     if (profile.avatarIconCodePoint != null) {
-      return CircleAvatar(
+      avatar = CircleAvatar(
         radius: radius,
         backgroundColor: colorScheme.primaryContainer,
         child: Icon(
@@ -417,16 +457,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
     if (profile.avatarUrl != null) {
-      return CircleAvatar(
+      final avatarWidget = FutureBuilder<String>(
+        future: resolveResizedStorageUrl(profile.avatarUrl!),
+        initialData:
+            getCachedResizedUrl(profile.avatarUrl!) ?? profile.avatarUrl!,
+        builder: (_, snap) => CircleAvatar(
+          radius: radius,
+          backgroundColor: colorScheme.primaryContainer,
+          backgroundImage: CachedNetworkImageProvider(snap.data!),
+        ),
+      );
+      if (!isFounder) return avatarWidget;
+      return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+              color: AquaThemeColors.founderColor(context), width: 2.5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: avatarWidget,
+        ),
+      );
+    } else {
+      avatar = CircleAvatar(
         radius: radius,
         backgroundColor: colorScheme.primaryContainer,
-        backgroundImage: CachedNetworkImageProvider(profile.avatarUrl!),
+        child: Icon(Icons.person, size: radius, color: colorScheme.primary),
       );
     }
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: colorScheme.primaryContainer,
-      child: Icon(Icons.person, size: radius, color: colorScheme.primary),
+    if (!isFounder) return avatar;
+    // Wrap with a purple ring for Founder Aquarists
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+            color: AquaThemeColors.founderColor(context), width: 2.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: avatar,
+      ),
     );
   }
 

@@ -7,6 +7,8 @@ import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/community_service.dart';
+import '../theme_colors.dart';
+import '../utils/storage_image_utils.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
@@ -23,6 +25,23 @@ class CommunityPostScreen extends ConsumerStatefulWidget {
 class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
+  Future<String>? _resolvedPostImageUrl;
+  Future<String>? _resolvedAvatarUrl;
+  // Tracks which inhabitant chip indices are tapped-open.
+  final Set<int> _expandedInhabitants = {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.post.imageUrl != null) {
+      _resolvedPostImageUrl =
+          resolveResizedStorageUrl(widget.post.imageUrl!);
+    }
+    if (widget.post.avatarUrl != null) {
+      _resolvedAvatarUrl =
+          resolveResizedStorageUrl(widget.post.avatarUrl!);
+    }
+  }
 
   @override
   void dispose() {
@@ -97,6 +116,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final currentUserId = authState.asData?.value?.uid ?? '';
     final commentsAsync =
         ref.watch(communityCommentsStreamProvider(widget.post.id));
+    final isFounder = widget.post.isFounderPost;
+    final isTankShowcase = widget.post.type == PostType.tankShowcase;
 
     return Scaffold(
       appBar: AppBar(
@@ -107,57 +128,21 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           Expanded(
             child: ListView(
               children: [
-                // Post header image
+                // ── Hero / header image ──────────────────────────────────
                 if (widget.post.imageUrl != null)
-                  CachedNetworkImage(
-                    imageUrl: widget.post.imageUrl!,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, _) => Container(
-                      height: 240,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (_, _, _) => const SizedBox(),
-                  ),
-                // Post content
+                  _buildImageHeader(context, l10n, isTankShowcase, isFounder),
+                // ── Post content ─────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Author row
-                      Row(
-                        children: [
-                          _buildAvatar(context),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.post.displayName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              Text(
-                                _formatDate(widget.post.createdAt),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      // Author row — only shown when there is no hero
+                      // (for tank showcase the author is overlaid on the image)
+                      if (!isTankShowcase || widget.post.imageUrl == null)
+                        _buildAuthorRow(context, l10n, isFounder),
+                      if (!isTankShowcase || widget.post.imageUrl == null)
+                        const SizedBox(height: 16),
                       // Title
                       Text(
                         widget.post.title,
@@ -172,18 +157,17 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         widget.post.body,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      // Post signature footer
-                      if (widget.post.postSignature != null &&
-                          widget.post.postSignature!.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        PostSignatureFooter(
-                            sig: widget.post.postSignature!),
-                      ],
-                      // Tank info section
+                      // Tank info — expanded section, main focus for showcase
                       if (widget.post.tankInfo != null &&
                           widget.post.tankInfo!.isNotEmpty) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         _buildTankInfo(context, l10n, widget.post.tankInfo!),
+                      ],
+                      // Signature footer — always at the bottom of post content
+                      if (widget.post.postSignature != null &&
+                          widget.post.postSignature!.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        PostSignatureFooter(sig: widget.post.postSignature!),
                       ],
                       const SizedBox(height: 16),
                       Divider(
@@ -250,14 +234,174 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     );
   }
 
+  /// Full-width image header.  For Tank Showcase posts this is a 320 px hero
+  /// with a gradient scrim and the author row overlaid at the bottom.
+  /// For all other post types this is a plain 240 px cover image followed by
+  /// the author row in the body section.
+  Widget _buildImageHeader(BuildContext context, AppLocalizations l10n,
+      bool isTankShowcase, bool isFounder) {
+    final theme = Theme.of(context);
+    final height = isTankShowcase ? 320.0 : 240.0;
+
+    final image = FutureBuilder<String>(
+      future: _resolvedPostImageUrl,
+      builder: (_, snap) => CachedNetworkImage(
+        imageUrl: snap.data ?? widget.post.imageUrl!,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => Container(
+          height: height,
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (_, _, _) => const SizedBox(),
+      ),
+    );
+
+    if (!isTankShowcase) return image;
+
+    // Tank Showcase: hero with gradient + author overlay
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          image,
+          // Gradient scrim
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.7),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
+              ),
+            ),
+          ),
+          // Author row overlaid at the bottom
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: Row(
+              children: [
+                _buildAvatar(context),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.post.displayName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                shadows: [
+                                  Shadow(blurRadius: 4, color: Colors.black54)
+                                ],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isFounder) ...[
+                            const SizedBox(width: 4),
+                            Tooltip(
+                              message: l10n.founderAquaristTitle,
+                              child: Icon(Icons.diamond,
+                                  size: 14,
+                                  color: AquaThemeColors.founderColor(context)),
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        _formatDate(widget.post.createdAt),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          shadows: [
+                            Shadow(blurRadius: 4, color: Colors.black54)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Standalone author row used for non-showcase posts (below the image).
+  Widget _buildAuthorRow(
+      BuildContext context, AppLocalizations l10n, bool isFounder) {
+    return Row(
+      children: [
+        _buildAvatar(context),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.post.displayName,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isFounder) ...[
+                    const SizedBox(width: 4),
+                    Tooltip(
+                      message: l10n.founderAquaristTitle,
+                      child: Icon(Icons.diamond,
+                          size: 14,
+                          color: AquaThemeColors.founderColor(context)),
+                    ),
+                  ],
+                ],
+              ),
+              Text(
+                _formatDate(widget.post.createdAt),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
     if (widget.post.avatarUrl != null) {
-      return CircleAvatar(
-        radius: 20,
-        backgroundImage:
-            CachedNetworkImageProvider(widget.post.avatarUrl!),
-        backgroundColor: theme.colorScheme.primaryContainer,
+      return FutureBuilder<String>(
+        future: _resolvedAvatarUrl,
+        builder: (_, snap) => CircleAvatar(
+          radius: 20,
+          backgroundImage: CachedNetworkImageProvider(
+              snap.data ?? widget.post.avatarUrl!),
+          backgroundColor: theme.colorScheme.primaryContainer,
+        ),
       );
     }
     return CircleAvatar(
@@ -276,32 +420,280 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   Widget _buildTankInfo(
       BuildContext context, AppLocalizations l10n, Map<String, dynamic> info) {
-    return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    // Map raw Firestore keys to icon + label pairs.
+    final fields = <_TankField>[];
+    if (info['name'] != null) {
+      fields.add(_TankField(Icons.water_drop_outlined, l10n.communityTankFieldName, '${info['name']}'));
+    }
+    if (info['type'] != null) {
+      fields.add(_TankField(Icons.category_outlined, l10n.communityTankFieldType, '${info['type']}'));
+    }
+    if (info['sizeGallons'] != null) {
+      fields.add(_TankField(Icons.straighten, l10n.communityTankFieldSize, '${info['sizeGallons']} gal'));
+    } else if (info['sizeLiters'] != null) {
+      fields.add(_TankField(Icons.straighten, l10n.communityTankFieldSize, '${info['sizeLiters']} L'));
+    }
+
+    // Parse detailed inhabitant list (stored since the new post format).
+    final rawList = info['inhabitantsList'];
+    final List<Map<String, dynamic>> inhabitantsList = rawList is List
+        ? rawList
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : [];
+    final totalInhabitants = inhabitantsList.fold<int>(
+        0, (sum, inh) => sum + ((inh['quantity'] as int?) ?? 1));
+
+    // Fall back to simple count if no detailed list is available.
+    if (inhabitantsList.isEmpty && info['inhabitants'] != null) {
+      fields.add(_TankField(Icons.set_meal_outlined, l10n.communityTankFieldInhabitants, '${info['inhabitants']}'));
+    }
+
+    if (fields.isEmpty && inhabitantsList.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(0.45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: cs.secondary.withOpacity(0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+            child: Row(
+              children: [
+                Icon(Icons.water, size: 18, color: cs.secondary),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.communityTankInfo,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: cs.onSecondaryContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: cs.secondary.withOpacity(0.2)),
+          // Field rows (name, type, size)
+          if (fields.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 10,
+                children: fields
+                    .map((f) => _buildTankField(context, f))
+                    .toList(),
+              ),
+            ),
+          // Detailed inhabitants section
+          if (inhabitantsList.isNotEmpty) ...[
+            if (fields.isNotEmpty)
+              Divider(height: 1, color: cs.secondary.withOpacity(0.15)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+              child: Row(
+                children: [
+                  Icon(Icons.set_meal_outlined, size: 15, color: cs.secondary),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.communityTankFieldInhabitants,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.onSecondaryContainer.withOpacity(0.65),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Total inhabitants count badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: cs.secondary.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$totalInhabitants',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cs.secondary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                alignment: WrapAlignment.center,
+                children: inhabitantsList.asMap().entries.map(
+                    (e) => _buildInhabitantChip(context, e.value, e.key)).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Renders a compact avatar + name + quantity chip for one inhabitant.
+  /// Tapping the chip toggles an expanded view that also shows the species name.
+  Widget _buildInhabitantChip(
+      BuildContext context, Map<String, dynamic> inh, int index) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final name = (inh['name'] as String?)?.isNotEmpty == true
+        ? inh['name'] as String
+        : (inh['fishUnit'] as String?)?.isNotEmpty == true
+            ? inh['fishUnit'] as String
+            : '?';
+    final species = (inh['fishUnit'] as String?)?.isNotEmpty == true
+        ? inh['fishUnit'] as String
+        : null;
+    final qty = inh['quantity'] as int? ?? 1;
+    final imageUrl = inh['imageUrl'] as String?;
+    final isExpanded = _expandedInhabitants.contains(index);
+    // Only show species row when it differs from the display name.
+    final showSpecies = isExpanded && species != null && species != name;
+
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (isExpanded) {
+          _expandedInhabitants.remove(index);
+        } else {
+          _expandedInhabitants.add(index);
+        }
+      }),
+      child: SizedBox(
+        width: 88,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: isExpanded
+                ? cs.secondaryContainer.withOpacity(0.8)
+                : cs.surfaceContainerHighest.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isExpanded
+                  ? cs.secondary.withOpacity(0.55)
+                  : cs.outlineVariant.withOpacity(0.5),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Avatar
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+                child: imageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        width: 88,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => _inhabitantPlaceholder(cs),
+                      )
+                    : _inhabitantPlaceholder(cs),
+              ),
+              // Name + optional species + qty
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (showSpecies) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        species,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 9,
+                          color: cs.secondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    Text(
+                      '×$qty',
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _inhabitantPlaceholder(ColorScheme cs) {
+    return Container(
+      width: 88,
+      height: 56,
+      color: cs.secondaryContainer,
+      child: Icon(Icons.set_meal_outlined, size: 22, color: cs.secondary),
+    );
+  }
+
+  Widget _buildTankField(BuildContext context, _TankField field) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(field.icon, size: 16, color: cs.secondary),
+        const SizedBox(width: 6),
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.communityTankInfo,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  ),
+              field.label,
+              style: tt.labelSmall?.copyWith(
+                color: cs.onSecondaryContainer.withOpacity(0.65),
+                fontSize: 10,
+              ),
             ),
-            const SizedBox(height: 8),
-            ...info.entries.map(
-              (e) => Text(
-                '${e.key}: ${e.value}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
+            Text(
+              field.value,
+              style: tt.bodyMedium?.copyWith(
+                color: cs.onSecondaryContainer,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
@@ -364,4 +756,12 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
+}
+
+/// Lightweight data holder for a single tank-info field row.
+class _TankField {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _TankField(this.icon, this.label, this.value);
 }
