@@ -512,15 +512,14 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 92,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
-                itemCount: inhabitantsList.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (_, i) =>
-                    _buildInhabitantChip(context, inhabitantsList[i]),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: inhabitantsList
+                    .map((inh) => _buildInhabitantChip(context, inh))
+                    .toList(),
               ),
             ),
           ],
@@ -541,66 +540,67 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final qty = inh['quantity'] as int? ?? 1;
     final imageUrl = inh['imageUrl'] as String?;
 
-    return Container(
-      width: 72,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Avatar
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
-            child: imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 72,
-                    height: 48,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
-                  )
-                : _inhabitantPlaceholder(cs),
-          ),
-          // Name + qty
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: tt.labelSmall?.copyWith(
-                    fontSize: 9,
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.w600,
+    return SizedBox(
+      width: 88,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Avatar
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+              child: imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width: 88,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
+                    )
+                  : _inhabitantPlaceholder(cs),
+            ),
+            // Name + qty
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: tt.labelSmall?.copyWith(
+                      fontSize: 10,
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                if (qty > 1)
                   Text(
                     '×$qty',
                     style: tt.labelSmall?.copyWith(
-                      fontSize: 9,
+                      fontSize: 10,
                       color: cs.onSurfaceVariant,
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _inhabitantPlaceholder(ColorScheme cs) {
     return Container(
-      width: 72,
-      height: 48,
+      width: 88,
+      height: 56,
       color: cs.secondaryContainer,
       child: Icon(Icons.set_meal_outlined, size: 22, color: cs.secondary),
     );
