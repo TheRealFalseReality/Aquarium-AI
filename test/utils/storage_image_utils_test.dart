@@ -15,7 +15,7 @@ void main() {
       final result = deriveResizedStoragePath(url, w, h);
 
       expect(result,
-          'community_posts/userId/1234567890_scaled_${w}x${h}.webp');
+          'community_posts/userId/1234567890_scaled_${w}x$h.webp');
     });
 
     test('derives resized path for a profile avatar', () {
@@ -27,7 +27,7 @@ void main() {
       final result = deriveResizedStoragePath(url, w, h);
 
       expect(result,
-          'profile_avatars/uid123/avatar_1700000000000_${w}x${h}.webp');
+          'profile_avatars/uid123/avatar_1700000000000_${w}x$h.webp');
     });
 
     test('handles path with no file extension', () {
@@ -38,7 +38,7 @@ void main() {
 
       final result = deriveResizedStoragePath(url, w, h);
 
-      expect(result, 'uploads/noext_${w}x${h}.webp');
+      expect(result, 'uploads/noext_${w}x$h.webp');
     });
 
     test('returns null for non-Firebase-Storage URLs', () {

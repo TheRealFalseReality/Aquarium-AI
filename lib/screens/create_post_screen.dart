@@ -175,7 +175,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           'name': i.customName,
           'fishUnit': i.fishUnit,
           'quantity': i.quantity,
-          if (imageUrl != null) 'imageUrl': imageUrl,
+          'imageUrl': ?imageUrl,
         };
       }).toList();
 

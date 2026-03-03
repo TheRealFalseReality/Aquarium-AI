@@ -961,7 +961,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                                 avatarUrl),
                                             initialData:
                                                 getCachedResizedUrl(avatarUrl) ??
-                                                    avatarUrl!,
+                                                    avatarUrl,
                                             builder: (_, snap) => CircleAvatar(
                                               backgroundColor: colorScheme
                                                   .primary
@@ -985,7 +985,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                                             avatarUrl),
                                         initialData:
                                             getCachedResizedUrl(avatarUrl) ??
-                                                avatarUrl!,
+                                                avatarUrl,
                                         builder: (_, snap) => CircleAvatar(
                                           backgroundColor: colorScheme.primary
                                               .withOpacity(0.3),

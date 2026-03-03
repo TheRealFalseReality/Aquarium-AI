@@ -328,7 +328,6 @@
   "lastReport": "Dernier Rapport",
   "selectFishTypes": "Sélectionner les Types de Poissons",
   "selectSpecies": "Sélectionner l'Espèce",
-  "selectedFish": "Poissons Sélectionnés",
   "getRecommendations": "Obtenir des Recommandations",
   "search": "Rechercher",
   "getReport": "Obtenir un Rapport",
@@ -379,7 +378,6 @@
   "visualWaterQualityGuesses": "Estimations Visuelles de la Qualité de l'Eau",
   "howAquaPiHelps": "Comment AquaPi Aide",
   "howAquaPiCanHelp": "Comment AquaPi Peut Aider",
-  "estimatedCO2Level": "Niveau Estimé de CO₂",
   "compatibilityReport": "Rapport de Compatibilité",
   "convertSalinity": "Convertir la Salinité",
   "calculateCO2": "Calculer le CO₂ (ppm)",
@@ -543,7 +541,6 @@
   "addCustomSpecies": "Ajouter une espèce personnalisée",
 
   "speciesOptional": "Espèce (Facultatif)",
-  "addSpeciesHint": "Ajouter une espèce...",
   "tagsOptional": "Étiquettes (Facultatif)",
   "addTagHint": "Ajouter une étiquette...",
   "addTag": "Ajouter une étiquette",

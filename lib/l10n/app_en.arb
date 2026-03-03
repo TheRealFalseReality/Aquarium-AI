@@ -2057,11 +2057,6 @@
     "description": "Button label to open the specific species selection dialog on the stocking screen"
   },
 
-  "selectedFish": "Selected Fish",
-  "@selectedFish": {
-    "description": "Header label for the selected fish chip panel on the stocking screen"
-  },
-
   "getRecommendations": "Get Recommendations",
   "@getRecommendations": {
     "description": "Get recommendations button label"
@@ -2333,12 +2328,7 @@
   "@howAquaPiCanHelp": {
     "description": "How AquaPi can help section heading"
   },
-
-  "estimatedCO2Level": "Estimated CO₂ Level",
-  "@estimatedCO2Level": {
-    "description": "Estimated CO₂ level label"
-  },
-
+  
   "compatibilityReport": "Compatibility Report",
   "@compatibilityReport": {
     "description": "Compatibility report title"
@@ -2897,11 +2887,6 @@
   "speciesOptional": "Species (Optional)",
   "@speciesOptional": {
     "description": "Label for the collapsed species section in the inhabitant dialog"
-  },
-
-  "addSpeciesHint": "Add species...",
-  "@addSpeciesHint": {
-    "description": "Hint text for the add species input field"
   },
 
   "tagsOptional": "Tags (Optional)",
