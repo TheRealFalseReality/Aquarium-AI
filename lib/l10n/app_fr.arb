@@ -854,7 +854,6 @@
   "clearApiKey": "Effacer la Clé API",
   "clearApiKeyConfirm": "Êtes-vous sûr de vouloir effacer {label} ? Vous devrez saisir à nouveau la clé pour l'utiliser.",
   "keyCleared": "{label} effacée.",
-  "clear": "Effacer",
   "clearKey": "Effacer la Clé",
   "saveKey": "Sauvegarder la Clé",
   "seeGuide": "Voir le Guide",
