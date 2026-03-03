@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -256,3 +257,23 @@ final purchaseProvider =
     StateNotifierProvider<PurchaseNotifier, PurchaseState>(
   (ref) => PurchaseNotifier(),
 );
+
+/// Debug-only provider that forces Founder Aquarist status without a real
+/// purchase. Only meaningful in debug builds ([kDebugMode]); always `false`
+/// in release builds. Reset on every cold start.
+final debugForceFounderProvider = StateProvider<bool>((ref) => false);
+
+/// The effective Founder Aquarist status for the current user.
+///
+/// In debug builds, this is `true` when either:
+///   - the user has actually purchased a founder product ([PurchaseState.isFounder]), or
+///   - the [debugForceFounderProvider] override is enabled.
+/// In release builds, this only reflects the real purchase state.
+final isFounderProvider = Provider<bool>((ref) {
+  final purchased = ref.watch(purchaseProvider).isFounder;
+  if (kDebugMode) {
+    final forced = ref.watch(debugForceFounderProvider);
+    return purchased || forced;
+  }
+  return purchased;
+});

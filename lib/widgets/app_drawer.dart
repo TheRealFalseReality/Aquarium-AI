@@ -621,7 +621,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       void Function(String) navigate) {
     final authAsync = ref.watch(authStateProvider);
     final user = authAsync.asData?.value;
-    final isFounder = ref.watch(purchaseProvider).isFounder;
+    final isFounder = ref.watch(isFounderProvider);
 
     if (user == null) {
       return ListTile(
@@ -837,7 +837,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     // Observe auth + profile for the profile chip
     final user = ref.watch(authStateProvider).asData?.value;
     final profile = ref.watch(currentUserProfileProvider).asData?.value;
-    final isFounder = ref.watch(purchaseProvider).isFounder;
+    final isFounder = ref.watch(isFounderProvider);
 
     String? displayName;
     IconData avatarIcon = Icons.account_circle;

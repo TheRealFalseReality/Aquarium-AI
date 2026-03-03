@@ -11,7 +11,7 @@ import '../main_layout.dart';
 import '../models/user_profile.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
-import '../providers/purchase_provider.dart';
+import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
@@ -264,7 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isOwner = _isOwnProfile || currentUid == profile.uid;
     // Founder badge is shown when the current user views their own profile
     // and has Founder Aquarist status.
-    final isFounder = _isOwnProfile && ref.watch(purchaseProvider).isFounder;
+    final isFounder = _isOwnProfile && ref.watch(isFounderProvider);
 
     return RefreshIndicator(
       onRefresh: () async {

@@ -14,6 +14,7 @@ import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
+import '../theme_colors.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
@@ -807,31 +808,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // Indicator: show when the app is using the built-in dev API key
         if (appSettings.enableAI && models.usingDeveloperGroqKeyForAny) ...[
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.amber.withOpacity(0.4),
+          Builder(builder: (context) {
+            final isFounder = ref.watch(isFounderProvider);
+            final maxPerMin = isFounder
+                ? RemoteConfigService.founderMaxRequestsPerMinute
+                : RemoteConfigService.maxRequestsPerMinute;
+            final maxPerDay = isFounder
+                ? RemoteConfigService.founderMaxRequestsPerDay
+                : RemoteConfigService.maxRequestsPerDay;
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isFounder
+                    ? AquaThemeColors.founderPurple.withOpacity(0.08)
+                    : Colors.amber.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isFounder
+                      ? AquaThemeColors.founderPurple.withOpacity(0.4)
+                      : Colors.amber.withOpacity(0.4),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline, color: Colors.amber, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Using App\'s Built-in Dev API Key (Groq free tier). '
-                    'Add your own Groq key in AI Provider settings for dedicated limits.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.amber.shade900,
+              child: Row(
+                children: [
+                  Icon(
+                    isFounder ? Icons.diamond : Icons.info_outline,
+                    color: isFounder
+                        ? AquaThemeColors.founderPurple
+                        : Colors.amber,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isFounder
+                          ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own Groq key for unlimited access.'
+                          : 'Using App\'s Built-in Dev API Key (Groq free tier). '
+                              'Add your own Groq key in AI Provider settings for dedicated limits.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isFounder
+                            ? AquaThemeColors.founderPurple
+                            : Colors.amber.shade900,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
         ],
         // Warning: shown when the free AI tier is disabled server-side but the
         // user has no own Groq key configured.
@@ -1113,6 +1137,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: appSettings.debugHideAds,
                   onChanged: (value) {
                     ref.read(appSettingsProvider.notifier).setDebugHideAds(value);
+                    setDialogState(() {});
+                  },
+                ),
+                const Divider(),
+                // Simulate Founder Tier toggle
+                SwitchListTile(
+                  secondary: const Icon(Icons.diamond,
+                      color: AquaThemeColors.founderPurple),
+                  title: const Text('Simulate Founder Tier'),
+                  subtitle: Text(
+                    ref.read(debugForceFounderProvider)
+                        ? 'Currently: Founder Aquarist active'
+                        : 'Currently: Standard tier',
+                  ),
+                  value: ref.read(debugForceFounderProvider),
+                  onChanged: (value) {
+                    ref.read(debugForceFounderProvider.notifier).state = value;
                     setDialogState(() {});
                   },
                 ),
