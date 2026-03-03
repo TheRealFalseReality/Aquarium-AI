@@ -4348,5 +4348,275 @@
   "i18nGuideInfo": "The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.",
   "@i18nGuideInfo": {
     "description": "Info text below the i18n card on the information screen"
+  },
+
+  "freeTierLimits": "Free-tier limits",
+  "@freeTierLimits": {
+    "description": "Title for the free tier limits expansion tile"
+  },
+  "freeTierLimitsSubtitle": "{reqPerDay} req/day  •  {reqPerMin} req/min  •  {photosPerDay} photo/day",
+  "@freeTierLimitsSubtitle": {
+    "description": "Subtitle showing free tier limits",
+    "placeholders": {
+      "reqPerDay": {"type": "int"},
+      "reqPerMin": {"type": "int"},
+      "photosPerDay": {"type": "int"}
+    }
+  },
+  "freeTierRequestsPerMin": "AI requests per minute",
+  "@freeTierRequestsPerMin": {
+    "description": "Label for AI requests per minute in free tier bullet list"
+  },
+  "freeTierRequestsPerDay": "AI requests per day",
+  "@freeTierRequestsPerDay": {
+    "description": "Label for AI requests per day in free tier bullet list"
+  },
+  "freeTierPhotoAnalysesPerDay": "photo analyses per day",
+  "@freeTierPhotoAnalysesPerDay": {
+    "description": "Label for photo analyses per day in free tier bullet list"
+  },
+  "freeTierChatHistoryPerRequest": "message chat history per request",
+  "@freeTierChatHistoryPerRequest": {
+    "description": "Label for chat history per request in free tier bullet list"
+  },
+  "freeTierModelNote": "Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.",
+  "@freeTierModelNote": {
+    "description": "Note about the model used in the free tier"
+  },
+  "freeTierRecommendation": "For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).",
+  "@freeTierRecommendation": {
+    "description": "Recommendation to use own key for best results"
+  },
+  "freeTierDisclaimer": "⚠️ Disclaimer: The in-app free AI is provided as a courtesy for aquarium lovers and is funded by the developer. It may be removed or modified at any time, and limits are subject to change without notice.",
+  "@freeTierDisclaimer": {
+    "description": "Disclaimer about the free AI tier"
+  },
+  "freeTierUnavailable": "Free AI tier currently unavailable",
+  "@freeTierUnavailable": {
+    "description": "Title shown when free AI tier is disabled"
+  },
+  "freeTierUnavailableDesc": "The built-in free AI provider has been disabled by the developer. Please add your own API key below to continue using AI features.",
+  "@freeTierUnavailableDesc": {
+    "description": "Description shown when free AI tier is disabled"
+  },
+  "freeAI": "Free AI",
+  "@freeAI": {
+    "description": "Title for the Free AI card section"
+  },
+  "freeAIDescription": "Use the built-in free AI service instead of your own API key.",
+  "@freeAIDescription": {
+    "description": "Description of the free AI service"
+  },
+  "useFreeAIForText": "Use Free AI for Text / Chat",
+  "@useFreeAIForText": {
+    "description": "Toggle label for using free AI for text/chat"
+  },
+  "useFreeAIForImage": "Use Free AI for Image / Photo",
+  "@useFreeAIForImage": {
+    "description": "Toggle label for using free AI for image/photo"
+  },
+  "chatHistoryLimit": "Chat History Limit",
+  "@chatHistoryLimit": {
+    "description": "Title for the chat history limit section"
+  },
+  "aiKeysNotRequired": "Note: Tank management (including harmony score) and all calculators (tank volume calculator, etc.) work without an AI key.",
+  "@aiKeysNotRequired": {
+    "description": "Note that calculators and tank management work without an AI key"
+  },
+  "freeTierBadge": "Free Tier",
+  "@freeTierBadge": {
+    "description": "Badge label shown next to chat history limit when on free tier"
+  },
+  "chatHistoryLimitDesc": "Control how many past messages are included with each request. More messages mean richer conversation context but uses more tokens and may hit rate limits faster.",
+  "@chatHistoryLimitDesc": {
+    "description": "Description for the chat history limit slider"
+  },
+  "chatHistoryFreeTierDesc": "Without your own API key, the app uses our free service tier with a fixed limit of {limit} past messages per request. Add your own API key above to unlock a configurable limit (up to {maxLimit} messages).",
+  "@chatHistoryFreeTierDesc": {
+    "description": "Description shown when chat history is locked on free tier",
+    "placeholders": {
+      "limit": {"type": "int"},
+      "maxLimit": {"type": "int"}
+    }
+  },
+  "providerMismatch": "Provider Mismatch",
+  "@providerMismatch": {
+    "description": "Title of the provider mismatch dialog"
+  },
+  "providerMismatchMessage": "The following providers are selected but have no API key configured:",
+  "@providerMismatchMessage": {
+    "description": "Message in the provider mismatch dialog"
+  },
+  "providerMismatchHint": "AI features using these providers will not work until a key is entered or a different provider is selected.",
+  "@providerMismatchHint": {
+    "description": "Hint in the provider mismatch dialog"
+  },
+  "stayAndFix": "Stay & Fix",
+  "@stayAndFix": {
+    "description": "Button to stay and fix provider mismatch"
+  },
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Button to dismiss the provider mismatch dialog"
+  },
+  "unsavedChanges": "Unsaved Changes",
+  "@unsavedChanges": {
+    "description": "Title of the unsaved changes dialog"
+  },
+  "textProviderChanged": "Text provider changed",
+  "@textProviderChanged": {
+    "description": "Unsaved changes item: text provider was changed"
+  },
+  "imageProviderChanged": "Image provider changed",
+  "@imageProviderChanged": {
+    "description": "Unsaved changes item: image provider was changed"
+  },
+  "textModelChanged": "Text model changed",
+  "@textModelChanged": {
+    "description": "Unsaved changes item: text model was changed"
+  },
+  "imageModelChanged": "Image model changed",
+  "@imageModelChanged": {
+    "description": "Unsaved changes item: image model was changed"
+  },
+  "apiKeysUpdated": "API keys updated",
+  "@apiKeysUpdated": {
+    "description": "Unsaved changes item: API keys were updated"
+  },
+  "providerKeyMismatchWarning": "Provider/key mismatch — AI will not work:",
+  "@providerKeyMismatchWarning": {
+    "description": "Warning shown in unsaved changes dialog when there is a provider/key mismatch"
+  },
+  "saveAllAndClose": "Save All & Close",
+  "@saveAllAndClose": {
+    "description": "Button to save all changes and close the dialog"
+  },
+  "apiKeys": "API Keys",
+  "@apiKeys": {
+    "description": "Title of the API Keys section"
+  },
+  "apiKeysDescription": "Enter your API key for each provider once. It will be used for both text and image features.",
+  "@apiKeysDescription": {
+    "description": "Description for the API keys section"
+  },
+  "geminiDescription": "Google's most capable AI model",
+  "@geminiDescription": {
+    "description": "Subtitle description for Gemini provider"
+  },
+  "groqDescription": "Lightning-fast LLM inference",
+  "@groqDescription": {
+    "description": "Subtitle description for Groq provider"
+  },
+  "openAIDescription": "ChatGPT and GPT models by OpenAI",
+  "@openAIDescription": {
+    "description": "Subtitle description for OpenAI provider"
+  },
+  "googleAIApiKey": "Google AI API Key",
+  "@googleAIApiKey": {
+    "description": "Label for the Google AI API key text field"
+  },
+  "groqApiKeyLabel": "Groq API Key",
+  "@groqApiKeyLabel": {
+    "description": "Label for the Groq API key text field"
+  },
+  "openAIApiKeyLabel": "OpenAI API Key",
+  "@openAIApiKeyLabel": {
+    "description": "Label for the OpenAI API key text field"
+  },
+  "saveKey": "Save Key",
+  "@saveKey": {
+    "description": "Button to save an API key"
+  },
+  "howToGetGoogleApiKey": "How to get your Google AI API key:",
+  "@howToGetGoogleApiKey": {
+    "description": "Guide title for getting a Google AI API key"
+  },
+  "geminiModelsRateLimits": "Gemini Models & Rate Limits:",
+  "@geminiModelsRateLimits": {
+    "description": "Guide title for Gemini models and rate limits"
+  },
+  "viewModelsRateLimits": "View available models and free-tier rate limits:",
+  "@viewModelsRateLimits": {
+    "description": "Link label for viewing models and free-tier rate limits"
+  },
+  "howToGetGroqApiKey": "How to get your Groq API key:",
+  "@howToGetGroqApiKey": {
+    "description": "Guide title for getting a Groq API key"
+  },
+  "groqModelsRateLimits": "Groq Models & Rate Limits:",
+  "@groqModelsRateLimits": {
+    "description": "Guide title for Groq models and rate limits"
+  },
+  "howToGetOpenAIApiKey": "How to get your OpenAI API key:",
+  "@howToGetOpenAIApiKey": {
+    "description": "Guide title for getting an OpenAI API key"
+  },
+  "openAIModelsRateLimits": "OpenAI Models & Rate Limits:",
+  "@openAIModelsRateLimits": {
+    "description": "Guide title for OpenAI models and rate limits"
+  },
+  "viewModelsUsageLimits": "View available models and usage limits:",
+  "@viewModelsUsageLimits": {
+    "description": "Link label for viewing models and usage limits"
+  },
+  "rateLimits": "Rate Limits",
+  "@rateLimits": {
+    "description": "Button/link label for rate limits"
+  },
+  "seeGuide": "See Guide",
+  "@seeGuide": {
+    "description": "Link label to see a guide"
+  },
+  "geminiTextModel": "Gemini Text Model",
+  "@geminiTextModel": {
+    "description": "Label for the Gemini text model text field"
+  },
+  "geminiMultimediaModel": "Gemini Multimedia Model",
+  "@geminiMultimediaModel": {
+    "description": "Label for the Gemini multimedia model text field"
+  },
+  "chatGPTTextModel": "ChatGPT Text Model",
+  "@chatGPTTextModel": {
+    "description": "Label for the ChatGPT text model text field"
+  },
+  "chatGPTMultimediaModel": "ChatGPT Multimedia Model",
+  "@chatGPTMultimediaModel": {
+    "description": "Label for the ChatGPT multimedia model text field"
+  },
+  "groqTextModel": "Groq Text Model",
+  "@groqTextModel": {
+    "description": "Label for the Groq text model text field"
+  },
+  "groqMultimediaModel": "Groq Multimedia Model",
+  "@groqMultimediaModel": {
+    "description": "Label for the Groq multimedia model text field"
+  },
+  "clearKey": "Clear Key",
+  "@clearKey": {
+    "description": "Button label to clear an API key"
+  },
+  "fixedWhenUsingFreeProvider": "Fixed when using the Free Provider.",
+  "@fixedWhenUsingFreeProvider": {
+    "description": "Helper text shown when a model field is locked due to using the free provider"
+  },
+  "mustBeVisionModel": "Must be a vision-capable model for photo analysis (e.g. meta-llama/llama-4-scout-17b-16e-instruct)",
+  "@mustBeVisionModel": {
+    "description": "Helper text for the Groq multimedia model field"
+  },
+  "freeAIUnavailable": "Free AI unavailable",
+  "@freeAIUnavailable": {
+    "description": "Subtitle shown in toggle when free AI is unavailable"
+  },
+  "usingFreeProvider": "Using Free Provider",
+  "@usingFreeProvider": {
+    "description": "Subtitle shown in toggle when free provider is active"
+  },
+  "useYourOwnKey": "Use your own key",
+  "@useYourOwnKey": {
+    "description": "Subtitle shown in toggle when free provider is not active"
+  },
+  "modelsButton": "Models",
+  "@modelsButton": {
+    "description": "Button label for the Models link"
   }
 }
