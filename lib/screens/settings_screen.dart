@@ -924,25 +924,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => Navigator.pushNamed(context, '/appearance'),
         ),
         const SizedBox(height: 16),
-        _buildRemoveAdsCard(context),
-        const SizedBox(height: 16),
-        _buildMenuCard(
-          context: context,
-          title: l10n.buyMeACoffee,
-          subtitle: l10n.buyMeACoffeeDesc,
-          icon: Icons.coffee,
-          gradient: LinearGradient(
-            colors: [
-              Colors.amber.withOpacity(0.25),
-              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          iconColor: Colors.amber.shade700,
-          onTap: () => _showBuyMeACoffeeDialog(),
-        ),
-        const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
           title: l10n.dataManagement,
@@ -980,6 +961,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               builder: (context) => const ChangelogScreen(),
             ),
           ),
+        ),
+        const SizedBox(height: 16),
+        _buildRemoveAdsCard(context),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.buyMeACoffee,
+          subtitle: l10n.buyMeACoffeeDesc,
+          icon: Icons.coffee,
+          gradient: LinearGradient(
+            colors: [
+              Colors.amber.withOpacity(0.25),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Colors.amber.shade700,
+          onTap: () => _showBuyMeACoffeeDialog(),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(
