@@ -272,7 +272,7 @@ class FishCompatibilityScreenState
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Analyzing Fish...',
+                    l10n.analyzingFish,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall
@@ -314,7 +314,7 @@ class FishCompatibilityScreenState
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Please wait while the AI generates your compatibility report.',
+                    l10n.pleaseWaitAIReport,
                     style: Theme.of(context)
                         .textTheme
                         .bodyLarge
@@ -401,7 +401,7 @@ class FishCompatibilityScreenState
         providerState.selectedFish.isNotEmpty ? 84.0 : 0.0;
 
     return MainLayout(
-      title: 'AI Compatibility Calculator',
+      title: l10n.aiCompatibilityCalculator,
       bottomNavigationBar: const AdBanner(),
       child: Stack(
         children: [
@@ -411,7 +411,7 @@ class FishCompatibilityScreenState
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Failed to load fish data:\n$error',
+                  l10n.failedToLoadFishData(error.toString()),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -429,7 +429,7 @@ class FishCompatibilityScreenState
                       child: Column(
                         children: [
                           Text(
-                            'AI Inhabitant Compatibility',
+                            l10n.aiInhabitantCompatibility,
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineLarge
@@ -438,7 +438,7 @@ class FishCompatibilityScreenState
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Select two or more inhabitants to generate a compatibility report.',
+                            l10n.selectInhabitantsHint,
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -467,7 +467,7 @@ class FishCompatibilityScreenState
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Tag fish with species names for better search',
+                                    l10n.tagFishForBetterSearch,
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                                       fontWeight: FontWeight.w500,
@@ -542,7 +542,7 @@ class FishCompatibilityScreenState
                           const BannerAdWidget(),
                           const SizedBox(height: 16),
                           Text(
-                            'This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you\'re interested in, and click "Get Report" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.',
+                            l10n.aiCompatToolFooterDescription,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: Theme.of(context)
                                       .colorScheme
@@ -642,7 +642,7 @@ class FishCompatibilityScreenState
               controller: _searchController,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search by name, species...',
+                hintText: l10n.searchByNameSpecies,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.close),
@@ -671,6 +671,7 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildCategorySelector(FishCompatibilityNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
       child: Column(
@@ -681,7 +682,7 @@ class FishCompatibilityScreenState
             alignment: WrapAlignment.center,
             children: [
               ModernSelectableChip(
-                label: 'Freshwater',
+                label: l10n.freshwater,
                 emoji: '🐟',
                 selected: _selectedCategory == 'freshwater',
                 onTap: () {
@@ -695,7 +696,7 @@ class FishCompatibilityScreenState
                 },
               ),
               ModernSelectableChip(
-                label: 'Saltwater',
+                label: l10n.saltwater,
                 emoji: '🪼',
                 selected: _selectedCategory == 'marine',
                 onTap: () {
@@ -717,7 +718,13 @@ class FishCompatibilityScreenState
   }
 
   Widget _buildReefSafeFilter() {
+    final l10n = AppLocalizations.of(context)!;
     const options = ['Yes', 'No', 'Caution'];
+    final Map<String, String> optionLabels = {
+      'Yes': l10n.reefSafeYes,
+      'No': l10n.reefSafeNo,
+      'Caution': l10n.reefSafeCaution,
+    };
     final colors = {
       'Yes': Colors.green,
       'No': Colors.red,
@@ -729,7 +736,7 @@ class FishCompatibilityScreenState
       alignment: WrapAlignment.center,
       children: [
         Text(
-          'Reef Safe:',
+          '${l10n.reefSafe}:',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -738,7 +745,7 @@ class FishCompatibilityScreenState
           final selected = _reefSafeFilter == opt;
           final color = colors[opt]!;
           return FilterChip(
-            label: Text(opt),
+            label: Text(optionLabels[opt]!),
             selected: selected,
             selectedColor: color.withOpacity(0.2),
             checkmarkColor: color,
@@ -787,7 +794,7 @@ class FishCompatibilityScreenState
               IconButton(
                 icon: const Icon(Icons.clear_rounded),
                 onPressed: () => notifier.clearSelection(),
-                tooltip: 'Clear Selection',
+                tooltip: l10n.clearSelection,
               ),
               const SizedBox(width: 4),
               Expanded(
@@ -963,6 +970,7 @@ class FishCompatibilityScreenState
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final l10n = AppLocalizations.of(context)!;
             final hasAnySelection =
                 selectedSpecies.values.any((set) => set.isNotEmpty);
             return AlertDialog(
@@ -971,7 +979,7 @@ class FishCompatibilityScreenState
                   : const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               title: Row(
                 children: [
-                  const Expanded(child: Text('Select Specific Species')),
+                  Expanded(child: Text(l10n.selectSpecificSpecies)),
                   IconButton(
                     icon: const Icon(Icons.close),
                     tooltip: 'Cancel',
@@ -991,7 +999,7 @@ class FishCompatibilityScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Optionally select specific species to refine the AI analysis.',
+                      l10n.optionallySelectSpecies,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 16),
@@ -1066,7 +1074,7 @@ class FishCompatibilityScreenState
                                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ),
                                           child: Text(
-                                            'Show $hiddenCount more...',
+                                            l10n.showMoreSpecies(hiddenCount),
                                             style: const TextStyle(fontSize: 12),
                                           ),
                                         ),
@@ -1077,9 +1085,9 @@ class FishCompatibilityScreenState
                                             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
                                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ),
-                                          child: const Text(
-                                            'Show less',
-                                            style: TextStyle(fontSize: 12),
+                                          child: Text(
+                                            l10n.showLess,
+                                            style: const TextStyle(fontSize: 12),
                                           ),
                                         ),
                                     ],
@@ -1094,8 +1102,8 @@ class FishCompatibilityScreenState
                                     child: TextField(
                                       controller: controller,
                                       autofocus: true,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Add species...',
+                                      decoration: InputDecoration(
+                                        hintText: l10n.addSpeciesHint,
                                         hintStyle: TextStyle(fontSize: 12),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -1191,7 +1199,7 @@ class FishCompatibilityScreenState
                         selectedSpecies.clear();
                       });
                     },
-                    child: const Text('Clear'),
+                    child: Text(l10n.clear),
                   ),
                 ElevatedButton(
                   onPressed: () {
@@ -1200,7 +1208,7 @@ class FishCompatibilityScreenState
                     );
                     Navigator.pop(context, result);
                   },
-                  child: const Text('Get Report'),
+                  child: Text(l10n.getReport),
                 ),
               ],
             );

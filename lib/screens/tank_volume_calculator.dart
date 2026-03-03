@@ -260,20 +260,20 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Tank Volume Calculator',
+      title: l10n.tankVolumeCalculator,
       bottomNavigationBar: const AdBanner(),
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           Text(
-            'Tank Volume Calculator',
+            l10n.tankVolumeCalculator,
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
             textAlign: TextAlign.center,
           ),
-          _buildSectionTitle(context, 'Shape'),
+          _buildSectionTitle(context, l10n.shape),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 14.0,
@@ -297,30 +297,37 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           ),
           if (_shape == 'Cylinder') ...[
             const SizedBox(height: 16),
-            _buildSectionTitle(context, 'Cylinder Type'),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12.0,
-              runSpacing: 10.0,
-              children: ['Full', 'Half', 'Corner'].map((typeName) {
-                final selected = _cylinderType == typeName;
-                return ModernSelectableChip(
-                  label: typeName,
-                  selected: selected,
-                  dense: true,
-                  selectedColor: Theme.of(context).colorScheme.tertiary,
-                  selectedTextColor: Theme.of(context).colorScheme.onTertiary,
-                  onTap: () {
-                    setState(() {
-                      _cylinderType = typeName;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
+            _buildSectionTitle(context, l10n.cylinderType),
+            Builder(builder: (context) {
+              final cylinderTypeLabels = {
+                'Full': l10n.cylinderFull,
+                'Half': l10n.cylinderHalf,
+                'Corner': l10n.cylinderCorner,
+              };
+              return Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12.0,
+                runSpacing: 10.0,
+                children: ['Full', 'Half', 'Corner'].map((typeName) {
+                  final selected = _cylinderType == typeName;
+                  return ModernSelectableChip(
+                    label: cylinderTypeLabels[typeName]!,
+                    selected: selected,
+                    dense: true,
+                    selectedColor: Theme.of(context).colorScheme.tertiary,
+                    selectedTextColor: Theme.of(context).colorScheme.onTertiary,
+                    onTap: () {
+                      setState(() {
+                        _cylinderType = typeName;
+                      });
+                    },
+                  );
+                }).toList(),
+              );
+            }),
           ],
           const SizedBox(height: 12),
-          _buildSectionTitle(context, 'Units'),
+          _buildSectionTitle(context, l10n.units),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 12.0,
@@ -462,37 +469,38 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   }
 
   Widget _renderInputs() {
+    final l10n = AppLocalizations.of(context)!;
     List<Widget> fields;
     switch (_shape) {
       case 'Cube':
-        fields = [_buildTextField(_lengthController, 'Side Length')];
+        fields = [_buildTextField(_lengthController, l10n.sideLength)];
         break;
       case 'Cylinder':
         fields = [
-          _buildTextField(_diameterController, 'Diameter'),
-          _buildTextField(_heightController, 'Height'),
+          _buildTextField(_diameterController, l10n.diameter),
+          _buildTextField(_heightController, l10n.height),
         ];
         break;
       case 'Hexagonal':
         fields = [
-          _buildTextField(_edgeController, 'Edge Length'),
-          _buildTextField(_heightController, 'Height'),
+          _buildTextField(_edgeController, l10n.edgeLength),
+          _buildTextField(_heightController, l10n.height),
         ];
         break;
       case 'BowFront':
         fields = [
-          _buildTextField(_lengthController, 'Length (Back)'),
-          _buildTextField(_widthController, 'Width (Side)'),
-          _buildTextField(_fullWidthController, 'Full Width'),
-          _buildTextField(_heightController, 'Height'),
+          _buildTextField(_lengthController, l10n.lengthBack),
+          _buildTextField(_widthController, l10n.widthSide),
+          _buildTextField(_fullWidthController, l10n.fullWidth),
+          _buildTextField(_heightController, l10n.height),
         ];
         break;
       case 'Rectangle':
       default:
         fields = [
-          _buildTextField(_lengthController, 'Length'),
-          _buildTextField(_widthController, 'Width'),
-          _buildTextField(_heightController, 'Height'),
+          _buildTextField(_lengthController, l10n.lengthLabel),
+          _buildTextField(_widthController, l10n.widthLabel),
+          _buildTextField(_heightController, l10n.height),
         ];
     }
 
@@ -535,6 +543,7 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
   }
 
   Widget _buildResultsCard() {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: Theme.of(context).colorScheme.surface,
       child: Padding(
@@ -543,13 +552,13 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildResultColumn(
-              'Volume',
+              l10n.volume,
               '$_gallons gal',
               '$_liters L',
               Theme.of(context).colorScheme.primary,
             ),
             _buildResultColumn(
-              'Weight',
+              l10n.weight,
               '$_pounds lbs',
               '$_kilograms kg',
               Colors.green,

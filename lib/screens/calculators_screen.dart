@@ -47,6 +47,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const List<String> calculatorTypes = [
       'Salinity',
       'CO2',
@@ -55,7 +56,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
     ];
 
     return MainLayout(
-      title: 'Calculators',
+      title: l10n.calculators,
       bottomNavigationBar: const AdBanner(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
@@ -64,7 +65,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
           child: Column(
             children: [
               Text(
-                'Aquarium Calculators',
+                l10n.aquariumCalculators,
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge
@@ -73,7 +74,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Essential tools for your aquarium.',
+                l10n.essentialToolsDescription,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -84,7 +85,7 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
                   child: Column(
                     children: [
-                      _buildSectionTitle(context, 'Calculator Type'),
+                      _buildSectionTitle(context, l10n.calculatorType),
                       Wrap(
                         alignment: WrapAlignment.center,
                         spacing: 14.0,
@@ -208,7 +209,7 @@ class SalinityConverterState extends State<SalinityConverter> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           const BannerAdWidget(),
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -285,13 +286,13 @@ class SalinityConverterState extends State<SalinityConverter> {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 14,
                   children: [
-                    _buildResultColumn('Salinity',
+                    _buildResultColumn(l10n.salinity,
                         '${_results['salinity']} ppt', Colors.teal),
-                    _buildResultColumn('Specific Gravity',
+                    _buildResultColumn(l10n.specificGravity,
                         '${_results['specificGravity']}', Colors.orange),
-                    _buildResultColumn('Density',
+                    _buildResultColumn(l10n.density,
                         '${_results['density']} kg/L', Colors.purple),
-                    _buildResultColumn('Conductivity',
+                    _buildResultColumn(l10n.conductivity,
                         '${_results['conductivity']} mS/cm', Colors.green),
                   ],
                 ),
@@ -430,7 +431,7 @@ class CarbonDioxideCalculatorState extends State<CarbonDioxideCalculator> {
                     horizontal: 22.0, vertical: 26.0),
                 child: Column(
                   children: [
-                    Text('Estimated CO₂ Level',
+                    Text(l10n.estimatedCO2Level,
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     Text('$_result ppm',
@@ -523,7 +524,7 @@ class AlkalinityConverterState extends State<AlkalinityConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,
@@ -674,7 +675,7 @@ class TemperatureConverterState extends State<TemperatureConverter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSubSectionTitle(context, 'Convert From'),
+        _buildSubSectionTitle(context, l10n.convertFrom),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 12.0,

@@ -4038,5 +4038,315 @@
   "moreThemeOptions": "More theme options",
   "@moreThemeOptions": {
     "description": "Button label in the app drawer that navigates to the full Appearance screen"
+  },
+
+  "analyzingFish": "Analyzing Fish...",
+  "@analyzingFish": {
+    "description": "Loading overlay title when AI is analyzing fish compatibility"
+  },
+
+  "pleaseWaitAIReport": "Please wait while the AI generates your compatibility report.",
+  "@pleaseWaitAIReport": {
+    "description": "Loading overlay subtitle when AI is generating compatibility report"
+  },
+
+  "aiCompatibilityCalculator": "AI Compatibility Calculator",
+  "@aiCompatibilityCalculator": {
+    "description": "Title for the AI fish compatibility screen"
+  },
+
+  "failedToLoadFishData": "Failed to load fish data:\n{error}",
+  "@failedToLoadFishData": {
+    "description": "Error message when fish data fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "aiInhabitantCompatibility": "AI Inhabitant Compatibility",
+  "@aiInhabitantCompatibility": {
+    "description": "Heading on the fish compatibility screen"
+  },
+
+  "selectInhabitantsHint": "Select two or more inhabitants to generate a compatibility report.",
+  "@selectInhabitantsHint": {
+    "description": "Subtitle hint on the fish compatibility screen"
+  },
+
+  "tagFishForBetterSearch": "Tag fish with species names for better search",
+  "@tagFishForBetterSearch": {
+    "description": "Label on the species tags link on the fish compatibility screen"
+  },
+
+  "searchByNameSpecies": "Search by name, species...",
+  "@searchByNameSpecies": {
+    "description": "Hint text in the fish search bar"
+  },
+
+  "reefSafe": "Reef Safe",
+  "@reefSafe": {
+    "description": "Label for the reef safe filter"
+  },
+
+  "reefSafeYes": "Yes",
+  "@reefSafeYes": {
+    "description": "Reef safe filter chip: yes"
+  },
+
+  "reefSafeNo": "No",
+  "@reefSafeNo": {
+    "description": "Reef safe filter chip: no"
+  },
+
+  "reefSafeCaution": "Caution",
+  "@reefSafeCaution": {
+    "description": "Reef safe filter chip: caution"
+  },
+
+  "clearSelection": "Clear Selection",
+  "@clearSelection": {
+    "description": "Tooltip on the clear selection button in the fish compatibility bottom bar"
+  },
+
+  "aiCompatToolFooterDescription": "This AI-powered tool helps you check the compatibility of freshwater and marine aquarium inhabitants. Select the fish you're interested in, and click \"Get Report\" to receive a detailed analysis, including recommended tank size, decorations, care guides, and potential conflict risks.",
+  "@aiCompatToolFooterDescription": {
+    "description": "Footer description on the fish compatibility screen"
+  },
+
+  "selectSpecificSpecies": "Select Specific Species",
+  "@selectSpecificSpecies": {
+    "description": "Title of the species selection dialog"
+  },
+
+  "optionallySelectSpecies": "Optionally select specific species to refine the AI analysis.",
+  "@optionallySelectSpecies": {
+    "description": "Subtitle in the species selection dialog"
+  },
+
+  "showMoreSpecies": "Show {count} more...",
+  "@showMoreSpecies": {
+    "description": "Button to show more species tags in the selection dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "showLess": "Show less",
+  "@showLess": {
+    "description": "Button to collapse species tags in the selection dialog"
+  },
+
+  "addSpeciesHint": "Add species...",
+  "@addSpeciesHint": {
+    "description": "Hint text in the add species text field"
+  },
+
+  "clear": "Clear",
+  "@clear": {
+    "description": "Button to clear species selections in the dialog"
+  },
+
+  "selectedFish": "Selected Fish",
+  "@selectedFish": {
+    "description": "Section title in the compatibility report for selected fish"
+  },
+
+  "compatibleTankMates": "Compatible Tank Mates",
+  "@compatibleTankMates": {
+    "description": "Section title in the compatibility report for compatible tank mates"
+  },
+
+  "detailedSummary": "Detailed Summary",
+  "@detailedSummary": {
+    "description": "Section title in the compatibility report for the detailed summary"
+  },
+
+  "recommendedTankSize": "Recommended Tank Size",
+  "@recommendedTankSize": {
+    "description": "Section title in the compatibility report for the recommended tank size"
+  },
+
+  "decorationsAndSetup": "Decorations and Setup",
+  "@decorationsAndSetup": {
+    "description": "Section title in the compatibility report for decorations and setup"
+  },
+
+  "careGuide": "Care Guide",
+  "@careGuide": {
+    "description": "Section title in the compatibility report for the care guide"
+  },
+
+  "aiDisclaimer": "Disclaimer: AI may occasionally provide inaccurate recommendations. Always cross-check critical information.",
+  "@aiDisclaimer": {
+    "description": "Disclaimer text at the bottom of the compatibility report"
+  },
+
+  "shareReport": "Share Report",
+  "@shareReport": {
+    "description": "Button label to share the compatibility report"
+  },
+
+  "groupHarmony": "Group Harmony",
+  "@groupHarmony": {
+    "description": "Title of the group harmony card in the compatibility report"
+  },
+
+  "calculationBreakdown": "Calculation Breakdown",
+  "@calculationBreakdown": {
+    "description": "Title of the calculation breakdown section in the compatibility report"
+  },
+
+  "clickFishToSearch": "(Click a fish to search)",
+  "@clickFishToSearch": {
+    "description": "Hint text below the compatible tank mates list"
+  },
+
+  "calculators": "Calculators",
+  "@calculators": {
+    "description": "Title of the calculators screen"
+  },
+
+  "essentialToolsDescription": "Essential tools for your aquarium.",
+  "@essentialToolsDescription": {
+    "description": "Subtitle on the calculators screen"
+  },
+
+  "calculatorType": "Calculator Type",
+  "@calculatorType": {
+    "description": "Section title for the calculator type selector"
+  },
+
+  "convertFrom": "Convert From",
+  "@convertFrom": {
+    "description": "Section title for the convert-from unit selector in calculators"
+  },
+
+  "estimatedCO2Level": "Estimated CO₂ Level",
+  "@estimatedCO2Level": {
+    "description": "Label for the CO₂ result in the CO₂ calculator"
+  },
+
+  "specificGravity": "Specific Gravity",
+  "@specificGravity": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "density": "Density",
+  "@density": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "conductivity": "Conductivity",
+  "@conductivity": {
+    "description": "Result column label in the salinity converter"
+  },
+
+  "shape": "Shape",
+  "@shape": {
+    "description": "Section title for the tank shape selector"
+  },
+
+  "cylinderType": "Cylinder Type",
+  "@cylinderType": {
+    "description": "Section title for the cylinder type selector"
+  },
+
+  "units": "Units",
+  "@units": {
+    "description": "Section title for the units selector in calculators"
+  },
+
+  "cylinderFull": "Full",
+  "@cylinderFull": {
+    "description": "Cylinder type chip label: full cylinder"
+  },
+
+  "cylinderHalf": "Half",
+  "@cylinderHalf": {
+    "description": "Cylinder type chip label: half cylinder"
+  },
+
+  "cylinderCorner": "Corner",
+  "@cylinderCorner": {
+    "description": "Cylinder type chip label: corner cylinder"
+  },
+
+  "sideLength": "Side Length",
+  "@sideLength": {
+    "description": "Field label for cube side length in the tank volume calculator"
+  },
+
+  "diameter": "Diameter",
+  "@diameter": {
+    "description": "Field label for cylinder diameter in the tank volume calculator"
+  },
+
+  "height": "Height",
+  "@height": {
+    "description": "Field label for tank height in the tank volume calculator"
+  },
+
+  "edgeLength": "Edge Length",
+  "@edgeLength": {
+    "description": "Field label for hexagonal tank edge length in the tank volume calculator"
+  },
+
+  "lengthBack": "Length (Back)",
+  "@lengthBack": {
+    "description": "Field label for bowfront tank back length in the tank volume calculator"
+  },
+
+  "widthSide": "Width (Side)",
+  "@widthSide": {
+    "description": "Field label for bowfront tank side width in the tank volume calculator"
+  },
+
+  "fullWidth": "Full Width",
+  "@fullWidth": {
+    "description": "Field label for bowfront tank full width in the tank volume calculator"
+  },
+
+  "lengthLabel": "Length",
+  "@lengthLabel": {
+    "description": "Field label for tank length in the tank volume calculator"
+  },
+
+  "widthLabel": "Width",
+  "@widthLabel": {
+    "description": "Field label for tank width in the tank volume calculator"
+  },
+
+  "volume": "Volume",
+  "@volume": {
+    "description": "Result column label for tank volume"
+  },
+
+  "weight": "Weight",
+  "@weight": {
+    "description": "Result column label for tank water weight"
+  },
+
+  "informationSubtitle": "Learn how to contribute to Aquarium AI and help make it available in your language.",
+  "@informationSubtitle": {
+    "description": "Subtitle on the information screen"
+  },
+
+  "i18nCardTitle": "Internationalization (i18n)",
+  "@i18nCardTitle": {
+    "description": "Title of the i18n card on the information screen"
+  },
+
+  "i18nCardSubtitle": "Help translate Aquarium AI into your language",
+  "@i18nCardSubtitle": {
+    "description": "Subtitle of the i18n card on the information screen"
+  },
+
+  "i18nGuideInfo": "The i18n guide contains links to additional resources including translation guides, testing documentation, and implementation details.",
+  "@i18nGuideInfo": {
+    "description": "Info text below the i18n card on the information screen"
   }
 }
