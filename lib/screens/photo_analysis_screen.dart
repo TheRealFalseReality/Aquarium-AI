@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

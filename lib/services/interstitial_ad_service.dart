@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../constants.dart';
 import 'ad_helper.dart';
+import 'remote_config_service.dart';
 
 /// Manages loading and displaying an interstitial ad for free-tier AI users.
 ///
-/// The ad is shown at most once every [admobInterstitialCooldownHours] hours
-/// and only on supported platforms (Android / iOS).
+/// The ad is shown at most once every [RemoteConfigService.interstitialCooldownHours]
+/// hours and only on supported platforms (Android / iOS).
 class InterstitialAdService {
   static const String _lastShownKey = 'interstitialAdLastShownMs';
 
@@ -44,7 +44,7 @@ class InterstitialAdService {
     final prefs = await SharedPreferences.getInstance();
     final lastShownMs = prefs.getInt(_lastShownKey) ?? 0;
     final cooldownMs =
-        Duration(hours: admobInterstitialCooldownHours).inMilliseconds;
+        Duration(hours: RemoteConfigService.interstitialCooldownHours).inMilliseconds;
     return DateTime.now().millisecondsSinceEpoch - lastShownMs >= cooldownMs;
   }
 
@@ -57,7 +57,7 @@ class InterstitialAdService {
   /// Shows the interstitial ad if:
   /// - The platform is supported
   /// - The ad is loaded
-  /// - The 6-hour cooldown has elapsed
+  /// - The cooldown period (configured via Remote Config) has elapsed
   ///
   /// [onWillShow] is called just before the ad is presented, allowing the
   /// caller to show a brief toast or notification to the user.

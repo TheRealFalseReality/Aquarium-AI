@@ -604,7 +604,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         width: 88,
                         height: 56,
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _inhabitantPlaceholder(cs),
+                        errorWidget: (_, _, _) => _inhabitantPlaceholder(cs),
                       )
                     : _inhabitantPlaceholder(cs),
               ),

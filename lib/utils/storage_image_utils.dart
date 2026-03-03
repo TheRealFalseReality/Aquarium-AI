@@ -84,7 +84,7 @@ String? deriveResizedStoragePath(String url, int width, int height) {
     final lastDot = storagePath.lastIndexOf('.');
     final nameWithoutExt =
         lastDot >= 0 ? storagePath.substring(0, lastDot) : storagePath;
-    return '${nameWithoutExt}_${width}x${height}.webp';
+    return '${nameWithoutExt}_${width}x$height.webp';
   } catch (_) {
     return null;
   }

@@ -32,8 +32,10 @@ const String admobBannerAdUnitId = 'ca-app-pub-5701077439648731/8630162735';
 const String admobNativeAdUnitId = 'ca-app-pub-5701077439648731/9085458306';
 const String admobInterstitialAdUnitId = 'ca-app-pub-5701077439648731/4488121170';
 
-// Interstitial ad cooldown: once every 6 hours for free-tier AI users
-const int admobInterstitialCooldownHours = 6;
+// Interstitial ad cooldown: once every N hours for free-tier AI users.
+// This is the in-app fallback default; the actual value is controlled via
+// Firebase Remote Config (RemoteConfigKeys.interstitialCooldownHours).
+const int rcDefaultInterstitialCooldownHours = 6;
 
 // AdSense constants
 const String adSenseAppId = 'ca-pub-5701077439648731';
@@ -205,6 +207,10 @@ class RemoteConfigKeys {
   /// free-tier (developer Groq key) users.  Defaults to `true`.
   static const String freePhotoAnalysisEnabled = 'free_photo_analysis_enabled';
 
+  // ── Ads ───────────────────────────────────────────────────────────────────
+  /// Integer — minimum hours between interstitial ad impressions for
+  /// free-tier users.  Defaults to [rcDefaultInterstitialCooldownHours] (6).
+  static const String interstitialCooldownHours = 'admob_interstitial_cooldown_hours';
   // ── Founder Aquarist AI limits ──────────────────────────────────────────────
   /// Integer — per-minute request cap for Founder Aquarist users.
   static const String founderMaxRequestsPerMinute = 'founder_max_requests_per_minute';
