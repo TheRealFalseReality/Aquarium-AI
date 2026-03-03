@@ -25,8 +25,10 @@ import './screens/photo_analysis_screen.dart';
 import './screens/tank_management_screen.dart';
 import './screens/species_tags_screen.dart';
 import './screens/analysis_history_screen.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import './constants.dart' show reCaptchaV3SiteKey;
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
 import './services/device_id_service.dart';
@@ -106,6 +108,78 @@ Future<bool> _initializeFirebaseWithRetry({int maxRetries = 3}) async {
   return false;
 }
 
+/// Initialize Firebase App Check to protect backend resources from abuse.
+///
+/// ## What you need to do in the Firebase Console
+///
+/// 1. Open https://console.firebase.google.com/ and select your project.
+/// 2. Navigate to **Build → App Check**.
+/// 3. Register each platform:
+///    - **Android**: Select your app, choose **Play Integrity** as the
+///      provider, and click *Save*.  Make sure the SHA-256 certificate
+///      fingerprint of your signing key is registered in Project Settings →
+///      Your Apps → Android App.
+///    - **iOS**: Select your app, choose **App Attest** as the provider,
+///      and click *Save*.  App Attest requires iOS 14+ / macOS 14+.
+///    - **Web**: Select your app, choose **reCAPTCHA v3**, copy the site key
+///      from https://www.google.com/recaptcha/admin, paste it into the
+///      `ReCaptchaV3Provider` call below, and click *Save* in the Console.
+/// 4. After registering all platforms, click **Enforce** for each Firebase
+///    service you want to protect (Storage, Firestore, Auth, etc.).
+///
+/// ## Debug tokens (for development / CI)
+///
+/// In debug builds the SDK generates a one-time token that is printed to
+/// logcat (Android) or Xcode console (iOS):
+///   `D/FirebaseAppCheck: Firebase App Check debug token: <TOKEN>`
+/// Register this token in Firebase Console → App Check → Apps →
+/// **Manage debug tokens**, so debug builds can still reach Firebase services.
+///
+/// Do **not** ship debug provider tokens in production.
+Future<void> _initializeAppCheck() async {
+  try {
+    await FirebaseAppCheck.instance.activate(
+      // ---------------------------------------------------------------
+      // Android: Play Integrity in release, debug provider in debug mode.
+      // Play Integrity is the recommended provider for Play-distributed apps
+      // and replaces the deprecated SafetyNet provider.
+      // ---------------------------------------------------------------
+      androidProvider: kDebugMode
+          ? AndroidProvider.debug
+          : AndroidProvider.playIntegrity,
+
+      // ---------------------------------------------------------------
+      // Apple (iOS / macOS): App Attest in release, debug in debug mode.
+      // App Attest requires iOS 14+ / macOS 14+.  For older OS targets
+      // you can use AppleProvider.deviceCheckWithFallbackToAppAttest.
+      // ---------------------------------------------------------------
+      appleProvider: kDebugMode
+          ? AppleProvider.debug
+          : AppleProvider.appAttest,
+
+      // ---------------------------------------------------------------
+      // Web: reCAPTCHA v3.
+      // Inject the site key at build time:
+      //   flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=<your-key>
+      // See constants.dart for details.  If the key is empty, App Check
+      // will fail on web but the app continues to function otherwise.
+      // ---------------------------------------------------------------
+      webProvider: ReCaptchaV3Provider(reCaptchaV3SiteKey),
+    );
+
+    if (kDebugMode) {
+      debugPrint('Firebase App Check initialized successfully');
+    }
+  } catch (e) {
+    // App Check activation failure is non-fatal; the app continues to work
+    // but Firebase backend calls may be rejected if enforcement is enabled
+    // without a valid token.
+    if (kDebugMode) {
+      debugPrint('Firebase App Check initialization failed: $e');
+    }
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -133,6 +207,13 @@ void main() async {
   
   // Only initialize Firebase-dependent services if Firebase initialized successfully
   if (_firebaseInitialized) {
+    // Activate Firebase App Check to prevent unauthorized access to Firebase
+    // backend resources.  Must be called before other Firebase services are
+    // used so that every request carries a valid App Check token.
+    // See the _initializeAppCheck() doc comment for the required Firebase
+    // Console setup steps.
+    await _initializeAppCheck();
+
     // Set app version and build info as Crashlytics custom keys (non-blocking)
     CrashlyticsService.setAppInfo().catchError((error) {
       if (kDebugMode) {

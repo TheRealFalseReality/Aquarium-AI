@@ -5,6 +5,15 @@
 const String developerGroqApiKey =
     String.fromEnvironment('DEVELOPER_GROQ_API_KEY', defaultValue: '');
 
+// reCAPTCHA v3 site key – injected at build time via:
+//   flutter build ... --dart-define=RECAPTCHA_V3_SITE_KEY=<your-key>
+// Required for Firebase App Check on the Web platform.
+// Obtain your key at https://www.google.com/recaptcha/admin and register it
+// in Firebase Console → Build → App Check → Web app → reCAPTCHA v3.
+// Leave the default empty; App Check will fail gracefully on web if not set.
+const String reCaptchaV3SiteKey =
+    String.fromEnvironment('RECAPTCHA_V3_SITE_KEY', defaultValue: '');
+
 // AdMob constants
 const String admobAppId = 'ca-app-pub-5701077439648731~1582287080';
 
