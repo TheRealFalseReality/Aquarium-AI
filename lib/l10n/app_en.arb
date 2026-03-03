@@ -3840,7 +3840,6 @@
     "description": "Button label to never show the AquaPi promotion dialog again (full label, for desktop)"
   },
 
-<<<<<<< copilot/translate-aquarium-calculators
   "calculators": "Calculators",
   "@calculators": {
     "description": "Short title for the Aquarium Calculators screen (AppBar)"
@@ -4031,7 +4030,6 @@
     "description": "Tooltip text on the dimension diagram button in the tank volume calculator",
     "placeholders": {
       "shape": {
-=======
   "themeDefault": "Default",
   "@themeDefault": {
     "description": "Display name for the Default colour theme"
@@ -4177,13 +4175,11 @@
     "description": "Snackbar shown when a history entry cannot be opened",
     "placeholders": {
       "error": {
->>>>>>> main
         "type": "String"
       }
     }
   },
 
-<<<<<<< copilot/translate-aquarium-calculators
   "resultVolume": "Volume",
   "@resultVolume": {
     "description": "Label for the volume result in the tank volume calculator"
@@ -4374,7 +4370,6 @@
     "description": "Snackbar message shown after an API key is cleared",
     "placeholders": {
       "label": {
-=======
   "analysisTypeWaterParameters": "Water Parameter Analysis",
   "@analysisTypeWaterParameters": {
     "description": "Display name for the water parameter analysis type in history"
@@ -4415,13 +4410,11 @@
     "description": "Label shown above error messages in the chatbot screen",
     "placeholders": {
       "appName": {
->>>>>>> main
         "type": "String"
       }
     }
   },
 
-<<<<<<< copilot/translate-aquarium-calculators
   "clear": "Clear",
   "@clear": {
     "description": "Short button label to clear/remove a value"
@@ -4789,11 +4782,10 @@
 
   "getTheApp": "Get the App",
   "@getTheApp": {
-    "description": "Button label to download the mobile app"
-=======
+    "description": "Button label to download the mobile app",
   "moreThemeOptions": "More theme options",
   "@moreThemeOptions": {
     "description": "Button label in the app drawer that navigates to the full Appearance screen"
->>>>>>> main
   }
 }
+      
