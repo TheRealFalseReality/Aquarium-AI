@@ -51,12 +51,29 @@ Current version: `3.0.10+3.0.10` (see `pubspec.yaml`).
   examples/               # Example data files
 assets/                   # Images, fonts, JSON data, documentation markdown files
   docs/
-    USER_GUIDE.md         # English user-facing guide (source of truth)
-    HELP_WANTED.md        # English contributor recruitment doc
-    CHANGELOG.md          # English changelog (source of truth)
+    en/                   # All English docs (source of truth for user-facing; dev-only)
+      USER_GUIDE_en.md        # English user guide
+      HELP_WANTED_en.md       # English contributor recruitment doc
+      CHANGELOG_en.md         # English changelog
+      CONTRIBUTING_en.md
+      START_HERE_I18N_en.md
+      TRANSLATION_GUIDE_en.md
+      TRANSLATION_QUICK_REF_en.md
+      LOCALIZATION_DEV_GUIDE_en.md
+      TESTING_I18N_en.md
+      I18N_IMPLEMENTATION_en.md
     de/                   # German translations of user-facing docs
+      USER_GUIDE_de.md
+      HELP_WANTED_de.md
+      CHANGELOG_de.md
     es/                   # Spanish translations of user-facing docs
+      USER_GUIDE_es.md
+      HELP_WANTED_es.md
+      CHANGELOG_es.md
     fr/                   # French translations of user-facing docs
+      USER_GUIDE_fr.md
+      HELP_WANTED_fr.md
+      CHANGELOG_fr.md
 scripts/
   validate_translations.sh  # Bash script; checks ARB key completeness and placeholder parity
 test/                     # Flutter unit/widget tests (run with `flutter test`)
@@ -265,7 +282,7 @@ When adding a new AI tool, calculator, or other significant feature:
 1. Create the screen in `lib/screens/my_tool_screen.dart` (see [Adding a New Screen](#adding-a-new-screen)).
 2. Register its named route in `lib/main.dart`.
 3. Add a feature card or navigation entry so it is discoverable (welcome screen, drawer, or information screen).
-4. **Update `assets/docs/USER_GUIDE.md`** to document the new tool:
+4. **Update `assets/docs/en/USER_GUIDE_en.md`** to document the new tool:
    - Add a new section under the appropriate heading (AI Tools, Calculators, Tank Tools, etc.).
    - Explain all inputs, outputs, and any prerequisites (e.g. API key requirement).
    - Add the section to the **Table of Contents** at the top of the file.
@@ -276,13 +293,13 @@ When adding a new AI tool, calculator, or other significant feature:
 
 ## Keeping the User Guide Up to Date
 
-`assets/docs/USER_GUIDE.md` is the single source of truth for end-user documentation.
+`assets/docs/en/USER_GUIDE_en.md` is the single source of truth for end-user documentation.
 **Any PR that changes how a tool works must also update the corresponding section of
 the User Guide and its translations.**
 
 Update the User Guide when you:
 
-| Change | What to update in `USER_GUIDE.md` |
+| Change | What to update in `USER_GUIDE_en.md` |
 | ------ | --------------------------------- |
 | Add a new input field or option | Add it to the tool's **Inputs** / **How to Use** list |
 | Remove or rename a field | Remove or rename it in the same list |
@@ -346,13 +363,21 @@ translated versions for German (`de`), Spanish (`es`), and French (`fr`):
 
 | English source | Description |
 | -------------- | ----------- |
-| `assets/docs/USER_GUIDE.md` | In-app user guide |
-| `assets/docs/HELP_WANTED.md` | Contributor recruitment page |
-| `assets/docs/CHANGELOG.md` | Release changelog |
+| `assets/docs/en/USER_GUIDE_en.md` | In-app user guide |
+| `assets/docs/en/HELP_WANTED_en.md` | Contributor recruitment page |
+| `assets/docs/en/CHANGELOG_en.md` | Release changelog |
 
-Translations live in locale subdirectories: `assets/docs/de/`, `assets/docs/es/`,
-`assets/docs/fr/`. The app loads the locale-appropriate file at runtime with a
-fallback to the English original.
+### File naming convention
+
+Files follow the pattern `{DOCNAME}_{locale}.md` inside `assets/docs/{locale}/`:
+
+- `assets/docs/en/USER_GUIDE_en.md` (English source of truth)
+- `assets/docs/de/USER_GUIDE_de.md` (German)
+- `assets/docs/es/USER_GUIDE_es.md` (Spanish)
+- `assets/docs/fr/USER_GUIDE_fr.md` (French)
+
+The app loads the locale-appropriate file at runtime with a fallback to the English
+original (`assets/docs/en/{DOCNAME}_en.md`).
 
 ### When to update translations
 
@@ -368,9 +393,9 @@ fallback to the English original.
 
 These docs are not shown in the app UI and do **not** need translated copies:
 
-- `CONTRIBUTING.md`, `START_HERE_I18N.md`, `TRANSLATION_GUIDE.md`
-- `TRANSLATION_QUICK_REF.md`, `LOCALIZATION_DEV_GUIDE.md`
-- `TESTING_I18N.md`, `I18N_IMPLEMENTATION.md`
+- `CONTRIBUTING_en.md`, `START_HERE_I18N_en.md`, `TRANSLATION_GUIDE_en.md`
+- `TRANSLATION_QUICK_REF_en.md`, `LOCALIZATION_DEV_GUIDE_en.md`
+- `TESTING_I18N_en.md`, `I18N_IMPLEMENTATION_en.md`
 
 ---
 

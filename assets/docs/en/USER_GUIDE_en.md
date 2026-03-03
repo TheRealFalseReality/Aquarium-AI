@@ -37,8 +37,7 @@ Aquarium AI includes a limited free tier powered by a built-in developer key. Th
 For unlimited access, add your own API key in **Settings → AI API Keys**. Supported providers:
 
 | Provider | Where to get a key |
-|----------|-------------------|
-
+| -------- | ------------------ |
 | **Groq** (default) | [console.groq.com](https://console.groq.com) |
 | **Google Gemini** | [aistudio.google.com](https://aistudio.google.com) |
 | **OpenAI (ChatGPT)** | [platform.openai.com](https://platform.openai.com) |
@@ -251,8 +250,7 @@ The report lists suitable species with a brief care note for each, plus stocking
 A set of offline, instant calculators — no API key needed.
 
 | Calculator | What it does |
-|-----------|-------------|
-
+| ---------- | ------------ |
 | **Salinity** | Converts between PPT, PSU, and Specific Gravity |
 | **CO₂** | Estimates dissolved CO₂ from pH and KH |
 | **Alkalinity** | Converts between dKH, meq/L, and ppm |

@@ -9,6 +9,7 @@ Aquarium AI uses Flutter's built-in internationalization (i18n) system with ARB 
 ## Getting Started
 
 ### Prerequisites
+
 - Basic understanding of JSON format
 - Familiarity with your target language
 - A text editor (VS Code, Sublime Text, or any editor you prefer)
@@ -16,7 +17,8 @@ Aquarium AI uses Flutter's built-in internationalization (i18n) system with ARB 
 ### File Structure
 
 Translation files are located in:
-```
+
+```text
 lib/l10n/
 ├── app_en.arb    (English - template)
 ├── app_es.arb    (Spanish - example)
@@ -33,6 +35,7 @@ lib/l10n/
 3. Update the `@@locale` value to your language code
 
 **Common language codes:**
+
 - `de` - German
 - `ja` - Japanese
 - `zh` - Chinese (Simplified)
@@ -44,13 +47,14 @@ lib/l10n/
 - `hi` - Hindi
 - `nl` - Dutch
 
-Find more language codes here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+Find more language codes here: <https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes>
 
 ### Step 2: Translate the Strings
 
 Translate each string value (but NOT the keys). Here's an example:
 
 **English (app_en.arb):**
+
 ```json
 {
   "@@locale": "en",
@@ -60,6 +64,7 @@ Translate each string value (but NOT the keys). Here's an example:
 ```
 
 **German (app_de.arb):**
+
 ```json
 {
   "@@locale": "de",
@@ -73,11 +78,13 @@ Translate each string value (but NOT the keys). Here's an example:
 Some strings contain placeholders like `{count}`. Keep these placeholders unchanged:
 
 **English:**
+
 ```json
 "totalTanks": "Total: {count}"
 ```
 
 **German:**
+
 ```json
 "totalTanks": "Gesamt: {count}"
 ```
@@ -85,6 +92,7 @@ Some strings contain placeholders like `{count}`. Keep these placeholders unchan
 ### Step 4: Preserve Special Characters
 
 Keep special characters and formatting:
+
 - Emojis: 🐠, 🤖, 📷, etc.
 - Special symbols: CO₂, ₂, etc.
 - HTML entities and escape sequences
@@ -105,26 +113,32 @@ supportedLocales: const [
 ## Translation Tips
 
 ### 1. Context Matters
+
 - Read the `@description` fields in the English ARB file for context
 - If unclear, check where the string is used in the app
 
 ### 2. Maintain Consistency
+
 - Use consistent terminology throughout
 - Keep the tone professional yet friendly
 - Match the style of existing translations
 
 ### 3. Cultural Adaptation
+
 - Adapt idioms and expressions to your culture
 - Consider regional differences in your language
 
 ### 4. Technical Terms
+
 Some technical terms should remain in English or use commonly accepted translations:
+
 - API Key
 - AI (Artificial Intelligence)
 - Model names (Gemini, OpenAI, Groq)
 - Tank (aquarium terminology)
 
 ### 5. Length Considerations
+
 - Try to keep translations roughly the same length as the original
 - Very long translations may not fit in the UI
 - If needed, use abbreviations common in your language
@@ -133,7 +147,7 @@ Some technical terms should remain in English or use commonly accepted translati
 
 While we don't require you to build and test the app yourself, here's how you can verify your work:
 
-1. **Check JSON Syntax**: Use a JSON validator (https://jsonlint.com/)
+1. **Check JSON Syntax**: Use a JSON validator (<https://jsonlint.com/>)
 2. **Review Completeness**: Ensure all keys from `app_en.arb` are translated
 3. **Check Placeholders**: Verify placeholders like `{count}` are preserved
 
@@ -142,16 +156,19 @@ While we don't require you to build and test the app yourself, here's how you ca
 Each ARB file contains:
 
 1. **Locale identifier:**
+
    ```json
    "@@locale": "en"
    ```
 
 2. **Translation key and value:**
+
    ```json
    "welcomeTitle": "Welcome"
    ```
 
 3. **Metadata (optional, from template):**
+
    ```json
    "@welcomeTitle": {
      "description": "Title for the welcome screen"
@@ -202,6 +219,7 @@ Before submitting, verify:
 ## Example Languages
 
 Check out these examples for reference:
+
 - English: `lib/l10n/app_en.arb` (template)
 - Spanish: `lib/l10n/app_es.arb`
 - French: `lib/l10n/app_fr.arb`
@@ -213,13 +231,13 @@ All translators will be credited in the app's About section and README. Thank yo
 ## Language Coverage Status
 
 | Language | Code | Status | Translator |
-|----------|------|--------|------------|
-| English  | en   | ✅ Complete | Native |
-| Spanish  | es   | ✅ Complete | Community |
-| French   | fr   | ✅ Complete | Community |
-| German   | de   | ✅ Complete | Community |
-| Japanese | ja   | 🔄 Needed | - |
-| Chinese  | zh   | 🔄 Needed | - |
+| -------- | ---- | ------ | ---------- |
+| English | en | ✅ Complete | Native |
+| Spanish | es | ✅ Complete | Community |
+| French | fr | ✅ Complete | Community |
+| German | de | ✅ Complete | Community |
+| Japanese | ja | 🔄 Needed | - |
+| Chinese | zh | 🔄 Needed | - |
 | Portuguese | pt | 🔄 Needed | - |
 
 Want to add your language? Follow this guide and submit a PR!
@@ -233,6 +251,6 @@ As the app evolves, new strings may be added to `app_en.arb`. To update your tra
 3. Add translations for new strings to your ARB file
 4. Submit an update PR
 
-## Thank You!
+## Thank You
 
 Your contribution helps aquarium enthusiasts worldwide use this app in their native language. Every translation makes a difference! 🌍🐠

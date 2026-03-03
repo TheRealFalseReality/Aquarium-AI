@@ -56,13 +56,13 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
       if (languageCode != 'en') {
         try {
           content = await rootBundle
-              .loadString('assets/docs/$languageCode/CHANGELOG.md');
+              .loadString('assets/docs/$languageCode/CHANGELOG_$languageCode.md');
         } catch (_) {
           content =
-              await rootBundle.loadString('assets/docs/CHANGELOG.md');
+              await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
         }
       } else {
-        content = await rootBundle.loadString('assets/docs/CHANGELOG.md');
+        content = await rootBundle.loadString('assets/docs/en/CHANGELOG_en.md');
       }
       setState(() {
         _markdownContent = content;

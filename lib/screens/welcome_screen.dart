@@ -148,7 +148,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _communityPromoDismissedKey = 'welcomeCommunityPromoDismissed';
   static const int _promoCardAutoDismissDays = 7;
   static const int _millisecondsPerDay = 86400000;
-  static const String _userGuideAssetPath = 'assets/docs/USER_GUIDE.md';
+  static const String _userGuideAssetPath = 'assets/docs/en/USER_GUIDE_en.md';
 
   bool _showChangelogBanner = false;
   String _changelogBannerVersion = '';
