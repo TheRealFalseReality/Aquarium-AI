@@ -940,5 +940,14 @@
   "freeAIUnavailable": "IA gratuita no disponible",
   "usingFreeProvider": "Usando proveedor gratuito",
   "useYourOwnKey": "Usa tu propia clave",
-  "modelsButton": "Modelos"
+  "modelsButton": "Modelos",
+  "clearApiKeyTitle": "Eliminar clave API",
+  "clearApiKeyConfirm": "¿Estás seguro de que quieres eliminar el {label}? Necesitarás volver a introducir la clave para utilizarla.",
+  "apiKeyCleared": "{label} eliminada.",
+  "unableToOpenLink": "No se puede abrir el enlace en este momento.",
+  "storeNotAvailable": "Tienda no disponible en este dispositivo.",
+  "storeError": "Error de tienda: {message}",
+  "productNotFound": "Producto no encontrado. Por favor, inténtalo más tarde.",
+  "unableToInitiatePurchase": "No se puede iniciar la compra. Por favor, inténtalo más tarde.",
+  "purchaseError": "Error de compra: {error}"
 }

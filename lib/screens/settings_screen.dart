@@ -503,25 +503,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String label, [
     StateSetter? setDialogState,
   ]) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Clear API Key'),
-        content: Text('Are you sure you want to clear the $label? You will need to re-enter the key to use it again.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(ctx).colorScheme.error,
+      builder: (ctx) {
+        final dialogL10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Text(dialogL10n.clearApiKeyTitle),
+          content: Text(dialogL10n.clearApiKeyConfirm(label)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(dialogL10n.cancel),
             ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(dialogL10n.clear),
+            ),
+          ],
+        );
+      },
     );
     if (confirmed != true) return;
     // Clear the controller and persist immediately (no validation).
@@ -537,7 +541,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setDialogState?.call(() {});
     await ref.read(modelProvider.notifier).clearApiKey(keyName);
     if (context.mounted) {
-      context.showAccessibleMessage('$label cleared.');
+      context.showAccessibleMessage(l10n.apiKeyCleared(label));
     }
   }
 
@@ -1220,8 +1224,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Unable to open link at this time.'),
+                    SnackBar(
+                      content: Text(l10n.unableToOpenLink),
                     ),
                   );
                 }
@@ -1233,8 +1237,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               );
               if (!launched && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Unable to open link at this time.'),
+                  SnackBar(
+                    content: Text(l10n.unableToOpenLink),
                   ),
                 );
               }
@@ -1251,9 +1255,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final available = await iap.isAvailable();
       if (!available) {
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Store not available on this device.'),
+            SnackBar(
+              content: Text(l10n.storeNotAvailable),
             ),
           );
         }
@@ -1263,9 +1268,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (response.error != null) {
         debugPrint('IAP query error for $buyMeACoffeeProductId: ${response.error}');
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Store error: ${response.error!.message}'),
+              content: Text(l10n.storeError(response.error!.message)),
             ),
           );
         }
@@ -1275,9 +1281,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           response.notFoundIDs.contains(buyMeACoffeeProductId)) {
         debugPrint('IAP product not found: $buyMeACoffeeProductId');
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Product not found. Please try again later.'),
+            SnackBar(
+              content: Text(l10n.productNotFound),
             ),
           );
         }
@@ -1289,9 +1296,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           'and no explicit error/notFoundIDs.',
         );
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Product not found. Please try again later.'),
+            SnackBar(
+              content: Text(l10n.productNotFound),
             ),
           );
         }
@@ -1304,9 +1312,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           'buyConsumable failed to initiate for product $buyMeACoffeeProductId',
         );
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Unable to initiate purchase. Please try again later.'),
+            SnackBar(
+              content: Text(l10n.unableToInitiatePurchase),
             ),
           );
         }
@@ -1314,8 +1323,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e) {
       debugPrint('Buy Me a Coffee purchase error: $e');
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Purchase error: $e')),
+          SnackBar(content: Text(l10n.purchaseError(e.toString()))),
         );
       }
     }
@@ -3346,7 +3356,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: Icon(Icons.clear, size: 18,
                               color: Theme.of(context).colorScheme.error),
-                          label: Text('Clear',
+                          label: Text(l10n.clear,
                               style: TextStyle(
                                   color: Theme.of(context).colorScheme.error)),
                           onPressed: () => _clearApiKey(
@@ -3495,7 +3505,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           OutlinedButton.icon(
                             icon: Icon(Icons.clear, size: 18,
                                 color: Theme.of(context).colorScheme.error),
-                            label: Text('Clear',
+                            label: Text(l10n.clear,
                                 style: TextStyle(
                                     color: Theme.of(context).colorScheme.error)),
                             onPressed: () => _clearApiKey(
@@ -3636,7 +3646,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         OutlinedButton.icon(
                           icon: Icon(Icons.clear, size: 18,
                               color: Theme.of(context).colorScheme.error),
-                          label: Text('Clear',
+                          label: Text(l10n.clear,
                               style: TextStyle(
                                   color: Theme.of(context).colorScheme.error)),
                           onPressed: () => _clearApiKey(

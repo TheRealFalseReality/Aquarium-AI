@@ -4618,5 +4618,70 @@
   "modelsButton": "Models",
   "@modelsButton": {
     "description": "Button label for the Models link"
+  },
+
+  "clearApiKeyTitle": "Clear API Key",
+  "@clearApiKeyTitle": {
+    "description": "Title of the confirmation dialog for clearing an API key"
+  },
+
+  "clearApiKeyConfirm": "Are you sure you want to clear the {label}? You will need to re-enter the key to use it again.",
+  "@clearApiKeyConfirm": {
+    "description": "Body of the confirmation dialog for clearing an API key",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+
+  "apiKeyCleared": "{label} cleared.",
+  "@apiKeyCleared": {
+    "description": "Toast shown after an API key is successfully cleared",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+
+  "unableToOpenLink": "Unable to open link at this time.",
+  "@unableToOpenLink": {
+    "description": "Snackbar shown when a URL cannot be opened"
+  },
+
+  "storeNotAvailable": "Store not available on this device.",
+  "@storeNotAvailable": {
+    "description": "Snackbar shown when the in-app purchase store is unavailable"
+  },
+
+  "storeError": "Store error: {message}",
+  "@storeError": {
+    "description": "Snackbar shown when there is an in-app store error",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+
+  "productNotFound": "Product not found. Please try again later.",
+  "@productNotFound": {
+    "description": "Snackbar shown when the in-app purchase product is not found"
+  },
+
+  "unableToInitiatePurchase": "Unable to initiate purchase. Please try again later.",
+  "@unableToInitiatePurchase": {
+    "description": "Snackbar shown when an in-app purchase cannot be started"
+  },
+
+  "purchaseError": "Purchase error: {error}",
+  "@purchaseError": {
+    "description": "Snackbar shown when an in-app purchase throws an exception",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }

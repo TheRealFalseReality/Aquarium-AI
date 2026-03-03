@@ -940,5 +940,14 @@
   "freeAIUnavailable": "Kostenlose KI nicht verfügbar",
   "usingFreeProvider": "Kostenloser Anbieter wird verwendet",
   "useYourOwnKey": "Eigenen Schlüssel verwenden",
-  "modelsButton": "Modelle"
+  "modelsButton": "Modelle",
+  "clearApiKeyTitle": "API-Schlüssel löschen",
+  "clearApiKeyConfirm": "Möchtest du den {label} wirklich löschen? Du musst den Schlüssel erneut eingeben, um ihn wieder zu verwenden.",
+  "apiKeyCleared": "{label} gelöscht.",
+  "unableToOpenLink": "Link kann derzeit nicht geöffnet werden.",
+  "storeNotAvailable": "Store auf diesem Gerät nicht verfügbar.",
+  "storeError": "Store-Fehler: {message}",
+  "productNotFound": "Produkt nicht gefunden. Bitte versuche es später erneut.",
+  "unableToInitiatePurchase": "Kauf kann nicht gestartet werden. Bitte versuche es später erneut.",
+  "purchaseError": "Kauffehler: {error}"
 }
