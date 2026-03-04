@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.00] - 2026-3-3 - Perks, Community and Profile Features  
+## [3.2.00] - 2026-3-
+
+### ***Breaking Change***
+- UUID reset American Cichlids
+
+### Changed
+
+
+## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features  
 
 ### Added
 
