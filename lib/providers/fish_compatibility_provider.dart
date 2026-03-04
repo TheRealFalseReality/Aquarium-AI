@@ -247,7 +247,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
         }
         if (models.usingDeveloperGroqKeyForText) {
           responseText = await GroqProxyService.sendMessage(
-            model: models.freeGroqTextModel(isFounder),
+            model: models.freeGroqTextModel(ref.read(isFounderProvider)),
             prompt: prompt,
           ).timeout(const Duration(seconds: 30));
           _cancellableCompleter?.complete();
