@@ -1133,7 +1133,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return modelState.chatGPTImageModel;
       case AIProvider.groq:
         return modelState.usingDeveloperGroqKeyForImage
-            ? modelState.freeGroqImageModel
+            ? modelState.freeGroqImageModel(isFounder)
             : modelState.groqImageModel;
     }
   }

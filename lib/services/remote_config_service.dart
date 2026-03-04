@@ -40,6 +40,7 @@ class RemoteConfigService {
         RemoteConfigKeys.founderDefaultGroqModel: rcDefaultFounderGroqModel,
         RemoteConfigKeys.freeDefaultGroqModel: rcDefaultFreeGroqModel,
         RemoteConfigKeys.freeGroqImageModel: rcDefaultFreeGroqImageModel,
+        RemoteConfigKeys.founderGroqImageModel: rcDefaultFounderGroqImageModel,
         RemoteConfigKeys.aquapiOriginalImageUrl:
             rcDefaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl:
@@ -191,6 +192,12 @@ class RemoteConfigService {
   static String get freeGroqImageModel => _modelString(
     RemoteConfigKeys.freeGroqImageModel,
     rcDefaultFreeGroqImageModel,
+  );
+
+  /// Groq image model for Founder Aquarist free-tier users.
+  static String get founderGroqImageModel => _modelString(
+    RemoteConfigKeys.founderGroqImageModel,
+    rcDefaultFounderGroqImageModel,
   );
 
   // ── Promotion images ────────────────────────────────────────────────────────

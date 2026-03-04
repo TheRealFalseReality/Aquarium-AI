@@ -4507,6 +4507,14 @@
       "photosPerDay": {"type": "int"}
     }
   },
+  "ownApiKeyTitle": "Using Own API Key",
+  "@ownApiKeyTitle": {
+    "description": "Title shown on the collapsed AI provider tile when using own API key"
+  },
+  "ownApiKeySubtitle": "No in-app limits — your provider's limits apply",
+  "@ownApiKeySubtitle": {
+    "description": "Subtitle shown on the collapsed AI provider tile when using own API key"
+  },
   "freeTierRequestsPerMin": "AI requests per minute",
   "@freeTierRequestsPerMin": {
     "description": "Label for AI requests per minute in free tier bullet list"
@@ -4523,12 +4531,9 @@
   "@freeTierChatHistoryPerRequest": {
     "description": "Label for chat history per request in free tier bullet list"
   },
-  "freeTierModelNote": "Uses the {model} model, which may not deliver the best results for text or image analysis.",
+  "freeTierModelNote": "These models may not deliver the best results for text or image analysis.",
   "@freeTierModelNote": {
-    "description": "Note about the model used in the free tier, with dynamic model name",
-    "placeholders": {
-      "model": {"type": "String"}
-    }
+    "description": "Quality note shown below the model list in the free tier expanded section"
   },
   "freeTierFounderModel": "Model: {model}",
   "@freeTierFounderModel": {

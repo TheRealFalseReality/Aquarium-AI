@@ -813,7 +813,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
                 AIProvider.gemini => _modelState.geminiImageModel,
                 AIProvider.openAI => _modelState.chatGPTImageModel,
                 AIProvider.groq => _modelState.usingDeveloperGroqKeyForImage
-                    ? _modelState.freeGroqImageModel
+                    ? _modelState.freeGroqImageModel(_isFounder)
                     : _modelState.groqImageModel,
               },
             ),
@@ -993,7 +993,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           final base64Image = base64Encode(imageBytes);
           final responseGroq = _modelState.usingDeveloperGroqKeyForImage
               ? await GroqProxyService.generateWithImage(
-                  model: _modelState.freeGroqImageModel,
+                  model: _modelState.freeGroqImageModel(_isFounder),
                   prompt: prompt,
                   base64Image: base64Image,
                   mimeType: mimeType,

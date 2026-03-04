@@ -137,9 +137,14 @@ class ModelState {
       : RemoteConfigService.freeDefaultGroqModel;
 
   /// Returns the Groq image model to use when the developer free API key is
-  /// active. Uses [RemoteConfigService.freeGroqImageModel] so the RC-controlled
-  /// value is applied regardless of the user's saved setting.
-  String get freeGroqImageModel => RemoteConfigService.freeGroqImageModel;
+  /// active. Founder Aquarist users receive the higher-capability model
+  /// configured via [RemoteConfigKeys.founderGroqImageModel]; standard
+  /// free-tier users receive [RemoteConfigKeys.freeGroqImageModel].
+  ///
+  /// When the user's own API key is active, [groqImageModel] is used instead.
+  String freeGroqImageModel(bool isFounder) => isFounder
+      ? RemoteConfigService.founderGroqImageModel
+      : RemoteConfigService.freeGroqImageModel;
 }
 
 // 2. Create the Notifier

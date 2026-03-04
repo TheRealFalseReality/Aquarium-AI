@@ -76,6 +76,13 @@ void main() {
         );
       });
 
+      test('founderGroqImageModel defaults to llama-4-maverick model', () {
+        expect(
+          RemoteConfigService.founderGroqImageModel,
+          equals('meta-llama/llama-4-maverick-17b-128e-instruct'),
+        );
+      });
+
       test('aquapiOriginalImageUrl defaults to empty string (use local asset)', () {
         expect(RemoteConfigService.aquapiOriginalImageUrl, equals(''));
       });
@@ -129,6 +136,8 @@ void main() {
             equals('free_default_groq_model'));
         expect(RemoteConfigKeys.freeGroqImageModel,
             equals('free_groq_image_model'));
+        expect(RemoteConfigKeys.founderGroqImageModel,
+            equals('founder_groq_image_model'));
         expect(RemoteConfigKeys.aquapiOriginalImageUrl,
             equals('aquapi_original_image_url'));
         expect(RemoteConfigKeys.aquapiEssentialImageUrl,
