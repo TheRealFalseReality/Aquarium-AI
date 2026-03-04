@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
+import '../services/analytics_service.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
 
 /// Shows the Remove Ads purchase dialog and, after it closes, the
 /// restore-outcome dialog when applicable.
 Future<void> showRemoveAdsDialog(BuildContext context) async {
+  AnalyticsService.logPurchaseAction(action: 'remove_ads_dialog_opened');
   await showDialog<void>(
     context: context,
     builder: (ctx) => const RemoveAdsDialog(),
@@ -75,6 +78,21 @@ class RemoveAdsDialog extends ConsumerWidget {
     // Auto-close when restore determines there is no previous purchase,
     // so the outcome dialog can be shown by the parent.
     ref.listen<PurchaseState>(purchaseProvider, (prev, next) {
+      // Log successful purchase.
+      if (!(prev?.adsRemoved ?? false) && next.adsRemoved) {
+        AnalyticsService.logPurchaseAction(
+          action: 'remove_ads_purchase_success',
+          productId: earlySupporterLifetimeProductId,
+        );
+      }
+      // Log successful restore.
+      if (prev?.restoreOutcome != RestoreOutcome.success &&
+          next.restoreOutcome == RestoreOutcome.success) {
+        AnalyticsService.logPurchaseAction(
+          action: 'remove_ads_restore_success',
+          productId: earlySupporterLifetimeProductId,
+        );
+      }
       if (next.restoreOutcome != RestoreOutcome.notFound) return;
       if (prev?.restoreOutcome == RestoreOutcome.notFound) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -170,7 +188,13 @@ class RemoveAdsDialog extends ConsumerWidget {
         TextButton(
           onPressed: busy
               ? null
-              : () => ref.read(purchaseProvider.notifier).restorePurchases(),
+              : () {
+                  AnalyticsService.logPurchaseAction(
+                    action: 'remove_ads_restore_initiated',
+                    productId: earlySupporterLifetimeProductId,
+                  );
+                  ref.read(purchaseProvider.notifier).restorePurchases();
+                },
           child: Text(l10n.restore),
         ),
         TextButton(
@@ -186,7 +210,13 @@ class RemoveAdsDialog extends ConsumerWidget {
               return ElevatedButton(
                 onPressed: busy
                     ? null
-                    : () => ref.read(purchaseProvider.notifier).buyRemoveAds(),
+                    : () {
+                        AnalyticsService.logPurchaseAction(
+                          action: 'remove_ads_purchase_initiated',
+                          productId: earlySupporterLifetimeProductId,
+                        );
+                        ref.read(purchaseProvider.notifier).buyRemoveAds();
+                      },
                 child: Text(l10n.removeAds),
               );
             }
@@ -204,8 +234,13 @@ class RemoveAdsDialog extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: busy
                       ? null
-                      : () =>
-                            ref.read(purchaseProvider.notifier).buyRemoveAds(),
+                      : () {
+                          AnalyticsService.logPurchaseAction(
+                            action: 'remove_ads_purchase_initiated',
+                            productId: earlySupporterLifetimeProductId,
+                          );
+                          ref.read(purchaseProvider.notifier).buyRemoveAds();
+                        },
                   child: Text(l10n.removeAds),
                 ),
               ],

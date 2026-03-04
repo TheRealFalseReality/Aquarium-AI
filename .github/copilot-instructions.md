@@ -287,7 +287,9 @@ When adding a new AI tool, calculator, or other significant feature:
    - Explain all inputs, outputs, and any prerequisites (e.g. API key requirement).
    - Add the section to the **Table of Contents** at the top of the file.
 5. Add any new user-visible strings to all `.arb` files (see [Localization Conventions](#localization-conventions-important-for-every-pr)).
-6. Log tool usage with `AnalyticsService.logFeatureUsed(featureName: 'my_tool', ...)` where appropriate.
+6. Add Firebase Analytics events: call `logScreenView` in `initState` and `logFeatureUsed` (or a
+   more specific method) for every significant user action. See
+   [Firebase Analytics Events](#firebase-analytics-events) for the full list of methods and rules.
 
 ---
 
@@ -465,6 +467,58 @@ class RemoteConfigService {
 3. Register a named route in `lib/main.dart` (the `routes:` map in `MaterialApp`).
 4. Add a navigation entry to `lib/widgets/app_drawer.dart` if it should appear in the side drawer.
 5. Add any new user-visible strings to all `.arb` files (see Localization section).
+6. Call `AnalyticsService.logScreenView(screenName: 'my_screen')` in `initState`.
+
+---
+
+## Firebase Analytics Events
+
+Every significant user action must be tracked with a Firebase Analytics event. Use `AnalyticsService`
+(in `lib/services/analytics_service.dart`) which wraps `FirebaseAnalytics` and is safe to call
+unconditionally.
+
+### Available logging methods
+
+| Method | When to use |
+| ------ | ----------- |
+| `logScreenView(screenName:)` | In `initState` of every new screen |
+| `logFeatureUsed(featureName:, parameters:)` | When a major feature action completes (AI run, backup, share, sign-out, etc.) |
+| `logAIInteraction(interactionType:, model:, feature:)` | When an AI call is initiated |
+| `logCommunityAction(action:, additionalData:)` | Any community post/comment/like action |
+| `logPurchaseAction(action:, productId:, additionalData:)` | Any purchase flow step (dialog opened, purchase initiated, success, restore) |
+| `logTankAction(action:, tankType:, tankSize:)` | Tank create/update/delete |
+| `logCalculatorUsed(calculatorType:, inputData:)` | Calculator runs |
+| `logSettingsChange(settingName:, newValue:, oldValue:)` | Settings changed by the user |
+| `logPhotoAnalysis(analysisType:, success:, errorType:)` | Photo analyzer runs |
+| `logAppPromotion(action:, source:)` | Rating / sharing prompts |
+| `logError(errorType:, errorMessage:, screen:)` | Non-fatal errors worth tracking |
+
+### Rules for analytics events
+
+1. **Every new screen** must call `AnalyticsService.logScreenView` in `initState`.
+2. **Every significant user action** (submit, delete, create, purchase, sign-out, share) must fire
+   an appropriate analytics event on success.
+3. **Purchase flows** must log at every step: dialog opened → purchase initiated → success/failure,
+   and restore initiated → restore success/not-found.
+4. **Community actions** (post created/deleted/edited, comment created/deleted, post liked/unliked,
+   post opened) must use `logCommunityAction`.
+5. **Event names and `featureName` values** are internal identifiers — they must use
+   `snake_case` and must not be localized.
+6. **Do not track PII.** Never include user IDs, names, emails, or message content in parameters.
+7. Keep parameter values short (Firebase truncates at 100 chars). Truncate if needed.
+
+### Example — new screen + feature
+
+```dart
+// In initState:
+AnalyticsService.logScreenView(screenName: 'my_new_screen');
+
+// When an action succeeds:
+AnalyticsService.logFeatureUsed(
+  featureName: 'my_feature_action',
+  parameters: {'item_type': itemType},
+);
+```
 
 ---
 

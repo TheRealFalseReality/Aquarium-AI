@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
+import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
@@ -96,6 +97,12 @@ class _PostCardState extends State<PostCard> {
           _likes = prevLikes;
         }
       });
+      if (success) {
+        AnalyticsService.logCommunityAction(
+          action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
     }
   }
 

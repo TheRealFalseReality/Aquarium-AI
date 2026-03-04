@@ -309,6 +309,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   void _openPost(BuildContext context, CommunityPost post) {
+    AnalyticsService.logCommunityAction(
+      action: 'post_opened',
+      additionalData: {'post_type': post.type.value},
+    );
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => CommunityPostScreen(post: post)),
@@ -325,6 +329,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   void _navigateToEdit(BuildContext context, CommunityPost post) {
+    AnalyticsService.logCommunityAction(
+      action: 'post_edit_started',
+      additionalData: {'post_type': post.type.value},
+    );
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => CreatePostScreen(editPost: post)),
@@ -358,6 +366,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     );
     if (confirmed == true) {
       await CommunityService.deletePost(post);
+      AnalyticsService.logCommunityAction(
+        action: 'post_deleted',
+        additionalData: {'post_type': post.type.value},
+      );
     }
   }
 }
