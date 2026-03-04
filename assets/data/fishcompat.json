@@ -1,7 +1,7 @@
 {
   "freshwater": [
     {
-      "name": "Angelfish (Female) \u2640",
+      "name": "Angelfish (Female) ♀",
       "commonNames": [
         "P. scalare",
         "P. altum",
@@ -9,8 +9,8 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_female_freshwater.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Cory Cats",
         "Hatchets",
         "Loaches",
@@ -21,8 +21,8 @@
       ],
       "notRecommended": [
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Gouramis",
         "Koi",
         "Shrimp - Freshwater",
@@ -35,7 +35,7 @@
         "Guppies"
       ],
       "withCaution": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Discus",
         "Freshwater Sharks",
         "Goldfish",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "name": "Angelfish (Male) \u2642",
+      "name": "Angelfish (Male) ♂",
       "commonNames": [
         "P. scalare",
         "P. altum",
@@ -54,7 +54,7 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/angelfish_male_freshwater.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
+        "Angelfish (Female) ♀",
         "Cory Cats",
         "Hatchets",
         "Loaches",
@@ -65,8 +65,8 @@
       ],
       "notRecommended": [
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Gouramis",
         "Koi",
         "Rasboras",
@@ -80,8 +80,8 @@
         "Guppies"
       ],
       "withCaution": [
-        "Angelfish (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Male) ♂",
+        "Cichlids - American",
         "Discus",
         "Freshwater Sharks",
         "Goldfish",
@@ -112,20 +112,20 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Cichlids - American",
         "Guppies",
         "Koi",
         "Shrimp - Freshwater"
       ],
       "notCompatible": [
-        "Bettas (Male) \u2642",
+        "Bettas (Male) ♂",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
+        "Bettas (Female) ♀",
         "Discus",
         "Goldfish",
         "Gouramis",
@@ -137,7 +137,7 @@
       ]
     },
     {
-      "name": "Bettas (Female) \u2640",
+      "name": "Bettas (Female) ♀",
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
       ],
@@ -151,21 +151,21 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Goldfish",
         "Gouramis",
         "Koi"
       ],
       "notCompatible": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Danios / Minnows",
         "Discus",
         "Freshwater Sharks",
@@ -180,7 +180,7 @@
       ]
     },
     {
-      "name": "Bettas (Male) \u2642",
+      "name": "Bettas (Male) ♂",
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
       ],
@@ -193,8 +193,8 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Discus",
         "Goldfish",
         "Gouramis",
@@ -202,14 +202,14 @@
       ],
       "notCompatible": [
         "Barbs",
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Koi"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
+        "Bettas (Female) ♀",
         "Danios / Minnows",
         "Freshwater Sharks",
         "Hatchets",
@@ -223,7 +223,7 @@
       ]
     },
     {
-      "name": "Cichlids - American, Large",
+      "name": "Cichlids - American",
       "commonNames": [
         "Oscar",
         "Jack Dempsey",
@@ -233,7 +233,10 @@
         "Eartheaters",
         "Convicts",
         "Green Terror",
-        "Flowerhorn"
+        "Flowerhorn",
+        "Silver Dollar",
+        "Texas Cichlid",
+        "Nicaraguan Cichlid"
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_amerian_large.jpg",
       "compatible": [
@@ -259,15 +262,15 @@
         "Tetras"
       ],
       "notCompatible": [
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Guppies",
         "Koi",
         "Shrimp - Freshwater"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Discus",
         "Freshwater Sharks",
         "Snails - Freshwater"
@@ -286,17 +289,17 @@
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_malawi.jpg",
       "compatible": [],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Tanganyikan",
         "Discus",
         "Plants"
       ],
       "notCompatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Freshwater Sharks",
@@ -335,17 +338,17 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Discus",
         "Plants"
       ],
       "notCompatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Freshwater Sharks",
@@ -381,11 +384,11 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cory_cats.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Gouramis",
@@ -403,7 +406,7 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Goldfish",
         "Koi"
       ],
@@ -443,20 +446,20 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Hatchets",
         "Koi"
       ],
       "notCompatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Discus"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Freshwater Sharks",
         "Goldfish",
         "Gouramis",
@@ -486,7 +489,7 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Bettas (Male) \u2642",
+        "Bettas (Male) ♂",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Goldfish",
@@ -501,11 +504,11 @@
         "Guppies"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Cichlids - American, Large",
+        "Bettas (Female) ♀",
+        "Cichlids - American",
         "Cory Cats",
         "Freshwater Sharks",
         "Gouramis",
@@ -542,11 +545,11 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Cory Cats",
         "Danios / Minnows",
         "Discus",
@@ -581,9 +584,9 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Cory Cats",
         "Discus"
       ],
@@ -592,8 +595,8 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
         "Danios / Minnows",
         "Freshwater Sharks",
@@ -635,11 +638,11 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Koi",
         "Shrimp - Freshwater"
       ],
@@ -684,21 +687,21 @@
       ],
       "notRecommended": [
         "Barbs",
-        "Bettas (Male) \u2642",
+        "Bettas (Male) ♂",
         "Killifish",
         "Larger Catfish",
         "Koi"
       ],
       "notCompatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Discus"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
+        "Bettas (Female) ♀",
         "Freshwater Sharks",
         "Goldfish",
         "Gouramis",
@@ -716,9 +719,9 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hatchets.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Bettas (Female) \u2640",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Bettas (Female) ♀",
         "Cory Cats",
         "Discus",
         "Freshwater Sharks",
@@ -736,7 +739,7 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Danios / Minnows",
         "Koi"
       ],
@@ -746,7 +749,7 @@
       ],
       "withCaution": [
         "Barbs",
-        "Bettas (Male) \u2642",
+        "Bettas (Male) ♂",
         "Goldfish",
         "Larger Catfish",
         "Rainbowfish"
@@ -776,7 +779,7 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Discus",
         "Guppies",
         "Koi"
@@ -787,11 +790,11 @@
         "Shrimp - Freshwater"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Danios / Minnows",
         "Goldfish",
         "Killifish",
@@ -821,10 +824,10 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
+        "Bettas (Female) ♀",
         "Cory Cats",
         "Danios / Minnows",
         "Discus",
@@ -841,8 +844,8 @@
         "Tetras"
       ],
       "notCompatible": [
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan"
       ],
@@ -862,15 +865,15 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/large_catfish.jpg",
       "compatible": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Larger Catfish",
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Male) \u2642",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Discus",
@@ -889,7 +892,7 @@
         "Shrimp - Freshwater"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
+        "Angelfish (Female) ♀",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Freshwater Sharks",
@@ -911,11 +914,11 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/loaches.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Gouramis",
@@ -931,7 +934,7 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Koi",
         "Snails - Freshwater"
       ],
@@ -976,7 +979,7 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Discus",
         "Larger Catfish",
         "Koi"
@@ -986,11 +989,11 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Freshwater Sharks",
         "Goldfish",
         "Tetras"
@@ -1010,11 +1013,11 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/plants_freshwater.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Discus",
@@ -1033,7 +1036,7 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Larger Catfish"
@@ -1058,12 +1061,12 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/pleco.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
-        "Cichlids - American, Large",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
         "Cory Cats",
         "Danios / Minnows",
         "Goldfish",
@@ -1104,8 +1107,8 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/rainbowfish.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
         "Cory Cats",
         "Danios / Minnows",
@@ -1119,7 +1122,7 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Discus",
         "Koi",
         "Shrimp - Freshwater"
@@ -1129,8 +1132,8 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Goldfish",
         "Gouramis",
         "Guppies",
@@ -1171,8 +1174,8 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Angelfish (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Male) ♂",
+        "Cichlids - American",
         "Larger Catfish",
         "Koi"
       ],
@@ -1181,9 +1184,9 @@
         "Cichlids - Lake Tanganyikan"
       ],
       "withCaution": [
-        "Angelfish (Female) \u2640",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Goldfish"
       ]
     },
@@ -1209,23 +1212,23 @@
         "Snails - Freshwater"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
         "Discus",
         "Gouramis",
         "Rainbowfish"
       ],
       "notCompatible": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan",
         "Killifish",
         "Larger Catfish"
       ],
       "withCaution": [
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Danios / Minnows",
         "Freshwater Sharks",
         "Goldfish",
@@ -1245,11 +1248,11 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/snails_freshwater.jpg",
       "compatible": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Cory Cats",
         "Danios / Minnows",
         "Discus",
@@ -1275,7 +1278,7 @@
       ],
       "notCompatible": [],
       "withCaution": [
-        "Cichlids - American, Large",
+        "Cichlids - American",
         "Cichlids - Lake Malawian/Victoria",
         "Cichlids - Lake Tanganyikan"
       ]
@@ -1305,9 +1308,9 @@
         "Tetras"
       ],
       "notRecommended": [
-        "Angelfish (Female) \u2640",
-        "Angelfish (Male) \u2642",
-        "Cichlids - American, Large",
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Cichlids - American",
         "Larger Catfish",
         "Koi"
       ],
@@ -1317,8 +1320,8 @@
       ],
       "withCaution": [
         "Barbs",
-        "Bettas (Female) \u2640",
-        "Bettas (Male) \u2642",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
         "Discus",
         "Freshwater Sharks",
         "Goldfish",
@@ -1368,11 +1371,13 @@
         "Parrotfish",
         "Pufferfish",
         "Seahorse / Pipefish",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Boxfish",
         "Eels",
         "Foxface / Rabbitfish",
@@ -1410,8 +1415,8 @@
         "Basslets",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Pseudochromis",
@@ -1431,7 +1436,9 @@
         "Dragonets",
         "Pufferfish",
         "Seahorse / Pipefish",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Batfish",
@@ -1496,7 +1503,9 @@
         "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1508,8 +1517,8 @@
         "Boxfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -1541,8 +1550,8 @@
         "Boxfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Filefish",
@@ -1570,7 +1579,9 @@
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1623,8 +1634,8 @@
         "Basslets",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -1635,7 +1646,9 @@
         "Sharks / Rays",
         "Triggerfish",
         "Anemone - Reef Safe",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1673,8 +1686,8 @@
         "Blennies",
         "Butterflyfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
@@ -1701,7 +1714,9 @@
       "notCompatible": [
         "Groupers",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1768,13 +1783,15 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
         "Blennies",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -1815,8 +1832,8 @@
         "Basslets",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Gobies",
@@ -1831,7 +1848,9 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Triggerfish",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1890,7 +1909,9 @@
         "Groupers",
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anglers / Frogfish",
@@ -1898,8 +1919,8 @@
         "Batfish",
         "Blennies",
         "Cardinalfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dragonets",
@@ -1934,8 +1955,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Dartfish",
         "Dragonets",
         "Filefish",
@@ -1956,7 +1977,9 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Sea Star - Fish Only",
-        "Anemone - Reef Safe"
+        "Anemone - Reef Safe",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -1985,9 +2008,9 @@
         "Copperband Butterflyfish",
         "Heniochus Butterflyfish",
         "Auriga (Threadfin) Butterflyfish",
-        "Sunburst (Klein\u2019s) Butterflyfish",
+        "Sunburst (Klein’s) Butterflyfish",
         "Pearlscale Butterflyfish",
-        "Merten\u2019s Butterflyfish",
+        "Merten’s Butterflyfish",
         "Pyramid Butterflyfish",
         "Zoster Butterflyfish",
         "Raccoon Butterflyfish",
@@ -2005,8 +2028,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Dartfish",
         "Dragonets",
         "Filefish",
@@ -2037,7 +2060,9 @@
       "notCompatible": [
         "Eels",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2067,8 +2092,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -2100,7 +2125,9 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2118,7 +2145,7 @@
       "name": "Chromis",
       "commonNames": [
         "Blue-Green Reef Chromis",
-        "Vanderbilt\u2019s Chromis",
+        "Vanderbilt’s Chromis",
         "Barrier Reef Chromis",
         "Black-Axil Chromis"
       ],
@@ -2133,8 +2160,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -2166,7 +2193,9 @@
         "Groupers",
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2179,7 +2208,7 @@
       ]
     },
     {
-      "name": "Clownfish (Female) \u2640",
+      "name": "Clownfish (Female) ♀",
       "commonNames": [
         "Ocellaris Clownfish",
         "Percula Clownfish",
@@ -2196,7 +2225,7 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Male) ♂",
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
@@ -2222,12 +2251,14 @@
       ],
       "notCompatible": [
         "Anglers / Frogfish",
-        "Clownfish (Female) \u2640",
+        "Clownfish (Female) ♀",
         "Eels",
         "Groupers",
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2244,7 +2275,7 @@
       ]
     },
     {
-      "name": "Clownfish (Male) \u2642",
+      "name": "Clownfish (Male) ♂",
       "commonNames": [
         "Ocellaris Clownfish",
         "Percula Clownfish",
@@ -2261,8 +2292,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Filefish",
         "Foxface / Rabbitfish",
@@ -2292,7 +2323,9 @@
         "Groupers",
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2322,8 +2355,8 @@
         "Basslets",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -2337,7 +2370,6 @@
         "Snails - Marine",
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe",
         "Marine Betta"
       ],
       "notRecommended": [
@@ -2354,7 +2386,9 @@
       "notCompatible": [
         "Parrotfish",
         "Sea Star - Fish Only",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2368,7 +2402,8 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Triggerfish",
-        "Anemone - Reef Safe"
+        "Anemone - Reef Safe",
+        "Wrasse - Reef Safe"
       ]
     },
     {
@@ -2377,8 +2412,8 @@
         "Blue Damsel",
         "Yellowtail Damsel",
         "Azure Damselfish",
-        "Talbot\u2019s Damselfish",
-        "Springer\u2019s Damselfish",
+        "Talbot’s Damselfish",
+        "Springer’s Damselfish",
         "Three-Stripe & Four-Stripe Damsels",
         "Domino Damselfish",
         "Blue Devil Damselfish",
@@ -2405,8 +2440,8 @@
       "notRecommended": [
         "Batfish",
         "Butterflyfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Gobies",
         "Hogfish",
         "Jawfish",
@@ -2421,7 +2456,9 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2488,15 +2525,17 @@
         "Lionfish / Scorpionfish",
         "Sharks / Rays",
         "Triggerfish",
-        "Sea Star - Fish Only"
+        "Sea Star - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
         "Anthias",
         "Basslets",
         "Batfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Filefish",
         "Pseudochromis",
@@ -2552,7 +2591,9 @@
         "Sharks / Rays",
         "Triggerfish",
         "Anemone - Reef Safe",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2560,8 +2601,8 @@
         "Basslets",
         "Batfish",
         "Blennies",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Filefish",
         "Pseudochromis",
@@ -2600,8 +2641,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -2613,7 +2654,9 @@
         "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -2661,8 +2704,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Filefish",
         "Foxface / Rabbitfish",
         "Gobies",
@@ -2687,7 +2730,9 @@
         "Sharks / Rays",
         "Shrimp - Marine",
         "Snails - Marine",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -2727,8 +2772,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -2750,7 +2795,9 @@
         "Lionfish / Scorpionfish"
       ],
       "notCompatible": [
-        "Seahorse / Pipefish"
+        "Seahorse / Pipefish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Corals",
@@ -2814,14 +2861,16 @@
         "Groupers",
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
         "Basslets",
         "Blennies",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Gobies",
         "Hawkfish",
         "Hogfish",
@@ -2862,8 +2911,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -2876,7 +2925,9 @@
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Squirrelfish",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anglers / Frogfish",
@@ -2927,8 +2978,8 @@
         "Basslets",
         "Butterflyfish",
         "Cardinalfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Filefish"
       ],
@@ -2944,7 +2995,9 @@
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -3006,15 +3059,17 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Shrimp - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anglers / Frogfish",
         "Basslets",
         "Blennies",
         "Boxfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Filefish",
         "Gobies",
         "Hawkfish",
@@ -3035,7 +3090,7 @@
         "Cuban (Spotfin) Hogfish",
         "Coral (Eclipse) Hogfish",
         "Peppermint (Candy) Hogfish",
-        "Diana\u2019s Hogfish"
+        "Diana’s Hogfish"
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/hogfish.jpg",
       "reefSafe": "No",
@@ -3057,8 +3112,8 @@
         "Blennies",
         "Butterflyfish",
         "Cardinalfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -3071,7 +3126,9 @@
         "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anglers / Frogfish",
@@ -3136,14 +3193,16 @@
         "Groupers",
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
-        "Sharks / Rays"
+        "Sharks / Rays",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
         "Basslets",
         "Blennies",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Gobies",
         "Hawkfish",
         "Jawfish",
@@ -3188,8 +3247,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -3200,7 +3259,9 @@
         "Sea Star - Reef Safe",
         "Seahorse / Pipefish",
         "Shrimp - Marine",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anthias",
@@ -3234,8 +3295,8 @@
         "Anthias",
         "Butterflyfish",
         "Cardinalfish",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Foxface / Rabbitfish",
@@ -3260,7 +3321,9 @@
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
-        "Shrimp - Marine"
+        "Shrimp - Marine",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Sea Star - Fish Only",
@@ -3312,8 +3375,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -3332,7 +3395,9 @@
         "Snails - Marine",
         "Worms / Misc. Inverts",
         "Sea Star - Fish Only",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -3387,7 +3452,9 @@
         "Lionfish / Scorpionfish",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -3396,8 +3463,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Dartfish",
         "Dragonets",
         "Filefish",
@@ -3451,7 +3518,9 @@
         "Worms / Misc. Inverts",
         "Sea Star - Fish Only",
         "Anemone - Reef Safe",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -3461,8 +3530,8 @@
         "Boxfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -3485,15 +3554,15 @@
         "Red Knob (African) Sea Star"
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/sea_star_fish_only.jpg",
-      "reefSafe": "No",
+      "reefSafe": "Caution",
       "compatible": [
         "Anthias",
         "Basslets",
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Gobies",
         "Dragonets",
@@ -3520,7 +3589,9 @@
         "Seahorse / Pipefish",
         "Sharks / Rays",
         "Triggerfish",
-        "Worms / Misc. Inverts"
+        "Worms / Misc. Inverts",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Anglers / Frogfish",
@@ -3555,8 +3626,8 @@
         "Basslets",
         "Blennies",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -3586,7 +3657,9 @@
         "Parrotfish",
         "Pufferfish",
         "Sharks / Rays",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Boxfish",
@@ -3635,8 +3708,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Eels",
         "Filefish",
@@ -3658,7 +3731,9 @@
         "Sea Star - Fish Only",
         "Anemone - Reef Safe",
         "Anemone - Fish Only",
-        "Marine Betta"
+        "Marine Betta",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Corals",
@@ -3700,8 +3775,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Dragonets",
@@ -3718,7 +3793,9 @@
         "Triggerfish",
         "Worms / Misc. Inverts",
         "Wrasse - Reef Safe",
-        "Sea Star - Fish Only"
+        "Sea Star - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -3757,8 +3834,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -3792,7 +3869,9 @@
         "Squirrelfish",
         "Triggerfish",
         "Wrasse - Fish Only",
-        "Marine Betta"
+        "Marine Betta",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Boxfish",
@@ -3822,8 +3901,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -3848,7 +3927,9 @@
         "Parrotfish",
         "Pufferfish",
         "Sharks / Rays",
-        "Triggerfish"
+        "Triggerfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -3901,8 +3982,8 @@
         "Butterflyfish",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -3917,7 +3998,9 @@
         "Seahorse / Pipefish",
         "Shrimp - Marine",
         "Worms / Misc. Inverts",
-        "Wrasse - Reef Safe"
+        "Wrasse - Reef Safe",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Blennies",
@@ -3957,8 +4040,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Damselfish",
         "Dartfish",
@@ -3990,7 +4073,9 @@
         "Lionfish / Scorpionfish"
       ],
       "notCompatible": [
-        "Seahorse / Pipefish"
+        "Seahorse / Pipefish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Boxfish",
@@ -4021,8 +4106,8 @@
         "Blennies",
         "Boxfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Gobies",
         "Jawfish",
@@ -4044,7 +4129,9 @@
         "Snails - Marine",
         "Sea Star - Fish Only",
         "Anemone - Reef Safe",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -4085,8 +4172,8 @@
         "Blennies",
         "Cardinalfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Dartfish",
         "Dragonets",
@@ -4118,7 +4205,9 @@
         "Pufferfish",
         "Sharks / Rays",
         "Squirrelfish",
-        "Sea Star - Fish Only"
+        "Sea Star - Fish Only",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Boxfish",
@@ -4151,8 +4240,8 @@
         "Wrasse - Fish Only"
       ],
       "notRecommended": [
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Corals",
         "Snails - Marine",
         "Squirrelfish",
@@ -4160,7 +4249,9 @@
       ],
       "notCompatible": [
         "Seahorse / Pipefish",
-        "Shrimp - Marine"
+        "Shrimp - Marine",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish - Dwarf",
@@ -4208,7 +4299,7 @@
         "Pink-Streaked Wrasse"
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/wrasse_reef_safe.jpg",
-      "reefSafe": "Yes",
+      "reefSafe": "Caution",
       "compatible": [
         "Angelfish - Dwarf",
         "Anthias",
@@ -4217,9 +4308,8 @@
         "Boxfish",
         "Butterflyfish",
         "Chromis",
-        "Clownfish (Female) \u2640",
-        "Clownfish (Male) \u2642",
-        "Corals",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
         "Damselfish",
         "Dartfish",
         "Filefish",
@@ -4240,7 +4330,9 @@
         "Grunts / Sweetlips",
         "Seahorse / Pipefish",
         "Sharks / Rays",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Urchins",
+        "Crabs"
       ],
       "withCaution": [
         "Angelfish",
@@ -4260,8 +4352,133 @@
         "Worms / Misc. Inverts",
         "Wrasse - Fish Only",
         "Sea Star - Fish Only",
-        "Anemone - Fish Only"
+        "Anemone - Fish Only",
+        "Corals"
       ]
+    },
+    {
+      "name": "Urchins",
+      "commonNames": [
+        "Pencil Urchins",
+        "Tuxedo Urchin",
+        "Pincushion Urchin",
+        "Halloween Urchin"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/urchins.jpg",
+      "reefSafe": "Yes",
+      "compatible": [],
+      "notRecommended": [],
+      "notCompatible": [
+        "Anemone - Fish Only",
+        "Anemone - Reef Safe",
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Anglers / Frogfish",
+        "Anthias",
+        "Basslets",
+        "Batfish",
+        "Blennies",
+        "Boxfish",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Damselfish",
+        "Dartfish",
+        "Dragonets",
+        "Eels",
+        "Filefish",
+        "Foxface / Rabbitfish",
+        "Gobies",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Jawfish",
+        "Lionfish / Scorpionfish",
+        "Marine Betta",
+        "Parrotfish",
+        "Pseudochromis",
+        "Pufferfish",
+        "Sea Star - Fish Only",
+        "Sea Star - Reef Safe",
+        "Seahorse / Pipefish",
+        "Sharks / Rays",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Squirrelfish",
+        "Tangs / Surgeons",
+        "Triggerfish",
+        "Worms / Misc. Inverts",
+        "Wrasse - Fish Only",
+        "Wrasse - Reef Safe",
+        "Crabs"
+      ],
+      "withCaution": []
+    },
+    {
+      "name": "Crabs",
+      "commonNames": [
+        "Blue Legged Hermit Crab",
+        "Scarlet Reef Hermit Crab",
+        "Emerald Crab",
+        "Sally Lightfoot Crab"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/crabs.jpg",
+      "reefSafe": "Caution",
+      "compatible": [],
+      "notRecommended": [],
+      "notCompatible": [
+        "Anemone - Fish Only",
+        "Anemone - Reef Safe",
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Anglers / Frogfish",
+        "Anthias",
+        "Basslets",
+        "Batfish",
+        "Blennies",
+        "Boxfish",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Damselfish",
+        "Dartfish",
+        "Dragonets",
+        "Eels",
+        "Filefish",
+        "Foxface / Rabbitfish",
+        "Gobies",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Hogfish",
+        "Jawfish",
+        "Lionfish / Scorpionfish",
+        "Marine Betta",
+        "Parrotfish",
+        "Pseudochromis",
+        "Pufferfish",
+        "Sea Star - Fish Only",
+        "Sea Star - Reef Safe",
+        "Seahorse / Pipefish",
+        "Sharks / Rays",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Squirrelfish",
+        "Tangs / Surgeons",
+        "Triggerfish",
+        "Worms / Misc. Inverts",
+        "Wrasse - Fish Only",
+        "Wrasse - Reef Safe",
+        "Urchins"
+      ],
+      "withCaution": []
     }
   ]
 }

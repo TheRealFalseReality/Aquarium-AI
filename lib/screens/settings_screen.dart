@@ -406,10 +406,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// (in order: Gemini → OpenAI → Groq → default). Used when Free AI is
   /// toggled OFF to immediately reflect the correct provider in the UI.
   AIProvider _bestProviderFromControllers() {
-    if (_geminiApiKeyController.text.trim().isNotEmpty)
+    if (_geminiApiKeyController.text.trim().isNotEmpty) {
       return AIProvider.gemini;
-    if (_openAIApiKeyController.text.trim().isNotEmpty)
+    }
+    if (_openAIApiKeyController.text.trim().isNotEmpty) {
       return AIProvider.openAI;
+    }
     if (_groqApiKeyController.text.trim().isNotEmpty) return AIProvider.groq;
     return defaultAIProvider;
   }

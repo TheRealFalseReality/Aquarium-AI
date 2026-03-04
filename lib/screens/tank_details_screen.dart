@@ -795,12 +795,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       padding: const EdgeInsets.all(4),
                       onSelected: (value) {
                         if (value == 'edit') _editPhoto(context, tank, photo);
-                        if (value == 'delete')
+                        if (value == 'delete') {
                           _deletePhoto(context, tank, photo);
-                        if (value == 'set_banner')
+                        }
+                        if (value == 'set_banner') {
                           _setBannerPhoto(tank, photo.id);
-                        if (value == 'remove_banner')
+                        }
+                        if (value == 'remove_banner') {
                           _setBannerPhoto(tank, null);
+                        }
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(
@@ -1809,10 +1812,12 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
   }
 
   String? _getDisplayImageUrl() {
-    if (_customImageUrl != null && _customImageUrl!.isNotEmpty)
+    if (_customImageUrl != null && _customImageUrl!.isNotEmpty) {
       return _customImageUrl;
-    if (_customImagePath != null && _customImagePath!.isNotEmpty)
+    }
+    if (_customImagePath != null && _customImagePath!.isNotEmpty) {
       return _customImagePath;
+    }
     return null;
   }
 

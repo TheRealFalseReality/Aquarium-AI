@@ -161,16 +161,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
   String? _missingApiKeyError() {
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
-        if (_modelState.geminiApiKey.isEmpty)
+        if (_modelState.geminiApiKey.isEmpty) {
           return 'Gemini API Key is not set. Please add your key in Settings.';
+        }
         break;
       case AIProvider.openAI:
-        if (_modelState.openAIApiKey.isEmpty)
+        if (_modelState.openAIApiKey.isEmpty) {
           return 'OpenAI API Key is not set. Please add your key in Settings.';
+        }
         break;
       case AIProvider.groq:
-        if (!_modelState.hasGroqKey)
+        if (!_modelState.hasGroqKey) {
           return 'Groq API Key is not set. Please add your key in Settings.';
+        }
         break;
     }
     return null;
@@ -214,25 +217,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
-        if (_modelState.geminiApiKey.isEmpty)
+        if (_modelState.geminiApiKey.isEmpty) {
           return _handleError(
             'Gemini API Key is not set. Please add your key in Settings.',
             message,
           );
+        }
         return _sendGeminiMessage(message);
       case AIProvider.openAI:
-        if (_modelState.openAIApiKey.isEmpty)
+        if (_modelState.openAIApiKey.isEmpty) {
           return _handleError(
             'OpenAI API Key is not set. Please add your key in Settings.',
             message,
           );
+        }
         return _sendOpenAIMessage(message);
       case AIProvider.groq:
-        if (!_modelState.hasGroqKey)
+        if (!_modelState.hasGroqKey) {
           return _handleError(
             'Groq API Key is not set. Please add your key in Settings.',
             message,
           );
+        }
         return _sendGroqMessage(message);
     }
   }
@@ -252,8 +258,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     String message, {
     bool isRetry = false,
   }) async {
-    if (_modelState.geminiApiKey.isEmpty)
+    if (_modelState.geminiApiKey.isEmpty) {
       return _handleError('Gemini API Key is not set.', message);
+    }
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
@@ -288,12 +295,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
           .sendMessage(Content.text(message))
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
-      if (response.text == null)
+      if (response.text == null) {
         throw Exception('No response received from Gemini');
+      }
       _processTextResponse(response.text!);
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), message);
+      }
     }
   }
 
@@ -343,18 +352,21 @@ class ChatNotifier extends StateNotifier<ChatState> {
           .timeout(const Duration(seconds: 30));
       _cancellable?.complete(response);
       final responseText = response.choices.first.message.content?.first.text;
-      if (responseText == null)
+      if (responseText == null) {
         throw Exception('No response received from OpenAI');
+      }
       _processTextResponse(responseText);
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), message);
+      }
     }
   }
 
   Future<void> _sendGroqMessage(String message, {bool isRetry = false}) async {
-    if (!_modelState.hasGroqKey)
+    if (!_modelState.hasGroqKey) {
       return _handleError('Groq API Key is not set.', message);
+    }
     _prepareForSending(message, isRetry: isRetry);
     _cancellable = CancellableCompleter();
     try {
@@ -387,12 +399,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
               messages: messages,
             );
       _cancellable?.complete(responseText);
-      if (responseText == null)
+      if (responseText == null) {
         throw Exception('No response received from Groq');
+      }
       _processTextResponse(responseText);
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), message);
+      }
     }
   }
 
@@ -482,8 +496,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           );
       return result;
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), userMsg);
+      }
       return null;
     }
   }
@@ -555,8 +570,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           );
       return script;
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), userMsg);
+      }
       return null;
     }
   }
@@ -613,8 +629,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     try {
       final responseText = await _generateContent(prompt, expectJson: true);
       final parsed = FishInfoResult.tryParseJson(extractJson(responseText));
-      if (parsed == null)
+      if (parsed == null) {
         throw const FormatException('Malformed JSON from AI fish info.');
+      }
       state = ChatState(
         messages: [
           ...state.messages,
@@ -638,8 +655,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           );
       return parsed;
     } catch (e) {
-      if (!(_cancellable?.isCancelled ?? false))
+      if (!(_cancellable?.isCancelled ?? false)) {
         _handleError(e.toString(), userMsg);
+      }
       return null;
     }
   }
@@ -759,8 +777,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
       final parsed = PhotoAnalysisResult.tryParseJson(
         extractJson(responseText),
       );
-      if (parsed == null)
+      if (parsed == null) {
         throw const FormatException('Malformed JSON from AI photo analysis.');
+      }
       state = ChatState(
         messages: [
           ...state.messages,
@@ -912,8 +931,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           }
           break;
       }
-      if (responseText == null)
+      if (responseText == null) {
         throw Exception('Received no response from the AI service.');
+      }
       return responseText;
     } catch (e) {
       rethrow;
@@ -987,8 +1007,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           responseText = responseGroq;
           break;
       }
-      if (responseText == null)
+      if (responseText == null) {
         throw Exception('Received no response from the AI service.');
+      }
       return responseText;
     } catch (e) {
       rethrow;
@@ -1077,10 +1098,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   String _getPhotoError(String err) {
-    if (err.contains('FormatException') || err.contains('json'))
+    if (err.contains('FormatException') || err.contains('json')) {
       return '🖼️ **Photo Analysis JSON Error**\n\nI got something back but could not parse it. Please retry.';
-    if (err.contains('network') || err.contains('connection'))
+    }
+    if (err.contains('network') || err.contains('connection')) {
       return '🔌 **Connection Issue**\n\nCould not reach the photo analysis service.';
+    }
     return '⚠️ **Photo Analysis Error**\n\n${err.split('\n').first}';
   }
 }

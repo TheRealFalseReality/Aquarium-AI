@@ -271,101 +271,123 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         } else {
           // ppt thresholds
           if (value >= 32 && value <= 35) return Colors.green;
-          if ((value >= 31 && value < 32) || (value > 35 && value <= 36))
+          if ((value >= 31 && value < 32) || (value > 35 && value <= 36)) {
             return Colors.yellow.shade700;
-          if ((value >= 29 && value < 31) || (value > 36 && value <= 38))
+          }
+          if ((value >= 29 && value < 31) || (value > 36 && value <= 38)) {
             return Colors.orange;
+          }
           return Colors.red;
         }
 
       case 'calcium':
         // Calcium thresholds for marine tanks (ppm)
         if (value >= 400 && value <= 450) return Colors.green;
-        if ((value >= 380 && value < 400) || (value > 450 && value <= 480))
+        if ((value >= 380 && value < 400) || (value > 450 && value <= 480)) {
           return Colors.yellow.shade700;
-        if ((value >= 350 && value < 380) || (value > 480 && value <= 520))
+        }
+        if ((value >= 350 && value < 380) || (value > 480 && value <= 520)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'magnesium':
         // Magnesium thresholds for marine tanks (ppm)
         if (value >= 1250 && value <= 1350) return Colors.green;
-        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400))
+        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400)) {
           return Colors.yellow.shade700;
-        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500))
+        }
+        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'kh':
         // KH thresholds (dKH)
         if (value >= 4 && value <= 8) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 8 && value <= 10))
+        if ((value >= 3 && value < 4) || (value > 8 && value <= 10)) {
           return Colors.yellow.shade700;
-        if ((value >= 2 && value < 3) || (value > 10 && value <= 12))
+        }
+        if ((value >= 2 && value < 3) || (value > 10 && value <= 12)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'gh':
         // GH thresholds (dGH) - general range for freshwater
         if (value >= 4 && value <= 12) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 12 && value <= 15))
+        if ((value >= 3 && value < 4) || (value > 12 && value <= 15)) {
           return Colors.yellow.shade700;
-        if ((value >= 2 && value < 3) || (value > 15 && value <= 18))
+        }
+        if ((value >= 2 && value < 3) || (value > 15 && value <= 18)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'alkalinity':
         // Alkalinity thresholds (meq/L or dKH)
         if (value >= 2.5 && value <= 4.0) return Colors.green;
-        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0))
+        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0)) {
           return Colors.yellow.shade700;
-        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0))
+        }
+        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'orp':
         // ORP thresholds (mV) - higher is better for most aquariums
         if (value >= 300 && value <= 450) return Colors.green;
-        if ((value >= 250 && value < 300) || (value > 450 && value <= 500))
+        if ((value >= 250 && value < 300) || (value > 450 && value <= 500)) {
           return Colors.yellow.shade700;
-        if ((value >= 200 && value < 250) || (value > 500 && value <= 550))
+        }
+        if ((value >= 200 && value < 250) || (value > 500 && value <= 550)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'ph':
         // pH thresholds - general range (6.5-8.0 is typical)
         if (value >= 6.8 && value <= 7.8) return Colors.green;
-        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2))
+        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2)) {
           return Colors.yellow.shade700;
-        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5))
+        }
+        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'potassium':
         // Potassium thresholds (ppm) - for planted tanks
         if (value >= 10 && value <= 30) return Colors.green;
-        if ((value >= 5 && value < 10) || (value > 30 && value <= 40))
+        if ((value >= 5 && value < 10) || (value > 30 && value <= 40)) {
           return Colors.yellow.shade700;
-        if ((value >= 2 && value < 5) || (value > 40 && value <= 50))
+        }
+        if ((value >= 2 && value < 5) || (value > 40 && value <= 50)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'tds':
         // TDS thresholds (ppm) - general freshwater range
         if (value >= 150 && value <= 250) return Colors.green;
-        if ((value >= 100 && value < 150) || (value > 250 && value <= 350))
+        if ((value >= 100 && value < 150) || (value > 250 && value <= 350)) {
           return Colors.yellow.shade700;
-        if ((value >= 50 && value < 100) || (value > 350 && value <= 450))
+        }
+        if ((value >= 50 && value < 100) || (value > 350 && value <= 450)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'iodine':
         // Iodine thresholds for marine tanks (ppm)
         if (value >= 0.06 && value <= 0.10) return Colors.green;
-        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12))
+        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12)) {
           return Colors.yellow.shade700;
-        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15))
+        }
+        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15)) {
           return Colors.orange;
+        }
         return Colors.red;
 
       case 'temperature':
@@ -375,18 +397,22 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         if (isFahrenheit) {
           // Fahrenheit thresholds (75-82°F is ideal for most tropical fish)
           if (value >= 76 && value <= 80) return Colors.green;
-          if ((value >= 72 && value < 76) || (value > 80 && value <= 84))
+          if ((value >= 72 && value < 76) || (value > 80 && value <= 84)) {
             return Colors.yellow.shade700;
-          if ((value >= 68 && value < 72) || (value > 84 && value <= 88))
+          }
+          if ((value >= 68 && value < 72) || (value > 84 && value <= 88)) {
             return Colors.orange;
+          }
           return Colors.red;
         } else {
           // Celsius thresholds (24-28°C is ideal for most tropical fish)
           if (value >= 24 && value <= 27) return Colors.green;
-          if ((value >= 22 && value < 24) || (value > 27 && value <= 29))
+          if ((value >= 22 && value < 24) || (value > 27 && value <= 29)) {
             return Colors.yellow.shade700;
-          if ((value >= 20 && value < 22) || (value > 29 && value <= 31))
+          }
+          if ((value >= 20 && value < 22) || (value > 29 && value <= 31)) {
             return Colors.orange;
+          }
           return Colors.red;
         }
 

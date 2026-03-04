@@ -490,8 +490,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       );
     }
 
-    if (fields.isEmpty && inhabitantsList.isEmpty)
+    if (fields.isEmpty && inhabitantsList.isEmpty) {
       return const SizedBox.shrink();
+    }
 
     return Container(
       decoration: BoxDecoration(

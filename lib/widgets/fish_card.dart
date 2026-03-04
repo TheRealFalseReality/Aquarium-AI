@@ -259,8 +259,9 @@ class FishCard extends ConsumerWidget {
                             }
                           }
 
-                          if (displayNames.isEmpty)
+                          if (displayNames.isEmpty) {
                             return const SizedBox.shrink();
+                          }
 
                           return Text(
                             displayNames.join(', '),

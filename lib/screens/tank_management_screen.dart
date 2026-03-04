@@ -109,10 +109,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_sortFilterAttentionKey, true);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _showSortFilterAttention = false;
         });
+      }
     } catch (e) {
       // ignore
     }

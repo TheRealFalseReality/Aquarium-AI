@@ -562,8 +562,9 @@ class MyApp extends ConsumerWidget {
                 bool autoOpenFishInfo = false;
                 if (args is Map) {
                   if (args['openPhotoAnalyzer'] == true) autoOpen = true;
-                  if (args['openWaterAnalysis'] == true)
+                  if (args['openWaterAnalysis'] == true) {
                     autoOpenWaterAnalysis = true;
+                  }
                   if (args['openFishInfo'] == true) autoOpenFishInfo = true;
                 }
                 page = ChatbotScreen(
