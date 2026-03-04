@@ -2,7 +2,7 @@ name: Build Android Release
 
 on:
   release:
-    # types: [created]
+    types: [created]
 
 jobs:
   build-android:
@@ -39,7 +39,7 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/fishai-release-key.jks
       
       - name: Build Production AAB
         run: flutter build appbundle --flavor production --release
@@ -68,4 +68,4 @@ jobs:
         if: always()
         run: |
           rm -f android/key.properties
-          rm -f android/app/upload-keystore.jks
+          rm -f android/app/fishai-release-key.jks
