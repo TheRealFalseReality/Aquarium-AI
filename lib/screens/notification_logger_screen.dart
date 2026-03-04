@@ -40,6 +40,7 @@ class NotificationLoggerScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'notification_logger_screen');
     _tabController = TabController(
       length: 2,
       vsync: this,

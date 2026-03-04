@@ -53,6 +53,7 @@ class _StockingReportScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'stocking_report_screen');
     _tabController = TabController(length: widget.reports.length, vsync: this);
   }
 

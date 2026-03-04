@@ -30,6 +30,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'parameter_logger_screen');
     if (widget.openAddDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _addParameter(context);

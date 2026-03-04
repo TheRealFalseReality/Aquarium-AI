@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../main_layout.dart';
 import '../providers/web_download_stub.dart'
     if (dart.library.html) '../providers/web_download_web.dart';
+import '../services/analytics_service.dart';
 
 // ── model ────────────────────────────────────────────────────────────────────
 
@@ -154,6 +155,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'fish_compat_editor_screen');
     _loadData();
     _searchCtrl.addListener(
       () =>

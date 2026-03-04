@@ -49,6 +49,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'tank_creation_screen');
 
     _tabController = TabController(length: 3, vsync: this);
 

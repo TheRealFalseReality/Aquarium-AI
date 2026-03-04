@@ -56,6 +56,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'chatbot_screen');
     _scrollController.addListener(_scrollListener);
     _inputFocusNode.addListener(() => setState(() {}));
     _sendIconController = AnimationController(

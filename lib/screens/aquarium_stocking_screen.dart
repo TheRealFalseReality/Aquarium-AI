@@ -39,6 +39,7 @@ class AquariumStockingScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'aquarium_stocking_screen');
     _interstitialAdService.load();
   }
 
