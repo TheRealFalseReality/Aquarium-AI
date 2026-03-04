@@ -1,5 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+
+# Fix for "Compatibility with CMake < 3.5 has been removed" error
+# in Firebase C++ SDK and other older dependencies.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 project(fishai LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
