@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
+import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
@@ -35,6 +36,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'community_post_screen');
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -62,6 +64,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       setState(() => _isSubmitting = false);
       if (comment != null) {
         _commentController.clear();
+        AnalyticsService.logCommunityAction(
+          action: 'comment_created',
+          additionalData: {'post_type': widget.post.type.value},
+        );
       } else {
         ScaffoldMessenger.of(
           context,
@@ -108,6 +114,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       orElse: () => comments.first,
     );
     await CommunityService.deleteComment(widget.post.id, comment);
+    AnalyticsService.logCommunityAction(
+      action: 'comment_deleted',
+      additionalData: {'post_type': widget.post.type.value},
+    );
   }
 
   @override

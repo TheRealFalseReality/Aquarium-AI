@@ -18,6 +18,12 @@ class CalculatorsScreen extends StatefulWidget {
 class CalculatorsScreenState extends State<CalculatorsScreen> {
   String _activeCalculator = 'Salinity';
 
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.logScreenView(screenName: 'calculators_screen');
+  }
+
   Widget _renderCalculator() {
     switch (_activeCalculator) {
       case 'Salinity':

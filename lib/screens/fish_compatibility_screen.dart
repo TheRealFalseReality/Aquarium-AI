@@ -43,6 +43,7 @@ class FishCompatibilityScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'fish_compatibility_screen');
     _searchController.addListener(_filterFishList);
     _interstitialAdService.load();
     // Initialize the list on the first build

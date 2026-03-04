@@ -316,6 +316,45 @@ class AnalyticsService {
     }, 'logSessionEnd');
   }
 
+  // Purchase / in-app purchase actions
+  static Future<void> logPurchaseAction({
+    required String action,
+    String? productId,
+    Map<String, Object>? additionalData,
+  }) async {
+    if (kDebugMode) {
+      print('Analytics: Purchase action - $action');
+    }
+
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'purchase_action',
+        parameters: {
+          'action': action,
+          'product_id': productId ?? 'unknown',
+          ...?additionalData,
+        },
+      );
+    }, 'logPurchaseAction');
+  }
+
+  // Community feature actions (posts, comments, likes)
+  static Future<void> logCommunityAction({
+    required String action,
+    Map<String, Object>? additionalData,
+  }) async {
+    if (kDebugMode) {
+      print('Analytics: Community action - $action');
+    }
+
+    await _safeAnalyticsCall(() async {
+      await _analytics.logEvent(
+        name: 'community_action',
+        parameters: {'action': action, ...?additionalData},
+      );
+    }, 'logCommunityAction');
+  }
+
   // Error tracking
   static Future<void> logError({
     required String errorType,

@@ -72,6 +72,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'tank_management_screen');
     _loadSortPreference();
     _checkSortFilterAttention();
     _interstitialAdService.load();

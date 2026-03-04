@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/analytics_service.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
 
@@ -78,6 +79,11 @@ class AppearanceScreen extends ConsumerWidget {
                       ],
                       selected: {themeState.themeMode},
                       onSelectionChanged: (modes) {
+                        AnalyticsService.logSettingsChange(
+                          settingName: 'theme_mode',
+                          newValue: modes.first.name,
+                          oldValue: themeState.themeMode.name,
+                        );
                         themeNotifier.setThemeMode(modes.first);
                       },
                     ),
@@ -116,7 +122,14 @@ class AppearanceScreen extends ConsumerWidget {
                     isMaterialYouAvailable: isMaterialYouAvailable,
                     customSeedColor: themeState.customSeedColor,
                     customThemeName: themeState.customThemeName,
-                    onSelected: (theme) => themeNotifier.setColorTheme(theme),
+                    onSelected: (theme) {
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'color_theme',
+                        newValue: theme.name,
+                        oldValue: themeState.colorTheme.name,
+                      );
+                      themeNotifier.setColorTheme(theme);
+                    },
                     onCustomEdit: () => _showCustomThemePicker(
                       context,
                       themeState.customSeedColor,
@@ -155,7 +168,14 @@ class AppearanceScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _FontSelector(
                     selected: themeState.font,
-                    onSelected: (font) => themeNotifier.setFont(font),
+                    onSelected: (font) {
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'app_font',
+                        newValue: font.name,
+                        oldValue: themeState.font.name,
+                      );
+                      themeNotifier.setFont(font);
+                    },
                   ),
                 ],
               ),

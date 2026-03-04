@@ -26,6 +26,7 @@ class _SpeciesTagsScreenState extends ConsumerState<SpeciesTagsScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'species_tags_screen');
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();

@@ -29,6 +29,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'dosing_logger_screen');
     if (widget.openAddDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _addDosingEntry(context);

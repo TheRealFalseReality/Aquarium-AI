@@ -176,6 +176,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
     if (confirmed != true || !mounted) return;
 
+    AnalyticsService.logFeatureUsed(featureName: 'profile_sign_out');
     await AuthService.signOut();
 
     if (mounted) {
@@ -193,6 +194,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _shareProfile(UserProfile profile) {
+    AnalyticsService.logFeatureUsed(featureName: 'profile_shared');
     final text = ProfileService.buildShareText(profile);
     Share.share(text);
   }
@@ -960,6 +962,7 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
 
     if (mounted) {
       if (ok) {
+        AnalyticsService.logFeatureUsed(featureName: 'profile_updated');
         Navigator.of(context).pop();
         ScaffoldMessenger.of(
           context,
