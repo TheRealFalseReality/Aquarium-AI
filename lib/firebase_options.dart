@@ -42,12 +42,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDM6ZbtHzwwSnqjy-MoKvpxKAbJy_jLKN0',
-    appId: '1:209151214292:web:de2f18efa1a32a51c8b141',
+    appId: '1:209151214292:web:34131c532abcb50bc8b141',
     messagingSenderId: '209151214292',
     projectId: 'fishai-31d40',
     authDomain: 'fishai-31d40.firebaseapp.com',
     storageBucket: 'fishai-31d40.firebasestorage.app',
-    measurementId: 'G-FJX1MLT3LT',
+    measurementId: 'G-FV9KYN4GHE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -82,7 +82,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyBx8tPwypAL-OYNzyO32upKc3zABmI3EJk',
-    appId: '1:209151214292:web:34131c532abcb50bc8b141',
+    appId: '1:209151214292:web:fcbc769b81afb791c8b141',
     messagingSenderId: '209151214292',
     projectId: 'fishai-31d40',
     authDomain: 'fishai-31d40.firebaseapp.com',
