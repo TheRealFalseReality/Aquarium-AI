@@ -388,7 +388,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
       final responseText = _modelState.usingDeveloperGroqKeyForText
           ? await GroqProxyService.sendChatMessages(
-              model: _modelState.groqModel,
+              model: _modelState.freeGroqTextModel(_isFounder),
               systemPrompt: _effectiveSystemPrompt(message),
               messages: messages,
             ).timeout(const Duration(seconds: 30))
@@ -914,7 +914,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           if (_modelState.usingDeveloperGroqKeyForText) {
             responseText = await GroqProxyService.sendMessage(
-              model: _modelState.groqModel,
+              model: _modelState.freeGroqTextModel(_isFounder),
               prompt: prompt,
             ).timeout(const Duration(seconds: 30));
             _cancellable?.complete();
@@ -991,7 +991,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           final base64Image = base64Encode(imageBytes);
           final responseGroq = _modelState.usingDeveloperGroqKeyForImage
               ? await GroqProxyService.generateWithImage(
-                  model: _modelState.groqImageModel,
+                  model: _modelState.freeGroqImageModel,
                   prompt: prompt,
                   base64Image: base64Image,
                   mimeType: mimeType,

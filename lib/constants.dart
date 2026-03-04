@@ -80,9 +80,13 @@ const String rcDefaultGeminiModel = 'gemini-flash-latest';
 const String rcDefaultGeminiImageModel = 'gemini-flash-latest';
 const String rcDefaultOpenAIModel = 'gpt-4o';
 const String rcDefaultOpenAIImageModel = 'gpt-4-vision-preview';
-const String rcDefaultGroqModel = 'llama-3.1-8b-instant';
+// Placeholder model shown in API Provider settings for the Groq text field.
+const String rcDefaultGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultGroqImageModel =
     'meta-llama/llama-4-scout-17b-16e-instruct';
+// Free-tier model names (used when the developer Groq key is active).
+const String rcDefaultFounderGroqModel = 'llama-3.3-70b-versatile';
+const String rcDefaultFreeGroqModel = 'llama-3.1-8b-instant';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
@@ -161,10 +165,19 @@ class RemoteConfigKeys {
   static const String defaultOpenAIImageModel = 'default_openai_image_model';
 
   /// String — default Groq text/chat model name.
+  /// Used as the placeholder hint in API Provider settings.
   static const String defaultGroqModel = 'default_groq_model';
 
   /// String — default Groq image-analysis model name.
+  /// Used as the placeholder hint in API Provider settings and as the
+  /// image model for free-tier (developer Groq key) users.
   static const String defaultGroqImageModel = 'default_groq_image_model';
+
+  /// String — Groq text model used for Founder Aquarist free-tier users.
+  static const String founderDefaultGroqModel = 'founder_default_groq_model';
+
+  /// String — Groq text model used for standard free-tier users.
+  static const String freeDefaultGroqModel = 'free_default_groq_model';
 
   // ── Promotion images ────────────────────────────────────────────────────
   /// String — URL for the "original" AquaPi promotion image.

@@ -37,6 +37,8 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultOpenAIImageModel: rcDefaultOpenAIImageModel,
         RemoteConfigKeys.defaultGroqModel: rcDefaultGroqModel,
         RemoteConfigKeys.defaultGroqImageModel: rcDefaultGroqImageModel,
+        RemoteConfigKeys.founderDefaultGroqModel: rcDefaultFounderGroqModel,
+        RemoteConfigKeys.freeDefaultGroqModel: rcDefaultFreeGroqModel,
         RemoteConfigKeys.aquapiOriginalImageUrl:
             rcDefaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl:
@@ -161,14 +163,27 @@ class RemoteConfigService {
     rcDefaultOpenAIImageModel,
   );
 
-  /// Default Groq text/chat model name.
+  /// Default Groq text/chat model name (used as placeholder in settings).
   static String get defaultGroqModel =>
       _modelString(RemoteConfigKeys.defaultGroqModel, rcDefaultGroqModel);
 
-  /// Default Groq image-analysis model name.
+  /// Default Groq image-analysis model name (placeholder in settings and
+  /// image model for free-tier users).
   static String get defaultGroqImageModel => _modelString(
     RemoteConfigKeys.defaultGroqImageModel,
     rcDefaultGroqImageModel,
+  );
+
+  /// Groq text model for Founder Aquarist free-tier users.
+  static String get founderDefaultGroqModel => _modelString(
+    RemoteConfigKeys.founderDefaultGroqModel,
+    rcDefaultFounderGroqModel,
+  );
+
+  /// Groq text model for standard free-tier (developer Groq key) users.
+  static String get freeDefaultGroqModel => _modelString(
+    RemoteConfigKeys.freeDefaultGroqModel,
+    rcDefaultFreeGroqModel,
   );
 
   // ── Promotion images ────────────────────────────────────────────────────────

@@ -125,6 +125,21 @@ class ModelState {
 
   /// Backwards-compat alias — true when any Groq operation uses the dev key.
   bool get usingDeveloperGroqKey => usingDeveloperGroqKeyForAny;
+
+  /// Returns the Groq text model to use when the developer free API key is
+  /// active. Founder Aquarist users receive the higher-capability model
+  /// configured via [RemoteConfigKeys.founderDefaultGroqModel]; standard
+  /// free-tier users receive [RemoteConfigKeys.freeDefaultGroqModel].
+  ///
+  /// When the user's own API key is active, [groqModel] is used instead.
+  String freeGroqTextModel(bool isFounder) => isFounder
+      ? RemoteConfigService.founderDefaultGroqModel
+      : RemoteConfigService.freeDefaultGroqModel;
+
+  /// Returns the Groq image model to use when the developer free API key is
+  /// active. Always uses [RemoteConfigService.defaultGroqImageModel] so the
+  /// RC-controlled value is applied regardless of the user's saved setting.
+  String get freeGroqImageModel => RemoteConfigService.defaultGroqImageModel;
 }
 
 // 2. Create the Notifier
