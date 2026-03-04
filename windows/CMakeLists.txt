@@ -1,4 +1,9 @@
 # Project-level configuration.
+
+# Force CMake to allow older projects (like Firebase SDK) that require version < 3.5
+# This MUST be set before cmake_minimum_required or project()
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Minimum policy version" FORCE)
+
 cmake_minimum_required(VERSION 3.14)
 project(fishai LANGUAGES CXX)
 
