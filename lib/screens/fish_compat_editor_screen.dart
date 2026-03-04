@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 
 import '../main_layout.dart';
 import '../providers/web_download_stub.dart'
@@ -14,6 +15,7 @@ import '../providers/web_download_stub.dart'
 // ── model ────────────────────────────────────────────────────────────────────
 
 class _FishEntry {
+  String uuid;
   String name;
   String imageURL;
   List<String> commonNames;
@@ -24,6 +26,7 @@ class _FishEntry {
   List<String> withCaution;
 
   _FishEntry({
+    String? uuid,
     required this.name,
     required this.imageURL,
     required this.commonNames,
@@ -32,9 +35,10 @@ class _FishEntry {
     required this.notRecommended,
     required this.notCompatible,
     required this.withCaution,
-  });
+  }) : uuid = uuid ?? const Uuid().v4();
 
   factory _FishEntry.fromJson(Map<String, dynamic> j) => _FishEntry(
+    uuid: j['uuid'] as String?,
     name: j['name'] as String? ?? '',
     imageURL: j['imageURL'] as String? ?? '',
     commonNames: List<String>.from(j['commonNames'] ?? []),
@@ -46,6 +50,7 @@ class _FishEntry {
   );
 
   Map<String, dynamic> toJson() => {
+    'uuid': uuid,
     'name': name,
     'commonNames': commonNames,
     'imageURL': imageURL,
@@ -416,6 +421,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   continue;
                 }
                 categoryFish[i] = _FishEntry(
+                  uuid: f.uuid,
                   name: f.name,
                   imageURL: f.imageURL,
                   commonNames: f.commonNames,
@@ -447,6 +453,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 if (saved != null && i < saved.length) {
                   final sf = saved[i];
                   saved[i] = _FishEntry(
+                    uuid: sf.uuid,
                     name: sf.name,
                     imageURL: sf.imageURL,
                     commonNames: sf.commonNames,
@@ -529,6 +536,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             // All existing fish names default to notCompatible with the new fish
             final existingNames = categoryFish.map((f) => f.name).toList();
             final newEntry = _FishEntry(
+              uuid: newFish.uuid,
               name: newFish.name,
               imageURL: newFish.imageURL,
               commonNames: newFish.commonNames,
@@ -543,6 +551,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             for (int i = 0; i < categoryFish.length - 1; i++) {
               final f = categoryFish[i];
               categoryFish[i] = _FishEntry(
+                uuid: f.uuid,
                 name: f.name,
                 imageURL: f.imageURL,
                 commonNames: f.commonNames,
@@ -574,6 +583,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             final categoryFish = _data[category]!;
             // Update the directly-edited fish
             categoryFish[index] = _FishEntry(
+              uuid: fish.uuid,
               name: fish.name,
               imageURL: fish.imageURL,
               commonNames: fish.commonNames,
@@ -640,6 +650,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     if (targetIndex == -1) return;
     final f = categoryFish[targetIndex];
     categoryFish[targetIndex] = _FishEntry(
+      uuid: f.uuid,
       name: f.name,
       imageURL: f.imageURL,
       commonNames: f.commonNames,
@@ -1144,6 +1155,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     }
 
     final updated = _FishEntry(
+      uuid: widget.fish.uuid,
       name: name,
       imageURL: imageURL,
       commonNames: commonNames,

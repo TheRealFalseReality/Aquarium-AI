@@ -58,6 +58,34 @@ void main() {
       expect(fish.reefSafe, isNull);
     });
 
+    test('uuid is null by default', () {
+      final fish = Fish(
+        name: 'Neon Tetra',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.uuid, isNull);
+    });
+
+    test('uuid can be set', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final fish = Fish(
+        uuid: testUuid,
+        name: 'Clownfish',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.uuid, equals(testUuid));
+    });
+
     test('reefSafe can be set to Yes for safe marine fish', () {
       final fish = Fish(
         name: 'Clownfish',
@@ -115,6 +143,36 @@ void main() {
       expect(fish.reefSafe, equals('No'));
     });
 
+    test('Fish.fromJson parses uuid field correctly', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final json = {
+        'uuid': testUuid,
+        'name': 'Clownfish',
+        'commonNames': [],
+        'imageURL': '',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.uuid, equals(testUuid));
+    });
+
+    test('Fish.fromJson handles missing uuid as null (backward compat)', () {
+      final json = {
+        'name': 'Betta',
+        'commonNames': [],
+        'imageURL': '',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.uuid, isNull);
+    });
+
     test('Fish.fromJson handles missing reefSafe as null', () {
       final json = {
         'name': 'Betta',
@@ -141,6 +199,37 @@ void main() {
       );
       final json = fish.toJson();
       expect(json.containsKey('reefSafe'), isFalse);
+    });
+
+    test('Fish.toJson omits uuid when null', () {
+      final fish = Fish(
+        name: 'Betta',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json.containsKey('uuid'), isFalse);
+    });
+
+    test('Fish.toJson includes uuid when set', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final fish = Fish(
+        uuid: testUuid,
+        name: 'Clownfish',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json.containsKey('uuid'), isTrue);
+      expect(json['uuid'], equals(testUuid));
     });
 
     test('Fish.toJson includes reefSafe when set', () {

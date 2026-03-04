@@ -1,6 +1,7 @@
 {
   "freshwater": [
     {
+      "uuid": "4b5e4a62-fb22-4dc1-a984-406e61e2723f",
       "name": "Angelfish (Female) ♀",
       "commonNames": [
         "P. scalare",
@@ -48,6 +49,7 @@
       ]
     },
     {
+      "uuid": "74379f3b-2747-4ef7-b4a8-250383d01e4d",
       "name": "Angelfish (Male) ♂",
       "commonNames": [
         "P. scalare",
@@ -95,6 +97,7 @@
       ]
     },
     {
+      "uuid": "e3f73a70-6159-4392-972a-57bf5b6f67e5",
       "name": "Barbs",
       "commonNames": [
         "Tiger Barb",
@@ -143,6 +146,7 @@
       ]
     },
     {
+      "uuid": "5ad4555d-4e2b-4da5-9a18-6a26aef2ea34",
       "name": "Bettas (Female) ♀",
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
@@ -188,6 +192,7 @@
       ]
     },
     {
+      "uuid": "7f97b6c0-96a0-4045-8910-7b4d921488f5",
       "name": "Bettas (Male) ♂",
       "commonNames": [
         "B. splendens (Siamese Fighting Fish)"
@@ -233,6 +238,7 @@
       ]
     },
     {
+      "uuid": "d89121e3-5112-4509-affa-647e59df89b7",
       "name": "Cichlids - American",
       "commonNames": [
         "Oscar",
@@ -289,6 +295,7 @@
       ]
     },
     {
+      "uuid": "d16a0bdc-2c7c-45be-ac00-c86e0299da75",
       "name": "Cichlids - Lake Malawian/Victoria",
       "commonNames": [
         "African Cichlid",
@@ -338,6 +345,7 @@
       ]
     },
     {
+      "uuid": "d29e99c8-fa28-4523-9cdb-e41ee89e8af9",
       "name": "Cichlids - Lake Tanganyikan",
       "commonNames": [
         "Frontosa",
@@ -388,6 +396,7 @@
       ]
     },
     {
+      "uuid": "f3c79b00-523d-4900-a648-6a7041cae284",
       "name": "Cory Cats",
       "commonNames": [
         "Corydoras Catfish",
@@ -439,6 +448,7 @@
       ]
     },
     {
+      "uuid": "0e5a1b12-ed3d-4d70-8df2-6c78b1b076bb",
       "name": "Danios / Minnows",
       "commonNames": [
         "Zebra Danio",
@@ -489,6 +499,7 @@
       ]
     },
     {
+      "uuid": "b99735da-bb57-4854-b10d-042471f94062",
       "name": "Discus",
       "commonNames": [
         "Pompadour fish",
@@ -541,6 +552,7 @@
       ]
     },
     {
+      "uuid": "ab93a73a-11a3-42e8-afbf-f63315c988e8",
       "name": "Freshwater Sharks",
       "commonNames": [
         "Red-Tailed Shark",
@@ -590,6 +602,7 @@
       ]
     },
     {
+      "uuid": "6d93343f-9a0c-486a-bba1-6656aef2f508",
       "name": "Goldfish",
       "commonNames": [
         "Comet Goldfish",
@@ -641,6 +654,7 @@
       ]
     },
     {
+      "uuid": "85377133-f5ce-4da7-8684-5a7d4a82495a",
       "name": "Gouramis",
       "commonNames": [
         "Dwarf Gourami",
@@ -691,6 +705,7 @@
       ]
     },
     {
+      "uuid": "dfb5f2e0-9864-4cc9-9d95-fa10eca13e49",
       "name": "Guppies",
       "commonNames": [
         "Millionfish",
@@ -740,6 +755,7 @@
       ]
     },
     {
+      "uuid": "66f15137-ea0e-454b-ab2e-841cb12f83a4",
       "name": "Hatchets",
       "commonNames": [
         "Freshwater Hatchetfish",
@@ -788,6 +804,7 @@
       ]
     },
     {
+      "uuid": "8b02a146-c1a8-4e31-b483-14b61ad62c6d",
       "name": "Killifish",
       "commonNames": [
         "Annual Killifish",
@@ -838,6 +855,7 @@
       ]
     },
     {
+      "uuid": "06e59959-6569-4bb3-abe8-ce160a9ecd29",
       "name": "Koi",
       "commonNames": [
         "Kohaku",
@@ -891,6 +909,7 @@
       ]
     },
     {
+      "uuid": "92b2fefc-c3fe-44f0-b4d6-ff9a64e6fb1f",
       "name": "Larger Catfish",
       "commonNames": [
         "Redtail Catfish",
@@ -940,6 +959,7 @@
       ]
     },
     {
+      "uuid": "0b4c56a9-bf03-4e04-839d-0809afa24f88",
       "name": "Loaches",
       "commonNames": [
         "Clown Loach",
@@ -991,6 +1011,7 @@
       ]
     },
     {
+      "uuid": "e1878ebd-ffc0-45bc-93f2-5e5feb3e5e05",
       "name": "Mollies / Platies / Swordtails",
       "commonNames": [
         "Sailfin Molly",
@@ -1042,6 +1063,7 @@
       ]
     },
     {
+      "uuid": "8c233a6a-7505-486a-a117-371f4df4b280",
       "name": "Plants",
       "commonNames": [
         "Java Fern",
@@ -1093,6 +1115,7 @@
       ]
     },
     {
+      "uuid": "04d6bc12-7b74-4b63-b088-b1884f64b71b",
       "name": "Plecos / Catfish",
       "commonNames": [
         "Suckerfish",
@@ -1142,6 +1165,7 @@
       ]
     },
     {
+      "uuid": "46945e0d-e6c9-4ebe-a002-94babbe13fab",
       "name": "Rainbowfish",
       "commonNames": [
         "Boeseman's Rainbowfish",
@@ -1192,6 +1216,7 @@
       ]
     },
     {
+      "uuid": "befb4979-bdac-4d2d-9807-8bd4609316ec",
       "name": "Rasboras",
       "commonNames": [
         "Harlequin Rasbora",
@@ -1241,6 +1266,7 @@
       ]
     },
     {
+      "uuid": "e701c0e0-9ecd-4c5a-b5ff-21f2193c733e",
       "name": "Shrimp - Freshwater",
       "commonNames": [
         "Cherry Shrimp",
@@ -1290,6 +1316,7 @@
       ]
     },
     {
+      "uuid": "b97d4361-b6b1-43b1-aef4-af8643148832",
       "name": "Snails - Freshwater",
       "commonNames": [
         "Nerite Snail",
@@ -1339,6 +1366,7 @@
       ]
     },
     {
+      "uuid": "186fe9e0-aa91-4f16-867d-79bcd1f1c137",
       "name": "Tetras",
       "commonNames": [
         "Neon Tetra",
@@ -1390,6 +1418,7 @@
       ]
     },
     {
+      "uuid": "15d51780-c708-4f23-8c80-5d82a65d54cc",
       "name": "Gobies - Freshwater",
       "commonNames": [
         "Neon Blue Stiphodon Goby",
@@ -1439,6 +1468,7 @@
       ]
     },
     {
+      "uuid": "2352c554-c462-44c2-ba8e-7dcbc80283a4",
       "name": "Pufferfish - Freshwater",
       "commonNames": [
         "Pea Puffer",
@@ -1489,6 +1519,7 @@
   ],
   "marine": [
     {
+      "uuid": "778fa90d-33f3-4653-988f-ae273d92e8c5",
       "name": "Anemone - Fish Only",
       "commonNames": [
         "Condy Anemone",
@@ -1556,6 +1587,7 @@
       ]
     },
     {
+      "uuid": "1c35175f-e0e5-46aa-99f4-26c240d3df4d",
       "name": "Anemone - Reef Safe",
       "commonNames": [
         "Bubble Tip Anemone",
@@ -1622,6 +1654,7 @@
       ]
     },
     {
+      "uuid": "15d7e3c6-b530-41da-a208-8a32c60e9eee",
       "name": "Angelfish",
       "commonNames": [
         "Queen Angelfish",
@@ -1690,6 +1723,7 @@
       ]
     },
     {
+      "uuid": "8b47518d-fbd4-46d2-8c50-1fa38e5c0b0c",
       "name": "Angelfish - Dwarf",
       "commonNames": [
         "Flame Angelfish",
@@ -1758,6 +1792,7 @@
       ]
     },
     {
+      "uuid": "48bf3592-b1b6-4b42-b8db-74c4531e1acb",
       "name": "Anglers / Frogfish",
       "commonNames": [
         "Wartskin Anglerfish",
@@ -1827,6 +1862,7 @@
       ]
     },
     {
+      "uuid": "7663e8eb-6178-48eb-95cb-a74ffe977f44",
       "name": "Anthias",
       "commonNames": [
         "Lyretail Anthias",
@@ -1896,6 +1932,7 @@
       ]
     },
     {
+      "uuid": "3789f304-07f3-48f1-a63c-7e52e856f251",
       "name": "Basslets",
       "commonNames": [
         "Royal Gramma",
@@ -1965,6 +2002,7 @@
       ]
     },
     {
+      "uuid": "62f03dd0-ba47-46f6-95b5-9c69530cc020",
       "name": "Batfish",
       "commonNames": [
         "Pinnate Batfish",
@@ -2031,6 +2069,7 @@
       ]
     },
     {
+      "uuid": "fa644f47-74db-4ff6-8408-c5b98b6e4d1a",
       "name": "Blennies",
       "commonNames": [
         "Lawnmower Blenny",
@@ -2100,6 +2139,7 @@
       ]
     },
     {
+      "uuid": "0ba718b6-141c-4659-bff0-d6f5ab5ca64d",
       "name": "Boxfish",
       "commonNames": [
         "Longhorn Cowfish",
@@ -2167,6 +2207,7 @@
       ]
     },
     {
+      "uuid": "7052de41-df3f-4816-aad6-a832ffa08315",
       "name": "Butterflyfish",
       "commonNames": [
         "Copperband Butterflyfish",
@@ -2240,6 +2281,7 @@
       ]
     },
     {
+      "uuid": "cdaa716c-f0ca-489c-823f-37778bdbe7f5",
       "name": "Cardinalfish",
       "commonNames": [
         "Banggai Cardinalfish",
@@ -2308,6 +2350,7 @@
       ]
     },
     {
+      "uuid": "6b5e5f97-5c2c-4c95-a55b-2788da6e2f04",
       "name": "Chromis",
       "commonNames": [
         "Blue-Green Reef Chromis",
@@ -2375,6 +2418,7 @@
       ]
     },
     {
+      "uuid": "f5af5f0f-94ab-429a-a39e-4080bcf81a5a",
       "name": "Clownfish (Female) ♀",
       "commonNames": [
         "Ocellaris Clownfish",
@@ -2443,6 +2487,7 @@
       ]
     },
     {
+      "uuid": "42540f76-5dd8-4891-a80e-ad3f60d7d313",
       "name": "Clownfish (Male) ♂",
       "commonNames": [
         "Ocellaris Clownfish",
@@ -2511,6 +2556,7 @@
       ]
     },
     {
+      "uuid": "949bc2ab-10f4-4631-b317-84353da0de25",
       "name": "Corals",
       "commonNames": [
         "Soft Corals",
@@ -2577,6 +2623,7 @@
       ]
     },
     {
+      "uuid": "641432e5-6354-475c-9e2a-32afa046e8b0",
       "name": "Damselfish",
       "commonNames": [
         "Blue Damsel",
@@ -2650,6 +2697,7 @@
       ]
     },
     {
+      "uuid": "9bee4df6-e8fb-455a-9c32-626bb7396c35",
       "name": "Dartfish",
       "commonNames": [
         "Firefish Goby",
@@ -2717,6 +2765,7 @@
       ]
     },
     {
+      "uuid": "0063fbf1-c8be-4d8e-a1f4-6da2ee86f4c7",
       "name": "Dragonets",
       "commonNames": [
         "Mandarinfish",
@@ -2786,6 +2835,7 @@
       ]
     },
     {
+      "uuid": "8b3eab96-d0f2-40d4-bd44-e007d2ff21ce",
       "name": "Eels",
       "commonNames": [
         "Snowflake Moray",
@@ -2856,6 +2906,7 @@
       ]
     },
     {
+      "uuid": "880244f7-d46d-4ba2-85bd-51ba51f2046f",
       "name": "Filefish",
       "commonNames": [
         "Aiptasia-Eating Filefish",
@@ -2925,6 +2976,7 @@
       ]
     },
     {
+      "uuid": "9866b049-b38a-41e6-b473-45cb107dacf2",
       "name": "Foxface / Rabbitfish",
       "commonNames": [
         "Magnificent Rabbitfish",
@@ -2993,6 +3045,7 @@
       ]
     },
     {
+      "uuid": "9ad777ae-9e37-42c1-baf4-392da2f13869",
       "name": "Gobies",
       "commonNames": [
         "Watchman Goby",
@@ -3061,6 +3114,7 @@
       ]
     },
     {
+      "uuid": "bd92f8cf-acb0-4149-af83-c9bc4a64bdc3",
       "name": "Groupers",
       "commonNames": [
         "Panther Grouper",
@@ -3128,6 +3182,7 @@
       ]
     },
     {
+      "uuid": "3b20f43b-77a4-44f5-b1cb-e1ef82daf0f5",
       "name": "Grunts / Sweetlips",
       "commonNames": [
         "Porkfish",
@@ -3195,6 +3250,7 @@
       ]
     },
     {
+      "uuid": "922320e5-bd76-4456-b3f0-d5817b9b1053",
       "name": "Hawkfish",
       "commonNames": [
         "Longnose Hawkfish",
@@ -3264,6 +3320,7 @@
       ]
     },
     {
+      "uuid": "c3e74373-27b4-4fbd-ab9e-7d12be7c20c4",
       "name": "Hogfish",
       "commonNames": [
         "Spanish Hogfish",
@@ -3332,6 +3389,7 @@
       ]
     },
     {
+      "uuid": "b4855027-328f-421b-bb77-a8f5c7cda595",
       "name": "Jawfish",
       "commonNames": [
         "Yellowhead Jawfish",
@@ -3399,6 +3457,7 @@
       ]
     },
     {
+      "uuid": "be5842ca-04c5-48b3-a3cf-8aaa45d8ae34",
       "name": "Lionfish / Scorpionfish",
       "commonNames": [
         "Lionfish",
@@ -3466,6 +3525,7 @@
       ]
     },
     {
+      "uuid": "edb2186e-2b07-4451-ac41-4f11193754f6",
       "name": "Marine Betta",
       "commonNames": [
         "C. altivelis"
@@ -3529,6 +3589,7 @@
       ]
     },
     {
+      "uuid": "03baec51-ed1e-4f87-b520-71a77ad47b2b",
       "name": "Parrotfish",
       "commonNames": [
         "Bicolor Parrotfish",
@@ -3598,6 +3659,7 @@
       ]
     },
     {
+      "uuid": "547f50dc-4a5f-4f09-8278-cfaa89503249",
       "name": "Pseudochromis",
       "commonNames": [
         "Orchid Dottyback",
@@ -3666,6 +3728,7 @@
       ]
     },
     {
+      "uuid": "9b4ba143-2d6f-4593-9b5f-7040135a8bcf",
       "name": "Pufferfish",
       "commonNames": [
         "Dogface Puffer",
@@ -3735,6 +3798,7 @@
       ]
     },
     {
+      "uuid": "ea51b5b9-0e8f-4b3d-a722-6083cfc6b6d8",
       "name": "Sea Star - Fish Only",
       "commonNames": [
         "Chocolate Chip Starfish",
@@ -3799,6 +3863,7 @@
       ]
     },
     {
+      "uuid": "4380b691-ea01-42a2-92c9-7ca6e1ac365c",
       "name": "Sea Star - Reef Safe",
       "commonNames": [
         "Brittle & Serpent Star",
@@ -3867,6 +3932,7 @@
       ]
     },
     {
+      "uuid": "ef41ff2e-cf64-433b-8334-5fa4dffee4cb",
       "name": "Seahorse / Pipefish",
       "commonNames": [
         "Lined Seahorse",
@@ -3938,6 +4004,7 @@
       ]
     },
     {
+      "uuid": "bea46658-debc-42c5-be8a-474d9e58a284",
       "name": "Sharks / Rays",
       "commonNames": [
         "Banded Catshark",
@@ -4008,6 +4075,7 @@
       ]
     },
     {
+      "uuid": "ae9422dc-258a-4f4c-a6be-14dcff8c38be",
       "name": "Shrimp - Marine",
       "commonNames": [
         "Skunk Cleaner Shrimp",
@@ -4078,6 +4146,7 @@
       ]
     },
     {
+      "uuid": "0875ea60-7f89-4007-a025-ab0e61bd2713",
       "name": "Snails - Marine",
       "commonNames": [
         "Astrea Snail",
@@ -4146,6 +4215,7 @@
       ]
     },
     {
+      "uuid": "439432ab-ae36-4717-a000-92f32cc929d5",
       "name": "Squirrelfish",
       "commonNames": [
         "Longspine Squirrelfish",
@@ -4215,6 +4285,7 @@
       ]
     },
     {
+      "uuid": "79f82bc3-6baf-4233-8999-5f9ba024f505",
       "name": "Tangs / Surgeons",
       "commonNames": [
         "Yellow Tang",
@@ -4284,6 +4355,7 @@
       ]
     },
     {
+      "uuid": "410b5482-1724-4eee-bdb9-03e82a5a5797",
       "name": "Triggerfish",
       "commonNames": [
         "Clown Triggerfish",
@@ -4352,6 +4424,7 @@
       ]
     },
     {
+      "uuid": "2ee47f31-41a8-471c-8666-55b0bcafca5f",
       "name": "Worms / Misc. Inverts",
       "commonNames": [
         "Feather Duster",
@@ -4421,6 +4494,7 @@
       ]
     },
     {
+      "uuid": "782b5742-16d2-46cd-9936-8db8ed4ca645",
       "name": "Wrasse - Fish Only",
       "commonNames": [
         "Harlequin Tusk Wrasse",
@@ -4489,6 +4563,7 @@
       ]
     },
     {
+      "uuid": "8f9ba24a-bbbe-483c-b1fc-e0b0b31bd3bd",
       "name": "Wrasse - Reef Safe",
       "commonNames": [
         "Six Line Wrasse",
@@ -4557,6 +4632,7 @@
       ]
     },
     {
+      "uuid": "38a91a03-c728-4c3a-9bc3-2d1f7a998892",
       "name": "Urchins",
       "commonNames": [
         "Pencil Urchins",
@@ -4623,6 +4699,7 @@
       ]
     },
     {
+      "uuid": "94bc3876-9a94-4239-a65e-36c7c107b5ec",
       "name": "Crabs - Reef Safe",
       "commonNames": [
         "Blue Legged Hermit Crab",
@@ -4689,6 +4766,7 @@
       ]
     },
     {
+      "uuid": "159fe1a3-05d6-4bee-81d5-71a0c9080b32",
       "name": "Crabs - Fish Only",
       "commonNames": [
         "Decorator Crab:",

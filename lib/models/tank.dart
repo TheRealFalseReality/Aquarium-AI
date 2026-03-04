@@ -98,6 +98,10 @@ class TankInhabitant {
   final String id;
   final String customName;
   final String fishUnit; // Matches fish name from fishcompat.json
+  /// Stable UUID from fishcompat.json. Null for inhabitants created before
+  /// UUID support was added. Use for fish lookups when present; fall back to
+  /// [fishUnit] name matching for backward compatibility.
+  final String? fishUuid;
   final int quantity;
   final String? customImageUrl; // User-provided image URL
   final String?
@@ -110,6 +114,7 @@ class TankInhabitant {
     required this.id,
     required this.customName,
     required this.fishUnit,
+    this.fishUuid,
     required this.quantity,
     this.customImageUrl,
     this.customImagePath,
@@ -122,6 +127,7 @@ class TankInhabitant {
       'id': id,
       'customName': customName,
       'fishUnit': fishUnit,
+      if (fishUuid != null) 'fishUuid': fishUuid,
       'quantity': quantity,
       'customImageUrl': customImageUrl,
       // Exclude customImagePath from backup to prevent restore errors
@@ -137,6 +143,7 @@ class TankInhabitant {
       id: json['id'] as String,
       customName: json['customName'] as String,
       fishUnit: json['fishUnit'] as String,
+      fishUuid: json['fishUuid'] as String?,
       quantity: json['quantity'] as int,
       customImageUrl: json['customImageUrl'] as String?,
       customImagePath: json['customImagePath'] as String?,
@@ -153,6 +160,7 @@ class TankInhabitant {
     String? id,
     String? customName,
     String? fishUnit,
+    String? fishUuid,
     int? quantity,
     String? customImageUrl,
     String? customImagePath,
@@ -163,6 +171,7 @@ class TankInhabitant {
       id: id ?? this.id,
       customName: customName ?? this.customName,
       fishUnit: fishUnit ?? this.fishUnit,
+      fishUuid: fishUuid ?? this.fishUuid,
       quantity: quantity ?? this.quantity,
       customImageUrl: customImageUrl ?? this.customImageUrl,
       customImagePath: customImagePath ?? this.customImagePath,

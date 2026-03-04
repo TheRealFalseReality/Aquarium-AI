@@ -216,6 +216,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
       id: const Uuid().v4(),
       customName: '${originalInhabitant.customName} (Copy)',
       fishUnit: originalInhabitant.fishUnit,
+      fishUuid: originalInhabitant.fishUuid,
       quantity: originalInhabitant.quantity,
       customImageUrl: originalInhabitant.customImageUrl,
       customImagePath: originalInhabitant.customImagePath,
@@ -422,18 +423,22 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
         if (_inhabitants.isNotEmpty && _availableFish.isNotEmpty) {
           final tankFish = <Fish>[];
           for (final inhabitant in _inhabitants) {
-            final fish = _availableFish.firstWhere(
-              (f) => f.name == inhabitant.fishUnit,
-              orElse: () => Fish(
-                name: inhabitant.fishUnit,
-                commonNames: [],
-                imageURL: '',
-                compatible: [],
-                notRecommended: [],
-                notCompatible: [],
-                withCaution: [],
-              ),
-            );
+            // Prefer UUID-based lookup for renamed-fish resilience; fall back to name.
+            final fish = (inhabitant.fishUuid != null
+                    ? _availableFish.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+                    : null) ??
+                _availableFish.firstWhere(
+                  (f) => f.name == inhabitant.fishUnit,
+                  orElse: () => Fish(
+                    name: inhabitant.fishUnit,
+                    commonNames: [],
+                    imageURL: '',
+                    compatible: [],
+                    notRecommended: [],
+                    notCompatible: [],
+                    withCaution: [],
+                  ),
+                );
             for (int i = 0; i < inhabitant.quantity; i++) {
               tankFish.add(fish);
             }
@@ -1453,9 +1458,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
 
     // Fall back to default fish image
     try {
-      final fish = _availableFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-      );
+      final fish = (inhabitant.fishUuid != null
+              ? _availableFish.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+              : null) ??
+          _availableFish.firstWhere(
+            (f) => f.name == inhabitant.fishUnit,
+          );
       return fish.imageURL.isNotEmpty ? fish.imageURL : null;
     } catch (e) {
       return null;
@@ -1488,6 +1496,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
   final ImagePicker _picker = ImagePicker();
 
   String? _selectedFishUnit;
+  String? _selectedFishUuid;
   List<Fish> _filteredFish = [];
   String? _customImageUrl;
   String? _customImagePath;
@@ -1508,6 +1517,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
       _customNameController.text = widget.existingInhabitant!.customName;
       _quantityController.text = widget.existingInhabitant!.quantity.toString();
       _selectedFishUnit = widget.existingInhabitant!.fishUnit;
+      _selectedFishUuid = widget.existingInhabitant!.fishUuid;
       _customImageUrl = widget.existingInhabitant!.customImageUrl;
       _customImagePath = widget.existingInhabitant!.customImagePath;
       _dateAdded = widget.existingInhabitant!.dateAdded;
@@ -1654,6 +1664,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
         id: widget.existingInhabitant?.id ?? const Uuid().v4(),
         customName: _customNameController.text.trim(),
         fishUnit: _selectedFishUnit!,
+        fishUuid: _selectedFishUuid,
         quantity: int.parse(_quantityController.text),
         customImageUrl: _customImageUrl,
         customImagePath: _customImagePath,
@@ -1963,6 +1974,7 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
                           _addSpeciesTagController.clear();
                         }
                         _selectedFishUnit = fish.name;
+                        _selectedFishUuid = fish.uuid;
                         // Only auto-fill custom name if user hasn't modified it
                         if (!_customNameUserModified) {
                           _customNameController.text = 'My ${fish.name}';
