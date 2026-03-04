@@ -812,7 +812,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
               modelName: switch (_modelState.activeImageProvider) {
                 AIProvider.gemini => _modelState.geminiImageModel,
                 AIProvider.openAI => _modelState.chatGPTImageModel,
-                AIProvider.groq => _modelState.groqImageModel,
+                AIProvider.groq => _modelState.usingDeveloperGroqKeyForImage
+                    ? _modelState.freeGroqImageModel
+                    : _modelState.groqImageModel,
               },
             ),
           );

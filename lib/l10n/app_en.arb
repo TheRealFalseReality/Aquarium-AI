@@ -4523,9 +4523,19 @@
   "@freeTierChatHistoryPerRequest": {
     "description": "Label for chat history per request in free tier bullet list"
   },
-  "freeTierModelNote": "Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.",
+  "freeTierModelNote": "Uses the {model} model, which may not deliver the best results for text or image analysis.",
   "@freeTierModelNote": {
-    "description": "Note about the model used in the free tier"
+    "description": "Note about the model used in the free tier, with dynamic model name",
+    "placeholders": {
+      "model": {"type": "String"}
+    }
+  },
+  "freeTierFounderModel": "Model: {model}",
+  "@freeTierFounderModel": {
+    "description": "Shows the active model for Founder Aquarist in the expanded limits section",
+    "placeholders": {
+      "model": {"type": "String"}
+    }
   },
   "freeTierRecommendation": "For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).",
   "@freeTierRecommendation": {

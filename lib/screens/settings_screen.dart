@@ -904,7 +904,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: Text(
                         isFounder
-                            ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
+                            ? 'Using App\'s Built-in Dev API Key — Founder Aquarist (${RemoteConfigService.founderDefaultGroqModel}): $maxPerMin req/min, $maxPerDay req/day. Add your own API key for unlimited access.'
                             : 'Using App\'s Built-in Dev API Key (free tier). '
                                   'Add your own API key in AI Provider settings for dedicated limits.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -918,6 +918,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
             },
+          ),
+        ],
+        // Indicator: shown when the user has their own API key configured and
+        // is not using the built-in developer key.
+        if (appSettings.enableAI &&
+            !models.usingDeveloperGroqKeyForAny &&
+            (models.groqApiKey.isNotEmpty ||
+                models.geminiApiKey.isNotEmpty ||
+                models.openAIApiKey.isNotEmpty)) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.withOpacity(0.4)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.key, color: Colors.green.shade700, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Using Own API Key — No in-app limits applied. Your API provider\'s rate limits apply.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
         // Warning: shown when the free AI tier is disabled server-side but the
@@ -1639,42 +1670,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
-                          '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
-                          '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
-                          '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: isFounder
-                                    ? AquaThemeColors.founderColor(context)
-                                    : Colors.amber.shade900,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        if (!isFounder) ...[
+                        if (_useDevGroqKeyForText ||
+                            _useDevGroqKeyForImage) ...[
                           Text(
-                            l10n.freeTierModelNote,
+                            '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
+                            '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
+                            '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
+                            '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.amber.shade900),
+                                ?.copyWith(
+                                  color: isFounder
+                                      ? AquaThemeColors.founderColor(context)
+                                      : Colors.amber.shade900,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            l10n.freeTierRecommendation,
+                            isFounder
+                                ? l10n.freeTierFounderModel(RemoteConfigService.founderDefaultGroqModel)
+                                : l10n.freeTierModelNote(RemoteConfigService.freeDefaultGroqModel),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: Colors.amber.shade800,
-                                  fontStyle: FontStyle.italic,
+                                  color: isFounder
+                                      ? AquaThemeColors.founderColor(context)
+                                      : Colors.amber.shade900,
                                 ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.freeTierDisclaimer,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.amber.shade800,
-                                  fontStyle: FontStyle.italic,
+                          if (!isFounder) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              l10n.freeTierRecommendation,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Colors.amber.shade800,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.freeTierDisclaimer,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Colors.amber.shade800,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                            ),
+                          ],
+                        ] else ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.key,
+                                size: 14,
+                                color: Colors.green.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Using your own API key — no in-app limits applied. Your API provider\'s rate limits apply.',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.copyWith(
+                                    color: Colors.green.shade700,
+                                  ),
                                 ),
+                              ),
+                            ],
                           ),
                         ],
                       ],
