@@ -427,18 +427,22 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     // Get existing fish from tank inhabitants
     final existingFish = <Fish>[];
     for (final inhabitant in tank.inhabitants) {
-      final fish = allFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-        orElse: () => Fish(
-          name: inhabitant.fishUnit,
-          commonNames: [],
-          imageURL: '',
-          compatible: [],
-          notRecommended: [],
-          notCompatible: [],
-          withCaution: [],
-        ),
-      );
+      // Prefer UUID-based lookup for renamed-fish resilience; fall back to name.
+      final fish = (inhabitant.fishUuid != null
+              ? allFish.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+              : null) ??
+          allFish.firstWhere(
+            (f) => f.name == inhabitant.fishUnit,
+            orElse: () => Fish(
+              name: inhabitant.fishUnit,
+              commonNames: [],
+              imageURL: '',
+              compatible: [],
+              notRecommended: [],
+              notCompatible: [],
+              withCaution: [],
+            ),
+          );
       // Add individual fish based on quantity for proper compatibility calculations
       for (int i = 0; i < inhabitant.quantity; i++) {
         existingFish.add(fish);

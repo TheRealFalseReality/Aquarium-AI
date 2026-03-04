@@ -4104,18 +4104,22 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final existingFish = <Fish>[];
 
     for (final inhabitant in tank.inhabitants) {
-      final fish = categoryFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-        orElse: () => Fish(
-          name: inhabitant.fishUnit,
-          commonNames: [],
-          imageURL: '',
-          compatible: [],
-          notRecommended: [],
-          notCompatible: [],
-          withCaution: [],
-        ),
-      );
+      // Prefer UUID-based lookup for renamed-fish resilience; fall back to name.
+      final fish = (inhabitant.fishUuid != null
+              ? categoryFish.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+              : null) ??
+          categoryFish.firstWhere(
+            (f) => f.name == inhabitant.fishUnit,
+            orElse: () => Fish(
+              name: inhabitant.fishUnit,
+              commonNames: [],
+              imageURL: '',
+              compatible: [],
+              notRecommended: [],
+              notCompatible: [],
+              withCaution: [],
+            ),
+          );
       // Add individual fish based on quantity for proper compatibility calculations
       // This is used for calculating harmony scores
       for (int i = 0; i < inhabitant.quantity; i++) {
@@ -4268,19 +4272,22 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         continue;
       }
 
-      // Use the database fish name
-      final fish = categoryFish.firstWhere(
-        (f) => f.name == inhabitant.fishUnit,
-        orElse: () => Fish(
-          name: inhabitant.fishUnit,
-          commonNames: [],
-          imageURL: '',
-          compatible: [],
-          notRecommended: [],
-          notCompatible: [],
-          withCaution: [],
-        ),
-      );
+      // Use the database fish name, preferring UUID lookup for renamed-fish resilience.
+      final fish = (inhabitant.fishUuid != null
+              ? categoryFish.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+              : null) ??
+          categoryFish.firstWhere(
+            (f) => f.name == inhabitant.fishUnit,
+            orElse: () => Fish(
+              name: inhabitant.fishUnit,
+              commonNames: [],
+              imageURL: '',
+              compatible: [],
+              notRecommended: [],
+              notCompatible: [],
+              withCaution: [],
+            ),
+          );
 
       // Collect species tags for this inhabitant
       if (inhabitant.speciesTags.isNotEmpty) {

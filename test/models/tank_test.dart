@@ -291,5 +291,98 @@ void main() {
       expect(deserializedTank.waterParameters[1].notes, 'Evening temperature');
     });
   });
+
+  group('TankInhabitant fishUuid', () {
+    test('fishUuid is null by default (backward compatibility)', () {
+      final inhabitant = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        quantity: 2,
+      );
+      expect(inhabitant.fishUuid, isNull);
+    });
+
+    test('fishUuid can be set', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final inhabitant = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        fishUuid: testUuid,
+        quantity: 2,
+      );
+      expect(inhabitant.fishUuid, equals(testUuid));
+    });
+
+    test('TankInhabitant.toJson includes fishUuid when set', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final inhabitant = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        fishUuid: testUuid,
+        quantity: 2,
+      );
+      final json = inhabitant.toJson();
+      expect(json.containsKey('fishUuid'), isTrue);
+      expect(json['fishUuid'], equals(testUuid));
+    });
+
+    test('TankInhabitant.toJson omits fishUuid when null', () {
+      final inhabitant = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        quantity: 2,
+      );
+      final json = inhabitant.toJson();
+      expect(json.containsKey('fishUuid'), isFalse);
+    });
+
+    test('TankInhabitant.fromJson reads fishUuid when present', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final json = {
+        'id': 'inh-1',
+        'customName': 'My Clownfish',
+        'fishUnit': 'Clownfish',
+        'fishUuid': testUuid,
+        'quantity': 2,
+        'customImageUrl': null,
+        'dateAdded': null,
+        'speciesTags': <String>[],
+      };
+      final inhabitant = TankInhabitant.fromJson(json);
+      expect(inhabitant.fishUuid, equals(testUuid));
+    });
+
+    test('TankInhabitant.fromJson handles missing fishUuid (backward compat)', () {
+      final json = {
+        'id': 'inh-1',
+        'customName': 'My Clownfish',
+        'fishUnit': 'Clownfish',
+        'quantity': 2,
+        'customImageUrl': null,
+        'dateAdded': null,
+        'speciesTags': <String>[],
+      };
+      final inhabitant = TankInhabitant.fromJson(json);
+      expect(inhabitant.fishUuid, isNull);
+    });
+
+    test('TankInhabitant.copyWith preserves fishUuid', () {
+      const testUuid = '12345678-1234-1234-1234-123456789abc';
+      final original = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        fishUuid: testUuid,
+        quantity: 2,
+      );
+      final copy = original.copyWith(quantity: 3);
+      expect(copy.fishUuid, equals(testUuid));
+      expect(copy.quantity, equals(3));
+    });
+  });
 }
 

@@ -827,19 +827,22 @@ class _FishCardGrid extends StatelessWidget {
         grouped[key]!['quantity'] =
             (grouped[key]!['quantity'] as int) + inhabitant.quantity;
       } else {
-        // Find the fish data
-        final fish = fishList.firstWhere(
-          (f) => f.name == inhabitant.fishUnit,
-          orElse: () => Fish(
-            name: inhabitant.fishUnit,
-            commonNames: [],
-            imageURL: '',
-            compatible: [],
-            notRecommended: [],
-            notCompatible: [],
-            withCaution: [],
-          ),
-        );
+        // Find the fish data, preferring UUID lookup for renamed-fish resilience.
+        final fish = (inhabitant.fishUuid != null
+                ? fishList.where((f) => f.uuid == inhabitant.fishUuid).firstOrNull
+                : null) ??
+            fishList.firstWhere(
+              (f) => f.name == inhabitant.fishUnit,
+              orElse: () => Fish(
+                name: inhabitant.fishUnit,
+                commonNames: [],
+                imageURL: '',
+                compatible: [],
+                notRecommended: [],
+                notCompatible: [],
+                withCaution: [],
+              ),
+            );
 
         grouped[key] = {
           'fish': fish,
