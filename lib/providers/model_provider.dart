@@ -137,9 +137,9 @@ class ModelState {
       : RemoteConfigService.freeDefaultGroqModel;
 
   /// Returns the Groq image model to use when the developer free API key is
-  /// active. Always uses [RemoteConfigService.defaultGroqImageModel] so the
-  /// RC-controlled value is applied regardless of the user's saved setting.
-  String get freeGroqImageModel => RemoteConfigService.defaultGroqImageModel;
+  /// active. Uses [RemoteConfigService.freeGroqImageModel] so the RC-controlled
+  /// value is applied regardless of the user's saved setting.
+  String get freeGroqImageModel => RemoteConfigService.freeGroqImageModel;
 }
 
 // 2. Create the Notifier

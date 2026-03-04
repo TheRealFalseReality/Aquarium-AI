@@ -87,6 +87,8 @@ const String rcDefaultGroqImageModel =
 // Free-tier model names (used when the developer Groq key is active).
 const String rcDefaultFounderGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultFreeGroqModel = 'llama-3.1-8b-instant';
+const String rcDefaultFreeGroqImageModel =
+    'meta-llama/llama-4-scout-17b-16e-instruct';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
@@ -178,6 +180,9 @@ class RemoteConfigKeys {
 
   /// String — Groq text model used for standard free-tier users.
   static const String freeDefaultGroqModel = 'free_default_groq_model';
+
+  /// String — Groq image model used for free-tier (developer Groq key) users.
+  static const String freeGroqImageModel = 'free_groq_image_model';
 
   // ── Promotion images ────────────────────────────────────────────────────
   /// String — URL for the "original" AquaPi promotion image.

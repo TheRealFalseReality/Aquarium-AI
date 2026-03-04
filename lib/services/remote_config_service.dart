@@ -39,6 +39,7 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultGroqImageModel: rcDefaultGroqImageModel,
         RemoteConfigKeys.founderDefaultGroqModel: rcDefaultFounderGroqModel,
         RemoteConfigKeys.freeDefaultGroqModel: rcDefaultFreeGroqModel,
+        RemoteConfigKeys.freeGroqImageModel: rcDefaultFreeGroqImageModel,
         RemoteConfigKeys.aquapiOriginalImageUrl:
             rcDefaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl:
@@ -184,6 +185,12 @@ class RemoteConfigService {
   static String get freeDefaultGroqModel => _modelString(
     RemoteConfigKeys.freeDefaultGroqModel,
     rcDefaultFreeGroqModel,
+  );
+
+  /// Groq image model for free-tier (developer Groq key) users.
+  static String get freeGroqImageModel => _modelString(
+    RemoteConfigKeys.freeGroqImageModel,
+    rcDefaultFreeGroqImageModel,
   );
 
   // ── Promotion images ────────────────────────────────────────────────────────
