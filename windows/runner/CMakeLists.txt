@@ -21,11 +21,19 @@ add_executable(${BINARY_NAME} WIN32
 apply_standard_settings(${BINARY_NAME})
 
 # Add preprocessor definitions for the build version.
+# For Windows, the build identifier (after +) must be numeric.
+# We remove dots from the build part to create a numeric version (e.g., 3.1.01 -> 3101).
+string(REPLACE "." "" WINDOWS_BUILD_NUMBER "${FLUTTER_VERSION_BUILD}")
+if(NOT WINDOWS_BUILD_NUMBER MATCHES "^[0-9]+$")
+  set(WINDOWS_BUILD_NUMBER 0)
+endif()
+
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=${FLUTTER_VERSION_PATCH}")
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTTER_VERSION_BUILD}")
+# Use our sanitized numeric build number
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${WINDOWS_BUILD_NUMBER}")
 
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")

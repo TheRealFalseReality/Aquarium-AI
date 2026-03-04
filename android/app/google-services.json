@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "209151214292-qt3id33amlf7vefnm34qbhuvvkpo7s6g.apps.googleusercontent.com",
+          "client_id": "209151214292-hr26ktkbieccaoclbal9m786ca4k3sng.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.cca.fishai",
-            "certificate_hash": "c506473dda80c87881231dd857bf296a5f747939"
+            "certificate_hash": "e3a52ca8de5c885fc84b7a5cad2b951994d68aa8"
           }
         },
         {
