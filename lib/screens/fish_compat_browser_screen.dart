@@ -491,7 +491,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                       status: status,
                       onTap: () => setState(() {
                         _selectedFish = other;
-                        _collapsedSections.clear();
+                        // Preserve _collapsedSections so the user's filter
+                        // preferences are kept when browsing fish.
                       }),
                     );
                   },
@@ -737,8 +738,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
               return InkWell(
                 onTap: () => setState(() {
                   _selectedFish = other;
-                  _collapsedSections.clear();
-                  // Stay in matrix view so user can keep browsing
+                  // Preserve _collapsedSections while browsing fish in matrix.
                 }),
                 child: Container(
                   height: rowH,
@@ -903,66 +903,80 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     ],
                   ),
                 ),
-                child: GestureDetector(
-                  onTap: fish.commonNames.isNotEmpty
-                      ? () => setState(() => _namesExpanded = !_namesExpanded)
+                child: Semantics(
+                  button: fish.commonNames.isNotEmpty,
+                  hint: fish.commonNames.isNotEmpty
+                      ? (_namesExpanded
+                          ? 'Collapse common names'
+                          : 'Expand common names')
                       : null,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 20, 14, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Fish name
-                        Text(
-                          fish.name,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                        ),
-                        // Common names (expandable)
-                        if (fish.commonNames.isNotEmpty) ...[
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  _namesExpanded
-                                      ? fish.commonNames.join(', ')
-                                      : fish.commonNames.first,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: Colors.white.withOpacity(0.85),
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                  maxLines: _namesExpanded ? null : 1,
-                                  overflow: _namesExpanded
-                                      ? TextOverflow.visible
-                                      : TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (fish.commonNames.length > 1) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  _namesExpanded
-                                      ? Icons.expand_less
-                                      : Icons.expand_more,
-                                  color: Colors.white.withOpacity(0.85),
-                                  size: 16,
-                                ),
-                              ],
-                            ],
+                  child: GestureDetector(
+                    onTap: fish.commonNames.isNotEmpty
+                        ? () => setState(() => _namesExpanded = !_namesExpanded)
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 20, 14, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Fish name
+                          Text(
+                            fish.name,
+                            style:
+                                Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                           ),
+                          // Common names (expandable)
+                          if (fish.commonNames.isNotEmpty) ...[
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    _namesExpanded
+                                        ? fish.commonNames.join(', ')
+                                        : fish.commonNames.first,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color:
+                                              Colors.white.withOpacity(0.85),
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                    maxLines: _namesExpanded ? null : 1,
+                                    overflow: _namesExpanded
+                                        ? TextOverflow.visible
+                                        : TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (fish.commonNames.length > 1) ...[
+                                  const SizedBox(width: 4),
+                                  Semantics(
+                                    label: _namesExpanded
+                                        ? 'Collapse common names'
+                                        : 'Expand common names',
+                                    child: Icon(
+                                      _namesExpanded
+                                          ? Icons.expand_less
+                                          : Icons.expand_more,
+                                      color: Colors.white.withOpacity(0.85),
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                          // Reef-safe badge
+                          if (fish.reefSafe != null) ...[
+                            const SizedBox(height: 6),
+                            _ReefSafeBadge(status: fish.reefSafe!),
+                          ],
                         ],
-                        // Reef-safe badge
-                        if (fish.reefSafe != null) ...[
-                          const SizedBox(height: 6),
-                          _ReefSafeBadge(status: fish.reefSafe!),
-                        ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
