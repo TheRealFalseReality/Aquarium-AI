@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -544,18 +545,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          sliver: SliverMasonryGrid.count(
-            crossAxisCount: columnCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childCount: tanks.length,
-            itemBuilder: (context, index) {
-              return _buildTankCard(
-                context,
-                ref,
-                tanks[index],
-                fishData,
-                appSettings,
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) {
+              // Guard against negative child widths on very narrow viewports
+              // (e.g. multi-window, orientation-change transitions).
+              // Spacing = min(16, extent/count) ensures every column stays >= 0px wide.
+              final crossAxisSpacing = columnCount > 1
+                  ? min(16.0, constraints.crossAxisExtent / columnCount)
+                  : 0.0;
+              return SliverMasonryGrid.count(
+                crossAxisCount: columnCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: crossAxisSpacing,
+                childCount: tanks.length,
+                itemBuilder: (context, index) {
+                  return _buildTankCard(
+                    context,
+                    ref,
+                    tanks[index],
+                    fishData,
+                    appSettings,
+                  );
+                },
               );
             },
           ),
@@ -592,22 +603,31 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       slivers.add(
         SliverPadding(
           padding: EdgeInsets.fromLTRB(16, startIndex == 0 ? 0 : 16, 16, 0),
-          sliver: SliverMasonryGrid.count(
-            crossAxisCount: columnCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childCount: tanksToShow,
-            itemBuilder: (context, index) {
-              final actualIndex = startIndex + index;
-              if (actualIndex >= tanks.length) {
-                return const SizedBox.shrink();
-              }
-              return _buildTankCard(
-                context,
-                ref,
-                tanks[actualIndex],
-                fishData,
-                appSettings,
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) {
+              // Guard against negative child widths on very narrow viewports.
+              // Spacing = min(16, extent/count) ensures every column stays >= 0px wide.
+              final crossAxisSpacing = columnCount > 1
+                  ? min(16.0, constraints.crossAxisExtent / columnCount)
+                  : 0.0;
+              return SliverMasonryGrid.count(
+                crossAxisCount: columnCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: crossAxisSpacing,
+                childCount: tanksToShow,
+                itemBuilder: (context, index) {
+                  final actualIndex = startIndex + index;
+                  if (actualIndex >= tanks.length) {
+                    return const SizedBox.shrink();
+                  }
+                  return _buildTankCard(
+                    context,
+                    ref,
+                    tanks[actualIndex],
+                    fishData,
+                    appSettings,
+                  );
+                },
               );
             },
           ),
