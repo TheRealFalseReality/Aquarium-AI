@@ -1024,5 +1024,20 @@
   "unitFeet": "Pies",
   "unitCm": "cm",
   "unitMeters": "Metros",
-  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito"
+  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito",
+  "fishCompatBrowser": "Explorador de Compatibilidad de Peces",
+  "fishCompatBrowserDesc": "Explora datos de compatibilidad para especies de agua dulce y marina. Toca un pez para ver qué compañeros de acuario son compatibles.",
+  "fishCompatBrowserDrawerDesc": "Explora tablas de compatibilidad de peces de agua dulce y marina.",
+  "compatible": "Compatible",
+  "withCaution": "Con Precaución",
+  "notRecommended": "No Recomendado",
+  "notCompatible": "No Compatible",
+  "unknownCompatibility": "Desconocido",
+  "marine": "Marino",
+  "noFishFound": "No se encontraron peces",
+  "searchFish": "Buscar peces…",
+  "tapAFishToViewCompatibility": "Toca un pez para ver su compatibilidad",
+  "backToList": "Volver a la lista",
+  "listView": "Vista de lista",
+  "matrixView": "Vista de matriz"
 }

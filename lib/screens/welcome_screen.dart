@@ -849,6 +849,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 900),
       ),
       FeatureInfo(
+        icon: '🔍',
+        title: l10n.fishCompatBrowser,
+        description: l10n.fishCompatBrowserDesc,
+        shortDescription: l10n.fishCompatBrowserDrawerDesc,
+        routeName: '/compat-browser',
+        delay: const Duration(milliseconds: 910),
+      ),
+      FeatureInfo(
         icon: '🌊',
         title: l10n.communityTitle,
         description: l10n.communityDrawerDescription,

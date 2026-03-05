@@ -1024,5 +1024,20 @@
   "unitFeet": "Fuß",
   "unitCm": "cm",
   "unitMeters": "Meter",
-  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe"
+  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe",
+  "fishCompatBrowser": "Fischkompatibilitäts-Browser",
+  "fishCompatBrowserDesc": "Erkunde Kompatibilitätsdaten für Süß- und Meerwasserarten. Tippe auf einen Fisch, um kompatible Beckengenossen zu sehen.",
+  "fishCompatBrowserDrawerDesc": "Kompatibilitätskarten für Süß- und Meerwasserfische durchsuchen.",
+  "compatible": "Kompatibel",
+  "withCaution": "Mit Vorsicht",
+  "notRecommended": "Nicht empfohlen",
+  "notCompatible": "Nicht kompatibel",
+  "unknownCompatibility": "Unbekannt",
+  "marine": "Meerwasser",
+  "noFishFound": "Kein Fisch gefunden",
+  "searchFish": "Fisch suchen…",
+  "tapAFishToViewCompatibility": "Tippe auf einen Fisch, um die Kompatibilität anzuzeigen",
+  "backToList": "Zurück zur Liste",
+  "listView": "Listenansicht",
+  "matrixView": "Matrixansicht"
 }

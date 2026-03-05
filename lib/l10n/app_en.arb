@@ -5047,5 +5047,65 @@
   "freeTierAdNotice": "Ad shown: supporting the free AI tier",
   "@freeTierAdNotice": {
     "description": "Brief snackbar message shown just before an interstitial ad appears for free-tier AI users"
+  },
+  "fishCompatBrowser": "Fish Compatibility Browser",
+  "@fishCompatBrowser": {
+    "description": "Title of the fish compatibility browser screen"
+  },
+  "fishCompatBrowserDesc": "Browse and explore compatibility data for freshwater & marine species. Tap a fish to see which tank mates are compatible.",
+  "@fishCompatBrowserDesc": {
+    "description": "Description of the fish compatibility browser (welcome screen / info screen)"
+  },
+  "fishCompatBrowserDrawerDesc": "Browse compatibility charts for freshwater & marine fish.",
+  "@fishCompatBrowserDrawerDesc": {
+    "description": "Short description of the fish compatibility browser (app drawer)"
+  },
+  "compatible": "Compatible",
+  "@compatible": {
+    "description": "Label for fish that are compatible with each other"
+  },
+  "withCaution": "With Caution",
+  "@withCaution": {
+    "description": "Label for fish compatibility status: keep together with caution"
+  },
+  "notRecommended": "Not Recommended",
+  "@notRecommended": {
+    "description": "Label for fish compatibility status: not recommended to keep together"
+  },
+  "notCompatible": "Not Compatible",
+  "@notCompatible": {
+    "description": "Label for fish compatibility status: incompatible fish"
+  },
+  "unknownCompatibility": "Unknown",
+  "@unknownCompatibility": {
+    "description": "Label for fish compatibility status: no data available"
+  },
+  "marine": "Marine",
+  "@marine": {
+    "description": "Label for the marine (saltwater) fish category"
+  },
+  "noFishFound": "No fish found",
+  "@noFishFound": {
+    "description": "Message shown when no fish match the search query"
+  },
+  "searchFish": "Search fish…",
+  "@searchFish": {
+    "description": "Hint text for the fish search field in the compatibility browser"
+  },
+  "tapAFishToViewCompatibility": "Tap a fish to view its compatibility",
+  "@tapAFishToViewCompatibility": {
+    "description": "Placeholder text shown on the right panel before a fish is selected"
+  },
+  "backToList": "Back to list",
+  "@backToList": {
+    "description": "Button label to return to the fish list from the detail/matrix view"
+  },
+  "listView": "List view",
+  "@listView": {
+    "description": "Tooltip for the button that switches to the list view in the compatibility browser"
+  },
+  "matrixView": "Matrix view",
+  "@matrixView": {
+    "description": "Tooltip/label for the matrix (grid) compatibility view"
   }
 }
