@@ -2801,23 +2801,43 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         // Notifications section (1 per row in grid mode, 2 per row otherwise)
         if (notificationItems.isNotEmpty) ...[
           if (recentActivityItems.isNotEmpty) const SizedBox(height: 10),
-          // Use LayoutBuilder directly (avoid adding a flex child inside an
-          // unbounded Column which causes RenderFlex assertions).
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // In grid mode use full width (1 per row), otherwise 2 per row
-              final itemWidth = inGridMode
-                  ? constraints.maxWidth
-                  : (constraints.maxWidth - 8) / 2;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: notificationItems
-                    .map((item) => SizedBox(width: itemWidth, child: item))
-                    .toList(),
-              );
-            },
-          ),
+          // Use Row+Expanded (non-grid) / Column (grid) instead of
+          // LayoutBuilder to avoid a RenderBox-not-laid-out crash that
+          // occurs when Material/InkWell children inside a LayoutBuilder
+          // are re-laid out during navigation transitions (offstage routes).
+          if (inGridMode)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (int i = 0; i < notificationItems.length; i++) ...[
+                  notificationItems[i],
+                  if (i < notificationItems.length - 1)
+                    const SizedBox(height: 8),
+                ],
+              ],
+            )
+          else
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < notificationItems.length; i += 2) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: notificationItems[i]),
+                      const SizedBox(width: 8),
+                      if (i + 1 < notificationItems.length)
+                        Expanded(child: notificationItems[i + 1])
+                      else
+                        const Expanded(child: SizedBox()),
+                    ],
+                  ),
+                  if (i + 2 < notificationItems.length)
+                    const SizedBox(height: 8),
+                ],
+              ],
+            ),
         ],
         const SizedBox(height: 14),
       ],

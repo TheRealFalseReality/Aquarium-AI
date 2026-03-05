@@ -913,7 +913,12 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ...sortedParams.map((param) {
           return Card(
             child: ListTile(
-              leading: Icon(Icons.science_outlined, color: cs.primary),
+              leading: Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(8),
+                child: Icon(Icons.science_outlined, color: cs.primary),
+              ),
               title: Text(param.parameterType.toUpperCase()),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1013,7 +1018,12 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ...recentEntries.map((entry) {
           return Card(
             child: ListTile(
-              leading: Icon(Icons.medication, color: cs.primary),
+              leading: Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(8),
+                child: Icon(Icons.medication, color: cs.primary),
+              ),
               title: Text(entry.treatmentName),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1091,7 +1101,12 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ...recentLogs.map((log) {
           return Card(
             child: ListTile(
-              leading: Icon(_getActivityIcon(log.type), color: cs.primary),
+              leading: Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(8),
+                child: Icon(_getActivityIcon(log.type), color: cs.primary),
+              ),
               title: Text(
                 log.customCategory ?? log.type.toString().split('.').last,
               ),
