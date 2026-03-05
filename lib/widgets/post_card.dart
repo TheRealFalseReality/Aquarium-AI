@@ -290,30 +290,34 @@ class _PostCardState extends State<PostCard> {
     bool isFounder,
   ) {
     if (!isTankShowcase) {
-      return GestureDetector(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FullScreenImageScreen(
-              imageUrl: widget.post.imageUrl!,
-              heroTag: 'post_image_${widget.post.id}',
+      return Semantics(
+        label: 'View post image full screen',
+        button: true,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => FullScreenImageScreen(
+                imageUrl: widget.post.imageUrl!,
+                heroTag: 'post_image_${widget.post.id}',
+              ),
             ),
           ),
-        ),
-        child: FutureBuilder<String>(
-          future: _resolvedPostImageUrl,
-          builder: (_, snap) => Hero(
-            tag: 'post_image_${widget.post.id}',
-            child: CachedNetworkImage(
-              imageUrl: snap.data ?? widget.post.imageUrl!,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-              errorWidget: (_, _, _) => Container(
+          child: FutureBuilder<String>(
+            future: _resolvedPostImageUrl,
+            builder: (_, snap) => Hero(
+              tag: 'post_image_${widget.post.id}',
+              child: CachedNetworkImage(
+                imageUrl: snap.data ?? widget.post.imageUrl!,
+                width: double.infinity,
                 height: 200,
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.broken_image,
-                  color: theme.colorScheme.onSurfaceVariant,
+                fit: BoxFit.cover,
+                errorWidget: (_, _, _) => Container(
+                  height: 200,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.broken_image,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -377,11 +381,12 @@ class _PostCardState extends State<PostCard> {
             bottom: 12,
             child: Row(
               children: [
-                GestureDetector(
+                InkWell(
                   onTap: () => Navigator.of(context).pushNamed(
                     '/profile',
                     arguments: {'userId': widget.post.userId},
                   ),
+                  borderRadius: BorderRadius.circular(8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

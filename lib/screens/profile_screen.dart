@@ -412,27 +412,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         );
                       }
-                      return FutureBuilder<List<CommunityPost>>(
-                        future: CommunityService.getPostsByIds(ids),
-                        builder: (context, snap) {
-                          if (!snap.hasData) {
-                            return const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                          return Column(
-                            children: snap.data!
-                                .take(10)
-                                .map(
-                                  (p) =>
-                                      _buildPostPreviewTile(context, l10n, p),
-                                )
-                                .toList(),
-                          );
-                        },
+                      return _BookmarkedPostsLoader(
+                        ids: ids,
+                        loadingBuilder: (_) => const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        builder: (posts) => Column(
+                          children: posts
+                              .take(10)
+                              .map(
+                                (p) => _buildPostPreviewTile(context, l10n, p),
+                              )
+                              .toList(),
+                        ),
                       );
                     },
                   );
@@ -944,6 +937,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _formatDate(DateTime dt) => DateFormat.yMMMd().format(dt);
+}
+
+// ─── Bookmarked posts future-cache widget ─────────────────────────────────────
+
+/// StatefulWidget that caches the `getPostsByIds` future so it does not refire
+/// on every parent rebuild.
+class _BookmarkedPostsLoader extends StatefulWidget {
+  final List<String> ids;
+  final Widget Function(List<CommunityPost> posts) builder;
+  final WidgetBuilder loadingBuilder;
+
+  const _BookmarkedPostsLoader({
+    required this.ids,
+    required this.builder,
+    required this.loadingBuilder,
+  });
+
+  @override
+  State<_BookmarkedPostsLoader> createState() => _BookmarkedPostsLoaderState();
+}
+
+class _BookmarkedPostsLoaderState extends State<_BookmarkedPostsLoader> {
+  late Future<List<CommunityPost>> _future;
+  List<String>? _cachedIds;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_cachedIds == null || _cachedIds!.join() != widget.ids.join()) {
+      _cachedIds = widget.ids;
+      _future = CommunityService.getPostsByIds(widget.ids);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<CommunityPost>>(
+      future: _future,
+      builder: (context, snap) {
+        if (!snap.hasData) return widget.loadingBuilder(context);
+        return widget.builder(snap.data!);
+      },
+    );
+  }
 }
 
 // ─── Stat chip ────────────────────────────────────────────────────────────────
