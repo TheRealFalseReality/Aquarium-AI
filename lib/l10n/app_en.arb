@@ -3069,6 +3069,16 @@
     "description": "Founder upsell text shown inside the rate-limit error dialog"
   },
 
+  "aiErrorTitle": "AI Error",
+  "@aiErrorTitle": {
+    "description": "Default title of the AI error dialog"
+  },
+
+  "apiKeyRequiredTitle": "API Key Required",
+  "@apiKeyRequiredTitle": {
+    "description": "Title of the AI error dialog when an API key is missing or invalid"
+  },
+
   "removeAdsContentDesc": "Support Aquarium AI with a one-time purchase to remove all ads permanently.",
   "@removeAdsContentDesc": {
     "description": "Main description text inside the Remove Ads purchase dialog"

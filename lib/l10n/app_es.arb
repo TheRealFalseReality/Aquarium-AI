@@ -578,6 +578,8 @@
   "becomeFounderAquarist": "Conviértete en Fundador Acuarista",
   "rateLimitReachedTitle": "Límite del nivel gratuito alcanzado",
   "rateLimitFounderUpsellBody": "Mejora a **Fundador Acuarista** para disfrutar de mayores límites de uso de IA y eliminar los anuncios permanentemente.",
+  "aiErrorTitle": "Error de IA",
+  "apiKeyRequiredTitle": "Se requiere clave API",
   "removeAdsContentDesc": "Apoya Aquarium AI con una compra única para eliminar todos los anuncios de forma permanente.",
   "removeAdsPurchaseTiedToAccount": "Tu compra está vinculada a tu cuenta de la tienda y se puede restaurar en cualquier dispositivo.",
   "removeAdsThankyouTitle": "¡Gracias! 🎉",

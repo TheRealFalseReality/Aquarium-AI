@@ -66,9 +66,9 @@ class _AiErrorDialog extends StatelessWidget {
     if (isRateLimitError) {
       headerTitle = l10n.rateLimitReachedTitle;
     } else if (isApiKeyError) {
-      headerTitle = 'API Key Required';
+      headerTitle = l10n.apiKeyRequiredTitle;
     } else {
-      headerTitle = 'AI Error';
+      headerTitle = l10n.aiErrorTitle;
     }
 
     return Dialog(
@@ -250,7 +250,7 @@ class _AiErrorDialog extends StatelessWidget {
                       onRetry!();
                     },
                     icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                     style: FilledButton.styleFrom(
                       backgroundColor: cs.error,
                       foregroundColor: cs.onError,

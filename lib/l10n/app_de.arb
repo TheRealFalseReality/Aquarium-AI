@@ -578,6 +578,8 @@
   "becomeFounderAquarist": "Gründer-Aquarist werden",
   "rateLimitReachedTitle": "Kostenloses Limit erreicht",
   "rateLimitFounderUpsellBody": "Upgrade auf **Gründer-Aquarist**, um höhere KI-Nutzungslimits zu genießen und Werbung dauerhaft zu entfernen.",
+  "aiErrorTitle": "KI-Fehler",
+  "apiKeyRequiredTitle": "API-Schlüssel erforderlich",
   "removeAdsContentDesc": "Unterstütze Aquarium AI mit einem einmaligen Kauf, um alle Werbung dauerhaft zu entfernen.",
   "removeAdsPurchaseTiedToAccount": "Dein Kauf ist mit deinem Store-Konto verknüpft und kann auf jedem Gerät wiederhergestellt werden.",
   "removeAdsThankyouTitle": "Danke! 🎉",

@@ -201,10 +201,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 errorMessage: last.text,
                 isApiKeyError: last.isApiKeyError,
                 isRetryable: last.isRetryable,
-                isRateLimitError: !last.isApiKeyError &&
-                    (last.text.contains('Free-tier limit reached') ||
-                        last.text.contains('Daily free-tier limit reached') ||
-                        last.text.contains('Daily photo analysis limit')),
+                isRateLimitError: last.isRateLimitError,
               );
             }
           });
