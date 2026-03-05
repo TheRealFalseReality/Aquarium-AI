@@ -573,6 +573,13 @@
   "founderPerkIncreasedAILimits": "Límites de uso de IA gratuita aumentados",
   "founderPerkPostBorder": "Borde de publicación violeta oscuro exclusivo",
   "founderPerkBadge": "Insignia de Fundador exclusiva en perfil y publicaciones",
+  "founderUpsellBannerTitle": "Desbloquea los privilegios de Fundador Acuarista",
+  "founderUpsellBannerBody": "Elimina los anuncios permanentemente y obtén límites de uso de IA más altos con una compra única.",
+  "becomeFounderAquarist": "Conviértete en Fundador Acuarista",
+  "rateLimitReachedTitle": "Límite del nivel gratuito alcanzado",
+  "rateLimitFounderUpsellBody": "Mejora a **Fundador Acuarista** para disfrutar de mayores límites de uso de IA y eliminar los anuncios permanentemente.",
+  "aiErrorTitle": "Error de IA",
+  "apiKeyRequiredTitle": "Se requiere clave API",
   "removeAdsContentDesc": "Apoya Aquarium AI con una compra única para eliminar todos los anuncios de forma permanente.",
   "removeAdsPurchaseTiedToAccount": "Tu compra está vinculada a tu cuenta de la tienda y se puede restaurar en cualquier dispositivo.",
   "removeAdsThankyouTitle": "¡Gracias! 🎉",
@@ -1024,5 +1031,8 @@
   "unitFeet": "Pies",
   "unitCm": "cm",
   "unitMeters": "Metros",
-  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito"
+  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito",
+  "interstitialAdBlurbTitle": "IA gratuita — financiada por anuncios",
+  "interstitialAdBlurbBody": "{hours, plural, =1{Puede aparecer un anuncio a pantalla completa cada hora para ayudar a cubrir el coste del nivel de IA gratuito.} other{Puede aparecer un anuncio a pantalla completa cada {hours} horas para ayudar a cubrir el coste del nivel de IA gratuito.}}",
+  "interstitialAdBlurbCta": "Eliminar anuncios"
 }

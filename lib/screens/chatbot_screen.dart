@@ -186,7 +186,8 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   errorMessage: last.text,
                   isApiKeyError: last.isApiKeyError,
                   isRetryable: last.isRetryable,
-                  onRetry: retryCallback,
+                  isRateLimitError: last.isRateLimitError,
+                  onRetry: !last.isRateLimitError ? retryCallback : null,
                 );
               }
             });
