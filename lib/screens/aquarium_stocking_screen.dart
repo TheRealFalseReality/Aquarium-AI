@@ -949,6 +949,9 @@ class AquariumStockingScreenState
           ),
         ),
       ),
+    ),
+        ],
+      ),
     );
   }
 
@@ -991,8 +994,6 @@ class AquariumStockingScreenState
             ),
           ),
         ),
-          ),
-        ],
       ),
     );
   }
