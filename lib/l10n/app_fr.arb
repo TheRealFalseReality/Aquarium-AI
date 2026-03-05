@@ -1040,5 +1040,13 @@
   "harmonyFair": "Moyen",
   "harmonyCaution": "Prudence",
   "harmonyWarning": "Avertissement",
-  "harmonyPoor": "Mauvais"
+  "harmonyPoor": "Mauvais",
+
+  "communityBookmark": "Enregistrer",
+  "communityUnbookmark": "Retirer le signet",
+  "communityBookmarked": "Enregistré",
+  "profilePostsSection": "Publications",
+  "profileNoPostsYet": "Aucune publication pour l'instant.",
+  "profileSavedPosts": "Publications sauvegardées",
+  "profileNoSavedPosts": "Aucune publication sauvegardée pour l'instant."
 }

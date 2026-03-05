@@ -93,6 +93,17 @@ final communityRepliesStreamProvider = StreamProvider.autoDispose
           CommunityService.repliesStream(args.postId, args.commentId),
     );
 
+/// Stream of bookmarked post IDs for the current user.
+final bookmarkedPostIdsProvider = StreamProvider<List<String>>((ref) {
+  return CommunityService.bookmarkedPostIdsStream();
+});
+
+/// Stream of posts by a specific user.
+final userPostsStreamProvider =
+    StreamProvider.family<List<CommunityPost>, String>((ref, userId) {
+  return CommunityService.postsByUserStream(userId);
+});
+
 // ─── Create Post State ────────────────────────────────────────────────────────
 
 class CreatePostState {

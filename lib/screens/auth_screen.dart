@@ -71,7 +71,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         AnalyticsService.logFeatureUsed(
           featureName: _isSignUp ? 'auth_sign_up_email' : 'auth_sign_in_email',
         );
-        Navigator.of(context).pushReplacementNamed('/profile');
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pushReplacementNamed('/profile');
+        }
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -89,7 +93,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final user = await AuthService.signInWithGoogle();
       if (user != null && mounted) {
         AnalyticsService.logFeatureUsed(featureName: 'auth_sign_in_google');
-        Navigator.of(context).pushReplacementNamed('/profile');
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pushReplacementNamed('/profile');
+        }
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -107,7 +115,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final user = await AuthService.signInWithFacebook();
       if (user != null && mounted) {
         AnalyticsService.logFeatureUsed(featureName: 'auth_sign_in_facebook');
-        Navigator.of(context).pushReplacementNamed('/profile');
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pushReplacementNamed('/profile');
+        }
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -401,9 +413,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                   featureName: 'auth_sign_in_anonymous',
                                 );
                                 setState(() => _isLoading = false);
-                                Navigator.of(
-                                  context,
-                                ).pushReplacementNamed('/profile');
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed('/profile');
+                                }
                               }
                             },
                     ),

@@ -1040,5 +1040,13 @@
   "harmonyFair": "Befriedigend",
   "harmonyCaution": "Vorsicht",
   "harmonyWarning": "Warnung",
-  "harmonyPoor": "Schlecht"
+  "harmonyPoor": "Schlecht",
+
+  "communityBookmark": "Lesezeichen",
+  "communityUnbookmark": "Lesezeichen entfernen",
+  "communityBookmarked": "Als Lesezeichen gespeichert",
+  "profilePostsSection": "Beiträge",
+  "profileNoPostsYet": "Noch keine Beiträge.",
+  "profileSavedPosts": "Gespeicherte Beiträge",
+  "profileNoSavedPosts": "Noch keine gespeicherten Beiträge."
 }

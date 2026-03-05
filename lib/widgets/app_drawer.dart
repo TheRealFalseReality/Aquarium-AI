@@ -795,18 +795,39 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       leading: SizedBox(
         width: 40,
         height: 40,
-        child: CircleAvatar(
-          backgroundColor: isFounder
-              ? AquaThemeColors.founderColor(context).withOpacity(0.18)
-              : Theme.of(context).colorScheme.tertiaryContainer,
-          child: Icon(
-            isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
-            color: isFounder
-                ? AquaThemeColors.founderColor(context)
-                : Theme.of(context).colorScheme.tertiary,
-            size: 22,
-          ),
-        ),
+        child: isFounder
+            ? Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AquaThemeColors.founderColor(context),
+                    width: 2.5,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: CircleAvatar(
+                    backgroundColor:
+                        AquaThemeColors.founderColor(context).withOpacity(0.18),
+                    child: Icon(
+                      isAnon
+                          ? Icons.no_accounts_outlined
+                          : Icons.account_circle,
+                      color: AquaThemeColors.founderColor(context),
+                      size: 20,
+                    ),
+                  ),
+                ),
+              )
+            : CircleAvatar(
+                backgroundColor:
+                    Theme.of(context).colorScheme.tertiaryContainer,
+                child: Icon(
+                  isAnon ? Icons.no_accounts_outlined : Icons.account_circle,
+                  color: Theme.of(context).colorScheme.tertiary,
+                  size: 22,
+                ),
+              ),
       ),
       title: Row(
         children: [

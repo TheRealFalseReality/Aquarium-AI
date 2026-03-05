@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
+import '../screens/full_screen_image_screen.dart';
 import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
@@ -33,6 +34,8 @@ class _PostCardState extends State<PostCard> {
   late int _likes;
   bool _isLiked = false;
   bool _likeLoading = false;
+  bool _isBookmarked = false;
+  bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
 
@@ -41,6 +44,7 @@ class _PostCardState extends State<PostCard> {
     super.initState();
     _likes = widget.post.likes;
     _loadLikeStatus();
+    _loadBookmarkStatus();
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -100,6 +104,34 @@ class _PostCardState extends State<PostCard> {
       if (success) {
         AnalyticsService.logCommunityAction(
           action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
+  }
+
+  Future<void> _loadBookmarkStatus() async {
+    if (widget.currentUserId.isEmpty) return;
+    final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
+    if (mounted) setState(() => _isBookmarked = bookmarked);
+  }
+
+  Future<void> _handleBookmark() async {
+    if (_bookmarkLoading || widget.currentUserId.isEmpty) return;
+    final wasBookmarked = _isBookmarked;
+    setState(() {
+      _bookmarkLoading = true;
+      _isBookmarked = !_isBookmarked;
+    });
+    final success = await CommunityService.toggleBookmark(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _bookmarkLoading = false;
+        if (!success) _isBookmarked = wasBookmarked;
+      });
+      if (success) {
+        AnalyticsService.logCommunityAction(
+          action: _isBookmarked ? 'post_bookmarked' : 'post_unbookmarked',
           additionalData: {'post_type': widget.post.type.value},
         );
       }
@@ -173,7 +205,7 @@ class _PostCardState extends State<PostCard> {
                   // Signature is intentionally omitted from the preview card.
                   // It appears only in the full post detail screen.
                   const SizedBox(height: 8),
-                  // Footer: likes + comments
+                  // Footer: likes + comments + bookmark
                   Row(
                     children: [
                       InkWell(
@@ -215,6 +247,26 @@ class _PostCardState extends State<PostCard> {
                         '${widget.post.commentCount}',
                         style: theme.textTheme.labelSmall,
                       ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: _handleBookmark,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          child: Icon(
+                            _isBookmarked
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            size: 18,
+                            color: _isBookmarked
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -238,19 +290,32 @@ class _PostCardState extends State<PostCard> {
     bool isFounder,
   ) {
     if (!isTankShowcase) {
-      return FutureBuilder<String>(
-        future: _resolvedPostImageUrl,
-        builder: (_, snap) => CachedNetworkImage(
-          imageUrl: snap.data ?? widget.post.imageUrl!,
-          width: double.infinity,
-          height: 200,
-          fit: BoxFit.cover,
-          errorWidget: (_, _, _) => Container(
-            height: 200,
-            color: theme.colorScheme.surfaceContainerHighest,
-            child: Icon(
-              Icons.broken_image,
-              color: theme.colorScheme.onSurfaceVariant,
+      return GestureDetector(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FullScreenImageScreen(
+              imageUrl: widget.post.imageUrl!,
+              heroTag: 'post_image_${widget.post.id}',
+            ),
+          ),
+        ),
+        child: FutureBuilder<String>(
+          future: _resolvedPostImageUrl,
+          builder: (_, snap) => Hero(
+            tag: 'post_image_${widget.post.id}',
+            child: CachedNetworkImage(
+              imageUrl: snap.data ?? widget.post.imageUrl!,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) => Container(
+                height: 200,
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.broken_image,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         ),
@@ -265,18 +330,31 @@ class _PostCardState extends State<PostCard> {
         fit: StackFit.expand,
         children: [
           // Hero image
-          FutureBuilder<String>(
-            future: _resolvedPostImageUrl,
-            builder: (_, snap) => CachedNetworkImage(
-              imageUrl: snap.data ?? widget.post.imageUrl!,
-              width: double.infinity,
-              height: 280,
-              fit: BoxFit.cover,
-              errorWidget: (_, _, _) => Container(
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.broken_image,
-                  color: theme.colorScheme.onSurfaceVariant,
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => FullScreenImageScreen(
+                  imageUrl: widget.post.imageUrl!,
+                  heroTag: 'post_showcase_${widget.post.id}',
+                ),
+              ),
+            ),
+            child: FutureBuilder<String>(
+              future: _resolvedPostImageUrl,
+              builder: (_, snap) => Hero(
+                tag: 'post_showcase_${widget.post.id}',
+                child: CachedNetworkImage(
+                  imageUrl: snap.data ?? widget.post.imageUrl!,
+                  width: double.infinity,
+                  height: 280,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => Container(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.broken_image,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -299,52 +377,65 @@ class _PostCardState extends State<PostCard> {
             bottom: 12,
             child: Row(
               children: [
-                _buildAvatar(theme, small: true),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pushNamed(
+                    '/profile',
+                    arguments: {'userId': widget.post.userId},
+                  ),
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
+                      _buildAvatar(theme, small: true),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(
-                            child: Text(
-                              widget.post.displayName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                shadows: [
-                                  Shadow(blurRadius: 4, color: Colors.black54),
-                                ],
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget.post.displayName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 4,
+                                        color: Colors.black54,
+                                      ),
+                                    ],
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              overflow: TextOverflow.ellipsis,
+                              if (isFounder) ...[
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.diamond,
+                                  size: 13,
+                                  color: AquaThemeColors.founderPurpleLight,
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            _formatDate(widget.post.createdAt, l10n),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              shadows: [
+                                Shadow(blurRadius: 4, color: Colors.black54),
+                              ],
                             ),
                           ),
-                          if (isFounder) ...[
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.diamond,
-                              size: 13,
-                              color: AquaThemeColors.founderPurpleLight,
-                            ),
-                          ],
                         ],
-                      ),
-                      Text(
-                        _formatDate(widget.post.createdAt, l10n),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54),
-                          ],
-                        ),
                       ),
                     ],
                   ),
                 ),
+                const Spacer(),
                 _buildTypeBadge(context, l10n),
                 if (isOwner) ...[
                   IconButton(
@@ -386,42 +477,53 @@ class _PostCardState extends State<PostCard> {
   ) {
     return Row(
       children: [
-        _buildAvatar(theme),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        InkWell(
+          onTap: () => Navigator.of(context).pushNamed(
+            '/profile',
+            arguments: {'userId': widget.post.userId},
+          ),
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
+              _buildAvatar(theme),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Flexible(
-                    child: Text(
-                      widget.post.displayName,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.post.displayName,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      if (isFounder) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.diamond,
+                          size: 13,
+                          color: AquaThemeColors.founderColor(context),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    _formatDate(widget.post.createdAt, l10n),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  if (isFounder) ...[
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.diamond,
-                      size: 13,
-                      color: AquaThemeColors.founderColor(context),
-                    ),
-                  ],
                 ],
-              ),
-              Text(
-                _formatDate(widget.post.createdAt, l10n),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
               ),
             ],
           ),
         ),
+        const Spacer(),
         _buildTypeBadge(context, l10n),
         if (isOwner)
           IconButton(

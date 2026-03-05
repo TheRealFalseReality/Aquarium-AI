@@ -466,4 +466,100 @@ class CommunityService {
       }
     }
   }
+
+  // ─── Bookmarks ──────────────────────────────────────────────────────────────
+
+  static const String _bookmarksCollection = 'bookmarks';
+
+  /// Toggles a bookmark on a post for the current user.
+  static Future<bool> toggleBookmark(String postId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    final bookmarkRef = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection(_bookmarksCollection)
+        .doc(postId);
+
+    try {
+      final snap = await bookmarkRef.get();
+      if (snap.exists) {
+        await bookmarkRef.delete();
+      } else {
+        await bookmarkRef.set({
+          'postId': postId,
+          'bookmarkedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('CommunityService toggleBookmark error: $e');
+      return false;
+    }
+  }
+
+  /// Returns whether the current user has bookmarked a post.
+  static Future<bool> hasBookmarked(String postId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    try {
+      final snap = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection(_bookmarksCollection)
+          .doc(postId)
+          .get();
+      return snap.exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Returns a stream of bookmarked post IDs for the current user.
+  static Stream<List<String>> bookmarkedPostIdsStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return Stream.value([]);
+    return _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection(_bookmarksCollection)
+        .orderBy('bookmarkedAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => d.id).toList());
+  }
+
+  /// Fetches multiple posts by their IDs (max 30 at once).
+  /// Note: Firestore's `whereIn` clause supports a maximum of 30 items.
+  static Future<List<CommunityPost>> getPostsByIds(
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return [];
+    try {
+      final snap = await _firestore
+          .collection(_postsCollection)
+          .where(FieldPath.documentId, whereIn: postIds.take(30).toList())
+          .get();
+      return snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService getPostsByIds error: $e');
+      }
+      return [];
+    }
+  }
+
+  /// Stream of posts by a specific user, ordered by newest first.
+  static Stream<List<CommunityPost>> postsByUserStream(
+    String userId, {
+    int limit = 30,
+  }) {
+    return _firestore
+        .collection(_postsCollection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList());
+  }
 }

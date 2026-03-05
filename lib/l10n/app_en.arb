@@ -5133,5 +5133,40 @@
   "harmonyPoor": "Poor",
   "@harmonyPoor": {
     "description": "Harmony score label: poor (< 20%)"
+  },
+
+  "communityBookmark": "Bookmark",
+  "@communityBookmark": {
+    "description": "Tooltip/button label to bookmark a community post"
+  },
+
+  "communityUnbookmark": "Remove bookmark",
+  "@communityUnbookmark": {
+    "description": "Tooltip/button label to remove a bookmark from a community post"
+  },
+
+  "communityBookmarked": "Bookmarked",
+  "@communityBookmarked": {
+    "description": "Label shown when a post is bookmarked"
+  },
+
+  "profilePostsSection": "Posts",
+  "@profilePostsSection": {
+    "description": "Section header for the user's posts on their profile"
+  },
+
+  "profileNoPostsYet": "No posts yet.",
+  "@profileNoPostsYet": {
+    "description": "Empty state text when a user has no community posts"
+  },
+
+  "profileSavedPosts": "Saved Posts",
+  "@profileSavedPosts": {
+    "description": "Section header for bookmarked/saved posts on the own profile"
+  },
+
+  "profileNoSavedPosts": "No saved posts yet.",
+  "@profileNoSavedPosts": {
+    "description": "Empty state text when the user has no bookmarked posts"
   }
 }

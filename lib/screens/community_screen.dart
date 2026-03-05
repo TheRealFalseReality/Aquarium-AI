@@ -257,8 +257,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(item.$3, size: 16),
-                  const SizedBox(width: 4),
-                  Text(item.$2),
+                  if (isSelected) ...[
+                    const SizedBox(width: 4),
+                    Text(item.$2),
+                  ],
                 ],
               ),
               onSelected: (_) => ref

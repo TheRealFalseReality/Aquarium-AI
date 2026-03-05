@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/community_post.dart';
 import '../models/user_profile.dart';
 import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
@@ -16,9 +17,11 @@ import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
+import '../services/community_service.dart';
 import '../services/profile_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
+import 'community_post_screen.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -180,7 +183,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await AuthService.signOut();
 
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/auth', (r) => false);
+      Navigator.of(context).pushNamed('/auth');
     }
   }
 
@@ -313,6 +316,130 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // ── Sign-out (owner only) ─────────────────────────────────────────
           if (isOwner && _isOwnProfile)
             SliverToBoxAdapter(child: _buildSignOutButton(context, l10n)),
+          // ── Posts section ─────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                l10n.profilePostsSection,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Consumer(
+              builder: (context, ref, _) {
+                final postsAsync = ref.watch(
+                  userPostsStreamProvider(profile.uid),
+                );
+                return postsAsync.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (posts) {
+                    if (posts.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          l10n.profileNoPostsYet,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: posts
+                          .take(10)
+                          .map(
+                            (p) => _buildPostPreviewTile(context, l10n, p),
+                          )
+                          .toList(),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          // ── Saved Posts (own profile only) ────────────────────────────────
+          if (isOwner && _isOwnProfile) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  l10n.profileSavedPosts,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final bookmarkedIds = ref.watch(bookmarkedPostIdsProvider);
+                  return bookmarkedIds.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
+                    data: (ids) {
+                      if (ids.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            l10n.profileNoSavedPosts,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        );
+                      }
+                      return FutureBuilder<List<CommunityPost>>(
+                        future: CommunityService.getPostsByIds(ids),
+                        builder: (context, snap) {
+                          if (!snap.hasData) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          return Column(
+                            children: snap.data!
+                                .take(10)
+                                .map(
+                                  (p) =>
+                                      _buildPostPreviewTile(context, l10n, p),
+                                )
+                                .toList(),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
@@ -680,6 +807,83 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   /// Red/error sign-out button shown at the bottom of the profile.
+  Widget _buildPostPreviewTile(
+    BuildContext context,
+    AppLocalizations l10n,
+    CommunityPost post,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    Color typeColor;
+    String typeLabel;
+    switch (post.type) {
+      case PostType.tankShowcase:
+        typeColor = colorScheme.primary;
+        typeLabel = l10n.communityPostTypeTankShowcase;
+        break;
+      case PostType.tip:
+        typeColor = Colors.green;
+        typeLabel = l10n.communityPostTypeTip;
+        break;
+      case PostType.question:
+        typeColor = Colors.orange;
+        typeLabel = l10n.communityPostTypeQuestion;
+        break;
+      case PostType.appFeedback:
+        typeColor = Colors.purple;
+        typeLabel = l10n.communityPostTypeAppFeedback;
+        break;
+    }
+
+    return ListTile(
+      title: Text(
+        post.title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: typeColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              typeLabel,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: typeColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            DateFormat('d MMM yyyy').format(post.createdAt),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+      leading: Icon(
+        Icons.article_outlined,
+        color: colorScheme.onSurfaceVariant,
+      ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: colorScheme.onSurfaceVariant,
+      ),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => CommunityPostScreen(post: post),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSignOutButton(BuildContext context, AppLocalizations l10n) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(

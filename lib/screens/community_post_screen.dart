@@ -15,6 +15,7 @@ import '../utils/storage_image_utils.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 import 'create_post_screen.dart';
+import 'full_screen_image_screen.dart';
 
 class CommunityPostScreen extends ConsumerStatefulWidget {
   final CommunityPost post;
@@ -40,6 +41,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   bool _isLiked = false;
   bool _likeLoading = false;
 
+  // Bookmark state
+  bool _isBookmarked = false;
+  bool _bookmarkLoading = false;
+
   // Reply state: the comment the user is currently replying to (null = top-level)
   CommunityComment? _replyingToComment;
 
@@ -52,6 +57,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     AnalyticsService.logScreenView(screenName: 'community_post_screen');
     _likes = widget.post.likes;
     _loadLikeStatus();
+    _loadBookmarkStatus();
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -95,6 +101,36 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       if (success) {
         AnalyticsService.logCommunityAction(
           action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
+  }
+
+  Future<void> _loadBookmarkStatus() async {
+    final userId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (userId.isEmpty) return;
+    final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
+    if (mounted) setState(() => _isBookmarked = bookmarked);
+  }
+
+  Future<void> _handleBookmark(AppLocalizations l10n) async {
+    final userId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (_bookmarkLoading || userId.isEmpty) return;
+    final wasBookmarked = _isBookmarked;
+    setState(() {
+      _bookmarkLoading = true;
+      _isBookmarked = !_isBookmarked;
+    });
+    final success = await CommunityService.toggleBookmark(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _bookmarkLoading = false;
+        if (!success) _isBookmarked = wasBookmarked;
+      });
+      if (success) {
+        AnalyticsService.logCommunityAction(
+          action: _isBookmarked ? 'post_bookmarked' : 'post_unbookmarked',
           additionalData: {'post_type': widget.post.type.value},
         );
       }
@@ -308,6 +344,17 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                   ],
                 ),
               ),
+            ),
+          // Bookmark button
+          if (currentUserId.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              ),
+              onPressed: () => _handleBookmark(l10n),
+              tooltip: _isBookmarked
+                  ? l10n.communityUnbookmark
+                  : l10n.communityBookmark,
             ),
           // Owner actions: edit + delete
           if (isOwner)
@@ -578,23 +625,38 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final theme = Theme.of(context);
     final height = isTankShowcase ? 320.0 : 240.0;
 
-    final image = FutureBuilder<String>(
+    final imageWidget = FutureBuilder<String>(
       future: _resolvedPostImageUrl,
-      builder: (_, snap) => CachedNetworkImage(
-        imageUrl: snap.data ?? widget.post.imageUrl!,
-        width: double.infinity,
-        height: height,
-        fit: BoxFit.cover,
-        placeholder: (_, _) => Container(
+      builder: (_, snap) => Hero(
+        tag: 'post_detail_image_${widget.post.id}',
+        child: CachedNetworkImage(
+          imageUrl: snap.data ?? widget.post.imageUrl!,
+          width: double.infinity,
           height: height,
-          color: theme.colorScheme.surfaceContainerHighest,
-          child: const Center(child: CircularProgressIndicator()),
+          fit: BoxFit.cover,
+          placeholder: (_, _) => Container(
+            height: height,
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+          errorWidget: (_, _, _) => const SizedBox(),
         ),
-        errorWidget: (_, _, _) => const SizedBox(),
       ),
     );
 
-    if (!isTankShowcase) return image;
+    final tappableImage = GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FullScreenImageScreen(
+            imageUrl: widget.post.imageUrl!,
+            heroTag: 'post_detail_image_${widget.post.id}',
+          ),
+        ),
+      ),
+      child: imageWidget,
+    );
+
+    if (!isTankShowcase) return tappableImage;
 
     // Tank Showcase: hero with gradient + author overlay
     return SizedBox(
@@ -603,7 +665,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          image,
+          tappableImage,
           // Gradient scrim
           DecoratedBox(
             decoration: BoxDecoration(
@@ -620,12 +682,17 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             left: 16,
             right: 16,
             bottom: 16,
-            child: Row(
-              children: [
-                _buildAvatar(context),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pushNamed(
+                '/profile',
+                arguments: {'userId': widget.post.userId},
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildAvatar(context),
+                  const SizedBox(width: 10),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -670,8 +737,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -685,12 +752,18 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     AppLocalizations l10n,
     bool isFounder,
   ) {
-    return Row(
-      children: [
-        _buildAvatar(context),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
+    return InkWell(
+      onTap: () => Navigator.of(context).pushNamed(
+        '/profile',
+        arguments: {'userId': widget.post.userId},
+      ),
+      borderRadius: BorderRadius.circular(8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildAvatar(context),
+          const SizedBox(width: 10),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -725,8 +798,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
