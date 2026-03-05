@@ -1039,5 +1039,9 @@
   "tapAFishToViewCompatibility": "Appuyez sur un poisson pour voir sa compatibilité",
   "backToList": "Retour à la liste",
   "listView": "Vue en liste",
-  "matrixView": "Vue matricielle"
+  "matrixView": "Vue matricielle",
+  "matrixViewForFish": "Vue matricielle : {fishName}",
+  "reefSafeYesLabel": "Adapté aux récifs : Oui",
+  "reefSafeNoLabel": "Adapté aux récifs : Non",
+  "reefSafeCautionLabel": "Adapté aux récifs : Précaution"
 }

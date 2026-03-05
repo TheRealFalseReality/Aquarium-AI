@@ -626,7 +626,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             children: [
               Flexible(
                 child: Text(
-                  '${l10n.matrixView}: ${selected.name}',
+                  '${l10n.matrixViewForFish(selected.name)}',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -970,15 +970,15 @@ class _ReefSafeBadge extends StatelessWidget {
     if (status == 'Yes') {
       color = Colors.green.shade700;
       icon = Icons.check_circle;
-      label = '${l10n.reefSafe}: ${l10n.reefSafeYes}';
+      label = l10n.reefSafeYesLabel;
     } else if (status == 'No') {
       color = Colors.red.shade700;
       icon = Icons.cancel;
-      label = '${l10n.reefSafe}: ${l10n.reefSafeNo}';
+      label = l10n.reefSafeNoLabel;
     } else {
       color = Colors.amber.shade700;
       icon = Icons.warning_amber_rounded;
-      label = '${l10n.reefSafe}: ${l10n.reefSafeCaution}';
+      label = l10n.reefSafeCautionLabel;
     }
     return Row(
       mainAxisSize: MainAxisSize.min,

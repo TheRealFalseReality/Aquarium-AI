@@ -5107,5 +5107,24 @@
   "matrixView": "Matrix view",
   "@matrixView": {
     "description": "Tooltip/label for the matrix (grid) compatibility view"
+  },
+  "matrixViewForFish": "Matrix view: {fishName}",
+  "@matrixViewForFish": {
+    "description": "Heading shown above the matrix view for a selected fish",
+    "placeholders": {
+      "fishName": {"type": "String"}
+    }
+  },
+  "reefSafeYesLabel": "Reef Safe: Yes",
+  "@reefSafeYesLabel": {
+    "description": "Label shown on a fish card indicating it is reef-safe"
+  },
+  "reefSafeNoLabel": "Reef Safe: No",
+  "@reefSafeNoLabel": {
+    "description": "Label shown on a fish card indicating it is not reef-safe"
+  },
+  "reefSafeCautionLabel": "Reef Safe: Caution",
+  "@reefSafeCautionLabel": {
+    "description": "Label shown on a fish card indicating reef-safe status is uncertain"
   }
 }
