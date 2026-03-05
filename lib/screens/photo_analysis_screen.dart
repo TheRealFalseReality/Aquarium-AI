@@ -13,6 +13,8 @@ import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/interstitial_ad_service.dart';
 import '../services/remote_config_service.dart';
+import '../widgets/ai_error_dialog.dart';
+import '../widgets/founder_upsell_banner.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
@@ -186,13 +188,40 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               );
             }
           });
+        } else if (!last.isUser &&
+            last.isError &&
+            !next.isLoading &&
+            previous?.messages.length != next.messages.length) {
+          // Show error dialog for any new error (incl. rate limit errors) while
+          // the user is still on the photo analysis screen.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              showAiErrorDialog(
+                context,
+                errorMessage: last.text,
+                isApiKeyError: last.isApiKeyError,
+                isRetryable: last.isRetryable,
+                isRateLimitError: !last.isApiKeyError &&
+                    (last.text.contains('Free-tier limit reached') ||
+                        last.text.contains('Daily free-tier limit reached') ||
+                        last.text.contains('Daily photo analysis limit')),
+              );
+            }
+          });
         }
       }
     });
 
     return MainLayout(
       title: l10n.photoAnalyzer,
-      child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FounderUpsellBanner(
+            usingDevAiKey: modelState.usingDeveloperGroqKeyForImage,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -419,6 +448,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
             ),
           ],
         ),
+            ),
+          ),
+        ],
       ),
     );
   }

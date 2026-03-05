@@ -16,6 +16,7 @@ import '../services/analytics_service.dart';
 import '../services/interstitial_ad_service.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../widgets/fish_selection_dialog.dart';
+import '../widgets/founder_upsell_banner.dart';
 import '../widgets/modern_chip.dart';
 import 'stocking_report_screen.dart';
 
@@ -554,6 +555,7 @@ class AquariumStockingScreenState
               errorMessage: next.error!,
               isApiKeyError: next.isApiKeyError,
               isRetryable: next.isRetryable,
+              isRateLimitError: next.isRateLimitError,
             );
             ref.read(aquariumStockingProvider.notifier).cancel();
           }
@@ -587,6 +589,7 @@ class AquariumStockingScreenState
     });
 
     final state = ref.watch(aquariumStockingProvider);
+    final modelState = ref.watch(modelProvider);
     final cs = Theme.of(context).colorScheme;
     final hasLastReport =
         state.lastRecommendations != null &&
@@ -610,7 +613,14 @@ class AquariumStockingScreenState
               icon: const Icon(Icons.history),
             )
           : null,
-      child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FounderUpsellBanner(
+            usingDevAiKey: modelState.usingDeveloperGroqKeyForText,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -977,6 +987,8 @@ class AquariumStockingScreenState
             ),
           ),
         ),
+          ),
+        ],
       ),
     );
   }
