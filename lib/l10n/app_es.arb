@@ -1040,8 +1040,5 @@
   "backToList": "Volver a la lista",
   "listView": "Vista de lista",
   "matrixView": "Vista de matriz",
-  "matrixViewForFish": "Vista de matriz: {fishName}",
-  "reefSafeYesLabel": "Seguro para el arrecife: Sí",
-  "reefSafeNoLabel": "Seguro para el arrecife: No",
-  "reefSafeCautionLabel": "Seguro para el arrecife: Precaución"
+  "matrixViewForFish": "Vista de matriz: {fishName}"
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,15 +30,17 @@ extension CompatStatusExt on CompatStatus {
   }
 
   Color backgroundColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final opacity = isDark ? 0.22 : 0.10;
     switch (this) {
       case CompatStatus.compatible:
-        return Colors.green.shade50;
+        return Colors.green.withOpacity(opacity);
       case CompatStatus.withCaution:
-        return Colors.amber.shade50;
+        return Colors.amber.withOpacity(opacity);
       case CompatStatus.notRecommended:
-        return Colors.deepOrange.shade50;
+        return Colors.deepOrange.withOpacity(opacity);
       case CompatStatus.notCompatible:
-        return Colors.red.shade50;
+        return Colors.red.withOpacity(opacity);
       case CompatStatus.unknown:
         return Theme.of(context).colorScheme.surfaceVariant;
     }
@@ -99,6 +103,9 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
   final FocusNode _searchFocus = FocusNode();
   bool _isSearchVisible = false;
 
+  /// Tracks which compat sections are collapsed in the detail view.
+  final Set<CompatStatus> _collapsedSections = {};
+
   static const List<String> _categories = ['freshwater', 'marine'];
 
   String get _currentCategory => _categories[_tabController.index];
@@ -118,6 +125,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
       _searchQuery = '';
       _searchController.clear();
       _showMatrixView = false;
+      _collapsedSections.clear();
+      _isSearchVisible = false;
     });
   }
 
@@ -146,107 +155,114 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
 
     return MainLayout(
       title: l10n.fishCompatBrowser,
-      actions: [
-        // Search toggle
-        IconButton(
-          icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search),
-          tooltip: l10n.searchFish,
-          onPressed: () {
-            setState(() {
-              _isSearchVisible = !_isSearchVisible;
-              if (!_isSearchVisible) {
-                _searchQuery = '';
-                _searchController.clear();
-                _searchFocus.unfocus();
-              } else {
-                _searchFocus.requestFocus();
-              }
-            });
-          },
-        ),
-        // Matrix view toggle (only when a fish is selected)
-        if (_selectedFish != null)
-          IconButton(
-            icon: Icon(_showMatrixView ? Icons.view_list : Icons.grid_view),
-            tooltip: _showMatrixView ? l10n.listView : l10n.matrixView,
-            onPressed: () => setState(() => _showMatrixView = !_showMatrixView),
-          ),
-      ],
-      child: Column(
+      child: Stack(
         children: [
-          // Tab bar
-          TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.water),
-                text: l10n.freshwater,
+          Column(
+            children: [
+              // Tab bar
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(
+                    icon: const Icon(Icons.water),
+                    text: l10n.freshwater,
+                  ),
+                  Tab(
+                    icon: const Icon(Icons.waves),
+                    text: l10n.marine,
+                  ),
+                ],
               ),
-              Tab(
-                icon: const Icon(Icons.waves),
-                text: l10n.marine,
+              // Main content
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: _categories.map((cat) {
+                    return fishDataAsync.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(
+                        child: Text(l10n.fishDataNotAvailable),
+                      ),
+                      data: (fishMap) {
+                        final allFish = fishMap[cat] ?? [];
+                        final filtered = _filterFish(allFish);
+                        return _buildCategoryView(
+                            context, l10n, filtered, allFish, cat);
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ],
           ),
-          // Search bar (animated)
-          AnimatedCrossFade(
-            firstChild: const SizedBox(height: 0),
-            secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: TextField(
-                controller: _searchController,
-                focusNode: _searchFocus,
-                decoration: InputDecoration(
-                  hintText: l10n.searchFish,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                ),
-                onChanged: (v) => setState(() => _searchQuery = v),
-              ),
-            ),
-            crossFadeState: _isSearchVisible
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 250),
-          ),
-          // Main content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: _categories.map((cat) {
-                return fishDataAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(
-                    child: Text(l10n.fishDataNotAvailable),
-                  ),
-                  data: (fishMap) {
-                    final allFish = fishMap[cat] ?? [];
-                    final filtered = _filterFish(allFish);
-                    return _buildCategoryView(context, l10n, filtered, allFish, cat);
-                  },
-                );
-              }).toList(),
-            ),
+          // Floating search bar (same style as the AI Compat tool)
+          Positioned(
+            bottom: 24,
+            left: 16,
+            right: 16,
+            child: _buildSearchWidget(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchWidget() {
+    final l10n = AppLocalizations.of(context)!;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: animation,
+        child: FadeTransition(opacity: animation, child: child),
+      ),
+      child: _isSearchVisible
+          ? Material(
+              key: const ValueKey('search_bar'),
+              elevation: 6,
+              borderRadius: BorderRadius.circular(30),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocus,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: l10n.searchFish,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _searchQuery = '';
+                        _isSearchVisible = false;
+                      });
+                      FocusScope.of(context).unfocus();
+                    },
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v),
+              ),
+            )
+          : Align(
+              alignment: Alignment.bottomLeft,
+              child: FloatingActionButton.extended(
+                key: const ValueKey('search_fab'),
+                heroTag: 'compat_browser_search_fab',
+                icon: const Icon(Icons.search),
+                label: Text(l10n.search),
+                onPressed: () {
+                  setState(() => _isSearchVisible = true);
+                  _searchFocus.requestFocus();
+                },
+              ),
+            ),
     );
   }
 
@@ -397,7 +413,10 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
         if (!isWide)
           SliverToBoxAdapter(
             child: TextButton.icon(
-              onPressed: () => setState(() => _selectedFish = null),
+              onPressed: () => setState(() {
+                _selectedFish = null;
+                _collapsedSections.clear();
+              }),
               icon: const Icon(Icons.arrow_back),
               label: Text(l10n.backToList),
             ),
@@ -406,43 +425,75 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
         SliverToBoxAdapter(
           child: _buildFishHeader(context, l10n, selected, cs, category),
         ),
+        // Detail / Matrix view toggle chips
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ViewToggleChip(
+                  label: l10n.listView,
+                  icon: Icons.view_list,
+                  isSelected: !_showMatrixView,
+                  onTap: () => setState(() => _showMatrixView = false),
+                ),
+                const SizedBox(width: 8),
+                _ViewToggleChip(
+                  label: l10n.matrixView,
+                  icon: Icons.grid_view,
+                  isSelected: _showMatrixView,
+                  onTap: () => setState(() => _showMatrixView = true),
+                ),
+              ],
+            ),
+          ),
+        ),
         // Legend
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
             child: _buildLegend(context, l10n),
           ),
         ),
-        // Compat sections
+        // Compat sections (collapsible)
         for (final status in CompatStatus.values)
           if (status != CompatStatus.unknown && grouped[status]!.isNotEmpty) ...[
             SliverToBoxAdapter(
-              child: _buildSectionHeader(context, l10n, status, grouped[status]!.length),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 160,
-                  childAspectRatio: 3 / 4,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, idx) {
-                    final other = grouped[status]![idx];
-                    return _CompatFishChip(
-                      fish: other,
-                      status: status,
-                      onTap: () => setState(() => _selectedFish = other),
-                    );
-                  },
-                  childCount: grouped[status]!.length,
-                ),
+              child: _buildSectionHeader(
+                context,
+                l10n,
+                status,
+                grouped[status]!.length,
               ),
             ),
+            if (!_collapsedSections.contains(status))
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                sliver: SliverGrid(
+                  gridDelegate:
+                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160,
+                    childAspectRatio: 3 / 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, idx) {
+                      final other = grouped[status]![idx];
+                      return _CompatFishChip(
+                        fish: other,
+                        status: status,
+                        onTap: () => setState(() => _selectedFish = other),
+                      );
+                    },
+                    childCount: grouped[status]!.length,
+                  ),
+                ),
+              ),
           ],
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        // Extra bottom padding so FAB doesn't cover content
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
@@ -530,7 +581,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                   ],
                   if (fish.reefSafe != null) ...[
                     const SizedBox(height: 8),
-                    _ReefSafeBadge(status: fish.reefSafe!, l10n: l10n),
+                    _ReefSafeBadge(status: fish.reefSafe!),
                   ],
                 ],
               ),
@@ -558,39 +609,61 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     CompatStatus status,
     int count,
   ) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Row(
-        children: [
-          Icon(status.icon, color: status.color(context), size: 20),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              status.label(l10n),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: status.color(context),
-                  ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: status.backgroundColor(context),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: status.color(context).withOpacity(0.4)),
-            ),
-            child: Text(
-              '$count',
-              style: TextStyle(
-                color: status.color(context),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+    final isCollapsed = _collapsedSections.contains(status);
+    return InkWell(
+      onTap: () => setState(() {
+        if (isCollapsed) {
+          _collapsedSections.remove(status);
+        } else {
+          _collapsedSections.add(status);
+        }
+      }),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        child: Row(
+          children: [
+            Icon(status.icon, color: status.color(context), size: 20),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                status.label(l10n),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: status.color(context),
+                    ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: status.backgroundColor(context),
+                borderRadius: BorderRadius.circular(12),
+                border:
+                    Border.all(color: status.color(context).withOpacity(0.4)),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: status.color(context),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const Spacer(),
+            AnimatedRotation(
+              turns: isCollapsed ? 0.0 : 0.5,
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                Icons.expand_more,
+                color: status.color(context),
+                size: 20,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -615,7 +688,10 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
       children: [
         if (!isWide)
           TextButton.icon(
-            onPressed: () => setState(() => _selectedFish = null),
+            onPressed: () => setState(() {
+              _selectedFish = null;
+              _collapsedSections.clear();
+            }),
             icon: const Icon(Icons.arrow_back),
             label: Text(l10n.backToList),
           ),
@@ -626,7 +702,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             children: [
               Flexible(
                 child: Text(
-                  '${l10n.matrixViewForFish(selected.name)}',
+                  l10n.matrixViewForFish(selected.name),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -643,7 +719,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
         // Matrix table
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
+            // Extra padding so FAB doesn't cover the last row
+            padding: const EdgeInsets.only(bottom: 80),
             child: Column(
               children: others.map((other) {
                 final status = _getCompatStatus(selected, other.name);
@@ -655,10 +732,14 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                     : status.color(context);
 
                 return InkWell(
-                  onTap: () => setState(() => _selectedFish = other),
+                  onTap: () => setState(() {
+                    _selectedFish = other;
+                    _showMatrixView = false;
+                  }),
                   child: Container(
                     height: rowH,
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                     decoration: BoxDecoration(
                       color: bgColor,
                       borderRadius: BorderRadius.circular(12),
@@ -698,9 +779,10 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           width: labelW,
                           child: Text(
                             other.name,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -790,31 +872,79 @@ class _FishTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image
+            // Image with reef-safe overlay badge
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                child: CachedNetworkImage(
-                  imageUrl: fish.imageURL,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 36, color: cs.outline),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(14)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: fish.imageURL,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: cs.surfaceVariant,
+                        child: Center(
+                          child:
+                              Icon(Icons.set_meal, size: 36, color: cs.outline),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: cs.surfaceVariant,
+                        child: Center(
+                          child:
+                              Icon(Icons.set_meal, size: 36, color: cs.outline),
+                        ),
+                      ),
                     ),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 36, color: cs.outline),
-                    ),
-                  ),
+                    // Reef-safe badge — same style as FishCard
+                    if (fish.reefSafe != null)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: BackdropFilter(
+                            filter:
+                                ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (fish.reefSafe == 'Yes'
+                                        ? Colors.green
+                                        : fish.reefSafe == 'Caution'
+                                            ? Colors.orange
+                                            : Colors.red)
+                                    .withOpacity(0.75),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                fish.reefSafe == 'Yes'
+                                    ? '🪸 Safe'
+                                    : fish.reefSafe == 'Caution'
+                                        ? '⚠️ Caution'
+                                        : '✗ Unsafe',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
             // Name
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Text(
                 fish.name,
                 textAlign: TextAlign.center,
@@ -826,14 +956,6 @@ class _FishTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Reef-safe badge (marine)
-            if (fish.reefSafe != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Center(
-                  child: _ReefSafeDot(status: fish.reefSafe!),
-                ),
-              ),
           ],
         ),
       ),
@@ -958,67 +1080,92 @@ class _LegendChip extends StatelessWidget {
 
 class _ReefSafeBadge extends StatelessWidget {
   final String status;
-  final AppLocalizations l10n;
 
-  const _ReefSafeBadge({required this.status, required this.l10n});
+  const _ReefSafeBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    Color color;
-    IconData icon;
-    String label;
+    final Color bgColor;
+    final String label;
     if (status == 'Yes') {
-      color = Colors.green.shade700;
-      icon = Icons.check_circle;
-      label = l10n.reefSafeYesLabel;
-    } else if (status == 'No') {
-      color = Colors.red.shade700;
-      icon = Icons.cancel;
-      label = l10n.reefSafeNoLabel;
+      bgColor = Colors.green;
+      label = '🪸 Safe';
+    } else if (status == 'Caution') {
+      bgColor = Colors.orange;
+      label = '⚠️ Caution';
     } else {
-      color = Colors.amber.shade700;
-      icon = Icons.warning_amber_rounded;
-      label = l10n.reefSafeCautionLabel;
+      bgColor = Colors.red;
+      label = '✗ Unsafe';
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 14),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bgColor.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
-      ],
+      ),
     );
   }
 }
 
-class _ReefSafeDot extends StatelessWidget {
-  final String status;
+/// Small toggle chip used to switch between Detail and Matrix views.
+class _ViewToggleChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const _ReefSafeDot({required this.status});
+  const _ViewToggleChip({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Color color;
-    if (status == 'Yes') {
-      color = Colors.green.shade600;
-    } else if (status == 'No') {
-      color = Colors.red.shade600;
-    } else {
-      color = Colors.amber.shade600;
-    }
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? cs.primaryContainer : cs.surfaceVariant,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? cs.primary.withOpacity(0.6)
+                : cs.outlineVariant.withOpacity(0.4),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? cs.primary : cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight:
+                    isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? cs.primary : cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
