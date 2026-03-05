@@ -1040,5 +1040,8 @@
   "backToList": "Zurück zur Liste",
   "listView": "Listenansicht",
   "matrixView": "Matrixansicht",
-  "matrixViewForFish": "Matrixansicht: {fishName}"
+  "matrixViewForFish": "Matrixansicht: {fishName}",
+  "reefSafeYesLabel": "🪸 Sicher",
+  "reefSafeNoLabel": "✗ Unsicher",
+  "reefSafeCautionLabel": "⚠️ Vorsicht"
 }

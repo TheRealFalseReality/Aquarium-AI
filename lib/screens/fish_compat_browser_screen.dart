@@ -903,39 +903,47 @@ class _FishTile extends StatelessWidget {
                       Positioned(
                         top: 4,
                         right: 4,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: BackdropFilter(
-                            filter:
-                                ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: (fish.reefSafe == 'Yes'
-                                        ? Colors.green
-                                        : fish.reefSafe == 'Caution'
-                                            ? Colors.orange
-                                            : Colors.red)
-                                    .withOpacity(0.75),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
+                        child: Builder(
+                          builder: (ctx) {
+                            final l10n = AppLocalizations.of(ctx)!;
+                            final Color badgeColor =
                                 fish.reefSafe == 'Yes'
-                                    ? '🪸 Safe'
+                                    ? Colors.green
                                     : fish.reefSafe == 'Caution'
-                                        ? '⚠️ Caution'
-                                        : '✗ Unsafe',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
+                                        ? Colors.orange
+                                        : Colors.red;
+                            final String badgeText =
+                                fish.reefSafe == 'Yes'
+                                    ? l10n.reefSafeYesLabel
+                                    : fish.reefSafe == 'Caution'
+                                        ? l10n.reefSafeCautionLabel
+                                        : l10n.reefSafeNoLabel;
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                    sigmaX: 4, sigmaY: 4),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: badgeColor.withOpacity(0.75),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    badgeText,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ),
                   ],
@@ -1085,17 +1093,18 @@ class _ReefSafeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final Color bgColor;
     final String label;
     if (status == 'Yes') {
       bgColor = Colors.green;
-      label = '🪸 Safe';
+      label = l10n.reefSafeYesLabel;
     } else if (status == 'Caution') {
       bgColor = Colors.orange;
-      label = '⚠️ Caution';
+      label = l10n.reefSafeCautionLabel;
     } else {
       bgColor = Colors.red;
-      label = '✗ Unsafe';
+      label = l10n.reefSafeNoLabel;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

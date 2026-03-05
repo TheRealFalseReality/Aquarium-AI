@@ -5114,5 +5114,17 @@
     "placeholders": {
       "fishName": {"type": "String"}
     }
+  },
+  "reefSafeYesLabel": "🪸 Safe",
+  "@reefSafeYesLabel": {
+    "description": "Compact reef-safe badge text shown on fish tiles when a fish is reef-safe"
+  },
+  "reefSafeNoLabel": "✗ Unsafe",
+  "@reefSafeNoLabel": {
+    "description": "Compact reef-safe badge text shown on fish tiles when a fish is not reef-safe"
+  },
+  "reefSafeCautionLabel": "⚠️ Caution",
+  "@reefSafeCautionLabel": {
+    "description": "Compact reef-safe badge text shown on fish tiles when a fish has reef-safe caution"
   }
 }
