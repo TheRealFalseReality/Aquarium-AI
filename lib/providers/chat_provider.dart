@@ -388,7 +388,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
       final responseText = _modelState.usingDeveloperGroqKeyForText
           ? await GroqProxyService.sendChatMessages(
-              model: _modelState.groqModel,
+              model: _modelState.freeGroqTextModel(_isFounder),
               systemPrompt: _effectiveSystemPrompt(message),
               messages: messages,
             ).timeout(const Duration(seconds: 30))
@@ -812,7 +812,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
               modelName: switch (_modelState.activeImageProvider) {
                 AIProvider.gemini => _modelState.geminiImageModel,
                 AIProvider.openAI => _modelState.chatGPTImageModel,
-                AIProvider.groq => _modelState.groqImageModel,
+                AIProvider.groq => _modelState.usingDeveloperGroqKeyForImage
+                    ? _modelState.freeGroqImageModel(_isFounder)
+                    : _modelState.groqImageModel,
               },
             ),
           );
@@ -914,7 +916,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         case AIProvider.groq:
           if (_modelState.usingDeveloperGroqKeyForText) {
             responseText = await GroqProxyService.sendMessage(
-              model: _modelState.groqModel,
+              model: _modelState.freeGroqTextModel(_isFounder),
               prompt: prompt,
             ).timeout(const Duration(seconds: 30));
             _cancellable?.complete();
@@ -991,7 +993,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           final base64Image = base64Encode(imageBytes);
           final responseGroq = _modelState.usingDeveloperGroqKeyForImage
               ? await GroqProxyService.generateWithImage(
-                  model: _modelState.groqImageModel,
+                  model: _modelState.freeGroqImageModel(_isFounder),
                   prompt: prompt,
                   base64Image: base64Image,
                   mimeType: mimeType,

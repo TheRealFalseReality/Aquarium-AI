@@ -219,7 +219,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         }
         if (models.usingDeveloperGroqKeyForText) {
           responseText = await GroqProxyService.sendMessage(
-            model: models.groqModel,
+            model: models.freeGroqTextModel(ref.read(isFounderProvider)),
             prompt: prompt,
           ).timeout(const Duration(seconds: 45));
         } else {
@@ -511,7 +511,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         }
         if (models.usingDeveloperGroqKeyForText) {
           responseText = await GroqProxyService.sendMessage(
-            model: models.groqModel,
+            model: models.freeGroqTextModel(ref.read(isFounderProvider)),
             prompt: prompt,
           ).timeout(const Duration(seconds: 45));
         } else {

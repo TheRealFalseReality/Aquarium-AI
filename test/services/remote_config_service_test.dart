@@ -44,14 +44,42 @@ void main() {
         expect(RemoteConfigService.defaultOpenAIImageModel, equals('gpt-4-vision-preview'));
       });
 
-      test('defaultGroqModel defaults to llama-3.1-8b-instant', () {
-        expect(RemoteConfigService.defaultGroqModel, equals('llama-3.1-8b-instant'));
+      test('defaultGroqModel defaults to llama-3.3-70b-versatile', () {
+        expect(RemoteConfigService.defaultGroqModel, equals('llama-3.3-70b-versatile'));
       });
 
       test('defaultGroqImageModel defaults to llama-4-scout model', () {
         expect(
           RemoteConfigService.defaultGroqImageModel,
           equals('meta-llama/llama-4-scout-17b-16e-instruct'),
+        );
+      });
+
+      test('founderDefaultGroqModel defaults to llama-3.3-70b-versatile', () {
+        expect(
+          RemoteConfigService.founderDefaultGroqModel,
+          equals('llama-3.3-70b-versatile'),
+        );
+      });
+
+      test('freeDefaultGroqModel defaults to llama-3.1-8b-instant', () {
+        expect(
+          RemoteConfigService.freeDefaultGroqModel,
+          equals('llama-3.1-8b-instant'),
+        );
+      });
+
+      test('freeGroqImageModel defaults to llama-4-scout model', () {
+        expect(
+          RemoteConfigService.freeGroqImageModel,
+          equals('meta-llama/llama-4-scout-17b-16e-instruct'),
+        );
+      });
+
+      test('founderGroqImageModel defaults to llama-4-maverick model', () {
+        expect(
+          RemoteConfigService.founderGroqImageModel,
+          equals('meta-llama/llama-4-maverick-17b-128e-instruct'),
         );
       });
 
@@ -102,6 +130,14 @@ void main() {
             equals('default_groq_model'));
         expect(RemoteConfigKeys.defaultGroqImageModel,
             equals('default_groq_image_model'));
+        expect(RemoteConfigKeys.founderDefaultGroqModel,
+            equals('founder_default_groq_model'));
+        expect(RemoteConfigKeys.freeDefaultGroqModel,
+            equals('free_default_groq_model'));
+        expect(RemoteConfigKeys.freeGroqImageModel,
+            equals('free_groq_image_model'));
+        expect(RemoteConfigKeys.founderGroqImageModel,
+            equals('founder_groq_image_model'));
         expect(RemoteConfigKeys.aquapiOriginalImageUrl,
             equals('aquapi_original_image_url'));
         expect(RemoteConfigKeys.aquapiEssentialImageUrl,

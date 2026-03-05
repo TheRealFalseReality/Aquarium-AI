@@ -37,6 +37,10 @@ class RemoteConfigService {
         RemoteConfigKeys.defaultOpenAIImageModel: rcDefaultOpenAIImageModel,
         RemoteConfigKeys.defaultGroqModel: rcDefaultGroqModel,
         RemoteConfigKeys.defaultGroqImageModel: rcDefaultGroqImageModel,
+        RemoteConfigKeys.founderDefaultGroqModel: rcDefaultFounderGroqModel,
+        RemoteConfigKeys.freeDefaultGroqModel: rcDefaultFreeGroqModel,
+        RemoteConfigKeys.freeGroqImageModel: rcDefaultFreeGroqImageModel,
+        RemoteConfigKeys.founderGroqImageModel: rcDefaultFounderGroqImageModel,
         RemoteConfigKeys.aquapiOriginalImageUrl:
             rcDefaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl:
@@ -161,14 +165,39 @@ class RemoteConfigService {
     rcDefaultOpenAIImageModel,
   );
 
-  /// Default Groq text/chat model name.
+  /// Default Groq text/chat model name (used as placeholder in settings).
   static String get defaultGroqModel =>
       _modelString(RemoteConfigKeys.defaultGroqModel, rcDefaultGroqModel);
 
-  /// Default Groq image-analysis model name.
+  /// Default Groq image-analysis model name (placeholder in settings and
+  /// image model for free-tier users).
   static String get defaultGroqImageModel => _modelString(
     RemoteConfigKeys.defaultGroqImageModel,
     rcDefaultGroqImageModel,
+  );
+
+  /// Groq text model for Founder Aquarist free-tier users.
+  static String get founderDefaultGroqModel => _modelString(
+    RemoteConfigKeys.founderDefaultGroqModel,
+    rcDefaultFounderGroqModel,
+  );
+
+  /// Groq text model for standard free-tier (developer Groq key) users.
+  static String get freeDefaultGroqModel => _modelString(
+    RemoteConfigKeys.freeDefaultGroqModel,
+    rcDefaultFreeGroqModel,
+  );
+
+  /// Groq image model for free-tier (developer Groq key) users.
+  static String get freeGroqImageModel => _modelString(
+    RemoteConfigKeys.freeGroqImageModel,
+    rcDefaultFreeGroqImageModel,
+  );
+
+  /// Groq image model for Founder Aquarist free-tier users.
+  static String get founderGroqImageModel => _modelString(
+    RemoteConfigKeys.founderGroqImageModel,
+    rcDefaultFounderGroqImageModel,
   );
 
   // ── Promotion images ────────────────────────────────────────────────────────

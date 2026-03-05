@@ -905,7 +905,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: Text(
                         isFounder
-                            ? 'Using App\'s Built-in Dev API Key — Founder Aquarist limits: $maxPerMin requests/min, $maxPerDay requests/day. Add your own API key for unlimited access.'
+                            ? 'Using App\'s Built-in Dev API Key — Founder Aquarist (${RemoteConfigService.founderDefaultGroqModel}): $maxPerMin req/min, $maxPerDay req/day. Add your own API key for unlimited access.'
                             : 'Using App\'s Built-in Dev API Key (free tier). '
                                   'Add your own API key in AI Provider settings for dedicated limits.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -919,6 +919,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
             },
+          ),
+        ],
+        // Indicator: shown when the user has their own API key configured and
+        // is not using the built-in developer key.
+        if (appSettings.enableAI &&
+            !models.usingDeveloperGroqKeyForAny &&
+            (models.groqApiKey.isNotEmpty ||
+                models.geminiApiKey.isNotEmpty ||
+                models.openAIApiKey.isNotEmpty)) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.withOpacity(0.4)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.key, color: Colors.green.shade700, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Using Own API Key — No in-app limits applied. Your API provider\'s rate limits apply.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
         // Warning: shown when the free AI tier is disabled server-side but the
@@ -1577,110 +1608,198 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       children: [
         // ─── Limits notice (collapsible; always shown when a dev key is available) ──
         if (RemoteConfigService.freeAiEnabled)
-          Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: isFounder
-                    ? AquaThemeColors.founderColor(context).withOpacity(0.08)
-                    : Colors.amber.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isFounder
-                      ? AquaThemeColors.founderColor(context).withOpacity(0.4)
-                      : Colors.amber.withOpacity(0.4),
-                ),
-              ),
-              child: RemoteConfigService.freeAiEnabled
-                  ? ExpansionTile(
-                      leading: isFounder
-                          ? Icon(
-                              Icons.diamond,
-                              color: AquaThemeColors.founderColor(context),
-                              size: 20,
-                            )
-                          : const Icon(
-                              Icons.speed,
-                              color: Colors.amber,
-                              size: 20,
-                            ),
-                      title: Text(
-                        isFounder
-                            ? l10n.founderAquaristTitle
-                            : l10n.freeTierLimits,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: isFounder
-                                  ? AquaThemeColors.founderColor(context)
-                                  : Colors.amber.shade800,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      // Collapsed subtitle: just the key numbers
-                      subtitle: Text(
-                        l10n.freeTierLimitsSubtitle(
-                          limitPerDay,
-                          limitPerMin,
-                          limitPhotos,
-                        ),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: isFounder
+          Builder(
+            builder: (context) {
+              final usingOwnKey =
+                  !_useDevGroqKeyForText && !_useDevGroqKeyForImage;
+              return Theme(
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: usingOwnKey
+                        ? Colors.green.withOpacity(0.08)
+                        : isFounder
+                            ? AquaThemeColors.founderColor(
+                                context,
+                              ).withOpacity(0.08)
+                            : Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: usingOwnKey
+                          ? Colors.green.withOpacity(0.4)
+                          : isFounder
                               ? AquaThemeColors.founderColor(
                                   context,
-                                ).withOpacity(0.8)
-                              : Colors.amber.shade700,
-                        ),
-                      ),
-                      initiallyExpanded: false,
-                      tilePadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
-                          '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
-                          '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
-                          '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: isFounder
-                                    ? AquaThemeColors.founderColor(context)
-                                    : Colors.amber.shade900,
+                                ).withOpacity(0.4)
+                              : Colors.amber.withOpacity(0.4),
+                    ),
+                  ),
+                  child: RemoteConfigService.freeAiEnabled
+                      ? ExpansionTile(
+                          leading: usingOwnKey
+                              ? Icon(
+                                  Icons.key,
+                                  color: Colors.green.shade700,
+                                  size: 20,
+                                )
+                              : isFounder
+                                  ? Icon(
+                                      Icons.diamond,
+                                      color: AquaThemeColors.founderColor(
+                                        context,
+                                      ),
+                                      size: 20,
+                                    )
+                                  : const Icon(
+                                      Icons.speed,
+                                      color: Colors.amber,
+                                      size: 20,
+                                    ),
+                          title: Text(
+                            usingOwnKey
+                                ? l10n.ownApiKeyTitle
+                                : isFounder
+                                    ? l10n.founderAquaristTitle
+                                    : l10n.freeTierLimits,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: usingOwnKey
+                                      ? Colors.green.shade700
+                                      : isFounder
+                                          ? AquaThemeColors.founderColor(
+                                              context,
+                                            )
+                                          : Colors.amber.shade800,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          // Collapsed subtitle: own-key message OR key numbers
+                          subtitle: Text(
+                            usingOwnKey
+                                ? l10n.ownApiKeySubtitle
+                                : l10n.freeTierLimitsSubtitle(
+                                    limitPerDay,
+                                    limitPerMin,
+                                    limitPhotos,
+                                  ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color: usingOwnKey
+                                  ? Colors.green.shade600
+                                  : isFounder
+                                      ? AquaThemeColors.founderColor(
+                                          context,
+                                        ).withOpacity(0.8)
+                                      : Colors.amber.shade700,
+                            ),
+                          ),
+                          initiallyExpanded: false,
+                          tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            12,
+                            0,
+                            12,
+                            12,
+                          ),
+                          expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!usingOwnKey) ...[
+                              Text(
+                                '• $limitPerMin ${l10n.freeTierRequestsPerMin}\n'
+                                '• $limitPerDay ${l10n.freeTierRequestsPerDay}\n'
+                                '• $limitPhotos ${l10n.freeTierPhotoAnalysesPerDay}\n'
+                                '• $limitChatHistory-${l10n.freeTierChatHistoryPerRequest}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: isFounder
+                                          ? AquaThemeColors.founderColor(
+                                              context,
+                                            )
+                                          : Colors.amber.shade900,
+                                    ),
                               ),
-                        ),
-                        const SizedBox(height: 6),
-                        if (!isFounder) ...[
-                          Text(
-                            l10n.freeTierModelNote,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.amber.shade900),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.freeTierRecommendation,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.amber.shade800,
-                                  fontStyle: FontStyle.italic,
+                              const SizedBox(height: 6),
+                              Text(
+                                isFounder
+                                    ? '• ${l10n.freeTierFounderModel(RemoteConfigService.founderDefaultGroqModel)} (${l10n.modelLabelText})\n'
+                                      '• ${l10n.freeTierFounderModel(RemoteConfigService.founderGroqImageModel)} (${l10n.modelLabelImage})'
+                                    : '• ${l10n.freeTierFounderModel(RemoteConfigService.freeDefaultGroqModel)} (${l10n.modelLabelText})\n'
+                                      '• ${l10n.freeTierFounderModel(RemoteConfigService.freeGroqImageModel)} (${l10n.modelLabelImage})',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: isFounder
+                                          ? AquaThemeColors.founderColor(
+                                              context,
+                                            )
+                                          : Colors.amber.shade900,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.freeTierModelNote,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: isFounder
+                                          ? AquaThemeColors.founderColor(
+                                              context,
+                                            ).withOpacity(0.8)
+                                          : Colors.amber.shade800,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                              ),
+                              if (!isFounder) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  l10n.freeTierRecommendation,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.amber.shade800,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                 ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.freeTierDisclaimer,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.amber.shade800,
-                                  fontStyle: FontStyle.italic,
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.freeTierDisclaimer,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.amber.shade800,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                 ),
-                          ),
-                        ],
-                      ],
-                    )
-                  : ListTile(
+                              ],
+                            ] else ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.key,
+                                    size: 14,
+                                    color: Colors.green.shade700,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.ownApiKeySubtitle,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.copyWith(
+                                        color: Colors.green.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        )
+                      : ListTile(
                       leading: const Icon(
                         Icons.block,
                         color: Colors.red,
@@ -1701,8 +1820,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
-            ),
-          ),
+              ),
+            );
+          },
+        ),
         // ─── Free AI toggles (global) ─────────────────────────────────────
         Card(
           clipBehavior: Clip.antiAlias,

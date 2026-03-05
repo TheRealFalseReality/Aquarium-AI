@@ -4507,6 +4507,14 @@
       "photosPerDay": {"type": "int"}
     }
   },
+  "ownApiKeyTitle": "Using Own API Key",
+  "@ownApiKeyTitle": {
+    "description": "Title shown on the collapsed AI provider tile when using own API key"
+  },
+  "ownApiKeySubtitle": "No in-app limits — your provider's limits apply",
+  "@ownApiKeySubtitle": {
+    "description": "Subtitle shown on the collapsed AI provider tile when using own API key"
+  },
   "freeTierRequestsPerMin": "AI requests per minute",
   "@freeTierRequestsPerMin": {
     "description": "Label for AI requests per minute in free tier bullet list"
@@ -4523,9 +4531,16 @@
   "@freeTierChatHistoryPerRequest": {
     "description": "Label for chat history per request in free tier bullet list"
   },
-  "freeTierModelNote": "Uses the fast llama-3.1-8b-instant model, which may not deliver the best results for text or image analysis.",
+  "freeTierModelNote": "These models may not deliver the best results for text or image analysis.",
   "@freeTierModelNote": {
-    "description": "Note about the model used in the free tier"
+    "description": "Quality note shown below the model list in the free tier expanded section"
+  },
+  "freeTierFounderModel": "Model: {model}",
+  "@freeTierFounderModel": {
+    "description": "Shows the active model for Founder Aquarist in the expanded limits section",
+    "placeholders": {
+      "model": {"type": "String"}
+    }
   },
   "freeTierRecommendation": "For best results, provide your own key. Recommended: llama-3.3-70b-versatile (text) and Gemini (image).",
   "@freeTierRecommendation": {

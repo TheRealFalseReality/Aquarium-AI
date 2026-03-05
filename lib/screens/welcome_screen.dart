@@ -1067,11 +1067,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${_getTextModelName(modelState)} (${l10n.modelLabelText})',
+                              '${_getTextModelName(modelState, ref.watch(isFounderProvider))} (${l10n.modelLabelText})',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              '${_getImageModelName(modelState)} (${l10n.modelLabelImage})',
+                              '${_getImageModelName(modelState, ref.watch(isFounderProvider))} (${l10n.modelLabelImage})',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 16),
@@ -1113,25 +1113,29 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  String _getTextModelName(ModelState modelState) {
+  String _getTextModelName(ModelState modelState, bool isFounder) {
     switch (modelState.activeTextProvider) {
       case AIProvider.gemini:
         return modelState.geminiModel;
       case AIProvider.openAI:
         return modelState.chatGPTModel;
       case AIProvider.groq:
-        return modelState.groqModel;
+        return modelState.usingDeveloperGroqKeyForText
+            ? modelState.freeGroqTextModel(isFounder)
+            : modelState.groqModel;
     }
   }
 
-  String _getImageModelName(ModelState modelState) {
+  String _getImageModelName(ModelState modelState, bool isFounder) {
     switch (modelState.activeImageProvider) {
       case AIProvider.gemini:
         return modelState.geminiImageModel;
       case AIProvider.openAI:
         return modelState.chatGPTImageModel;
       case AIProvider.groq:
-        return modelState.groqImageModel;
+        return modelState.usingDeveloperGroqKeyForImage
+            ? modelState.freeGroqImageModel(isFounder)
+            : modelState.groqImageModel;
     }
   }
 
