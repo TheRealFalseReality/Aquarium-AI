@@ -1031,5 +1031,8 @@
   "unitFeet": "Pies",
   "unitCm": "cm",
   "unitMeters": "Metros",
-  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito"
+  "freeTierAdNotice": "Anuncio: apoyando el nivel de IA gratuito",
+  "interstitialAdBlurbTitle": "IA gratuita — financiada por anuncios",
+  "interstitialAdBlurbBody": "{hours, plural, =1{Puede aparecer un anuncio a pantalla completa cada hora para ayudar a cubrir el coste del nivel de IA gratuito.} other{Puede aparecer un anuncio a pantalla completa cada {hours} horas para ayudar a cubrir el coste del nivel de IA gratuito.}}",
+  "interstitialAdBlurbCta": "Eliminar anuncios"
 }

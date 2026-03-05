@@ -21,6 +21,7 @@ import '../widgets/ad_component.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../widgets/fish_card.dart';
 import '../widgets/founder_upsell_banner.dart';
+import '../widgets/interstitial_ad_blurb.dart';
 import '../widgets/modern_chip.dart';
 import 'compatibility_report.dart';
 
@@ -519,6 +520,12 @@ class FishCompatibilityScreenState
                   SliverToBoxAdapter(child: _buildCategorySelector(notifier)),
                   SliverToBoxAdapter(
                     child: FounderUpsellBanner(
+                      usingDevAiKey:
+                          modelState.usingDeveloperGroqKeyForText,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: InterstitialAdBlurb(
                       usingDevAiKey:
                           modelState.usingDeveloperGroqKeyForText,
                     ),

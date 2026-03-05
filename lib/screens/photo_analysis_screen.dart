@@ -15,6 +15,7 @@ import '../services/interstitial_ad_service.dart';
 import '../services/remote_config_service.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../widgets/founder_upsell_banner.dart';
+import '../widgets/interstitial_ad_blurb.dart';
 import 'photo_analysis_result_screen.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
@@ -215,6 +216,9 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FounderUpsellBanner(
+            usingDevAiKey: modelState.usingDeveloperGroqKeyForImage,
+          ),
+          InterstitialAdBlurb(
             usingDevAiKey: modelState.usingDeveloperGroqKeyForImage,
           ),
           Expanded(

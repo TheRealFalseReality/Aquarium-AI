@@ -5082,5 +5082,23 @@
   "freeTierAdNotice": "Ad shown: supporting the free AI tier",
   "@freeTierAdNotice": {
     "description": "Brief snackbar message shown just before an interstitial ad appears for free-tier AI users"
+  },
+
+  "interstitialAdBlurbTitle": "Free AI — Supported by Ads",
+  "@interstitialAdBlurbTitle": {
+    "description": "Title of the dismissible blurb on AI tool screens explaining that a full-screen ad may appear"
+  },
+
+  "interstitialAdBlurbBody": "{hours, plural, =1{A full-screen ad may appear every hour to help cover the cost of the free AI tier.} other{A full-screen ad may appear every {hours} hours to help cover the cost of the free AI tier.}}",
+  "@interstitialAdBlurbBody": {
+    "description": "Body of the dismissible blurb explaining the interstitial ad frequency",
+    "placeholders": {
+      "hours": {"type": "num", "format": "compact"}
+    }
+  },
+
+  "interstitialAdBlurbCta": "Remove Ads",
+  "@interstitialAdBlurbCta": {
+    "description": "Call-to-action button label on the interstitial ad blurb — opens the Remove Ads purchase dialog"
   }
 }

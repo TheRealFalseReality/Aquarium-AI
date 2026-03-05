@@ -1031,5 +1031,8 @@
   "unitFeet": "Fuß",
   "unitCm": "cm",
   "unitMeters": "Meter",
-  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe"
+  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe",
+  "interstitialAdBlurbTitle": "Kostenlose KI – durch Werbung unterstützt",
+  "interstitialAdBlurbBody": "{hours, plural, =1{Es kann jede Stunde eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.} other{Es kann alle {hours} Stunden eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.}}",
+  "interstitialAdBlurbCta": "Werbung entfernen"
 }

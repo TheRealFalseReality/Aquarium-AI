@@ -5,42 +5,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
-import '../theme_colors.dart';
+import '../services/remote_config_service.dart';
 import 'remove_ads_dialog.dart';
 
-/// A dismissible promotional banner that upsells the Founder Aquarist perk to
-/// free-tier users on AI tool screens.
+/// A dismissible informational blurb shown on free-tier AI tool screens when
+/// the user has ads enabled.
 ///
-/// The banner is hidden when:
-/// - The user is already a Founder Aquarist.
-/// - The user is not using the free (developer) AI tier.
-/// - The user has previously dismissed the banner.
-/// - The app is running on web.
+/// Explains that a full-screen interstitial ad may appear every
+/// [RemoteConfigService.interstitialCooldownHours] hours to offset AI costs
+/// and offers a "Remove Ads" button to open the purchase dialog.
 ///
-/// [usingDevAiKey] should be `true` when the current tool is running on the
-/// developer's free-tier API key (e.g. `modelState.usingDeveloperGroqKeyForText`
-/// for text-based tools, or `modelState.usingDeveloperGroqKeyForImage` for the
-/// Photo Analyzer).
-class FounderUpsellBanner extends ConsumerStatefulWidget {
+/// The blurb is hidden when:
+/// - The user's ads are removed (they purchased "Remove Ads" or Founder).
+/// - The user is not using the developer's free-tier AI key.
+/// - The app is running on web (no interstitial ads on web).
+/// - The user has previously dismissed the blurb.
+///
+/// [usingDevAiKey] should be `true` when the tool is running on the
+/// developer's free-tier API key.
+class InterstitialAdBlurb extends ConsumerStatefulWidget {
   final bool usingDevAiKey;
 
-  /// When `true` the banner renders without horizontal padding (full-width for
-  /// use inside scrollable page content). When `false` (default) a 16 px
-  /// horizontal padding is added — matching the AI-tool screen card style.
-  final bool fullWidth;
-
-  const FounderUpsellBanner({
-    super.key,
-    required this.usingDevAiKey,
-    this.fullWidth = false,
-  });
+  const InterstitialAdBlurb({super.key, required this.usingDevAiKey});
 
   @override
-  FounderUpsellBannerState createState() => FounderUpsellBannerState();
+  InterstitialAdBlurbState createState() => InterstitialAdBlurbState();
 }
 
-class FounderUpsellBannerState extends ConsumerState<FounderUpsellBanner> {
-  static const String _dismissedKey = 'founder_upsell_banner_dismissed_v1';
+class InterstitialAdBlurbState extends ConsumerState<InterstitialAdBlurb> {
+  static const String _dismissedKey = 'interstitial_ad_blurb_dismissed_v1';
 
   bool _dismissed = false;
   bool _prefsLoaded = false;
@@ -72,55 +65,54 @@ class FounderUpsellBannerState extends ConsumerState<FounderUpsellBanner> {
     if (kIsWeb) return const SizedBox.shrink();
     if (!_prefsLoaded) return const SizedBox.shrink();
     if (_dismissed) return const SizedBox.shrink();
-
-    final isFounder = ref.watch(isFounderProvider);
-    if (isFounder) return const SizedBox.shrink();
     if (!widget.usingDevAiKey) return const SizedBox.shrink();
 
+    final adsRemoved = ref.watch(purchaseProvider).adsRemoved;
+    if (adsRemoved) return const SizedBox.shrink();
+
     final l10n = AppLocalizations.of(context)!;
-    final founderColor = AquaThemeColors.founderColor(context);
+    final cs = Theme.of(context).colorScheme;
+    final hours = RemoteConfigService.interstitialCooldownHours;
 
     return Padding(
-      padding: widget.fullWidth
-          ? const EdgeInsets.only(bottom: 8)
-          : const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
         decoration: BoxDecoration(
-          color: founderColor.withOpacity(0.08),
+          color: cs.surfaceContainerHighest.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: founderColor.withOpacity(0.35)),
+          border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.diamond, size: 20, color: founderColor),
+            Icon(Icons.ondemand_video_outlined, size: 20, color: cs.primary),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.founderUpsellBannerTitle,
+                    l10n.interstitialAdBlurbTitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: founderColor,
+                      color: cs.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    l10n.founderUpsellBannerBody,
+                    l10n.interstitialAdBlurbBody(hours),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 6),
                   TextButton.icon(
                     onPressed: () => showRemoveAdsDialog(context),
-                    icon: Icon(Icons.diamond, size: 14, color: founderColor),
+                    icon: Icon(Icons.block, size: 14, color: cs.primary),
                     label: Text(
-                      l10n.becomeFounderAquarist,
-                      style: TextStyle(color: founderColor, fontSize: 12),
+                      l10n.interstitialAdBlurbCta,
+                      style: TextStyle(color: cs.primary, fontSize: 12),
                     ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -138,9 +130,7 @@ class FounderUpsellBannerState extends ConsumerState<FounderUpsellBanner> {
               icon: Icon(
                 Icons.close,
                 size: 16,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                color: cs.onSurfaceVariant.withOpacity(0.7),
               ),
               onPressed: _dismiss,
               tooltip: l10n.dismiss,
