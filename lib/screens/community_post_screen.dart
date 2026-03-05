@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/community_comment.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/analytics_service.dart';
@@ -13,6 +14,7 @@ import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
+import 'create_post_screen.dart';
 
 class CommunityPostScreen extends ConsumerStatefulWidget {
   final CommunityPost post;
@@ -33,10 +35,23 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   // Tracks which inhabitant chip indices are tapped-open.
   final Set<int> _expandedInhabitants = {};
 
+  // Like state (mirrors PostCard pattern, initialised from widget.post.likes)
+  late int _likes;
+  bool _isLiked = false;
+  bool _likeLoading = false;
+
+  // Reply state: the comment the user is currently replying to (null = top-level)
+  CommunityComment? _replyingToComment;
+
+  // Set of comment IDs whose reply list is currently expanded
+  final Set<String> _expandedReplies = {};
+
   @override
   void initState() {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'community_post_screen');
+    _likes = widget.post.likes;
+    _loadLikeStatus();
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -51,21 +66,123 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     super.dispose();
   }
 
+  Future<void> _loadLikeStatus() async {
+    final userId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (userId.isEmpty) return;
+    final liked = await CommunityService.hasLiked(widget.post.id);
+    if (mounted) setState(() => _isLiked = liked);
+  }
+
+  Future<void> _handleLike(AppLocalizations l10n) async {
+    final userId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (_likeLoading || userId.isEmpty) return;
+    final wasLiked = _isLiked;
+    final prevLikes = _likes;
+    setState(() {
+      _likeLoading = true;
+      _isLiked = !_isLiked;
+      _likes += _isLiked ? 1 : -1;
+    });
+    final success = await CommunityService.toggleLike(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _likeLoading = false;
+        if (!success) {
+          _isLiked = wasLiked;
+          _likes = prevLikes;
+        }
+      });
+      if (success) {
+        AnalyticsService.logCommunityAction(
+          action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
+  }
+
+  void _editPost(BuildContext context) {
+    AnalyticsService.logCommunityAction(
+      action: 'post_edit_started',
+      additionalData: {'post_type': widget.post.type.value},
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CreatePostScreen(editPost: widget.post),
+      ),
+    );
+  }
+
+  Future<void> _deletePost(BuildContext context, AppLocalizations l10n) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.communityDeletePost),
+        content: Text(l10n.communityDeletePostConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await CommunityService.deletePost(widget.post);
+      AnalyticsService.logCommunityAction(
+        action: 'post_deleted',
+        additionalData: {'post_type': widget.post.type.value},
+      );
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
   Future<void> _submitComment(AppLocalizations l10n) async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
     setState(() => _isSubmitting = true);
-    final comment = await CommunityService.createComment(
-      postId: widget.post.id,
-      body: text,
-    );
+
+    final replyTarget = _replyingToComment;
+    bool success;
+    if (replyTarget != null) {
+      final reply = await CommunityService.createReply(
+        postId: widget.post.id,
+        parentCommentId: replyTarget.id,
+        body: text,
+      );
+      success = reply != null;
+      if (success && mounted) {
+        // Expand the replies section so the user sees their reply
+        setState(() => _expandedReplies.add(replyTarget.id));
+      }
+    } else {
+      final comment = await CommunityService.createComment(
+        postId: widget.post.id,
+        body: text,
+      );
+      success = comment != null;
+    }
+
     if (mounted) {
-      setState(() => _isSubmitting = false);
-      if (comment != null) {
+      setState(() {
+        _isSubmitting = false;
+        if (success) _replyingToComment = null;
+      });
+      if (success) {
         _commentController.clear();
         AnalyticsService.logCommunityAction(
-          action: 'comment_created',
+          action: replyTarget != null ? 'reply_created' : 'comment_created',
           additionalData: {'post_type': widget.post.type.value},
         );
       } else {
@@ -76,7 +193,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     }
   }
 
-  Future<void> _deleteComment(String commentId, String userId) async {
+  Future<void> _deleteComment(
+    String commentId,
+    String userId, {
+    String? parentCommentId,
+  }) async {
     final authState = ref.read(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
     if (currentUserId != userId) return;
@@ -104,20 +225,43 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     );
     if (confirmed != true) return;
 
-    // Create a lightweight comment object just to pass userId
     final commentsAsync = ref.read(
       communityCommentsStreamProvider(widget.post.id),
     );
     final comments = commentsAsync.asData?.value ?? [];
-    final comment = comments.firstWhere(
-      (c) => c.id == commentId,
-      orElse: () => comments.first,
-    );
-    await CommunityService.deleteComment(widget.post.id, comment);
-    AnalyticsService.logCommunityAction(
-      action: 'comment_deleted',
-      additionalData: {'post_type': widget.post.type.value},
-    );
+
+    if (parentCommentId != null) {
+      // Deleting a reply
+      final repliesAsync = ref.read(
+        communityRepliesStreamProvider(
+          (postId: widget.post.id, commentId: parentCommentId),
+        ),
+      );
+      final replies = repliesAsync.asData?.value ?? [];
+      final reply = replies.firstWhere(
+        (r) => r.id == commentId,
+        orElse: () => replies.first,
+      );
+      await CommunityService.deleteReply(
+        widget.post.id,
+        parentCommentId,
+        reply,
+      );
+      AnalyticsService.logCommunityAction(
+        action: 'reply_deleted',
+        additionalData: {'post_type': widget.post.type.value},
+      );
+    } else {
+      final comment = comments.firstWhere(
+        (c) => c.id == commentId,
+        orElse: () => comments.first,
+      );
+      await CommunityService.deleteComment(widget.post.id, comment);
+      AnalyticsService.logCommunityAction(
+        action: 'comment_deleted',
+        additionalData: {'post_type': widget.post.type.value},
+      );
+    }
   }
 
   @override
@@ -130,9 +274,85 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     );
     final isFounder = widget.post.isFounderPost;
     final isTankShowcase = widget.post.type == PostType.tankShowcase;
+    final isOwner = currentUserId == widget.post.userId;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.communityPostDetail)),
+      appBar: AppBar(
+        title: Text(l10n.communityPostDetail),
+        actions: [
+          // Like button
+          if (currentUserId.isNotEmpty)
+            InkWell(
+              onTap: () => _handleLike(l10n),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _isLiked ? Icons.favorite : Icons.favorite_border,
+                      size: 20,
+                      color: _isLiked
+                          ? Colors.red
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$_likes',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Owner actions: edit + delete
+          if (isOwner)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                if (value == 'edit') _editPost(context);
+                if (value == 'delete') _deletePost(context, l10n);
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.edit_outlined, size: 18),
+                      const SizedBox(width: 8),
+                      Flexible(child: Text(l10n.communityEditPost)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.communityDeletePost,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -219,10 +439,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     }
                     return Column(
                       children: comments.map((c) {
-                        return CommentTile(
-                          comment: c,
-                          currentUserId: currentUserId,
-                          onDelete: () => _deleteComment(c.id, c.userId),
+                        return _buildCommentWithReplies(
+                          context,
+                          l10n,
+                          c,
+                          currentUserId,
                         );
                       }).toList(),
                     );
@@ -236,6 +457,111 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           _buildCommentBar(context, l10n, currentUserId),
         ],
       ),
+    );
+  }
+
+  /// Builds a top-level comment tile plus its reply section.
+  Widget _buildCommentWithReplies(
+    BuildContext context,
+    AppLocalizations l10n,
+    CommunityComment comment,
+    String currentUserId,
+  ) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final hasReplies = comment.replyCount > 0;
+    final isExpanded = _expandedReplies.contains(comment.id);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CommentTile(
+          comment: comment,
+          currentUserId: currentUserId,
+          onDelete: () => _deleteComment(comment.id, comment.userId),
+          onReply: currentUserId.isNotEmpty
+              ? () => setState(() {
+                    _replyingToComment = comment;
+                    _commentController.clear();
+                  })
+              : null,
+        ),
+        // Show/hide replies button
+        if (hasReplies || isExpanded)
+          Padding(
+            padding: const EdgeInsets.only(left: 56, bottom: 4),
+            child: GestureDetector(
+              onTap: () => setState(() {
+                if (isExpanded) {
+                  _expandedReplies.remove(comment.id);
+                } else {
+                  _expandedReplies.add(comment.id);
+                }
+              }),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isExpanded
+                        ? l10n.communityHideReplies
+                        : l10n.communityViewReplies(comment.replyCount),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        // Replies
+        if (isExpanded)
+          Consumer(
+            builder: (context, ref, _) {
+              final repliesAsync = ref.watch(
+                communityRepliesStreamProvider(
+                  (postId: widget.post.id, commentId: comment.id),
+                ),
+              );
+              return repliesAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(left: 56, bottom: 8),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (replies) => Column(
+                  children: replies.map((reply) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 32),
+                      child: CommentTile(
+                        comment: reply,
+                        currentUserId: currentUserId,
+                        isReply: true,
+                        onDelete: () => _deleteComment(
+                          reply.id,
+                          reply.userId,
+                          parentCommentId: comment.id,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 
@@ -504,6 +830,13 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       return const SizedBox.shrink();
     }
 
+    // Parse harmony score (stored when the post was created with tank info)
+    final harmonyScore = info['harmonyScore'] is double
+        ? info['harmonyScore'] as double
+        : info['harmonyScore'] is num
+        ? (info['harmonyScore'] as num).toDouble()
+        : null;
+
     return Container(
       decoration: BoxDecoration(
         color: cs.secondaryContainer.withOpacity(0.45),
@@ -598,9 +931,93 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               ),
             ),
           ],
+          // Harmony score section
+          if (harmonyScore != null) ...[
+            Divider(height: 1, color: cs.secondary.withOpacity(0.15)),
+            _buildHarmonyScore(context, l10n, harmonyScore),
+          ],
         ],
       ),
     );
+  }
+
+  /// Renders the harmony score row inside the tank info card.
+  Widget _buildHarmonyScore(
+    BuildContext context,
+    AppLocalizations l10n,
+    double score,
+  ) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final label = _harmonyLabel(score, l10n);
+    final color = _harmonyColor(score);
+    final percent = (score * 100).toStringAsFixed(0);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Row(
+        children: [
+          Icon(Icons.favorite_outline, size: 16, color: color),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              l10n.communityTankHarmony,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: cs.onSecondaryContainer.withOpacity(0.65),
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: color.withOpacity(0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$percent%',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _harmonyLabel(double score, AppLocalizations l10n) {
+    if (score >= 0.9) return l10n.harmonyExcellent;
+    if (score >= 0.8) return l10n.harmonyGood;
+    if (score >= 0.6) return l10n.harmonyFair;
+    if (score >= 0.4) return l10n.harmonyCaution;
+    if (score >= 0.2) return l10n.harmonyWarning;
+    return l10n.harmonyPoor;
+  }
+
+  Color _harmonyColor(double score) {
+    if (score >= 0.8) return Colors.green;
+    if (score >= 0.6) return Colors.yellow.shade700;
+    if (score >= 0.4) return Colors.orange;
+    return Colors.red;
   }
 
   /// Renders a compact avatar + name + quantity chip for one inhabitant.
@@ -762,58 +1179,100 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     String currentUserId,
   ) {
     final theme = Theme.of(context);
-    return Container(
-      padding: EdgeInsets.only(
-        left: 12,
-        right: 12,
-        top: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: theme.colorScheme.outlineVariant),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _commentController,
-              enabled: currentUserId.isNotEmpty,
-              decoration: InputDecoration(
-                hintText: currentUserId.isEmpty
-                    ? l10n.communitySignInToComment
-                    : l10n.communityAddComment,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                isDense: true,
-              ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _submitComment(l10n),
-            ),
-          ),
-          const SizedBox(width: 8),
-          _isSubmitting
-              ? const SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : IconButton(
-                  onPressed: currentUserId.isEmpty
-                      ? null
-                      : () => _submitComment(l10n),
-                  icon: const Icon(Icons.send),
+    final replyTarget = _replyingToComment;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Reply mode banner
+        if (replyTarget != null)
+          Container(
+            color: theme.colorScheme.surfaceContainerHighest,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.reply,
+                  size: 16,
                   color: theme.colorScheme.primary,
                 ),
-        ],
-      ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.communityReplyingTo(replyTarget.displayName),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => setState(() {
+                    _replyingToComment = null;
+                    _commentController.clear();
+                  }),
+                ),
+              ],
+            ),
+          ),
+        Container(
+          padding: EdgeInsets.only(
+            left: 12,
+            right: 12,
+            top: 8,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            border: Border(
+              top: BorderSide(color: theme.colorScheme.outlineVariant),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  enabled: currentUserId.isNotEmpty,
+                  decoration: InputDecoration(
+                    hintText: currentUserId.isEmpty
+                        ? l10n.communitySignInToComment
+                        : replyTarget != null
+                        ? l10n.communityAddReply
+                        : l10n.communityAddComment,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    isDense: true,
+                  ),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _submitComment(l10n),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _isSubmitting
+                  ? const SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : IconButton(
+                      onPressed: currentUserId.isEmpty
+                          ? null
+                          : () => _submitComment(l10n),
+                      icon: const Icon(Icons.send),
+                      color: theme.colorScheme.primary,
+                    ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

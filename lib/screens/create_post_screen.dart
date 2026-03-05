@@ -14,6 +14,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/remote_config_service.dart';
+import '../utils/tank_harmony_calculator.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final PostType? initialType;
@@ -38,6 +39,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   String? _imageFileName;
   bool _includeTankInfo = false;
   String? _selectedTankId;
+  // In edit mode: track if the existing image should be removed.
+  bool _removeExistingImage = false;
 
   bool get _isEditing => widget.editPost != null;
 
@@ -50,7 +53,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       _selectedType = post.type;
       _titleController.text = post.title;
       _bodyController.text = post.body;
-      // tankInfo editing not supported in edit mode for simplicity
+      // Pre-populate tank info if present in the post being edited
+      if (post.tankInfo != null && post.tankInfo!.isNotEmpty) {
+        _includeTankInfo = true;
+      }
     } else {
       _selectedType = widget.initialType ?? PostType.tip;
     }
@@ -83,6 +89,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     setState(() {
       _imageFilePath = null;
       _imageFileName = null;
+      _removeExistingImage = true;
     });
   }
 
@@ -90,7 +97,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     setState(() => _selectedType = type);
     // Auto-scroll so the selected chip is visible
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final types = [PostType.tankShowcase, PostType.tip, PostType.question];
+      final types = [
+        PostType.tankShowcase,
+        PostType.tip,
+        PostType.question,
+        PostType.appFeedback,
+      ];
       final index = types.indexOf(type);
       if (index >= 0 && _typeScrollController.hasClients) {
         final offset = index * _kTypeChipWidth;
@@ -101,10 +113,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         );
       }
     });
-    // Clear tank info when switching away from tank showcase
-    if (type != PostType.tankShowcase && _includeTankInfo) {
-      setState(() => _includeTankInfo = false);
-    }
   }
 
   Future<void> _submit() async {
@@ -113,31 +121,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(createPostProvider.notifier);
 
-    if (_isEditing) {
-      final updated = await notifier.updatePost(
-        post: widget.editPost!,
-        title: _titleController.text.trim(),
-        body: _bodyController.text.trim(),
-        newImageFilePath: _imageFilePath,
-      );
-      if (mounted) {
-        if (updated != null) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.communityPostEdited)));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.communityPostError),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      }
-      return;
-    }
-
+    // Build tank info map (used in both create and edit modes)
     Map<String, dynamic>? tankInfo;
     if (_includeTankInfo && _selectedTankId != null) {
       final tanks = ref.read(tankProvider).tanks;
@@ -147,8 +131,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       );
 
       // Build a flat lookup: fishUnit name → default imageURL from fishcompat.
-      // TankInhabitant.fishUnit is set from fish.name at selection time, so
-      // keys match exactly when the fish data source is the same.
       Map<String, String> defaultImageLookup = {};
       try {
         final fishDataService = ref.read(fishDataServiceProvider);
@@ -162,12 +144,20 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         // If fish data is unavailable, inhabitant images fall back to null.
       }
 
-      // Serialize each inhabitant with name, fishUnit, quantity, and the
-      // best-available image URL (user URL > default from fishcompat).
+      // Compute harmony score for the tank
+      double? harmonyScore;
+      try {
+        final fishDataService = ref.read(fishDataServiceProvider);
+        final fishData = await fishDataService.loadFishData();
+        harmonyScore = TankHarmonyCalculator.calculateTankHarmonyScore(
+          tank,
+          fishData,
+        );
+      } catch (_) {
+        // Harmony score is optional — silently ignore errors.
+      }
+
       final inhabitantsList = tank.inhabitants.map((i) {
-        // Use the user-provided URL when it's a real remote URL.
-        // If they only have a local file path (customImagePath non-null and
-        // customImageUrl is null/empty), fall back to the fishcompat default.
         final String? imageUrl =
             (i.customImageUrl != null &&
                 i.customImageUrl!.isNotEmpty &&
@@ -190,7 +180,37 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         'type': tank.type,
         'inhabitants': tank.inhabitants.length,
         if (inhabitantsList.isNotEmpty) 'inhabitantsList': inhabitantsList,
+        if (harmonyScore != null) 'harmonyScore': harmonyScore,
       };
+    }
+
+    if (_isEditing) {
+      final updated = await notifier.updatePost(
+        post: widget.editPost!,
+        title: _titleController.text.trim(),
+        body: _bodyController.text.trim(),
+        type: _selectedType,
+        tankInfo: _includeTankInfo ? tankInfo : null,
+        clearTankInfo: !_includeTankInfo && widget.editPost!.tankInfo != null,
+        newImageFilePath: _imageFilePath,
+        removeImage: _removeExistingImage && _imageFilePath == null,
+      );
+      if (mounted) {
+        if (updated != null) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.communityPostEdited)));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.communityPostError),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+      return;
     }
 
     final profile = ref.read(currentUserProfileProvider).asData?.value;
@@ -275,13 +295,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Post type selector (hidden in edit mode)
-            if (!_isEditing) ...[
-              Text(l10n.communityPostType, style: theme.textTheme.labelLarge),
-              const SizedBox(height: 8),
-              _buildTypeChips(l10n),
-              const SizedBox(height: 16),
-            ],
+            // Post type selector
+            Text(l10n.communityPostType, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            _buildTypeChips(l10n),
+            const SizedBox(height: 16),
 
             // Title
             TextFormField(
@@ -341,6 +359,33 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     ),
                   ],
                 )
+              // In edit mode: show the existing image with option to remove it
+              else if (_isEditing &&
+                  widget.editPost!.imageUrl != null &&
+                  !_removeExistingImage)
+                Row(
+                  children: [
+                    const Icon(Icons.image, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.communityCurrentImage,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: _removeImage,
+                      tooltip: l10n.communityRemoveImage,
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.swap_horiz, size: 16),
+                      label: Text(l10n.communityReplaceImage),
+                    ),
+                  ],
+                )
               else if (isAnonymous)
                 Row(
                   children: [
@@ -368,67 +413,65 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               const SizedBox(height: 12),
             ],
 
-            // Attach tank info — only for Tank Showcase type
-            if (_selectedType == PostType.tankShowcase && !_isEditing) ...[
-              if (tankState.isLoading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: LinearProgressIndicator(),
-                )
-              else if (tanks.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 18,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          l10n.communityNoTanksForShowcase,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontStyle: FontStyle.italic,
-                          ),
+            // Attach tank info — available for all post types
+            if (tankState.isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: LinearProgressIndicator(),
+              )
+            else if (tanks.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.communityNoTanksForShowcase,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                    ],
-                  ),
-                )
-              else ...[
-                SwitchListTile(
-                  title: Text(l10n.communityAttachTank),
-                  value: _includeTankInfo,
-                  onChanged: (v) => setState(() {
-                    _includeTankInfo = v;
-                    if (v && _selectedTankId == null) {
-                      _selectedTankId = tanks.first.id;
-                    }
-                  }),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                if (_includeTankInfo) ...[
-                  DropdownButtonFormField<String>(
-                    value: _selectedTankId,
-                    decoration: InputDecoration(
-                      labelText: l10n.communitySelectTank,
-                      border: const OutlineInputBorder(),
                     ),
-                    items: tanks
-                        .map(
-                          (t) => DropdownMenuItem(
-                            value: t.id,
-                            child: Text(t.name),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _selectedTankId = v),
+                  ],
+                ),
+              )
+            else ...[
+              SwitchListTile(
+                title: Text(l10n.communityAttachTank),
+                value: _includeTankInfo,
+                onChanged: (v) => setState(() {
+                  _includeTankInfo = v;
+                  if (v && _selectedTankId == null) {
+                    _selectedTankId = tanks.first.id;
+                  }
+                }),
+                contentPadding: EdgeInsets.zero,
+              ),
+              if (_includeTankInfo) ...[
+                DropdownButtonFormField<String>(
+                  value: _selectedTankId,
+                  decoration: InputDecoration(
+                    labelText: l10n.communitySelectTank,
+                    border: const OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                ],
+                  items: tanks
+                      .map(
+                        (t) => DropdownMenuItem(
+                          value: t.id,
+                          child: Text(t.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedTankId = v),
+                ),
+                const SizedBox(height: 12),
               ],
             ],
           ],
@@ -446,6 +489,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
+      (
+        PostType.appFeedback,
+        l10n.communityPostTypeAppFeedback,
+        Icons.bug_report_outlined,
+      ),
     ];
 
     return SingleChildScrollView(

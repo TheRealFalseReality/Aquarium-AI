@@ -122,12 +122,17 @@ class CommunityService {
     }
   }
 
-  /// Updates a post's title, body, and optionally image.
+  /// Updates a post's title, body, type, tank info, and optionally image.
+  /// Pass [removeImage] as true to explicitly clear the image.
   static Future<CommunityPost?> updatePost({
     required CommunityPost post,
     required String title,
     required String body,
+    PostType? type,
+    Map<String, dynamic>? tankInfo,
+    bool clearTankInfo = false,
     String? newImageFilePath,
+    bool removeImage = false,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != post.userId) return null;
@@ -135,7 +140,10 @@ class CommunityService {
     try {
       String? imageUrl = post.imageUrl;
 
-      if (newImageFilePath != null) {
+      if (removeImage && post.imageUrl != null) {
+        await _deleteImageByUrl(post.imageUrl!);
+        imageUrl = null;
+      } else if (newImageFilePath != null) {
         // Delete old image first
         if (post.imageUrl != null) {
           await _deleteImageByUrl(post.imageUrl!);
@@ -145,16 +153,27 @@ class CommunityService {
       }
 
       final updatedAt = DateTime.now();
-      await _firestore.collection(_postsCollection).doc(post.id).update({
+      final updates = <String, dynamic>{
         'title': title,
         'body': body,
         'imageUrl': imageUrl,
+        'type': (type ?? post.type).value,
         'updatedAt': Timestamp.fromDate(updatedAt),
-      });
+      };
+
+      if (clearTankInfo) {
+        updates['tankInfo'] = FieldValue.delete();
+      } else if (tankInfo != null) {
+        updates['tankInfo'] = tankInfo;
+      }
+
+      await _firestore.collection(_postsCollection).doc(post.id).update(updates);
 
       return post.copyWith(
         title: title,
         body: body,
+        type: type ?? post.type,
+        tankInfo: clearTankInfo ? null : tankInfo ?? post.tankInfo,
         imageUrl: imageUrl,
         updatedAt: updatedAt,
       );
@@ -219,12 +238,31 @@ class CommunityService {
 
   // ─── Comments ────────────────────────────────────────────────────────────────
 
-  /// Returns a stream of comments for a post ordered by oldest first.
+  /// Returns a stream of top-level comments for a post ordered by oldest first.
   static Stream<List<CommunityComment>> commentsStream(String postId) {
     return _firestore
         .collection(_postsCollection)
         .doc(postId)
         .collection(_commentsCollection)
+        .where('parentCommentId', isNull: true)
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
+        );
+  }
+
+  /// Returns a stream of replies to a specific comment ordered by oldest first.
+  static Stream<List<CommunityComment>> repliesStream(
+    String postId,
+    String commentId,
+  ) {
+    return _firestore
+        .collection(_postsCollection)
+        .doc(postId)
+        .collection(_commentsCollection)
+        .where('parentCommentId', isEqualTo: commentId)
         .orderBy('createdAt', descending: false)
         .snapshots()
         .map(
@@ -300,6 +338,96 @@ class CommunityService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService deleteComment error: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Creates a reply to an existing comment. Returns the created
+  /// [CommunityComment] or null on failure.
+  static Future<CommunityComment?> createReply({
+    required String postId,
+    required String parentCommentId,
+    required String body,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    try {
+      final now = DateTime.now();
+      final replyRef = _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .doc();
+
+      final reply = CommunityComment(
+        id: replyRef.id,
+        postId: postId,
+        userId: user.uid,
+        displayName: AuthService.getDisplayName(user),
+        avatarUrl: user.photoURL,
+        body: body,
+        createdAt: now,
+        parentCommentId: parentCommentId,
+      );
+
+      await replyRef.set(reply.toFirestore());
+
+      // Increment the reply count on the parent comment
+      await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .doc(parentCommentId)
+          .update({'replyCount': FieldValue.increment(1)});
+
+      // Also increment the overall comment count on the post
+      await _firestore.collection(_postsCollection).doc(postId).update({
+        'commentCount': FieldValue.increment(1),
+      });
+
+      return reply;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService createReply error: $e');
+      }
+      return null;
+    }
+  }
+
+  /// Deletes a reply from a post.
+  static Future<bool> deleteReply(
+    String postId,
+    String parentCommentId,
+    CommunityComment reply,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != reply.userId) return false;
+
+    try {
+      await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .doc(reply.id)
+          .delete();
+
+      await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .doc(parentCommentId)
+          .update({'replyCount': FieldValue.increment(-1)});
+
+      await _firestore.collection(_postsCollection).doc(postId).update({
+        'commentCount': FieldValue.increment(-1),
+      });
+
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService deleteReply error: $e');
       }
       return false;
     }

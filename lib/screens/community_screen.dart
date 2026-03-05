@@ -236,6 +236,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
+      (
+        PostType.appFeedback,
+        l10n.communityPostTypeAppFeedback,
+        Icons.bug_report_outlined,
+      ),
     ];
 
     return SingleChildScrollView(

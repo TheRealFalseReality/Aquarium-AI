@@ -1024,5 +1024,21 @@
   "unitFeet": "Fuß",
   "unitCm": "cm",
   "unitMeters": "Meter",
-  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe"
+  "freeTierAdNotice": "Anzeige: zur Unterstützung der kostenlosen KI-Stufe",
+  "communityPostTypeAppFeedback": "App-Feedback",
+  "communityReply": "Antworten",
+  "communityAddReply": "Eine Antwort hinzufügen…",
+  "communityReplyingTo": "Antwort an {name}",
+  "communityViewReplies": "{count} {count, plural, =1{Antwort} other{Antworten}} anzeigen",
+  "communityHideReplies": "Antworten ausblenden",
+  "communityTankHarmony": "Harmonie",
+  "communityCurrentImage": "Aktuelles Bild",
+  "communityRemoveImage": "Bild entfernen",
+  "communityReplaceImage": "Ersetzen",
+  "harmonyExcellent": "Ausgezeichnet",
+  "harmonyGood": "Gut",
+  "harmonyFair": "Befriedigend",
+  "harmonyCaution": "Vorsicht",
+  "harmonyWarning": "Warnung",
+  "harmonyPoor": "Schlecht"
 }

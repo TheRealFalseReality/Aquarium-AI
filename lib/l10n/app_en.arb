@@ -5047,5 +5047,91 @@
   "freeTierAdNotice": "Ad shown: supporting the free AI tier",
   "@freeTierAdNotice": {
     "description": "Brief snackbar message shown just before an interstitial ad appears for free-tier AI users"
+  },
+
+  "communityPostTypeAppFeedback": "App Feedback",
+  "@communityPostTypeAppFeedback": {
+    "description": "Label for the App Feedback post type in the community"
+  },
+
+  "communityReply": "Reply",
+  "@communityReply": {
+    "description": "Button label to reply to a comment"
+  },
+
+  "communityAddReply": "Add a reply…",
+  "@communityAddReply": {
+    "description": "Hint text shown in the comment input bar when replying to a comment"
+  },
+
+  "communityReplyingTo": "Replying to {name}",
+  "@communityReplyingTo": {
+    "description": "Banner shown above the comment bar when replying to a comment",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "communityViewReplies": "View {count} {count, plural, =1{reply} other{replies}}",
+  "@communityViewReplies": {
+    "description": "Button that shows the number of replies and expands them",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "communityHideReplies": "Hide replies",
+  "@communityHideReplies": {
+    "description": "Button to collapse the replies list under a comment"
+  },
+
+  "communityTankHarmony": "Harmony",
+  "@communityTankHarmony": {
+    "description": "Label for the harmony score row inside the tank info card on a community post"
+  },
+
+  "communityCurrentImage": "Current image",
+  "@communityCurrentImage": {
+    "description": "Label showing that the post currently has an image attached (in edit mode)"
+  },
+
+  "communityRemoveImage": "Remove image",
+  "@communityRemoveImage": {
+    "description": "Tooltip for the button that removes the existing image in edit mode"
+  },
+
+  "communityReplaceImage": "Replace",
+  "@communityReplaceImage": {
+    "description": "Button label to replace the existing image with a new one in edit mode"
+  },
+
+  "harmonyExcellent": "Excellent",
+  "@harmonyExcellent": {
+    "description": "Harmony score label: excellent (>= 90%)"
+  },
+
+  "harmonyGood": "Good",
+  "@harmonyGood": {
+    "description": "Harmony score label: good (>= 80%)"
+  },
+
+  "harmonyFair": "Fair",
+  "@harmonyFair": {
+    "description": "Harmony score label: fair (>= 60%)"
+  },
+
+  "harmonyCaution": "Caution",
+  "@harmonyCaution": {
+    "description": "Harmony score label: caution (>= 40%)"
+  },
+
+  "harmonyWarning": "Warning",
+  "@harmonyWarning": {
+    "description": "Harmony score label: warning (>= 20%)"
+  },
+
+  "harmonyPoor": "Poor",
+  "@harmonyPoor": {
+    "description": "Harmony score label: poor (< 20%)"
   }
 }

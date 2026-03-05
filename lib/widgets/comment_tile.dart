@@ -9,12 +9,19 @@ class CommentTile extends StatelessWidget {
   final CommunityComment comment;
   final String currentUserId;
   final VoidCallback? onDelete;
+  final VoidCallback? onReply;
+
+  /// When true, the tile is rendered as an indented reply (slightly smaller
+  /// avatar, no reply button shown to prevent multi-level nesting).
+  final bool isReply;
 
   const CommentTile({
     super.key,
     required this.comment,
     required this.currentUserId,
     this.onDelete,
+    this.onReply,
+    this.isReply = false,
   });
 
   @override
@@ -64,6 +71,31 @@ class CommentTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(comment.body, style: theme.textTheme.bodyMedium),
+                // Reply button — shown only on top-level comments
+                if (!isReply && onReply != null) ...[
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onTap: onReply,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.reply,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          l10n.communityReply,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

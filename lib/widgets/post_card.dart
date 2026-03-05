@@ -492,6 +492,10 @@ class _PostCardState extends State<PostCard> {
         color = Colors.orange;
         label = l10n.communityPostTypeQuestion;
         break;
+      case PostType.appFeedback:
+        color = Colors.purple;
+        label = l10n.communityPostTypeAppFeedback;
+        break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

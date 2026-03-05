@@ -86,6 +86,13 @@ final communityCommentsStreamProvider =
       return CommunityService.commentsStream(postId);
     });
 
+/// Live stream of replies for a given top-level comment.
+final communityRepliesStreamProvider = StreamProvider.autoDispose
+    .family<List<CommunityComment>, ({String postId, String commentId})>(
+      (ref, args) =>
+          CommunityService.repliesStream(args.postId, args.commentId),
+    );
+
 // ─── Create Post State ────────────────────────────────────────────────────────
 
 class CreatePostState {
@@ -155,7 +162,11 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     required CommunityPost post,
     required String title,
     required String body,
+    PostType? type,
+    Map<String, dynamic>? tankInfo,
+    bool clearTankInfo = false,
     String? newImageFilePath,
+    bool removeImage = false,
   }) async {
     state = state.copyWith(
       isSubmitting: true,
@@ -166,7 +177,11 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
       post: post,
       title: title,
       body: body,
+      type: type,
+      tankInfo: tankInfo,
+      clearTankInfo: clearTankInfo,
       newImageFilePath: newImageFilePath,
+      removeImage: removeImage,
     );
     if (updated != null) {
       state = state.copyWith(isSubmitting: false, success: true);

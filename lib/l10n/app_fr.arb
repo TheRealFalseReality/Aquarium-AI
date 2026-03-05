@@ -1024,5 +1024,21 @@
   "unitFeet": "Pieds",
   "unitCm": "cm",
   "unitMeters": "Mètres",
-  "freeTierAdNotice": "Publicité : soutenir le niveau IA gratuit"
+  "freeTierAdNotice": "Publicité : soutenir le niveau IA gratuit",
+  "communityPostTypeAppFeedback": "Retour sur l'App",
+  "communityReply": "Répondre",
+  "communityAddReply": "Ajouter une réponse…",
+  "communityReplyingTo": "Réponse à {name}",
+  "communityViewReplies": "Voir {count} {count, plural, =1{réponse} other{réponses}}",
+  "communityHideReplies": "Masquer les réponses",
+  "communityTankHarmony": "Harmonie",
+  "communityCurrentImage": "Image actuelle",
+  "communityRemoveImage": "Supprimer l'image",
+  "communityReplaceImage": "Remplacer",
+  "harmonyExcellent": "Excellent",
+  "harmonyGood": "Bon",
+  "harmonyFair": "Moyen",
+  "harmonyCaution": "Prudence",
+  "harmonyWarning": "Avertissement",
+  "harmonyPoor": "Mauvais"
 }
