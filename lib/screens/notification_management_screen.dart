@@ -29,6 +29,7 @@ class _NotificationManagementScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'notification_management_screen');
     _checkNotificationPermissions();
   }
 

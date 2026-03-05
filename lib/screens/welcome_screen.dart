@@ -193,6 +193,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'welcome_screen');
     _loadVersion();
     _loadHiddenFeatures();
     _loadPromoCards();

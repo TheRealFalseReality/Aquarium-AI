@@ -35,6 +35,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'photo_analysis_screen');
     if (widget.initialImageBytes != null) {
       _imageBytes = widget.initialImageBytes;
     }

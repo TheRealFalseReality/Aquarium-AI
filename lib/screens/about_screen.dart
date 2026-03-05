@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../services/analytics_service.dart';
 import '../services/in_app_update_service.dart';
 import '../widgets/ad_component.dart';
 
@@ -27,6 +28,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'about_screen');
     _loadVersion();
   }
 

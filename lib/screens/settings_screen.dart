@@ -51,6 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView(screenName: 'settings_screen');
     final models = ref.read(modelProvider);
     _geminiModelController = TextEditingController(text: models.geminiModel);
     _geminiImageModelController = TextEditingController(
