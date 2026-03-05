@@ -447,8 +447,10 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       curve: Curves.easeInOutCubic,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
             children: [
               MiniAIChip(
                 label: l10n.aquarium,
@@ -464,7 +466,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   });
                 },
               ),
-              const SizedBox(width: 10),
               MiniAIChip(
                 label: l10n.aquaPi,
                 // Simply provide the image. The chip will color it automatically.
@@ -482,7 +483,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   });
                 },
               ),
-              const SizedBox(width: 10),
               MiniAIChip(
                 label: l10n.aiTools,
                 icon: Icons.science_outlined,
