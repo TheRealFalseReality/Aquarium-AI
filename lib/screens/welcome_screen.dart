@@ -2179,10 +2179,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Guard against negative child widths on very narrow viewports.
+        // Spacing = min(16, width/count) ensures every column stays >= 0px wide.
+        final crossAxisSpacing = crossAxisCount > 1
+            ? min(16.0, constraints.maxWidth / crossAxisCount)
+            : 0.0;
         return MasonryGridView.count(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
+          crossAxisSpacing: crossAxisSpacing,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: features.length,
