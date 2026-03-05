@@ -392,7 +392,12 @@ class NotificationLoggerScreenState
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         initiallyExpanded: false,
-        leading: Icon(Icons.summarize, color: cs.primary),
+        leading: Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(8),
+          child: Icon(Icons.summarize, color: cs.primary),
+        ),
         title: Text(
           l10n.notesSection,
           style: Theme.of(
@@ -719,7 +724,12 @@ class NotificationLoggerScreenState
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         initiallyExpanded: false,
-        leading: Icon(Icons.summarize, color: cs.primary),
+        leading: Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(8),
+          child: Icon(Icons.summarize, color: cs.primary),
+        ),
         title: Text(
           l10n.activitySummary,
           style: Theme.of(
