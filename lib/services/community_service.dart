@@ -244,12 +244,14 @@ class CommunityService {
         .collection(_postsCollection)
         .doc(postId)
         .collection(_commentsCollection)
-        .where('parentCommentId', isNull: true)
         .orderBy('createdAt', descending: false)
         .snapshots()
         .map(
-          (snap) =>
-              snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
+          (snap) => snap.docs
+              .map((d) => CommunityComment.fromFirestore(d))
+              // Filter out replies (only return top-level comments)
+              .where((c) => c.parentCommentId == null)
+              .toList(),
         );
   }
 
