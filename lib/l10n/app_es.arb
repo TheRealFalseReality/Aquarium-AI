@@ -739,6 +739,7 @@
   "authErrorTooManyRequests": "Demasiados intentos. Por favor, inténtalo más tarde.",
   "authErrorNetwork": "Error de red. Comprueba tu conexión e inténtalo de nuevo.",
   "authErrorGeneric": "Se produjo un error. Por favor, inténtalo de nuevo.",
+  "authErrorAppCheckFailed": "Verificación de seguridad fallida. Por favor, actualiza la página e inténtalo de nuevo.",
   "authSignInWithGoogle": "Continuar con Google",
   "authSignInWithFacebook": "Continuar con Facebook",
   "authOrDivider": "o",

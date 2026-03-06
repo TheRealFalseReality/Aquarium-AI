@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 /// Play Integrity (Android) and App Attest (iOS/macOS) are handled
 /// transparently by the Firebase SDK.
 class AppCheckService {
-  /// Requests a Firebase App Check token on the web platform.
+  /// Requests a Firebase App Check token on the web platform (non-enforcing).
   ///
   /// This triggers a reCAPTCHA v3 evaluation that verifies the user is
   /// interacting from a real browser session.  Call this method before
@@ -32,6 +32,33 @@ class AppCheckService {
         debugPrint('AppCheckService.requestToken error: $e');
       }
       // Non-fatal: the operation continues even if the token request fails.
+    }
+  }
+
+  /// Verifies the Firebase App Check token on the web platform (enforcing).
+  ///
+  /// Returns `true` when a valid App Check token is obtained (the reCAPTCHA v3
+  /// challenge passed), or `false` when the challenge fails.
+  ///
+  /// On non-web platforms the attestation is handled transparently by the
+  /// Firebase SDK (Play Integrity / App Attest), so this method always returns
+  /// `true` there.
+  ///
+  /// Callers that receive `false` **must** block the operation and show an
+  /// appropriate error to the user.  In debug builds a bypass toggle is
+  /// available via [debugBypassAppCheckEnforcementProvider] in
+  /// `purchase_provider.dart`; callers are responsible for consulting that
+  /// provider before calling this method when enforcement should be skipped.
+  static Future<bool> verifyToken() async {
+    if (!kIsWeb) return true;
+    try {
+      await FirebaseAppCheck.instance.getToken();
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AppCheckService.verifyToken failed: $e');
+      }
+      return false;
     }
   }
 }

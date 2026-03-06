@@ -3667,6 +3667,11 @@
     "description": "Generic auth error fallback"
   },
 
+  "authErrorAppCheckFailed": "Security verification failed. Please refresh the page and try again.",
+  "@authErrorAppCheckFailed": {
+    "description": "Error shown when Firebase App Check (reCAPTCHA v3) verification fails during sign-in on web"
+  },
+
   "authSignInWithGoogle": "Continue with Google",
   "@authSignInWithGoogle": {
     "description": "Button label for Google sign-in"

@@ -1251,6 +1251,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   },
                 ),
                 const Divider(),
+                // Bypass App Check enforcement toggle
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.security,
+                    color: Colors.orange,
+                  ),
+                  title: const Text('Bypass App Check Enforcement'),
+                  subtitle: Text(
+                    ref.read(debugBypassAppCheckEnforcementProvider)
+                        ? 'App Check: enforcement bypassed (web login allowed even if reCAPTCHA fails)'
+                        : 'App Check: enforcement active (failed reCAPTCHA blocks login on web)',
+                  ),
+                  value: ref.read(debugBypassAppCheckEnforcementProvider),
+                  onChanged: (value) {
+                    ref
+                        .read(
+                          debugBypassAppCheckEnforcementProvider.notifier,
+                        )
+                        .state = value;
+                    setDialogState(() {});
+                  },
+                ),
+                const Divider(),
                 // Simulate Ads Removed (toggle purchase state for testing)
                 ListTile(
                   leading: const Icon(Icons.shopping_bag_outlined),
