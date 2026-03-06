@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/storage_image_utils.dart';
+
 class FullScreenImageScreen extends StatefulWidget {
   final String imageUrl;
 
@@ -21,9 +23,12 @@ class FullScreenImageScreen extends StatefulWidget {
 }
 
 class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
+  late final Future<String> _resolvedUrl;
+
   @override
   void initState() {
     super.initState();
+    _resolvedUrl = resolveResizedStorageUrl(widget.imageUrl);
     // Immersive mode is only meaningful on Android/iOS.
     if (!kIsWeb) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -40,17 +45,27 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget image = InteractiveViewer(
-      minScale: 0.5,
-      maxScale: 5,
-      child: CachedNetworkImage(
-        imageUrl: widget.imageUrl,
-        fit: BoxFit.contain,
-        placeholder: (_, _) => const Center(child: CircularProgressIndicator()),
-        errorWidget: (_, _, _) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
-        ),
-      ),
+    Widget image = FutureBuilder<String>(
+      future: _resolvedUrl,
+      builder: (_, snap) {
+        if (!snap.hasData) {
+          // Show a placeholder while the URL is being resolved.
+          return const Center(child: CircularProgressIndicator());
+        }
+        return InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 5,
+          child: CachedNetworkImage(
+            imageUrl: snap.data!,
+            fit: BoxFit.contain,
+            placeholder: (_, _) =>
+                const Center(child: CircularProgressIndicator()),
+            errorWidget: (_, _, _) => const Center(
+              child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+            ),
+          ),
+        );
+      },
     );
 
     if (widget.heroTag != null) {

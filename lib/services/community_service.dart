@@ -317,6 +317,17 @@ class CommunityService {
         );
   }
 
+  /// Live stream of the post count for [userId].
+  /// Uses a simple single-field query (no composite index required) so it
+  /// works without any extra Firestore index setup.
+  static Stream<int> userPostCountStream(String userId) {
+    return _firestore
+        .collection(_postsCollection)
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snap) => snap.size);
+  }
+
   // ─── Comments ────────────────────────────────────────────────────────────────
   static Stream<List<CommunityComment>> commentsStream(String postId) {
     return _firestore

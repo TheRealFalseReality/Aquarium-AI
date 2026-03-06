@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
-import '../screens/full_screen_image_screen.dart';
 import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
@@ -296,16 +295,6 @@ class _PostCardState extends State<PostCard> {
   /// For Tank Showcase posts this is a 280 px hero with a gradient scrim and
   /// the author row overlaid at the bottom.  All other post types show a plain
   /// 200 px cover image.
-  void _openFullScreenImage(Object heroTag) {
-    final url = widget.post.imageUrl;
-    if (url == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => FullScreenImageScreen(imageUrl: url, heroTag: heroTag),
-      ),
-    );
-  }
-
   Widget _buildImageSection(
     ThemeData theme,
     AppLocalizations l10n,
@@ -313,21 +302,43 @@ class _PostCardState extends State<PostCard> {
     bool isOwner,
     bool isFounder,
   ) {
-    final heroTag = 'post_image_${widget.post.id}';
     if (!isTankShowcase) {
-      return GestureDetector(
-        onTap: () => _openFullScreenImage(heroTag),
-        child: FutureBuilder<String>(
-          future: _resolvedPostImageUrl,
-          builder: (_, snap) => Hero(
-            tag: heroTag,
-            child: CachedNetworkImage(
+      return FutureBuilder<String>(
+        future: _resolvedPostImageUrl,
+        builder: (_, snap) => CachedNetworkImage(
+          imageUrl: snap.data ?? widget.post.imageUrl!,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorWidget: (_, _, _) => Container(
+            height: 200,
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Icon(
+              Icons.broken_image,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ── Tank Showcase hero ─────────────────────────────────────────────────
+    return SizedBox(
+      height: 280,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Hero image
+          FutureBuilder<String>(
+            future: _resolvedPostImageUrl,
+            builder: (_, snap) => CachedNetworkImage(
               imageUrl: snap.data ?? widget.post.imageUrl!,
               width: double.infinity,
-              height: 200,
+              height: 280,
               fit: BoxFit.cover,
               errorWidget: (_, _, _) => Container(
-                height: 200,
+                height: 280,
                 color: theme.colorScheme.surfaceContainerHighest,
                 child: Icon(
                   Icons.broken_image,
@@ -336,39 +347,6 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
           ),
-        ),
-      );
-    }
-
-    // ── Tank Showcase hero ─────────────────────────────────────────────────
-    return GestureDetector(
-      onTap: () => _openFullScreenImage(heroTag),
-      child: SizedBox(
-        height: 280,
-        width: double.infinity,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Hero image
-            FutureBuilder<String>(
-              future: _resolvedPostImageUrl,
-              builder: (_, snap) => Hero(
-                tag: heroTag,
-                child: CachedNetworkImage(
-                  imageUrl: snap.data ?? widget.post.imageUrl!,
-                  width: double.infinity,
-                  height: 280,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, _, _) => Container(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.broken_image,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           // Gradient scrim
           DecoratedBox(
             decoration: BoxDecoration(
@@ -462,7 +440,6 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
         ],
-        ),
       ),
     );
   }

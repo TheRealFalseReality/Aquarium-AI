@@ -553,10 +553,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     AppLocalizations l10n,
     UserProfile profile,
   ) {
-    final postsAsync = _isOwnProfile
-        ? ref.watch(userPostsStreamProvider(profile.uid))
+    final postCountAsync = _isOwnProfile
+        ? ref.watch(userPostCountProvider(profile.uid))
         : null;
-    final postCount = postsAsync?.asData?.value.length ?? 0;
+    final postCount = postCountAsync?.asData?.value ?? 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
