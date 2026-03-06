@@ -26,7 +26,8 @@ class AppCheckService {
   static Future<void> requestToken() async {
     if (!kIsWeb) return;
     try {
-      await FirebaseAppCheck.instance.getToken();
+      // Force a fresh App Check token so reCAPTCHA v3 runs at the point of use.
+      await FirebaseAppCheck.instance.getToken(true);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('AppCheckService.requestToken error: $e');

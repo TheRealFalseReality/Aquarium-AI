@@ -774,9 +774,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
     final originalMessage =
         'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     try {
-      // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
-      await AppCheckService.requestToken();
       final responseText = await _generateContentWithImage(
         prompt,
         imageBytes,
