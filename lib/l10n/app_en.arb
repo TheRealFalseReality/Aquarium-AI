@@ -5145,6 +5145,11 @@
     "description": "Tooltip/button label to remove a bookmark from a community post"
   },
 
+  "communityBookmarked": "Bookmarked",
+  "@communityBookmarked": {
+    "description": "Label shown when a post is bookmarked"
+  },
+
   "profilePostsSection": "Posts",
   "@profilePostsSection": {
     "description": "Section header for the user's posts on their profile"

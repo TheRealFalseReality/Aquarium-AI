@@ -682,12 +682,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             left: 16,
             right: 16,
             bottom: 16,
-            child: InkWell(
+            child: GestureDetector(
               onTap: () => Navigator.of(context).pushNamed(
                 '/profile',
                 arguments: {'userId': widget.post.userId},
               ),
-              borderRadius: BorderRadius.circular(8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
