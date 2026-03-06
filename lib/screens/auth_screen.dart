@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
+import '../services/app_check_service.dart';
 import '../services/auth_service.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _errorMessage = null;
     });
 
+    // Fire a reCAPTCHA v3 token request on web before sign-in/sign-up.
+    // Non-enforcing: errors are swallowed and the login proceeds regardless.
+    await AppCheckService.requestToken();
+
     try {
       User? user;
       if (_isSignUp) {
@@ -85,6 +90,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isSocialLoading = true;
       _errorMessage = null;
     });
+    // Fire a reCAPTCHA v3 token request on web before sign-in.
+    await AppCheckService.requestToken();
     try {
       final user = await AuthService.signInWithGoogle();
       if (user != null && mounted) {
@@ -103,6 +110,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isSocialLoading = true;
       _errorMessage = null;
     });
+    // Fire a reCAPTCHA v3 token request on web before sign-in.
+    await AppCheckService.requestToken();
     try {
       final user = await AuthService.signInWithFacebook();
       if (user != null && mounted) {
@@ -395,6 +404,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? null
                           : () async {
                               setState(() => _isLoading = true);
+                              // Fire a reCAPTCHA v3 token request on web before
+                              // anonymous sign-in.
+                              await AppCheckService.requestToken();
                               await AuthService.signInAnonymously();
                               if (mounted) {
                                 AnalyticsService.logFeatureUsed(
