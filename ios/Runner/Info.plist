@@ -8,6 +8,45 @@
 		<array>
 			<string>https</string>
 			<string>mailto</string>
+			<!-- Required for Facebook Login to detect the Facebook app and Messenger -->
+			<string>fbapi</string>
+			<string>fbapi20130214</string>
+			<string>fbapi20130410</string>
+			<string>fbapi20130702</string>
+			<string>fbapi20131010</string>
+			<string>fbapi20131219</string>
+			<string>fbapi20140410</string>
+			<string>fbapi20140116</string>
+			<string>fbapi20150313</string>
+			<string>fbapi20150629</string>
+			<string>fbapi20160328</string>
+			<string>fb-messenger-share-api</string>
+			<string>fbauth2</string>
+			<string>fbshareextension</string>
+		</array>
+		<!-- Facebook SDK configuration.
+		     Set FACEBOOK_APP_ID and FACEBOOK_CLIENT_TOKEN as User-Defined Build
+		     Settings in Xcode (Target → Build Settings → + → Add User-Defined
+		     Setting) or in your .xcconfig files so that these are injected at
+		     build time and never committed as plain text.
+		     Obtain the values from the Facebook Developer Console:
+		     https://developers.facebook.com/apps/ -->
+		<key>FacebookAppID</key>
+		<string>$(FACEBOOK_APP_ID)</string>
+		<key>FacebookClientToken</key>
+		<string>$(FACEBOOK_CLIENT_TOKEN)</string>
+		<key>FacebookDisplayName</key>
+		<string>Aquarium AI</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<!-- fb$(FACEBOOK_APP_ID) is substituted at build time from the
+					     FACEBOOK_APP_ID User-Defined Build Setting in Xcode. -->
+					<string>fb$(FACEBOOK_APP_ID)</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
