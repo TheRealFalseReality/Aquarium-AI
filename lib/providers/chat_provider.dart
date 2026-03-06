@@ -248,7 +248,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
   }
 
-  Future<void> retryMessage(String original) {
+  Future<void> retryMessage(String original) async {
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         return _sendGeminiMessage(original, isRetry: true);
@@ -450,6 +452,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         return null;
       }
     }
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     final userMsg =
         'Please analyze my water parameters for my ${params['tankType']} tank.\n'
         'Temp: ${params['temp']}°${params['tempUnit']}'
@@ -538,6 +542,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         return null;
       }
     }
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     final userMsg = 'Generate an automation script for: "$description"';
     _prepareForSending(userMsg);
     final settings = _ref.read(appSettingsProvider);
@@ -616,6 +622,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         return null;
       }
     }
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     final userMsg =
         'Give me comprehensive information about: $fishNames'
         '${tankSize != null && tankSize.isNotEmpty ? ' (tank size: $tankSize)' : ''}'
