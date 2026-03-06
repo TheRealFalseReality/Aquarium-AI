@@ -20,6 +20,26 @@ const String reCaptchaV3SiteKey = String.fromEnvironment(
   defaultValue: '6Lc6P4AsAAAAANB5aWATibw1Aada7IUq6IttLI5a',
 );
 
+// Facebook App ID – public, safe to embed in client code.
+// This is the production app ID for Aquarium AI on Facebook.
+// Register and manage this at: https://developers.facebook.com/apps/941109785269057/
+// The App ID is a public identifier; only the Client Token (below) and the
+// App Secret (server-side only) must be kept out of source control.
+const String facebookAppId = '941109785269057';
+
+// Facebook Client Token – injected at build time via:
+//   flutter build ... --dart-define=FACEBOOK_CLIENT_TOKEN=<your-token>
+// Required for flutter_facebook_auth web initialisation and for the native
+// Facebook SDK on Android/iOS. Obtain this from:
+//   Facebook Developer Console → Your App → Settings → Advanced → Client Token.
+// The token is embedded in the app binary by the Facebook SDK regardless, so
+// it is not a secret in the server-side sense, but it is kept out of source
+// control as a best practice.
+const String facebookClientToken = String.fromEnvironment(
+  'FACEBOOK_CLIENT_TOKEN',
+  defaultValue: '',
+);
+
 // AdMob constants
 const String admobAppId = 'ca-app-pub-5701077439648731~1582287080';
 
