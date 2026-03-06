@@ -351,7 +351,15 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
           fish: f,
           isSelected: isSelected,
           category: category,
-          onTap: () => setState(() => _selectedFish = isSelected ? null : f),
+          onTap: () {
+            if (!isSelected) {
+              AnalyticsService.logFeatureUsed(
+                featureName: 'compat_browser_fish_selected',
+                parameters: {'fish_name': f.name, 'category': category},
+              );
+            }
+            setState(() => _selectedFish = isSelected ? null : f);
+          },
         );
       },
     );
@@ -579,17 +587,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     );
   }
 
-  Widget _buildLegend(BuildContext context, AppLocalizations l10n) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 6,
-      children: CompatStatus.values
-          .where((s) => s != CompatStatus.unknown)
-          .map((s) => _LegendChip(status: s, l10n: l10n))
-          .toList(),
-    );
-  }
-
   Widget _buildSectionHeader(
     BuildContext context,
     AppLocalizations l10n,
@@ -666,8 +663,29 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     final isWide = MediaQuery.of(context).size.width >= 720;
     final cs = Theme.of(context).colorScheme;
 
-    // Filter out the selected fish; show ALL others in matrix rows
-    final others = allFish.where((f) => f.name != selected.name).toList();
+    // All others (excluding the selected fish).
+    final allOthers = allFish.where((f) => f.name != selected.name).toList();
+
+    // Build grouped map for the filter chips (same structure as detail view).
+    final Map<CompatStatus, List<Fish>> grouped = {
+      CompatStatus.compatible: [],
+      CompatStatus.withCaution: [],
+      CompatStatus.notRecommended: [],
+      CompatStatus.notCompatible: [],
+    };
+    for (final other in allOthers) {
+      final status = _getCompatStatus(selected, other.name);
+      if (status != CompatStatus.unknown) {
+        grouped[status]!.add(other);
+      }
+    }
+
+    // Only show rows whose status is not hidden by the filter chips.
+    final others = allOthers.where((f) {
+      final status = _getCompatStatus(selected, f.name);
+      return !_collapsedSections.contains(status);
+    }).toList();
+
     const double rowH = 56.0;
     const double avatarW = 56.0;
     const double labelW = 140.0;
@@ -715,14 +733,14 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             ),
           ),
         ),
-        // Legend
+        // Filter chips — same as detail view; toggling hides/shows rows
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: _buildLegend(context, l10n),
+            child: _buildFilterChips(context, l10n, grouped),
           ),
         ),
-        // Matrix rows
+        // Matrix rows (filtered by _collapsedSections)
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
@@ -845,6 +863,57 @@ class _FishHeaderCard extends StatefulWidget {
 class _FishHeaderCardState extends State<_FishHeaderCard> {
   bool _namesExpanded = false;
 
+  void _openFullScreenImage(BuildContext context) {
+    AnalyticsService.logFeatureUsed(
+      featureName: 'compat_browser_image_viewed',
+      parameters: {'fish_name': widget.fish.name},
+    );
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.92),
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Center(
+                  child: InteractiveViewer(
+                    maxScale: 5,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.fish.imageURL,
+                      fit: BoxFit.contain,
+                      placeholder: (_, __) => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                      errorWidget: (_, __, ___) => const Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 64,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -866,28 +935,57 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
-            // Full-width image
-            SizedBox(
-              width: double.infinity,
-              height: 200,
-              child: CachedNetworkImage(
-                imageUrl: fish.imageURL,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: cs.surfaceVariant,
-                  child: Center(
-                    child: Icon(Icons.set_meal, size: 56, color: cs.outline),
+            // Full-width image — tap to open full-screen viewer
+            GestureDetector(
+              onTap: () => _openFullScreenImage(context),
+              child: SizedBox(
+                width: double.infinity,
+                height: 200,
+                child: CachedNetworkImage(
+                  imageUrl: fish.imageURL,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(
+                    color: cs.surfaceVariant,
+                    child: Center(
+                      child: Icon(Icons.set_meal, size: 56, color: cs.outline),
+                    ),
                   ),
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  color: cs.surfaceVariant,
-                  child: Center(
-                    child: Icon(Icons.set_meal, size: 56, color: cs.outline),
+                  errorWidget: (_, __, ___) => Container(
+                    color: cs.surfaceVariant,
+                    child: Center(
+                      child: Icon(Icons.set_meal, size: 56, color: cs.outline),
+                    ),
                   ),
                 ),
               ),
             ),
-            // Gradient overlay at the bottom
+            // Fullscreen hint icon in the top-right corner
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () => _openFullScreenImage(context),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.fullscreen,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Gradient overlay at the bottom (tapping expands common names)
             Positioned(
               left: 0,
               right: 0,
@@ -1204,42 +1302,6 @@ class _CompatFishChip extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _LegendChip extends StatelessWidget {
-  final CompatStatus status;
-  final AppLocalizations l10n;
-
-  const _LegendChip({required this.status, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = status.color(context);
-    final bg = status.backgroundColor(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(status.icon, color: color, size: 14),
-          const SizedBox(width: 4),
-          Text(
-            status.label(l10n),
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }
