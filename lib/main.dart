@@ -10,13 +10,12 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../l10n/app_localizations.dart';
-import './constants.dart' show facebookAppId, reCaptchaV3SiteKey;
+import './constants.dart' show reCaptchaV3SiteKey;
 import './providers/app_settings_provider.dart';
 import './screens/about_screen.dart';
 import './screens/analysis_history_screen.dart';
@@ -331,37 +330,6 @@ void main() async {
   if (!kIsWeb) {
     unawaited(MobileAds.instance.initialize());
   }
-
-  // Initialize flutter_facebook_auth for web and desktop platforms.
-  // On mobile (Android/iOS), the Facebook SDK is configured via the native
-  // manifests (AndroidManifest.xml / Info.plist) and does not need this call.
-  final bool needsFacebookWebInit =
-      kIsWeb ||
-      (!kIsWeb &&
-          (Platform.isMacOS || Platform.isWindows || Platform.isLinux));
-  if (needsFacebookWebInit && facebookAppId.isNotEmpty) {
-    await FacebookAuth.i
-        .webAndDesktopInitialize(
-          appId: facebookAppId,
-          cookie: true,
-          xfbml: true,
-          version: 'v21.0',
-        )
-        .catchError((error) {
-          if (kDebugMode) {
-            debugPrint('Facebook web/desktop initialization error: $error');
-          }
-          if (_firebaseInitialized) {
-            CrashlyticsService.recordError(
-              error,
-              StackTrace.current,
-              reason: 'Facebook web/desktop initialization failed',
-              fatal: false,
-            );
-          }
-        });
-  }
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
