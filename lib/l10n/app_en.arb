@@ -3561,6 +3561,18 @@
   "@profileStatYears": {
     "description": "Stat chip label for years of experience"
   },
+  "profileStatPosts": "Posts",
+  "@profileStatPosts": {
+    "description": "Stat chip label for community post count"
+  },
+  "profileBookmarksSection": "Bookmarks",
+  "@profileBookmarksSection": {
+    "description": "Section header for bookmarked posts on the profile screen"
+  },
+  "profileNoBookmarks": "No bookmarks yet.",
+  "@profileNoBookmarks": {
+    "description": "Placeholder shown when user has no bookmarks"
+  },
   "profileJoined": "Member since",
   "@profileJoined": {
     "description": "Label for join date on profile details card"

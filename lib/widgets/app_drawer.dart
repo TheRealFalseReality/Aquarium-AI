@@ -771,6 +771,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     final authAsync = ref.watch(authStateProvider);
     final user = authAsync.asData?.value;
     final isFounder = ref.watch(isFounderProvider);
+    final profile = ref.watch(currentUserProfileProvider).asData?.value;
 
     if (user == null) {
       return ListTile(
@@ -785,17 +786,48 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     }
 
     final isAnon = user.isAnonymous;
-    final displayName = user.displayName?.isNotEmpty == true
-        ? user.displayName!
-        : (isAnon
-              ? l10n.profileAnonymous
-              : user.email ?? l10n.profileAnonymous);
+    final displayName =
+        profile?.displayName ??
+        (user.displayName?.isNotEmpty == true
+            ? user.displayName!
+            : (isAnon
+                  ? l10n.profileAnonymous
+                  : user.email ?? l10n.profileAnonymous));
 
-    return ListTile(
-      leading: SizedBox(
-        width: 40,
-        height: 40,
-        child: CircleAvatar(
+    // Determine avatar: icon code point > avatarUrl > provider photo > generic
+    Widget avatarWidget;
+    if (profile?.avatarIconCodePoint != null) {
+      final icon = _profileIconList.firstWhere(
+        (i) => i.codePoint == profile!.avatarIconCodePoint,
+        orElse: () => Icons.person,
+      );
+      avatarWidget = CircleAvatar(
+        backgroundColor: isFounder
+            ? AquaThemeColors.founderColor(context).withOpacity(0.18)
+            : Theme.of(context).colorScheme.tertiaryContainer,
+        child: Icon(
+          icon,
+          color: isFounder
+              ? AquaThemeColors.founderColor(context)
+              : Theme.of(context).colorScheme.tertiary,
+          size: 22,
+        ),
+      );
+    } else {
+      final avatarUrl = profile?.avatarUrl ?? user.photoURL;
+      if (avatarUrl != null) {
+        avatarWidget = FutureBuilder<String>(
+          future: resolveResizedStorageUrl(avatarUrl),
+          initialData: getCachedResizedUrl(avatarUrl) ?? avatarUrl,
+          builder: (_, snap) => CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(snap.data!),
+            backgroundColor: isFounder
+                ? AquaThemeColors.founderColor(context).withOpacity(0.18)
+                : Theme.of(context).colorScheme.tertiaryContainer,
+          ),
+        );
+      } else {
+        avatarWidget = CircleAvatar(
           backgroundColor: isFounder
               ? AquaThemeColors.founderColor(context).withOpacity(0.18)
               : Theme.of(context).colorScheme.tertiaryContainer,
@@ -806,7 +838,26 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                 : Theme.of(context).colorScheme.tertiary,
             size: 22,
           ),
-        ),
+        );
+      }
+    }
+
+    return ListTile(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: isFounder
+            ? Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AquaThemeColors.founderColor(context),
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(child: avatarWidget),
+              )
+            : avatarWidget,
       ),
       title: Row(
         children: [

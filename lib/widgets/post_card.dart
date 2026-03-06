@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/community_post.dart';
+import '../screens/full_screen_image_screen.dart';
 import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
@@ -16,6 +17,11 @@ class PostCard extends StatefulWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 
+  /// When `true`, the bookmark button starts in the bookmarked state without
+  /// firing a Firestore read. Useful when the caller already knows the post
+  /// is bookmarked (e.g. the profile bookmarks section).
+  final bool? initialIsBookmarked;
+
   const PostCard({
     super.key,
     required this.post,
@@ -23,6 +29,7 @@ class PostCard extends StatefulWidget {
     this.onTap,
     this.onDelete,
     this.onEdit,
+    this.initialIsBookmarked,
   });
 
   @override
@@ -33,6 +40,8 @@ class _PostCardState extends State<PostCard> {
   late int _likes;
   bool _isLiked = false;
   bool _likeLoading = false;
+  bool _isBookmarked = false;
+  bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
 
@@ -41,6 +50,11 @@ class _PostCardState extends State<PostCard> {
     super.initState();
     _likes = widget.post.likes;
     _loadLikeStatus();
+    if (widget.initialIsBookmarked != null) {
+      _isBookmarked = widget.initialIsBookmarked!;
+    } else {
+      _loadBookmarkStatus();
+    }
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -100,6 +114,36 @@ class _PostCardState extends State<PostCard> {
       if (success) {
         AnalyticsService.logCommunityAction(
           action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
+  }
+
+  Future<void> _loadBookmarkStatus() async {
+    if (widget.currentUserId.isEmpty) return;
+    final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
+    if (mounted) {
+      setState(() => _isBookmarked = bookmarked);
+    }
+  }
+
+  Future<void> _handleBookmark() async {
+    if (_bookmarkLoading || widget.currentUserId.isEmpty) return;
+    final prev = _isBookmarked;
+    setState(() {
+      _bookmarkLoading = true;
+      _isBookmarked = !_isBookmarked;
+    });
+    final result = await CommunityService.toggleBookmark(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _bookmarkLoading = false;
+        if (result == null) _isBookmarked = prev;
+      });
+      if (result != null) {
+        AnalyticsService.logCommunityAction(
+          action: result ? 'post_bookmarked' : 'post_unbookmarked',
           additionalData: {'post_type': widget.post.type.value},
         );
       }
@@ -215,6 +259,28 @@ class _PostCardState extends State<PostCard> {
                         '${widget.post.commentCount}',
                         style: theme.textTheme.labelSmall,
                       ),
+                      const Spacer(),
+                      // Bookmark button
+                      if (widget.currentUserId.isNotEmpty)
+                        InkWell(
+                          onTap: _handleBookmark,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
+                            ),
+                            child: Icon(
+                              _isBookmarked
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_border,
+                              size: 18,
+                              color: _isBookmarked
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -230,6 +296,16 @@ class _PostCardState extends State<PostCard> {
   /// For Tank Showcase posts this is a 280 px hero with a gradient scrim and
   /// the author row overlaid at the bottom.  All other post types show a plain
   /// 200 px cover image.
+  void _openFullScreenImage(Object heroTag) {
+    final url = widget.post.imageUrl;
+    if (url == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FullScreenImageScreen(imageUrl: url, heroTag: heroTag),
+      ),
+    );
+  }
+
   Widget _buildImageSection(
     ThemeData theme,
     AppLocalizations l10n,
@@ -237,42 +313,21 @@ class _PostCardState extends State<PostCard> {
     bool isOwner,
     bool isFounder,
   ) {
+    final heroTag = 'post_image_${widget.post.id}';
     if (!isTankShowcase) {
-      return FutureBuilder<String>(
-        future: _resolvedPostImageUrl,
-        builder: (_, snap) => CachedNetworkImage(
-          imageUrl: snap.data ?? widget.post.imageUrl!,
-          width: double.infinity,
-          height: 200,
-          fit: BoxFit.cover,
-          errorWidget: (_, _, _) => Container(
-            height: 200,
-            color: theme.colorScheme.surfaceContainerHighest,
-            child: Icon(
-              Icons.broken_image,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      );
-    }
-
-    // ── Tank Showcase hero ─────────────────────────────────────────────────
-    return SizedBox(
-      height: 280,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Hero image
-          FutureBuilder<String>(
-            future: _resolvedPostImageUrl,
-            builder: (_, snap) => CachedNetworkImage(
+      return GestureDetector(
+        onTap: () => _openFullScreenImage(heroTag),
+        child: FutureBuilder<String>(
+          future: _resolvedPostImageUrl,
+          builder: (_, snap) => Hero(
+            tag: heroTag,
+            child: CachedNetworkImage(
               imageUrl: snap.data ?? widget.post.imageUrl!,
               width: double.infinity,
-              height: 280,
+              height: 200,
               fit: BoxFit.cover,
               errorWidget: (_, _, _) => Container(
+                height: 200,
                 color: theme.colorScheme.surfaceContainerHighest,
                 child: Icon(
                   Icons.broken_image,
@@ -281,6 +336,39 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
           ),
+        ),
+      );
+    }
+
+    // ── Tank Showcase hero ─────────────────────────────────────────────────
+    return GestureDetector(
+      onTap: () => _openFullScreenImage(heroTag),
+      child: SizedBox(
+        height: 280,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Hero image
+            FutureBuilder<String>(
+              future: _resolvedPostImageUrl,
+              builder: (_, snap) => Hero(
+                tag: heroTag,
+                child: CachedNetworkImage(
+                  imageUrl: snap.data ?? widget.post.imageUrl!,
+                  width: double.infinity,
+                  height: 280,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => Container(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.broken_image,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           // Gradient scrim
           DecoratedBox(
             decoration: BoxDecoration(
@@ -374,6 +462,7 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
