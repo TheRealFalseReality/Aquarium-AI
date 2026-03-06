@@ -739,7 +739,6 @@
   "authErrorTooManyRequests": "Trop de tentatives. Veuillez réessayer plus tard.",
   "authErrorNetwork": "Erreur réseau. Vérifiez votre connexion et réessayez.",
   "authErrorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
-  "authErrorAppCheckFailed": "La vérification de sécurité a échoué. Veuillez actualiser la page et réessayer.",
   "authSignInWithGoogle": "Continuer avec Google",
   "authSignInWithFacebook": "Continuer avec Facebook",
   "authOrDivider": "ou",

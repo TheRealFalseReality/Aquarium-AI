@@ -259,14 +259,6 @@ final purchaseProvider = StateNotifierProvider<PurchaseNotifier, PurchaseState>(
 /// in release builds. Reset on every cold start.
 final debugForceFounderProvider = StateProvider<bool>((ref) => false);
 
-/// Debug-only provider that bypasses Firebase App Check enforcement during
-/// login.  When `true` in debug mode, a failed reCAPTCHA v3 check will NOT
-/// block sign-in operations.  Always `false` in release builds — enforcement
-/// is always active there.  Reset on every cold start.
-final debugBypassAppCheckEnforcementProvider = StateProvider<bool>(
-  (ref) => false,
-);
-
 /// The effective Founder Aquarist status for the current user.
 ///
 /// In debug builds, this is `true` when either:

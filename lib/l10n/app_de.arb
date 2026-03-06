@@ -739,7 +739,6 @@
   "authErrorTooManyRequests": "Zu viele Versuche. Bitte später erneut versuchen.",
   "authErrorNetwork": "Netzwerkfehler. Überprüfe deine Verbindung und versuche es erneut.",
   "authErrorGeneric": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
-  "authErrorAppCheckFailed": "Sicherheitsüberprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
   "authSignInWithGoogle": "Mit Google fortfahren",
   "authSignInWithFacebook": "Mit Facebook fortfahren",
   "authOrDivider": "oder",

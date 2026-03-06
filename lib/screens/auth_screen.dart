@@ -3,12 +3,10 @@
 import 'dart:math' show pi;
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
-import '../providers/purchase_provider.dart' show debugBypassAppCheckEnforcementProvider;
 import '../services/analytics_service.dart';
 import '../services/app_check_service.dart';
 import '../services/auth_service.dart';
@@ -53,8 +51,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _errorMessage = null;
     });
 
-    // Enforce App Check (reCAPTCHA v3) on web before sign-in/sign-up.
-    if (!await _checkAppCheck()) return;
+    // Fire a reCAPTCHA v3 token request on web before sign-in/sign-up.
+    // Non-enforcing: errors are swallowed and the login proceeds regardless.
+    await AppCheckService.requestToken();
 
     try {
       User? user;
@@ -91,10 +90,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isSocialLoading = true;
       _errorMessage = null;
     });
-
-    // Enforce App Check (reCAPTCHA v3) on web before sign-in.
-    if (!await _checkAppCheck(isSocial: true)) return;
-
+    // Fire a reCAPTCHA v3 token request on web before sign-in.
+    await AppCheckService.requestToken();
     try {
       final user = await AuthService.signInWithGoogle();
       if (user != null && mounted) {
@@ -113,10 +110,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isSocialLoading = true;
       _errorMessage = null;
     });
-
-    // Enforce App Check (reCAPTCHA v3) on web before sign-in.
-    if (!await _checkAppCheck(isSocial: true)) return;
-
+    // Fire a reCAPTCHA v3 token request on web before sign-in.
+    await AppCheckService.requestToken();
     try {
       final user = await AuthService.signInWithFacebook();
       if (user != null && mounted) {
@@ -128,49 +123,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     } finally {
       if (mounted) setState(() => _isSocialLoading = false);
     }
-  }
-
-  /// Verifies the Firebase App Check token (reCAPTCHA v3) on web before a
-  /// sign-in or sign-up operation.
-  ///
-  /// Returns `true` when the check passes (or when enforcement is bypassed in
-  /// a debug build), and `false` when the check fails and the operation must
-  /// be aborted.  When returning `false` the relevant loading flag is reset
-  /// and [_errorMessage] is set so the user sees an explanatory message.
-  ///
-  /// [isSocial] should be `true` for Google and Facebook sign-in flows which
-  /// use [_isSocialLoading]; leave it `false` (default) for email/password and
-  /// anonymous flows which use [_isLoading].
-  Future<bool> _checkAppCheck({bool isSocial = false}) async {
-    // App Check (reCAPTCHA v3) is only applicable on the web platform.
-    // On Android/iOS the attestation is handled transparently by the SDK.
-    if (!kIsWeb) return true;
-
-    // In debug builds, honour the bypass toggle so developers can test the
-    // sign-in flow without triggering a real reCAPTCHA evaluation.
-    if (kDebugMode) {
-      final bypass = ref.read(debugBypassAppCheckEnforcementProvider);
-      if (bypass) {
-        debugPrint('AppCheck enforcement bypassed (debug mode)');
-        return true;
-      }
-    }
-
-    final passed = await AppCheckService.verifyToken();
-    if (!passed) {
-      if (mounted) {
-        setState(() {
-          if (isSocial) {
-            _isSocialLoading = false;
-          } else {
-            _isLoading = false;
-          }
-          _errorMessage =
-              AppLocalizations.of(context)!.authErrorAppCheckFailed;
-        });
-      }
-    }
-    return passed;
   }
 
   Future<void> _forgotPassword() async {
@@ -452,9 +404,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? null
                           : () async {
                               setState(() => _isLoading = true);
-                              // Enforce App Check (reCAPTCHA v3) on web before
+                              // Fire a reCAPTCHA v3 token request on web before
                               // anonymous sign-in.
-                              if (!await _checkAppCheck()) return;
+                              await AppCheckService.requestToken();
                               await AuthService.signInAnonymously();
                               if (mounted) {
                                 AnalyticsService.logFeatureUsed(
