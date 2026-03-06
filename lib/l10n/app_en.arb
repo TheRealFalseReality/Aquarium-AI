@@ -3221,6 +3221,10 @@
   "@communityPostTypeQuestion": {
     "description": "Post type label: question"
   },
+  "communityPostTypeAppFeedback": "App Feedback",
+  "@communityPostTypeAppFeedback": {
+    "description": "Post type label: app feedback"
+  },
   "communityDeletePost": "Delete Post",
   "@communityDeletePost": {
     "description": "Tooltip/button label to delete a post"

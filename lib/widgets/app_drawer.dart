@@ -1115,8 +1115,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         color: colorScheme.surface.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: colorScheme.onSurface.withOpacity(0.2),
-                          width: 1,
+                          color: isFounder
+                              ? AquaThemeColors.founderColor(context)
+                              : colorScheme.onSurface.withOpacity(0.2),
+                          width: isFounder ? 2.5 : 1,
                         ),
                       ),
                       child: Row(

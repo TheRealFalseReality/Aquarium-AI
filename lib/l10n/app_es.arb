@@ -614,6 +614,7 @@
   "communityPostTypeTankShowcase": "Presentación de acuario",
   "communityPostTypeTip": "Consejo",
   "communityPostTypeQuestion": "Pregunta",
+  "communityPostTypeAppFeedback": "Comentarios de la app",
   "communityDeletePost": "Eliminar publicación",
   "communityDeletePostConfirm": "¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.",
   "communityComments": "Comentarios",

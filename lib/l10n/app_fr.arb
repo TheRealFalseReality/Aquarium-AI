@@ -614,6 +614,7 @@
   "communityPostTypeTankShowcase": "Présentation d'aquarium",
   "communityPostTypeTip": "Conseil",
   "communityPostTypeQuestion": "Question",
+  "communityPostTypeAppFeedback": "Retour sur l'app",
   "communityDeletePost": "Supprimer la publication",
   "communityDeletePostConfirm": "Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.",
   "communityComments": "Commentaires",

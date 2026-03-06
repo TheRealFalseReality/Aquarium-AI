@@ -90,7 +90,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     setState(() => _selectedType = type);
     // Auto-scroll so the selected chip is visible
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final types = [PostType.tankShowcase, PostType.tip, PostType.question];
+      final types = [
+        PostType.tankShowcase,
+        PostType.tip,
+        PostType.question,
+        PostType.appFeedback,
+      ];
       final index = types.indexOf(type);
       if (index >= 0 && _typeScrollController.hasClients) {
         final offset = index * _kTypeChipWidth;
@@ -446,6 +451,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
+      (
+        PostType.appFeedback,
+        l10n.communityPostTypeAppFeedback,
+        Icons.feedback_outlined,
+      ),
     ];
 
     return SingleChildScrollView(

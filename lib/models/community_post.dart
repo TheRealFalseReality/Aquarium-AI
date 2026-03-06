@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum PostType { tankShowcase, tip, question }
+enum PostType { tankShowcase, tip, question, appFeedback }
 
 extension PostTypeExt on PostType {
   String get value {
@@ -11,6 +11,8 @@ extension PostTypeExt on PostType {
         return 'tip';
       case PostType.question:
         return 'question';
+      case PostType.appFeedback:
+        return 'app_feedback';
     }
   }
 
@@ -22,6 +24,8 @@ extension PostTypeExt on PostType {
         return PostType.tip;
       case 'question':
         return PostType.question;
+      case 'app_feedback':
+        return PostType.appFeedback;
       default:
         return PostType.tip;
     }

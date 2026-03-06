@@ -1988,6 +1988,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         l10n.communityPostTypeQuestion,
                         PostType.question,
                       ),
+                      const SizedBox(width: 8),
+                      _communityFilterChip(
+                        context,
+                        Icons.feedback_outlined,
+                        l10n.communityPostTypeAppFeedback,
+                        PostType.appFeedback,
+                      ),
                     ],
                   ),
                 ),
@@ -2151,6 +2158,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return Colors.green.shade400;
       case PostType.question:
         return Colors.orange.shade400;
+      case PostType.appFeedback:
+        return Colors.purple.shade400;
     }
   }
 

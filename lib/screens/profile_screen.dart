@@ -180,7 +180,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await AuthService.signOut();
 
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/auth', (r) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/auth',
+        ModalRoute.withName('/'),
+      );
     }
   }
 
