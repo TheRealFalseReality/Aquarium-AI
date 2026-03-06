@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Facebook SDK configuration.
+
+    These values are injected at build time via Gradle manifest placeholders.
+    Set the following in your CI environment (GitHub Secrets) or in
+    android/key.properties (do not commit key.properties):
+
+        FACEBOOK_APP_ID=941109785269057
+        FACEBOOK_CLIENT_TOKEN=<your-client-token-from-facebook-developer-console>
+
+    Or in key.properties:
+        facebookAppId=941109785269057
+        facebookClientToken=<your-client-token>
+
+    Obtain the Client Token from:
+    Facebook Developer Console → Your App → Settings → Advanced → Client Token
+    https://developers.facebook.com/apps/941109785269057/settings/advanced/
+-->
+<resources>
+    <string name="facebook_app_id">${facebookAppId}</string>
+    <string name="facebook_client_token">${facebookClientToken}</string>
+    <string name="fb_login_protocol_scheme">fb${facebookAppId}</string>
+</resources>

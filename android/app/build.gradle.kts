@@ -43,6 +43,19 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Facebook SDK credentials – read from environment variables first,
+        // then fall back to key.properties entries.
+        // Set FACEBOOK_APP_ID and FACEBOOK_CLIENT_TOKEN in your CI environment
+        // or add them to android/key.properties (do not commit that file).
+        val facebookAppId: String =
+            System.getenv("FACEBOOK_APP_ID")
+                ?: (keyProperties["facebookAppId"] as? String ?: "")
+        val facebookClientToken: String =
+            System.getenv("FACEBOOK_CLIENT_TOKEN")
+                ?: (keyProperties["facebookClientToken"] as? String ?: "")
+        manifestPlaceholders["facebookAppId"] = facebookAppId
+        manifestPlaceholders["facebookClientToken"] = facebookClientToken
     }
 
     buildTypes {
