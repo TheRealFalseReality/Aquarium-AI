@@ -8,6 +8,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../models/analysis_history_entry.dart';
 import '../prompts/fish_compatibility_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
@@ -228,6 +229,9 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     }
 
     _cancellableCompleter = CancellableCompleter();
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;

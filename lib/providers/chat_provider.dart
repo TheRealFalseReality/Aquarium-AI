@@ -17,6 +17,7 @@ import '../prompts/automation_script_prompt.dart';
 import '../prompts/fish_info_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
@@ -217,6 +218,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         );
       }
     }
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) {
@@ -772,6 +775,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final originalMessage =
         'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
     try {
+      // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+      await AppCheckService.requestToken();
       final responseText = await _generateContentWithImage(
         prompt,
         imageBytes,

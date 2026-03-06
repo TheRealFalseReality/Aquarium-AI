@@ -166,10 +166,9 @@ Future<void> _initializeAppCheck() async {
 
       // ---------------------------------------------------------------
       // Web: reCAPTCHA v3.
-      // Inject the site key at build time:
-      //   flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=<your-key>
-      // See constants.dart for details.  If the key is empty, App Check
-      // will fail on web but the app continues to function otherwise.
+      // The site key is baked in via constants.reCaptchaV3SiteKey.
+      // Override at build time with:
+      //   flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=<key>
       // ---------------------------------------------------------------
       webProvider: ReCaptchaV3Provider(reCaptchaV3SiteKey),
     );
