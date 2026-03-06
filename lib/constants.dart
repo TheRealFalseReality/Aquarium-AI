@@ -10,14 +10,15 @@ const String developerGroqApiKey = String.fromEnvironment(
 // Facebook App ID – injected at build time via:
 //   flutter build ... --dart-define=FACEBOOK_APP_ID=<your-app-id>
 // Required for flutter_facebook_auth on web and desktop platforms.
+// The default below is the production Facebook App ID; override it via
+// --dart-define only when you need a different ID (e.g. staging).
 // Obtain your App ID from the Facebook Developer Console:
 //   https://developers.facebook.com/apps/
 // For Android and iOS, the App ID is configured in the native manifests
 // (AndroidManifest.xml / Info.plist) separately.
-// Leave the default empty; Facebook login will fail gracefully on web if not set.
 const String facebookAppId = String.fromEnvironment(
   'FACEBOOK_APP_ID',
-  defaultValue: '',
+  defaultValue: '941109785269057',
 );
 
 // reCAPTCHA v3 site key – injected at build time via:

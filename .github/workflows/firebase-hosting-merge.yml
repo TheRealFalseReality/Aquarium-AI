@@ -16,6 +16,9 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter build web
+          --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
+          --dart-define=RECAPTCHA_V3_SITE_KEY=${{ secrets.RECAPTCHA_V3_SITE_KEY }}
+          --dart-define=FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

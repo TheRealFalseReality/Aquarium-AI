@@ -42,16 +42,36 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > android/app/fishai-release-key.jks
       
       - name: Build Production AAB
+        env:
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+          DEVELOPER_GROQ_API_KEY: ${{ secrets.DEVELOPER_GROQ_API_KEY }}
         run: flutter build appbundle --flavor production --release
+          --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
       
       - name: Build Production APK
+        env:
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+          DEVELOPER_GROQ_API_KEY: ${{ secrets.DEVELOPER_GROQ_API_KEY }}
         run: flutter build apk --flavor production --release
+          --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
       
       - name: Build Staging AAB
+        env:
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+          DEVELOPER_GROQ_API_KEY: ${{ secrets.DEVELOPER_GROQ_API_KEY }}
         run: flutter build appbundle --flavor staging --release
+          --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
       
       - name: Build Staging APK
+        env:
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+          DEVELOPER_GROQ_API_KEY: ${{ secrets.DEVELOPER_GROQ_API_KEY }}
         run: flutter build apk --flavor staging --release
+          --dart-define=DEVELOPER_GROQ_API_KEY=${{ secrets.DEVELOPER_GROQ_API_KEY }}
       
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
