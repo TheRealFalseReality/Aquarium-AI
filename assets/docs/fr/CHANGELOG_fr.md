@@ -2,6 +2,16 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
+## [3.1.03] - 2026-3-7 - UUID, principalement des contrôles d'autorisation, prise en charge de la connexion Facebook
+
+### Modifié
+
+### ***Veuillez noter:***
+- **Vous devrez peut-être réinitialiser votre stockage pour que le nouvel ensemble de données se charge. J'ai ajouté des UUID aux types de poissons pour permettre de meilleurs changements à l'avenir.**
+- Le reste est principalement constitué de mises à jour backend.
+
+**Journal complet des modifications** : https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
+
 ## [3.1.00] - 2026-3-3 – Avantages, fonctionnalités communauté et profil
 
 ### Ajouté
