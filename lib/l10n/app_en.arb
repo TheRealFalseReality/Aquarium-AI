@@ -5259,5 +5259,18 @@
   "harmonyDelta": "Harmony Delta",
   "@harmonyDelta": {
     "description": "Label for the harmony score change chip toggle in settings"
+  },
+
+  "editInhabitant": "Edit Inhabitant",
+  "@editInhabitant": {
+    "description": "Tooltip / label for the Edit Inhabitant FAB on TankInhabitantScreen"
+  },
+
+  "inhabitantFishTypeNoLongerAvailable": "The previous fish type \"{fishUnit}\" is no longer available. Please select a new fish type.",
+  "@inhabitantFishTypeNoLongerAvailable": {
+    "description": "Warning shown in the edit inhabitant dialog when the fish type no longer exists in the data",
+    "placeholders": {
+      "fishUnit": {"type": "String"}
+    }
   }
 }

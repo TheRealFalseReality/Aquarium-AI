@@ -1561,6 +1561,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       builder: (context) => TankInhabitantScreen(
                         tank: tank,
                         inhabitant: inhabitant,
+                        availableFish: fishData[tank.type] ?? const [],
                       ),
                     ),
                   );

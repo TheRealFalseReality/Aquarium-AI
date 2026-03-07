@@ -2161,6 +2161,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               Icons.straighten,
                               _formatTankSize(tank),
                             ),
+                          _buildTankAgeChip(context, tank),
                           if (tank.inhabitants.isNotEmpty && fishData != null)
                             _buildHarmonyScoreChip(tank),
                         ],
@@ -3909,6 +3910,57 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
     }
     return '';
+  }
+
+  /// Returns a compact age string (e.g. "2y 5m") for the given date.
+  String _formatTankAge(BuildContext context, DateTime since) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    int years = now.year - since.year;
+    int months = now.month - since.month;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years == 0 && months == 0) return '<1m';
+    return l10n.ageYearsMonths(years, months);
+  }
+
+  Widget _buildTankAgeChip(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final ageText = _formatTankAge(context, tank.createdAt);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 14,
+            color: cs.onSecondaryContainer,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              '${l10n.tankAge}: $ageText',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSecondaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildHarmonyScoreChip(Tank tank) {

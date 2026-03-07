@@ -1069,5 +1069,9 @@
   "ageYearsMonths": "{years}y {months}m",
   "tankAge": "Âge du bac",
   "inhabitantAge": "Âge",
-  "harmonyDelta": "Delta d'harmonie"
+  "harmonyDelta": "Delta d'harmonie",
+
+  "editInhabitant": "Modifier l'habitant",
+
+  "inhabitantFishTypeNoLongerAvailable": "Le type de poisson précédent \"{fishUnit}\" n'est plus disponible. Veuillez sélectionner un nouveau type de poisson."
 }

@@ -12,16 +12,22 @@ import '../models/tank.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import 'tank_creation_screen.dart' show InhabitantDialog;
 
 /// Dedicated screen for viewing and editing details of a single tank inhabitant.
 class TankInhabitantScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final TankInhabitant inhabitant;
 
+  /// Available fish list for the tank's type. Used to show the edit dialog.
+  /// Sourced from [fishDataProvider] keyed on [tank.type].
+  final List<Fish>? availableFish;
+
   const TankInhabitantScreen({
     super.key,
     required this.tank,
     required this.inhabitant,
+    this.availableFish,
   });
 
   @override
@@ -85,6 +91,37 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       _editingNotes = false;
     });
     AnalyticsService.logFeatureUsed(featureName: 'inhabitant_notes_saved');
+  }
+
+  /// Opens the edit dialog for the current inhabitant.
+  void _showEditDialog(TankInhabitant inhabitant, Tank tank) {
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    // Prefer the explicitly-passed list; fall back to loading from provider.
+    final fishList =
+        widget.availableFish ?? fishData?[tank.type] ?? const <Fish>[];
+    showDialog<void>(
+      context: context,
+      builder: (_) => InhabitantDialog(
+        availableFish: fishList,
+        existingInhabitant: inhabitant,
+        onAdd: (updated) {
+          final updatedTank = tank.copyWith(
+            inhabitants: tank.inhabitants
+                .map((i) => i.id == updated.id ? updated : i)
+                .toList(),
+            updatedAt: DateTime.now(),
+          );
+          ref.read(tankProvider.notifier).updateTank(updatedTank);
+          AnalyticsService.logFeatureUsed(
+            featureName: 'inhabitant_edited_from_detail',
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _pickCustomImage(TankInhabitant inhabitant, Tank tank) async {
@@ -191,6 +228,12 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
             onPressed: () => _pickCustomImage(inhabitant, tank),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'edit_inhabitant_fab',
+        onPressed: () => _showEditDialog(inhabitant, tank),
+        tooltip: l10n.editInhabitant,
+        child: const Icon(Icons.edit_outlined),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

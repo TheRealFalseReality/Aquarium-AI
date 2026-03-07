@@ -1069,5 +1069,9 @@
   "ageYearsMonths": "{years}y {months}m",
   "tankAge": "Edad del acuario",
   "inhabitantAge": "Edad",
-  "harmonyDelta": "Delta de armonía"
+  "harmonyDelta": "Delta de armonía",
+
+  "editInhabitant": "Editar habitante",
+
+  "inhabitantFishTypeNoLongerAvailable": "El tipo de pez anterior \"{fishUnit}\" ya no está disponible. Por favor, selecciona un nuevo tipo de pez."
 }
