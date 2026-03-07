@@ -1065,5 +1065,9 @@
   "userNotesHint": "Escribe notas sobre este habitante…",
   "dateAdded": "Fecha de adición",
   "speciesType": "Tipo de especie",
-  "quantityLabel": "Cantidad"
+  "quantityLabel": "Cantidad",
+  "ageYearsMonths": "{years}y {months}m",
+  "tankAge": "Edad del acuario",
+  "inhabitantAge": "Edad",
+  "harmonyDelta": "Delta de armonía"
 }

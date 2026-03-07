@@ -206,8 +206,36 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   }
 
   void _removeInhabitant(int index) {
-    setState(() {
-      _inhabitants.removeAt(index);
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(
+          '${l10n.delete} "${_inhabitants[index].customName}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        setState(() {
+          _inhabitants.removeAt(index);
+        });
+      }
     });
   }
 
@@ -460,6 +488,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 notes: _notesController.text.trim().isNotEmpty
                     ? _notesController.text.trim()
                     : null,
+                // Preserve old score as previousHarmonyScore before updating
+                previousHarmonyScore: widget.existingTank!.harmonyScore,
                 harmonyScore: harmonyScore,
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,

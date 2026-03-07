@@ -12,6 +12,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -726,6 +727,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         Icons.line_weight,
                         _formatWaterWeight(tank),
                       ),
+                    _buildTankAgeChip(context, tank),
                     if (tank.inhabitants.isNotEmpty && fishData != null)
                       _buildHarmonyScoreChip(tank),
                   ],
@@ -1368,6 +1370,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final score = tank.harmonyScore ?? 0.0;
     final percentage = (score * 100).toInt();
+    final appSettings = ref.watch(appSettingsProvider);
 
     Color scoreColor;
     if (score >= 0.8) {
@@ -1378,7 +1381,36 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       scoreColor = Colors.red;
     }
 
-    return Container(
+    // Delta chip
+    Widget? deltaChip;
+    if (!appSettings.tankHideHarmonyDelta &&
+        tank.previousHarmonyScore != null) {
+      final delta = score - tank.previousHarmonyScore!;
+      if (delta.abs() >= 0.005) {
+        final sign = delta > 0 ? '+' : '';
+        final deltaStr = '$sign${(delta * 100).toStringAsFixed(0)}%';
+        final deltaColor =
+            delta > 0 ? Colors.green.shade700 : Colors.red.shade700;
+        deltaChip = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: deltaColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: deltaColor.withOpacity(0.4)),
+          ),
+          child: Text(
+            deltaStr,
+            style: TextStyle(
+              fontSize: 12,
+              color: deltaColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
+    }
+
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: scoreColor.withOpacity(0.15),
@@ -1396,6 +1428,59 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: scoreColor,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (deltaChip == null) return chip;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [chip, const SizedBox(width: 6), deltaChip],
+    );
+  }
+
+  /// Formats a duration (since a date) as "X years Y months old".
+  String _formatAge(BuildContext context, DateTime since) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    int years = now.year - since.year;
+    int months = now.month - since.month;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    // Use compact "Xy Zm" format via l10n, but show words when years or
+    // months are zero so the chip reads more naturally.
+    if (years == 0 && months == 0) return '<1m';
+    return l10n.ageYearsMonths(years, months);
+  }
+
+  Widget _buildTankAgeChip(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final ageText = _formatAge(context, tank.createdAt);
+    if (ageText.trim().isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today_outlined, size: 14, color: cs.onSecondaryContainer),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              '${l10n.tankAge}: $ageText',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSecondaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

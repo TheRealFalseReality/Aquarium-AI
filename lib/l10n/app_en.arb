@@ -5235,5 +5235,29 @@
   "quantityLabel": "Quantity",
   "@quantityLabel": {
     "description": "Label for the quantity field on the inhabitant detail screen"
+  },
+
+  "ageYearsMonths": "{years}y {months}m",
+  "@ageYearsMonths": {
+    "description": "Compact age label (e.g. '2y 5m'). years=0 or months=0 are just shown as '0y'/'0m'.",
+    "placeholders": {
+      "years": {"type": "int"},
+      "months": {"type": "int"}
+    }
+  },
+
+  "tankAge": "Tank Age",
+  "@tankAge": {
+    "description": "Label for the tank age chip"
+  },
+
+  "inhabitantAge": "Age",
+  "@inhabitantAge": {
+    "description": "Label for the inhabitant age chip on the detail screen"
+  },
+
+  "harmonyDelta": "Harmony Delta",
+  "@harmonyDelta": {
+    "description": "Label for the harmony score change chip toggle in settings"
   }
 }

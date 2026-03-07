@@ -354,6 +354,14 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
                 DateFormat.yMMMd().format(inhabitant.dateAdded!),
                 cs,
               ),
+              const Divider(height: 20),
+              _infoRow(
+                context,
+                Icons.timelapse,
+                l10n.inhabitantAge,
+                _formatAge(context, inhabitant.dateAdded!),
+                cs,
+              ),
             ],
           ],
         ),
@@ -390,6 +398,20 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         ),
       ],
     );
+  }
+
+  /// Returns a compact age string (e.g. "2y 5m") for a given start date.
+  String _formatAge(BuildContext context, DateTime since) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    int years = now.year - since.year;
+    int months = now.month - since.month;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years == 0 && months == 0) return '<1m';
+    return l10n.ageYearsMonths(years, months);
   }
 
   Widget _buildSpeciesTagsCard(

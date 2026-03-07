@@ -198,6 +198,8 @@ class Tank {
   final double? sizeLiters; // Tank size in liters
   final String? notes; // User notes about the tank
   final double? harmonyScore; // Cached harmony score (0.0 to 1.0)
+  final double?
+  previousHarmonyScore; // Harmony score before last inhabitants change
   final String? calculationBreakdown; // Cached calculation breakdown string
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -225,6 +227,7 @@ class Tank {
     this.sizeLiters,
     this.notes,
     this.harmonyScore,
+    this.previousHarmonyScore,
     this.calculationBreakdown,
     required this.createdAt,
     required this.updatedAt,
@@ -256,6 +259,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    double? previousHarmonyScore,
     String? calculationBreakdown,
     DateTime? createdAt,
     List<TankPhoto>? photos,
@@ -281,6 +285,7 @@ class Tank {
       sizeLiters: sizeLiters,
       notes: notes,
       harmonyScore: harmonyScore,
+      previousHarmonyScore: previousHarmonyScore,
       calculationBreakdown: calculationBreakdown,
       createdAt: createdAt ?? now,
       updatedAt: now,
@@ -311,6 +316,8 @@ class Tank {
       'sizeLiters': sizeLiters,
       'notes': notes,
       'harmonyScore': harmonyScore,
+      if (previousHarmonyScore != null)
+        'previousHarmonyScore': previousHarmonyScore,
       'calculationBreakdown': calculationBreakdown,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -343,6 +350,7 @@ class Tank {
       sizeLiters: json['sizeLiters']?.toDouble(),
       notes: json['notes'] as String?,
       harmonyScore: json['harmonyScore']?.toDouble(),
+      previousHarmonyScore: json['previousHarmonyScore']?.toDouble(),
       calculationBreakdown: json['calculationBreakdown'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -396,6 +404,7 @@ class Tank {
     double? sizeLiters,
     String? notes,
     double? harmonyScore,
+    double? previousHarmonyScore,
     String? calculationBreakdown,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -425,6 +434,7 @@ class Tank {
       sizeLiters: sizeLiters ?? this.sizeLiters,
       notes: notes ?? this.notes,
       harmonyScore: harmonyScore ?? this.harmonyScore,
+      previousHarmonyScore: previousHarmonyScore ?? this.previousHarmonyScore,
       calculationBreakdown: calculationBreakdown ?? this.calculationBreakdown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

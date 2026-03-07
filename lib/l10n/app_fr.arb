@@ -1065,5 +1065,9 @@
   "userNotesHint": "Saisir des notes sur cet habitant…",
   "dateAdded": "Date d'ajout",
   "speciesType": "Type d'espèce",
-  "quantityLabel": "Quantité"
+  "quantityLabel": "Quantité",
+  "ageYearsMonths": "{years}y {months}m",
+  "tankAge": "Âge du bac",
+  "inhabitantAge": "Âge",
+  "harmonyDelta": "Delta d'harmonie"
 }

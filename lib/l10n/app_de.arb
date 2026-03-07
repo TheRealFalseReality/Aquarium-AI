@@ -1065,5 +1065,9 @@
   "userNotesHint": "Notizen zu diesem Bewohner eingeben…",
   "dateAdded": "Hinzugefügt am",
   "speciesType": "Artentyp",
-  "quantityLabel": "Anzahl"
+  "quantityLabel": "Anzahl",
+  "ageYearsMonths": "{years}y {months}m",
+  "tankAge": "Beckeralter",
+  "inhabitantAge": "Alter",
+  "harmonyDelta": "Harmonie-Delta"
 }

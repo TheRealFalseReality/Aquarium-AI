@@ -75,6 +75,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'tank_management_screen');
     _loadSortPreference();
+    _loadFilterPreferences();
     _checkSortFilterAttention();
     _interstitialAdService.load();
   }
@@ -88,6 +89,40 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           _currentSortOption = TankSortOption.values[sortIndex];
         });
       }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  Future<void> _loadFilterPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final filterType = prefs.getString('tank_filter_type');
+      final filterReef = prefs.getBool('tank_filter_reef') ?? false;
+      final filterTagsList = prefs.getStringList('tank_filter_tags') ?? [];
+      if (mounted) {
+        setState(() {
+          _filterByType = filterType;
+          _filterByReef = filterReef;
+          _filterByTags = Set<String>.from(filterTagsList);
+        });
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  Future<void> _saveFilterPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (_filterByType != null) {
+        await prefs.setString('tank_filter_type', _filterByType!);
+      } else {
+        await prefs.remove('tank_filter_type');
+      }
+      await prefs.setBool('tank_filter_reef', _filterByReef);
+      await prefs.setStringList(
+          'tank_filter_tags', _filterByTags.toList());
     } catch (e) {
       // Handle error silently
     }
@@ -1180,6 +1215,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                   _filterByReef = false;
                                   _filterByTags = {};
                                 });
+                                _saveFilterPreferences();
                               },
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
@@ -1285,6 +1321,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             _filterByType = selected ? 'freshwater' : null;
                             _filterByReef = false;
                           });
+                          _saveFilterPreferences();
                         },
                       ),
                       FilterChip(
@@ -1299,6 +1336,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             _filterByType = selected ? 'marine' : null;
                             _filterByReef = false;
                           });
+                          _saveFilterPreferences();
                         },
                       ),
                       if (_filterByType == 'marine')
@@ -1313,6 +1351,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             setState(() {
                               _filterByReef = selected;
                             });
+                            _saveFilterPreferences();
                           },
                         ),
                     ],
@@ -1363,6 +1402,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     .toSet();
                               }
                             });
+                            _saveFilterPreferences();
                           },
                         );
                       }).toList(),
@@ -1494,6 +1534,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 (v) => ref
                                     .read(appSettingsProvider.notifier)
                                     .setTankHidePhotos(v),
+                              ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.favorite,
+                                l10n.harmonyDelta,
+                                appSettings.tankHideHarmonyDelta,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideHarmonyDelta(v),
                               ),
                             ],
                           ),
@@ -3866,6 +3915,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final harmonyScore = tank.harmonyScore;
     if (harmonyScore == null) return const SizedBox.shrink();
 
+    final appSettings = ref.watch(appSettingsProvider);
     final label = TankHarmonyCalculator.getHarmonyLabel(harmonyScore);
     final percentage = (harmonyScore * 100).toStringAsFixed(0);
 
@@ -3885,7 +3935,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       textColor = Colors.red.shade800;
     }
 
-    return Container(
+    // Build optional delta chip
+    Widget? deltaChip;
+    if (!appSettings.tankHideHarmonyDelta &&
+        tank.previousHarmonyScore != null) {
+      final delta = harmonyScore - tank.previousHarmonyScore!;
+      if (delta.abs() >= 0.005) {
+        final sign = delta > 0 ? '+' : '';
+        final deltaStr = '$sign${(delta * 100).toStringAsFixed(0)}%';
+        final deltaColor = delta > 0 ? Colors.green.shade700 : Colors.red.shade700;
+        deltaChip = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: deltaColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: deltaColor.withOpacity(0.4)),
+          ),
+          child: Text(
+            deltaStr,
+            style: TextStyle(
+              fontSize: 11,
+              color: deltaColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
+    }
+
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: chipColor,
@@ -3894,7 +3972,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.shape_line, size: 14, color: textColor),
+          Icon(Icons.favorite, size: 14, color: textColor),
           const SizedBox(width: 4),
           Text(
             '$label ($percentage%)',
@@ -3905,6 +3983,12 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           ),
         ],
       ),
+    );
+
+    if (deltaChip == null) return chip;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [chip, const SizedBox(width: 6), deltaChip],
     );
   }
 
