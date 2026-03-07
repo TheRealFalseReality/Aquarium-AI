@@ -256,7 +256,6 @@
       ],
       "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/cichlids_amerian_large.jpg",
       "compatible": [
-        "Cichlids - American, Large",
         "Larger Catfish",
         "Plecos / Catfish"
       ],
@@ -291,7 +290,8 @@
         "Angelfish (Male) ♂",
         "Discus",
         "Freshwater Sharks",
-        "Snails - Freshwater"
+        "Snails - Freshwater",
+        "Cichlids - American"
       ]
     },
     {
@@ -602,6 +602,57 @@
       ]
     },
     {
+      "uuid": "15d51780-c708-4f23-8c80-5d82a65d54cc",
+      "name": "Gobies - Freshwater",
+      "commonNames": [
+        "Neon Blue Stiphodon Goby",
+        "Peacock Gudgeon",
+        "Desert Goby",
+        "Rhinogobius Species",
+        "Bumblebee Goby",
+        "Knight Goby",
+        "Dragon Goby"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/gobies_freshwater.jpg",
+      "compatible": [
+        "Plants",
+        "Snails - Freshwater",
+        "Danios / Minnows",
+        "Guppies",
+        "Mollies / Platies / Swordtails",
+        "Tetras",
+        "Rasboras",
+        "Gobies - Freshwater"
+      ],
+      "notRecommended": [],
+      "notCompatible": [
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Bettas (Female) ♀",
+        "Bettas (Male) ♂",
+        "Cichlids - American",
+        "Cichlids - Lake Malawian/Victoria",
+        "Cichlids - Lake Tanganyikan",
+        "Discus",
+        "Goldfish",
+        "Koi",
+        "Larger Catfish"
+      ],
+      "withCaution": [
+        "Rainbowfish",
+        "Shrimp - Freshwater",
+        "Cory Cats",
+        "Gouramis",
+        "Hatchets",
+        "Killifish",
+        "Loaches",
+        "Plecos / Catfish",
+        "Barbs",
+        "Freshwater Sharks",
+        "Pufferfish - Freshwater"
+      ]
+    },
+    {
       "uuid": "6d93343f-9a0c-486a-bba1-6656aef2f508",
       "name": "Goldfish",
       "commonNames": [
@@ -873,7 +924,8 @@
         "Goldfish",
         "Plecos / Catfish",
         "Pond Fish",
-        "Snails - Freshwater"
+        "Snails - Freshwater",
+        "Koi"
       ],
       "notRecommended": [
         "Angelfish (Female) ♀",
@@ -1165,6 +1217,56 @@
       ]
     },
     {
+      "uuid": "2352c554-c462-44c2-ba8e-7dcbc80283a4",
+      "name": "Pufferfish - Freshwater",
+      "commonNames": [
+        "Pea Puffer",
+        "Amazon Puffer",
+        "Spotted Congo Puffer",
+        "Fahaka Puffer",
+        "Mbu Puffer"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/pufferfish_freshwater.jpg",
+      "compatible": [
+        "Cory Cats",
+        "Danios / Minnows",
+        "Gouramis",
+        "Guppies",
+        "Loaches",
+        "Mollies / Platies / Swordtails",
+        "Plants",
+        "Plecos / Catfish",
+        "Rainbowfish",
+        "Rasboras",
+        "Tetras",
+        "Pufferfish - Freshwater"
+      ],
+      "notRecommended": [
+        "Angelfish (Female) ♀",
+        "Angelfish (Male) ♂",
+        "Bettas (Male) ♂",
+        "Discus"
+      ],
+      "notCompatible": [
+        "Cichlids - American",
+        "Cichlids - Lake Malawian/Victoria",
+        "Cichlids - Lake Tanganyikan",
+        "Freshwater Sharks",
+        "Goldfish",
+        "Koi",
+        "Larger Catfish",
+        "Shrimp - Freshwater",
+        "Snails - Freshwater"
+      ],
+      "withCaution": [
+        "Barbs",
+        "Bettas (Female) ♀",
+        "Hatchets",
+        "Killifish",
+        "Gobies - Freshwater"
+      ]
+    },
+    {
       "uuid": "46945e0d-e6c9-4ebe-a002-94babbe13fab",
       "name": "Rainbowfish",
       "commonNames": [
@@ -1285,7 +1387,8 @@
         "Plecos / Catfish",
         "Rasboras",
         "Shrimp",
-        "Snails - Freshwater"
+        "Snails - Freshwater",
+        "Shrimp - Freshwater"
       ],
       "notRecommended": [
         "Angelfish (Female) ♀",
@@ -1351,7 +1454,8 @@
         "Shrimp - Freshwater",
         "Snails",
         "Tetras",
-        "Gobies - Freshwater"
+        "Gobies - Freshwater",
+        "Snails - Freshwater"
       ],
       "notRecommended": [
         "Loaches"
@@ -1415,105 +1519,6 @@
         "Mollies / Platies / Swordtails",
         "Rainbowfish",
         "Shrimp - Freshwater"
-      ]
-    },
-    {
-      "uuid": "15d51780-c708-4f23-8c80-5d82a65d54cc",
-      "name": "Gobies - Freshwater",
-      "commonNames": [
-        "Neon Blue Stiphodon Goby",
-        "Peacock Gudgeon",
-        "Desert Goby",
-        "Rhinogobius Species",
-        "Bumblebee Goby",
-        "Knight Goby",
-        "Dragon Goby"
-      ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/gobies_freshwater.jpg",
-      "compatible": [
-        "Plants",
-        "Snails - Freshwater",
-        "Danios / Minnows",
-        "Guppies",
-        "Mollies / Platies / Swordtails",
-        "Tetras",
-        "Rasboras"
-      ],
-      "notRecommended": [],
-      "notCompatible": [
-        "Angelfish (Female) ♀",
-        "Angelfish (Male) ♂",
-        "Bettas (Female) ♀",
-        "Bettas (Male) ♂",
-        "Cichlids - American",
-        "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan",
-        "Discus",
-        "Goldfish",
-        "Koi",
-        "Larger Catfish"
-      ],
-      "withCaution": [
-        "Rainbowfish",
-        "Shrimp - Freshwater",
-        "Cory Cats",
-        "Gouramis",
-        "Hatchets",
-        "Killifish",
-        "Loaches",
-        "Plecos / Catfish",
-        "Barbs",
-        "Freshwater Sharks",
-        "Pufferfish - Freshwater"
-      ]
-    },
-    {
-      "uuid": "2352c554-c462-44c2-ba8e-7dcbc80283a4",
-      "name": "Pufferfish - Freshwater",
-      "commonNames": [
-        "Pea Puffer",
-        "Amazon Puffer",
-        "Spotted Congo Puffer",
-        "Fahaka Puffer",
-        "Mbu Puffer"
-      ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/pufferfish_freshwater.jpg",
-      "compatible": [
-        "Cory Cats",
-        "Danios / Minnows",
-        "Gouramis",
-        "Guppies",
-        "Loaches",
-        "Mollies / Platies / Swordtails",
-        "Plants",
-        "Plecos / Catfish",
-        "Rainbowfish",
-        "Rasboras",
-        "Tetras"
-      ],
-      "notRecommended": [
-        "Angelfish (Female) ♀",
-        "Angelfish (Male) ♂",
-        "Bettas (Male) ♂",
-        "Discus"
-      ],
-      "notCompatible": [
-        "Cichlids - American",
-        "Cichlids - Lake Malawian/Victoria",
-        "Cichlids - Lake Tanganyikan",
-        "Freshwater Sharks",
-        "Goldfish",
-        "Koi",
-        "Larger Catfish",
-        "Shrimp - Freshwater",
-        "Snails - Freshwater"
-      ],
-      "withCaution": [
-        "Barbs",
-        "Bettas (Female) ♀",
-        "Hatchets",
-        "Killifish",
-        "Gobies - Freshwater"
       ]
     }
   ],
@@ -1583,7 +1588,8 @@
         "Gobies",
         "Jawfish",
         "Blennies",
-        "Crabs - Reef Safe"
+        "Crabs - Reef Safe",
+        "Anemone - Fish Only"
       ]
     },
     {
@@ -1609,7 +1615,8 @@
         "Pseudochromis",
         "Tangs / Surgeons",
         "Wrasse - Reef Safe",
-        "Crabs - Reef Safe"
+        "Crabs - Reef Safe",
+        "Anemone - Reef Safe"
       ],
       "notRecommended": [
         "Angelfish",
@@ -1812,7 +1819,8 @@
         "Foxface / Rabbitfish",
         "Grunts / Sweetlips",
         "Lionfish / Scorpionfish",
-        "Squirrelfish"
+        "Squirrelfish",
+        "Anglers / Frogfish"
       ],
       "notRecommended": [
         "Eels",
@@ -2620,6 +2628,142 @@
         "Anemone - Reef Safe",
         "Wrasse - Reef Safe",
         "Urchins"
+      ]
+    },
+    {
+      "uuid": "159fe1a3-05d6-4bee-81d5-71a0c9080b32",
+      "name": "Crabs - Fish Only",
+      "commonNames": [
+        "Decorator Crab:",
+        "White-Spotted Hermit Crab",
+        "Rough Box Crab",
+        "Gorilla Crab"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/crabs.jpg",
+      "reefSafe": "No",
+      "compatible": [
+        "Eels",
+        "Triggerfish"
+      ],
+      "notRecommended": [
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Batfish",
+        "Boxfish",
+        "Butterflyfish",
+        "Foxface / Rabbitfish",
+        "Grunts / Sweetlips",
+        "Hogfish",
+        "Parrotfish",
+        "Squirrelfish",
+        "Marine Betta",
+        "Sea Star - Fish Only",
+        "Sea Star - Reef Safe",
+        "Seahorse / Pipefish",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Urchins",
+        "Crabs - Reef Safe"
+      ],
+      "notCompatible": [
+        "Anemone - Fish Only",
+        "Anemone - Reef Safe",
+        "Anglers / Frogfish",
+        "Corals",
+        "Hawkfish",
+        "Pseudochromis",
+        "Worms / Misc. Inverts"
+      ],
+      "withCaution": [
+        "Groupers",
+        "Lionfish / Scorpionfish",
+        "Pufferfish",
+        "Sharks / Rays",
+        "Tangs / Surgeons",
+        "Wrasse - Fish Only",
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Damselfish",
+        "Dartfish",
+        "Dragonets",
+        "Filefish",
+        "Gobies",
+        "Jawfish",
+        "Wrasse - Reef Safe",
+        "Crabs - Fish Only"
+      ]
+    },
+    {
+      "uuid": "94bc3876-9a94-4239-a65e-36c7c107b5ec",
+      "name": "Crabs - Reef Safe",
+      "commonNames": [
+        "Blue Legged Hermit Crab",
+        "Scarlet Reef Hermit Crab",
+        "Emerald Crab",
+        "Sally Lightfoot Crab"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/crabs_reef_safe.jpg",
+      "reefSafe": "Caution",
+      "compatible": [
+        "Angelfish",
+        "Angelfish - Dwarf",
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Corals",
+        "Damselfish",
+        "Dartfish",
+        "Filefish",
+        "Foxface / Rabbitfish",
+        "Hawkfish",
+        "Jawfish",
+        "Marine Betta",
+        "Pseudochromis",
+        "Tangs / Surgeons",
+        "Wrasse - Reef Safe",
+        "Anemone - Reef Safe",
+        "Urchins",
+        "Gobies",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Crabs - Reef Safe"
+      ],
+      "notRecommended": [
+        "Crabs - Fish Only",
+        "Batfish",
+        "Boxfish",
+        "Dragonets",
+        "Grunts / Sweetlips",
+        "Hogfish",
+        "Parrotfish",
+        "Squirrelfish",
+        "Wrasse - Fish Only"
+      ],
+      "notCompatible": [
+        "Anglers / Frogfish",
+        "Eels",
+        "Groupers",
+        "Lionfish / Scorpionfish",
+        "Pufferfish",
+        "Sea Star - Fish Only",
+        "Sea Star - Reef Safe",
+        "Sharks / Rays",
+        "Triggerfish"
+      ],
+      "withCaution": [
+        "Anemone - Fish Only",
+        "Seahorse / Pipefish",
+        "Worms / Misc. Inverts"
       ]
     },
     {
@@ -3553,7 +3697,8 @@
         "Chromis",
         "Sea Star - Reef Safe",
         "Crabs - Reef Safe",
-        "Urchins"
+        "Urchins",
+        "Marine Betta"
       ],
       "notRecommended": [
         "Blennies",
@@ -3751,7 +3896,8 @@
         "Parrotfish",
         "Puffers",
         "Squirrelfish",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Pufferfish"
       ],
       "notRecommended": [
         "Anglers / Frogfish",
@@ -3818,7 +3964,8 @@
         "Gobies",
         "Dragonets",
         "Pseudochromis",
-        "Tangs / Surgeons"
+        "Tangs / Surgeons",
+        "Sea Star - Fish Only"
       ],
       "notRecommended": [
         "Angelfish",
@@ -3892,7 +4039,8 @@
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
         "Marine Betta",
-        "Urchins"
+        "Urchins",
+        "Sea Star - Reef Safe"
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
@@ -4108,7 +4256,8 @@
         "Tangs / Surgeons",
         "Worms / Misc. Inverts",
         "Crabs - Reef Safe",
-        "Urchins"
+        "Urchins",
+        "Shrimp - Marine"
       ],
       "notRecommended": [
         "Angelfish - Dwarf",
@@ -4179,7 +4328,8 @@
         "Worms / Misc. Inverts",
         "Marine Betta",
         "Crabs - Reef Safe",
-        "Urchins"
+        "Urchins",
+        "Snails - Marine"
       ],
       "notRecommended": [
         "Anglers / Frogfish",
@@ -4424,6 +4574,74 @@
       ]
     },
     {
+      "uuid": "38a91a03-c728-4c3a-9bc3-2d1f7a998892",
+      "name": "Urchins",
+      "commonNames": [
+        "Pencil Urchins",
+        "Tuxedo Urchin",
+        "Pincushion Urchin",
+        "Halloween Urchin"
+      ],
+      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/urchins.jpg",
+      "reefSafe": "Caution",
+      "compatible": [
+        "Crabs - Reef Safe",
+        "Anthias",
+        "Basslets",
+        "Blennies",
+        "Butterflyfish",
+        "Cardinalfish",
+        "Chromis",
+        "Clownfish (Female) ♀",
+        "Clownfish (Male) ♂",
+        "Filefish",
+        "Foxface / Rabbitfish",
+        "Gobies",
+        "Jawfish",
+        "Marine Betta",
+        "Pseudochromis",
+        "Sea Star - Reef Safe",
+        "Seahorse / Pipefish",
+        "Shrimp - Marine",
+        "Snails - Marine",
+        "Tangs / Surgeons",
+        "Worms / Misc. Inverts",
+        "Dartfish",
+        "Wrasse - Reef Safe",
+        "Urchins"
+      ],
+      "notRecommended": [
+        "Crabs - Fish Only",
+        "Anemone - Fish Only",
+        "Anemone - Reef Safe",
+        "Angelfish",
+        "Boxfish",
+        "Batfish",
+        "Eels",
+        "Hogfish",
+        "Parrotfish",
+        "Squirrelfish",
+        "Wrasse - Fish Only"
+      ],
+      "notCompatible": [
+        "Anglers / Frogfish",
+        "Dragonets",
+        "Groupers",
+        "Grunts / Sweetlips",
+        "Hawkfish",
+        "Lionfish / Scorpionfish",
+        "Pufferfish",
+        "Sea Star - Fish Only",
+        "Sharks / Rays",
+        "Triggerfish"
+      ],
+      "withCaution": [
+        "Angelfish - Dwarf",
+        "Corals",
+        "Damselfish"
+      ]
+    },
+    {
       "uuid": "2ee47f31-41a8-471c-8666-55b0bcafca5f",
       "name": "Worms / Misc. Inverts",
       "commonNames": [
@@ -4629,207 +4847,6 @@
         "Anemone - Fish Only",
         "Corals",
         "Crabs - Fish Only"
-      ]
-    },
-    {
-      "uuid": "38a91a03-c728-4c3a-9bc3-2d1f7a998892",
-      "name": "Urchins",
-      "commonNames": [
-        "Pencil Urchins",
-        "Tuxedo Urchin",
-        "Pincushion Urchin",
-        "Halloween Urchin"
-      ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/urchins.jpg",
-      "reefSafe": "Caution",
-      "compatible": [
-        "Crabs - Reef Safe",
-        "Anthias",
-        "Basslets",
-        "Blennies",
-        "Butterflyfish",
-        "Cardinalfish",
-        "Chromis",
-        "Clownfish (Female) ♀",
-        "Clownfish (Male) ♂",
-        "Filefish",
-        "Foxface / Rabbitfish",
-        "Gobies",
-        "Jawfish",
-        "Marine Betta",
-        "Pseudochromis",
-        "Sea Star - Reef Safe",
-        "Seahorse / Pipefish",
-        "Shrimp - Marine",
-        "Snails - Marine",
-        "Tangs / Surgeons",
-        "Worms / Misc. Inverts",
-        "Dartfish",
-        "Wrasse - Reef Safe"
-      ],
-      "notRecommended": [
-        "Crabs - Fish Only",
-        "Anemone - Fish Only",
-        "Anemone - Reef Safe",
-        "Angelfish",
-        "Boxfish",
-        "Batfish",
-        "Eels",
-        "Hogfish",
-        "Parrotfish",
-        "Squirrelfish",
-        "Wrasse - Fish Only"
-      ],
-      "notCompatible": [
-        "Anglers / Frogfish",
-        "Dragonets",
-        "Groupers",
-        "Grunts / Sweetlips",
-        "Hawkfish",
-        "Lionfish / Scorpionfish",
-        "Pufferfish",
-        "Sea Star - Fish Only",
-        "Sharks / Rays",
-        "Triggerfish"
-      ],
-      "withCaution": [
-        "Angelfish - Dwarf",
-        "Corals",
-        "Damselfish"
-      ]
-    },
-    {
-      "uuid": "94bc3876-9a94-4239-a65e-36c7c107b5ec",
-      "name": "Crabs - Reef Safe",
-      "commonNames": [
-        "Blue Legged Hermit Crab",
-        "Scarlet Reef Hermit Crab",
-        "Emerald Crab",
-        "Sally Lightfoot Crab"
-      ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/crabs_reef_safe.jpg",
-      "reefSafe": "Caution",
-      "compatible": [
-        "Angelfish",
-        "Angelfish - Dwarf",
-        "Anthias",
-        "Basslets",
-        "Blennies",
-        "Butterflyfish",
-        "Cardinalfish",
-        "Chromis",
-        "Clownfish (Female) ♀",
-        "Clownfish (Male) ♂",
-        "Corals",
-        "Damselfish",
-        "Dartfish",
-        "Filefish",
-        "Foxface / Rabbitfish",
-        "Hawkfish",
-        "Jawfish",
-        "Marine Betta",
-        "Pseudochromis",
-        "Tangs / Surgeons",
-        "Wrasse - Reef Safe",
-        "Anemone - Reef Safe",
-        "Urchins",
-        "Gobies",
-        "Shrimp - Marine",
-        "Snails - Marine"
-      ],
-      "notRecommended": [
-        "Crabs - Fish Only",
-        "Batfish",
-        "Boxfish",
-        "Dragonets",
-        "Grunts / Sweetlips",
-        "Hogfish",
-        "Parrotfish",
-        "Squirrelfish",
-        "Wrasse - Fish Only"
-      ],
-      "notCompatible": [
-        "Anglers / Frogfish",
-        "Eels",
-        "Groupers",
-        "Lionfish / Scorpionfish",
-        "Pufferfish",
-        "Sea Star - Fish Only",
-        "Sea Star - Reef Safe",
-        "Sharks / Rays",
-        "Triggerfish"
-      ],
-      "withCaution": [
-        "Anemone - Fish Only",
-        "Seahorse / Pipefish",
-        "Worms / Misc. Inverts"
-      ]
-    },
-    {
-      "uuid": "159fe1a3-05d6-4bee-81d5-71a0c9080b32",
-      "name": "Crabs - Fish Only",
-      "commonNames": [
-        "Decorator Crab:",
-        "White-Spotted Hermit Crab",
-        "Rough Box Crab",
-        "Gorilla Crab"
-      ],
-      "imageURL": "https://raw.githubusercontent.com/TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/crabs.jpg",
-      "reefSafe": "No",
-      "compatible": [
-        "Eels",
-        "Triggerfish"
-      ],
-      "notRecommended": [
-        "Angelfish",
-        "Angelfish - Dwarf",
-        "Batfish",
-        "Boxfish",
-        "Butterflyfish",
-        "Foxface / Rabbitfish",
-        "Grunts / Sweetlips",
-        "Hogfish",
-        "Parrotfish",
-        "Squirrelfish",
-        "Marine Betta",
-        "Sea Star - Fish Only",
-        "Sea Star - Reef Safe",
-        "Seahorse / Pipefish",
-        "Shrimp - Marine",
-        "Snails - Marine",
-        "Urchins",
-        "Crabs - Reef Safe"
-      ],
-      "notCompatible": [
-        "Anemone - Fish Only",
-        "Anemone - Reef Safe",
-        "Anglers / Frogfish",
-        "Corals",
-        "Hawkfish",
-        "Pseudochromis",
-        "Worms / Misc. Inverts"
-      ],
-      "withCaution": [
-        "Groupers",
-        "Lionfish / Scorpionfish",
-        "Pufferfish",
-        "Sharks / Rays",
-        "Tangs / Surgeons",
-        "Wrasse - Fish Only",
-        "Anthias",
-        "Basslets",
-        "Blennies",
-        "Cardinalfish",
-        "Chromis",
-        "Clownfish (Female) ♀",
-        "Clownfish (Male) ♂",
-        "Damselfish",
-        "Dartfish",
-        "Dragonets",
-        "Filefish",
-        "Gobies",
-        "Jawfish",
-        "Wrasse - Reef Safe"
       ]
     }
   ]
