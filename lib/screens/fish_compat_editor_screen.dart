@@ -63,6 +63,23 @@ class _FishEntry {
   };
 
   _FishEntry copy() => _FishEntry.fromJson(toJson());
+
+  _FishEntry copyWith({
+    List<String>? compatible,
+    List<String>? notRecommended,
+    List<String>? notCompatible,
+    List<String>? withCaution,
+  }) => _FishEntry(
+    uuid: uuid,
+    name: name,
+    imageURL: imageURL,
+    commonNames: commonNames,
+    reefSafe: reefSafe,
+    compatible: compatible ?? this.compatible,
+    notRecommended: notRecommended ?? this.notRecommended,
+    notCompatible: notCompatible ?? this.notCompatible,
+    withCaution: withCaution ?? this.withCaution,
+  );
 }
 
 // ── validator ─────────────────────────────────────────────────────────────────
@@ -88,6 +105,22 @@ List<String> _validateData(Map<String, List<_FishEntry>> data) {
       }
       if (f.commonNames.isEmpty) {
         errors.add('$prefix: at least 1 common name is required.');
+      }
+
+      // The fish must reference itself in exactly one sub-category.
+      int selfCount = 0;
+      if (f.compatible.contains(f.name)) selfCount++;
+      if (f.notRecommended.contains(f.name)) selfCount++;
+      if (f.notCompatible.contains(f.name)) selfCount++;
+      if (f.withCaution.contains(f.name)) selfCount++;
+      if (selfCount == 0) {
+        errors.add(
+          '$prefix: missing self-reference (the fish must appear in one of its own compatibility sub-categories).',
+        );
+      } else if (selfCount > 1) {
+        errors.add(
+          '$prefix: appears in $selfCount of its own sub-categories (must be exactly 1).',
+        );
       }
 
       // Each other fish in the same category must appear in exactly one
@@ -215,6 +248,18 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           list.sort(
             (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
           );
+          // Backwards compat: ensure each fish references itself in one
+          // of its four sub-categories, defaulting to "compatible".
+          for (final fish in list) {
+            final hasSelf =
+                fish.compatible.contains(fish.name) ||
+                fish.notRecommended.contains(fish.name) ||
+                fish.notCompatible.contains(fish.name) ||
+                fish.withCaution.contains(fish.name);
+            if (!hasSelf) {
+              fish.compatible.add(fish.name);
+            }
+          }
           result[category] = list;
         }
       }
@@ -408,6 +453,22 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             // Propagate name change to all other fish in the same category
             if (oldName.isNotEmpty && oldName != updated.name) {
               final categoryFish = _data[category]!;
+              // Update self-reference in the renamed fish's own lists.
+              final self = categoryFish[index];
+              categoryFish[index] = self.copyWith(
+                compatible: self.compatible
+                    .map((n) => n == oldName ? self.name : n)
+                    .toList(),
+                notRecommended: self.notRecommended
+                    .map((n) => n == oldName ? self.name : n)
+                    .toList(),
+                notCompatible: self.notCompatible
+                    .map((n) => n == oldName ? self.name : n)
+                    .toList(),
+                withCaution: self.withCaution
+                    .map((n) => n == oldName ? self.name : n)
+                    .toList(),
+              );
               for (int i = 0; i < categoryFish.length; i++) {
                 if (i == index) continue;
                 final f = categoryFish[i];
@@ -543,7 +604,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               imageURL: newFish.imageURL,
               commonNames: newFish.commonNames,
               reefSafe: newFish.reefSafe,
-              compatible: [],
+              compatible: [newFish.name], // self-reference: compatible with itself
               notRecommended: [],
               notCompatible: List<String>.from(existingNames),
               withCaution: [],
