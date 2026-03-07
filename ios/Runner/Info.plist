@@ -4,10 +4,29 @@
 	<dict>
 		<key>GADApplicationIdentifier</key>
 		<string>ca-app-pub-5701077439648731~1582287080</string>
+		<!-- Facebook Login: App ID and Client Token are required by the Facebook SDK. -->
+		<!-- The Client Token is injected at build time by the CI pipeline.           -->
+		<key>FacebookAppID</key>
+		<string>941109785269057</string>
+		<key>FacebookClientToken</key>
+		<string>$(FACEBOOK_CLIENT_TOKEN)</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
+			<string>fbapi</string>
+			<string>fb-messenger-share-api</string>
+			<string>fbauth2</string>
+			<string>fbshareextension</string>
 			<string>https</string>
 			<string>mailto</string>
+		</array>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>fb941109785269057</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
