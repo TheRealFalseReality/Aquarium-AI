@@ -5161,6 +5161,7 @@
   "reefSafeCautionLabel": "⚠️ Caution",
   "@reefSafeCautionLabel": {
     "description": "Compact reef-safe badge text shown on fish tiles when a fish has reef-safe caution"
+  },
 
   "interstitialAdBlurbTitle": "Free AI — Supported by Ads",
   "@interstitialAdBlurbTitle": {
