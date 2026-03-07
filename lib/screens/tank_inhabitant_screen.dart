@@ -128,8 +128,9 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
           featureName: 'inhabitant_custom_image_set');
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
+          SnackBar(content: Text(l10n.failedToPickImage)),
         );
       }
     }
@@ -378,7 +379,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
               .bodyMedium
               ?.copyWith(color: cs.onSurfaceVariant),
         ),
-        Expanded(
+        Flexible(
           child: Text(
             value,
             style: Theme.of(context)
@@ -455,7 +456,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
               children: [
                 Icon(Icons.note_outlined, size: 18, color: cs.tertiary),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: Text(
                     l10n.notes,
                     style: Theme.of(context)
