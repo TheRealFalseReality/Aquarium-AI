@@ -1057,5 +1057,13 @@
   "reefSafeCautionLabel": "⚠️ Precaución",
   "interstitialAdBlurbTitle": "IA gratuita — financiada por anuncios",
   "interstitialAdBlurbBody": "{hours, plural, =1{Puede aparecer un anuncio a pantalla completa cada hora para ayudar a cubrir el coste del nivel de IA gratuito.} other{Puede aparecer un anuncio a pantalla completa cada {hours} horas para ayudar a cubrir el coste del nivel de IA gratuito.}}",
-  "interstitialAdBlurbCta": "Eliminar anuncios"
+  "interstitialAdBlurbCta": "Eliminar anuncios",
+  "tankActions": "Acciones del acuario",
+  "inhabitantDetails": "Detalles del habitante",
+  "addUserNotes": "Añadir notas",
+  "editUserNotes": "Editar notas",
+  "userNotesHint": "Escribe notas sobre este habitante…",
+  "dateAdded": "Fecha de adición",
+  "speciesType": "Tipo de especie",
+  "quantityLabel": "Cantidad"
 }

@@ -22,6 +22,7 @@ import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'parameter_logger_screen.dart';
 import 'tank_creation_screen.dart';
+import 'tank_inhabitant_screen.dart';
 
 /// Dedicated screen for displaying tank details with tabbed navigation
 ///
@@ -40,6 +41,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showCalculationBreakdown = false;
+  bool _fabOpen = false;
 
   @override
   void initState() {
@@ -204,42 +206,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 ),
               ],
             ),
-            actions: [
-              // Share button
-              IconButton(
-                icon: const Icon(Icons.share),
-                tooltip: l10n.shareTank,
-                onPressed: () {
-                  BackupRestoreUtils.shareTank(context, ref, tank);
-                },
-              ),
-              // Edit button
-              IconButton(
-                icon: const Icon(Icons.edit),
-                tooltip: l10n.editTank,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          TankCreationScreen(existingTank: tank),
-                    ),
-                  );
-                },
-              ),
-              // Notifications button
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                tooltip: l10n.notifications,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          NotificationManagementScreen(tank: tank),
-                    ),
-                  );
-                },
-              ),
-            ],
+            actions: const [],
           ),
           body: TabBarView(
             controller: _tabController,
@@ -466,10 +433,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     );
   }
 
-  /// Floating action button - context-sensitive per tab
+  /// Floating action button - context-sensitive per tab.
+  /// Tab 0 (Overview) shows a speed-dial FAB with tank actions.
   Widget? _buildFab(BuildContext context, Tank tank) {
     final l10n = AppLocalizations.of(context)!;
     switch (_tabController.index) {
+      case 0: // Overview – tank actions speed-dial
+        return _buildTankActionsFab(context, tank, l10n);
       case 1: // Photos
         return FloatingActionButton.extended(
           heroTag: 'fab_photos',
@@ -534,6 +504,129 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       default:
         return null;
     }
+  }
+
+  /// Speed-dial FAB for the Overview tab – shows Edit, Share, and Notifications.
+  Widget _buildTankActionsFab(
+      BuildContext context, Tank tank, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Mini action buttons (only visible when expanded)
+        AnimatedOpacity(
+          opacity: _fabOpen ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedSlide(
+            offset: _fabOpen ? Offset.zero : const Offset(0, 0.5),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: IgnorePointer(
+              ignoring: !_fabOpen,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildFabAction(
+                    heroTag: 'fab_action_notifications',
+                    icon: Icons.notifications_outlined,
+                    label: l10n.notifications,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              NotificationManagementScreen(tank: tank),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_share',
+                    icon: Icons.share_outlined,
+                    label: l10n.shareTank,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      BackupRestoreUtils.shareTank(context, ref, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_edit',
+                    icon: Icons.edit_outlined,
+                    label: l10n.editTank,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TankCreationScreen(existingTank: tank),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Main toggle FAB
+        FloatingActionButton(
+          heroTag: 'fab_tank_actions_main',
+          tooltip: l10n.tankActions,
+          onPressed: () => setState(() => _fabOpen = !_fabOpen),
+          child: AnimatedRotation(
+            turns: _fabOpen ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: Icon(_fabOpen ? Icons.close : Icons.more_vert),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds a single mini FAB row (icon button + label).
+  Widget _buildFabAction({
+    required String heroTag,
+    required IconData icon,
+    required String label,
+    required ColorScheme cs,
+    required VoidCallback onPressed,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: BorderRadius.circular(8),
+          color: cs.surfaceContainerHigh,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: cs.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        FloatingActionButton.small(
+          heroTag: heroTag,
+          onPressed: onPressed,
+          child: Icon(icon),
+        ),
+      ],
+    );
   }
 
   /// Overview tab - Tank info, harmony score, inhabitants, action buttons
@@ -1375,129 +1468,149 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 fishData,
                 inhabitant: inhabitant,
               );
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundImage: fishImageUrl != null
-                              ? (fishImageUrl.startsWith('http')
-                                    ? CachedNetworkImageProvider(fishImageUrl)
-                                    : FileImage(File(fishImageUrl))
-                                          as ImageProvider)
-                              : null,
-                          backgroundColor: fishImageUrl == null
-                              ? cs.primaryContainer
-                              : null,
-                          child: fishImageUrl == null
-                              ? Icon(
-                                  Icons.shape_line,
-                                  color: cs.onPrimaryContainer,
-                                  size: 22,
-                                )
-                              : null,
-                        ),
-                        // Quantity badge
-                        if (inhabitant.quantity > 1)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: cs.primary,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: cs.surface,
-                                  width: 1.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                '${inhabitant.quantity}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: cs.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+              return InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TankInhabitantScreen(
+                        tank: tank,
+                        inhabitant: inhabitant,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  child: Row(
+                    children: [
+                      Stack(
                         children: [
-                          Text(
-                            inhabitant.customName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundImage: fishImageUrl != null
+                                ? (fishImageUrl.startsWith('http')
+                                      ? CachedNetworkImageProvider(fishImageUrl)
+                                      : FileImage(File(fishImageUrl))
+                                            as ImageProvider)
+                                : null,
+                            backgroundColor: fishImageUrl == null
+                                ? cs.primaryContainer
+                                : null,
+                            child: fishImageUrl == null
+                                ? Icon(
+                                    Icons.shape_line,
+                                    color: cs.onPrimaryContainer,
+                                    size: 22,
+                                  )
+                                : null,
                           ),
-                          Text(
-                            inhabitant.fishUnit,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          if (inhabitant.speciesTags.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 3),
-                              child: Wrap(
-                                spacing: 4,
-                                runSpacing: 2,
-                                children: inhabitant.speciesTags
-                                    .map(
-                                      (tag) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: cs.secondaryContainer
-                                              .withOpacity(0.6),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          tag,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                fontSize: 10,
-                                                color: cs.onSecondaryContainer,
-                                              ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          if (inhabitant.dateAdded != null)
-                            Text(
-                              'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: cs.onSurfaceVariant.withOpacity(0.7),
-                                    fontSize: 11,
+                          // Quantity badge
+                          if (inhabitant.quantity > 1)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: cs.surface,
+                                    width: 1.5,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  '${inhabitant.quantity}',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              inhabitant.customName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              inhabitant.fishUnit,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (inhabitant.speciesTags.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Wrap(
+                                  spacing: 4,
+                                  runSpacing: 2,
+                                  children: inhabitant.speciesTags
+                                      .map(
+                                        (tag) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: cs.secondaryContainer
+                                                .withOpacity(0.6),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            tag,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: 10,
+                                                  color:
+                                                      cs.onSecondaryContainer,
+                                                ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                            if (inhabitant.dateAdded != null)
+                              Text(
+                                'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          cs.onSurfaceVariant.withOpacity(0.7),
+                                      fontSize: 11,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: cs.onSurface.withOpacity(0.35),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),

@@ -5195,5 +5195,45 @@
   "interstitialAdBlurbCta": "Remove Ads",
   "@interstitialAdBlurbCta": {
     "description": "Call-to-action button label on the interstitial ad blurb — opens the Remove Ads purchase dialog"
+  },
+
+  "tankActions": "Tank Actions",
+  "@tankActions": {
+    "description": "Tooltip/label for the tank actions FAB menu button"
+  },
+
+  "inhabitantDetails": "Inhabitant Details",
+  "@inhabitantDetails": {
+    "description": "Title for the tank inhabitant detail screen"
+  },
+
+  "addUserNotes": "Add Notes",
+  "@addUserNotes": {
+    "description": "Button label to add user notes for an inhabitant"
+  },
+
+  "editUserNotes": "Edit Notes",
+  "@editUserNotes": {
+    "description": "Button label to edit user notes for an inhabitant"
+  },
+
+  "userNotesHint": "Enter notes about this inhabitant…",
+  "@userNotesHint": {
+    "description": "Hint text for the user notes text field on the inhabitant screen"
+  },
+
+  "dateAdded": "Date Added",
+  "@dateAdded": {
+    "description": "Label for the date-added field on the inhabitant detail screen"
+  },
+
+  "speciesType": "Species Type",
+  "@speciesType": {
+    "description": "Label for the species type field on the inhabitant detail screen"
+  },
+
+  "quantityLabel": "Quantity",
+  "@quantityLabel": {
+    "description": "Label for the quantity field on the inhabitant detail screen"
   }
 }

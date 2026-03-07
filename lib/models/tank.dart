@@ -109,6 +109,7 @@ class TankInhabitant {
   final DateTime? dateAdded; // Date when inhabitant was added to tank
   final List<String>
   speciesTags; // Selected species tags for more granular identification
+  final String? userNotes; // User-added notes/details about this inhabitant
 
   TankInhabitant({
     required this.id,
@@ -120,6 +121,7 @@ class TankInhabitant {
     this.customImagePath,
     this.dateAdded,
     List<String>? speciesTags,
+    this.userNotes,
   }) : speciesTags = speciesTags ?? [];
 
   Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
@@ -135,6 +137,7 @@ class TankInhabitant {
         'customImagePath': customImagePath,
       'dateAdded': dateAdded?.toIso8601String(),
       'speciesTags': speciesTags,
+      if (userNotes != null) 'userNotes': userNotes,
     };
   }
 
@@ -153,6 +156,7 @@ class TankInhabitant {
       speciesTags:
           (json['speciesTags'] as List?)?.map((t) => t.toString()).toList() ??
           [],
+      userNotes: json['userNotes'] as String?,
     );
   }
 
@@ -166,6 +170,8 @@ class TankInhabitant {
     String? customImagePath,
     DateTime? dateAdded,
     List<String>? speciesTags,
+    String? userNotes,
+    bool clearUserNotes = false,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
@@ -177,6 +183,7 @@ class TankInhabitant {
       customImagePath: customImagePath ?? this.customImagePath,
       dateAdded: dateAdded ?? this.dateAdded,
       speciesTags: speciesTags ?? this.speciesTags,
+      userNotes: clearUserNotes ? null : (userNotes ?? this.userNotes),
     );
   }
 }
