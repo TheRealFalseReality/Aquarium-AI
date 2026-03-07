@@ -1094,10 +1094,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ),
                             const SizedBox(height: 16),
                             if (_version.isNotEmpty)
-                              Text(
-                                l10n.versionNumber(_version),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              ActionChip(
+                                avatar: const Icon(Icons.history, size: 16),
+                                label: Text(l10n.versionNumber(_version)),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const ChangelogScreen()),
+                                  );
+                                },
                               ),
                             if (!kIsWeb && Platform.isAndroid) ...[
                               const SizedBox(height: 8),

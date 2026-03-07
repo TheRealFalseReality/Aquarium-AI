@@ -108,7 +108,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
 
   static const List<String> _categories = ['freshwater', 'marine'];
 
-  String get _currentCategory => _categories[_tabController.index];
 
   @override
   void initState() {
@@ -396,7 +395,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     Fish selected,
     String category,
   ) {
-    final cs = Theme.of(context).colorScheme;
     final isWide = MediaQuery.of(context).size.width >= 720;
 
     // Build map: status → list of Fish objects
@@ -783,12 +781,12 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           width: avatarW,
                           height: rowH,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => SizedBox(
+                          placeholder: (_, _) => SizedBox(
                             width: avatarW,
                             height: rowH,
                             child: Icon(Icons.set_meal, color: cs.outline),
                           ),
-                          errorWidget: (_, __, ___) => SizedBox(
+                          errorWidget: (_, _, _) => SizedBox(
                             width: avatarW,
                             height: rowH,
                             child: Icon(Icons.set_meal, color: cs.outline),
@@ -885,10 +883,10 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     child: CachedNetworkImage(
                       imageUrl: widget.fish.imageURL,
                       fit: BoxFit.contain,
-                      placeholder: (_, __) => const Center(
+                      placeholder: (_, _) => const Center(
                         child: CircularProgressIndicator(color: Colors.white),
                       ),
-                      errorWidget: (_, __, ___) => const Center(
+                      errorWidget: (_, _, _) => const Center(
                         child: Icon(
                           Icons.broken_image_outlined,
                           size: 64,
@@ -944,13 +942,13 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                 child: CachedNetworkImage(
                   imageUrl: fish.imageURL,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
+                  placeholder: (_, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 56, color: cs.outline),
                     ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
+                  errorWidget: (_, _, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 56, color: cs.outline),
@@ -1146,14 +1144,14 @@ class _FishTile extends StatelessWidget {
                     CachedNetworkImage(
                       imageUrl: fish.imageURL,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         color: cs.surfaceVariant,
                         child: Center(
                           child:
                               Icon(Icons.set_meal, size: 36, color: cs.outline),
                         ),
                       ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: cs.surfaceVariant,
                         child: Center(
                           child:
@@ -1271,13 +1269,13 @@ class _CompatFishChip extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: fish.imageURL,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
+                  placeholder: (_, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
                     ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
+                  errorWidget: (_, _, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
