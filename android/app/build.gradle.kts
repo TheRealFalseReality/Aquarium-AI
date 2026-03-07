@@ -1,11 +1,25 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.util.Base64
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val keyProperties = Properties()
 val keyPropertiesFile = rootProject.file("key.properties")
 if (keyPropertiesFile.exists()) {
     keyProperties.load(FileInputStream(keyPropertiesFile))
+}
+
+// Extract flutter dart-defines
+val dartEnvironmentVariables = mutableMapOf<String, String>()
+if (project.hasProperty("dart-defines")) {
+    val defines = project.property("dart-defines") as String
+    defines.split(",").forEach {
+        val decoded = String(Base64.getDecoder().decode(it))
+        val split = decoded.split("=", limit = 2)
+        if (split.size == 2) {
+            dartEnvironmentVariables[split[0]] = split[1]
+        }
+    }
 }
 
 plugins {
@@ -27,13 +41,12 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-
     signingConfigs {
         create("release") {
-            keyAlias = keyProperties["keyAlias"] as String
-            keyPassword = keyProperties["keyPassword"] as String
-            storeFile = file(keyProperties["storeFile"] as String)
-            storePassword = keyProperties["storePassword"] as String
+            keyAlias = keyProperties["keyAlias"] as String? ?: ""
+            keyPassword = keyProperties["keyPassword"] as String? ?: ""
+            storeFile = if (keyProperties["storeFile"] != null) file(keyProperties["storeFile"] as String) else null
+            storePassword = keyProperties["storePassword"] as String? ?: ""
         }
     }
 
@@ -45,15 +58,16 @@ android {
         versionName = flutter.versionName
         // Facebook SDK requires the App ID and Client Token at native build time.
         // The App ID is public; the Client Token is read from the FACEBOOK_CLIENT_TOKEN
-        // environment variable (set in CI via GitHub Secrets).
-        // An absent token is only acceptable for local debug builds where
-        // Facebook Login is not being tested; release / CI builds must supply the value.
-        val fbClientToken = System.getenv("FACEBOOK_CLIENT_TOKEN") ?: ""
+        // passed via --dart-define=FACEBOOK_CLIENT_TOKEN=XXXX or environment variable.
+        val fbClientToken = dartEnvironmentVariables["FACEBOOK_CLIENT_TOKEN"] 
+            ?: System.getenv("FACEBOOK_CLIENT_TOKEN") 
+            ?: ""
+            
         if (fbClientToken.isEmpty()) {
             logger.warn(
                 "[WARNING] FACEBOOK_CLIENT_TOKEN is not set. " +
                 "Facebook Login will not work at runtime. " +
-                "Set the environment variable before a release build."
+                "Set it via --dart-define=FACEBOOK_CLIENT_TOKEN=XXXX before a release build."
             )
         }
         resValue("string", "facebook_app_id", "941109785269057")
