@@ -1506,11 +1506,13 @@ class InhabitantDialog extends ConsumerStatefulWidget {
   final List<Fish> availableFish;
   final TankInhabitant? existingInhabitant;
   final Function(TankInhabitant) onAdd;
+  final VoidCallback? onDelete;
 
   const InhabitantDialog({
     required this.availableFish,
     required this.onAdd,
     this.existingInhabitant,
+    this.onDelete,
   });
 
   @override
@@ -2534,23 +2536,83 @@ class _InhabitantDialogState extends ConsumerState<InhabitantDialog> {
               ),
 
               // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
                 children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _save,
-                      child: Text(
-                        widget.existingInhabitant != null ? 'Update' : 'Add',
+                  if (widget.existingInhabitant != null &&
+                      widget.onDelete != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text(l10n.deleteInhabitant),
+                              content: Text(
+                                l10n.deleteInhabitantConfirm(
+                                    widget.existingInhabitant!.customName),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(ctx).pop(false),
+                                  child: Text(l10n.cancel),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(ctx).pop(true),
+                                  child: Text(
+                                    l10n.delete,
+                                    style: TextStyle(
+                                      color: Theme.of(ctx)
+                                          .colorScheme
+                                          .error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirmed == true && mounted) {
+                            Navigator.of(context).pop();
+                            widget.onDelete!();
+                          }
+                        },
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        label: Text(
+                          l10n.deleteInhabitant,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
                       ),
                     ),
+                    const Divider(height: 8),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _save,
+                          child: Text(
+                            widget.existingInhabitant != null
+                                ? 'Update'
+                                : 'Add',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

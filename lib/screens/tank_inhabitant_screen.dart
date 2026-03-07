@@ -120,8 +120,51 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
             featureName: 'inhabitant_edited_from_detail',
           );
         },
+        onDelete: () => _performDeleteInhabitant(inhabitant, tank),
       ),
     );
+  }
+
+  /// Shows a confirmation dialog and removes the inhabitant from the tank.
+  Future<void> _deleteInhabitant(
+      TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteInhabitant),
+        content: Text(l10n.deleteInhabitantConfirm(inhabitant.customName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      _performDeleteInhabitant(inhabitant, tank);
+    }
+  }
+
+  /// Removes the inhabitant from the tank without showing a confirmation.
+  /// Used when confirmation has already been obtained (e.g., from the edit dialog).
+  void _performDeleteInhabitant(TankInhabitant inhabitant, Tank tank) {
+    final updatedTank = tank.copyWith(
+      inhabitants:
+          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(featureName: 'inhabitant_deleted');
+    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _pickCustomImage(TankInhabitant inhabitant, Tank tank) async {
@@ -226,6 +269,12 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: l10n.addPhoto,
             onPressed: () => _pickCustomImage(inhabitant, tank),
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_outline,
+                color: Theme.of(context).colorScheme.error),
+            tooltip: l10n.deleteInhabitant,
+            onPressed: () => _deleteInhabitant(inhabitant, tank),
           ),
         ],
       ),

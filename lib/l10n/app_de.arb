@@ -1079,5 +1079,18 @@
 
   "quickAddPhoto": "Foto schnell hinzufügen",
 
-  "cardTags": "Etiketten"
+  "cardTags": "Etiketten",
+
+  "deleteInhabitant": "Bewohner löschen",
+  "@deleteInhabitant": {
+    "description": "Label / tooltip for the delete inhabitant action"
+  },
+
+  "deleteInhabitantConfirm": "Möchtest du \"{inhabitantName}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@deleteInhabitantConfirm": {
+    "description": "Confirmation message shown before deleting an inhabitant",
+    "placeholders": {
+      "inhabitantName": {"type": "String"}
+    }
+  }
 }

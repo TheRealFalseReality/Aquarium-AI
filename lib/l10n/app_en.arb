@@ -5287,5 +5287,18 @@
   "cardTags": "Tags",
   "@cardTags": {
     "description": "Label for the card tags show/hide toggle in card content settings"
+  },
+
+  "deleteInhabitant": "Delete Inhabitant",
+  "@deleteInhabitant": {
+    "description": "Label / tooltip for the delete inhabitant action"
+  },
+
+  "deleteInhabitantConfirm": "Are you sure you want to delete \"{inhabitantName}\"? This action cannot be undone.",
+  "@deleteInhabitantConfirm": {
+    "description": "Confirmation message shown before deleting an inhabitant",
+    "placeholders": {
+      "inhabitantName": {"type": "String"}
+    }
   }
 }
