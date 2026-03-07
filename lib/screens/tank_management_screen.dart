@@ -1544,6 +1544,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     .read(appSettingsProvider.notifier)
                                     .setTankHideHarmonyDelta(v),
                               ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.label_outline,
+                                l10n.cardTags,
+                                appSettings.tankHideCardTags,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideCardTags(v),
+                              ),
                             ],
                           ),
                         ],
@@ -2420,7 +2429,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ],
 
                     // Tank tags section (if tags exist)
-                    if (tank.tags.isNotEmpty) ...[
+                    if (!appSettings.tankHideCardTags && tank.tags.isNotEmpty) ...[
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,

@@ -291,6 +291,82 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     ref.read(tankProvider.notifier).updateTank(updatedTank);
   }
 
+  /// Quick add a photo directly via image picker (bypasses the full photo dialog)
+  Future<void> _quickAddPhoto(BuildContext context, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.addPhoto),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.photo_library_outlined),
+            label: Text(l10n.gallery),
+            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(l10n.camera),
+            onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+          ),
+        ],
+      ),
+    );
+    if (source == null || !mounted) return;
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: source, imageQuality: 80);
+      if (picked == null || !mounted) return;
+      final currentTank = _getCurrentTank();
+      final photo = TankPhoto(
+        id: const Uuid().v4(),
+        imagePath: picked.path,
+        addedAt: DateTime.now(),
+      );
+      final updatedTank = currentTank.copyWith(
+        photos: [...currentTank.photos, photo],
+        updatedAt: DateTime.now(),
+      );
+      ref.read(tankProvider.notifier).updateTank(updatedTank);
+      AnalyticsService.logFeatureUsed(featureName: 'quick_add_tank_photo');
+    } catch (e) {
+      if (mounted) {
+        final l10n2 = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n2.failedToPickImage)),
+        );
+      }
+    }
+  }
+
+  /// Quick add inhabitant via the InhabitantDialog; auto-saves the tank.
+  void _quickAddInhabitant(BuildContext context, Tank tank) {
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    final availableFish = fishData?[tank.type] ?? const <Fish>[];
+    showDialog<void>(
+      context: context,
+      builder: (_) => InhabitantDialog(
+        availableFish: availableFish,
+        onAdd: (inhabitant) {
+          final currentTank = _getCurrentTank();
+          final updatedTank = currentTank.copyWith(
+            inhabitants: [...currentTank.inhabitants, inhabitant],
+            updatedAt: DateTime.now(),
+          );
+          ref.read(tankProvider.notifier).updateTank(updatedTank);
+          AnalyticsService.logFeatureUsed(
+            featureName: 'quick_add_inhabitant',
+            parameters: {'fish_type': inhabitant.fishUnit},
+          );
+        },
+      ),
+    );
+  }
+
   /// Add a new photo to the tank
   void _addPhoto(BuildContext context, Tank tank) {
     showDialog(
@@ -507,7 +583,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     }
   }
 
-  /// Speed-dial FAB for the Overview tab – shows Edit, Share, and Notifications.
+  /// Speed-dial FAB for the Overview tab – shows Edit, Share, Notifications,
+  /// Add Inhabitant, Quick Add Photo, Quick Add Parameters, Quick Add Dosing,
+  /// and Quick Add Activity.
   Widget _buildTankActionsFab(
       BuildContext context, Tank tank, AppLocalizations l10n) {
     final cs = Theme.of(context).colorScheme;
@@ -570,6 +648,81 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                               TankCreationScreen(existingTank: tank),
                         ),
                       );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_activity',
+                    icon: Icons.history,
+                    label: l10n.addLogEntry,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => NotificationLoggerScreen(
+                            tank: tank,
+                            openAddDialog: true,
+                            initialTabIndex: 1,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_dosing',
+                    icon: Icons.medication_outlined,
+                    label: l10n.addDose,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DosingLoggerScreen(tank: tank, openAddDialog: true),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_parameters',
+                    icon: Icons.science_outlined,
+                    label: l10n.addParameter,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ParameterLoggerScreen(
+                            tank: tank,
+                            openAddDialog: true,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_photo',
+                    icon: Icons.add_a_photo_outlined,
+                    label: l10n.quickAddPhoto,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _quickAddPhoto(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_add_inhabitant',
+                    icon: Icons.pets,
+                    label: l10n.addInhabitant,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _quickAddInhabitant(context, tank);
                     },
                   ),
                   const SizedBox(height: 14),

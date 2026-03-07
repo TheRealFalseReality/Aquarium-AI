@@ -1073,5 +1073,11 @@
 
   "editInhabitant": "Modifier l'habitant",
 
-  "inhabitantFishTypeNoLongerAvailable": "Le type de poisson précédent \"{fishUnit}\" n'est plus disponible. Veuillez sélectionner un nouveau type de poisson."
+  "inhabitantFishTypeNoLongerAvailable": "Le type de poisson précédent \"{fishUnit}\" n'est plus disponible. Veuillez sélectionner un nouveau type de poisson.",
+
+  "addInhabitant": "Ajouter un habitant",
+
+  "quickAddPhoto": "Ajout rapide de photo",
+
+  "cardTags": "Étiquettes"
 }

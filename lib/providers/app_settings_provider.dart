@@ -38,6 +38,8 @@ class AppSettingsState {
   final bool tankHidePhotos;
   final bool
   tankHideHarmonyDelta; // Hide the +/-% harmony delta chip on tank cards (default false = show)
+  final bool
+  tankHideCardTags; // Hide the tank tag chips on tank cards (default false = show)
 
   AppSettingsState({
     required this.showStockingButton,
@@ -57,6 +59,7 @@ class AppSettingsState {
     this.tankHideActivity = false,
     this.tankHidePhotos = false,
     this.tankHideHarmonyDelta = false, // Default to showing delta
+    this.tankHideCardTags = false, // Default to showing tags
   });
 }
 
@@ -103,6 +106,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final tankHidePhotos = prefs.getBool('tankHidePhotos') ?? false;
     final tankHideHarmonyDelta =
         prefs.getBool('tankHideHarmonyDelta') ?? false; // Default to showing
+    final tankHideCardTags =
+        prefs.getBool('tankHideCardTags') ?? false; // Default to showing
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -122,6 +127,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: tankHideActivity,
       tankHidePhotos: tankHidePhotos,
       tankHideHarmonyDelta: tankHideHarmonyDelta,
+      tankHideCardTags: tankHideCardTags,
     );
   }
 
@@ -155,6 +161,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -180,6 +187,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -209,6 +217,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -237,6 +246,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -261,6 +271,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -287,6 +298,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -312,6 +324,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -336,6 +349,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -360,6 +374,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -384,6 +399,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -408,6 +424,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -432,6 +449,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -456,6 +474,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: value,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -480,6 +499,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: value,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -504,6 +524,32 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: value,
+      tankHideCardTags: state.tankHideCardTags,
+    );
+  }
+
+  Future<void> setTankHideCardTags(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideCardTags', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+      tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: value,
     );
   }
 
@@ -536,6 +582,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -564,6 +611,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 
@@ -626,6 +674,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
     );
   }
 }

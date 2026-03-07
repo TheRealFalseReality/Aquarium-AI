@@ -5272,5 +5272,20 @@
     "placeholders": {
       "fishUnit": {"type": "String"}
     }
+  },
+
+  "addInhabitant": "Add Inhabitant",
+  "@addInhabitant": {
+    "description": "Label for the quick-add inhabitant FAB action in the speed-dial"
+  },
+
+  "quickAddPhoto": "Quick Add Photo",
+  "@quickAddPhoto": {
+    "description": "Label for the quick-add photo FAB action in the speed-dial"
+  },
+
+  "cardTags": "Tags",
+  "@cardTags": {
+    "description": "Label for the card tags show/hide toggle in card content settings"
   }
 }
