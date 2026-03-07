@@ -2,6 +2,18 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+## [3.X.XX] - 2026-
+
+## [3.1.03] - 2026-3-7 - UUID, principalmente comprobaciones de autorización, soporte de inicio de sesión de Facebook
+
+### Cambió
+
+### ***Tenga en cuenta:***
+- **PUEDE que necesites restablecer tu almacenamiento para que se cargue un nuevo conjunto de datos. Agregué UUID a los tipos de peces para permitir mejores cambios en el futuro.**
+- El resto son principalmente actualizaciones de backend.
+
+**Registro de cambios completo**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
+
 ## [3.1.00] - 2026-3-3 – Ventajas, funciones de comunidad y perfil
 
 ### Añadido
