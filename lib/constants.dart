@@ -141,6 +141,9 @@ const bool rcDefaultCommunityImageUpload = true;
 const bool rcDefaultFreeFishCompatEnabled = true;
 const bool rcDefaultFreePhotoAnalysisEnabled = true;
 
+// Feature visibility toggles (false = visible by default)
+const bool rcDefaultHideFacebookLogin = false;
+
 // Founder Aquarist tier limits (increased vs standard free tier)
 const int rcDefaultFounderMaxRequestsPerMinute = 10;
 const int rcDefaultFounderMaxRequestsPerDay = 150;
@@ -271,6 +274,13 @@ class RemoteConfigKeys {
   /// free-tier users.  Defaults to [rcDefaultInterstitialCooldownHours] (6).
   static const String interstitialCooldownHours =
       'admob_interstitial_cooldown_hours';
+
+  // ── Feature visibility ─────────────────────────────────────────────────────
+  /// Boolean — when `true` the Facebook Login button is hidden on the auth
+  /// screen.  Defaults to `false` (button is shown).  Set to `true` in
+  /// Firebase Remote Config to temporarily hide Facebook Login without
+  /// shipping an app update (e.g. while the Facebook App is under review).
+  static const String hideFacebookLogin = 'hide_facebook_login';
 
   // ── Founder Aquarist AI limits ──────────────────────────────────────────────
   /// Integer — per-minute request cap for Founder Aquarist users.
