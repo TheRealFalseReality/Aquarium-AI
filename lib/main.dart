@@ -11,11 +11,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../l10n/app_localizations.dart';
-import './constants.dart' show reCaptchaV3SiteKey;
+import './constants.dart' show facebookAppId, reCaptchaV3SiteKey;
 import './providers/app_settings_provider.dart';
 import './screens/about_screen.dart';
 import './screens/analysis_history_screen.dart';
@@ -188,6 +189,19 @@ Future<void> _initializeAppCheck() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize flutter_facebook_auth for web/desktop so that the Facebook
+  // Login SDK is available before any sign-in attempt.  On mobile the native
+  // Facebook SDK is bootstrapped automatically via the AndroidManifest / Info.plist
+  // entries, so this call is a no-op on those platforms.
+  if (kIsWeb) {
+    await FacebookAuth.i.webAndDesktopInitialize(
+      appId: facebookAppId,
+      cookie: true,
+      xfbml: true,
+      version: 'v21.0',
+    );
+  }
 
   // Pre-warm the device ID so the first rate-limit check can use the cached
   // value without introducing extra async latency.

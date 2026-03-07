@@ -17,7 +17,7 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=6Lc6P4AsAAAAANB5aWATibw1Aada7IUq6IttLI5a
+      - run: flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=6Lc6P4AsAAAAANB5aWATibw1Aada7IUq6IttLI5a --dart-define=FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

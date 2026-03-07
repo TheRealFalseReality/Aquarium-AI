@@ -43,15 +43,23 @@ jobs:
       
       - name: Build Production AAB
         run: flutter build appbundle --flavor production --release
+        env:
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
       - name: Build Production APK
         run: flutter build apk --flavor production --release
+        env:
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
       - name: Build Staging AAB
         run: flutter build appbundle --flavor staging --release
+        env:
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
       - name: Build Staging APK
         run: flutter build apk --flavor staging --release
+        env:
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2

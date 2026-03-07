@@ -56,6 +56,7 @@ class RemoteConfigService {
         RemoteConfigKeys.freeFishCompatEnabled: rcDefaultFreeFishCompatEnabled,
         RemoteConfigKeys.freePhotoAnalysisEnabled:
             rcDefaultFreePhotoAnalysisEnabled,
+        RemoteConfigKeys.hideFacebookLogin: rcDefaultHideFacebookLogin,
         RemoteConfigKeys.interstitialCooldownHours:
             rcDefaultInterstitialCooldownHours,
         RemoteConfigKeys.founderMaxRequestsPerMinute:
@@ -316,6 +317,13 @@ class RemoteConfigService {
   static bool get freePhotoAnalysisEnabled =>
       _instance?.getBool(RemoteConfigKeys.freePhotoAnalysisEnabled) ??
       rcDefaultFreePhotoAnalysisEnabled;
+
+  /// Whether the Facebook Login button is hidden on the auth screen.
+  /// Defaults to `false` (button is visible). Set to `true` in Firebase
+  /// Remote Config to hide Facebook Login without shipping an app update.
+  static bool get hideFacebookLogin =>
+      _instance?.getBool(RemoteConfigKeys.hideFacebookLogin) ??
+      rcDefaultHideFacebookLogin;
 
   // ── Ads ─────────────────────────────────────────────────────────────────────
 

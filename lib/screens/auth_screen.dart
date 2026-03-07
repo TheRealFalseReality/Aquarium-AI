@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
 import '../services/app_check_service.dart';
 import '../services/auth_service.dart';
+import '../services/remote_config_service.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -226,19 +227,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? null
                           : _signInWithGoogle,
                     ),
-                    const SizedBox(height: 8),
-                    _SocialSignInButton(
-                      label: l10n.authSignInWithFacebook,
-                      icon: const Icon(
-                        Icons.facebook,
-                        color: Color(0xFF1877F2),
-                        size: 22,
+                    if (!RemoteConfigService.hideFacebookLogin) ...[
+                      const SizedBox(height: 8),
+                      _SocialSignInButton(
+                        label: l10n.authSignInWithFacebook,
+                        icon: const Icon(
+                          Icons.facebook,
+                          color: Color(0xFF1877F2),
+                          size: 22,
+                        ),
+                        isLoading: _isSocialLoading,
+                        onPressed: _isSocialLoading || _isLoading
+                            ? null
+                            : _signInWithFacebook,
                       ),
-                      isLoading: _isSocialLoading,
-                      onPressed: _isSocialLoading || _isLoading
-                          ? null
-                          : _signInWithFacebook,
-                    ),
+                    ],
 
                     // ── Divider ───────────────────────────────────────────
                     Padding(
