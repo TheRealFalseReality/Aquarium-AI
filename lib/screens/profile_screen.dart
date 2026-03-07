@@ -14,11 +14,13 @@ import '../providers/community_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
+import '../screens/community_post_screen.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
+import '../widgets/post_card.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
 
@@ -180,7 +182,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await AuthService.signOut();
 
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/auth', (r) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/auth',
+        ModalRoute.withName('/'),
+      );
     }
   }
 
@@ -310,6 +315,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildTankTile(context, l10n, profile.tanks[i]),
             ),
           ],
+          // ── Bookmarks (own profile only) ─────────────────────────────────
+          if (_isOwnProfile)
+            SliverToBoxAdapter(
+              child: _buildBookmarksSection(context, l10n),
+            ),
           // ── Sign-out (owner only) ─────────────────────────────────────────
           if (isOwner && _isOwnProfile)
             SliverToBoxAdapter(child: _buildSignOutButton(context, l10n)),
@@ -543,6 +553,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     AppLocalizations l10n,
     UserProfile profile,
   ) {
+    final postCountAsync = _isOwnProfile
+        ? ref.watch(userPostCountProvider(profile.uid))
+        : null;
+    final postCount = postCountAsync?.asData?.value ?? 0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -564,6 +579,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             value: '${profile.yearsOfExperience}',
             label: l10n.profileStatYears,
           ),
+          if (_isOwnProfile) ...[
+            const SizedBox(width: 8),
+            _StatChip(
+              icon: Icons.post_add_outlined,
+              value: '$postCount',
+              label: l10n.profileStatPosts,
+            ),
+          ],
         ],
       ),
     );
@@ -676,6 +699,70 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               visualDensity: VisualDensity.compact,
             )
           : null,
+    );
+  }
+
+  /// Bookmarks section — shown on the owner's own profile.
+  Widget _buildBookmarksSection(BuildContext context, AppLocalizations l10n) {
+    final bookmarksAsync = ref.watch(bookmarkedPostsProvider);
+    final authAsync = ref.watch(authStateProvider);
+    final currentUserId = authAsync.asData?.value?.uid ?? '';
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Row(
+            children: [
+              Icon(Icons.bookmark, size: 20, color: colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                l10n.profileBookmarksSection,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        bookmarksAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (posts) {
+            if (posts.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(
+                  l10n.profileNoBookmarks,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: posts.map((post) {
+                return PostCard(
+                  post: post,
+                  currentUserId: currentUserId,
+                  initialIsBookmarked: true,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommunityPostScreen(post: post),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 

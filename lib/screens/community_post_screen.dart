@@ -11,6 +11,7 @@ import '../services/analytics_service.dart';
 import '../services/community_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
+import '../screens/full_screen_image_screen.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/post_card.dart';
 
@@ -251,20 +252,38 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   ) {
     final theme = Theme.of(context);
     final height = isTankShowcase ? 320.0 : 240.0;
+    final heroTag = 'post_image_${widget.post.id}';
 
-    final image = FutureBuilder<String>(
-      future: _resolvedPostImageUrl,
-      builder: (_, snap) => CachedNetworkImage(
-        imageUrl: snap.data ?? widget.post.imageUrl!,
-        width: double.infinity,
-        height: height,
-        fit: BoxFit.cover,
-        placeholder: (_, _) => Container(
-          height: height,
-          color: theme.colorScheme.surfaceContainerHighest,
-          child: const Center(child: CircularProgressIndicator()),
+    void openFullScreen() {
+      final url = widget.post.imageUrl;
+      if (url == null) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              FullScreenImageScreen(imageUrl: url, heroTag: heroTag),
         ),
-        errorWidget: (_, _, _) => const SizedBox(),
+      );
+    }
+
+    final image = GestureDetector(
+      onTap: openFullScreen,
+      child: FutureBuilder<String>(
+        future: _resolvedPostImageUrl,
+        builder: (_, snap) => Hero(
+          tag: heroTag,
+          child: CachedNetworkImage(
+            imageUrl: snap.data ?? widget.post.imageUrl!,
+            width: double.infinity,
+            height: height,
+            fit: BoxFit.cover,
+            placeholder: (_, _) => Container(
+              height: height,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (_, _, _) => const SizedBox(),
+          ),
+        ),
       ),
     );
 

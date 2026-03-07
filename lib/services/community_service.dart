@@ -221,9 +221,118 @@ class CommunityService {
     }
   }
 
-  // ─── Comments ────────────────────────────────────────────────────────────────
+  // ─── Bookmarks ───────────────────────────────────────────────────────────────
 
-  /// Returns a stream of comments for a post ordered by oldest first.
+  static const String _bookmarksCollection = 'bookmarks';
+  static const String _usersCollection = 'users';
+
+  /// Toggles bookmark state for [postId]. Returns `true` when the post is now
+  /// bookmarked, `false` when removed, and `null` on error.
+  static Future<bool?> toggleBookmark(String postId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+    final ref = _firestore
+        .collection(_usersCollection)
+        .doc(user.uid)
+        .collection(_bookmarksCollection)
+        .doc(postId);
+    try {
+      final snap = await ref.get();
+      if (snap.exists) {
+        await ref.delete();
+        return false;
+      } else {
+        await ref.set({'bookmarkedAt': FieldValue.serverTimestamp()});
+        return true;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('CommunityService toggleBookmark error: $e');
+      return null;
+    }
+  }
+
+  /// Returns whether the current user has bookmarked [postId].
+  static Future<bool> hasBookmarked(String postId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    try {
+      final snap = await _firestore
+          .collection(_usersCollection)
+          .doc(user.uid)
+          .collection(_bookmarksCollection)
+          .doc(postId)
+          .get();
+      return snap.exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Live stream of the current user's bookmarked post IDs (newest first).
+  static Stream<List<String>> bookmarkedPostIdsStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const Stream.empty();
+    return _firestore
+        .collection(_usersCollection)
+        .doc(user.uid)
+        .collection(_bookmarksCollection)
+        .orderBy('bookmarkedAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => d.id).toList());
+  }
+
+  /// Fetches posts by their IDs. Firestore `whereIn` is limited to 30 items;
+  /// only the first 30 IDs in [ids] will be fetched when more are provided.
+  /// Results are returned in the same order as [ids] (newest bookmark first)
+  /// rather than Firestore's arbitrary result order.
+  static Future<List<CommunityPost>> getPostsByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final batch = ids.take(30).toList();
+    try {
+      final snap = await _firestore
+          .collection(_postsCollection)
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+      // Build a map so we can restore the original order (Firestore whereIn
+      // does not guarantee result order).
+      final postsById = {
+        for (var d in snap.docs) d.id: CommunityPost.fromFirestore(d),
+      };
+      return [
+        for (var id in batch)
+          if (postsById.containsKey(id)) postsById[id]!,
+      ];
+    } catch (e) {
+      if (kDebugMode) debugPrint('CommunityService getPostsByIds error: $e');
+      return [];
+    }
+  }
+
+  /// Live stream of posts authored by [userId], newest first.
+  static Stream<List<CommunityPost>> postsByUserStream(String userId) {
+    return _firestore
+        .collection(_postsCollection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommunityPost.fromFirestore(d)).toList(),
+        );
+  }
+
+  /// Live stream of the post count for [userId].
+  /// Uses a simple single-field query (no composite index required) so it
+  /// works without any extra Firestore index setup.
+  static Stream<int> userPostCountStream(String userId) {
+    return _firestore
+        .collection(_postsCollection)
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snap) => snap.size);
+  }
+
+  // ─── Comments ────────────────────────────────────────────────────────────────
   static Stream<List<CommunityComment>> commentsStream(String postId) {
     return _firestore
         .collection(_postsCollection)

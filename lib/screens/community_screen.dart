@@ -236,6 +236,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       ),
       (PostType.tip, l10n.communityPostTypeTip, Icons.lightbulb_outline),
       (PostType.question, l10n.communityPostTypeQuestion, Icons.help_outline),
+      (
+        PostType.appFeedback,
+        l10n.communityPostTypeAppFeedback,
+        Icons.feedback_outlined,
+      ),
     ];
 
     return SingleChildScrollView(
@@ -248,14 +253,16 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
               selected: isSelected,
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(item.$3, size: 16),
-                  const SizedBox(width: 4),
-                  Text(item.$2),
-                ],
-              ),
+              label: isSelected
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(item.$3, size: 16),
+                        const SizedBox(width: 4),
+                        Text(item.$2),
+                      ],
+                    )
+                  : Icon(item.$3, size: 16),
               onSelected: (_) => ref
                   .read(communityFeedProvider.notifier)
                   .setSelectedType(item.$1),

@@ -181,3 +181,32 @@ final createPostProvider =
     NotifierProvider.autoDispose<CreatePostNotifier, CreatePostState>(
       CreatePostNotifier.new,
     );
+
+// ─── Bookmarks ────────────────────────────────────────────────────────────────
+
+/// Live stream of the current user's bookmarked post IDs.
+final bookmarkedPostIdsProvider = StreamProvider<List<String>>((ref) {
+  return CommunityService.bookmarkedPostIdsStream();
+});
+
+/// Async provider that fetches the full [CommunityPost] objects for the
+/// current user's bookmarks (in bookmark order, newest first).
+final bookmarkedPostsProvider =
+    FutureProvider.autoDispose<List<CommunityPost>>((ref) async {
+      final ids = ref.watch(bookmarkedPostIdsProvider).asData?.value ?? [];
+      return CommunityService.getPostsByIds(ids);
+    });
+
+/// Live stream of posts authored by a given user ID.
+final userPostsStreamProvider =
+    StreamProvider.autoDispose.family<List<CommunityPost>, String>(
+      (ref, userId) => CommunityService.postsByUserStream(userId),
+    );
+
+/// Live stream of the post count for a given user ID.
+/// Uses a single-field query (no composite index required).
+final userPostCountProvider =
+    StreamProvider.autoDispose.family<int, String>(
+      (ref, userId) => CommunityService.userPostCountStream(userId),
+    );
+
