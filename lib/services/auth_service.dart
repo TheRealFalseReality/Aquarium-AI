@@ -194,31 +194,28 @@ class AuthService {
 
   /// Sign in with Facebook.
   ///
-  /// Uses [flutter_facebook_auth] to obtain a Facebook access token, then
-  /// signs in to Firebase with [FacebookAuthProvider]. Anonymous accounts are
-  /// automatically linked when possible.
+  /// Uses [flutter_facebook_auth] to obtain a Facebook access token on all
+  /// platforms (web and mobile), then signs in to Firebase with
+  /// [FacebookAuthProvider]. Anonymous accounts are automatically linked when
+  /// possible.
+  ///
+  /// Only `public_profile` is requested; the `email` permission is omitted to
+  /// avoid the "Invalid Scopes: email" error that Facebook raises when `email`
+  /// is requested as an OAuth scope in certain app configurations.
   static Future<User?> signInWithFacebook() async {
     try {
-      AuthCredential credential;
-
-      if (kIsWeb) {
-        // Web: use Firebase popup directly
-        final provider = FacebookAuthProvider();
-        final result = await _auth.signInWithPopup(provider);
-        final user = result.user;
-        if (user != null) await _ensureUserDocument(user);
-        return user;
-      }
-
-      // Mobile: obtain access token from Facebook SDK
+      // Use flutter_facebook_auth for both web and mobile so that permissions
+      // are always sent as Facebook permissions (not OAuth scopes), which avoids
+      // the "Invalid Scopes: email" developer warning from the Facebook API.
       final LoginResult loginResult = await FacebookAuth.instance.login(
-        permissions: const ['email', 'public_profile'],
+        permissions: const ['public_profile'],
       );
 
       if (loginResult.status != LoginStatus.success) return null;
 
       final AccessToken accessToken = loginResult.accessToken!;
-      credential = FacebookAuthProvider.credential(accessToken.tokenString);
+      final AuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
 
       User? user;
       final current = _auth.currentUser;
