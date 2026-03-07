@@ -8,19 +8,6 @@ if (keyPropertiesFile.exists()) {
     keyProperties.load(FileInputStream(keyPropertiesFile))
 }
 
-// Read the Facebook Client Token from the environment (set by CI via GitHub
-// Secrets).  An absent token is only acceptable for local debug builds where
-// Facebook Login is not being tested; release / CI builds should always
-// supply the value.
-val facebookClientToken: String = System.getenv("FACEBOOK_CLIENT_TOKEN") ?: run {
-    logger.warn(
-        "[WARNING] FACEBOOK_CLIENT_TOKEN is not set. " +
-        "Facebook Login will not work at runtime. " +
-        "Set the environment variable before a release build."
-    )
-    ""
-}
-
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
@@ -59,8 +46,18 @@ android {
         // Facebook SDK requires the App ID and Client Token at native build time.
         // The App ID is public; the Client Token is read from the FACEBOOK_CLIENT_TOKEN
         // environment variable (set in CI via GitHub Secrets).
+        // An absent token is only acceptable for local debug builds where
+        // Facebook Login is not being tested; release / CI builds must supply the value.
+        val fbClientToken = System.getenv("FACEBOOK_CLIENT_TOKEN") ?: ""
+        if (fbClientToken.isEmpty()) {
+            logger.warn(
+                "[WARNING] FACEBOOK_CLIENT_TOKEN is not set. " +
+                "Facebook Login will not work at runtime. " +
+                "Set the environment variable before a release build."
+            )
+        }
         resValue("string", "facebook_app_id", "941109785269057")
-        resValue("string", "facebook_client_token", facebookClientToken)
+        resValue("string", "facebook_client_token", fbClientToken)
         resValue("string", "fb_login_protocol_scheme", "fb941109785269057")
     }
 
@@ -123,4 +120,9 @@ dependencies {
 
     // Play Integrity API
     implementation("com.google.android.play:integrity:1.6.0")
+
+    // Facebook Login SDK – required by flutter_facebook_auth for Android.
+    // Pinned to the same version that flutter_facebook_auth 7.x bundles so
+    // that Gradle resolves a single consistent version.
+    implementation("com.facebook.android:facebook-login:17.0.2")
 }
