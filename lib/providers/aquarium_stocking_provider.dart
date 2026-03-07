@@ -11,6 +11,7 @@ import '../models/analysis_history_entry.dart';
 import '../models/tank.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
@@ -189,6 +190,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
     );
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;
@@ -483,6 +487,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
     );
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;

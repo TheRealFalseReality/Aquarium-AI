@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/community_comment.dart';
 import '../models/community_post.dart';
+import 'app_check_service.dart';
 import 'auth_service.dart';
 
 class CommunityService {
@@ -61,6 +62,9 @@ class CommunityService {
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the write.
+    await AppCheckService.requestToken();
 
     try {
       String? imageUrl;
@@ -350,6 +354,9 @@ class CommunityService {
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the write.
+    await AppCheckService.requestToken();
 
     try {
       final now = DateTime.now();
