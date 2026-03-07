@@ -45,6 +45,8 @@ class AnalyticsService {
         return 'chatbot_screen';
       case '/compat-ai':
         return 'fish_compatibility_screen';
+      case '/compat-browser':
+        return 'fish_compat_browser_screen';
       case '/photo-analyzer':
         return 'photo_analysis_screen';
       case '/settings':

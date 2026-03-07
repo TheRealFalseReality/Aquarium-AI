@@ -26,6 +26,7 @@ import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
 import './screens/community_screen.dart';
 import './screens/fish_compat_editor_screen.dart';
+import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/information_screen.dart';
 import './screens/photo_analysis_screen.dart';
@@ -590,6 +591,10 @@ class MyApp extends ConsumerWidget {
               case '/compat-ai':
                 page = const FishCompatibilityScreen();
                 screenName = 'fish_compatibility_screen';
+                break;
+              case '/compat-browser':
+                page = const FishCompatBrowserScreen();
+                screenName = 'fish_compat_browser_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();
