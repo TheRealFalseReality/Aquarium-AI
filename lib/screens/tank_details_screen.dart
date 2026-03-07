@@ -321,7 +321,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       final photo = TankPhoto(
         id: const Uuid().v4(),
         imagePath: picked.path,
-        addedAt: DateTime.now(),
+        dateTaken: DateTime.now(),
       );
       final updatedTank = currentTank.copyWith(
         photos: [...currentTank.photos, photo],
