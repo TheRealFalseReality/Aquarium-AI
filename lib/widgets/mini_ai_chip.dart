@@ -106,6 +106,10 @@ class _MiniAIChipState extends State<MiniAIChip> {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
         child: Container(
+          // Safety constraint to prevent unbounded width crashes when used in Rows
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.45,
+          ),
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
             vertical: verticalPadding,

@@ -573,6 +573,13 @@
   "founderPerkIncreasedAILimits": "Erhöhte kostenlose KI-Nutzungslimits",
   "founderPerkPostBorder": "Exklusiver tiefvioletter Beitragsrahmen",
   "founderPerkBadge": "Exklusives Gründer-Abzeichen im Profil und auf Beiträgen",
+  "founderUpsellBannerTitle": "Gründer-Aquarist-Vorteile freischalten",
+  "founderUpsellBannerBody": "Werbung dauerhaft entfernen und höhere KI-Nutzungslimits mit einem einmaligen Kauf erhalten.",
+  "becomeFounderAquarist": "Gründer-Aquarist werden",
+  "rateLimitReachedTitle": "Kostenloses Limit erreicht",
+  "rateLimitFounderUpsellBody": "Upgrade auf **Gründer-Aquarist**, um höhere KI-Nutzungslimits zu genießen und Werbung dauerhaft zu entfernen.",
+  "aiErrorTitle": "KI-Fehler",
+  "apiKeyRequiredTitle": "API-Schlüssel erforderlich",
   "removeAdsContentDesc": "Unterstütze Aquarium AI mit einem einmaligen Kauf, um alle Werbung dauerhaft zu entfernen.",
   "removeAdsPurchaseTiedToAccount": "Dein Kauf ist mit deinem Store-Konto verknüpft und kann auf jedem Gerät wiederhergestellt werden.",
   "removeAdsThankyouTitle": "Danke! 🎉",
@@ -1044,4 +1051,7 @@
   "reefSafeYesLabel": "🪸 Sicher",
   "reefSafeNoLabel": "✗ Unsicher",
   "reefSafeCautionLabel": "⚠️ Vorsicht"
+  "interstitialAdBlurbTitle": "Kostenlose KI – durch Werbung unterstützt",
+  "interstitialAdBlurbBody": "{hours, plural, =1{Es kann jede Stunde eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.} other{Es kann alle {hours} Stunden eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.}}",
+  "interstitialAdBlurbCta": "Werbung entfernen"
 }

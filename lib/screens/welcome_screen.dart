@@ -33,6 +33,7 @@ import '../widgets/ad_component.dart';
 import '../widgets/api_key_dialog.dart';
 import '../widgets/app_promotion_dialog.dart';
 import '../widgets/aquapi_promotion_dialog.dart';
+import '../widgets/founder_upsell_banner.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
@@ -954,6 +955,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ],
 
                       const SizedBox(height: 16),
+
+                      // Founder upsell banner – full-width above AI cards, only
+                      // shown to free-tier non-founder users.
+                      if (appSettings.enableAI)
+                        FounderUpsellBanner(
+                          usingDevAiKey:
+                              modelState.usingDeveloperGroqKeyForAny,
+                          fullWidth: true,
+                        ),
 
                       // Feature Cards section header with layout toggle
                       Builder(

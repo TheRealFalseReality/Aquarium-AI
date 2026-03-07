@@ -57,3 +57,5 @@ flutter.tar.xz
 flutter/
 /.vscode
 assets/service-account-google-play.json
+/assets/bugs
+/.run

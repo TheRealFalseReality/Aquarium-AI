@@ -20,6 +20,8 @@ import '../services/remote_config_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/ai_error_dialog.dart';
 import '../widgets/fish_card.dart';
+import '../widgets/founder_upsell_banner.dart';
+import '../widgets/interstitial_ad_blurb.dart';
 import '../widgets/modern_chip.dart';
 import 'compatibility_report.dart';
 
@@ -388,7 +390,8 @@ class FishCompatibilityScreenState
               errorMessage: next.error!,
               isApiKeyError: next.isApiKeyError,
               isRetryable: next.isRetryable,
-              onRetry: next.isRetryable
+              isRateLimitError: next.isRateLimitError,
+              onRetry: next.isRetryable && !next.isRateLimitError
                   ? () => notifier.retryCompatibilityReport()
                   : null,
             );
@@ -515,6 +518,18 @@ class FishCompatibilityScreenState
                     ),
                   ),
                   SliverToBoxAdapter(child: _buildCategorySelector(notifier)),
+                  SliverToBoxAdapter(
+                    child: FounderUpsellBanner(
+                      usingDevAiKey:
+                          modelState.usingDeveloperGroqKeyForText,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: InterstitialAdBlurb(
+                      usingDevAiKey:
+                          modelState.usingDeveloperGroqKeyForText,
+                    ),
+                  ),
                   if (isFishCompatDisabled)
                     SliverToBoxAdapter(
                       child: Padding(

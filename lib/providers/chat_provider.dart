@@ -17,6 +17,7 @@ import '../prompts/automation_script_prompt.dart';
 import '../prompts/fish_info_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
@@ -43,6 +44,7 @@ class ChatMessage {
   final bool isError;
   final bool isRetryable;
   final bool isApiKeyError;
+  final bool isRateLimitError;
   final String? originalMessage;
   final bool isAd;
 
@@ -58,6 +60,7 @@ class ChatMessage {
     this.isError = false,
     this.isRetryable = false,
     this.isApiKeyError = false,
+    this.isRateLimitError = false,
     this.originalMessage,
     this.isAd = false,
   });
@@ -215,6 +218,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         );
       }
     }
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     switch (_modelState.activeTextProvider) {
       case AIProvider.gemini:
         if (_modelState.geminiApiKey.isEmpty) {
@@ -688,9 +693,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
                   '⏱️ **Free-tier limit reached** ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
               isUser: false,
               isError: true,
-              isRetryable: true,
-              originalMessage:
-                  'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}',
+              isRetryable: false,
+              isRateLimitError: true,
               photoBytes: imageBytes,
             ),
           ],
@@ -707,6 +711,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
               isUser: false,
               isError: true,
               isRetryable: false,
+              isRateLimitError: true,
             ),
           ],
           isLoading: false,
@@ -730,6 +735,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
                 isUser: false,
                 isError: true,
                 isRetryable: false,
+                isRateLimitError: true,
               ),
             ],
             isLoading: false,
@@ -768,6 +774,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
     final originalMessage =
         'Retry photo analysis${userNote?.isNotEmpty == true ? ': $userNote' : ''}';
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
     try {
       final responseText = await _generateContentWithImage(
         prompt,
@@ -1090,9 +1098,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
           text: friendlyError,
           isUser: false,
           isError: true,
-          isRetryable: !apiKeyError,
+          isRetryable: !apiKeyError && !isRateLimitError,
           isApiKeyError: apiKeyError,
-          originalMessage: apiKeyError ? null : originalMessage,
+          isRateLimitError: isRateLimitError,
+          originalMessage: apiKeyError || isRateLimitError ? null : originalMessage,
         ),
       ],
       isLoading: false,

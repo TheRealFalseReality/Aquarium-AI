@@ -3044,6 +3044,41 @@
     "description": "Perk line: badge shown on profile and post cards for Founder Aquarists"
   },
 
+  "founderUpsellBannerTitle": "Unlock Founder Aquarist Perks",
+  "@founderUpsellBannerTitle": {
+    "description": "Title of the dismissible founder upsell banner on AI tool screens"
+  },
+
+  "founderUpsellBannerBody": "Remove ads permanently and get higher AI usage limits with a one-time purchase.",
+  "@founderUpsellBannerBody": {
+    "description": "Body text of the dismissible founder upsell banner on AI tool screens"
+  },
+
+  "becomeFounderAquarist": "Become a Founder Aquarist",
+  "@becomeFounderAquarist": {
+    "description": "Button label to open the Founder Aquarist / Remove Ads purchase dialog"
+  },
+
+  "rateLimitReachedTitle": "Free Tier Limit Reached",
+  "@rateLimitReachedTitle": {
+    "description": "Title of the error dialog shown when the user hits the free-tier AI rate limit"
+  },
+
+  "rateLimitFounderUpsellBody": "Upgrade to **Founder Aquarist** to enjoy higher AI usage limits and remove ads permanently.",
+  "@rateLimitFounderUpsellBody": {
+    "description": "Founder upsell text shown inside the rate-limit error dialog"
+  },
+
+  "aiErrorTitle": "AI Error",
+  "@aiErrorTitle": {
+    "description": "Default title of the AI error dialog"
+  },
+
+  "apiKeyRequiredTitle": "API Key Required",
+  "@apiKeyRequiredTitle": {
+    "description": "Title of the AI error dialog when an API key is missing or invalid"
+  },
+
   "removeAdsContentDesc": "Support Aquarium AI with a one-time purchase to remove all ads permanently.",
   "@removeAdsContentDesc": {
     "description": "Main description text inside the Remove Ads purchase dialog"
@@ -5126,5 +5161,22 @@
   "reefSafeCautionLabel": "⚠️ Caution",
   "@reefSafeCautionLabel": {
     "description": "Compact reef-safe badge text shown on fish tiles when a fish has reef-safe caution"
+
+  "interstitialAdBlurbTitle": "Free AI — Supported by Ads",
+  "@interstitialAdBlurbTitle": {
+    "description": "Title of the dismissible blurb on AI tool screens explaining that a full-screen ad may appear"
+  },
+
+  "interstitialAdBlurbBody": "{hours, plural, =1{A full-screen ad may appear every hour to help cover the cost of the free AI tier.} other{A full-screen ad may appear every {hours} hours to help cover the cost of the free AI tier.}}",
+  "@interstitialAdBlurbBody": {
+    "description": "Body of the dismissible blurb explaining the interstitial ad frequency",
+    "placeholders": {
+      "hours": {"type": "num", "format": "compact"}
+    }
+  },
+
+  "interstitialAdBlurbCta": "Remove Ads",
+  "@interstitialAdBlurbCta": {
+    "description": "Call-to-action button label on the interstitial ad blurb — opens the Remove Ads purchase dialog"
   }
 }

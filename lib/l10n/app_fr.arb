@@ -573,6 +573,13 @@
   "founderPerkIncreasedAILimits": "Limites d'utilisation d'IA gratuites augmentées",
   "founderPerkPostBorder": "Bordure de publication violet foncé exclusive",
   "founderPerkBadge": "Badge Fondateur exclusif sur le profil et les publications",
+  "founderUpsellBannerTitle": "Débloquez les avantages du Fondateur Aquariste",
+  "founderUpsellBannerBody": "Supprimez les publicités définitivement et obtenez des limites d'utilisation de l'IA plus élevées avec un achat unique.",
+  "becomeFounderAquarist": "Devenir Fondateur Aquariste",
+  "rateLimitReachedTitle": "Limite du niveau gratuit atteinte",
+  "rateLimitFounderUpsellBody": "Passez au niveau **Fondateur Aquariste** pour profiter de limites d'utilisation de l'IA plus élevées et supprimer les publicités définitivement.",
+  "aiErrorTitle": "Erreur IA",
+  "apiKeyRequiredTitle": "Clé API requise",
   "removeAdsContentDesc": "Soutenez Aquarium AI avec un achat unique pour supprimer toutes les publicités de façon permanente.",
   "removeAdsPurchaseTiedToAccount": "Votre achat est lié à votre compte de boutique et peut être restauré sur n'importe quel appareil.",
   "removeAdsThankyouTitle": "Merci ! 🎉",
@@ -1044,4 +1051,7 @@
   "reefSafeYesLabel": "🪸 Sûr",
   "reefSafeNoLabel": "✗ Non adapté",
   "reefSafeCautionLabel": "⚠️ Précaution"
+  "interstitialAdBlurbTitle": "IA gratuite — financée par la publicité",
+  "interstitialAdBlurbBody": "{hours, plural, =1{Une publicité plein écran peut apparaître toutes les heures pour aider à couvrir le coût du niveau IA gratuit.} other{Une publicité plein écran peut apparaître toutes les {hours} heures pour aider à couvrir le coût du niveau IA gratuit.}}",
+  "interstitialAdBlurbCta": "Supprimer les publicités"
 }

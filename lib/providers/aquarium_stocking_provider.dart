@@ -11,6 +11,7 @@ import '../models/analysis_history_entry.dart';
 import '../models/tank.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
@@ -33,6 +34,7 @@ class AquariumStockingState {
   final String? error;
   final bool isApiKeyError;
   final bool isRetryable;
+  final bool isRateLimitError;
   final List<Fish> selectedFish;
 
   AquariumStockingState({
@@ -42,6 +44,7 @@ class AquariumStockingState {
     this.error,
     this.isApiKeyError = false,
     this.isRetryable = false,
+    this.isRateLimitError = false,
     this.selectedFish = const [],
   });
 
@@ -52,6 +55,7 @@ class AquariumStockingState {
     String? error,
     bool? isApiKeyError,
     bool? isRetryable,
+    bool? isRateLimitError,
     List<Fish>? selectedFish,
     bool clearError = false,
     bool clearRecommendation = false,
@@ -65,6 +69,8 @@ class AquariumStockingState {
       error: clearError ? null : error ?? this.error,
       isApiKeyError: clearError ? false : isApiKeyError ?? this.isApiKeyError,
       isRetryable: clearError ? false : isRetryable ?? this.isRetryable,
+      isRateLimitError:
+          clearError ? false : isRateLimitError ?? this.isRateLimitError,
       selectedFish: selectedFish ?? this.selectedFish,
     );
   }
@@ -158,6 +164,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           error:
               '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
@@ -165,6 +172,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           error:
               '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       }
@@ -182,6 +190,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
     );
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;
@@ -412,6 +423,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           error:
               '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
@@ -419,6 +431,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
           error:
               '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       }
@@ -474,6 +487,9 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
     );
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;

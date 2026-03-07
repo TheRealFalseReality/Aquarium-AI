@@ -12,10 +12,12 @@ const String developerGroqApiKey = String.fromEnvironment(
 // Required for Firebase App Check on the Web platform.
 // Obtain your key at https://www.google.com/recaptcha/admin and register it
 // in Firebase Console → Build → App Check → Web app → reCAPTCHA v3.
-// Leave the default empty; App Check will fail gracefully on web if not set.
+// The default below is the production site key for this app.  Site keys are
+// public (safe to embed in client-side code); only the server-side secret key
+// must be kept private.
 const String reCaptchaV3SiteKey = String.fromEnvironment(
   'RECAPTCHA_V3_SITE_KEY',
-  defaultValue: '',
+  defaultValue: '6Lc6P4AsAAAAANB5aWATibw1Aada7IUq6IttLI5a',
 );
 
 // AdMob constants

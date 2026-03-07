@@ -8,6 +8,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../models/analysis_history_entry.dart';
 import '../prompts/fish_compatibility_prompt.dart';
+import '../services/app_check_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
@@ -66,6 +67,7 @@ class FishCompatibilityState {
   final String? error;
   final bool isRetryable;
   final bool isApiKeyError;
+  final bool isRateLimitError;
   final String? lastCategory;
 
   FishCompatibilityState({
@@ -77,6 +79,7 @@ class FishCompatibilityState {
     this.error,
     this.isRetryable = false,
     this.isApiKeyError = false,
+    this.isRateLimitError = false,
     this.lastCategory,
   });
 
@@ -89,6 +92,7 @@ class FishCompatibilityState {
     String? error,
     bool? isRetryable,
     bool? isApiKeyError,
+    bool? isRateLimitError,
     String? lastCategory,
     bool clearReport = false,
     bool clearLastReport = false,
@@ -103,6 +107,8 @@ class FishCompatibilityState {
       error: clearError ? null : error ?? this.error,
       isRetryable: clearError ? false : isRetryable ?? this.isRetryable,
       isApiKeyError: clearError ? false : isApiKeyError ?? this.isApiKeyError,
+      isRateLimitError:
+          clearError ? false : isRateLimitError ?? this.isRateLimitError,
       lastCategory: lastCategory ?? this.lastCategory,
     );
   }
@@ -208,6 +214,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
           error:
               '⏱️ Free-tier limit reached ($maxPerMin requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       } else if (result == DevRateLimitResult.dailyLimitReached) {
@@ -215,12 +222,16 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
           error:
               '📅 Daily free-tier limit reached ($maxPerDay requests/day). Come back tomorrow or add your own Groq API key in Settings.',
           isLoading: false,
+          isRateLimitError: true,
         );
         return;
       }
     }
 
     _cancellableCompleter = CancellableCompleter();
+
+    // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
+    await AppCheckService.requestToken();
 
     try {
       String? responseText;
