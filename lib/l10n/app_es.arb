@@ -1067,7 +1067,7 @@
   "speciesType": "Tipo de especie",
   "quantityLabel": "Cantidad",
   "ageYearsMonths": "{years}y {months}m",
-  "tankAge": "Edad del acuario",
+  "tankAge": "Edad",
   "inhabitantAge": "Edad",
   "harmonyDelta": "Delta de armonía",
 

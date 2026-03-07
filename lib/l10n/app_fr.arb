@@ -1067,7 +1067,7 @@
   "speciesType": "Type d'espèce",
   "quantityLabel": "Quantité",
   "ageYearsMonths": "{years}y {months}m",
-  "tankAge": "Âge du bac",
+  "tankAge": "Âge",
   "inhabitantAge": "Âge",
   "harmonyDelta": "Delta d'harmonie",
 

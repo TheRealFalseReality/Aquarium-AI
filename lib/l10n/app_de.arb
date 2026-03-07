@@ -1067,7 +1067,7 @@
   "speciesType": "Artentyp",
   "quantityLabel": "Anzahl",
   "ageYearsMonths": "{years}y {months}m",
-  "tankAge": "Beckeralter",
+  "tankAge": "Alter",
   "inhabitantAge": "Alter",
   "harmonyDelta": "Harmonie-Delta",
 

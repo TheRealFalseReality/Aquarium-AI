@@ -5246,7 +5246,7 @@
     }
   },
 
-  "tankAge": "Tank Age",
+  "tankAge": "Age",
   "@tankAge": {
     "description": "Label for the tank age chip"
   },
