@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.2.00] - 2026-3-
-
-### ***Breaking Change***
-- UUID reset American Cichlids
+## [3.1.03] - 2026-3-7 - UUIDs, Mostly Authorization Checks, Facebook Login support
 
 ### Changed
+
+### ***Please Note:***
+- **You MAY need to reset your storage in order for new data set to load. I added UUIDs to the fish types to allow for better changes in the future.**
+- The rest if mostly backend updates.
+
+**Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
 
 ## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features  
 
