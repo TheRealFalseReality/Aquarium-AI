@@ -18,7 +18,7 @@ import '../services/fish_firestore_service.dart';
 // ── authorised editor ─────────────────────────────────────────────────────────
 
 /// The Firebase Auth UID that is permitted to write fish data to Firestore.
-const String _authorizedEditorUid = 'dEaO8u8e1bQim1S1kx5ZFYLYyWJ2';
+const String _authorizedEditorUid = String.fromEnvironment('AUTHORIZED_USER');
 
 // ── model ────────────────────────────────────────────────────────────────────
 
