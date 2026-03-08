@@ -58,6 +58,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
+  /// Called when the user chooses to skip sign-in entirely.
+  /// If launched from the onboarding flow (returnRouteArgs contains
+  /// 'onboardingNextPage'), navigates directly to that onboarding step.
+  /// Otherwise, just pops back to the previous screen.
+  void _skipSignIn() {
+    final args = _returnRouteArgs;
+    if (args is Map && args.containsKey('onboardingNextPage')) {
+      final nextPage = (args['onboardingNextPage'] as int?) ?? 2;
+      Navigator.of(context).pushReplacementNamed(
+        '/onboarding',
+        arguments: {'initialPage': nextPage},
+      );
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -461,7 +478,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         TextButton(
                           onPressed: _isLoading || _isSocialLoading
                               ? null
-                              : () => Navigator.of(context).maybePop(),
+                              : _skipSignIn,
                           child: Text(
                             l10n.authSkipSignIn,
                             style: TextStyle(

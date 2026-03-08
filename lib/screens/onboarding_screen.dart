@@ -15,6 +15,8 @@ import '../widgets/modern_chip.dart';
 import 'tank_creation_screen.dart' show InhabitantDialog;
 import 'tank_volume_calculator.dart';
 
+import '../widgets/fish_image.dart';
+
 /// A five-step, skippable onboarding flow shown once on first launch.
 ///
 /// Steps:
@@ -130,7 +132,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
-      _pageController.nextPage(
+      // If leaving the tank-creation step (2) with no tank name, skip the
+      // inhabitants step (3) since there is nothing to add inhabitants to.
+      final skipInhabitants = _currentPage == 2 &&
+          _tankNameController.text.trim().isEmpty;
+      final targetPage = skipInhabitants ? 4 : _currentPage + 1;
+      if (targetPage >= _totalPages) {
+        _finish(skipped: false);
+        return;
+      }
+      _pageController.animateToPage(
+        targetPage,
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
@@ -717,8 +729,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildBenefit(context, cs, '🏆', l10n.onboardingSignInBenefit1),
-                const SizedBox(height: 10),
                 _buildBenefit(context, cs, '🌐', l10n.onboardingSignInBenefit2),
                 const SizedBox(height: 10),
                 _buildBenefit(context, cs, '💡', l10n.onboardingSignInBenefit3),
@@ -728,14 +738,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       _markInteracted(1);
-                      // Navigate to auth, which will return to onboarding at
-                      // step 2 (tank creation) after successful sign-in.
+                      // Navigate to auth; on success the user goes to their
+                      // profile where a banner prompts them to continue onboarding.
                       Navigator.pushNamed(
                         context,
                         '/auth',
                         arguments: {
-                          'returnRoute': '/onboarding',
-                          'returnRouteArgs': {'initialPage': 2},
+                          'returnRoute': '/profile',
+                          'returnRouteArgs': {
+                            'fromOnboarding': true,
+                            'onboardingNextPage': 2,
+                          },
                         },
                       );
                     },
@@ -1185,23 +1198,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ..._inhabitants.asMap().entries.map((entry) {
               final index = entry.key;
               final inhabitant = entry.value;
+              // Look up the Fish object to get its image.
+              final fish = _availableFish.where(
+                (f) => f.name == inhabitant.fishUnit,
+              ).firstOrNull;
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircleAvatar(
-                      backgroundColor: cs.primaryContainer,
-                      child: Text(
-                        inhabitant.fishUnit.isNotEmpty
-                            ? inhabitant.fishUnit[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: cs.onPrimaryContainer,
-                        ),
-                      ),
+                    width: 44,
+                    height: 44,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: fish != null
+                          ? FishImage(fish: fish, fit: BoxFit.cover)
+                          : Container(
+                              color: cs.primaryContainer,
+                              child: Center(
+                                child: Text(
+                                  inhabitant.fishUnit.isNotEmpty
+                                      ? inhabitant.fishUnit[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   title: Text(inhabitant.customName),

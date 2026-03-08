@@ -648,8 +648,19 @@ class MyApp extends ConsumerWidget {
                 break;
               case '/profile':
                 String? uid;
-                if (args is Map) uid = args['userId'] as String?;
-                page = ProfileScreen(userId: uid);
+                bool fromOnboarding = false;
+                int onboardingNextPage = 2;
+                if (args is Map) {
+                  uid = args['userId'] as String?;
+                  fromOnboarding = (args['fromOnboarding'] as bool?) ?? false;
+                  onboardingNextPage =
+                      (args['onboardingNextPage'] as int?) ?? 2;
+                }
+                page = ProfileScreen(
+                  userId: uid,
+                  fromOnboarding: fromOnboarding,
+                  onboardingNextPage: onboardingNextPage,
+                );
                 screenName = 'profile_screen';
                 break;
               default:

@@ -131,7 +131,19 @@ class ProfileScreen extends ConsumerStatefulWidget {
   /// When provided, shows another user's profile (read-only).
   final String? userId;
 
-  const ProfileScreen({super.key, this.userId});
+  /// When `true`, a banner is shown prompting the user to continue onboarding.
+  /// Set when navigating here after a successful sign-in from the onboarding flow.
+  final bool fromOnboarding;
+
+  /// The onboarding page index to resume from when the user taps the banner.
+  final int onboardingNextPage;
+
+  const ProfileScreen({
+    super.key,
+    this.userId,
+    this.fromOnboarding = false,
+    this.onboardingNextPage = 2,
+  });
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -147,6 +159,54 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (_isOwnProfile) {
       _syncTanks();
     }
+    if (widget.fromOnboarding) {
+      // Schedule the onboarding-continue banner after the first frame so that
+      // the ScaffoldMessenger is available.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showOnboardingBanner();
+      });
+    }
+  }
+
+  void _showOnboardingBanner() {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    ScaffoldMessenger.of(context).showMaterialBanner(
+      MaterialBanner(
+        backgroundColor: cs.primaryContainer,
+        content: Text(
+          l10n.onboardingContinueBannerDesc,
+          style: TextStyle(color: cs.onPrimaryContainer),
+        ),
+        leading: Icon(Icons.auto_awesome_outlined, color: cs.onPrimaryContainer),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: cs.onPrimaryContainer.withOpacity(0.7),
+            ),
+            child: Text(l10n.onboardingContinueBannerDismiss),
+          ),
+          FilledButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              Navigator.of(context).pushNamed(
+                '/onboarding',
+                arguments: {'initialPage': widget.onboardingNextPage},
+              );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
+            ),
+            child: Text(l10n.onboardingContinueBanner),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _syncTanks() async {

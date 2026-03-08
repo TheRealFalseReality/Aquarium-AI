@@ -1324,4 +1324,20 @@
   "@calculatorUseThisSize": {
     "description": "Button in the tank volume calculator results to autofill the result into the onboarding tank size fields"
   }
+,
+
+  "onboardingContinueBanner": "Continuer la configuration",
+  "@onboardingContinueBanner": {
+    "description": "Label on the profile screen banner encouraging the user to continue onboarding"
+  },
+
+  "onboardingContinueBannerDesc": "Vous avez presque terminé ! Reprenez là où vous vous êtes arrêté.",
+  "@onboardingContinueBannerDesc": {
+    "description": "Body text on the onboarding continue banner shown on the profile screen"
+  },
+
+  "onboardingContinueBannerDismiss": "Ignorer",
+  "@onboardingContinueBannerDismiss": {
+    "description": "Dismiss action on the onboarding continue banner"
+  }
 }
