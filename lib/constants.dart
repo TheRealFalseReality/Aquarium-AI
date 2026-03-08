@@ -118,9 +118,6 @@ const String rcDefaultFreeGroqImageModel =
 const String rcDefaultAquapiOriginalImageUrl = '';
 const String rcDefaultAquapiEssentialImageUrl = '';
 
-// Fish compatibility data (empty = use bundled assets/data/fishcompat.json)
-const String rcDefaultFishcompatJson = '';
-
 // In-app purchase pricing (0.0 = do not show a price label)
 const double rcDefaultEarlySupporterPrice = 0.99;
 
@@ -224,10 +221,6 @@ class RemoteConfigKeys {
   static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
 
   // ── Fish compatibility data ─────────────────────────────────────────────
-  /// String — full JSON content of the fish compatibility database.
-  /// Empty string (default) means use the bundled `assets/data/fishcompat.json`.
-  static const String fishcompatJson = 'fishcompat_json';
-
   // ── In-app purchase pricing ─────────────────────────────────────────────
   /// String — USD price for the Early Supporter lifetime purchase.
   /// Store a positive number (e.g. `0.99`) in Remote Config.

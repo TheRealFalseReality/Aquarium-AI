@@ -133,27 +133,77 @@ void main() {
       }
     });
 
-    test('loadFishData persists JSON to SharedPreferences', () async {
-      await service.loadFishData();
-
-      final prefs = await SharedPreferences.getInstance();
-      // Without RC data the local asset is used; nothing is written to SP
-      // (SP is only written when RC provides data).
-      // Verify the key is absent when no RC JSON is set.
-      expect(prefs.getString('fishcompat_cached_json'), isNull);
-    });
-
-    test('clearPersistentCache removes SharedPreferences entry', () async {
-      // Manually seed an SP entry to simulate a previous RC fetch.
+    test('clearPersistentCache clears both in-memory and SP cache', () async {
+      // Seed an SP entry to simulate a previous Firestore fetch.
+      // The empty arrays mean _parseFishMap produces empty lists; the service
+      // falls through to the local asset to populate the in-memory cache.
       SharedPreferences.setMockInitialValues({
         'fishcompat_cached_json': '{"freshwater":[],"marine":[]}',
       });
       final svc = FishDataService();
+      await svc.loadFishData(); // loads from local asset (SP data is empty)
+
       await svc.clearPersistentCache();
 
+      expect(svc.getCachedFishByCategory('freshwater'), isNull,
+          reason: 'In-memory cache should be cleared');
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('fishcompat_cached_json'), isNull);
-      expect(svc.getCachedFishByCategory('freshwater'), isNull);
+      expect(prefs.getString('fishcompat_cached_json'), isNull,
+          reason: 'SP cache key should be removed');
+    });
+
+    test('loadFishData falls back to SP cache when Firestore is unavailable',
+        () async {
+      // Seed SP with a minimal valid dataset that contains a fish named
+      // "GuppySPCacheTest" — a name that cannot exist in the bundled local
+      // asset.  This lets us prove the data came from the SP cache rather
+      // than the local fallback asset.
+      const uniqueName = 'GuppySPCacheTest';
+      final mockJson = '{"freshwater":[{"uuid":"test-sp-1","name":"$uniqueName",'
+          '"commonNames":["$uniqueName"],"imageURL":"https://raw.githubusercontent.com/'
+          'TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/'
+          'guppies.webp","compatible":[],"notRecommended":[],'
+          '"notCompatible":[],"withCaution":[]}],'
+          '"marine":[{"uuid":"test-sp-2","name":"TestClownfish",'
+          '"commonNames":["TestClownfish"],"imageURL":"https://raw.githubusercontent.com/'
+          'TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/'
+          'clownfish_male.webp","reefSafe":"Yes","compatible":[],'
+          '"notRecommended":[],"notCompatible":[],"withCaution":[]}]}';
+      SharedPreferences.setMockInitialValues({
+        'fishcompat_cached_json': mockJson,
+      });
+
+      // Firestore is not initialised in the test environment so it throws
+      // immediately; the service catches that and falls through to SP.
+      final svc = FishDataService();
+      final data = await svc.loadFishData();
+
+      // The unique sentinel name proves SP data was used, not the local asset.
+      final freshwater = data['freshwater'] ?? [];
+      expect(
+        freshwater.any((f) => f.name == uniqueName),
+        isTrue,
+        reason: 'SP cache data should be returned when Firestore is unavailable',
+      );
+    });
+
+    test('fish localImagePath extracts assets/ suffix from full URL', () async {
+      final data = await service.loadFishData();
+
+      for (final category in ['freshwater', 'marine']) {
+        for (final fish in data[category]!) {
+          expect(
+            fish.localImagePath,
+            startsWith('assets/images/fish/'),
+            reason: '${fish.name} localImagePath should be a local asset path',
+          );
+          expect(
+            fish.localImagePath,
+            endsWith('.webp'),
+            reason: '${fish.name} localImagePath should use .webp extension',
+          );
+        }
+      }
     });
   });
 }

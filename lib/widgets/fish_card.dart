@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -119,20 +118,11 @@ class FishCard extends ConsumerWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      CachedNetworkImage(
-                        imageUrl: fish.imageURL,
+                      Image.asset(
+                        fish.localImagePath,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: cs.surfaceVariant,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: cs.primary,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) =>
-                            const Center(child: Icon(Icons.error)),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(child: Icon(Icons.set_meal)),
                       ),
                       Positioned(
                         top: 4,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,8 +13,18 @@ import '../main_layout.dart';
 import '../providers/web_download_stub.dart'
     if (dart.library.html) '../providers/web_download_web.dart';
 import '../services/analytics_service.dart';
+import '../services/fish_firestore_service.dart';
+
+// ── authorised editor ─────────────────────────────────────────────────────────
+
+/// The Firebase Auth UID that is permitted to write fish data to Firestore.
+const String _authorizedEditorUid = String.fromEnvironment('AUTHORIZED_USER');
 
 // ── model ────────────────────────────────────────────────────────────────────
+
+/// Sentinel value used by [_FishEntry.copyWith] to distinguish an explicit
+/// `null` from "not provided" for the nullable [_FishEntry.reefSafe] field.
+const Object _sentinel = Object();
 
 class _FishEntry {
   String uuid;
@@ -65,21 +76,45 @@ class _FishEntry {
   _FishEntry copy() => _FishEntry.fromJson(toJson());
 
   _FishEntry copyWith({
+    String? uuid,
+    String? name,
+    String? imageURL,
+    List<String>? commonNames,
+    Object? reefSafe = _sentinel,
     List<String>? compatible,
     List<String>? notRecommended,
     List<String>? notCompatible,
     List<String>? withCaution,
   }) => _FishEntry(
-    uuid: uuid,
-    name: name,
-    imageURL: imageURL,
-    commonNames: commonNames,
-    reefSafe: reefSafe,
-    compatible: compatible ?? this.compatible,
-    notRecommended: notRecommended ?? this.notRecommended,
-    notCompatible: notCompatible ?? this.notCompatible,
-    withCaution: withCaution ?? this.withCaution,
+    uuid: uuid ?? this.uuid,
+    name: name ?? this.name,
+    imageURL: imageURL ?? this.imageURL,
+    commonNames: commonNames ?? List<String>.from(this.commonNames),
+    reefSafe: reefSafe == _sentinel ? this.reefSafe : reefSafe as String?,
+    compatible: compatible ?? List<String>.from(this.compatible),
+    notRecommended: notRecommended ?? List<String>.from(this.notRecommended),
+    notCompatible: notCompatible ?? List<String>.from(this.notCompatible),
+    withCaution: withCaution ?? List<String>.from(this.withCaution),
   );
+
+  /// Local asset path derived from [imageURL].
+  ///
+  /// [imageURL] follows the convention:
+  ///   `https://raw.githubusercontent.com/.../assets/images/fish/XXX.webp`
+  ///
+  /// The bundled asset lives at `assets/images/fish/XXX.webp`, so the local
+  /// path is the `assets/…` suffix of the URL.
+  String get localImagePath {
+    const assetsMarker = 'assets/';
+    final idx = imageURL.indexOf(assetsMarker);
+    if (idx != -1) return imageURL.substring(idx);
+    // Fallback for bare filenames without a URL prefix.
+    final filename = imageURL.contains('/') ? imageURL.split('/').last : imageURL;
+    final base = filename.contains('.')
+        ? filename.substring(0, filename.lastIndexOf('.'))
+        : filename;
+    return 'assets/images/fish/$base.webp';
+  }
 }
 
 // ── validator ─────────────────────────────────────────────────────────────────
@@ -170,6 +205,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
   Map<String, List<_FishEntry>> _savedData = {};
   bool _isLoading = true;
   String? _loadError;
+  bool _isSavingToFirestore = false;
+  bool _isRefreshing = false;
 
   // Validation
   List<String> _validationErrors = [];
@@ -184,6 +221,10 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   // Grid column count (1–4)
   int _columnCount = 2;
+
+  /// Whether the currently signed-in user is the authorised Firestore editor.
+  bool get _isAuthorizedEditor =>
+      FirebaseAuth.instance.currentUser?.uid == _authorizedEditorUid;
 
   @override
   void initState() {
@@ -233,7 +274,48 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     return (count: count, modifiedIndices: modifiedIndices);
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData({bool fromFirestore = true}) async {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+
+    // 1. Try Firestore first (primary source).
+    if (fromFirestore) {
+      try {
+        final firestoreData = await FishFirestoreService.fetchFishData()
+            .timeout(const Duration(seconds: 10));
+        if (firestoreData != null && firestoreData.isNotEmpty) {
+          final result = <String, List<_FishEntry>>{};
+          for (final category in ['freshwater', 'marine']) {
+            final rawList = firestoreData[category];
+            if (rawList != null && rawList.isNotEmpty) {
+              final list = rawList
+                  .map((e) => _FishEntry.fromJson(e))
+                  .toList();
+              list.sort(
+                (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+              );
+              result[category] = list;
+            }
+          }
+          if (result.isNotEmpty) {
+            setState(() {
+              _data = result;
+              _savedData = _deepCopy(result);
+              _isLoading = false;
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('FishCompatEditor: Firestore load failed ($e). Falling back to local asset.');
+        }
+      }
+    }
+
+    // 2. Fall back to the bundled local asset (human-readable reference copy).
     try {
       final jsonString = await rootBundle.loadString(
         'assets/data/fishcompat.json',
@@ -276,14 +358,86 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     }
   }
 
-  void _saveChanges() {
-    setState(() => _savedData = _deepCopy(_data));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('✅ Changes saved.'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  Future<void> _saveChanges() async {
+    // Commit the local snapshot immediately so dirty tracking clears.
+    setState(() {
+      _savedData = _deepCopy(_data);
+    });
+
+    if (_isAuthorizedEditor) {
+      // Build the JSON map from the working copy and upload to Firestore.
+      setState(() => _isSavingToFirestore = true);
+      try {
+        final output = <String, dynamic>{};
+        for (final cat in ['freshwater', 'marine']) {
+          if (_data.containsKey(cat)) {
+            output[cat] = _data[cat]!.map((f) => f.toJson()).toList();
+          }
+        }
+        await FishFirestoreService.uploadJsonData(output);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Saved to Firestore.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Firestore save failed: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isSavingToFirestore = false);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            '✅ Changes saved locally. Sign in as the editor account to save to Firestore.',
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Reload the latest data from Firestore, discarding any unsaved local edits.
+  Future<void> _refreshFromFirestore() async {
+    if (_computeDirtyInfo().count > 0) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Unsaved Changes'),
+          content: const Text(
+            'Refreshing will discard your unsaved changes. Continue?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Discard & Refresh'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+    setState(() => _isRefreshing = true);
+    await _loadData(fromFirestore: true);
+    if (mounted) {
+      setState(() => _isRefreshing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('🔄 Refreshed from Firestore.')),
+      );
+    }
   }
 
   Future<void> _undoChanges() async {
@@ -337,7 +491,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       ),
     );
     if (result == 'save') {
-      _saveChanges();
+      await _saveChanges();
       return true;
     }
     return result == 'discard';
@@ -743,14 +897,26 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
     final dirty = changedCount > 0;
 
     Widget body;
-    if (_isLoading) {
-      body = const Center(child: CircularProgressIndicator());
+    if (_isLoading || _isRefreshing) {
+      body = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(
+              _isRefreshing ? 'Refreshing from Firestore…' : 'Loading…',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      );
     } else if (_loadError != null) {
       body = Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Error loading fishcompat.json:\n$_loadError',
+            'Error loading fish data:\n$_loadError',
             style: TextStyle(color: colorScheme.error),
           ),
         ),
@@ -768,7 +934,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       },
       child: MainLayout(
         title: 'Fish Compat Editor',
-        floatingActionButton: _isLoading || _loadError != null
+        floatingActionButton: _isLoading || _isRefreshing || _loadError != null
             ? null
             : Column(
                 mainAxisSize: MainAxisSize.min,
@@ -800,9 +966,23 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     const SizedBox(height: 8),
                     FloatingActionButton.extended(
                       heroTag: 'save',
-                      onPressed: _saveChanges,
-                      icon: const Icon(Icons.save),
-                      label: Text('Save ($changedCount)'),
+                      onPressed: _isSavingToFirestore ? null : _saveChanges,
+                      icon: _isSavingToFirestore
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.save),
+                      label: Text(
+                        _isSavingToFirestore
+                            ? 'Saving…'
+                            : 'Save ($changedCount)'
+                                '${_isAuthorizedEditor ? "" : " (local)"}',
+                      ),
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,
                     ),
@@ -816,6 +996,19 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   ],
                   const SizedBox(height: 8),
                   FloatingActionButton.extended(
+                    heroTag: 'refresh',
+                    onPressed: _isRefreshing ? null : _refreshFromFirestore,
+                    icon: _isRefreshing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh),
+                    label: const Text('Refresh'),
+                  ),
+                  const SizedBox(height: 8),
+                  FloatingActionButton.extended(
                     heroTag: 'download',
                     onPressed: _isDownloading ? null : _downloadJson,
                     icon: _isDownloading
@@ -825,7 +1018,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.download),
-                    label: const Text('Download'),
+                    label: const Text('Download JSON'),
                   ),
                 ],
               ),
@@ -852,16 +1045,52 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               children: [
                 const Icon(Icons.bug_report, color: Colors.white, size: 16),
                 const SizedBox(width: 8),
-                const Text(
-                  'DEBUG TOOL – not visible in release builds',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                const Flexible(
+                  child: Text(
+                    'DEBUG TOOL – not visible in release builds',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const Spacer(),
+                // Auth / editor role badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _isAuthorizedEditor
+                        ? Colors.green.shade700
+                        : Colors.grey.shade600,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isAuthorizedEditor ? Icons.edit : Icons.visibility,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _isAuthorizedEditor ? 'Editor' : 'Read-only',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 if (changedCount > 0) ...[
+                  const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -880,9 +1109,9 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
                 ],
-                if (_validationRun)
+                if (_validationRun) ...[
+                  const SizedBox(width: 6),
                   Icon(
                     _validationErrors.isEmpty
                         ? Icons.check_circle
@@ -892,6 +1121,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                         : Colors.red.shade200,
                     size: 16,
                   ),
+                ],
               ],
             ),
           ),
@@ -1048,8 +1278,8 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            f.imageURL,
+          child: Image.asset(
+            f.localImagePath,
             width: 56,
             height: 56,
             fit: BoxFit.cover,
@@ -1057,7 +1287,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               width: 56,
               height: 56,
               color: colorScheme.surfaceVariant,
-              child: const Icon(Icons.broken_image),
+              child: const Icon(Icons.image_not_supported),
             ),
           ),
         ),

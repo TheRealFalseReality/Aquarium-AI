@@ -21,6 +21,27 @@ class Fish {
     required this.withCaution,
   });
 
+  /// Local asset path for the fish image.
+  ///
+  /// [imageURL] follows the convention:
+  ///   `https://raw.githubusercontent.com/.../assets/images/fish/XXX.webp`
+  ///
+  /// The bundled asset lives at the same relative path `assets/images/fish/XXX.webp`,
+  /// so we simply extract the `assets/…` suffix from the URL.
+  String get localImagePath {
+    const assetsMarker = 'assets/';
+    final idx = imageURL.indexOf(assetsMarker);
+    if (idx != -1) {
+      return imageURL.substring(idx);
+    }
+    // Fallback for bare filenames (no URL prefix).
+    final filename = imageURL.contains('/') ? imageURL.split('/').last : imageURL;
+    final base = filename.contains('.')
+        ? filename.substring(0, filename.lastIndexOf('.'))
+        : filename;
+    return 'assets/images/fish/$base.webp';
+  }
+
   factory Fish.fromJson(Map<String, dynamic> json) {
     // Helper function to safely parse lists that might contain objects
     List<String> parseStringList(List<dynamic>? data) {
