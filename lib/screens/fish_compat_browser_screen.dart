@@ -780,7 +780,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           width: avatarW,
                           height: rowH,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => SizedBox(
+                          errorBuilder: (_, _, _) => SizedBox(
                             width: avatarW,
                             height: rowH,
                             child: Icon(Icons.set_meal, color: cs.outline),
@@ -877,7 +877,7 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     child: Image.asset(
                       widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Center(
+                      errorBuilder: (_, _, _) => const Center(
                         child: Icon(
                           Icons.broken_image_outlined,
                           size: 64,
@@ -933,7 +933,7 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                 child: Image.asset(
                   fish.localImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 56, color: cs.outline),
@@ -1129,7 +1129,7 @@ class _FishTile extends StatelessWidget {
                     Image.asset(
                       fish.localImagePath,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: cs.surfaceVariant,
                         child: Center(
                           child:
@@ -1247,7 +1247,7 @@ class _CompatFishChip extends StatelessWidget {
                 child: Image.asset(
                   fish.localImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
