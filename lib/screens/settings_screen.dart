@@ -1281,8 +1281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Force Refresh Fish Data'),
                   subtitle: const Text(
-                    'Clears the fish data cache and cooldown timer so the '
-                    'next load fetches fresh data from Firestore.',
+                    'Clears the fish data cache',
                   ),
                   onTap: () async {
                     Navigator.of(ctx).pop(); // close debug menu first
@@ -1309,7 +1308,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Clear All Preferences'),
                   subtitle: const Text(
-                    'Wipe all SharedPreferences (restart required)',
+                    'Wipe all SharedPreferences',
                   ),
                   onTap: () async {
                     final confirmed = await showDialog<bool>(
