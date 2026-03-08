@@ -639,7 +639,11 @@ class MyApp extends ConsumerWidget {
                 screenName = 'auth_screen';
                 break;
               case '/onboarding':
-                page = const OnboardingScreen();
+                int initialPage = 0;
+                if (args is Map) {
+                  initialPage = (args['initialPage'] as int?) ?? 0;
+                }
+                page = OnboardingScreen(initialPage: initialPage);
                 screenName = 'onboarding_screen';
                 break;
               case '/profile':

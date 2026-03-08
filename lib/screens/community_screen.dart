@@ -30,13 +30,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   void initState() {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'community_screen');
-    _ensureSignedIn();
-  }
-
-  Future<void> _ensureSignedIn() async {
-    if (AuthService.currentUser == null) {
-      await AuthService.signInAnonymously();
-    }
+    // No longer auto-creates an anonymous account — community requires sign-in.
   }
 
   @override
@@ -50,14 +44,22 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         kDebugMode && ref.watch(appSettingsProvider).debugHideAds;
     final showAds = !kIsWeb && !adsRemoved && !debugHideAds;
 
-    final currentUserId = authState.asData?.value?.uid ?? '';
+    final user = authState.asData?.value;
+    final isSignedIn = user != null && !user.isAnonymous;
+    final currentUserId = isSignedIn ? user.uid : '';
+
+    // Gate: require a real (non-anonymous) signed-in user.
+    if (!isSignedIn) {
+      return MainLayout(
+        title: l10n.communityTitle,
+        child: _buildSignInGate(context, l10n),
+      );
+    }
 
     return MainLayout(
       title: l10n.communityTitle,
       floatingActionButton: FloatingActionButton(
-        onPressed: authState.asData?.value == null
-            ? null
-            : () => _navigateToCreate(context, feedState.selectedType),
+        onPressed: () => _navigateToCreate(context, feedState.selectedType),
         tooltip: l10n.communityCreatePost,
         child: const Icon(Icons.add),
       ),
@@ -161,6 +163,67 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               : null,
         );
       },
+    );
+  }
+
+  Widget _buildSignInGate(BuildContext context, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cs.primaryContainer, cs.secondaryContainer],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('🌊', style: TextStyle(fontSize: 48)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              l10n.communitySignInRequired,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.communitySignInRequiredDesc,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: cs.onSurfaceVariant,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/auth'),
+                icon: const Icon(Icons.login),
+                label: Text(l10n.communitySignInButton),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

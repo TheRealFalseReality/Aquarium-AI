@@ -1258,4 +1258,70 @@
   "@googleSearchFish": {
     "description": "Tooltip for the Google search action in the fish card speed-dial"
   }
+,
+
+  "authContinueAsGuest": "Continuer en tant qu'invité",
+  "@authContinueAsGuest": {
+    "description": "Button to continue with an anonymous account (clearly labelled as guest)"
+  },
+
+  "authContinueAsGuestDesc": "Crée un compte anonyme temporaire que vous pourrez lier plus tard.",
+  "@authContinueAsGuestDesc": {
+    "description": "Subtitle explaining what guest/anonymous access means"
+  },
+
+  "authSkipSignIn": "Continuer sans se connecter",
+  "@authSkipSignIn": {
+    "description": "Button to skip sign-in entirely without creating any account"
+  },
+
+  "communitySignInRequired": "Connectez-vous pour accéder à la Communauté",
+  "@communitySignInRequired": {
+    "description": "Title of the sign-in required screen shown when accessing Community without being signed in"
+  },
+
+  "communitySignInRequiredDesc": "La Communauté est réservée aux utilisateurs connectés. Créez un compte pour partager vos aquariums et échanger avec d'autres aquariophiles.",
+  "@communitySignInRequiredDesc": {
+    "description": "Body text explaining why sign-in is required for the Community"
+  },
+
+  "communitySignInButton": "Se connecter pour continuer",
+  "@communitySignInButton": {
+    "description": "Button on the community sign-in required screen"
+  },
+
+  "onboardingSkipConfirmTitle": "Passer la configuration ?",
+  "@onboardingSkipConfirmTitle": {
+    "description": "Title of the confirmation dialog when tapping the top-bar Skip button in onboarding"
+  },
+
+  "onboardingSkipConfirmBody": "Vous pouvez revenir sur cette configuration à tout moment depuis les Paramètres.",
+  "@onboardingSkipConfirmBody": {
+    "description": "Body text of the skip confirmation dialog"
+  },
+
+  "onboardingSkipConfirm": "Oui, passer",
+  "@onboardingSkipConfirm": {
+    "description": "Confirm button in the skip onboarding dialog"
+  },
+
+  "onboardingSkipForNow": "Passer pour l'instant",
+  "@onboardingSkipForNow": {
+    "description": "Secondary button label on steps where no interaction has occurred yet"
+  },
+
+  "revisitOnboarding": "Revoir la configuration",
+  "@revisitOnboarding": {
+    "description": "Settings menu card title to re-launch the onboarding flow"
+  },
+
+  "revisitOnboardingDesc": "Parcourir à nouveau l'assistant de configuration de l'app",
+  "@revisitOnboardingDesc": {
+    "description": "Settings menu card subtitle for the revisit onboarding option"
+  },
+
+  "calculatorUseThisSize": "Utiliser cette taille",
+  "@calculatorUseThisSize": {
+    "description": "Button in the tank volume calculator results to autofill the result into the onboarding tank size fields"
+  }
 }

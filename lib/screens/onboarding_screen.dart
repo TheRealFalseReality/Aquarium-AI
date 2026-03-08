@@ -13,6 +13,7 @@ import '../theme_colors.dart';
 import '../theme_provider.dart';
 import '../widgets/modern_chip.dart';
 import 'tank_creation_screen.dart' show InhabitantDialog;
+import 'tank_volume_calculator.dart';
 
 /// A five-step, skippable onboarding flow shown once on first launch.
 ///
@@ -22,8 +23,14 @@ import 'tank_creation_screen.dart' show InhabitantDialog;
 ///   3. Create Your Tank   – simplified tank setup (name, type, size)
 ///   4. Add Inhabitants    – optionally populate the tank with fish
 ///   5. Discover AI Tools  – overview of the key AI features
+///
+/// Pass [initialPage] to start on a specific step (e.g. when resuming after
+/// sign-in via [AuthScreen]).
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.initialPage = 0});
+
+  /// The step index to show first (0-based). Used when resuming after sign-in.
+  final int initialPage;
 
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
@@ -39,8 +46,8 @@ class OnboardingScreen extends ConsumerStatefulWidget {
     await prefs.setBool(_onboardingCompletedKey, true);
   }
 
-  /// Clears the completed flag – useful only in debug / testing scenarios.
-  static Future<void> resetForTesting() async {
+  /// Clears the completed flag – useful for revisiting onboarding from Settings.
+  static Future<void> reset() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_onboardingCompletedKey);
   }
@@ -52,17 +59,20 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const int _totalPages = 5;
 
-  final PageController _pageController = PageController();
+  late final PageController _pageController;
   int _currentPage = 0;
 
-  // ── Step 2 state: tank creation ─────────────────────────────────────────
+  // ── Per-step interaction tracking (used for smart Next/Skip label) ────────
+  final Set<int> _interactedPages = {};
+
+  // ── Step 3 state: tank creation ─────────────────────────────────────────
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
   String _selectedTankType = 'freshwater';
   bool _isReef = false;
 
-  // ── Step 3 state: inhabitants ────────────────────────────────────────────
+  // ── Step 4 state: inhabitants ────────────────────────────────────────────
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
 
@@ -72,6 +82,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    _currentPage = widget.initialPage;
+    _pageController = PageController(initialPage: _currentPage);
+    // Mark earlier pages as already "interacted" when resuming mid-flow.
+    for (var i = 0; i < _currentPage; i++) {
+      _interactedPages.add(i);
+    }
     AnalyticsService.logScreenView(screenName: 'onboarding_screen');
     _loadFishData();
   }
@@ -98,6 +114,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
+  // ── Interaction tracking ──────────────────────────────────────────────────
+
+  /// Call whenever the user makes a meaningful input on a step.
+  void _markInteracted([int? page]) {
+    final p = page ?? _currentPage;
+    if (!_interactedPages.contains(p)) {
+      setState(() => _interactedPages.add(p));
+    }
+  }
+
+  bool get _currentPageInteracted => _interactedPages.contains(_currentPage);
+
   // ── Navigation ────────────────────────────────────────────────────────────
 
   void _nextPage() {
@@ -117,6 +145,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
+    }
+  }
+
+  /// Shows a confirmation dialog before skipping the entire onboarding flow.
+  Future<void> _confirmSkip() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.onboardingSkipConfirmTitle),
+        content: Text(l10n.onboardingSkipConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.onboardingSkipConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      _finish(skipped: true);
     }
   }
 
@@ -203,7 +256,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       context: context,
       builder: (context) => InhabitantDialog(
         availableFish: _availableFish,
-        onAdd: (inhabitant) => setState(() => _inhabitants.add(inhabitant)),
+        onAdd: (inhabitant) {
+          setState(() => _inhabitants.add(inhabitant));
+          _markInteracted(3);
+        },
       ),
     );
   }
@@ -289,11 +345,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               }),
             ),
           ),
-          // Skip button
+          // Skip button — shows confirmation dialog
           SizedBox(
             width: 64,
             child: TextButton(
-              onPressed: () => _finish(skipped: true),
+              onPressed: _confirmSkip,
               child: Text(
                 l10n.onboardingSkip,
                 style: TextStyle(color: cs.onSurfaceVariant),
@@ -312,6 +368,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
+    final isLastPage = _currentPage == _totalPages - 1;
+    // On the last page the primary button always says "Get Started".
+    // On other pages: if the user has interacted on this step, show "Next";
+    // if not, show "Skip for now" to make it clear the step is optional.
+    final primaryLabel = isLastPage
+        ? l10n.onboardingGetStarted
+        : (_currentPageInteracted ? l10n.onboardingNext : l10n.onboardingSkipForNow);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       child: Column(
@@ -328,9 +392,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               child: Text(
-                _currentPage == _totalPages - 1
-                    ? l10n.onboardingGetStarted
-                    : l10n.onboardingNext,
+                primaryLabel,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -338,17 +400,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ),
           ),
-          // "Skip for now" secondary action on the inhabitants step
-          if (_currentPage == 3) ...[
-            const SizedBox(height: 6),
-            TextButton(
-              onPressed: _nextPage,
-              child: Text(
-                l10n.onboardingSkipInhabitants,
-                style: TextStyle(color: cs.onSurfaceVariant),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -485,8 +536,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ],
               selected: {themeState.themeMode},
-              onSelectionChanged: (modes) =>
-                  themeNotifier.setThemeMode(modes.first),
+              onSelectionChanged: (modes) {
+                themeNotifier.setThemeMode(modes.first);
+                _markInteracted(0);
+              },
             ),
           ),
           const SizedBox(height: 24),
@@ -510,7 +563,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               final isSelected = themeState.colorTheme == theme;
 
               return GestureDetector(
-                onTap: () => themeNotifier.setColorTheme(theme),
+                onTap: () {
+                  themeNotifier.setColorTheme(theme);
+                  _markInteracted(0);
+                },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -670,11 +726,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await Navigator.pushNamed(context, '/auth');
-                      // Advance to tank setup step after returning from auth,
-                      // but only if we haven't already moved past step 1.
-                      if (mounted && _currentPage == 1) _nextPage();
+                    onPressed: () {
+                      _markInteracted(1);
+                      // Navigate to auth, which will return to onboarding at
+                      // step 2 (tank creation) after successful sign-in.
+                      Navigator.pushNamed(
+                        context,
+                        '/auth',
+                        arguments: {
+                          'returnRoute': '/onboarding',
+                          'returnRouteArgs': {'initialPage': 2},
+                        },
+                      );
                     },
                     icon: const Icon(Icons.login),
                     label: Text(l10n.authSignIn),
@@ -693,7 +756,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           // "Continue without account" secondary link
           Center(
             child: TextButton(
-              onPressed: _nextPage,
+              onPressed: () {
+                _markInteracted(1);
+                _nextPage();
+              },
               child: Text(
                 l10n.authContinueAnonymously,
                 style: TextStyle(color: cs.onSurfaceVariant),
@@ -791,6 +857,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               border: const OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
+            onChanged: (_) => _markInteracted(2),
           ),
           const SizedBox(height: 24),
 
@@ -811,13 +878,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 label: l10n.freshwater,
                 emoji: '🐟',
                 selected: _selectedTankType == 'freshwater',
-                onTap: () => _onTankTypeChanged('freshwater'),
+                onTap: () {
+                  _onTankTypeChanged('freshwater');
+                  _markInteracted(2);
+                },
               ),
               ModernSelectableChip(
                 label: l10n.saltwater,
                 emoji: '🪼',
                 selected: _selectedTankType == 'marine',
-                onTap: () => _onTankTypeChanged('marine'),
+                onTap: () {
+                  _onTankTypeChanged('marine');
+                  _markInteracted(2);
+                },
               ),
             ],
           ),
@@ -943,8 +1016,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/tank-volume'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TankVolumeCalculator(
+                          onSizeSelected: (gallons, liters) {
+                            setState(() {
+                              _sizeGallonsController.text =
+                                  gallons.toStringAsFixed(1);
+                              _sizeLitersController.text =
+                                  liters.toStringAsFixed(1);
+                            });
+                            _markInteracted(2);
+                          },
+                        ),
+                      ),
+                    );
+                  },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
