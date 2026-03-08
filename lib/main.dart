@@ -29,6 +29,7 @@ import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/information_screen.dart';
+import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/species_tags_screen.dart';
@@ -636,6 +637,10 @@ class MyApp extends ConsumerWidget {
               case '/auth':
                 page = const AuthScreen();
                 screenName = 'auth_screen';
+                break;
+              case '/onboarding':
+                page = const OnboardingScreen();
+                screenName = 'onboarding_screen';
                 break;
               case '/profile':
                 String? uid;

@@ -5300,5 +5300,130 @@
     "placeholders": {
       "inhabitantName": {"type": "String"}
     }
+  },
+
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": {
+    "description": "Button label to skip the onboarding flow"
+  },
+
+  "onboardingNext": "Next",
+  "@onboardingNext": {
+    "description": "Button label to advance to the next onboarding step"
+  },
+
+  "onboardingGetStarted": "Get Started",
+  "@onboardingGetStarted": {
+    "description": "Button label on the last onboarding step to finish and enter the app"
+  },
+
+  "onboardingWelcomeTitle": "Welcome to Aquarium AI",
+  "@onboardingWelcomeTitle": {
+    "description": "Title on the first onboarding step (welcome / sign-in)"
+  },
+
+  "onboardingWelcomeSubtitle": "Set up your aquarium hub in just a few steps.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtitle on the first onboarding step"
+  },
+
+  "onboardingSignInTitle": "Sign In for the Full Experience",
+  "@onboardingSignInTitle": {
+    "description": "Heading for the sign-in upsell card on the first onboarding step"
+  },
+
+  "onboardingSignInBenefit1": "Sync your tanks and data across devices",
+  "@onboardingSignInBenefit1": {
+    "description": "First benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingSignInBenefit2": "Connect with fellow aquarium enthusiasts",
+  "@onboardingSignInBenefit2": {
+    "description": "Second benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingSignInBenefit3": "Showcase your tanks and share tips in the Community",
+  "@onboardingSignInBenefit3": {
+    "description": "Third benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingCreateTankTitle": "Set Up Your First Tank",
+  "@onboardingCreateTankTitle": {
+    "description": "Title on the second onboarding step (create tank)"
+  },
+
+  "onboardingCreateTankSubtitle": "Tell us about your aquarium. You can always edit the details later.",
+  "@onboardingCreateTankSubtitle": {
+    "description": "Subtitle on the second onboarding step"
+  },
+
+  "onboardingCreateTankTip": "Not sure about your tank size? Use the Volume Calculator to find out.",
+  "@onboardingCreateTankTip": {
+    "description": "Tip shown below the size fields on the create-tank onboarding step"
+  },
+
+  "onboardingTankNameLabel": "Tank Name",
+  "@onboardingTankNameLabel": {
+    "description": "Label for the tank name field on the onboarding create-tank step"
+  },
+
+  "onboardingTankNameHint": "e.g. My Reef Paradise",
+  "@onboardingTankNameHint": {
+    "description": "Hint text for the tank name field on the onboarding create-tank step"
+  },
+
+  "onboardingTankType": "Tank Type",
+  "@onboardingTankType": {
+    "description": "Section heading for the tank type selector on the onboarding create-tank step"
+  },
+
+  "onboardingTankSize": "Tank Size",
+  "@onboardingTankSize": {
+    "description": "Section heading for the tank size fields on the onboarding create-tank step"
+  },
+
+  "onboardingOptional": "(optional)",
+  "@onboardingOptional": {
+    "description": "Parenthetical label indicating an optional field in the onboarding flow"
+  },
+
+  "onboardingOpenCalculator": "Calculator",
+  "@onboardingOpenCalculator": {
+    "description": "Short label for the button that opens the tank volume calculator from onboarding"
+  },
+
+  "onboardingInhabitantsTitle": "Add Your Fish & Inhabitants",
+  "@onboardingInhabitantsTitle": {
+    "description": "Title on the third onboarding step (add inhabitants)"
+  },
+
+  "onboardingInhabitantsSubtitle": "Build your tank community. You can always add more later.",
+  "@onboardingInhabitantsSubtitle": {
+    "description": "Subtitle on the third onboarding step"
+  },
+
+  "onboardingInhabitantsTankRequired": "Enter a tank name in the previous step to save inhabitants.",
+  "@onboardingInhabitantsTankRequired": {
+    "description": "Info message shown when the user tries to add inhabitants without a tank name"
+  },
+
+  "onboardingNoInhabitantsYet": "No inhabitants added yet",
+  "@onboardingNoInhabitantsYet": {
+    "description": "Placeholder text when the inhabitants list is empty on the onboarding step"
+  },
+
+  "onboardingSkipInhabitants": "Skip for now",
+  "@onboardingSkipInhabitants": {
+    "description": "Link below the Next button on the inhabitants onboarding step to skip adding fish"
+  },
+
+  "onboardingDiscoverTitle": "Explore Your AI Tools",
+  "@onboardingDiscoverTitle": {
+    "description": "Title on the fourth onboarding step (discover AI tools)"
+  },
+
+  "onboardingDiscoverSubtitle": "Powerful AI-powered tools to help you care for your aquarium.",
+  "@onboardingDiscoverSubtitle": {
+    "description": "Subtitle on the fourth onboarding step"
   }
 }

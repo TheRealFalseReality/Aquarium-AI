@@ -39,6 +39,7 @@ import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
 import 'community_post_screen.dart';
 import 'markdown_viewer_screen.dart';
+import 'onboarding_screen.dart';
 
 class ToolChipInfo {
   final String label;
@@ -202,6 +203,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
     InAppReviewService.maybeRequestReview();
+    // Show onboarding on first launch (before any dialogs)
+    _checkShowOnboarding();
     // Check if we should show the app promotion dialog on web
     if (kIsWeb) {
       _checkShowPromotionDialog();
@@ -407,6 +410,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _checkShowOnboarding() async {
+    final completed = await OnboardingScreen.hasCompleted();
+    if (!completed && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushNamed(context, '/onboarding');
+        }
+      });
+    }
   }
 
   Future<void> _checkShowPromotionDialog() async {
