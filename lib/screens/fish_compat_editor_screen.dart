@@ -22,6 +22,10 @@ const String _authorizedEditorUid = String.fromEnvironment('AUTHORIZED_USER');
 
 // ── model ────────────────────────────────────────────────────────────────────
 
+/// Sentinel value used by [_FishEntry.copyWith] to distinguish an explicit
+/// `null` from "not provided" for the nullable [_FishEntry.reefSafe] field.
+const Object _sentinel = Object();
+
 class _FishEntry {
   String uuid;
   String name;
@@ -70,6 +74,28 @@ class _FishEntry {
   };
 
   _FishEntry copy() => _FishEntry.fromJson(toJson());
+
+  _FishEntry copyWith({
+    String? uuid,
+    String? name,
+    String? imageURL,
+    List<String>? commonNames,
+    Object? reefSafe = _sentinel,
+    List<String>? compatible,
+    List<String>? notRecommended,
+    List<String>? notCompatible,
+    List<String>? withCaution,
+  }) => _FishEntry(
+    uuid: uuid ?? this.uuid,
+    name: name ?? this.name,
+    imageURL: imageURL ?? this.imageURL,
+    commonNames: commonNames ?? List<String>.from(this.commonNames),
+    reefSafe: reefSafe == _sentinel ? this.reefSafe : reefSafe as String?,
+    compatible: compatible ?? List<String>.from(this.compatible),
+    notRecommended: notRecommended ?? List<String>.from(this.notRecommended),
+    notCompatible: notCompatible ?? List<String>.from(this.notCompatible),
+    withCaution: withCaution ?? List<String>.from(this.withCaution),
+  );
 
   /// Local asset path derived from [imageURL].
   ///
