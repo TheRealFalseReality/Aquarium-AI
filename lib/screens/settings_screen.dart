@@ -13,7 +13,7 @@ import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
-import '../services/fish_firestore_service.dart';
+import '../services/fish_data_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
@@ -1273,21 +1273,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 const Divider(),
-                // Upload fish data to Firestore
+                // Force refresh fish data (clear cooldown + cache)
                 ListTile(
                   leading: const Icon(
-                    Icons.cloud_upload_outlined,
+                    Icons.refresh,
                     color: Colors.blue,
                   ),
-                  title: const Text('Upload Fish Data to Firestore'),
+                  title: const Text('Force Refresh Fish Data'),
                   subtitle: const Text(
-                    'Uploads assets/data/fishcompat.json to Cloud Firestore '
-                    '(fish_compat collection). See code comments for required '
-                    'Firestore rules before running.',
+                    'Clears the fish data cache and cooldown timer so the '
+                    'next load fetches fresh data from Firestore.',
                   ),
-                  onTap: () {
+                  onTap: () async {
                     Navigator.of(ctx).pop(); // close debug menu first
-                    _uploadFishDataToFirestore();
+                    final service = ref.read(fishDataServiceProvider);
+                    await service.clearPersistentCache();
+                    ref.invalidate(fishDataProvider);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Fish data cache cleared. Data will refresh on next load.',
+                          ),
+                        ),
+                      );
+                    }
                   },
                 ),
                 const Divider(),
@@ -1352,132 +1362,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  /// Upload the bundled `assets/data/fishcompat.json` to Cloud Firestore.
-  ///
-  /// Shows a progress dialog while uploading and displays a result snackbar.
-  ///
-  /// ─────────────────────────────────────────────────────────────────────────
-  /// Firebase Console – steps before using this uploader
-  /// ─────────────────────────────────────────────────────────────────────────
-  /// 1. Open Firebase Console → Firestore Database → Rules and temporarily
-  ///    allow authenticated writes to the `fish_compat` collection:
-  ///
-  ///      match /fish_compat/{category} {
-  ///        allow read: if true;
-  ///        allow write: if request.auth != null;
-  ///
-  ///        match /fish/{fishId} {
-  ///          allow read: if true;
-  ///          allow write: if request.auth != null;
-  ///        }
-  ///      }
-  ///
-  /// 2. Sign in to the app (any account) so `request.auth != null` is true.
-  /// 3. Open Settings → Debug Menu → "Upload Fish Data to Firestore".
-  /// 4. After a successful upload, tighten the rules back to:
-  ///
-  ///      allow write: if false;
-  ///
-  ///    to prevent anyone from overwriting the data from a client.
-  /// ─────────────────────────────────────────────────────────────────────────
-  Future<void> _uploadFishDataToFirestore() async {
-    if (!mounted) return;
-
-    // Use a ValueNotifier so the progress dialog can listen for updates
-    // without requiring access to the StatefulBuilder's setProgress callback.
-    final progress = ValueNotifier<_UploadProgress>(
-      const _UploadProgress(done: 0, total: 0, uploading: true),
-    );
-
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => ValueListenableBuilder<_UploadProgress>(
-        valueListenable: progress,
-        builder: (dialogCtx, p, _) => AlertDialog(
-          icon: const Icon(Icons.cloud_upload_outlined, size: 36),
-          title: const Text('Upload Fish Data to Firestore'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (p.error != null) ...[
-                Icon(
-                  Icons.error_outline,
-                  color: Colors.red.shade700,
-                  size: 48,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Upload failed:\n${p.error}',
-                  style: TextStyle(color: Colors.red.shade700),
-                  textAlign: TextAlign.center,
-                ),
-              ] else if (p.uploading) ...[
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  p.total > 0
-                      ? 'Uploading fish ${p.done} / ${p.total}…'
-                      : 'Preparing upload…',
-                ),
-                if (p.total > 0) ...[
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(value: p.done / p.total),
-                ],
-              ] else ...[
-                Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.green.shade700,
-                  size: 48,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Upload complete!\n${p.done} fish uploaded to Firestore.',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            if (!p.uploading || p.error != null)
-              TextButton(
-                onPressed: () => Navigator.of(dialogCtx).pop(),
-                child: const Text('Close'),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    // Run the upload and push progress updates to the ValueNotifier.
-    try {
-      final count = await FishFirestoreService.uploadFromAsset(
-        onProgress: (done, total) {
-          progress.value = _UploadProgress(
-            done: done,
-            total: total,
-            uploading: true,
-          );
-        },
-      );
-      progress.value = _UploadProgress(
-        done: count,
-        total: count,
-        uploading: false,
-      );
-      AnalyticsService.logFeatureUsed(
-        featureName: 'debug_upload_fish_firestore',
-        parameters: {'fish_count': count},
-      );
-    } catch (e) {
-      progress.value = _UploadProgress(
-        done: progress.value.done,
-        total: progress.value.total,
-        uploading: false,
-        error: e.toString(),
-      );
-    }
-  }
 
   void _showBuyMeACoffeeDialog() {
     final l10n = AppLocalizations.of(context)!;
@@ -5140,19 +5024,4 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
-}
-
-/// Immutable progress state for the Firestore fish-data upload dialog.
-class _UploadProgress {
-  final int done;
-  final int total;
-  final bool uploading;
-  final String? error;
-
-  const _UploadProgress({
-    required this.done,
-    required this.total,
-    required this.uploading,
-    this.error,
-  });
 }

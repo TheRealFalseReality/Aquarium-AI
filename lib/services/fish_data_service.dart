@@ -104,39 +104,36 @@ class FishDataService {
       hours: RemoteConfigService.fishDataCooldownHours,
     );
 
-    // Check whether a fresh SP cache exists.  If so, skip Firestore entirely
-    // to avoid an unnecessary network round-trip on every app launch.
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastFetchMs = prefs.getInt(_prefKeyLastFetchMs);
-      if (lastFetchMs != null) {
-        final age = Duration(
-          milliseconds:
-              DateTime.now().millisecondsSinceEpoch - lastFetchMs,
-        );
-        if (age < cooldown) {
-          // Cache is fresh — load from SP without contacting Firestore.
-          final cachedJson = prefs.getString(_prefKeyJson);
-          if (cachedJson != null && cachedJson.isNotEmpty) {
-            final raw = json.decode(cachedJson) as Map<String, dynamic>;
-            final fishData = _parseFishMap(raw);
-            if (fishData.isNotEmpty) {
-              if (kDebugMode) {
-                debugPrint(
-                  'FishDataService: cache is ${age.inMinutes} min old '
-                  '(< ${cooldown.inHours}h), skipping Firestore.',
-                );
+    // In debug mode, always fetch from Firestore to ensure data is current.
+    if (!kDebugMode) {
+      // Check whether a fresh SP cache exists.  If so, skip Firestore entirely
+      // to avoid an unnecessary network round-trip on every app launch.
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final lastFetchMs = prefs.getInt(_prefKeyLastFetchMs);
+        if (lastFetchMs != null) {
+          final age = Duration(
+            milliseconds:
+                DateTime.now().millisecondsSinceEpoch - lastFetchMs,
+          );
+          if (age < cooldown) {
+            // Cache is fresh — load from SP without contacting Firestore.
+            final cachedJson = prefs.getString(_prefKeyJson);
+            if (cachedJson != null && cachedJson.isNotEmpty) {
+              final raw = json.decode(cachedJson) as Map<String, dynamic>;
+              final fishData = _parseFishMap(raw);
+              if (fishData.isNotEmpty) {
+                _cachedFishData = fishData;
+                return fishData;
               }
-              _cachedFishData = fishData;
-              return fishData;
             }
           }
         }
+      } catch (_) {
+        // Cooldown check failed — proceed to Firestore fetch.
       }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('FishDataService: cooldown check failed ($e)');
-      }
+    } else {
+      debugPrint('FishDataService: debug mode — skipping cooldown.');
     }
 
     // 1. Try Firestore (real-time source). Use a short timeout so a slow or

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -439,6 +440,66 @@ class _FishInfoSheet extends StatefulWidget {
 class _FishInfoSheetState extends State<_FishInfoSheet> {
   final Set<CompatStatus> _hiddenSections = {};
 
+  void _openFullScreenImage(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.92),
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Center(
+                  child: InteractiveViewer(
+                    maxScale: 5,
+                    child: Image.asset(
+                      widget.fish.localImagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) {
+                        if (widget.fish.imageURL.isNotEmpty) {
+                          return CachedNetworkImage(
+                            imageUrl: widget.fish.imageURL,
+                            fit: BoxFit.contain,
+                            placeholder: (_, __) => const SizedBox.shrink(),
+                            errorWidget: (_, __, ___) => const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          );
+                        }
+                        return const Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: 64,
+                            color: Colors.white54,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -510,15 +571,49 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   children: [
-                    // Fish image
+                    // Fish image — tap to view full-screen
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: SizedBox(
-                        height: 200,
-                        child: FishImage(
-                          fish: widget.fish,
-                          fit: BoxFit.cover,
-                        ),
+                      child: Stack(
+                        children: [
+                          GestureDetector(
+                            onTap: () => _openFullScreenImage(context),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 200,
+                              child: FishImage(
+                                fish: widget.fish,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () => _openFullScreenImage(context),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: BackdropFilter(
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Icon(
+                                      Icons.fullscreen,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
