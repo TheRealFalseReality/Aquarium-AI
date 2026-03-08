@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/fish.dart';
+import 'fish_firestore_service.dart';
 import 'remote_config_service.dart';
 
 // SharedPreferences key for the persistent fish-compat cache.
@@ -14,12 +16,14 @@ const String _prefKeyJson = 'fishcompat_cached_json';
 ///
 /// Data is sourced in priority order:
 ///   1. In-memory cache (fastest — cleared when [clearCache] is called).
-///   2. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
+///   2. Cloud Firestore [FishFirestoreService.fetchFishData] (real-time
+///      updates; used when the data has been uploaded to Firestore).
+///   3. Firebase Remote Config [RemoteConfigKeys.fishcompatJson] (allows
 ///      updating fish data without an app-store release).  The loaded value is
 ///      persisted to SharedPreferences so offline re-launches can use it.
-///   3. SharedPreferences persistent cache (the last value fetched from RC;
+///   4. SharedPreferences persistent cache (the last value fetched from RC;
 ///      used when RC is unavailable on the current launch).
-///   4. Bundled local asset `assets/data/fishcompat.json` (always available offline).
+///   5. Bundled local asset `assets/data/fishcompat.json` (always available offline).
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
 
@@ -61,14 +65,47 @@ class FishDataService {
 
   /// Load fish data, returning typed [Fish] objects grouped by category.
   ///
-  /// Returns the in-memory cache when data is already loaded.  Otherwise loads
-  /// from Remote Config, the persistent SP cache, or the bundled local asset
-  /// (in that order).
+  /// Returns the in-memory cache when data is already loaded.  Otherwise tries
+  /// the following sources in order:
+  ///   1. Cloud Firestore (when data has been uploaded via the debug uploader)
+  ///   2. Remote Config, then the SP persistent cache
+  ///   3. Bundled local asset `assets/data/fishcompat.json`
   Future<Map<String, List<Fish>>> loadFishData() async {
     if (_cachedFishData != null) {
       return _cachedFishData!;
     }
 
+    // 1. Try Firestore first (real-time source). Use a short timeout so a slow
+    //    or unavailable network doesn't block the app startup.
+    try {
+      final firestoreData = await FishFirestoreService.fetchFishData()
+          .timeout(const Duration(seconds: 5));
+      if (firestoreData != null && firestoreData.isNotEmpty) {
+        final fishData = <String, List<Fish>>{};
+        for (final category in ['freshwater', 'marine']) {
+          final rawList = firestoreData[category];
+          if (rawList != null && rawList.isNotEmpty) {
+            final list = rawList.map((f) => Fish.fromJson(f)).toList();
+            list.sort(
+              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+            );
+            fishData[category] = list;
+          }
+        }
+        if (fishData.isNotEmpty) {
+          _cachedFishData = fishData;
+          return fishData;
+        }
+      }
+    } catch (e) {
+      // Firestore unavailable, timed out, or permission denied — fall through
+      // to the next data source.
+      if (kDebugMode) {
+        debugPrint('FishDataService: Firestore fetch failed ($e), using fallback.');
+      }
+    }
+
+    // 2. Fall back to Remote Config / SP cache / local asset.
     final jsonString = await _getJsonString();
     final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
 
