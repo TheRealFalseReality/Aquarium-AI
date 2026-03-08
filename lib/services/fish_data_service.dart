@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/fish.dart';
 import 'fish_firestore_service.dart';
+import 'remote_config_service.dart';
 
 // ---------------------------------------------------------------------------
 // Firestore data priority:
@@ -19,6 +20,10 @@ import 'fish_firestore_service.dart';
 /// SharedPreferences key used to persist the last successful Firestore fetch
 /// so that subsequent offline launches can use it instead of the bundled asset.
 const String _prefKeyJson = 'fishcompat_cached_json';
+
+/// SharedPreferences key storing the epoch-millisecond timestamp of the last
+/// successful Firestore fetch.  Used to enforce the refresh cooldown.
+const String _prefKeyLastFetchMs = 'fishcompat_last_fetch_ms';
 
 /// Centralised service for loading and caching fish data.
 ///
@@ -63,6 +68,11 @@ class FishDataService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKeyJson, json.encode(firestoreData));
+      // Record the current time so we can enforce the fetch cooldown.
+      await prefs.setInt(
+        _prefKeyLastFetchMs,
+        DateTime.now().millisecondsSinceEpoch,
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('FishDataService: SP persist failed ($e)');
@@ -78,9 +88,52 @@ class FishDataService {
   ///
   /// Returns the in-memory cache when data is already loaded.  Otherwise tries
   /// each source in priority order until one succeeds.
+  ///
+  /// A cooldown (default 12 hours, configurable via Remote Config key
+  /// `fish_data_cooldown_hours`) is enforced on Firestore fetches: if a fresh
+  /// SP cache exists the SP cache is returned directly without contacting
+  /// Firestore.
   Future<Map<String, List<Fish>>> loadFishData() async {
     if (_cachedFishData != null) {
       return _cachedFishData!;
+    }
+
+    // Resolve the cooldown from Remote Config (falls back to the in-app
+    // default when RC is unavailable).
+    final cooldown = Duration(
+      hours: RemoteConfigService.fishDataCooldownHours,
+    );
+
+    // In debug mode, always fetch from Firestore to ensure data is current.
+    if (!kDebugMode) {
+      // Check whether a fresh SP cache exists.  If so, skip Firestore entirely
+      // to avoid an unnecessary network round-trip on every app launch.
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final lastFetchMs = prefs.getInt(_prefKeyLastFetchMs);
+        if (lastFetchMs != null) {
+          final age = Duration(
+            milliseconds:
+                DateTime.now().millisecondsSinceEpoch - lastFetchMs,
+          );
+          if (age < cooldown) {
+            // Cache is fresh — load from SP without contacting Firestore.
+            final cachedJson = prefs.getString(_prefKeyJson);
+            if (cachedJson != null && cachedJson.isNotEmpty) {
+              final raw = json.decode(cachedJson) as Map<String, dynamic>;
+              final fishData = _parseFishMap(raw);
+              if (fishData.isNotEmpty) {
+                _cachedFishData = fishData;
+                return fishData;
+              }
+            }
+          }
+        }
+      } catch (_) {
+        // Cooldown check failed — proceed to Firestore fetch.
+      }
+    } else {
+      debugPrint('FishDataService: debug mode — skipping cooldown.');
     }
 
     // 1. Try Firestore (real-time source). Use a short timeout so a slow or
@@ -178,6 +231,7 @@ class FishDataService {
     clearCache();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKeyJson);
+    await prefs.remove(_prefKeyLastFetchMs);
   }
 
   /// Get fish data for a specific category without triggering a load.

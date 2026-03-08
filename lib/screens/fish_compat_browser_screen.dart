@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +9,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../widgets/fish_image.dart';
 
 /// Compatibility status between two fish types.
 enum CompatStatus { compatible, withCaution, notRecommended, notCompatible, unknown }
@@ -434,6 +436,39 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             category: category,
           ),
         ),
+        // Description card (shown when the fish has a description)
+        if (selected.description?.isNotEmpty == true)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              child: Card(
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.fishDescription,
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        selected.description!,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         // Detail / Matrix view toggle chips
         SliverToBoxAdapter(
           child: Padding(
@@ -775,16 +810,11 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           topLeft: Radius.circular(12),
                           bottomLeft: Radius.circular(12),
                         ),
-                        child: Image.asset(
-                          other.localImagePath,
+                        child: FishImage(
+                          fish: other,
                           width: avatarW,
                           height: rowH,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => SizedBox(
-                            width: avatarW,
-                            height: rowH,
-                            child: Icon(Icons.set_meal, color: cs.outline),
-                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -877,13 +907,29 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     child: Image.asset(
                       widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          size: 64,
-                          color: Colors.white54,
-                        ),
-                      ),
+                      errorBuilder: (_, __, ___) {
+                        if (widget.fish.imageURL.isNotEmpty) {
+                          return CachedNetworkImage(
+                            imageUrl: widget.fish.imageURL,
+                            fit: BoxFit.contain,
+                            placeholder: (_, __) => const SizedBox.shrink(),
+                            errorWidget: (_, __, ___) => const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          );
+                        }
+                        return const Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: 64,
+                            color: Colors.white54,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -930,16 +976,7 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
               child: SizedBox(
                 width: double.infinity,
                 height: 200,
-                child: Image.asset(
-                  fish.localImagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 56, color: cs.outline),
-                    ),
-                  ),
-                ),
+                child: FishImage(fish: fish, fit: BoxFit.cover),
               ),
             ),
             // Fullscreen hint icon in the top-right corner
@@ -1126,17 +1163,7 @@ class _FishTile extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      fish.localImagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        color: cs.surfaceVariant,
-                        child: Center(
-                          child:
-                              Icon(Icons.set_meal, size: 36, color: cs.outline),
-                        ),
-                      ),
-                    ),
+                    FishImage(fish: fish, fit: BoxFit.cover),
                     // Reef-safe badge — same style as FishCard
                     if (fish.reefSafe != null)
                       Positioned(
@@ -1247,12 +1274,37 @@ class _CompatFishChip extends StatelessWidget {
                 child: Image.asset(
                   fish.localImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
-                    ),
-                  ),
+                  errorBuilder: (_, __, ___) {
+                    if (fish.imageURL.isNotEmpty) {
+                      return CachedNetworkImage(
+                        imageUrl: fish.imageURL,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(
+                          color: cs.surfaceVariant,
+                        ),
+                        errorWidget: (_, __, ___) => Container(
+                          color: cs.surfaceVariant,
+                          child: Center(
+                            child: Icon(
+                              Icons.set_meal,
+                              size: 28,
+                              color: fgColor.withOpacity(0.5),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return Container(
+                      color: cs.surfaceVariant,
+                      child: Center(
+                        child: Icon(
+                          Icons.set_meal,
+                          size: 28,
+                          color: fgColor.withOpacity(0.5),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

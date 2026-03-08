@@ -5444,5 +5444,23 @@
   "onboardingChangeTankTypeWarning": "Changing the tank type will remove the inhabitants you have added.",
   "@onboardingChangeTankTypeWarning": {
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
+  "fishDescription": "Description",
+  "@fishDescription": {
+    "description": "Label for the fish description field in the fish compat browser and editor"
+  },
+
+  "noDescriptionAvailable": "No description available.",
+  "@noDescriptionAvailable": {
+    "description": "Placeholder text shown when a fish has no description"
+  },
+
+  "fishTypeInfo": "Fish Info",
+  "@fishTypeInfo": {
+    "description": "Title for the fish type information bottom sheet shown from the fish card speed-dial"
+  },
+
+  "googleSearchFish": "Google Search",
+  "@googleSearchFish": {
+    "description": "Tooltip for the Google search action in the fish card speed-dial"
   }
 }
