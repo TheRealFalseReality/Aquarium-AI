@@ -30,6 +30,7 @@ class _FishEntry {
   String uuid;
   String name;
   String imageURL;
+  String? description; // Optional plain-text description of this fish type
   List<String> commonNames;
   String? reefSafe;
   List<String> compatible;
@@ -41,6 +42,7 @@ class _FishEntry {
     String? uuid,
     required this.name,
     required this.imageURL,
+    this.description,
     required this.commonNames,
     this.reefSafe,
     required this.compatible,
@@ -53,6 +55,7 @@ class _FishEntry {
     uuid: j['uuid'] as String?,
     name: j['name'] as String? ?? '',
     imageURL: j['imageURL'] as String? ?? '',
+    description: j['description'] as String?,
     commonNames: List<String>.from(j['commonNames'] ?? []),
     reefSafe: j['reefSafe'] as String?,
     compatible: List<String>.from(j['compatible'] ?? []),
@@ -66,6 +69,8 @@ class _FishEntry {
     'name': name,
     'commonNames': commonNames,
     'imageURL': imageURL,
+    if (description != null && description!.isNotEmpty)
+      'description': description,
     if (reefSafe != null) 'reefSafe': reefSafe,
     'compatible': compatible,
     'notRecommended': notRecommended,
@@ -79,6 +84,7 @@ class _FishEntry {
     String? uuid,
     String? name,
     String? imageURL,
+    Object? description = _sentinel,
     List<String>? commonNames,
     Object? reefSafe = _sentinel,
     List<String>? compatible,
@@ -89,6 +95,8 @@ class _FishEntry {
     uuid: uuid ?? this.uuid,
     name: name ?? this.name,
     imageURL: imageURL ?? this.imageURL,
+    description:
+        description == _sentinel ? this.description : description as String?,
     commonNames: commonNames ?? List<String>.from(this.commonNames),
     reefSafe: reefSafe == _sentinel ? this.reefSafe : reefSafe as String?,
     compatible: compatible ?? List<String>.from(this.compatible),
@@ -641,6 +649,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   uuid: f.uuid,
                   name: f.name,
                   imageURL: f.imageURL,
+                  description: f.description,
                   commonNames: f.commonNames,
                   reefSafe: f.reefSafe,
                   compatible: inCompatible
@@ -673,6 +682,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     uuid: sf.uuid,
                     name: sf.name,
                     imageURL: sf.imageURL,
+                    description: sf.description,
                     commonNames: sf.commonNames,
                     reefSafe: sf.reefSafe,
                     compatible: inCompatible
@@ -756,6 +766,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               uuid: newFish.uuid,
               name: newFish.name,
               imageURL: newFish.imageURL,
+              description: newFish.description,
               commonNames: newFish.commonNames,
               reefSafe: newFish.reefSafe,
               compatible: [newFish.name], // self-reference: compatible with itself
@@ -771,6 +782,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 uuid: f.uuid,
                 name: f.name,
                 imageURL: f.imageURL,
+                description: f.description,
                 commonNames: f.commonNames,
                 reefSafe: f.reefSafe,
                 compatible: f.compatible,
@@ -803,6 +815,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               uuid: fish.uuid,
               name: fish.name,
               imageURL: fish.imageURL,
+              description: fish.description,
               commonNames: fish.commonNames,
               reefSafe: fish.reefSafe,
               compatible: updatedLists['compatible']!,
@@ -870,6 +883,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       uuid: f.uuid,
       name: f.name,
       imageURL: f.imageURL,
+      description: f.description,
       commonNames: f.commonNames,
       reefSafe: f.reefSafe,
       compatible: newKey == 'compatible'
@@ -1377,6 +1391,7 @@ class _FishEditDialog extends StatefulWidget {
 class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _nameCtrl;
   late TextEditingController _urlCtrl;
+  late TextEditingController _descriptionCtrl;
   late List<TextEditingController> _commonNameCtrls;
   final TextEditingController _newCommonNameCtrl = TextEditingController();
   late String? _reefSafe;
@@ -1386,6 +1401,8 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.fish.name);
     _urlCtrl = TextEditingController(text: widget.fish.imageURL);
+    _descriptionCtrl =
+        TextEditingController(text: widget.fish.description ?? '');
     _commonNameCtrls = widget.fish.commonNames
         .map((n) => TextEditingController(text: n))
         .toList();
@@ -1396,6 +1413,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   void dispose() {
     _nameCtrl.dispose();
     _urlCtrl.dispose();
+    _descriptionCtrl.dispose();
     _newCommonNameCtrl.dispose();
     for (final ctrl in _commonNameCtrls) {
       ctrl.dispose();
@@ -1451,6 +1469,9 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       uuid: widget.fish.uuid,
       name: name,
       imageURL: imageURL,
+      description: _descriptionCtrl.text.trim().isEmpty
+          ? null
+          : _descriptionCtrl.text.trim(),
       commonNames: commonNames,
       reefSafe: _reefSafe,
       compatible: widget.fish.compatible,
@@ -1491,6 +1512,19 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              // Description
+              TextField(
+                controller: _descriptionCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter a brief description of this fish type…',
+                ),
+                maxLines: 3,
+                minLines: 2,
+                keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 12),
               // Reef Safe (marine only)

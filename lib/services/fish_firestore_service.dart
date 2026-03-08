@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 //   name        (String)
 //   commonNames (Array<String>)
 //   imageURL    (String)
+//   description (String | null)  — optional plain-text description of the fish
 //   reefSafe    (String | null)  — only set for marine fish
 //   compatible        (Array<String>)
 //   notRecommended    (Array<String>)

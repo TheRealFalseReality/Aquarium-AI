@@ -141,6 +141,9 @@ const bool rcDefaultFreePhotoAnalysisEnabled = true;
 // Feature visibility toggles (false = visible by default)
 const bool rcDefaultHideFacebookLogin = false;
 
+// Fish compatibility data cooldown (hours between Firestore fetches)
+const int rcDefaultFishDataCooldownHours = 12;
+
 // Founder Aquarist tier limits (increased vs standard free tier)
 const int rcDefaultFounderMaxRequestsPerMinute = 10;
 const int rcDefaultFounderMaxRequestsPerDay = 150;
@@ -221,6 +224,11 @@ class RemoteConfigKeys {
   static const String aquapiEssentialImageUrl = 'aquapi_essential_image_url';
 
   // ── Fish compatibility data ─────────────────────────────────────────────
+  /// Integer — minimum hours between Firestore fetches for fish compatibility
+  /// data.  Defaults to [rcDefaultFishDataCooldownHours] (12).
+  /// Reduce to fetch more often, or increase to reduce network usage.
+  static const String fishDataCooldownHours = 'fish_data_cooldown_hours';
+
   // ── In-app purchase pricing ─────────────────────────────────────────────
   /// String — USD price for the Early Supporter lifetime purchase.
   /// Store a positive number (e.g. `0.99`) in Remote Config.

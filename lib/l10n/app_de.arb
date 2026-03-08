@@ -1092,5 +1092,25 @@
     "placeholders": {
       "inhabitantName": {"type": "String"}
     }
+  },
+
+  "fishDescription": "Beschreibung",
+  "@fishDescription": {
+    "description": "Label for the fish description field in the fish compat browser and editor"
+  },
+
+  "noDescriptionAvailable": "Keine Beschreibung verfügbar.",
+  "@noDescriptionAvailable": {
+    "description": "Placeholder text shown when a fish has no description"
+  },
+
+  "fishTypeInfo": "Fischinformation",
+  "@fishTypeInfo": {
+    "description": "Title for the fish type information bottom sheet shown from the fish card speed-dial"
+  },
+
+  "googleSearchFish": "Google-Suche",
+  "@googleSearchFish": {
+    "description": "Tooltip for the Google search action in the fish card speed-dial"
   }
 }

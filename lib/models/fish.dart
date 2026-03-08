@@ -1,6 +1,7 @@
 class Fish {
   final String? uuid; // Stable unique identifier; null for legacy entries without UUID
   final String name;
+  final String? description; // Optional plain-text description of this fish type
   final List<String> commonNames;
   final String imageURL;
   final String? reefSafe;
@@ -12,6 +13,7 @@ class Fish {
   Fish({
     this.uuid,
     required this.name,
+    this.description,
     required this.commonNames,
     required this.imageURL,
     this.reefSafe,
@@ -56,6 +58,7 @@ class Fish {
     return Fish(
       uuid: json['uuid'] as String?,
       name: json['name'] as String,
+      description: json['description'] as String?,
       commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
       reefSafe: json['reefSafe'] as String?,
@@ -70,6 +73,7 @@ class Fish {
   Map<String, dynamic> toJson() => {
     if (uuid != null) 'uuid': uuid,
     'name': name,
+    if (description != null) 'description': description,
     'commonNames': commonNames,
     'imageURL': imageURL,
     if (reefSafe != null) 'reefSafe': reefSafe,
