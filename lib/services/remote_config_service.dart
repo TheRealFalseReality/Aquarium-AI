@@ -66,6 +66,8 @@ class RemoteConfigService {
             rcDefaultFounderMaxPhotoAnalysesPerDay,
         RemoteConfigKeys.founderChatHistoryLimit:
             rcDefaultFounderChatHistoryLimit,
+        RemoteConfigKeys.fishDataCooldownHours:
+            rcDefaultFishDataCooldownHours,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -345,4 +347,12 @@ class RemoteConfigService {
   static int get founderChatHistoryLimit =>
       _instance?.getInt(RemoteConfigKeys.founderChatHistoryLimit) ??
       rcDefaultFounderChatHistoryLimit;
+
+  // ── Fish compatibility data ─────────────────────────────────────────────
+
+  /// Minimum hours between Firestore fetches for fish compatibility data.
+  /// Defaults to [rcDefaultFishDataCooldownHours] (12).
+  static int get fishDataCooldownHours =>
+      _instance?.getInt(RemoteConfigKeys.fishDataCooldownHours) ??
+      rcDefaultFishDataCooldownHours;
 }
