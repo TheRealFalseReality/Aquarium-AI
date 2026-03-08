@@ -13,6 +13,7 @@ import '../main_layout.dart';
 import '../services/analytics_service.dart';
 import '../services/in_app_update_service.dart';
 import '../widgets/ad_component.dart';
+import 'changelog_screen.dart';
 
 class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
@@ -374,20 +375,15 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
 
           // Version
           Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Theme.of(
+            child: ActionChip(
+              avatar: const Icon(Icons.history, size: 16),
+              label: Text(l10n.versionDisplay(_version)),
+              onPressed: () {
+                Navigator.push(
                   context,
-                ).colorScheme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                l10n.versionDisplay(_version),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-              ),
+                  MaterialPageRoute(builder: (context) => const ChangelogScreen()),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),

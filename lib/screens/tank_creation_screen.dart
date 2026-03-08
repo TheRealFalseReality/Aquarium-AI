@@ -179,7 +179,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   void _addInhabitant() {
     showDialog(
       context: context,
-      builder: (context) => _InhabitantDialog(
+      builder: (context) => InhabitantDialog(
         availableFish: _availableFish,
         onAdd: (inhabitant) {
           setState(() {
@@ -193,7 +193,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   void _editInhabitant(int index) {
     showDialog(
       context: context,
-      builder: (context) => _InhabitantDialog(
+      builder: (context) => InhabitantDialog(
         availableFish: _availableFish,
         existingInhabitant: _inhabitants[index],
         onAdd: (inhabitant) {
@@ -206,8 +206,36 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   }
 
   void _removeInhabitant(int index) {
-    setState(() {
-      _inhabitants.removeAt(index);
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(
+          '${l10n.delete} "${_inhabitants[index].customName}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        setState(() {
+          _inhabitants.removeAt(index);
+        });
+      }
     });
   }
 
@@ -460,6 +488,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 notes: _notesController.text.trim().isNotEmpty
                     ? _notesController.text.trim()
                     : null,
+                // Preserve old score as previousHarmonyScore before updating
+                previousHarmonyScore: widget.existingTank!.harmonyScore,
                 harmonyScore: harmonyScore,
                 calculationBreakdown: calculationBreakdown,
                 createdAt: _creationDate,
@@ -1472,22 +1502,24 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   }
 }
 
-class _InhabitantDialog extends ConsumerStatefulWidget {
+class InhabitantDialog extends ConsumerStatefulWidget {
   final List<Fish> availableFish;
   final TankInhabitant? existingInhabitant;
   final Function(TankInhabitant) onAdd;
+  final VoidCallback? onDelete;
 
-  const _InhabitantDialog({
+  const InhabitantDialog({
     required this.availableFish,
     required this.onAdd,
     this.existingInhabitant,
+    this.onDelete,
   });
 
   @override
-  ConsumerState<_InhabitantDialog> createState() => _InhabitantDialogState();
+  ConsumerState<InhabitantDialog> createState() => _InhabitantDialogState();
 }
 
-class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
+class _InhabitantDialogState extends ConsumerState<InhabitantDialog> {
   final _formKey = GlobalKey<FormState>();
   final _customNameController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -1517,8 +1549,30 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     if (widget.existingInhabitant != null) {
       _customNameController.text = widget.existingInhabitant!.customName;
       _quantityController.text = widget.existingInhabitant!.quantity.toString();
-      _selectedFishUnit = widget.existingInhabitant!.fishUnit;
-      _selectedFishUuid = widget.existingInhabitant!.fishUuid;
+
+      // Resolve the fish: try UUID lookup first (handles renamed fish), then
+      // fall back to name-based lookup for backward compatibility.
+      Fish? resolvedFish = widget.existingInhabitant!.fishUuid != null
+          ? widget.availableFish
+                .where((f) => f.uuid == widget.existingInhabitant!.fishUuid)
+                .firstOrNull
+          : null;
+      resolvedFish ??= widget.availableFish
+          .where((f) => f.name == widget.existingInhabitant!.fishUnit)
+          .firstOrNull;
+
+      if (resolvedFish != null) {
+        _selectedFishUnit = resolvedFish.name;
+        _selectedFishUuid = resolvedFish.uuid;
+        // Start collapsed since a valid fish is found
+        _fishSelectorExpanded = false;
+      } else {
+        // Fish no longer exists in data (UUID changed or renamed without UUID).
+        // Leave _selectedFishUnit null so the user must re-select, and open
+        // the fish picker automatically.
+        _fishSelectorExpanded = true;
+      }
+
       _customImageUrl = widget.existingInhabitant!.customImageUrl;
       _customImagePath = widget.existingInhabitant!.customImagePath;
       _dateAdded = widget.existingInhabitant!.dateAdded;
@@ -1530,8 +1584,6 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
       final defaultName = 'My ${widget.existingInhabitant!.fishUnit}';
       _customNameUserModified =
           widget.existingInhabitant!.customName != defaultName;
-      // Start collapsed since a fish type is already selected
-      _fishSelectorExpanded = false;
     } else {
       _quantityController.text = '1';
       _dateAdded = DateTime.now(); // Default to now for new inhabitants
@@ -1689,6 +1741,12 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               .firstOrNull
         : null;
 
+    // Show a warning if we are editing an existing inhabitant whose fish type
+    // could not be resolved (fish was renamed or UUID changed in data).
+    final showMissingFishWarning = widget.existingInhabitant != null &&
+        selectedFish == null &&
+        _fishSelectorExpanded;
+
     // Get available species tags for the selected fish type.
     // Merge fish.commonNames with user-added species tags so that new
     // commonNames entries in fish_data.json are always reflected here,
@@ -1703,6 +1761,36 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Warning banner when the previous fish type is no longer in the data
+        if (showMissingFishWarning) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.amber.shade400),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded,
+                    color: Colors.amber.shade800, size: 18),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.inhabitantFishTypeNoLongerAvailable(
+                      widget.existingInhabitant!.fishUnit,
+                    ),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         // Header row with title and expand/change button
         Row(
           children: [
@@ -2448,23 +2536,83 @@ class _InhabitantDialogState extends ConsumerState<_InhabitantDialog> {
               ),
 
               // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
                 children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _save,
-                      child: Text(
-                        widget.existingInhabitant != null ? 'Update' : 'Add',
+                  if (widget.existingInhabitant != null &&
+                      widget.onDelete != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text(l10n.deleteInhabitant),
+                              content: Text(
+                                l10n.deleteInhabitantConfirm(
+                                    widget.existingInhabitant!.customName),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(ctx).pop(false),
+                                  child: Text(l10n.cancel),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(ctx).pop(true),
+                                  child: Text(
+                                    l10n.delete,
+                                    style: TextStyle(
+                                      color: Theme.of(ctx)
+                                          .colorScheme
+                                          .error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirmed == true && mounted) {
+                            Navigator.of(context).pop();
+                            widget.onDelete!();
+                          }
+                        },
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        label: Text(
+                          l10n.deleteInhabitant,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
                       ),
                     ),
+                    const Divider(height: 8),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _save,
+                          child: Text(
+                            widget.existingInhabitant != null
+                                ? 'Update'
+                                : 'Add',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
