@@ -1057,5 +1057,40 @@
   "reefSafeCautionLabel": "⚠️ Vorsicht",
   "interstitialAdBlurbTitle": "Kostenlose KI – durch Werbung unterstützt",
   "interstitialAdBlurbBody": "{hours, plural, =1{Es kann jede Stunde eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.} other{Es kann alle {hours} Stunden eine Vollbild-Werbung erscheinen, um die Kosten der kostenlosen KI-Stufe zu decken.}}",
-  "interstitialAdBlurbCta": "Werbung entfernen"
+  "interstitialAdBlurbCta": "Werbung entfernen",
+  "tankActions": "Tank-Aktionen",
+  "inhabitantDetails": "Bewohner-Details",
+  "addUserNotes": "Notizen hinzufügen",
+  "editUserNotes": "Notizen bearbeiten",
+  "userNotesHint": "Notizen zu diesem Bewohner eingeben…",
+  "dateAdded": "Hinzugefügt am",
+  "speciesType": "Artentyp",
+  "quantityLabel": "Anzahl",
+  "ageYearsMonths": "{years}y {months}m",
+  "tankAge": "Alter",
+  "inhabitantAge": "Alter",
+  "harmonyDelta": "Harmonie-Delta",
+
+  "editInhabitant": "Bewohner bearbeiten",
+
+  "inhabitantFishTypeNoLongerAvailable": "Der vorherige Fischart \"{fishUnit}\" ist nicht mehr verfügbar. Bitte wähle eine neue Fischart aus.",
+
+  "addInhabitant": "Bewohner hinzufügen",
+
+  "quickAddPhoto": "Foto schnell hinzufügen",
+
+  "cardTags": "Etiketten",
+
+  "deleteInhabitant": "Bewohner löschen",
+  "@deleteInhabitant": {
+    "description": "Label / tooltip for the delete inhabitant action"
+  },
+
+  "deleteInhabitantConfirm": "Möchtest du \"{inhabitantName}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@deleteInhabitantConfirm": {
+    "description": "Confirmation message shown before deleting an inhabitant",
+    "placeholders": {
+      "inhabitantName": {"type": "String"}
+    }
+  }
 }

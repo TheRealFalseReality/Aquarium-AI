@@ -107,7 +107,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
 
   static const List<String> _categories = ['freshwater', 'marine'];
 
-  String get _currentCategory => _categories[_tabController.index];
 
   @override
   void initState() {
@@ -395,7 +394,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     Fish selected,
     String category,
   ) {
-    final cs = Theme.of(context).colorScheme;
     final isWide = MediaQuery.of(context).size.width >= 720;
 
     // Build map: status → list of Fish objects

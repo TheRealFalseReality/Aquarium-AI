@@ -169,13 +169,20 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             color: chipColor,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text(
-            '$label $percentage%',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.favorite, size: 12, color: textColor),
+              const SizedBox(width: 4),
+              Text(
+                '$label $percentage%',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         );
       }

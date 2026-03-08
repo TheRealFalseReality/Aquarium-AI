@@ -12,6 +12,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -22,6 +23,7 @@ import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'parameter_logger_screen.dart';
 import 'tank_creation_screen.dart';
+import 'tank_inhabitant_screen.dart';
 
 /// Dedicated screen for displaying tank details with tabbed navigation
 ///
@@ -40,6 +42,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showCalculationBreakdown = false;
+  bool _fabOpen = false;
 
   @override
   void initState() {
@@ -204,42 +207,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 ),
               ],
             ),
-            actions: [
-              // Share button
-              IconButton(
-                icon: const Icon(Icons.share),
-                tooltip: l10n.shareTank,
-                onPressed: () {
-                  BackupRestoreUtils.shareTank(context, ref, tank);
-                },
-              ),
-              // Edit button
-              IconButton(
-                icon: const Icon(Icons.edit),
-                tooltip: l10n.editTank,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          TankCreationScreen(existingTank: tank),
-                    ),
-                  );
-                },
-              ),
-              // Notifications button
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                tooltip: l10n.notifications,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          NotificationManagementScreen(tank: tank),
-                    ),
-                  );
-                },
-              ),
-            ],
+            actions: const [],
           ),
           body: TabBarView(
             controller: _tabController,
@@ -321,6 +289,82 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ? tank.copyWith(clearBannerPhotoId: true, updatedAt: DateTime.now())
         : tank.copyWith(bannerPhotoId: photoId, updatedAt: DateTime.now());
     ref.read(tankProvider.notifier).updateTank(updatedTank);
+  }
+
+  /// Quick add a photo directly via image picker (bypasses the full photo dialog)
+  Future<void> _quickAddPhoto(BuildContext context, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.addPhoto),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.photo_library_outlined),
+            label: Text(l10n.gallery),
+            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(l10n.camera),
+            onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+          ),
+        ],
+      ),
+    );
+    if (source == null || !mounted) return;
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: source, imageQuality: 80);
+      if (picked == null || !mounted) return;
+      final currentTank = _getCurrentTank();
+      final photo = TankPhoto(
+        id: const Uuid().v4(),
+        imagePath: picked.path,
+        dateTaken: DateTime.now(),
+      );
+      final updatedTank = currentTank.copyWith(
+        photos: [...currentTank.photos, photo],
+        updatedAt: DateTime.now(),
+      );
+      ref.read(tankProvider.notifier).updateTank(updatedTank);
+      AnalyticsService.logFeatureUsed(featureName: 'quick_add_tank_photo');
+    } catch (e) {
+      if (mounted) {
+        final l10n2 = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n2.failedToPickImage)),
+        );
+      }
+    }
+  }
+
+  /// Quick add inhabitant via the InhabitantDialog; auto-saves the tank.
+  void _quickAddInhabitant(BuildContext context, Tank tank) {
+    final fishDataAsync = ref.read(fishDataProvider);
+    final fishData = fishDataAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => null,
+    );
+    final availableFish = fishData?[tank.type] ?? const <Fish>[];
+    showDialog<void>(
+      context: context,
+      builder: (_) => InhabitantDialog(
+        availableFish: availableFish,
+        onAdd: (inhabitant) {
+          final currentTank = _getCurrentTank();
+          final updatedTank = currentTank.copyWith(
+            inhabitants: [...currentTank.inhabitants, inhabitant],
+            updatedAt: DateTime.now(),
+          );
+          ref.read(tankProvider.notifier).updateTank(updatedTank);
+          AnalyticsService.logFeatureUsed(
+            featureName: 'quick_add_inhabitant',
+            parameters: {'fish_type': inhabitant.fishUnit},
+          );
+        },
+      ),
+    );
   }
 
   /// Add a new photo to the tank
@@ -466,10 +510,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     );
   }
 
-  /// Floating action button - context-sensitive per tab
+  /// Floating action button - context-sensitive per tab.
+  /// Tab 0 (Overview) shows a speed-dial FAB with tank actions.
   Widget? _buildFab(BuildContext context, Tank tank) {
     final l10n = AppLocalizations.of(context)!;
     switch (_tabController.index) {
+      case 0: // Overview – tank actions speed-dial
+        return _buildTankActionsFab(context, tank, l10n);
       case 1: // Photos
         return FloatingActionButton.extended(
           heroTag: 'fab_photos',
@@ -534,6 +581,206 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       default:
         return null;
     }
+  }
+
+  /// Speed-dial FAB for the Overview tab – shows Edit, Share, Notifications,
+  /// Add Inhabitant, Quick Add Photo, Quick Add Parameters, Quick Add Dosing,
+  /// and Quick Add Activity.
+  Widget _buildTankActionsFab(
+      BuildContext context, Tank tank, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Mini action buttons (only visible when expanded)
+        AnimatedOpacity(
+          opacity: _fabOpen ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedSlide(
+            offset: _fabOpen ? Offset.zero : const Offset(0, 0.5),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: IgnorePointer(
+              ignoring: !_fabOpen,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildFabAction(
+                    heroTag: 'fab_action_notifications',
+                    icon: Icons.notifications_outlined,
+                    label: l10n.notifications,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              NotificationManagementScreen(tank: tank),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_share',
+                    icon: Icons.share_outlined,
+                    label: l10n.shareTank,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      BackupRestoreUtils.shareTank(context, ref, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_edit',
+                    icon: Icons.edit_outlined,
+                    label: l10n.editTank,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TankCreationScreen(existingTank: tank),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_activity',
+                    icon: Icons.history,
+                    label: l10n.addLogEntry,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => NotificationLoggerScreen(
+                            tank: tank,
+                            openAddDialog: true,
+                            initialTabIndex: 1,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_dosing',
+                    icon: Icons.medication_outlined,
+                    label: l10n.addDose,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DosingLoggerScreen(tank: tank, openAddDialog: true),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_parameters',
+                    icon: Icons.science_outlined,
+                    label: l10n.addParameter,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ParameterLoggerScreen(
+                            tank: tank,
+                            openAddDialog: true,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_photo',
+                    icon: Icons.add_a_photo_outlined,
+                    label: l10n.quickAddPhoto,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _quickAddPhoto(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_add_inhabitant',
+                    icon: Icons.pets,
+                    label: l10n.addInhabitant,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _quickAddInhabitant(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Main toggle FAB
+        FloatingActionButton(
+          heroTag: 'fab_tank_actions_main',
+          tooltip: l10n.tankActions,
+          onPressed: () => setState(() => _fabOpen = !_fabOpen),
+          child: AnimatedRotation(
+            turns: _fabOpen ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: Icon(_fabOpen ? Icons.close : Icons.more_vert),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds a single mini FAB row (icon button + label).
+  Widget _buildFabAction({
+    required String heroTag,
+    required IconData icon,
+    required String label,
+    required ColorScheme cs,
+    required VoidCallback onPressed,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: BorderRadius.circular(8),
+          color: cs.surfaceContainerHigh,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: cs.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        FloatingActionButton.small(
+          heroTag: heroTag,
+          onPressed: onPressed,
+          child: Icon(icon),
+        ),
+      ],
+    );
   }
 
   /// Overview tab - Tank info, harmony score, inhabitants, action buttons
@@ -633,6 +880,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         Icons.line_weight,
                         _formatWaterWeight(tank),
                       ),
+                    _buildTankAgeChip(context, tank),
                     if (tank.inhabitants.isNotEmpty && fishData != null)
                       _buildHarmonyScoreChip(tank),
                   ],
@@ -1275,6 +1523,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final l10n = AppLocalizations.of(context)!;
     final score = tank.harmonyScore ?? 0.0;
     final percentage = (score * 100).toInt();
+    final appSettings = ref.watch(appSettingsProvider);
 
     Color scoreColor;
     if (score >= 0.8) {
@@ -1285,7 +1534,36 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       scoreColor = Colors.red;
     }
 
-    return Container(
+    // Delta chip
+    Widget? deltaChip;
+    if (!appSettings.tankHideHarmonyDelta &&
+        tank.previousHarmonyScore != null) {
+      final delta = score - tank.previousHarmonyScore!;
+      if (delta.abs() >= 0.005) {
+        final sign = delta > 0 ? '+' : '';
+        final deltaStr = '$sign${(delta * 100).toStringAsFixed(0)}%';
+        final deltaColor =
+            delta > 0 ? Colors.green.shade700 : Colors.red.shade700;
+        deltaChip = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: deltaColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: deltaColor.withOpacity(0.4)),
+          ),
+          child: Text(
+            deltaStr,
+            style: TextStyle(
+              fontSize: 12,
+              color: deltaColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
+    }
+
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: scoreColor.withOpacity(0.15),
@@ -1303,6 +1581,59 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: scoreColor,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (deltaChip == null) return chip;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [chip, const SizedBox(width: 6), deltaChip],
+    );
+  }
+
+  /// Formats a duration (since a date) as "X years Y months old".
+  String _formatAge(BuildContext context, DateTime since) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    int years = now.year - since.year;
+    int months = now.month - since.month;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    // Use compact "Xy Zm" format via l10n, but show words when years or
+    // months are zero so the chip reads more naturally.
+    if (years == 0 && months == 0) return '<1m';
+    return l10n.ageYearsMonths(years, months);
+  }
+
+  Widget _buildTankAgeChip(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final ageText = _formatAge(context, tank.createdAt);
+    if (ageText.trim().isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today_outlined, size: 14, color: cs.onSecondaryContainer),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              '${l10n.tankAge}: $ageText',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSecondaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -1375,129 +1706,150 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 fishData,
                 inhabitant: inhabitant,
               );
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundImage: fishImageUrl != null
-                              ? (fishImageUrl.startsWith('http')
-                                    ? CachedNetworkImageProvider(fishImageUrl)
-                                    : FileImage(File(fishImageUrl))
-                                          as ImageProvider)
-                              : null,
-                          backgroundColor: fishImageUrl == null
-                              ? cs.primaryContainer
-                              : null,
-                          child: fishImageUrl == null
-                              ? Icon(
-                                  Icons.shape_line,
-                                  color: cs.onPrimaryContainer,
-                                  size: 22,
-                                )
-                              : null,
-                        ),
-                        // Quantity badge
-                        if (inhabitant.quantity > 1)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: cs.primary,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: cs.surface,
-                                  width: 1.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                '${inhabitant.quantity}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: cs.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+              return InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TankInhabitantScreen(
+                        tank: tank,
+                        inhabitant: inhabitant,
+                        availableFish: fishData[tank.type] ?? const [],
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  child: Row(
+                    children: [
+                      Stack(
                         children: [
-                          Text(
-                            inhabitant.customName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundImage: fishImageUrl != null
+                                ? (fishImageUrl.startsWith('http')
+                                      ? CachedNetworkImageProvider(fishImageUrl)
+                                      : FileImage(File(fishImageUrl))
+                                            as ImageProvider)
+                                : null,
+                            backgroundColor: fishImageUrl == null
+                                ? cs.primaryContainer
+                                : null,
+                            child: fishImageUrl == null
+                                ? Icon(
+                                    Icons.shape_line,
+                                    color: cs.onPrimaryContainer,
+                                    size: 22,
+                                  )
+                                : null,
                           ),
-                          Text(
-                            inhabitant.fishUnit,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          if (inhabitant.speciesTags.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 3),
-                              child: Wrap(
-                                spacing: 4,
-                                runSpacing: 2,
-                                children: inhabitant.speciesTags
-                                    .map(
-                                      (tag) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: cs.secondaryContainer
-                                              .withOpacity(0.6),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          tag,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                fontSize: 10,
-                                                color: cs.onSecondaryContainer,
-                                              ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          if (inhabitant.dateAdded != null)
-                            Text(
-                              'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: cs.onSurfaceVariant.withOpacity(0.7),
-                                    fontSize: 11,
+                          // Quantity badge
+                          if (inhabitant.quantity > 1)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: cs.surface,
+                                    width: 1.5,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  '${inhabitant.quantity}',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              inhabitant.customName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              inhabitant.fishUnit,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (inhabitant.speciesTags.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Wrap(
+                                  spacing: 4,
+                                  runSpacing: 2,
+                                  children: inhabitant.speciesTags
+                                      .map(
+                                        (tag) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: cs.secondaryContainer
+                                                .withOpacity(0.6),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            tag,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  fontSize: 10,
+                                                  color:
+                                                      cs.onSecondaryContainer,
+                                                ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                            if (inhabitant.dateAdded != null)
+                              Text(
+                                'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          cs.onSurfaceVariant.withOpacity(0.7),
+                                      fontSize: 11,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: cs.onSurface.withOpacity(0.35),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),
