@@ -1771,7 +1771,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _getHarmonyIcon(harmonyScore),
+                        Icons.favorite,
                         size: 14,
                         color: _getHarmonyColor(harmonyScore),
                       ),

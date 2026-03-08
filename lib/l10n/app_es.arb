@@ -1057,5 +1057,40 @@
   "reefSafeCautionLabel": "⚠️ Precaución",
   "interstitialAdBlurbTitle": "IA gratuita — financiada por anuncios",
   "interstitialAdBlurbBody": "{hours, plural, =1{Puede aparecer un anuncio a pantalla completa cada hora para ayudar a cubrir el coste del nivel de IA gratuito.} other{Puede aparecer un anuncio a pantalla completa cada {hours} horas para ayudar a cubrir el coste del nivel de IA gratuito.}}",
-  "interstitialAdBlurbCta": "Eliminar anuncios"
+  "interstitialAdBlurbCta": "Eliminar anuncios",
+  "tankActions": "Acciones del acuario",
+  "inhabitantDetails": "Detalles del habitante",
+  "addUserNotes": "Añadir notas",
+  "editUserNotes": "Editar notas",
+  "userNotesHint": "Escribe notas sobre este habitante…",
+  "dateAdded": "Fecha de adición",
+  "speciesType": "Tipo de especie",
+  "quantityLabel": "Cantidad",
+  "ageYearsMonths": "{years}y {months}m",
+  "tankAge": "Edad",
+  "inhabitantAge": "Edad",
+  "harmonyDelta": "Delta de armonía",
+
+  "editInhabitant": "Editar habitante",
+
+  "inhabitantFishTypeNoLongerAvailable": "El tipo de pez anterior \"{fishUnit}\" ya no está disponible. Por favor, selecciona un nuevo tipo de pez.",
+
+  "addInhabitant": "Agregar habitante",
+
+  "quickAddPhoto": "Agregar foto rápida",
+
+  "cardTags": "Etiquetas",
+
+  "deleteInhabitant": "Eliminar habitante",
+  "@deleteInhabitant": {
+    "description": "Label / tooltip for the delete inhabitant action"
+  },
+
+  "deleteInhabitantConfirm": "¿Estás seguro de que deseas eliminar \"{inhabitantName}\"? Esta acción no se puede deshacer.",
+  "@deleteInhabitantConfirm": {
+    "description": "Confirmation message shown before deleting an inhabitant",
+    "placeholders": {
+      "inhabitantName": {"type": "String"}
+    }
+  }
 }
