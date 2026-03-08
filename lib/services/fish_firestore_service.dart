@@ -31,39 +31,21 @@ import 'package:flutter/services.dart';
 // ---------------------------------------------------------------------------
 //
 // Add the following rule block to your Firestore rules so the app can read
-// fish data without authentication (public read), while preventing
-// unauthorised writes:
+// fish data publicly while restricting writes to the authorised editor account
+// (UID dEaO8u8e1bQim1S1kx5ZFYLYyWJ2):
 //
 //   match /fish_compat/{category} {
-//     allow read: if true;   // Anyone can read fish data
-//     allow write: if false; // Writes only from Admin SDK / trusted code
+//     allow read:  if true;
+//     allow write: if request.auth != null
+//                  && request.auth.uid == 'dEaO8u8e1bQim1S1kx5ZFYLYyWJ2';
 //
 //     match /fish/{fishId} {
-//       allow read: if true;
-//       allow write: if false;
+//       allow read:  if true;
+//       allow write: if request.auth != null
+//                    && request.auth.uid == 'dEaO8u8e1bQim1S1kx5ZFYLYyWJ2';
 //     }
 //   }
 //
-// If you want to restrict reads to authenticated users instead, replace
-// `if true` with `if request.auth != null`.
-//
-// IMPORTANT: The upload helper in this file uses the Firestore client SDK, so
-// you must temporarily allow writes during the initial upload (or use the
-// Firebase Admin SDK / Firebase CLI).  A practical approach for the debug
-// upload is to allow writes only for authenticated users while running the
-// debug build:
-//
-//   match /fish_compat/{category} {
-//     allow read: if true;
-//     allow write: if request.auth != null;  // allow during debug upload
-//
-//     match /fish/{fishId} {
-//       allow read: if true;
-//       allow write: if request.auth != null;
-//     }
-//   }
-//
-// After the initial upload you can tighten it back to `allow write: if false`.
 // ---------------------------------------------------------------------------
 
 /// Service for reading and writing fish-compatibility data to Cloud Firestore.

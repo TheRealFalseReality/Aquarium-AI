@@ -23,15 +23,19 @@ class Fish {
 
   /// Local asset path for the fish image.
   ///
-  /// Extracts the filename from [imageURL] (which may be a full GitHub raw URL
-  /// or just a filename) and maps it to the bundled `assets/images/fish/`
-  /// directory.  Images are stored as `.webp` files.
+  /// [imageURL] follows the convention:
+  ///   `https://raw.githubusercontent.com/.../assets/images/fish/XXX.webp`
+  ///
+  /// The bundled asset lives at the same relative path `assets/images/fish/XXX.webp`,
+  /// so we simply extract the `assets/…` suffix from the URL.
   String get localImagePath {
-    // Extract just the filename portion from a full URL or plain filename.
-    final filename = imageURL.contains('/')
-        ? imageURL.split('/').last
-        : imageURL;
-    // Normalise to .webp regardless of what the stored URL says.
+    const assetsMarker = 'assets/';
+    final idx = imageURL.indexOf(assetsMarker);
+    if (idx != -1) {
+      return imageURL.substring(idx);
+    }
+    // Fallback for bare filenames (no URL prefix).
+    final filename = imageURL.contains('/') ? imageURL.split('/').last : imageURL;
     final base = filename.contains('.')
         ? filename.substring(0, filename.lastIndexOf('.'))
         : filename;
