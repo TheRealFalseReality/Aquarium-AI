@@ -1217,5 +1217,25 @@
   "onboardingDiscoverSubtitle": "Des outils IA puissants pour vous aider à prendre soin de votre aquarium.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingThemeTitle": "Choisissez votre style",
+  "@onboardingThemeTitle": {
+    "description": "Title on the new first onboarding step (theme selection)"
+  },
+
+  "onboardingThemeSubtitle": "Choisissez une palette de couleurs. Vous pouvez la modifier à tout moment dans les paramètres d'apparence.",
+  "@onboardingThemeSubtitle": {
+    "description": "Subtitle on the theme-selection onboarding step"
+  },
+
+  "onboardingThemeModeLabel": "Luminosité",
+  "@onboardingThemeModeLabel": {
+    "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
+  },
+
+  "onboardingChangeTankTypeWarning": "Changer le type d'aquarium supprimera les habitants que vous avez ajoutés.",
+  "@onboardingChangeTankTypeWarning": {
+    "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   }
 }

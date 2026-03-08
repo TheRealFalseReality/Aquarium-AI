@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,16 +9,19 @@ import '../models/tank.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../theme_colors.dart';
+import '../theme_provider.dart';
 import '../widgets/modern_chip.dart';
 import 'tank_creation_screen.dart' show InhabitantDialog;
 
-/// A four-step, skippable onboarding flow shown once on first launch.
+/// A five-step, skippable onboarding flow shown once on first launch.
 ///
 /// Steps:
-///   1. Welcome / Sign In  – upsells the community and account features
-///   2. Create Your Tank   – simplified tank setup (name, type, size)
-///   3. Add Inhabitants    – optionally populate the tank with fish
-///   4. Discover AI Tools  – overview of the key AI features
+///   1. Choose Your Style  – theme and brightness mode selection
+///   2. Welcome / Sign In  – upsells the community and account features
+///   3. Create Your Tank   – simplified tank setup (name, type, size)
+///   4. Add Inhabitants    – optionally populate the tank with fish
+///   5. Discover AI Tools  – overview of the key AI features
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -46,7 +50,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _totalPages = 4;
+  static const int _totalPages = 5;
 
   final PageController _pageController = PageController();
   int _currentPage = 0;
@@ -159,8 +163,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l10n.changeTankType),
-          content: const Text(
-            'Changing the tank type will remove the inhabitants you have added.',
+          content: Text(
+            l10n.onboardingChangeTankTypeWarning,
           ),
           actions: [
             TextButton(
@@ -226,6 +230,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (i) => setState(() => _currentPage = i),
                 children: [
+                  _buildThemePage(context, l10n, cs),
                   _buildWelcomePage(context, l10n, cs),
                   _buildCreateTankPage(context, l10n, cs),
                   _buildInhabitantsPage(context, l10n, cs),
@@ -334,7 +339,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           // "Skip for now" secondary action on the inhabitants step
-          if (_currentPage == 2) ...[
+          if (_currentPage == 3) ...[
             const SizedBox(height: 6),
             TextButton(
               onPressed: _nextPage,
@@ -349,7 +354,240 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 1: Welcome / Sign In ─────────────────────────────────────────────
+  // ── Step 1: Choose Your Style ────────────────────────────────────────────
+
+  // Maps each non-custom theme to its two swatch preview colours.
+  static const Map<AppColorTheme, Color> _swatchPrimary = {
+    AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchPrimary,
+    AppColorTheme.materialYou: Color(0xFF7C4DFF),
+    AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchPrimary,
+    AppColorTheme.iceBlue: AquaThemeColors.iceBlueSwatchPrimary,
+    AppColorTheme.gold: AquaThemeColors.goldSwatchPrimary,
+    AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchPrimary,
+    AppColorTheme.midnight: AquaThemeColors.midnightSwatchPrimary,
+    AppColorTheme.orange: AquaThemeColors.orangeSwatchPrimary,
+    AppColorTheme.green: AquaThemeColors.greenSwatchPrimary,
+    AppColorTheme.skyBlue: AquaThemeColors.skyBlueSwatchPrimary,
+    AppColorTheme.royalBlue: AquaThemeColors.royalBlueSwatchPrimary,
+    AppColorTheme.orchid: AquaThemeColors.orchidSwatchPrimary,
+    AppColorTheme.hotPink: AquaThemeColors.hotPinkSwatchPrimary,
+    AppColorTheme.crimson: AquaThemeColors.crimsonSwatchPrimary,
+  };
+
+  static const Map<AppColorTheme, Color> _swatchSecondary = {
+    AppColorTheme.defaultTheme: AquaThemeColors.defaultSwatchSecondary,
+    AppColorTheme.materialYou: Color(0xFF512DA8),
+    AppColorTheme.oceanBlue: AquaThemeColors.oceanBlueSwatchSecondary,
+    AppColorTheme.iceBlue: AquaThemeColors.iceBlueSwatchSecondary,
+    AppColorTheme.gold: AquaThemeColors.goldSwatchSecondary,
+    AppColorTheme.mulberry: AquaThemeColors.mulberrySwatchSecondary,
+    AppColorTheme.midnight: AquaThemeColors.midnightSwatchSecondary,
+    AppColorTheme.orange: AquaThemeColors.orangeSwatchSecondary,
+    AppColorTheme.green: AquaThemeColors.greenSwatchSecondary,
+    AppColorTheme.skyBlue: AquaThemeColors.skyBlueSwatchSecondary,
+    AppColorTheme.royalBlue: AquaThemeColors.royalBlueSwatchSecondary,
+    AppColorTheme.orchid: AquaThemeColors.orchidSwatchSecondary,
+    AppColorTheme.hotPink: AquaThemeColors.hotPinkSwatchSecondary,
+    AppColorTheme.crimson: AquaThemeColors.crimsonSwatchSecondary,
+  };
+
+  Widget _buildThemePage(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final themeState = ref.watch(themeProviderNotifierProvider);
+    final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
+    final isMaterialYouAvailable =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+    // All themes, optionally excluding Material You on unsupported platforms.
+    final themes = AppColorTheme.values
+        .where(
+          (t) =>
+              t != AppColorTheme.custom &&
+              (t != AppColorTheme.materialYou || isMaterialYouAvailable),
+        )
+        .toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero circle
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _swatchPrimary[themeState.colorTheme] ?? cs.primary,
+                    _swatchSecondary[themeState.colorTheme] ??
+                        cs.primaryContainer,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('🎨', style: TextStyle(fontSize: 38)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.onboardingThemeTitle,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.onboardingThemeSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // ── Brightness mode ─────────────────────────────────────────────
+          _buildSectionLabel(
+            context,
+            cs,
+            icon: Icons.brightness_6_outlined,
+            containerColor: cs.secondaryContainer,
+            iconColor: cs.onSecondaryContainer,
+            label: l10n.onboardingThemeModeLabel,
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: const Icon(Icons.light_mode_outlined),
+                  label: Text(l10n.light),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: const Icon(Icons.brightness_auto_outlined),
+                  label: Text(l10n.system),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: const Icon(Icons.dark_mode_outlined),
+                  label: Text(l10n.dark),
+                ),
+              ],
+              selected: {themeState.themeMode},
+              onSelectionChanged: (modes) =>
+                  themeNotifier.setThemeMode(modes.first),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // ── Colour palette ──────────────────────────────────────────────
+          _buildSectionLabel(
+            context,
+            cs,
+            icon: Icons.palette_outlined,
+            containerColor: cs.primaryContainer,
+            iconColor: cs.onPrimaryContainer,
+            label: l10n.colourTheme,
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: themes.map((theme) {
+              final primary = _swatchPrimary[theme] ?? cs.primary;
+              final secondary = _swatchSecondary[theme] ?? cs.primaryContainer;
+              final isSelected = themeState.colorTheme == theme;
+
+              return GestureDetector(
+                onTap: () => themeNotifier.setColorTheme(theme),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [primary, secondary],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(
+                                color: cs.onSurface,
+                                width: 3,
+                              )
+                            : Border.all(
+                                color: cs.outline.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: primary.withOpacity(0.4),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color: _contrastColor(primary),
+                              size: 24,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 64,
+                      child: Text(
+                        theme.displayName,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: isSelected
+                              ? cs.primary
+                              : cs.onSurfaceVariant,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  /// Returns black or white depending on which gives better contrast against [bg].
+  static Color _contrastColor(Color bg) {
+    final luminance = bg.computeLuminance();
+    return luminance > 0.35 ? Colors.black87 : Colors.white;
+  }
+
+  // ── Step 2: Welcome / Sign In ─────────────────────────────────────────────
 
   Widget _buildWelcomePage(
     BuildContext context,
@@ -436,7 +674,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       await Navigator.pushNamed(context, '/auth');
                       // Advance to tank setup step after returning from auth,
                       // but only if we haven't already moved past step 1.
-                      if (mounted && _currentPage == 0) _nextPage();
+                      if (mounted && _currentPage == 1) _nextPage();
                     },
                     icon: const Icon(Icons.login),
                     label: Text(l10n.authSignIn),
@@ -492,7 +730,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 2: Create Tank ───────────────────────────────────────────────────
+  // ── Step 3: Create Tank ───────────────────────────────────────────────────
 
   Widget _buildCreateTankPage(
     BuildContext context,
@@ -570,13 +808,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             spacing: 12,
             children: [
               ModernSelectableChip(
-                label: 'Freshwater',
+                label: l10n.freshwater,
                 emoji: '🐟',
                 selected: _selectedTankType == 'freshwater',
                 onTap: () => _onTankTypeChanged('freshwater'),
               ),
               ModernSelectableChip(
-                label: 'Saltwater',
+                label: l10n.saltwater,
                 emoji: '🪼',
                 selected: _selectedTankType == 'marine',
                 onTap: () => _onTankTypeChanged('marine'),
@@ -630,10 +868,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Expanded(
                 child: TextField(
                   controller: _sizeGallonsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Gallons',
+                  decoration: InputDecoration(
+                    labelText: l10n.gallons,
                     hintText: '55',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     suffixText: 'gal',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
@@ -656,10 +894,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Expanded(
                 child: TextField(
                   controller: _sizeLitersController,
-                  decoration: const InputDecoration(
-                    labelText: 'Liters',
+                  decoration: InputDecoration(
+                    labelText: l10n.liters,
                     hintText: '208',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     suffixText: 'L',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
@@ -732,7 +970,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 3: Add Inhabitants ───────────────────────────────────────────────
+  // ── Step 4: Add Inhabitants ───────────────────────────────────────────────
 
   Widget _buildInhabitantsPage(
     BuildContext context,
@@ -898,7 +1136,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
 
-  // ── Step 4: Discover AI Tools ─────────────────────────────────────────────
+  // ── Step 5: Discover AI Tools ─────────────────────────────────────────────
 
   Widget _buildDiscoverToolsPage(
     BuildContext context,

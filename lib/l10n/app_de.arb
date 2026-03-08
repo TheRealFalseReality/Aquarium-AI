@@ -1217,5 +1217,25 @@
   "onboardingDiscoverSubtitle": "Leistungsstarke KI-Tools für die Pflege deines Aquariums.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingThemeTitle": "Wähle deinen Stil",
+  "@onboardingThemeTitle": {
+    "description": "Title on the new first onboarding step (theme selection)"
+  },
+
+  "onboardingThemeSubtitle": "Wähle eine Farbpalette. Du kannst sie jederzeit in den Erscheinungsbild-Einstellungen ändern.",
+  "@onboardingThemeSubtitle": {
+    "description": "Subtitle on the theme-selection onboarding step"
+  },
+
+  "onboardingThemeModeLabel": "Helligkeit",
+  "@onboardingThemeModeLabel": {
+    "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
+  },
+
+  "onboardingChangeTankTypeWarning": "Durch das Ändern des Beckentyps werden die hinzugefügten Bewohner entfernt.",
+  "@onboardingChangeTankTypeWarning": {
+    "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   }
 }

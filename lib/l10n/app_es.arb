@@ -1217,5 +1217,25 @@
   "onboardingDiscoverSubtitle": "Potentes herramientas de IA para ayudarte a cuidar tu acuario.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingThemeTitle": "Elige tu estilo",
+  "@onboardingThemeTitle": {
+    "description": "Title on the new first onboarding step (theme selection)"
+  },
+
+  "onboardingThemeSubtitle": "Elige una paleta de colores. Siempre puedes cambiarla más tarde en los ajustes de apariencia.",
+  "@onboardingThemeSubtitle": {
+    "description": "Subtitle on the theme-selection onboarding step"
+  },
+
+  "onboardingThemeModeLabel": "Brillo",
+  "@onboardingThemeModeLabel": {
+    "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
+  },
+
+  "onboardingChangeTankTypeWarning": "Cambiar el tipo de acuario eliminará los habitantes que hayas añadido.",
+  "@onboardingChangeTankTypeWarning": {
+    "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   }
 }

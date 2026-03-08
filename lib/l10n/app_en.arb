@@ -3127,8 +3127,7 @@
   "buyMeACoffeeWebsite": "Buy on buymeacoffee.com",
   "@buyMeACoffeeWebsite": {
     "description": "Button label for opening the Buy Me a Coffee website"
-  }
-,
+  },
   "appearanceSubtitle": "Customise the look of the app.",
   "@appearanceSubtitle": {
     "description": "Subtitle on the Appearance screen"
@@ -5425,5 +5424,25 @@
   "onboardingDiscoverSubtitle": "Powerful AI-powered tools to help you care for your aquarium.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingThemeTitle": "Choose Your Style",
+  "@onboardingThemeTitle": {
+    "description": "Title on the new first onboarding step (theme selection)"
+  },
+
+  "onboardingThemeSubtitle": "Pick a colour palette. You can always change it later in Appearance settings.",
+  "@onboardingThemeSubtitle": {
+    "description": "Subtitle on the theme-selection onboarding step"
+  },
+
+  "onboardingThemeModeLabel": "Brightness",
+  "@onboardingThemeModeLabel": {
+    "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
+  },
+
+  "onboardingChangeTankTypeWarning": "Changing the tank type will remove the inhabitants you have added.",
+  "@onboardingChangeTankTypeWarning": {
+    "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   }
 }
