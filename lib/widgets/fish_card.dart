@@ -64,7 +64,7 @@ class _FishCardState extends ConsumerState<FishCard>
     _closeSpeedDial();
     // Load all fish for the same category so the sheet can show compat info.
     final fishDataAsync = ref.read(fishDataProvider);
-    final allFish = fishDataAsync.valueOrNull?[widget.category] ?? [];
+    final allFish = fishDataAsync.asData?.value[widget.category] ?? [];
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
