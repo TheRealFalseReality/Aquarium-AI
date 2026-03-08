@@ -135,11 +135,13 @@ void main() {
 
     test('clearPersistentCache clears both in-memory and SP cache', () async {
       // Seed an SP entry to simulate a previous Firestore fetch.
+      // The empty arrays mean _parseFishMap produces empty lists; the service
+      // falls through to the local asset to populate the in-memory cache.
       SharedPreferences.setMockInitialValues({
         'fishcompat_cached_json': '{"freshwater":[],"marine":[]}',
       });
       final svc = FishDataService();
-      await svc.loadFishData(); // populates in-memory cache from local asset
+      await svc.loadFishData(); // loads from local asset (SP data is empty)
 
       await svc.clearPersistentCache();
 
@@ -147,32 +149,42 @@ void main() {
           reason: 'In-memory cache should be cleared');
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('fishcompat_cached_json'), isNull,
-          reason: 'SP cache should be removed');
+          reason: 'SP cache key should be removed');
     });
 
     test('loadFishData falls back to SP cache when Firestore is unavailable',
         () async {
-      // Simulate a previous successful fetch stored in SP (without Firestore
-      // being available in test — the service will time out and fall through
-      // to SP).  We pre-seed SP with minimal valid JSON.
-      final mockJson = '{"freshwater":[{"uuid":"test-1","name":"Guppy",'
-          '"commonNames":["Guppy"],"imageURL":"https://raw.githubusercontent.com/'
+      // Seed SP with a minimal valid dataset that contains a fish named
+      // "GuppySPCacheTest" — a name that cannot exist in the bundled local
+      // asset.  This lets us prove the data came from the SP cache rather
+      // than the local fallback asset.
+      const uniqueName = 'GuppySPCacheTest';
+      final mockJson = '{"freshwater":[{"uuid":"test-sp-1","name":"$uniqueName",'
+          '"commonNames":["$uniqueName"],"imageURL":"https://raw.githubusercontent.com/'
           'TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/'
           'guppies.webp","compatible":[],"notRecommended":[],'
-          '"notCompatible":[],"withCaution":[]}],"marine":[]}';
+          '"notCompatible":[],"withCaution":[]}],'
+          '"marine":[{"uuid":"test-sp-2","name":"TestClownfish",'
+          '"commonNames":["TestClownfish"],"imageURL":"https://raw.githubusercontent.com/'
+          'TheRealFalseReality/Aquarium-AI/refs/heads/main/assets/images/fish/'
+          'clownfish_male.webp","reefSafe":"Yes","compatible":[],'
+          '"notRecommended":[],"notCompatible":[],"withCaution":[]}]}';
       SharedPreferences.setMockInitialValues({
         'fishcompat_cached_json': mockJson,
       });
 
-      // With Firestore unavailable (test environment) and the SP key present,
-      // loadFishData should return the SP data rather than the local asset.
-      // In tests Firestore is not initialised so it throws immediately; the
-      // service catches that and falls through to SP.
+      // Firestore is not initialised in the test environment so it throws
+      // immediately; the service catches that and falls through to SP.
       final svc = FishDataService();
       final data = await svc.loadFishData();
 
-      // Data will be either from SP or the local asset — both are non-empty.
-      expect(data, isNotEmpty);
+      // The unique sentinel name proves SP data was used, not the local asset.
+      final freshwater = data['freshwater'] ?? [];
+      expect(
+        freshwater.any((f) => f.name == uniqueName),
+        isTrue,
+        reason: 'SP cache data should be returned when Firestore is unavailable',
+      );
     });
 
     test('fish localImagePath extracts assets/ suffix from full URL', () async {

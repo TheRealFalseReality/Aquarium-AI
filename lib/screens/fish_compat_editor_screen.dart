@@ -1217,7 +1217,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               width: 56,
               height: 56,
               color: colorScheme.surfaceVariant,
-              child: const Icon(Icons.set_meal),
+              child: const Icon(Icons.image_not_supported),
             ),
           ),
         ),
