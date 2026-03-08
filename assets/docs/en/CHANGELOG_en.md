@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.03] - 2026-3-7 - UUIDs, Mostly Authorization Checks, Facebook Login support
+## [3.1.03] - 2026-3-7 • UUIDs, Mostly Authorization Checks, Facebook Login support
 
 ### Changed
 
@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 **Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
 
-## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features  
+## [3.1.01] - 2026-3-3 • Perks, Community and Profile Features  
 
 ### Added
 
@@ -37,7 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-## [3.0.10] - 2026-2-27 - Visual Updates, Stocking Tool Fixes
+## [3.0.10] - 2026-2-27 • Visual Updates, Stocking Tool Fixes
 
 ### Added
 
@@ -51,7 +51,7 @@ All notable changes to this project will be documented in this file.
 
 **Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.03...v3.0.10>
 
-## [3.0.03] - 2026-2-24  - Major Updates
+## [3.0.03] - 2026-2-24 • Major Updates
 
 ### Added
 
