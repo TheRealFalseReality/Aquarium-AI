@@ -2,8 +2,6 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
-## [3.X.XX] - 2026-
-
 ## [3.1.03] - 2026-3-7 - UUID, principalmente comprobaciones de autorización, soporte de inicio de sesión de Facebook
 
 ### Cambió

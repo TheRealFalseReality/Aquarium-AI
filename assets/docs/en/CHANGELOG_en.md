@@ -2,8 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.X.XX] - 2026-
-
 ## [3.1.03] - 2026-3-7 - UUIDs, Mostly Authorization Checks, Facebook Login support
 
 ### Changed
@@ -14,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 **Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
 
-## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features
+## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features  
 
 ### Added
 

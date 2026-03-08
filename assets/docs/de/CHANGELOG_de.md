@@ -2,8 +2,6 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
-## [3.X.XX] - 2026-
-
 ## [3.1.03] – 7.3.2026 – UUIDs, hauptsächlich Autorisierungsprüfungen, Facebook-Login-Unterstützung
 
 ### Geändert

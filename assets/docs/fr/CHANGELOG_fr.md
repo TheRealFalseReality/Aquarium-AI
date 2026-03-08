@@ -2,8 +2,6 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
-## [3.X.XX] - 2026-
-
 ## [3.1.03] - 2026-3-7 - UUID, principalement des contrôles d'autorisation, prise en charge de la connexion Facebook
 
 ### Modifié
