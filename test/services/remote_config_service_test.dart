@@ -91,10 +91,6 @@ void main() {
         expect(RemoteConfigService.aquapiEssentialImageUrl, equals(''));
       });
 
-      test('fishcompatJson defaults to empty string (use local asset)', () {
-        expect(RemoteConfigService.fishcompatJson, equals(''));
-      });
-
       test('buyMeACoffeeUrl defaults to expected URL', () {
         expect(
           RemoteConfigService.buyMeACoffeeUrl,
@@ -142,8 +138,6 @@ void main() {
             equals('aquapi_original_image_url'));
         expect(RemoteConfigKeys.aquapiEssentialImageUrl,
             equals('aquapi_essential_image_url'));
-        expect(RemoteConfigKeys.fishcompatJson,
-            equals('fishcompat_json'));
         expect(RemoteConfigKeys.buyMeACoffeeUrl,
             equals('buy_me_a_coffee_url'));
         expect(RemoteConfigKeys.changelogEn,
