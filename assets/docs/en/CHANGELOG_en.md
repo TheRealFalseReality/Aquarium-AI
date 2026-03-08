@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### ***Please Note:***
 - **You MAY need to reset your storage in order for new data set to load. I added UUIDs to the fish types to allow for better changes in the future.**
-- The rest if mostly backend updates.
+- The rest is mostly backend updates.
 
 **Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
 
