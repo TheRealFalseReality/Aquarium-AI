@@ -1,6 +1,5 @@
 import 'package:fish_ai/services/fish_data_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -9,7 +8,6 @@ void main() {
     late FishDataService service;
 
     setUp(() {
-      SharedPreferences.setMockInitialValues({});
       service = FishDataService();
     });
 
@@ -133,27 +131,34 @@ void main() {
       }
     });
 
-    test('loadFishData persists JSON to SharedPreferences', () async {
-      await service.loadFishData();
+    test('clearPersistentCache clears in-memory cache', () async {
+      // Load data first.
+      final svc = FishDataService();
+      await svc.loadFishData();
+      expect(svc.getCachedFishByCategory('freshwater'), isNotNull);
 
-      final prefs = await SharedPreferences.getInstance();
-      // Without RC data the local asset is used; nothing is written to SP
-      // (SP is only written when RC provides data).
-      // Verify the key is absent when no RC JSON is set.
-      expect(prefs.getString('fishcompat_cached_json'), isNull);
+      // clearPersistentCache should clear the in-memory cache.
+      await svc.clearPersistentCache();
+      expect(svc.getCachedFishByCategory('freshwater'), isNull);
     });
 
-    test('clearPersistentCache removes SharedPreferences entry', () async {
-      // Manually seed an SP entry to simulate a previous RC fetch.
-      SharedPreferences.setMockInitialValues({
-        'fishcompat_cached_json': '{"freshwater":[],"marine":[]}',
-      });
-      final svc = FishDataService();
-      await svc.clearPersistentCache();
+    test('fish localImagePath resolves to expected asset path', () async {
+      final data = await service.loadFishData();
 
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('fishcompat_cached_json'), isNull);
-      expect(svc.getCachedFishByCategory('freshwater'), isNull);
+      for (final category in ['freshwater', 'marine']) {
+        for (final fish in data[category]!) {
+          expect(
+            fish.localImagePath,
+            startsWith('assets/images/fish/'),
+            reason: '${fish.name} localImagePath should be a local asset path',
+          );
+          expect(
+            fish.localImagePath,
+            endsWith('.webp'),
+            reason: '${fish.name} localImagePath should use .webp extension',
+          );
+        }
+      }
     });
   });
 }

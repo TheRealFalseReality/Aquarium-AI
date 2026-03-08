@@ -45,7 +45,6 @@ class RemoteConfigService {
             rcDefaultAquapiOriginalImageUrl,
         RemoteConfigKeys.aquapiEssentialImageUrl:
             rcDefaultAquapiEssentialImageUrl,
-        RemoteConfigKeys.fishcompatJson: rcDefaultFishcompatJson,
         RemoteConfigKeys.earlySupporterPrice: rcDefaultEarlySupporterPrice,
         RemoteConfigKeys.buyMeACoffeeUrl: rcDefaultBuyMeACoffeeUrl,
         RemoteConfigKeys.changelogEn: rcDefaultChangelog,
@@ -93,8 +92,7 @@ class RemoteConfigService {
           'maxPhotosPerDay=$maxPhotoAnalysesPerDay, '
           'chatHistoryLimit=$freeTierChatHistoryLimit, '
           'geminiModel=$defaultGeminiModel, '
-          'groqModel=$defaultGroqModel, '
-          'fishcompatJsonLoaded=${fishcompatJson.isNotEmpty}',
+          'groqModel=$defaultGroqModel',
         );
       }
     } catch (e) {
@@ -218,14 +216,6 @@ class RemoteConfigService {
     RemoteConfigKeys.aquapiEssentialImageUrl,
     rcDefaultAquapiEssentialImageUrl,
   );
-
-  // ── Fish compatibility data ─────────────────────────────────────────────────
-
-  /// Full JSON string of the fish compatibility database from Remote Config.
-  /// Returns an empty string when not set in Remote Config,
-  /// signalling that the bundled `assets/data/fishcompat.json` should be used.
-  static String get fishcompatJson =>
-      _modelString(RemoteConfigKeys.fishcompatJson, rcDefaultFishcompatJson);
 
   // ── In-app purchase pricing ─────────────────────────────────────────────────
 

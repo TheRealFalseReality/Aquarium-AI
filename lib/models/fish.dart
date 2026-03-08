@@ -21,6 +21,23 @@ class Fish {
     required this.withCaution,
   });
 
+  /// Local asset path for the fish image.
+  ///
+  /// Extracts the filename from [imageURL] (which may be a full GitHub raw URL
+  /// or just a filename) and maps it to the bundled `assets/images/fish/`
+  /// directory.  Images are stored as `.webp` files.
+  String get localImagePath {
+    // Extract just the filename portion from a full URL or plain filename.
+    final filename = imageURL.contains('/')
+        ? imageURL.split('/').last
+        : imageURL;
+    // Normalise to .webp regardless of what the stored URL says.
+    final base = filename.contains('.')
+        ? filename.substring(0, filename.lastIndexOf('.'))
+        : filename;
+    return 'assets/images/fish/$base.webp';
+  }
+
   factory Fish.fromJson(Map<String, dynamic> json) {
     // Helper function to safely parse lists that might contain objects
     List<String> parseStringList(List<dynamic>? data) {

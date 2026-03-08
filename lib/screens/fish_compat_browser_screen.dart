@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -778,17 +777,12 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           topLeft: Radius.circular(12),
                           bottomLeft: Radius.circular(12),
                         ),
-                        child: CachedNetworkImage(
-                          imageUrl: other.imageURL,
+                        child: Image.asset(
+                          other.localImagePath,
                           width: avatarW,
                           height: rowH,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => SizedBox(
-                            width: avatarW,
-                            height: rowH,
-                            child: Icon(Icons.set_meal, color: cs.outline),
-                          ),
-                          errorWidget: (_, __, ___) => SizedBox(
+                          errorBuilder: (_, __, ___) => SizedBox(
                             width: avatarW,
                             height: rowH,
                             child: Icon(Icons.set_meal, color: cs.outline),
@@ -882,13 +876,10 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                 Center(
                   child: InteractiveViewer(
                     maxScale: 5,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.fish.imageURL,
+                    child: Image.asset(
+                      widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      placeholder: (_, __) => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                      errorWidget: (_, __, ___) => const Center(
+                      errorBuilder: (_, __, ___) => const Center(
                         child: Icon(
                           Icons.broken_image_outlined,
                           size: 64,
@@ -941,16 +932,10 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
               child: SizedBox(
                 width: double.infinity,
                 height: 200,
-                child: CachedNetworkImage(
-                  imageUrl: fish.imageURL,
+                child: Image.asset(
+                  fish.localImagePath,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 56, color: cs.outline),
-                    ),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
+                  errorBuilder: (_, __, ___) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 56, color: cs.outline),
@@ -1143,17 +1128,10 @@ class _FishTile extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: fish.imageURL,
+                    Image.asset(
+                      fish.localImagePath,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: cs.surfaceVariant,
-                        child: Center(
-                          child:
-                              Icon(Icons.set_meal, size: 36, color: cs.outline),
-                        ),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorBuilder: (_, __, ___) => Container(
                         color: cs.surfaceVariant,
                         child: Center(
                           child:
@@ -1268,16 +1246,10 @@ class _CompatFishChip extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: CachedNetworkImage(
-                  imageUrl: fish.imageURL,
+                child: Image.asset(
+                  fish.localImagePath,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: cs.surfaceVariant,
-                    child: Center(
-                      child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
-                    ),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
+                  errorBuilder: (_, __, ___) => Container(
                     color: cs.surfaceVariant,
                     child: Center(
                       child: Icon(Icons.set_meal, size: 28, color: fgColor.withOpacity(0.5)),
