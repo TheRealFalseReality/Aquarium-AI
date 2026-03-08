@@ -1237,6 +1237,8 @@
   "onboardingChangeTankTypeWarning": "Cambiar el tipo de acuario eliminará los habitantes que hayas añadido.",
   "@onboardingChangeTankTypeWarning": {
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
+  },
+
   "fishDescription": "Descripción",
   "@fishDescription": {
     "description": "Label for the fish description field in the fish compat browser and editor"

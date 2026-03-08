@@ -5444,6 +5444,8 @@
   "onboardingChangeTankTypeWarning": "Changing the tank type will remove the inhabitants you have added.",
   "@onboardingChangeTankTypeWarning": {
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
+  },
+
   "fishDescription": "Description",
   "@fishDescription": {
     "description": "Label for the fish description field in the fish compat browser and editor"
