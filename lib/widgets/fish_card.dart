@@ -440,6 +440,14 @@ class _FishInfoSheet extends StatefulWidget {
 class _FishInfoSheetState extends State<_FishInfoSheet> {
   final Set<CompatStatus> _hiddenSections = {};
 
+  static const _brokenImagePlaceholder = Center(
+    child: Icon(
+      Icons.broken_image_outlined,
+      size: 64,
+      color: Colors.white54,
+    ),
+  );
+
   void _openFullScreenImage(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -464,22 +472,11 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
                             placeholder: (_, __) => const SizedBox.shrink(),
-                            errorWidget: (_, __, ___) => const Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                size: 64,
-                                color: Colors.white54,
-                              ),
-                            ),
+                            errorWidget: (_, __, ___) =>
+                                _brokenImagePlaceholder,
                           );
                         }
-                        return const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            size: 64,
-                            color: Colors.white54,
-                          ),
-                        );
+                        return _brokenImagePlaceholder;
                       },
                     ),
                   ),
