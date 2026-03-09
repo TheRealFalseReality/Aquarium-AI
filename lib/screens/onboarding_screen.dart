@@ -1212,7 +1212,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: (hasTankName && !_availableFish.isEmpty)
+              onPressed: (hasTankName && _availableFish.isNotEmpty)
                   ? _addInhabitant
                   : null,
               icon: const Icon(Icons.add),
