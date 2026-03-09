@@ -28,6 +28,7 @@ plugins {
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.firebase.crashlytics") version "3.0.6"
+    id("com.google.firebase.firebase-perf")
 }
 
 android {
