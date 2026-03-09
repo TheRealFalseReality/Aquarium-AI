@@ -1340,4 +1340,50 @@
   "@onboardingContinueBannerDismiss": {
     "description": "Dismiss action on the onboarding continue banner"
   }
+,
+
+  "onboardingApiTitle": "Potencia tu IA",
+  "@onboardingApiTitle": {
+    "description": "Title for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingApiSubtitle": "Aquarium AI funciona directamente con un nivel gratuito compartido. Agrega tu propia clave API o conviértete en Aquarista Fundador para la mejor experiencia.",
+  "@onboardingApiSubtitle": {
+    "description": "Subtitle for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingApiFreeTierTitle": "Nivel Gratuito (Clave Compartida)",
+  "@onboardingApiFreeTierTitle": {
+    "description": "Title for the free tier section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyTitle": "Tu Propia Clave API",
+  "@onboardingApiOwnKeyTitle": {
+    "description": "Title for the own API key section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyDesc": "Agrega una clave Groq, Gemini u OpenAI gratuita para límites dedicados y acceso a modelos más potentes.",
+  "@onboardingApiOwnKeyDesc": {
+    "description": "Description of the own API key benefits in the API key onboarding step"
+  },
+
+  "onboardingApiFounderDesc": "Compra única — elimina los anuncios para siempre y te da una mejor clave compartida con límites más altos.",
+  "@onboardingApiFounderDesc": {
+    "description": "Description of the Founder Aquarist in the API key onboarding step"
+  },
+
+  "onboardingApiGoToSettings": "Configurar Clave API",
+  "@onboardingApiGoToSettings": {
+    "description": "Button label to go to settings for API key setup"
+  },
+
+  "onboardingApiNotNow": "Ahora no",
+  "@onboardingApiNotNow": {
+    "description": "Button label to skip the API key setup"
+  },
+
+  "onboardingApiKeyNote": "La gestión de tanques, las puntuaciones de armonía y todas las calculadoras siempre funcionan sin una clave API.",
+  "@onboardingApiKeyNote": {
+    "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  }
 }

@@ -1320,4 +1320,50 @@
   "@onboardingContinueBannerDismiss": {
     "description": "Dismiss action on the onboarding continue banner"
   }
+,
+
+  "onboardingApiTitle": "KI aufwerten",
+  "@onboardingApiTitle": {
+    "description": "Title for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingApiSubtitle": "Aquarium AI funktioniert direkt mit einem kostenlosen gemeinsamen Tier. Füge deinen eigenen API-Schlüssel hinzu oder werde Gründer-Aquarist für das beste Erlebnis.",
+  "@onboardingApiSubtitle": {
+    "description": "Subtitle for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingApiFreeTierTitle": "Kostenloses Tier (geteilter Schlüssel)",
+  "@onboardingApiFreeTierTitle": {
+    "description": "Title for the free tier section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyTitle": "Eigener API-Schlüssel",
+  "@onboardingApiOwnKeyTitle": {
+    "description": "Title for the own API key section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyDesc": "Füge einen kostenlosen Groq-, Gemini- oder OpenAI-Schlüssel für dedizierte Limits und Zugang zu leistungsstärkeren Modellen hinzu.",
+  "@onboardingApiOwnKeyDesc": {
+    "description": "Description of the own API key benefits in the API key onboarding step"
+  },
+
+  "onboardingApiFounderDesc": "Einmaliger Kauf — entfernt Werbung für immer und gibt dir einen besseren gemeinsamen Schlüssel mit höheren Limits.",
+  "@onboardingApiFounderDesc": {
+    "description": "Description of the Founder Aquarist in the API key onboarding step"
+  },
+
+  "onboardingApiGoToSettings": "API-Schlüssel einrichten",
+  "@onboardingApiGoToSettings": {
+    "description": "Button label to go to settings for API key setup"
+  },
+
+  "onboardingApiNotNow": "Nicht jetzt",
+  "@onboardingApiNotNow": {
+    "description": "Button label to skip the API key setup"
+  },
+
+  "onboardingApiKeyNote": "Tankmanagement, Harmoniebewertungen und alle Rechner funktionieren immer ohne API-Schlüssel.",
+  "@onboardingApiKeyNote": {
+    "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  }
 }

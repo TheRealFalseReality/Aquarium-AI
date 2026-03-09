@@ -6,18 +6,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
+import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
+import '../widgets/aquapi_promotion_dialog.dart';
+import '../widgets/fish_image.dart';
 import '../widgets/modern_chip.dart';
+import '../widgets/remove_ads_dialog.dart';
 import 'tank_creation_screen.dart' show InhabitantDialog;
 import 'tank_volume_calculator.dart';
 
-import '../widgets/fish_image.dart';
-
-/// A five-step, skippable onboarding flow shown once on first launch.
+/// A six-step, skippable onboarding flow shown once on first launch.
 ///
 /// Steps:
 ///   1. Choose Your Style  – theme and brightness mode selection
@@ -25,6 +28,7 @@ import '../widgets/fish_image.dart';
 ///   3. Create Your Tank   – simplified tank setup (name, type, size)
 ///   4. Add Inhabitants    – optionally populate the tank with fish
 ///   5. Discover AI Tools  – overview of the key AI features
+///   6. Power Up Your AI   – API key explainer + Founder Aquarist upsell
 ///
 /// Pass [initialPage] to start on a specific step (e.g. when resuming after
 /// sign-in via [AuthScreen]).
@@ -59,7 +63,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _totalPages = 5;
+  static const int _totalPages = 6;
 
   late final PageController _pageController;
   int _currentPage = 0;
@@ -192,6 +196,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       featureName: skipped ? 'onboarding_skipped' : 'onboarding_completed',
       parameters: {'step': _currentPage.toString()},
     );
+    if (!mounted) return;
+    // Show the AquaPi promotion dialog once after completing onboarding
+    // (not when skipping) so users learn about the hardware companion.
+    if (!skipped && await AquaPiPromotionDialog.shouldShowDialog()) {
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (_) => const AquaPiPromotionDialog(),
+      );
+    }
     if (mounted) Navigator.of(context).pushReplacementNamed('/');
   }
 
@@ -295,7 +309,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 onPageChanged: (i) => setState(() => _currentPage = i),
                 children: [
                   _buildThemePage(context, l10n, cs),
@@ -303,6 +317,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _buildCreateTankPage(context, l10n, cs),
                   _buildInhabitantsPage(context, l10n, cs),
                   _buildDiscoverToolsPage(context, l10n, cs),
+                  _buildApiKeyPage(context, l10n, cs),
                 ],
               ),
             ),
@@ -738,17 +753,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       _markInteracted(1);
-                      // Navigate to auth; on success the user goes to their
-                      // profile where a banner prompts them to continue onboarding.
+                      // Navigate to auth; on success return directly to
+                      // onboarding at the tank-creation step.
                       Navigator.pushNamed(
                         context,
                         '/auth',
                         arguments: {
-                          'returnRoute': '/profile',
-                          'returnRouteArgs': {
-                            'fromOnboarding': true,
-                            'onboardingNextPage': 2,
-                          },
+                          'returnRoute': '/onboarding',
+                          'returnRouteArgs': {'initialPage': 2},
                         },
                       );
                     },
@@ -1441,6 +1453,361 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               .textTheme
               .titleMedium
               ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+
+  // ── Step 6: API Key & Founder Upsell ─────────────────────────────────────
+
+  Widget _buildApiKeyPage(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final isFounder = ref.watch(isFounderProvider);
+    final purchaseState = ref.watch(purchaseProvider);
+    final maxPerMin = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerMinute
+        : RemoteConfigService.maxRequestsPerMinute;
+    final maxPerDay = isFounder
+        ? RemoteConfigService.founderMaxRequestsPerDay
+        : RemoteConfigService.maxRequestsPerDay;
+    final maxPhotos = isFounder
+        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
+        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final founderColor = AquaThemeColors.founderColor(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cs.primary, cs.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(Icons.auto_awesome, color: Colors.white, size: 40),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.onboardingApiTitle,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.onboardingApiSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── Free Tier card ─────────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isFounder
+                  ? founderColor.withOpacity(0.06)
+                  : Colors.amber.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isFounder
+                    ? founderColor.withOpacity(0.35)
+                    : Colors.amber.withOpacity(0.4),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isFounder ? Icons.diamond : Icons.bolt,
+                      size: 18,
+                      color: isFounder ? founderColor : Colors.amber.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        isFounder
+                            ? l10n.founderAquaristTitle
+                            : l10n.onboardingApiFreeTierTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: isFounder
+                                  ? founderColor
+                                  : Colors.amber.shade800,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _buildApiLimitRow(
+                  context,
+                  cs,
+                  icon: Icons.timer_outlined,
+                  label: '$maxPerMin req / min',
+                  color: isFounder ? founderColor : Colors.amber.shade800,
+                ),
+                const SizedBox(height: 5),
+                _buildApiLimitRow(
+                  context,
+                  cs,
+                  icon: Icons.today_outlined,
+                  label: '$maxPerDay req / day',
+                  color: isFounder ? founderColor : Colors.amber.shade800,
+                ),
+                const SizedBox(height: 5),
+                _buildApiLimitRow(
+                  context,
+                  cs,
+                  icon: Icons.photo_camera_outlined,
+                  label: '$maxPhotos photo ${maxPhotos == 1 ? 'analysis' : 'analyses'} / day',
+                  color: isFounder ? founderColor : Colors.amber.shade800,
+                ),
+                if (isFounder) ...[
+                  const SizedBox(height: 5),
+                  _buildApiLimitRow(
+                    context,
+                    cs,
+                    icon: Icons.block,
+                    label: l10n.founderPerkAdsRemoved,
+                    color: founderColor,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Own API Key card ───────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: cs.secondaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: cs.outline.withOpacity(0.25)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.key, size: 18, color: Colors.green.shade700),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.onboardingApiOwnKeyTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.onboardingApiOwnKeyDesc,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/settings');
+                    },
+                    icon: const Icon(Icons.key, size: 18),
+                    label: Text(l10n.onboardingApiGoToSettings),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green.shade700,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Founder Aquarist upsell (only when not already a founder) ──
+          if (!isFounder && !kIsWeb) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    founderColor.withOpacity(0.1),
+                    cs.primaryContainer.withOpacity(0.2),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: founderColor.withOpacity(0.35)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.diamond, size: 18, color: founderColor),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.founderAquaristTitle,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: founderColor,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.onboardingApiFounderDesc,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.block,
+                    label: l10n.founderPerkAdsRemoved,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.auto_awesome,
+                    label: l10n.founderPerkIncreasedAILimits,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.diamond,
+                    label: l10n.founderPerkBadge,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: purchaseState.isPurchasing
+                          ? null
+                          : () {
+                              showRemoveAdsDialog(context);
+                            },
+                      icon: const Icon(Icons.diamond, size: 18),
+                      label: Text(l10n.founderAquaristTitle),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: founderColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // ── Disclaimer note ────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: cs.outline.withOpacity(0.2)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 14, color: cs.onSurfaceVariant),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.onboardingApiKeyNote,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  /// A small icon + label row used in the API key step's info cards.
+  Widget _buildApiLimitRow(
+    BuildContext context,
+    ColorScheme cs, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: color, height: 1.3),
+          ),
         ),
       ],
     );
