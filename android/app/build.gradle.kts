@@ -126,7 +126,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Add the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     // Add the Crashlytics dependency
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-auth")
@@ -139,4 +139,6 @@ dependencies {
     // Pinned to the same version that flutter_facebook_auth 7.x bundles so
     // that Gradle resolves a single consistent version.
     implementation("com.facebook.android:facebook-login:17.0.2")
+    // Performance Monitoring SDK
+    implementation("com.google.firebase:firebase-perf")
 }
