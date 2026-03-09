@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -39,6 +40,10 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
+  /// Set the first time onboarding is displayed. Prevents re-showing if the
+  /// user exits mid-flow without completing.
+  static const String _onboardingSeenOnceKey = 'onboarding_seen_once';
+
   /// Returns `true` if the user has already completed or dismissed onboarding.
   static Future<bool> hasCompleted() async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,7 +56,30 @@ class OnboardingScreen extends ConsumerStatefulWidget {
     await prefs.setBool(_onboardingCompletedKey, true);
   }
 
+  /// Returns `true` if onboarding has already been displayed at least once on
+  /// this device. Used to prevent re-showing mid-flow on subsequent launches.
+  static Future<bool> hasBeenSeenOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingSeenOnceKey) ?? false;
+  }
+
+  /// Marks that onboarding has been shown at least once.
+  static Future<void> markSeenOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingSeenOnceKey, true);
+  }
+
+  /// Returns `true` when the device has existing user data (tanks), indicating
+  /// this is an app update rather than a fresh install. In that case onboarding
+  /// should be silently skipped.
+  static Future<bool> isExistingUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('user_tanks');
+  }
+
   /// Clears the completed flag – useful for revisiting onboarding from Settings.
+  /// Does NOT clear [_onboardingSeenOnceKey] so the auto-check in
+  /// WelcomeScreen does not re-trigger (Settings navigates directly instead).
   static Future<void> reset() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_onboardingCompletedKey);
@@ -74,8 +102,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
+  final _tankNotesController = TextEditingController();
   String _selectedTankType = 'freshwater';
   bool _isReef = false;
+  DateTime _tankCreatedDate = DateTime.now();
 
   // ── Step 3 state: inhabitants ────────────────────────────────────────────
   List<TankInhabitant> _inhabitants = [];
@@ -103,6 +133,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _tankNameController.dispose();
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
+    _tankNotesController.dispose();
     super.dispose();
   }
 
@@ -220,6 +251,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       isReef: _isReef,
       sizeGallons: gallons,
       sizeLiters: liters,
+      notes: _tankNotesController.text.trim().isEmpty
+          ? null
+          : _tankNotesController.text.trim(),
+      createdAt: _tankCreatedDate,
       inhabitants: _inhabitants,
     );
     await ref.read(tankProvider.notifier).addTank(tank);
@@ -278,7 +313,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         availableFish: _availableFish,
         onAdd: (inhabitant) {
           setState(() => _inhabitants.add(inhabitant));
-          _markInteracted(3);
+          _markInteracted(2);
         },
       ),
     );
@@ -767,7 +802,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               border: const OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
-            onChanged: (_) => _markInteracted(2),
+            onChanged: (_) => _markInteracted(1),
           ),
           const SizedBox(height: 24),
 
@@ -790,7 +825,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 selected: _selectedTankType == 'freshwater',
                 onTap: () {
                   _onTankTypeChanged('freshwater');
-                  _markInteracted(2);
+                  _markInteracted(1);
                 },
               ),
               ModernSelectableChip(
@@ -799,7 +834,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 selected: _selectedTankType == 'marine',
                 onTap: () {
                   _onTankTypeChanged('marine');
-                  _markInteracted(2);
+                  _markInteracted(1);
                 },
               ),
             ],
@@ -938,7 +973,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               _sizeLitersController.text =
                                   liters.toStringAsFixed(1);
                             });
-                            _markInteracted(2);
+                            _markInteracted(1);
                           },
                         ),
                       ),
@@ -964,12 +999,132 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 8),
+
+          // ── Date Created ────────────────────────────────────────────────
+          _buildSectionLabel(
+            context,
+            cs,
+            icon: Icons.calendar_today_outlined,
+            containerColor: cs.tertiaryContainer,
+            iconColor: cs.onTertiaryContainer,
+            label: l10n.onboardingTankDateCreated,
+          ),
+          const SizedBox(height: 10),
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _tankCreatedDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
+              );
+              if (picked != null) {
+                setState(() => _tankCreatedDate = picked);
+                _markInteracted(1);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: cs.outline.withOpacity(0.6),
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.event, size: 18, color: cs.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DateFormat.yMd(
+                            Localizations.localeOf(context).toString(),
+                          ).format(_tankCreatedDate),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          _tankAgeString(_tankCreatedDate, l10n),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.edit_calendar_outlined, size: 18, color: cs.onSurfaceVariant),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // ── Notes ────────────────────────────────────────────────────────
+          Row(
+            children: [
+              _buildSectionLabel(
+                context,
+                cs,
+                icon: Icons.notes,
+                containerColor: cs.secondaryContainer,
+                iconColor: cs.onSecondaryContainer,
+                label: l10n.onboardingTankNotes,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.onboardingOptional,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _tankNotesController,
+            decoration: InputDecoration(
+              hintText: l10n.onboardingTankNotesHint,
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: (_) => _markInteracted(1),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  // ── Step 3: Add Inhabitants ───────────────────────────────────────────────
+  /// Returns a human-readable approximate age string for a tank created on [date].
+  String _tankAgeString(DateTime date, AppLocalizations l10n) {
+    final now = DateTime.now();
+    final days = now.difference(date).inDays;
+    if (days == 0) return l10n.onboardingTankAgeToday;
+    if (days < 7) {
+      return l10n.onboardingTankAgeDays(days);
+    }
+    // Accurate month/year deltas via calendar arithmetic.
+    int years = now.year - date.year;
+    int months = now.month - date.month;
+    if (now.day < date.day) months--;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    final totalMonths = years * 12 + months;
+    if (totalMonths < 1) {
+      final weeks = (days / 7).floor();
+      return l10n.onboardingTankAgeWeeks(weeks);
+    } else if (totalMonths < 12) {
+      return l10n.onboardingTankAgeMonths(totalMonths);
+    } else {
+      return l10n.onboardingTankAgeYears(years);
+    }
+  }
 
   Widget _buildInhabitantsPage(
     BuildContext context,
@@ -1146,7 +1301,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _buildPageHeader(
             context,
             cs,
-            heroContent: const Text('🤖', style: TextStyle(fontSize: 30)),
+            heroContent: const Text('🛠️', style: TextStyle(fontSize: 30)),
             heroDecoration: BoxDecoration(
               color: cs.primaryContainer,
               shape: BoxShape.circle,
@@ -1154,9 +1309,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: l10n.onboardingDiscoverTitle,
             subtitle: l10n.onboardingDiscoverSubtitle,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // AI tool cards
+          // ── AI Tools section ────────────────────────────────────────────
+          _buildSectionChip(context, cs, Icons.auto_awesome, l10n.onboardingDiscoverSectionAI),
+          const SizedBox(height: 10),
           _buildToolCard(
             context,
             cs,
@@ -1164,7 +1321,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: l10n.aiCompatibilityTool,
             description: l10n.aiCompatibilityDrawerDescription,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildToolCard(
             context,
             cs,
@@ -1172,7 +1329,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: l10n.aiChatbot,
             description: l10n.aiChatbotDrawerDescription,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildToolCard(
             context,
             cs,
@@ -1180,7 +1337,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: l10n.photoAnalyzer,
             description: l10n.photoAnalyzerDrawerDescription,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildToolCard(
             context,
             cs,
@@ -1188,7 +1345,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: l10n.aiStockingAssistant,
             description: l10n.aiStockingDrawerDescription,
           ),
+          const SizedBox(height: 16),
+
+          // ── Tank Tools section ──────────────────────────────────────────
+          _buildSectionChip(context, cs, Icons.water, l10n.onboardingDiscoverSectionTank),
           const SizedBox(height: 10),
+          _buildToolCard(
+            context,
+            cs,
+            icon: '🐠',
+            title: l10n.myTanks,
+            description: l10n.onboardingDiscoverTankDesc,
+          ),
+          const SizedBox(height: 8),
           _buildToolCard(
             context,
             cs,
@@ -1197,8 +1366,61 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             description: l10n.communityDrawerDescription,
           ),
           const SizedBox(height: 16),
+
+          // ── Calculators section ─────────────────────────────────────────
+          _buildSectionChip(context, cs, Icons.calculate, l10n.onboardingDiscoverSectionCalc),
+          const SizedBox(height: 10),
+          _buildToolCard(
+            context,
+            cs,
+            icon: '🧪',
+            title: l10n.aquariumCalculators,
+            description: l10n.aquariumCalculatorsDrawerDescription,
+          ),
+          const SizedBox(height: 8),
+          _buildToolCard(
+            context,
+            cs,
+            icon: '📐',
+            title: l10n.tankVolumeCalculator,
+            description: l10n.tankVolumeDrawerDescription,
+          ),
+          const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionChip(
+    BuildContext context,
+    ColorScheme cs,
+    IconData icon,
+    String label,
+  ) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: cs.secondaryContainer.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: cs.onSecondaryContainer),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: cs.onSecondaryContainer,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

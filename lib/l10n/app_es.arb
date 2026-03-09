@@ -1183,7 +1183,57 @@
     "description": "Parenthetical label indicating an optional field in the onboarding flow"
   },
 
-  "onboardingOpenCalculator": "Calculadora",
+  "onboardingTankDateCreated": "Fecha de creación",
+  "@onboardingTankDateCreated": {
+    "description": "Label for the date-created field on the onboarding tank setup step"
+  },
+
+  "onboardingTankAgeToday": "Creado hoy",
+  "@onboardingTankAgeToday": {
+    "description": "Tank age label when the tank was created today"
+  },
+
+  "onboardingTankAgeDays": "{days} día(s) de antigüedad",
+  "@onboardingTankAgeDays": {
+    "description": "Tank age label in days",
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeWeeks": "{weeks} semana(s) de antigüedad",
+  "@onboardingTankAgeWeeks": {
+    "description": "Tank age label in weeks",
+    "placeholders": {
+      "weeks": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeMonths": "{months} mes(es) de antigüedad",
+  "@onboardingTankAgeMonths": {
+    "description": "Tank age label in months",
+    "placeholders": {
+      "months": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeYears": "{years} año(s) de antigüedad",
+  "@onboardingTankAgeYears": {
+    "description": "Tank age label in years",
+    "placeholders": {
+      "years": {"type": "int"}
+    }
+  },
+
+  "onboardingTankNotes": "Notas",
+  "@onboardingTankNotes": {
+    "description": "Label for the notes field on the onboarding tank setup step"
+  },
+
+  "onboardingTankNotesHint": "Añadir notas sobre tu acuario…",
+  "@onboardingTankNotesHint": {
+    "description": "Hint text for the notes field on the onboarding tank setup step"
+  },
   "@onboardingOpenCalculator": {
     "description": "Short label for the button that opens the tank volume calculator from onboarding"
   },
@@ -1213,14 +1263,34 @@
     "description": "Link below the Next button on the inhabitants onboarding step to skip adding fish"
   },
 
-  "onboardingDiscoverTitle": "Explora tus herramientas de IA",
+  "onboardingDiscoverTitle": "Explorar herramientas de la app",
   "@onboardingDiscoverTitle": {
-    "description": "Title on the fourth onboarding step (discover AI tools)"
+    "description": "Title on the fourth onboarding step (discover app tools)"
   },
 
-  "onboardingDiscoverSubtitle": "Potentes herramientas de IA para ayudarte a cuidar tu acuario.",
+  "onboardingDiscoverSubtitle": "Herramientas de IA, calculadoras y gestión de acuarios — todo para un acuario próspero.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingDiscoverSectionAI": "Herramientas de IA",
+  "@onboardingDiscoverSectionAI": {
+    "description": "Section header chip for AI tools in the discover step"
+  },
+
+  "onboardingDiscoverSectionTank": "Acuario y Comunidad",
+  "@onboardingDiscoverSectionTank": {
+    "description": "Section header chip for tank management tools in the discover step"
+  },
+
+  "onboardingDiscoverSectionCalc": "Calculadoras",
+  "@onboardingDiscoverSectionCalc": {
+    "description": "Section header chip for calculator tools in the discover step"
+  },
+
+  "onboardingDiscoverTankDesc": "Gestiona tus acuarios, rastrea habitantes, registra parámetros del agua y lleva un diario de dosificación.",
+  "@onboardingDiscoverTankDesc": {
+    "description": "Description for the My Tanks tool card in the discover step"
   },
 
   "onboardingThemeTitle": "Elige tu estilo",

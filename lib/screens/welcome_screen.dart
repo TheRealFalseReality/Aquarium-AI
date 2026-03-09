@@ -414,8 +414,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   Future<void> _checkShowOnboarding() async {
-    final completed = await OnboardingScreen.hasCompleted();
-    if (!completed && mounted) {
+    // Already completed → never show again.
+    if (await OnboardingScreen.hasCompleted()) return;
+
+    // Existing user who updated the app → auto-complete silently so they are
+    // never shown onboarding on update.
+    if (await OnboardingScreen.isExistingUserData()) {
+      await OnboardingScreen.markCompleted();
+      return;
+    }
+
+    // Onboarding was already shown once (e.g. user exited mid-flow) → do not
+    // show again automatically; they can revisit via Settings.
+    if (await OnboardingScreen.hasBeenSeenOnce()) return;
+
+    // Fresh install first launch → show onboarding once.
+    await OnboardingScreen.markSeenOnce();
+    if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Navigator.pushNamed(context, '/onboarding');
