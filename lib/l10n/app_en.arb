@@ -5321,6 +5321,11 @@
     "description": "Button label on the last onboarding step to finish and enter the app"
   },
 
+  "onboardingAddInhabitants": "Add Inhabitants",
+  "@onboardingAddInhabitants": {
+    "description": "Primary button label on the tank-creation step once the user has entered a tank name"
+  },
+
   "onboardingWelcomeTitle": "Welcome to Aquarium AI",
   "@onboardingWelcomeTitle": {
     "description": "Title on the first onboarding step (welcome / sign-in)"
@@ -5557,6 +5562,11 @@
   "onboardingApiTitle": "Power Up Your AI",
   "@onboardingApiTitle": {
     "description": "Title for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingFounderCtaButton": "Join Founders",
+  "@onboardingFounderCtaButton": {
+    "description": "CTA button label on the Founder Aquarist card in onboarding step 5"
   },
 
   "onboardingApiSubtitle": "Aquarium AI works out of the box with a shared free tier. Add your own API key or become a Founder Aquarist for the best experience.",

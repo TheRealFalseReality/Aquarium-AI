@@ -196,12 +196,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       parameters: {'step': _currentPage.toString()},
     );
     if (!mounted) return;
-    // After completing (not skipping), set a flag so the welcome screen shows
-    // the AquaPi promotion dialog shortly after arriving there.
-    if (!skipped) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('aquapi_show_after_onboarding', true);
-    }
+    // Set a flag so the welcome screen shows the AquaPi promotion dialog
+    // shortly after arriving there (whether onboarding was completed or skipped).
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('aquapi_show_after_onboarding', true);
     if (mounted) Navigator.of(context).pushReplacementNamed('/');
   }
 
@@ -411,16 +409,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ) {
     final isLastPage = _currentPage == _totalPages - 1;
     // On the last page the primary button always says "Get Started".
-    // On the Discover Tools page (4) the button always says "Next" since
+    // On the Discover Tools page (3) the button always says "Next" since
     // there is nothing to interact with on that page.
-    // On other pages: if the user has interacted on this step, show "Next";
-    // if not, show "Skip for now" to make it clear the step is optional.
+    // On the tank-creation page (1): "Add Inhabitants" when a tank name has
+    // been typed; "Skip for now" when the field is still empty.
+    // On other pages: "Next" once the user has interacted, "Skip for now" otherwise.
     const _discoverToolsPage = 3;
+    const _tankPage = 1;
+    final hasTankName = _tankNameController.text.trim().isNotEmpty;
     final primaryLabel = isLastPage
         ? l10n.onboardingGetStarted
-        : (_currentPage == _discoverToolsPage || _currentPageInteracted
+        : _currentPage == _discoverToolsPage
             ? l10n.onboardingNext
-            : l10n.onboardingSkipForNow);
+            : (_currentPage == _tankPage && hasTankName)
+                ? l10n.onboardingAddInhabitants
+                : (_currentPageInteracted
+                    ? l10n.onboardingNext
+                    : l10n.onboardingSkipForNow);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -448,6 +453,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // ── Shared page header (icon inline with title + subtitle) ───────────────
+
+  /// Builds a compact header with the hero [icon] beside the [title] and
+  /// [subtitle], reducing vertical space compared to a centred hero layout.
+  Widget _buildPageHeader(
+    BuildContext context,
+    ColorScheme cs, {
+    required Widget heroContent,
+    required BoxDecoration heroDecoration,
+    required String title,
+    required String subtitle,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: heroDecoration,
+          child: Center(child: heroContent),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -512,45 +565,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero circle
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    _swatchPrimary[themeState.colorTheme] ?? cs.primary,
-                    _swatchSecondary[themeState.colorTheme] ??
-                        cs.primaryContainer,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
+          // Inline header: icon + title + subtitle
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🎨', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  _swatchPrimary[themeState.colorTheme] ?? cs.primary,
+                  _swatchSecondary[themeState.colorTheme] ??
+                      cs.primaryContainer,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: const Center(
-                child: Text('🎨', style: TextStyle(fontSize: 38)),
-              ),
+              shape: BoxShape.circle,
             ),
+            title: l10n.onboardingThemeTitle,
+            subtitle: l10n.onboardingThemeSubtitle,
           ),
           const SizedBox(height: 20),
-          Text(
-            l10n.onboardingThemeTitle,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.onboardingThemeSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 24),
 
           // ── Brightness mode ─────────────────────────────────────────────
           _buildSectionLabel(
@@ -701,37 +736,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero circle
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: cs.secondaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🐠', style: TextStyle(fontSize: 40)),
-              ),
+          // Inline header: icon + title + subtitle
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🐠', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              color: cs.secondaryContainer,
+              shape: BoxShape.circle,
             ),
+            title: l10n.onboardingCreateTankTitle,
+            subtitle: l10n.onboardingCreateTankSubtitle,
           ),
           const SizedBox(height: 20),
-          Text(
-            l10n.onboardingCreateTankTitle,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.onboardingCreateTankSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 28),
 
           // ── Tank Name ───────────────────────────────────────────────────
           _buildSectionLabel(
@@ -966,35 +983,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero circle
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: cs.tertiaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🐡', style: TextStyle(fontSize: 40)),
-              ),
+          // Inline header: icon + title + subtitle
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🐡', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              color: cs.tertiaryContainer,
+              shape: BoxShape.circle,
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.onboardingInhabitantsTitle,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.onboardingInhabitantsSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
+            title: l10n.onboardingInhabitantsTitle,
+            subtitle: l10n.onboardingInhabitantsSubtitle,
           ),
 
           // Warn if no tank name so inhabitants cannot be saved
@@ -1143,37 +1142,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero circle
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: cs.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🤖', style: TextStyle(fontSize: 40)),
-              ),
+          // Inline header: icon + title + subtitle
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🤖', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              color: cs.primaryContainer,
+              shape: BoxShape.circle,
             ),
+            title: l10n.onboardingDiscoverTitle,
+            subtitle: l10n.onboardingDiscoverSubtitle,
           ),
           const SizedBox(height: 20),
-          Text(
-            l10n.onboardingDiscoverTitle,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.onboardingDiscoverSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 24),
 
           // AI tool cards
           _buildToolCard(
@@ -1334,41 +1315,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [cs.primary, cs.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(Icons.auto_awesome, color: Colors.white, size: 40),
-              ),
+          // Inline header: icon + title + subtitle
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 28,
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.onboardingApiTitle,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.onboardingApiSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
+            heroDecoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [cs.primary, cs.secondary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
             ),
+            title: l10n.onboardingApiTitle,
+            subtitle: l10n.onboardingApiSubtitle,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // ── Founder Aquarist upsell (shown first; only when not already a founder) ──
           if (!isFounder && !kIsWeb) ...[
@@ -1452,7 +1419,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ? null
                           : () => showRemoveAdsDialog(context),
                       icon: const Icon(Icons.diamond, size: 18),
-                      label: Text(l10n.founderAquaristTitle),
+                      label: Text(l10n.onboardingFounderCtaButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: founderColor,
                         foregroundColor: Colors.white,

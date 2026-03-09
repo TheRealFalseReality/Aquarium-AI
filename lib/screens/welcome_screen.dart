@@ -494,8 +494,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   Future<void> _checkShowAquaPiPromotionDialog() async {
     try {
-      // Check if user has chosen to never show the dialog again
+      final prefs = await SharedPreferences.getInstance();
+
+      // Only show the AquaPi dialog when the post-onboarding flag is set
+      // (i.e. user just completed or skipped onboarding). This prevents the
+      // dialog from firing on every normal app launch.
+      final showAfterOnboarding =
+          prefs.getBool('aquapi_show_after_onboarding') ?? false;
+      if (!showAfterOnboarding) return;
+
+      // Respect the "never show again" preference.
       final shouldShow = await AquaPiPromotionDialog.shouldShowDialog();
+      await prefs.remove('aquapi_show_after_onboarding');
       if (!shouldShow) {
         debugPrint(
           'AquaPi promotion dialog will not be shown (user selected never show again)',
@@ -503,51 +513,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return;
       }
 
-      final prefs = await SharedPreferences.getInstance();
-
-      // Check if the onboarding flow just completed and requested the popup.
-      // In this case, bypass the cooldown timer so it shows immediately.
-      final showAfterOnboarding =
-          prefs.getBool('aquapi_show_after_onboarding') ?? false;
-      if (showAfterOnboarding) {
-        await prefs.remove('aquapi_show_after_onboarding');
-        debugPrint(
-          'AquaPi promotion dialog will be shown (post-onboarding)',
-        );
-        Timer(const Duration(seconds: 2), () {
-          if (mounted) _showAquaPiPromotionDialog();
-        });
-        return;
-      }
-
-      final lastShownTimestamp =
-          prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
-      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown =
-          (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-
-      debugPrint(
-        'AquaPi promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_aquapiPromotionDialogCooldownHours hours',
-      );
-
-      // Show the dialog if it has never been shown or if cooldown period has passed
-      if (hoursSinceLastShown >= _aquapiPromotionDialogCooldownHours &&
-          mounted) {
-        debugPrint(
-          'AquaPi promotion dialog will be shown (cooldown period elapsed)',
-        );
-        // Show the popup after a delay to allow the screen to load
-        // Use a longer delay to avoid showing both popups at once
-        Timer(const Duration(seconds: 3), () {
-          if (mounted) {
-            _showAquaPiPromotionDialog();
-          }
-        });
-      } else {
-        debugPrint(
-          'AquaPi promotion dialog will not be shown (cooldown period not elapsed)',
-        );
-      }
+      debugPrint('AquaPi promotion dialog will be shown (post-onboarding)');
+      // Show the popup after a short delay so the welcome screen can settle.
+      Timer(const Duration(seconds: 2), () {
+        if (mounted) _showAquaPiPromotionDialog();
+      });
     } catch (e) {
       // If there's an error with SharedPreferences, silently continue
       debugPrint('Error checking AquaPi promotion dialog preference: $e');
