@@ -151,6 +151,11 @@ class RemoveAdsDialog extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 _PerkRow(
+                  icon: Icons.smart_toy,
+                  label: l10n.founderPerkMoreCapableModels,
+                ),
+                const SizedBox(height: 4),
+                _PerkRow(
                   icon: Icons.border_outer,
                   label: l10n.founderPerkPostBorder,
                 ),

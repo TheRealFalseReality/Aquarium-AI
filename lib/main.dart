@@ -602,7 +602,11 @@ class MyApp extends ConsumerWidget {
                 screenName = 'photo_analysis_screen';
                 break;
               case '/settings':
-                page = const SettingsScreen();
+                {
+                  final openAIProvider = (args is Map &&
+                          args['openAIProvider'] == true);
+                  page = SettingsScreen(openAIProvider: openAIProvider);
+                }
                 screenName = 'settings_screen';
                 break;
               case '/appearance':

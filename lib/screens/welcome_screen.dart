@@ -209,8 +209,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (kIsWeb) {
       _checkShowPromotionDialog();
     }
-    // Check if we should show the AquaPi promotion dialog
-    _checkShowAquaPiPromotionDialog();
     // Check if we should show the changelog dialog (once per version)
     _checkShowChangelogDialog();
   }

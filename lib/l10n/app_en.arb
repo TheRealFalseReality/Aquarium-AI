@@ -3044,6 +3044,11 @@
     "description": "Perk line: badge shown on profile and post cards for Founder Aquarists"
   },
 
+  "founderPerkMoreCapableModels": "Access to more capable AI models",
+  "@founderPerkMoreCapableModels": {
+    "description": "Founder perk: access to more capable AI models (shown in purchase dialog and onboarding)"
+  },
+
   "founderUpsellBannerTitle": "Unlock Founder Aquarist Perks",
   "@founderUpsellBannerTitle": {
     "description": "Title of the dismissible founder upsell banner on AI tool screens"

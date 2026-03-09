@@ -24,7 +24,11 @@ import 'changelog_screen.dart';
 import 'onboarding_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  /// When `true`, the AI Provider dialog is opened automatically after the
+  /// first frame (e.g. when navigated from the onboarding API key step).
+  final bool openAIProvider;
+
+  const SettingsScreen({super.key, this.openAIProvider = false});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -81,6 +85,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Map && args['openRemoveAds'] == true && !kIsWeb) {
         _showRemoveAdsDialog();
+      }
+      // Auto-open the AI Provider dialog when requested (e.g. from onboarding).
+      if (widget.openAIProvider) {
+        _showAIProviderDialog();
       }
     });
   }

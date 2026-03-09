@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
+import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
@@ -134,13 +135,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
+  /// Returns `true` when the current Firebase user is fully signed in
+  /// (non-null and non-anonymous). Used to auto-skip the sign-in step.
+  bool get _isSignedIn {
+    final user = ref.read(authStateProvider).asData?.value;
+    return user != null && !user.isAnonymous;
+  }
+
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
       // If leaving the tank-creation step (2) with no tank name, skip the
       // inhabitants step (3) since there is nothing to add inhabitants to.
       final skipInhabitants = _currentPage == 2 &&
           _tankNameController.text.trim().isEmpty;
-      final targetPage = skipInhabitants ? 4 : _currentPage + 1;
+      int targetPage = skipInhabitants ? 4 : _currentPage + 1;
+      // Skip the sign-in step (1) when the user is already signed in.
+      if (targetPage == 1 && _isSignedIn) targetPage = 2;
       if (targetPage >= _totalPages) {
         _finish(skipped: false);
         return;
@@ -310,7 +320,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: PageView(
                 controller: _pageController,
                 physics: const ClampingScrollPhysics(),
-                onPageChanged: (i) => setState(() => _currentPage = i),
+                onPageChanged: (i) {
+                  setState(() => _currentPage = i);
+                  // Auto-skip the sign-in step (1) when the user is already
+                  // signed in, in case they swipe there manually.
+                  if (i == 1 && _isSignedIn) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        _pageController.animateToPage(
+                          2,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    });
+                  }
+                  // Auto-skip the inhabitants step (3) when no tank name was
+                  // entered, in case the user swiped there directly.
+                  if (i == 3 && _tankNameController.text.trim().isEmpty) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        _pageController.animateToPage(
+                          4,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    });
+                  }
+                },
                 children: [
                   _buildThemePage(context, l10n, cs),
                   _buildWelcomePage(context, l10n, cs),
@@ -397,11 +435,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ) {
     final isLastPage = _currentPage == _totalPages - 1;
     // On the last page the primary button always says "Get Started".
+    // On the Discover Tools page (4) the button always says "Next" since
+    // there is nothing to interact with on that page.
     // On other pages: if the user has interacted on this step, show "Next";
     // if not, show "Skip for now" to make it clear the step is optional.
+    const _discoverToolsPage = 4;
     final primaryLabel = isLastPage
         ? l10n.onboardingGetStarted
-        : (_currentPageInteracted ? l10n.onboardingNext : l10n.onboardingSkipForNow);
+        : (_currentPage == _discoverToolsPage || _currentPageInteracted
+            ? l10n.onboardingNext
+            : l10n.onboardingSkipForNow);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -1169,7 +1212,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _availableFish.isEmpty ? null : _addInhabitant,
+              onPressed: (hasTankName && !_availableFish.isEmpty)
+                  ? _addInhabitant
+                  : null,
               icon: const Icon(Icons.add),
               label: Text(l10n.addInhabitant),
               style: OutlinedButton.styleFrom(
@@ -1312,7 +1357,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             icon: '🐡',
             title: l10n.aiCompatibilityTool,
             description: l10n.aiCompatibilityDrawerDescription,
-            routeName: '/compat-ai',
           ),
           const SizedBox(height: 10),
           _buildToolCard(
@@ -1321,7 +1365,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             icon: '🤖',
             title: l10n.aiChatbot,
             description: l10n.aiChatbotDrawerDescription,
-            routeName: '/chatbot',
           ),
           const SizedBox(height: 10),
           _buildToolCard(
@@ -1330,8 +1373,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             icon: '📷',
             title: l10n.photoAnalyzer,
             description: l10n.photoAnalyzerDrawerDescription,
-            routeName: '/chatbot',
-            routeArgs: const {'openPhotoAnalyzer': true},
           ),
           const SizedBox(height: 10),
           _buildToolCard(
@@ -1340,7 +1381,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             icon: '🦐',
             title: l10n.aiStockingAssistant,
             description: l10n.aiStockingDrawerDescription,
-            routeName: '/stocking',
           ),
           const SizedBox(height: 10),
           _buildToolCard(
@@ -1349,7 +1389,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             icon: '🌊',
             title: l10n.communityTitle,
             description: l10n.communityDrawerDescription,
-            routeName: '/community',
           ),
           const SizedBox(height: 16),
         ],
@@ -1363,62 +1402,49 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     required String icon,
     required String title,
     required String description,
-    required String routeName,
-    Map<String, dynamic>? routeArgs,
   }) {
     return Material(
       color: cs.surfaceContainerLow,
       borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () =>
-            Navigator.pushNamed(context, routeName, arguments: routeArgs),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(icon, style: const TextStyle(fontSize: 24)),
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style:
-                          Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            height: 1.3,
-                          ),
-                    ),
-                  ],
-                ),
+              child: Center(
+                child: Text(icon, style: const TextStyle(fontSize: 24)),
               ),
-              const SizedBox(width: 6),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style:
+                        Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          height: 1.3,
+                        ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1518,6 +1544,105 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 20),
+
+          // ── Founder Aquarist upsell (shown first; only when not already a founder) ──
+          if (!isFounder && !kIsWeb) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    founderColor.withOpacity(0.1),
+                    cs.primaryContainer.withOpacity(0.2),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: founderColor.withOpacity(0.35)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.diamond, size: 18, color: founderColor),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.founderAquaristTitle,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: founderColor,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.onboardingApiFounderDesc,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.block,
+                    label: l10n.founderPerkAdsRemoved,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.auto_awesome,
+                    label: l10n.founderPerkIncreasedAILimits,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.border_outer,
+                    label: l10n.founderPerkPostBorder,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildApiLimitRow(
+                    context, cs,
+                    icon: Icons.diamond,
+                    label: l10n.founderPerkBadge,
+                    color: founderColor,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: purchaseState.isPurchasing
+                          ? null
+                          : () => showRemoveAdsDialog(context),
+                      icon: const Icon(Icons.diamond, size: 18),
+                      label: Text(l10n.founderAquaristTitle),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: founderColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
 
           // ── Free Tier card ─────────────────────────────────────────────
           Container(
@@ -1644,9 +1769,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/settings');
-                    },
+                    // Navigate to Settings and immediately open AI Provider dialog.
+                    onPressed: () => Navigator.of(context).pushNamed(
+                      '/settings',
+                      arguments: {'openAIProvider': true},
+                    ),
                     icon: const Icon(Icons.key, size: 18),
                     label: Text(l10n.onboardingApiGoToSettings),
                     style: FilledButton.styleFrom(
@@ -1662,100 +1789,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 14),
-
-          // ── Founder Aquarist upsell (only when not already a founder) ──
-          if (!isFounder && !kIsWeb) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    founderColor.withOpacity(0.1),
-                    cs.primaryContainer.withOpacity(0.2),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: founderColor.withOpacity(0.35)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.diamond, size: 18, color: founderColor),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          l10n.founderAquaristTitle,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: founderColor,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.onboardingApiFounderDesc,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildApiLimitRow(
-                    context, cs,
-                    icon: Icons.block,
-                    label: l10n.founderPerkAdsRemoved,
-                    color: founderColor,
-                  ),
-                  const SizedBox(height: 4),
-                  _buildApiLimitRow(
-                    context, cs,
-                    icon: Icons.auto_awesome,
-                    label: l10n.founderPerkIncreasedAILimits,
-                    color: founderColor,
-                  ),
-                  const SizedBox(height: 4),
-                  _buildApiLimitRow(
-                    context, cs,
-                    icon: Icons.diamond,
-                    label: l10n.founderPerkBadge,
-                    color: founderColor,
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: purchaseState.isPurchasing
-                          ? null
-                          : () {
-                              showRemoveAdsDialog(context);
-                            },
-                      icon: const Icon(Icons.diamond, size: 18),
-                      label: Text(l10n.founderAquaristTitle),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: founderColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-          ],
 
           // ── Disclaimer note ────────────────────────────────────────────
           Container(
