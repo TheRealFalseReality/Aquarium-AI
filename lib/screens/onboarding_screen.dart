@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
-import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
@@ -14,7 +13,6 @@ import '../services/fish_data_service.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
-import '../widgets/aquapi_promotion_dialog.dart';
 import '../widgets/fish_image.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/remove_ads_dialog.dart';
@@ -64,7 +62,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _totalPages = 6;
+  static const int _totalPages = 5;
 
   late final PageController _pageController;
   int _currentPage = 0;
@@ -72,14 +70,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // ── Per-step interaction tracking (used for smart Next/Skip label) ────────
   final Set<int> _interactedPages = {};
 
-  // ── Step 3 state: tank creation ─────────────────────────────────────────
+  // ── Step 2 state: tank creation ─────────────────────────────────────────
   final _tankNameController = TextEditingController();
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
   String _selectedTankType = 'freshwater';
   bool _isReef = false;
 
-  // ── Step 4 state: inhabitants ────────────────────────────────────────────
+  // ── Step 3 state: inhabitants ────────────────────────────────────────────
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
 
@@ -135,22 +133,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
-  /// Returns `true` when the current Firebase user is fully signed in
-  /// (non-null and non-anonymous). Used to auto-skip the sign-in step.
-  bool get _isSignedIn {
-    final user = ref.read(authStateProvider).asData?.value;
-    return user != null && !user.isAnonymous;
-  }
-
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
-      // If leaving the tank-creation step (2) with no tank name, skip the
-      // inhabitants step (3) since there is nothing to add inhabitants to.
-      final skipInhabitants = _currentPage == 2 &&
+      // If leaving the tank-creation step (1) with no tank name, skip the
+      // inhabitants step (2) since there is nothing to add inhabitants to.
+      final skipInhabitants = _currentPage == 1 &&
           _tankNameController.text.trim().isEmpty;
-      int targetPage = skipInhabitants ? 4 : _currentPage + 1;
-      // Skip the sign-in step (1) when the user is already signed in.
-      if (targetPage == 1 && _isSignedIn) targetPage = 2;
+      final targetPage = skipInhabitants ? 3 : _currentPage + 1;
       if (targetPage >= _totalPages) {
         _finish(skipped: false);
         return;
@@ -207,14 +196,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       parameters: {'step': _currentPage.toString()},
     );
     if (!mounted) return;
-    // Show the AquaPi promotion dialog once after completing onboarding
-    // (not when skipping) so users learn about the hardware companion.
-    if (!skipped && await AquaPiPromotionDialog.shouldShowDialog()) {
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (_) => const AquaPiPromotionDialog(),
-      );
+    // After completing (not skipping), set a flag so the welcome screen shows
+    // the AquaPi promotion dialog shortly after arriving there.
+    if (!skipped) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('aquapi_show_after_onboarding', true);
     }
     if (mounted) Navigator.of(context).pushReplacementNamed('/');
   }
@@ -321,27 +307,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 controller: _pageController,
                 physics: const ClampingScrollPhysics(),
                 onPageChanged: (i) {
+                  // Capture direction BEFORE setState updates _currentPage.
+                  final wasGoingBack = i < _currentPage;
                   setState(() => _currentPage = i);
-                  // Auto-skip the sign-in step (1) when the user is already
-                  // signed in, in case they swipe there manually.
-                  if (i == 1 && _isSignedIn) {
+                  // Auto-skip the inhabitants step (2) when no tank name was
+                  // entered — only when going FORWARD (swiping), never back.
+                  if (!wasGoingBack &&
+                      i == 2 &&
+                      _tankNameController.text.trim().isEmpty) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
                         _pageController.animateToPage(
-                          2,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    });
-                  }
-                  // Auto-skip the inhabitants step (3) when no tank name was
-                  // entered, in case the user swiped there directly.
-                  if (i == 3 && _tankNameController.text.trim().isEmpty) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        _pageController.animateToPage(
-                          4,
+                          3,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                         );
@@ -351,7 +328,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 },
                 children: [
                   _buildThemePage(context, l10n, cs),
-                  _buildWelcomePage(context, l10n, cs),
                   _buildCreateTankPage(context, l10n, cs),
                   _buildInhabitantsPage(context, l10n, cs),
                   _buildDiscoverToolsPage(context, l10n, cs),
@@ -439,7 +415,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // there is nothing to interact with on that page.
     // On other pages: if the user has interacted on this step, show "Next";
     // if not, show "Skip for now" to make it clear the step is optional.
-    const _discoverToolsPage = 4;
+    const _discoverToolsPage = 3;
     final primaryLabel = isLastPage
         ? l10n.onboardingGetStarted
         : (_currentPage == _discoverToolsPage || _currentPageInteracted
@@ -713,158 +689,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return luminance > 0.35 ? Colors.black87 : Colors.white;
   }
 
-  // ── Step 2: Welcome / Sign In ─────────────────────────────────────────────
-
-  Widget _buildWelcomePage(
-    BuildContext context,
-    AppLocalizations l10n,
-    ColorScheme cs,
-  ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hero circle
-          Center(
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    cs.primaryContainer,
-                    cs.secondaryContainer,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🌊', style: TextStyle(fontSize: 52)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.onboardingWelcomeTitle,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.onboardingWelcomeSubtitle,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 32),
-          // Sign-in upsell card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  cs.primaryContainer.withOpacity(0.55),
-                  cs.secondaryContainer.withOpacity(0.35),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: cs.primary.withOpacity(0.2)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.onboardingSignInTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildBenefit(context, cs, '🌐', l10n.onboardingSignInBenefit2),
-                const SizedBox(height: 10),
-                _buildBenefit(context, cs, '💡', l10n.onboardingSignInBenefit3),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _markInteracted(1);
-                      // Navigate to auth; on success return directly to
-                      // onboarding at the tank-creation step.
-                      Navigator.pushNamed(
-                        context,
-                        '/auth',
-                        arguments: {
-                          'returnRoute': '/onboarding',
-                          'returnRouteArgs': {'initialPage': 2},
-                        },
-                      );
-                    },
-                    icon: const Icon(Icons.login),
-                    label: Text(l10n.authSignIn),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          // "Continue without account" secondary link
-          Center(
-            child: TextButton(
-              onPressed: () {
-                _markInteracted(1);
-                _nextPage();
-              },
-              child: Text(
-                l10n.authContinueAnonymously,
-                style: TextStyle(color: cs.onSurfaceVariant),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBenefit(
-    BuildContext context,
-    ColorScheme cs,
-    String emoji,
-    String text,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 20)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: cs.onSurface, height: 1.4),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Step 3: Create Tank ───────────────────────────────────────────────────
+    // ── Step 2: Create Tank ───────────────────────────────────────────────────
 
   Widget _buildCreateTankPage(
     BuildContext context,
@@ -1127,7 +952,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 4: Add Inhabitants ───────────────────────────────────────────────
+  // ── Step 3: Add Inhabitants ───────────────────────────────────────────────
 
   Widget _buildInhabitantsPage(
     BuildContext context,
@@ -1306,7 +1131,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
 
-  // ── Step 5: Discover AI Tools ─────────────────────────────────────────────
+  // ── Step 4: Discover AI Tools ─────────────────────────────────────────────
 
   Widget _buildDiscoverToolsPage(
     BuildContext context,
@@ -1484,7 +1309,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 6: API Key & Founder Upsell ─────────────────────────────────────
+  // ── Step 5: API Key & Founder Upsell ─────────────────────────────────────
 
   Widget _buildApiKeyPage(
     BuildContext context,

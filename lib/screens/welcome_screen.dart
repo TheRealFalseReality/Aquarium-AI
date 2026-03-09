@@ -209,6 +209,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (kIsWeb) {
       _checkShowPromotionDialog();
     }
+    // Check if we should show the AquaPi promotion dialog
+    // (after onboarding completion or on normal cooldown schedule)
+    _checkShowAquaPiPromotionDialog();
     // Check if we should show the changelog dialog (once per version)
     _checkShowChangelogDialog();
   }
@@ -501,6 +504,22 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
 
       final prefs = await SharedPreferences.getInstance();
+
+      // Check if the onboarding flow just completed and requested the popup.
+      // In this case, bypass the cooldown timer so it shows immediately.
+      final showAfterOnboarding =
+          prefs.getBool('aquapi_show_after_onboarding') ?? false;
+      if (showAfterOnboarding) {
+        await prefs.remove('aquapi_show_after_onboarding');
+        debugPrint(
+          'AquaPi promotion dialog will be shown (post-onboarding)',
+        );
+        Timer(const Duration(seconds: 2), () {
+          if (mounted) _showAquaPiPromotionDialog();
+        });
+        return;
+      }
+
       final lastShownTimestamp =
           prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
