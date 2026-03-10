@@ -419,22 +419,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// Returns `true` if the onboarding screen was pushed (dialogs should be
   /// suppressed in that case).
   Future<bool> _checkShowOnboarding() async {
-    // In debug builds, skip onboarding entirely so developers aren't
-    // interrupted on every hot-restart.
-    if (kDebugMode) return false;
-
     // Already completed → never show again.
     if (await OnboardingScreen.hasCompleted()) return false;
 
-    // Fresh install first launch → mark completed and show onboarding.
+    // Widget may have been disposed during the async gap above.
+    if (!mounted) return false;
+
+    // First launch → mark completed so subsequent launches don't re-trigger,
+    // then navigate to onboarding.
     await OnboardingScreen.markCompleted();
-    if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.pushNamed(context, '/onboarding');
-        }
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushNamed(context, '/onboarding');
+      }
+    });
     return true;
   }
 
