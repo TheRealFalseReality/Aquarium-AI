@@ -54,6 +54,7 @@ dependencies:
   flex_color_scheme: ^8.0.0
   flutter_colorpicker: ^1.1.0
   in_app_update: ^4.2.5
+  firebase_performance: ^0.11.1+5
 
 dev_dependencies:
   flutter_test:
