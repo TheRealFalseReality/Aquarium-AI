@@ -469,6 +469,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             selected.funFact?.isNotEmpty == true)
           SliverToBoxAdapter(
             child: Padding(
+              key: ValueKey('info_card_${selected.uuid ?? selected.name}'),
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
               child: Card(
                 margin: EdgeInsets.zero,
