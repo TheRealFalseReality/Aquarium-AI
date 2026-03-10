@@ -4960,7 +4960,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: l10n.leaveAReviewDesc,
               onTap: () {
                 Navigator.of(ctx).pop();
-                InAppReviewService.openStoreListing();
+                // Delay slightly so the dialog-dismiss animation completes
+                // and a valid foreground activity is available for the
+                // in-app review API.
+                Future.delayed(
+                  const Duration(milliseconds: reviewDialogDismissDelayMs),
+                  () => InAppReviewService.forceRequestReview(),
+                );
               },
             ),
             const SizedBox(height: 12),

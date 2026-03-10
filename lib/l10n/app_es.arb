@@ -791,6 +791,8 @@
   "contactUsMessage": "¡Nos encantaría saber de ti! Deja una reseña rápida en la tienda para compartir tu experiencia, o abre un problema en GitHub para reportar un error o sugerir una nueva función.",
   "leaveAReview": "Dejar una Reseña",
   "leaveAReviewDesc": "Califica la app en la tienda",
+  "reviewReminderBannerTitle": "¿Disfrutas Aquarium AI?",
+  "reviewReminderBannerBody": "Si te encanta la app, dejar una reseña en Play Store ayuda a otros aficionados a los acuarios a descubrirla.",
   "submitAnIssue": "Enviar un Problema",
   "submitAnIssueDesc": "Reportar un error o solicitar una función en GitHub",
   "debugMenu": "Menú de Depuración",

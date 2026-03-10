@@ -3889,6 +3889,16 @@
     "description": "Option subtitle in the Contact Us dialog"
   },
 
+  "reviewReminderBannerTitle": "Enjoying Aquarium AI?",
+  "@reviewReminderBannerTitle": {
+    "description": "Title of the dismissible review reminder banner on the welcome screen"
+  },
+
+  "reviewReminderBannerBody": "If you love the app, leaving a review on the Play Store really helps other aquarium enthusiasts discover it!",
+  "@reviewReminderBannerBody": {
+    "description": "Body text of the dismissible review reminder banner on the welcome screen"
+  },
+
   "submitAnIssue": "Submit an Issue",
   "@submitAnIssue": {
     "description": "Option title in the Contact Us dialog"

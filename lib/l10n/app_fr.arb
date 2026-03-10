@@ -791,6 +791,8 @@
   "contactUsMessage": "Nous serions ravis de vous entendre ! Laissez un avis rapide sur la boutique pour partager votre expérience, ou ouvrez un problème GitHub pour signaler un bug ou suggérer une nouvelle fonctionnalité.",
   "leaveAReview": "Laisser un Avis",
   "leaveAReviewDesc": "Notez l'application sur la boutique",
+  "reviewReminderBannerTitle": "Vous aimez Aquarium AI ?",
+  "reviewReminderBannerBody": "Si vous adorez l'application, laisser un avis sur le Play Store aide d'autres passionnés d'aquarium à la découvrir !",
   "submitAnIssue": "Soumettre un Problème",
   "submitAnIssueDesc": "Signaler un bug ou demander une fonctionnalité sur GitHub",
   "debugMenu": "Menu de Débogage",
