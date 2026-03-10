@@ -488,11 +488,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: true,
                           child: MarkdownBody(
                             data: selected.originHabitat!,
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context),
-                            ).copyWith(
-                              p: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            styleSheet: _fishInfoMarkdownStyle(context),
                           ),
                         ),
                       if (selected.careFacts.isNotEmpty)
@@ -514,11 +510,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: false,
                           child: MarkdownBody(
                             data: selected.generalInfo!,
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context),
-                            ).copyWith(
-                              p: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            styleSheet: _fishInfoMarkdownStyle(context),
                           ),
                         ),
                       if (selected.compatibilityHighlights.isNotEmpty)
@@ -542,11 +534,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: false,
                           child: MarkdownBody(
                             data: selected.funFact!,
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context),
-                            ).copyWith(
-                              p: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            styleSheet: _fishInfoMarkdownStyle(context),
                           ),
                         ),
                       const SizedBox(height: 8),
@@ -1583,6 +1571,11 @@ class _BrowserInfoSectionState extends State<_BrowserInfoSection> {
   }
 }
 
+/// Returns a [MarkdownStyleSheet] matched to the app's [bodyMedium] text style.
+MarkdownStyleSheet _fishInfoMarkdownStyle(BuildContext context) =>
+    MarkdownStyleSheet.fromTheme(Theme.of(context))
+        .copyWith(p: Theme.of(context).textTheme.bodyMedium);
+
 /// Single bullet-point list item used in the browser info card.
 class _BrowserBulletItem extends StatelessWidget {
   final String text;
@@ -1609,8 +1602,7 @@ class _BrowserBulletItem extends StatelessWidget {
           Expanded(
             child: MarkdownBody(
               data: text,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-                  .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+              styleSheet: _fishInfoMarkdownStyle(context),
             ),
           ),
         ],

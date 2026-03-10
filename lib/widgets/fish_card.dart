@@ -829,8 +829,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: true,
         child: MarkdownBody(
           data: fish.originHabitat!,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+          styleSheet: _fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -858,8 +857,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: false,
         child: MarkdownBody(
           data: fish.generalInfo!,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+          styleSheet: _fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -887,8 +885,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: false,
         child: MarkdownBody(
           data: fish.funFact!,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+          styleSheet: _fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -1068,6 +1065,11 @@ class _InfoExpansionSectionState extends State<_InfoExpansionSection> {
   }
 }
 
+/// Returns a [MarkdownStyleSheet] matched to the app's [bodyMedium] text style.
+MarkdownStyleSheet _fishInfoMarkdownStyle(BuildContext context) =>
+    MarkdownStyleSheet.fromTheme(Theme.of(context))
+        .copyWith(p: Theme.of(context).textTheme.bodyMedium);
+
 /// A single bullet-point list item.
 class _BulletItem extends StatelessWidget {
   final String text;
@@ -1094,8 +1096,7 @@ class _BulletItem extends StatelessWidget {
           Expanded(
             child: MarkdownBody(
               data: text,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-                  .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+              styleSheet: _fishInfoMarkdownStyle(context),
             ),
           ),
         ],
