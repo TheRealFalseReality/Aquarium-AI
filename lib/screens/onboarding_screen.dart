@@ -90,7 +90,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _totalPages = 5;
+  static const int _totalPages = 6;
 
   late final PageController _pageController;
   int _currentPage = 0;
@@ -166,11 +166,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
-      // If leaving the tank-creation step (1) with no tank name, skip the
-      // inhabitants step (2) since there is nothing to add inhabitants to.
-      final skipInhabitants = _currentPage == 1 &&
+      // If leaving the tank-creation step (2) with no tank name, skip the
+      // inhabitants step (3) since there is nothing to add inhabitants to.
+      final skipInhabitants = _currentPage == 2 &&
           _tankNameController.text.trim().isEmpty;
-      final targetPage = skipInhabitants ? 3 : _currentPage + 1;
+      final targetPage = skipInhabitants ? 4 : _currentPage + 1;
       if (targetPage >= _totalPages) {
         _finish(skipped: false);
         return;
@@ -313,7 +313,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         availableFish: _availableFish,
         onAdd: (inhabitant) {
           setState(() => _inhabitants.add(inhabitant));
-          _markInteracted(2);
+          _markInteracted(3);
         },
       ),
     );
@@ -343,15 +343,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   // Capture direction BEFORE setState updates _currentPage.
                   final wasGoingBack = i < _currentPage;
                   setState(() => _currentPage = i);
-                  // Auto-skip the inhabitants step (2) when no tank name was
+                  // Auto-skip the inhabitants step (3) when no tank name was
                   // entered — only when going FORWARD (swiping), never back.
                   if (!wasGoingBack &&
-                      i == 2 &&
+                      i == 3 &&
                       _tankNameController.text.trim().isEmpty) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
                         _pageController.animateToPage(
-                          3,
+                          4,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                         );
@@ -360,6 +360,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   }
                 },
                 children: [
+                  _buildWelcomePage(context, l10n, cs),
                   _buildThemePage(context, l10n, cs),
                   _buildCreateTankPage(context, l10n, cs),
                   _buildInhabitantsPage(context, l10n, cs),
@@ -444,23 +445,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ) {
     final isLastPage = _currentPage == _totalPages - 1;
     // On the last page the primary button always says "Get Started".
-    // On the Discover Tools page (3) the button always says "Next" since
+    // On the Welcome page (0) the button always says "Let's Get Started".
+    // On the Discover Tools page (4) the button always says "Next" since
     // there is nothing to interact with on that page.
-    // On the tank-creation page (1): "Add Inhabitants" when a tank name has
+    // On the tank-creation page (2): "Add Inhabitants" when a tank name has
     // been typed; "Skip for now" when the field is still empty.
     // On other pages: "Next" once the user has interacted, "Skip for now" otherwise.
-    const _discoverToolsPage = 3;
-    const _tankPage = 1;
+    const _welcomePage = 0;
+    const _discoverToolsPage = 4;
+    const _tankPage = 2;
     final hasTankName = _tankNameController.text.trim().isNotEmpty;
     final primaryLabel = isLastPage
         ? l10n.onboardingGetStarted
-        : _currentPage == _discoverToolsPage
-            ? l10n.onboardingNext
-            : (_currentPage == _tankPage && hasTankName)
-                ? l10n.onboardingAddInhabitants
-                : (_currentPageInteracted
-                    ? l10n.onboardingNext
-                    : l10n.onboardingSkipForNow);
+        : _currentPage == _welcomePage
+            ? l10n.onboardingWelcomeGetStarted
+            : _currentPage == _discoverToolsPage
+                ? l10n.onboardingNext
+                : (_currentPage == _tankPage && hasTankName)
+                    ? l10n.onboardingAddInhabitants
+                    : (_currentPageInteracted
+                        ? l10n.onboardingNext
+                        : l10n.onboardingSkipForNow);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -533,6 +538,94 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Step 0: Welcome ───────────────────────────────────────────────────────
+
+  Widget _buildWelcomePage(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final textTheme = Theme.of(context).textTheme;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🐠', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [cs.primary, cs.tertiary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+            ),
+            title: l10n.onboardingWelcomeTitle,
+            subtitle: l10n.onboardingWelcomeSubtitle,
+          ),
+          const SizedBox(height: 32),
+
+          // Thank-you message
+          Text(
+            l10n.onboardingWelcomeThankYou,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.onboardingWelcomeBody,
+            style: textTheme.bodyLarge?.copyWith(
+              color: cs.onSurfaceVariant,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Feature highlights
+          _buildWelcomeFeature(cs, Icons.auto_awesome, l10n.aiCompatibilityTool),
+          const SizedBox(height: 12),
+          _buildWelcomeFeature(cs, Icons.chat_bubble_outline, l10n.aiChatbot),
+          const SizedBox(height: 12),
+          _buildWelcomeFeature(cs, Icons.water_outlined, l10n.myTanks),
+          const SizedBox(height: 12),
+          _buildWelcomeFeature(cs, Icons.calculate_outlined, l10n.aquariumCalculators),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeFeature(ColorScheme cs, IconData icon, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: cs.primaryContainer,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 20, color: cs.onPrimaryContainer),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: cs.onSurface,
+            ),
           ),
         ),
       ],
@@ -654,7 +747,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               selected: {themeState.themeMode},
               onSelectionChanged: (modes) {
                 themeNotifier.setThemeMode(modes.first);
-                _markInteracted(0);
+                _markInteracted(1);
               },
             ),
           ),
@@ -681,7 +774,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               return GestureDetector(
                 onTap: () {
                   themeNotifier.setColorTheme(theme);
-                  _markInteracted(0);
+                  _markInteracted(1);
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -802,7 +895,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               border: const OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
-            onChanged: (_) => _markInteracted(1),
+            onChanged: (_) => _markInteracted(2),
           ),
           const SizedBox(height: 24),
 
@@ -825,7 +918,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 selected: _selectedTankType == 'freshwater',
                 onTap: () {
                   _onTankTypeChanged('freshwater');
-                  _markInteracted(1);
+                  _markInteracted(2);
                 },
               ),
               ModernSelectableChip(
@@ -834,7 +927,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 selected: _selectedTankType == 'marine',
                 onTap: () {
                   _onTankTypeChanged('marine');
-                  _markInteracted(1);
+                  _markInteracted(2);
                 },
               ),
             ],
@@ -973,7 +1066,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               _sizeLitersController.text =
                                   liters.toStringAsFixed(1);
                             });
-                            _markInteracted(1);
+                            _markInteracted(2);
                           },
                         ),
                       ),
@@ -1021,7 +1114,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               );
               if (picked != null) {
                 setState(() => _tankCreatedDate = picked);
-                _markInteracted(1);
+                _markInteracted(2);
               }
             },
             child: Container(
@@ -1091,7 +1184,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             maxLines: 3,
             textCapitalization: TextCapitalization.sentences,
-            onChanged: (_) => _markInteracted(1),
+            onChanged: (_) => _markInteracted(2),
           ),
           const SizedBox(height: 8),
         ],

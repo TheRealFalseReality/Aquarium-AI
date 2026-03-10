@@ -414,6 +414,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   Future<void> _checkShowOnboarding() async {
+    // In debug builds, skip onboarding entirely so developers aren't
+    // interrupted on every hot-restart.
+    if (kDebugMode) return;
+
     // Already completed → never show again.
     if (await OnboardingScreen.hasCompleted()) return;
 

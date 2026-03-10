@@ -1122,6 +1122,13 @@
   "@onboardingWelcomeSubtitle": {
     "description": "Subtitle on the first onboarding step"
   },
+  "onboardingWelcomeThankYou": "Merci d'essayer Aquarium AI !",
+  "@onboardingWelcomeThankYou": {"description": "Thank-you line on the welcome/intro step of onboarding"},
+  "onboardingWelcomeBody": "Votre compagnon aquariophile tout-en-un : outils IA, gestion de bacs, calculateurs et une communauté d'aquariophiles.",
+  "@onboardingWelcomeBody": {"description": "Body paragraph on the welcome/intro step of onboarding"},
+  "onboardingWelcomeGetStarted": "Commençons !",
+  "@onboardingWelcomeGetStarted": {"description": "Primary CTA button on the welcome/intro step of onboarding"},
+
 
   "onboardingSignInTitle": "Connectez-vous pour l'expérience complète",
   "@onboardingSignInTitle": {

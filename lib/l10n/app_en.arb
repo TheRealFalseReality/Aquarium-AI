@@ -5335,6 +5335,13 @@
   "@onboardingWelcomeSubtitle": {
     "description": "Subtitle on the first onboarding step"
   },
+  "onboardingWelcomeThankYou": "Thank you for trying Aquarium AI!",
+  "@onboardingWelcomeThankYou": {"description": "Thank-you line on the welcome/intro step of onboarding"},
+  "onboardingWelcomeBody": "Your all-in-one aquarium companion — AI tools, tank management, calculators, and a community of aquarists.",
+  "@onboardingWelcomeBody": {"description": "Body paragraph on the welcome/intro step of onboarding"},
+  "onboardingWelcomeGetStarted": "Let's Get Started",
+  "@onboardingWelcomeGetStarted": {"description": "Primary CTA button on the welcome/intro step of onboarding"},
+
 
   "onboardingSignInTitle": "Sign In for the Full Experience",
   "@onboardingSignInTitle": {
