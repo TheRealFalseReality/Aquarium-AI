@@ -48,6 +48,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final isSignedIn = user != null && !user.isAnonymous;
     final currentUserId = isSignedIn ? user.uid : '';
 
+    // While auth is still resolving, show a loading indicator to avoid a
+    // flash of the sign-in gate for already-authenticated users.
+    if (authState.isLoading) {
+      return MainLayout(
+        title: l10n.communityTitle,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // Gate: require a real (non-anonymous) signed-in user.
     if (!isSignedIn) {
       return MainLayout(
@@ -210,7 +219,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/auth'),
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  '/auth',
+                  arguments: {'returnRoute': '/community'},
+                ),
                 icon: const Icon(Icons.login),
                 label: Text(l10n.communitySignInButton),
                 style: FilledButton.styleFrom(

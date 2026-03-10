@@ -203,17 +203,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
     InAppReviewService.maybeRequestReview();
-    // Show onboarding on first launch (before any dialogs)
-    _checkShowOnboarding();
-    // Check if we should show the app promotion dialog on web
-    if (kIsWeb) {
-      _checkShowPromotionDialog();
-    }
-    // Check if we should show the AquaPi promotion dialog
-    // (after onboarding completion or on normal cooldown schedule)
-    _checkShowAquaPiPromotionDialog();
-    // Check if we should show the changelog dialog (once per version)
-    _checkShowChangelogDialog();
+    // Show onboarding on first launch (before any dialogs); only run the
+    // other startup checks if onboarding is not going to be shown.
+    _checkShowOnboarding().then((onboardingShowing) {
+      if (!mounted || onboardingShowing) return;
+      // Check if we should show the app promotion dialog on web
+      if (kIsWeb) {
+        _checkShowPromotionDialog();
+      }
+      // Check if we should show the AquaPi promotion dialog
+      // (after onboarding completion or on normal cooldown schedule)
+      _checkShowAquaPiPromotionDialog();
+      // Check if we should show the changelog dialog (once per version)
+      _checkShowChangelogDialog();
+    });
   }
 
   @override
@@ -413,34 +416,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Future<void> _checkShowOnboarding() async {
+  /// Returns `true` if the onboarding screen was pushed (dialogs should be
+  /// suppressed in that case).
+  Future<bool> _checkShowOnboarding() async {
     // In debug builds, skip onboarding entirely so developers aren't
     // interrupted on every hot-restart.
-    if (kDebugMode) return;
+    if (kDebugMode) return false;
 
     // Already completed → never show again.
-    if (await OnboardingScreen.hasCompleted()) return;
+    if (await OnboardingScreen.hasCompleted()) return false;
 
-    // Existing user who updated the app → auto-complete silently so they are
-    // never shown onboarding on update.
-    if (await OnboardingScreen.isExistingUserData()) {
-      await OnboardingScreen.markCompleted();
-      return;
-    }
+    // Widget may have been disposed during the async gap above.
+    if (!mounted) return false;
 
-    // Onboarding was already shown once (e.g. user exited mid-flow) → do not
-    // show again automatically; they can revisit via Settings.
-    if (await OnboardingScreen.hasBeenSeenOnce()) return;
-
-    // Fresh install first launch → show onboarding once.
-    await OnboardingScreen.markSeenOnce();
-    if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.pushNamed(context, '/onboarding');
-        }
-      });
-    }
+    // First launch → mark completed so subsequent launches don't re-trigger,
+    // then navigate to onboarding.
+    await OnboardingScreen.markCompleted();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushNamed(context, '/onboarding');
+      }
+    });
+    return true;
   }
 
   Future<void> _checkShowPromotionDialog() async {

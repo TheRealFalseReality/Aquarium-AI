@@ -1241,6 +1241,7 @@
   "@onboardingTankNotesHint": {
     "description": "Hint text for the notes field on the onboarding tank setup step"
   },
+  "onboardingOpenCalculator": "Rechner",
   "@onboardingOpenCalculator": {
     "description": "Short label for the button that opens the tank volume calculator from onboarding"
   },
