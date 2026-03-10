@@ -23,8 +23,8 @@ import 'tank_volume_calculator.dart';
 /// A six-step, skippable onboarding flow shown once on first launch.
 ///
 /// Steps:
-///   1. Choose Your Style  – theme and brightness mode selection
-///   2. Welcome / Sign In  – upsells the community and account features
+///   1. Welcome / Sign In  – upsells the community and account features
+///   2. Choose Your Style  – theme and brightness mode selection
 ///   3. Create Your Tank   – simplified tank setup (name, type, size)
 ///   4. Add Inhabitants    – optionally populate the tank with fish
 ///   5. Discover AI Tools  – overview of the key AI features
@@ -40,10 +40,6 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
-  /// Set the first time onboarding is displayed. Prevents re-showing if the
-  /// user exits mid-flow without completing.
-  static const String _onboardingSeenOnceKey = 'onboarding_seen_once';
-
   /// Returns `true` if the user has already completed or dismissed onboarding.
   static Future<bool> hasCompleted() async {
     final prefs = await SharedPreferences.getInstance();
@@ -56,30 +52,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
     await prefs.setBool(_onboardingCompletedKey, true);
   }
 
-  /// Returns `true` if onboarding has already been displayed at least once on
-  /// this device. Used to prevent re-showing mid-flow on subsequent launches.
-  static Future<bool> hasBeenSeenOnce() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_onboardingSeenOnceKey) ?? false;
-  }
-
-  /// Marks that onboarding has been shown at least once.
-  static Future<void> markSeenOnce() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingSeenOnceKey, true);
-  }
-
-  /// Returns `true` when the device has existing user data (tanks), indicating
-  /// this is an app update rather than a fresh install. In that case onboarding
-  /// should be silently skipped.
-  static Future<bool> isExistingUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey('user_tanks');
-  }
-
   /// Clears the completed flag – useful for revisiting onboarding from Settings.
-  /// Does NOT clear [_onboardingSeenOnceKey] so the auto-check in
-  /// WelcomeScreen does not re-trigger (Settings navigates directly instead).
   static Future<void> reset() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_onboardingCompletedKey);
@@ -821,7 +794,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     SizedBox(
                       width: 64,
                       child: Text(
-                        theme.displayName,
+                        _themeLocalizedName(theme, l10n),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -1951,5 +1924,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
       ],
     );
+  }
+}
+
+// ── Localized theme name helper ───────────────────────────────────────────────
+
+String _themeLocalizedName(AppColorTheme theme, AppLocalizations l10n) {
+  switch (theme) {
+    case AppColorTheme.defaultTheme:
+      return l10n.themeDefault;
+    case AppColorTheme.materialYou:
+      return l10n.themeMaterialYou;
+    case AppColorTheme.oceanBlue:
+      return l10n.themeOceanBlue;
+    case AppColorTheme.iceBlue:
+      return l10n.themeIceBlue;
+    case AppColorTheme.gold:
+      return l10n.themeGold;
+    case AppColorTheme.mulberry:
+      return l10n.themeMulberry;
+    case AppColorTheme.midnight:
+      return l10n.themeMidnight;
+    case AppColorTheme.orange:
+      return l10n.themeOrange;
+    case AppColorTheme.green:
+      return l10n.themeGreen;
+    case AppColorTheme.skyBlue:
+      return l10n.themeSkyBlue;
+    case AppColorTheme.royalBlue:
+      return l10n.themeRoyalBlue;
+    case AppColorTheme.orchid:
+      return l10n.themeOrchid;
+    case AppColorTheme.hotPink:
+      return l10n.themeHotPink;
+    case AppColorTheme.crimson:
+      return l10n.themeCrimson;
+    case AppColorTheme.custom:
+      return l10n.colorCustom;
   }
 }
