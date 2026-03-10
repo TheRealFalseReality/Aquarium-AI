@@ -10,6 +10,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../utils/markdown_style_utils.dart';
 import '../widgets/fish_image.dart';
 
 /// Compatibility status between two fish types.
@@ -488,7 +489,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: true,
                           child: MarkdownBody(
                             data: selected.originHabitat!,
-                            styleSheet: _fishInfoMarkdownStyle(context),
+                            styleSheet: fishInfoMarkdownStyle(context),
                           ),
                         ),
                       if (selected.careFacts.isNotEmpty)
@@ -510,7 +511,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: false,
                           child: MarkdownBody(
                             data: selected.generalInfo!,
-                            styleSheet: _fishInfoMarkdownStyle(context),
+                            styleSheet: fishInfoMarkdownStyle(context),
                           ),
                         ),
                       if (selected.compatibilityHighlights.isNotEmpty)
@@ -534,7 +535,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           initiallyExpanded: false,
                           child: MarkdownBody(
                             data: selected.funFact!,
-                            styleSheet: _fishInfoMarkdownStyle(context),
+                            styleSheet: fishInfoMarkdownStyle(context),
                           ),
                         ),
                       const SizedBox(height: 8),
@@ -1571,11 +1572,6 @@ class _BrowserInfoSectionState extends State<_BrowserInfoSection> {
   }
 }
 
-/// Returns a [MarkdownStyleSheet] matched to the app's [bodyMedium] text style.
-MarkdownStyleSheet _fishInfoMarkdownStyle(BuildContext context) =>
-    MarkdownStyleSheet.fromTheme(Theme.of(context))
-        .copyWith(p: Theme.of(context).textTheme.bodyMedium);
-
 /// Single bullet-point list item used in the browser info card.
 class _BrowserBulletItem extends StatelessWidget {
   final String text;
@@ -1602,7 +1598,7 @@ class _BrowserBulletItem extends StatelessWidget {
           Expanded(
             child: MarkdownBody(
               data: text,
-              styleSheet: _fishInfoMarkdownStyle(context),
+              styleSheet: fishInfoMarkdownStyle(context),
             ),
           ),
         ],

@@ -13,6 +13,7 @@ import '../providers/species_tags_provider.dart';
 import '../screens/fish_compat_browser_screen.dart';
 import '../services/fish_data_service.dart';
 import '../theme_provider.dart';
+import '../utils/markdown_style_utils.dart';
 import 'fish_image.dart';
 
 class FishCard extends ConsumerStatefulWidget {
@@ -829,7 +830,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: true,
         child: MarkdownBody(
           data: fish.originHabitat!,
-          styleSheet: _fishInfoMarkdownStyle(context),
+          styleSheet: fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -857,7 +858,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: false,
         child: MarkdownBody(
           data: fish.generalInfo!,
-          styleSheet: _fishInfoMarkdownStyle(context),
+          styleSheet: fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -885,7 +886,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         initiallyExpanded: false,
         child: MarkdownBody(
           data: fish.funFact!,
-          styleSheet: _fishInfoMarkdownStyle(context),
+          styleSheet: fishInfoMarkdownStyle(context),
         ),
       ));
     }
@@ -1065,11 +1066,6 @@ class _InfoExpansionSectionState extends State<_InfoExpansionSection> {
   }
 }
 
-/// Returns a [MarkdownStyleSheet] matched to the app's [bodyMedium] text style.
-MarkdownStyleSheet _fishInfoMarkdownStyle(BuildContext context) =>
-    MarkdownStyleSheet.fromTheme(Theme.of(context))
-        .copyWith(p: Theme.of(context).textTheme.bodyMedium);
-
 /// A single bullet-point list item.
 class _BulletItem extends StatelessWidget {
   final String text;
@@ -1096,7 +1092,7 @@ class _BulletItem extends StatelessWidget {
           Expanded(
             child: MarkdownBody(
               data: text,
-              styleSheet: _fishInfoMarkdownStyle(context),
+              styleSheet: fishInfoMarkdownStyle(context),
             ),
           ),
         ],
