@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:fish_ai/screens/aquarium_stocking_screen.dart';
 import 'package:fish_ai/screens/settings_screen.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -235,6 +236,18 @@ void main() async {
     // See the _initializeAppCheck() doc comment for the required Firebase
     // Console setup steps.
     await _initializeAppCheck();
+
+    // Enable Firebase Performance Monitoring
+    try {
+      await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+      if (kDebugMode) {
+        debugPrint('Firebase Performance initialized successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Firebase Performance initialization failed: $e');
+      }
+    }
 
     // Set app version and build info as Crashlytics custom keys (non-blocking)
     CrashlyticsService.setAppInfo().catchError((error) {
