@@ -419,6 +419,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// Returns `true` if the onboarding screen was pushed (dialogs should be
   /// suppressed in that case).
   Future<bool> _checkShowOnboarding() async {
+    // In debug builds, skip onboarding entirely so developers aren't
+    // interrupted on every hot-restart.
+    if (kDebugMode) return false;
+
     // Already completed → never show again.
     if (await OnboardingScreen.hasCompleted()) return false;
 
