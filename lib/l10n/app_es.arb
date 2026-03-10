@@ -1323,14 +1323,29 @@
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   },
 
-  "fishDescription": "Descripción",
-  "@fishDescription": {
-    "description": "Label for the fish description field in the fish compat browser and editor"
+  "fishOriginHabitat": "Origen y Hábitat",
+  "@fishOriginHabitat": {
+    "description": "Section label for the fish origin and habitat information"
   },
 
-  "noDescriptionAvailable": "Sin descripción disponible.",
-  "@noDescriptionAvailable": {
-    "description": "Placeholder text shown when a fish has no description"
+  "fishCareFacts": "Datos de Cuidado",
+  "@fishCareFacts": {
+    "description": "Section label for fish care facts (bullet list)"
+  },
+
+  "fishGeneralInfo": "Información General del Acuario",
+  "@fishGeneralInfo": {
+    "description": "Section label for general aquarium information about the fish"
+  },
+
+  "fishCompatibilityHighlights": "Aspectos de Compatibilidad",
+  "@fishCompatibilityHighlights": {
+    "description": "Section label for fish compatibility highlights (bullet list)"
+  },
+
+  "fishFunFact": "Dato Curioso",
+  "@fishFunFact": {
+    "description": "Section label for a short fun fact about the fish"
   },
 
   "fishTypeInfo": "Info del pez",

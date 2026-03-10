@@ -1,7 +1,11 @@
 class Fish {
   final String? uuid; // Stable unique identifier; null for legacy entries without UUID
   final String name;
-  final String? description; // Optional plain-text description of this fish type
+  final String? originHabitat; // Where the fish originates / its natural habitat
+  final List<String> careFacts; // Bullet-point care information
+  final String? generalInfo; // General aquarium information (short paragraph)
+  final List<String> compatibilityHighlights; // Compatibility highlight bullets
+  final String? funFact; // Short fun fact about the species
   final List<String> commonNames;
   final String imageURL;
   final String? reefSafe;
@@ -13,7 +17,11 @@ class Fish {
   Fish({
     this.uuid,
     required this.name,
-    this.description,
+    this.originHabitat,
+    this.careFacts = const [],
+    this.generalInfo,
+    this.compatibilityHighlights = const [],
+    this.funFact,
     required this.commonNames,
     required this.imageURL,
     this.reefSafe,
@@ -58,7 +66,13 @@ class Fish {
     return Fish(
       uuid: json['uuid'] as String?,
       name: json['name'] as String,
-      description: json['description'] as String?,
+      originHabitat: json['originHabitat'] as String?,
+      careFacts: List<String>.from(json['careFacts'] ?? []),
+      generalInfo: json['generalInfo'] as String?,
+      compatibilityHighlights: List<String>.from(
+        json['compatibilityHighlights'] ?? [],
+      ),
+      funFact: json['funFact'] as String?,
       commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
       reefSafe: json['reefSafe'] as String?,
@@ -73,7 +87,12 @@ class Fish {
   Map<String, dynamic> toJson() => {
     if (uuid != null) 'uuid': uuid,
     'name': name,
-    if (description != null) 'description': description,
+    if (originHabitat != null) 'originHabitat': originHabitat,
+    if (careFacts.isNotEmpty) 'careFacts': careFacts,
+    if (generalInfo != null) 'generalInfo': generalInfo,
+    if (compatibilityHighlights.isNotEmpty)
+      'compatibilityHighlights': compatibilityHighlights,
+    if (funFact != null) 'funFact': funFact,
     'commonNames': commonNames,
     'imageURL': imageURL,
     if (reefSafe != null) 'reefSafe': reefSafe,
