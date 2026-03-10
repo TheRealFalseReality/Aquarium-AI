@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.00] - 2026-3-10 • Fish Compatibility Browser & Onboarding
+
+### Added
+
+- **Fish Compatibility Browser** - check out the compatibility of the fish at a glance. I want to make the community help expand on this.
+- **Add skippable 6-step onboarding flow**
+
+### Changed
+
+- Move tank header actions to FAB speed-dial; add TankInhabitantScreen with age chips, harmony delta, persistent filters, inhabitant edit/delete FAB, and quick-action speed-dial
+- Migrate fish compatibility data to Cloud Firestore with Fish Compat Editor integration and local WebP images
+
+### Removed
+
+- Remove bundled fishcompat.json; use Firestore exclusively with SP cache fallback and retry UX
+
+**Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.03...v3.2.00
+
 ## [3.1.03] - 2026-3-7 • UUIDs, Mostly Authorization Checks, Facebook Login support
 
 ### Changed
